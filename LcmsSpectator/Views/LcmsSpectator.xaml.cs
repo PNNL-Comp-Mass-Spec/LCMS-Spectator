@@ -11,13 +11,13 @@ namespace LcmsSpectator.Views
     /// <summary>
     /// Interaction logic for MsPathViewer.xaml
     /// </summary>
-    public partial class MsPathViewer: Window
+    public partial class LcmsSpectator: Window
     {
-        public MsPathViewerViewModel Ms2ViewerViewModel { get; set; }
-        public MsPathViewer()
+        public LcmsSpectatorViewModel Ms2ViewerViewModel { get; set; }
+        public LcmsSpectator()
         {
             InitializeComponent();
-            Ms2ViewerViewModel = new MsPathViewerViewModel();
+            Ms2ViewerViewModel = new LcmsSpectatorViewModel();
             DataContext = Ms2ViewerViewModel;
             Ms2ViewerViewModel.UpdateSelections += UpdateSelections;
             _updatePlots = false;
