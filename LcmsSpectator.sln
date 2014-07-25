@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LcmsSpectator", "LcmsSpectator\LcmsSpectator.csproj", "{039EE188-53B9-48A7-90DD-FCF31685B125}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LcmsSpectatorModels", "LcmsSpectatorModels\LcmsSpectatorModels.csproj", "{CC66E356-83D9-4D67-89D7-0BD10A9A53E9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{039EE188-53B9-48A7-90DD-FCF31685B125}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{039EE188-53B9-48A7-90DD-FCF31685B125}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{039EE188-53B9-48A7-90DD-FCF31685B125}.Debug|x64.ActiveCfg = Debug|x64
+		{039EE188-53B9-48A7-90DD-FCF31685B125}.Debug|x64.Build.0 = Debug|x64
+		{039EE188-53B9-48A7-90DD-FCF31685B125}.Debug|x64.Deploy.0 = Debug|x64
+		{039EE188-53B9-48A7-90DD-FCF31685B125}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{039EE188-53B9-48A7-90DD-FCF31685B125}.Release|Any CPU.Build.0 = Release|Any CPU
+		{039EE188-53B9-48A7-90DD-FCF31685B125}.Release|x64.ActiveCfg = Release|x64
+		{039EE188-53B9-48A7-90DD-FCF31685B125}.Release|x64.Build.0 = Release|x64
+		{CC66E356-83D9-4D67-89D7-0BD10A9A53E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC66E356-83D9-4D67-89D7-0BD10A9A53E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC66E356-83D9-4D67-89D7-0BD10A9A53E9}.Debug|x64.ActiveCfg = Debug|x64
+		{CC66E356-83D9-4D67-89D7-0BD10A9A53E9}.Debug|x64.Build.0 = Debug|x64
+		{CC66E356-83D9-4D67-89D7-0BD10A9A53E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC66E356-83D9-4D67-89D7-0BD10A9A53E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC66E356-83D9-4D67-89D7-0BD10A9A53E9}.Release|x64.ActiveCfg = Release|x64
+		{CC66E356-83D9-4D67-89D7-0BD10A9A53E9}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

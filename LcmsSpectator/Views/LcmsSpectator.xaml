@@ -1,0 +1,275 @@
+﻿<Window x:Class="LcmsSpectator.Views.MsPathViewer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:MsPathViewer.Views"
+        xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
+        xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+        xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
+        Title="LcMsSpectator" WindowState="Maximized">
+    <Window.DataContext>
+        <viewModels:MsPathViewerViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <utils:NeutralLossToStringConverter x:Key="NeutralLossToString" />
+    </Window.Resources>
+    <Grid>
+        <!-- Menu -->
+        <Menu VerticalAlignment="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open" Click="OpenFile" />
+            </MenuItem>
+        </Menu>
+        <!-- End Menu -->
+        <Grid HorizontalAlignment="Stretch" Margin="0,22,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="7*" />
+                <RowDefinition Height="93*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <!-- Header -->
+            <ScrollViewer VerticalAlignment="Top" Grid.Row="0"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Visibility="{Binding FileOpen, Converter={StaticResource BoolToVis}}">
+                    <TextBlock TextAlignment="Center" TextWrapping="Wrap"
+                                   Text="{Binding Path=SelectedPrSm.ProteinNameDesc}"
+                                   FontSize="16" FontWeight="Bold"/>
+                    <TextBlock TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=SelectedPrSm.SequenceText}"
+                                   FontWeight="Bold"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="Charge: " FontWeight="Bold" />
+                        <TextBlock Text="{Binding Path=SelectedPrSm.Charge}" FontWeight="Bold" Width="75" />
+                        <TextBlock Text="Precursor M/z: " FontWeight="Bold" />
+                        <TextBlock Text="{Binding Path=SelectedPrSm.PrecursorMz}" FontWeight="Bold" Width="75" />
+                        <TextBlock Text="Score: " FontWeight="Bold" />
+                        <TextBlock Text="{Binding Path=SelectedPrSm.MatchedFragments}" FontWeight="Bold" Width="75"/>
+                        <TextBlock Text="QValue: " FontWeight="Bold" />
+                        <TextBlock Text="{Binding Path=SelectedPrSm.QValue}" FontWeight="Bold" Width="75"/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+            <!-- End Header -->
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25*"/>
+                    <RowDefinition Height="25*"/>
+                    <RowDefinition Height="25*"/>
+                    <RowDefinition Height="3" />
+                    <RowDefinition Height="300"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="90"/>
+                    <ColumnDefinition Width="3" />
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <!-- Ion type selector -->
+                <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
+                        Grid.Row="0" ItemsSource="{Binding BaseIonTypes}"
+                        SelectionChanged="IonTypeSelectionChange"
+                        Name="IonTypes">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Ion Type" Width="*" Binding="{Binding Symbol}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
+                        Grid.Row="1" ItemsSource="{Binding NeutralLosses}"
+                        SelectionChanged="NeutralLossSelectionChange"
+                        Name="NeutralLosses">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Neutral Loss" Width="*" Binding="{Binding Converter={StaticResource NeutralLossToString}}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <GroupBox Grid.Column="0" Grid.Row="2" ToolTip="Select Charges [Min, Max]">
+                    <GroupBox.Header>
+                        <Label>Ion Charges</Label>
+                    </GroupBox.Header>
+                    <ScrollViewer VerticalAlignment="Top"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock>Min:</TextBlock>
+                            <TextBox Height="20" TextAlignment="Right"
+                                    Margin="0,0,0,20"
+                                    Text="{Binding Path=MinCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Command="{Binding Path=SetIonChargesCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            <TextBlock>Max:</TextBlock>
+                            <TextBox Height="20" TextAlignment="Right"
+                                    Text="{Binding Path=MaxCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Command="{Binding Path=SetIonChargesCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </GroupBox>
+                <!-- End Ion type selector -->
+                <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" ShowsPreview="True" />
+                <!-- Plots -->
+                <TabControl Grid.Row="0" Grid.Column="2" Grid.RowSpan="3">
+                    <TabItem Header="Spectrum View">
+                        <views:SpectrumView DataContext="{Binding Ms2SpectrumViewModel}" />
+                    </TabItem>
+                    <TabItem Header="XIC View">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="50*" />
+                                <RowDefinition Height="50*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="3" />
+                                <ColumnDefinition Width ="85" />
+                            </Grid.ColumnDefinitions>
+                            <views:XicView Grid.RowSpan="2" DataContext="{Binding XicViewModel}" />
+                            <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" ShowsPreview="True" />
+                            <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                                        IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" 
+                                        Grid.Row="0" ItemsSource="{Binding FragmentXics}"
+                                        SelectionChanged="FragmentIonSelectionChange"
+                                        Name="FragmentIons">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding Label}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                                        ItemsSource="{Binding PrecursorXics}"
+                                        IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" Grid.Row="1"
+                                        SelectionChanged="PrecursorIsotopeSelectionChange"
+                                        Name="PrecursorIsotopes">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Isotope" Width="*" Binding="{Binding Label}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+                <!-- End Plots -->
+                <GridSplitter Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch"
+                          ShowsPreview="True" />
+                <Grid Grid.Row="4" Grid.Column="0" ColumnSpan="3">
+                    <TabControl>
+                        <!-- ID Tree -->
+                        <TabItem Header="ID Tree">
+                            <TreeView ItemsSource="{Binding Ids}" SelectedItemChanged="ScanSelectionChange">
+                                <TreeView.Resources>
+                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteinId}" ItemsSource="{Binding Proteoforms}">
+                                        <TextBlock Text="{Binding ProteinNameDesc}" />
+                                    </HierarchicalDataTemplate>
+                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteoformId}" ItemsSource="{Binding ChargeStates}">
+                                        <TextBlock Text="{Binding SequenceText}" />
+                                    </HierarchicalDataTemplate>
+                                    <HierarchicalDataTemplate DataType="{x:Type models:ChargeStateId}" ItemsSource="{Binding PrSms}">
+                                        <TextBlock Text="{Binding Charge}" />
+                                    </HierarchicalDataTemplate>
+                                    <HierarchicalDataTemplate DataType="{x:Type models:PrSm}">
+                                        <TextBlock Text="{Binding Scan}" />
+                                    </HierarchicalDataTemplate>
+                                </TreeView.Resources>
+                            </TreeView>
+                        </TabItem>
+                        <!-- End ID Tree -->
+                        <!-- Scan View -->
+                        <TabItem Header="Scan View">
+                            <DataGrid AutoGenerateColumns="False" SelectionMode="Extended"
+                                  IsReadOnly="True" RowHeaderWidth="0" 
+                                  ItemsSource="{Binding PrSms}" SelectedItem="{Binding SelectedPrSm}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Scan" Width="10*" Binding="{Binding Scan}"/>
+                                    <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" />
+                                    <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
+                                    <DataGridTextColumn Header="Precursor m/z" Width="10*" Binding="{Binding PrecursorMz}" />
+                                    <DataGridTextColumn Header="Charge" Width="15*" Binding="{Binding Charge}" />
+                                    <DataGridTextColumn Header="Score" Width="10*" Binding="{Binding MatchedFragments}" />
+                                    <DataGridTextColumn Header="QValue" Width="10*" Binding="{Binding QValue}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <!-- End Scan View -->
+                        <!-- Sequence Graph -->
+<!--                        <TabItem Header="Sequence Graph">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="20" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="90*" />
+                                    <ColumnDefinition Width="10*" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox ItemsSource="{Binding Ids}" Grid.Row="0" SelectedItem="{Binding SelectedProtein}">
+                                    <ComboBox.Resources>
+                                        <DataTemplate DataType="{x:Type models1:ProteinId}">
+                                            <TextBlock Text="{Binding ProteinNameDesc}" />
+                                        </DataTemplate>
+                                    </ComboBox.Resources>
+                                </ComboBox>
+                                <ComboBox ItemsSource="{Binding Path=SelectedProtein.Scans}" SelectedItem="{Binding SelectedPrSm}"
+                                      Grid.Row="0" Grid.Column="1">
+                                    <ComboBox.Resources>
+                                        <DataTemplate DataType="{x:Type models1:PrSm}">
+                                            <TextBlock Text="{Binding Scan}" />
+                                        </DataTemplate>
+                                    </ComboBox.Resources>
+                                </ComboBox>
+                                <views:SequenceGraph Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                                 Protein="{Binding SelectedProtein}"
+                                                 PrSm="{Binding SelectedPrSm}" />
+                            </Grid>
+                        </TabItem> -->
+                        <!-- End Sequence Graph -->
+                        <!-- PrSm Creator -->
+                        <TabItem Header="Create Sequence">
+                            <Grid Height="66" Width="300" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="33*" />
+                                    <RowDefinition Height="33*" />
+                                    <RowDefinition Height="33*" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30*" />
+                                    <ColumnDefinition Width="70*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Sequence" FontWeight="Bold" Grid.Row="0" Grid.Column="0" />
+                                <TextBox Text="{Binding SequenceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Command="{Binding Path=CreatePrSmCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <TextBlock Text="Charge" FontWeight="Bold" Grid.Row="1" Grid.Column="0" />
+                                <TextBox Text="{Binding SelectedCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" TextAlignment="Right">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Command="{Binding Path=CreatePrSmCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <Button Command="{Binding CreatePrSmCommand}" Grid.Row="2" Grid.Column="1">Create</Button>
+                            </Grid>
+                        </TabItem>
+                        <!-- End PrSm Creator -->
+                    </TabControl>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" 
+                Name="LoadingScreen" VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*"/>
+                    <RowDefinition Height="50*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Margin="0"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Bottom"
+                           Grid.Row="0"
+                           TextAlignment="Center"
+                           FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
+                    Loading<LineBreak />Please Wait...
+                </TextBlock >
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

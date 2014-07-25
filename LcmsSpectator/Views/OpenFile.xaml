@@ -1,0 +1,18 @@
+﻿<Window x:Class="MsPathViewer.Views.OpenFile"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ms2Viewer: Open File" Height="210" Width="600">
+    <Grid>
+        <Label FontWeight="Bold" Margin="10,20,0,0">Param File:</Label>
+        <TextBox Height="28" HorizontalAlignment="Left" Margin="110,20,0,0" Name="ParamFileBox" VerticalAlignment="Top" Width="350" />
+        <Button Content="Browse" Height="23" HorizontalAlignment="Left" Margin="475,22,0,0" Name="ParamFileBrowse" VerticalAlignment="Top" Width="75" Click="BrowseParamFile" />
+        <Label FontWeight="Bold" Margin="10,60,0,0">ID File:</Label>
+        <TextBox Height="28" HorizontalAlignment="Left" Margin="110,60,0,0" Name="IdFileBox" VerticalAlignment="Top" Width="350"/>
+        <Button Content="Browse" Height="23" HorizontalAlignment="Left" Margin="475,62,0,0" Name="IdFileBrowse" VerticalAlignment="Top" Width="75" Click="BrowseIdFile"/>
+        <Label FontWeight="Bold" Margin="10,100,0,0">Raw File:</Label>
+        <TextBox Height="28" HorizontalAlignment="Left" Margin="110,100,0,0" Name="RawFileBox" VerticalAlignment="Top" Width="350"/>
+        <Button Content="Browse" Height="23" HorizontalAlignment="Left" Margin="475,100,0,0" Name="RawFileBrowse" VerticalAlignment="Top" Width="75" Click="BrowseRawFile"/>
+        <Button Content="Open" Height="23" HorizontalAlignment="Left" Margin="475,140,0,0" Name="OpenButton" VerticalAlignment="Top" Width="75" Click="UpdateFiles"/>
+        <Button Content="Cancel" Height="23" HorizontalAlignment="Left" Margin="385,140,0,0" Name="CancelButton" VerticalAlignment="Top" Width="75" Click="CancelClick"/>
+    </Grid>
+</Window>
