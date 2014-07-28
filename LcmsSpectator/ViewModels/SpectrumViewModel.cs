@@ -38,10 +38,10 @@ namespace LcmsSpectator.ViewModels
 
             var prevms1 = prsm.PreviousMs1;
             var nextms1 = prsm.NextMs1;
-            LabeledIon prevms1Ion = null;
-            LabeledIon nextms1Ion = null;
+            LabeledIonPeaks prevms1Ion = null;
+            LabeledIonPeaks nextms1Ion = null;
             var ms2PrecursorIon = prsm.PrecursorIonPeaks();
-            List<LabeledIon> ms2Ions = prsm.GetFragmentIons(baseIons, neutralLosses, minCharge, maxCharge);
+            List<LabeledIonPeaks> ms2Ions = prsm.GetFragmentIons(baseIons, neutralLosses, minCharge, maxCharge);
             ms2Ions.Add(ms2PrecursorIon);
 
             InitSpectrumPlots(ms2, prevms1, nextms1);
@@ -84,7 +84,7 @@ namespace LcmsSpectator.ViewModels
             _ms1XAxis.Zoom(ms1MinMz, ms1MaxMz);
         }
 
-        private void LoadMs2SpectrumPlot(Spectrum spectrum, IEnumerable<LabeledIon> ions)
+        private void LoadMs2SpectrumPlot(Spectrum spectrum, IEnumerable<LabeledIonPeaks> ions)
         {
             if (spectrum == null)
             {
@@ -98,7 +98,7 @@ namespace LcmsSpectator.ViewModels
             OnPropertyChanged("Ms2SpectrumPlotModel");
         }
 
-        private void LoadPreviousMs1PlotModel(Spectrum spectrum, LabeledIon precursorIon)
+        private void LoadPreviousMs1PlotModel(Spectrum spectrum, LabeledIonPeaks precursorIon)
         {
             if (spectrum == null)
             {
@@ -106,7 +106,7 @@ namespace LcmsSpectator.ViewModels
                 OnPropertyChanged("PreviousMs1PlotModel");
                 return;
             }
-            var ions = new List<LabeledIon>();
+            var ions = new List<LabeledIonPeaks>();
             if (precursorIon != null) ions.Add(precursorIon);
             var title = String.Format("Previous Ms1 Spectrum (Scan {0})", spectrum.ScanNum);
             var plotModel = new SpectrumPlotModel(title, spectrum, ions, Colors, _ms1XAxis, 1.1);
@@ -114,7 +114,7 @@ namespace LcmsSpectator.ViewModels
             OnPropertyChanged("PreviousMs1PlotModel");
         }
 
-        private void LoadNextMs1PlotModel(Spectrum spectrum, LabeledIon precursorIon)
+        private void LoadNextMs1PlotModel(Spectrum spectrum, LabeledIonPeaks precursorIon)
         {
             if (spectrum == null)
             {
@@ -122,7 +122,7 @@ namespace LcmsSpectator.ViewModels
                 OnPropertyChanged("NextMs1PlotModel");
                 return;
             }
-            var ions = new List<LabeledIon>();
+            var ions = new List<LabeledIonPeaks>();
             if (precursorIon != null) ions.Add(precursorIon);
             var title = String.Format("Next Ms1 Spectrum (Scan {0})", spectrum.ScanNum);
             var plotModel = new SpectrumPlotModel(title, spectrum, ions, Colors, _ms1XAxis, 1.1);

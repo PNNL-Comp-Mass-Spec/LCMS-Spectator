@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using LcmsSpectatorModels.Models;
 
 namespace LcmsSpectatorModels.Config
@@ -14,9 +13,9 @@ namespace LcmsSpectatorModels.Config
             _tsvFile = tsvFile;
         }
 
-        public List<ProteinId> Read()
+        public IdentificationTree Read()
         {
-            var proteins = new Dictionary<string, ProteinId>();
+            var idTree = new IdentificationTree();
             var file = File.ReadLines(_tsvFile);
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
@@ -34,13 +33,10 @@ namespace LcmsSpectatorModels.Config
                 }
                 var idData = new PrSm(line, headers, IcParameters.Instance.Lcms);
                 if (idData.QValue > QValueThreshold) continue;
-                var key = idData.ProteinNameDesc;
-                if (!proteins.ContainsKey(key))
-                    proteins.Add(key, new ProteinId(idData));
-                else proteins[key].Add(idData);
+                idTree.Add(idData);
             }
 
-            return proteins.Values.ToList();
+            return idTree;
         }
 
         private readonly string _tsvFile;

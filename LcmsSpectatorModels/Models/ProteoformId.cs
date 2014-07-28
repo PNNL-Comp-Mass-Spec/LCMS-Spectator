@@ -9,43 +9,31 @@ namespace LcmsSpectatorModels.Models
     {
         public Sequence Sequence { get; private set; }
         public string SequenceText { get; private set; }
-        public List<ChargeStateId> ChargeStates { get; private set; }
+        public Dictionary<int, ChargeStateId> ChargeStates { get; private set; }
 
         public ProteoformId(Sequence sequence, string sequenceText)
         {
             Sequence = sequence;
             SequenceText = sequenceText;
-            ChargeStates = new List<ChargeStateId>();
+            ChargeStates = new Dictionary<int, ChargeStateId>();
         }
 
         public void Add(PrSm data)
         {
-            var chargeState = GetChargeState(data);
+            if (!ChargeStates.ContainsKey(data.Charge)) ChargeStates.Add(data.Charge, new ChargeStateId(data.Charge, data.Sequence, data.SequenceText, data.ProteinNameDesc, data.PrecursorMz));
+            var chargeState = ChargeStates[data.Charge];
             chargeState.Add(data);
         }
 
-        public ChargeStateId GetChargeState(PrSm data)
+        public bool Contains(PrSm data)
         {
-            var searchChargeState = new ChargeStateId(data.Charge, Sequence, data.SequenceText, data.ProteinNameDesc, data.PrecursorMz);
-            var pos = ChargeStates.BinarySearch(searchChargeState, new ChargeStateComparer());
-            ChargeStateId chargeState;
-            if (pos < 0)
-            {
-                ChargeStates.Add(searchChargeState);
-                chargeState = ChargeStates.Last();
-                ChargeStates.Sort(new ChargeStateComparer());
-            }
-            else
-            {
-                chargeState = ChargeStates[pos];
-            }
-            return chargeState;
+            return ChargeStates.Values.Any(chargeState => chargeState.Contains(data));
         }
 
         public PrSm GetHighestScoringPrSm()
         {
             PrSm highest = null;
-            foreach (var chargeState in ChargeStates)
+            foreach (var chargeState in ChargeStates.Values)
             {
                 var chargeStateHighest = chargeState.GetHighestScoringPrSm();
                 if (highest == null || chargeStateHighest.MatchedFragments >= highest.MatchedFragments)
@@ -56,10 +44,6 @@ namespace LcmsSpectatorModels.Models
             return highest;
         }
 
-        public bool Contains(PrSm data)
-        {
-            return ChargeStates.Any(chargeState => chargeState.Contains(data));
-        }
     }
 
     internal class SequenceComparer : IComparer<ProteoformId>

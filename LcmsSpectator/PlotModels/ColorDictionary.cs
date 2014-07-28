@@ -12,7 +12,7 @@ namespace LcmsSpectator.PlotModels
             BuildColorDictionary(length);
         }
 
-        public OxyColor GetColor(LabeledData label)
+        public OxyColor GetColor(LabeledIon label)
         {
             return label.IsFragmentIon ? _fragmentColors[label.IonType.BaseIonType][label.IonType.Charge - 1] : _precursorColors[label.Index];
         }

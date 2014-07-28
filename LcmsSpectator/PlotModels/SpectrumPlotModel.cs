@@ -14,7 +14,7 @@ namespace LcmsSpectator.PlotModels
     {
         public Spectrum Spectrum { get; private set; }
 
-        public SpectrumPlotModel(string title, Spectrum spectrum, IEnumerable<LabeledIon> ions, ColorDictionary colors, Axis xAxis, double mult): base(xAxis, mult)
+        public SpectrumPlotModel(string title, Spectrum spectrum, IEnumerable<LabeledIonPeaks> ions, ColorDictionary colors, Axis xAxis, double mult): base(xAxis, mult)
         {
             _title = title;
             Spectrum = spectrum;
@@ -22,7 +22,7 @@ namespace LcmsSpectator.PlotModels
             GeneratePlot(ions);
         }
 
-        private void GeneratePlot(IEnumerable<LabeledIon> ions)
+        private void GeneratePlot(IEnumerable<LabeledIonPeaks> ions)
         {
             Title = _title;
             var spectrumSeries = new StemSeries(OxyColors.Black, 0.5);
@@ -34,7 +34,7 @@ namespace LcmsSpectator.PlotModels
             foreach (var a in ionHighlights.Item2) Annotations.Add(a);
         }
 
-        private Tuple<List<Series>, List<Annotation>> GetIonSeries(IEnumerable<LabeledIon> ions, ColorDictionary colors)
+        private Tuple<List<Series>, List<Annotation>> GetIonSeries(IEnumerable<LabeledIonPeaks> ions, ColorDictionary colors)
         {
             var series = new List<Series>();
             var annotations = new List<Annotation>();

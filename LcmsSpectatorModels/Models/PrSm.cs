@@ -79,11 +79,11 @@ namespace LcmsSpectatorModels.Models
 
         public PrSm() {}
 
-        public List<LabeledIon> GetFragmentIons(BaseIonType baseIon, NeutralLoss neutralLoss, int charge)
+        public List<LabeledIonPeaks> GetFragmentIons(BaseIonType baseIon, NeutralLoss neutralLoss, int charge)
         {
             var ionType = IcParameters.Instance.GetIonType(baseIon, neutralLoss, charge);
-            var fragments = Utils.Utils.GetCompositions(Sequence, ionType.BaseIonType.IsPrefix);
-            var peaks = new List<LabeledIon>();
+            var fragments = Utils.IonUtils.GetCompositions(Sequence, ionType.BaseIonType.IsPrefix);
+            var peaks = new List<LabeledIonPeaks>();
 
             for (int i = 0; i < fragments.Count; i++) 
             {
@@ -92,14 +92,14 @@ namespace LcmsSpectatorModels.Models
                 var isotopePeaks = Ms2Spectrum.GetAllIsotopePeaks(ion, IcParameters.Instance.ProductIonTolerancePpm, RelativeIntensityThreshold);
                 var index = i + 1;
                 if (isotopePeaks == null)   isotopePeaks = new Peak[0];
-                peaks.Add(new LabeledIon(Scan, index, isotopePeaks, correlationScore, ionType));
+                peaks.Add(new LabeledIonPeaks(fragments[i], index, isotopePeaks, correlationScore, ionType));
             }
             return peaks;
         }
 
-        public List<LabeledIon> GetFragmentIons(IList<BaseIonType> baseIons, IList<NeutralLoss> neutralLosses, int minCharge, int maxCharge)
+        public List<LabeledIonPeaks> GetFragmentIons(IList<BaseIonType> baseIons, IList<NeutralLoss> neutralLosses, int minCharge, int maxCharge)
         {
-            var fragmentIons = new List<LabeledIon>();
+            var fragmentIons = new List<LabeledIonPeaks>();
             foreach (var neutralLoss in neutralLosses)
             {
                 foreach (var baseIonType in baseIons)
@@ -115,7 +115,7 @@ namespace LcmsSpectatorModels.Models
             return fragmentIons;
         }
 
-        public LabeledIon PrecursorIonPeaks(Spectrum spectrum=null)
+        public LabeledIonPeaks PrecursorIonPeaks(Spectrum spectrum=null)
         {
             if (spectrum == null) spectrum = Ms2Spectrum;
             var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
@@ -125,7 +125,7 @@ namespace LcmsSpectatorModels.Models
                 RelativeIntensityThreshold);
             var correlationScore = spectrum.GetCorrScore(ion, IcParameters.Instance.ProductIonTolerancePpm);
             if (isotopePeaks == null) isotopePeaks = new Peak[0];
-            return new LabeledIon(Scan, 0, isotopePeaks, correlationScore, precursorIonType, false);
+            return new LabeledIonPeaks(composition, 0, isotopePeaks, correlationScore, precursorIonType, false);
         }
 
         public double PrecursorMz
@@ -147,7 +147,7 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
-        public LabeledIon PrevMs1PrecursorIonPeaks
+        public LabeledIonPeaks PrevMs1PrecursorIonPeaks
         {
             get
             {
@@ -166,7 +166,7 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
-        public LabeledIon NextMs1PrecursorIonPeaks
+        public LabeledIonPeaks NextMs1PrecursorIonPeaks
         {
             get
             {

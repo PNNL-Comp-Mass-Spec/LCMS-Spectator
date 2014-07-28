@@ -29,11 +29,11 @@ namespace LcmsSpectator.Views
             {
                 NeutralLosses.SelectedItems.Add(neutralLoss);
             }
-            foreach (var fragment in Ms2ViewerViewModel.SelectedFragmentXics)
+            foreach (var fragment in Ms2ViewerViewModel.SelectedFragmentLabels)
             {
                 FragmentIons.SelectedItems.Add(fragment);
             }
-            foreach (var precursorIon in Ms2ViewerViewModel.SelectedPrecursorXics)
+            foreach (var precursorIon in Ms2ViewerViewModel.SelectedPrecursorLabels)
             {
                 PrecursorIsotopes.SelectedItems.Add(precursorIon);
             }
@@ -51,11 +51,11 @@ namespace LcmsSpectator.Views
         private void UpdateSelections(object sender, System.EventArgs e)
         {
             _updatePlots = false;
-            foreach (var fragment in Ms2ViewerViewModel.SelectedFragmentXics)
+            foreach (var fragment in Ms2ViewerViewModel.SelectedFragmentLabels)
             {
                 FragmentIons.SelectedItems.Add(fragment);
             }
-            foreach (var precursorIon in Ms2ViewerViewModel.SelectedPrecursorXics)
+            foreach (var precursorIon in Ms2ViewerViewModel.SelectedPrecursorLabels)
             {
                 PrecursorIsotopes.SelectedItems.Add(precursorIon);
             }
@@ -93,9 +93,8 @@ namespace LcmsSpectator.Views
             if (dataGrid != null)
             {
                 var selectedfragments = dataGrid.SelectedItems;
-                var fragmentList = selectedfragments.Cast<LabeledXic>().ToList();
-                Ms2ViewerViewModel.SelectedFragmentXics = fragmentList;
-                Ms2ViewerViewModel.LoadFragmentXicPlot();
+                var fragmentList = selectedfragments.Cast<LabeledIon>().ToList();
+                Ms2ViewerViewModel.SelectedFragmentLabels = fragmentList;
             }
         }
 
@@ -106,9 +105,8 @@ namespace LcmsSpectator.Views
             if (dataGrid != null)
             {
                 var selectedisotopes = dataGrid.SelectedItems;
-                var isotopeList = selectedisotopes.Cast<LabeledXic>().ToList();
-                Ms2ViewerViewModel.SelectedPrecursorXics = isotopeList;
-                Ms2ViewerViewModel.LoadPrecursorXicPlot();
+                var isotopeList = selectedisotopes.Cast<LabeledIon>().ToList();
+                Ms2ViewerViewModel.SelectedPrecursorLabels = isotopeList;
             }
         }
 

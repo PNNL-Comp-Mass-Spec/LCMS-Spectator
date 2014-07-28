@@ -1,17 +1,56 @@
-﻿using InformedProteomics.Backend.Data.Spectrometry;
+﻿using System;
+using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Spectrometry;
 
 namespace LcmsSpectatorModels.Models
 {
-    public class LabeledIon: LabeledData
+    public class LabeledIon
     {
-        public Peak[] Peaks { get; private set; }
-        public double CorrelationScore { get; private set; }
+        public Composition Composition { get; private set; }
+        public Ion PrecursorIon { get; private set; }
+        public int Index { get; private set; }
+        public IonType IonType { get; private set; }
+        public bool IsFragmentIon { get; private set; }
 
-        public LabeledIon(int scan, int index, Peak[] peaks, double correlationScore, IonType ionType, bool isFragmentIon=true):
-               base(scan, index, ionType, isFragmentIon)
+        public LabeledIon(Composition composition, int index, IonType ionType,  bool isFragmentIon, Ion precursorIon=null)
         {
-            Peaks = peaks;
-            CorrelationScore = correlationScore;
+            Composition = composition;
+            PrecursorIon = precursorIon;
+            Index = index;
+            IonType = ionType;
+            IsFragmentIon = isFragmentIon;
+        }
+
+        public Ion Ion
+        {
+            get { return IonType.GetIon(Composition); }
+        }
+
+        public virtual string Label
+        {
+            get
+            {
+                var annotation = "";
+                if (IsFragmentIon)
+                {
+                    var baseIonTypeName = IonType.BaseIonType.Symbol;
+                    var neutralLoss = IonType.NeutralLoss.Name;
+                    annotation = String.Format("{0}{1}{2}({3}+)", baseIonTypeName, Index, neutralLoss, IonType.Charge);
+                }
+                else
+                {
+                    if (Index < 0) annotation = String.Format("Precursor{0} ({1}+)", Index, IonType.Charge);
+                    else if (Index == 0) annotation = String.Format("Precursor ({0}+)", IonType.Charge);
+                    else if (Index > 0) annotation = String.Format("Precursor+{0} ({1}+)", Index, IonType.Charge);
+                }
+                return annotation;
+            }
+        }
+
+        public override string ToString()
+        {
+            return Label;
         }
     }
 }

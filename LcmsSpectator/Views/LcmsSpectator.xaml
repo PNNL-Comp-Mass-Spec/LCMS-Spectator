@@ -128,16 +128,16 @@
                             <views:XicView Grid.RowSpan="2" DataContext="{Binding XicViewModel}" />
                             <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" ShowsPreview="True" />
                             <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                                        IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" 
-                                        Grid.Row="0" ItemsSource="{Binding FragmentXics}"
-                                        SelectionChanged="FragmentIonSelectionChange"
-                                        Name="FragmentIons">
+                                       IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" 
+                                       Grid.Row="0" ItemsSource="{Binding FragmentLabels}"
+                                       SelectionChanged="FragmentIonSelectionChange"
+                                       Name="FragmentIons">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding Label}"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                             <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                                        ItemsSource="{Binding PrecursorXics}"
+                                        ItemsSource="{Binding PrecursorLabels}"
                                         IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" Grid.Row="1"
                                         SelectionChanged="PrecursorIsotopeSelectionChange"
                                         Name="PrecursorIsotopes">
@@ -155,15 +155,15 @@
                     <TabControl>
                         <!-- ID Tree -->
                         <TabItem Header="ID Tree">
-                            <TreeView ItemsSource="{Binding Ids}" SelectedItemChanged="ScanSelectionChange">
+                            <TreeView ItemsSource="{Binding Ids.Proteins.Values}" SelectedItemChanged="ScanSelectionChange">
                                 <TreeView.Resources>
-                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteinId}" ItemsSource="{Binding Proteoforms}">
+                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
                                         <TextBlock Text="{Binding ProteinNameDesc}" />
                                     </HierarchicalDataTemplate>
-                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteoformId}" ItemsSource="{Binding ChargeStates}">
+                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
                                         <TextBlock Text="{Binding SequenceText}" />
                                     </HierarchicalDataTemplate>
-                                    <HierarchicalDataTemplate DataType="{x:Type models:ChargeStateId}" ItemsSource="{Binding PrSms}">
+                                    <HierarchicalDataTemplate DataType="{x:Type models:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
                                         <TextBlock Text="{Binding Charge}" />
                                     </HierarchicalDataTemplate>
                                     <HierarchicalDataTemplate DataType="{x:Type models:PrSm}">

@@ -23,6 +23,13 @@ namespace LcmsSpectator.PlotModels
             GeneratePlot(xics);
         }
 
+        public XicPlotModel(): base(new LinearAxis(), 0)
+        {
+            _title = "";
+            _colors = new ColorDictionary(2);
+            _showScanMarkers = false;
+        }
+
         public void SetPointMarker(double x)
         {
             var y = YAxis.Maximum;
@@ -46,11 +53,7 @@ namespace LcmsSpectator.PlotModels
                 xPoint = point.X;
                 Series.Remove(_pointMarkers);
             }
-
-            var maxY = GetMaxYInRange(minX, maxX);
-            var yaxis = DefaultYAxis ?? YAxis;
-            yaxis.Maximum = maxY * Multiplier;
-            InvalidatePlot(false);
+            base.SetBounds(minX, maxX);
             SetPointMarker(xPoint);
         }
 
