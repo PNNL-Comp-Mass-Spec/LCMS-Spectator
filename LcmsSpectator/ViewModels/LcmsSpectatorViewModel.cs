@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -33,7 +35,7 @@ namespace LcmsSpectator.ViewModels
         public event EventHandler UpdateSelections;
 
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
-        public XicViewModel XicViewModel { get; private set; }
+        public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
 
         public LcmsSpectatorViewModel()
         {
@@ -41,7 +43,9 @@ namespace LcmsSpectator.ViewModels
             PrSms = new List<PrSm>();
             _colors = new ColorDictionary(2);
             Ms2SpectrumViewModel = new SpectrumViewModel(_colors);
-            XicViewModel = new XicViewModel(_colors);
+            XicViewModels = new ObservableCollection<XicViewModel>();
+//            var XicViewModel = new XicViewModel(_colors);
+//            XicViewModels.Add(XicViewModel);
 
             _spectrumChanged = false;
 
@@ -74,8 +78,6 @@ namespace LcmsSpectator.ViewModels
             FileOpen = false;
 
             SelectedPrSm = null;
-
-            XicViewModel.SelectedScanNumberChanged += XicScanNumberChanged;
         }
 
         /// <summary>
@@ -109,7 +111,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 if (value == null) return;
-                XicViewModel.SelectedScanNumber = _selectedPrSm.Scan;
+                XicViewModels[0].SelectedScanNumber = _selectedPrSm.Scan;
                 if (_selectedChargeState == null || 
                     _selectedChargeState.SequenceText != value.SequenceText || 
                     _selectedChargeState.Charge != value.Charge)
@@ -119,10 +121,10 @@ namespace LcmsSpectator.ViewModels
                     MaxCharge = _maxFragmentIonCharge;
                     _colors.BuildColorDictionary(_maxFragmentIonCharge);
                     _selectedChargeState = value;
-                    XicViewModel.Reset();
+                    if (XicViewModels.Count > 0) XicViewModels[0].Reset();
                     SetFragmentLabels();
                     SetPrecursorLabels();
-                    XicViewModel.ZoomToScan(SelectedPrSm.Scan);
+                    if (XicViewModels.Count > 0) XicViewModels[0].ZoomToScan(SelectedPrSm.Scan);
                 }
                 UpdateSpectrum();
                 OnPropertyChanged("SelectedChargeState");
@@ -160,7 +162,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedFragmentLabels = value;
-                XicViewModel.SelectedFragments = _selectedFragmentLabels;
+                if (XicViewModels.Count > 0)  XicViewModels[0].SelectedFragments = _selectedFragmentLabels;
                 OnPropertyChanged("SelectedFragmentLabels");
             }
         }
@@ -171,7 +173,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedPrecursorLabels = value;
-                XicViewModel.SelectedPrecursors = _selectedPrecursorLabels;
+                if (XicViewModels.Count > 0)  XicViewModels[0].SelectedPrecursors = _selectedPrecursorLabels;
                 OnPropertyChanged("SelectedPrecursorLabels");
             }
         }
@@ -286,7 +288,14 @@ namespace LcmsSpectator.ViewModels
             {
                 var reader = new IcFileReader(idFile, rawFile);
                 var ids = reader.Read();
-                XicViewModel.Lcms = IcParameters.Instance.Lcms;
+                var rawFileWithoutPath = Path.GetFileName(rawFile);
+                var xicViewModel = new XicViewModel(rawFileWithoutPath, _colors)
+                {
+                    Lcms = IcParameters.Instance.Lcms
+                };
+                xicViewModel.SelectedScanNumberChanged += XicScanNumberChanged;
+                var addXicAction = new Action<XicViewModel>(XicViewModels.Add);
+                _guiThread.Invoke(addXicAction, xicViewModel);
                 _minFragmentIonCharge = 1;
                 _maxFragmentIonCharge = 15;
                 MinCharge = _minFragmentIonCharge;

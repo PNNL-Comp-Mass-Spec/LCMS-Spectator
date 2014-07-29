@@ -5,6 +5,7 @@
         xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
         xmlns:utils="clr-namespace:LcmsSpectator.Utils"
         xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
+        xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
         Title="LcMsSpectator" WindowState="Maximized">
     <Window.DataContext>
         <viewModels:LcmsSpectatorViewModel/>
@@ -111,44 +112,66 @@
                 <!-- End Ion type selector -->
                 <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" ShowsPreview="True" />
                 <!-- Plots -->
-                <TabControl Grid.Row="0" Grid.Column="2" Grid.RowSpan="3">
-                    <TabItem Header="Spectrum View">
-                        <views:SpectrumView DataContext="{Binding Ms2SpectrumViewModel}" />
-                    </TabItem>
-                    <TabItem Header="XIC View">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="50*" />
-                                <RowDefinition Height="50*" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="3" />
-                                <ColumnDefinition Width ="85" />
-                            </Grid.ColumnDefinitions>
-                            <views:XicView Grid.RowSpan="2" DataContext="{Binding XicViewModel}" />
-                            <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" ShowsPreview="True" />
-                            <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                <xcad:DockingManager Grid.Row="0" Grid.Column="2" Grid.RowSpan="3">
+                    <xcad:LayoutRoot>
+                        <xcad:LayoutPanel>
+                            <xcad:LayoutAnchorablePane>
+                                <xcad:LayoutAnchorable Title="Spectrum View" CanClose="False">
+                                    <views:SpectrumView DataContext="{Binding Ms2SpectrumViewModel}" />
+                                </xcad:LayoutAnchorable>
+                                <xcad:LayoutAnchorable Title="XIC View" CanClose="False">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="50*" />
+                                            <RowDefinition Height="50*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="3" />
+                                            <ColumnDefinition Width ="85" />
+                                        </Grid.ColumnDefinitions>
+                                        <xcad:DockingManager Grid.RowSpan="2" AllowMixedOrientation="True" DocumentsSource="{Binding XicViewModels}">
+                                            <xcad:DockingManager.LayoutItemTemplate>
+                                                <DataTemplate>
+                                                    <views:XicView />
+                                                </DataTemplate>
+                                            </xcad:DockingManager.LayoutItemTemplate>
+                                            <xcad:DockingManager.LayoutItemContainerStyle>
+                                                <Style TargetType="{x:Type xcad:LayoutItem}">
+                                                    <Setter Property="Title" Value="{Binding Model.RawFileName}" />
+                                                </Style>
+                                            </xcad:DockingManager.LayoutItemContainerStyle>
+                                            <xcad:LayoutRoot>
+                                                <xcad:LayoutPanel>
+                                                    <xcad:LayoutDocumentPane />
+                                                </xcad:LayoutPanel>
+                                            </xcad:LayoutRoot>
+                                        </xcad:DockingManager>
+                                        <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" ShowsPreview="True" />
+                                        <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                                        IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" 
                                        Grid.Row="0" ItemsSource="{Binding FragmentLabels}"
                                        SelectionChanged="FragmentIonSelectionChange"
                                        Name="FragmentIons">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding Label}"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                            <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding Label}"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                        <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                                         ItemsSource="{Binding PrecursorLabels}"
                                         IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" Grid.Row="1"
                                         SelectionChanged="PrecursorIsotopeSelectionChange"
                                         Name="PrecursorIsotopes">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Isotope" Width="*" Binding="{Binding Label}" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Grid>
-                    </TabItem>
-                </TabControl>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Isotope" Width="*" Binding="{Binding Label}" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Grid>
+                                </xcad:LayoutAnchorable>
+                            </xcad:LayoutAnchorablePane>
+                        </xcad:LayoutPanel>
+                    </xcad:LayoutRoot>
+                </xcad:DockingManager>
                 <!-- End Plots -->
                 <GridSplitter Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch"
                           ShowsPreview="True" />

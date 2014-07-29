@@ -12,12 +12,14 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicViewModel: ViewModelBase
     {
+        public string RawFileName { get; set; }
         public LcMsRun Lcms { get; set; }
         public ColorDictionary Colors { get; set; }
         public DelegateCommand SelectFragmentScanNumberCommand { get; set; }
         public event EventHandler SelectedScanNumberChanged;
-        public XicViewModel(ColorDictionary colors)
+        public XicViewModel(string rawFileName, ColorDictionary colors)
         {
+            RawFileName = rawFileName;
             Colors = colors;
             _precursorXicCache = new Dictionary<Composition, LabeledXic>();
             _fragmentXicCache = new Dictionary<Composition, LabeledXic>();
