@@ -154,6 +154,7 @@
     <Compile Include="Utils\PrSmChangedEventArgs.cs" />
     <Compile Include="ViewModels\DelegateCommand.cs" />
     <Compile Include="ViewModels\LcmsSpectatorViewModel.cs" />
+    <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SpectrumViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\XicViewModel.cs" />

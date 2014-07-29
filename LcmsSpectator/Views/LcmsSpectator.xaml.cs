@@ -45,7 +45,14 @@ namespace LcmsSpectator.Views
             var openFileDialog = new OpenFile();
             openFileDialog.ShowDialog();
             InvalidateVisual();
-            Ms2ViewerViewModel.OpenFile(openFileDialog.ParamFileName, openFileDialog.IdFileName, openFileDialog.RawFileName);
+            Ms2ViewerViewModel.OpenFile(openFileDialog.IdFileName, openFileDialog.RawFileName);
+        }
+
+        private void Settings(object sender, RoutedEventArgs e)
+        {
+            var settingsDialog = new Settings();
+            settingsDialog.ShowDialog();
+            InvalidateVisual();
         }
 
         private void UpdateSelections(object sender, System.EventArgs e)

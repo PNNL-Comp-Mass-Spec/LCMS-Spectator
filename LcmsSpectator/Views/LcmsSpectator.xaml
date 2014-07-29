@@ -18,6 +18,7 @@
         <Menu VerticalAlignment="Top">
             <MenuItem Header="_File">
                 <MenuItem Header="_Open" Click="OpenFile" />
+                <MenuItem Header="_Settings" Click="Settings"></MenuItem>
             </MenuItem>
         </Menu>
         <!-- End Menu -->

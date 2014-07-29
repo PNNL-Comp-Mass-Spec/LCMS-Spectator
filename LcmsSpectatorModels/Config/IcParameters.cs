@@ -17,17 +17,13 @@ namespace LcmsSpectatorModels.Config
         public bool Tda { get; set; }
         public Tolerance PrecursorTolerancePpm { get; set; }
         public Tolerance ProductIonTolerancePpm { get; set; }
-        public int MinSequenceLength { get; set; }
-        public int MaxSequenceLength { get; set; }
-        public int MinPrecursorIonCharge { get; set; }
-        public int MaxPrecursorIonCharge { get; set; }
-        public int MinProductIonCharge { get; set; }
-        public int MaxProductIonCharge { get; set; }
-        public int MinSequenceMass { get; set; }
-        public int MaxSequenceMass { get; set; }
         public int MaxDynamicModificationsPerSequence { get; set; }
+        public double QValueThreshold { get; set; }
+        public double IonCorrelationThreshold { get; set; }
         public List<SearchModification> Modifications { get; set; }
         public IonTypeFactory IonTypeFactory { get; set; }
+
+        public event EventHandler SettingsUpdated;
 
         public static IcParameters Instance
         {
@@ -62,9 +58,21 @@ namespace LcmsSpectatorModels.Config
             return IonTypeFactory.GetIonType(name);
         }
 
+        public void Update()
+        {
+//            SettingsUpdated(this, null);
+        }
+
         private IcParameters()
         {
             Modifications = new List<SearchModification>();
+
+            PrecursorTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
+            ProductIonTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
+            QValueThreshold = 0.1;
+            IonCorrelationThreshold = 0.7;
+            MaxDynamicModificationsPerSequence = 0;
+            IonTypeFactory = new IonTypeFactory(15);
         }
 
         private void ReadRawFile()
@@ -99,31 +107,6 @@ namespace LcmsSpectatorModels.Config
                         break;
                     case "ProductIonTolerancePpm":
                         ProductIonTolerancePpm = new Tolerance(Convert.ToDouble(parts[1]), ToleranceUnit.Ppm);
-                        break;
-                    case "MinSequenceLength":
-                        MinSequenceLength = Convert.ToInt32(parts[1]);
-                        break;
-                    case "MaxSequenceLength":
-                        MaxSequenceLength = Convert.ToInt32(parts[1]);
-                        break;
-                    case "MinPrecursorIonCharge":
-                        MinPrecursorIonCharge = Convert.ToInt32(parts[1]);
-                        break;
-                    case "MaxPrecursorIonCharge":
-                        MaxPrecursorIonCharge = Convert.ToInt32(parts[1]);
-                        IonTypeFactory = new IonTypeFactory(MaxPrecursorIonCharge);
-                        break;
-                    case "MinProductIonCharge":
-                        MinProductIonCharge = Convert.ToInt32(parts[1]);
-                        break;
-                    case "MaxProductIonCharge":
-                        MaxProductIonCharge = Convert.ToInt32(parts[1]);
-                        break;
-                    case "MinSequenceMass":
-                        MinSequenceMass = Convert.ToInt32(parts[1]);
-                        break;
-                    case "MaxSequenceMass":
-                        MaxSequenceMass = Convert.ToInt32(parts[1]);
                         break;
                     case "MaxDynamicModificationsPerSequence":
                         MaxDynamicModificationsPerSequence = Convert.ToInt32(parts[1]);

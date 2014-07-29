@@ -6,10 +6,9 @@ namespace LcmsSpectatorModels.Config
 {
     public class IcFileReader
     {
-        public IcFileReader(string tsvFile, string paramFile, string rawFile)
+        public IcFileReader(string tsvFile, string rawFile)
         {
             IcParameters.Instance.RawFile = rawFile;
-            IcParameters.Instance.ParamFile = paramFile;
             _tsvFile = tsvFile;
         }
 

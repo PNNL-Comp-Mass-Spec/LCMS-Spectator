@@ -276,20 +276,19 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Open a raw file, parameter file, and identification file
         /// </summary>
-        /// <param name="paramFile">Name of the parameter file to open.</param>
         /// <param name="idFile">Name of the identification list file to open.</param>
         /// <param name="rawFile">Name of the raw file to open.</param>
-        public void OpenFile(string paramFile, string idFile, string rawFile)
+        public void OpenFile(string idFile, string rawFile)
         {
-            if (paramFile == "" || idFile == "") return;
+            if (idFile == "") return;
             IsLoading = true;
             Task.Factory.StartNew(() =>
             {
-                var reader = new IcFileReader(idFile, paramFile, rawFile);
+                var reader = new IcFileReader(idFile, rawFile);
                 var ids = reader.Read();
                 XicViewModel.Lcms = IcParameters.Instance.Lcms;
-                _minFragmentIonCharge = IcParameters.Instance.MinProductIonCharge;
-                _maxFragmentIonCharge = IcParameters.Instance.MaxProductIonCharge;
+                _minFragmentIonCharge = 1;
+                _maxFragmentIonCharge = 15;
                 MinCharge = _minFragmentIonCharge;
                 MaxCharge = _maxFragmentIonCharge;
                 _selectedPrSm = null;
