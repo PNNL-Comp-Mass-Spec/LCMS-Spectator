@@ -16,6 +16,7 @@
             <MenuItem Header="_File">
                 <MenuItem Header="Open _Raw File" Command="{Binding OpenRawFileCommand}" />
                 <MenuItem Header="Open _Id File" Command="{Binding OpenTsvFileCommand}" />
+                <MenuItem Header="Save _As" />
                 <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
             </MenuItem>
         </Menu>

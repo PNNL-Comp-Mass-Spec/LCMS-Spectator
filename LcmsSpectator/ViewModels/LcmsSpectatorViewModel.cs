@@ -14,6 +14,7 @@ using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
+using Microsoft.Win32;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -36,6 +37,7 @@ namespace LcmsSpectator.ViewModels
         public DelegateCommand CreatePrSmCommand { get; set; }
         public DelegateCommand OpenRawFileCommand { get; set; }
         public DelegateCommand OpenTsvFileCommand { get; set; }
+        public DelegateCommand SaveCommand { get; set; }
         public DelegateCommand OpenSettingsCommand { get; set; }
 
         public event EventHandler UpdateSelections;
@@ -333,6 +335,11 @@ namespace LcmsSpectator.ViewModels
                 FileOpen = true;
                 IsLoading = false;
             });
+        }
+
+        public void Save()
+        {
+            
         }
 
         public void OpenSettings()

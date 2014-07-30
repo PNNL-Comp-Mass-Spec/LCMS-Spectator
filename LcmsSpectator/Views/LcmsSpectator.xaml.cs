@@ -1,14 +1,10 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.ViewModels;
 using LcmsSpectatorModels.Models;
-using MsPathViewer.Views;
-using Ookii.Dialogs;
 using DataGrid = System.Windows.Controls.DataGrid;
 using TreeView = System.Windows.Controls.TreeView;
 
@@ -44,13 +40,6 @@ namespace LcmsSpectator.Views
                 PrecursorIsotopes.SelectedItems.Add(precursorIon);
             }
             _updatePlots = true;
-        }
-
-        private void Settings(object sender, RoutedEventArgs e)
-        {
-            var settingsDialog = new Settings();
-            settingsDialog.ShowDialog();
-            InvalidateVisual();
         }
 
         private void UpdateSelections(object sender, System.EventArgs e)

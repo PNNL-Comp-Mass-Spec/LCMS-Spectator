@@ -71,12 +71,6 @@
     <Reference Include="MultiDimensionalPeakFinding">
       <HintPath>..\Library\MultiDimensionalPeakFinding.dll</HintPath>
     </Reference>
-    <Reference Include="Ookii.Dialogs">
-      <HintPath>..\Library\Ookii.Dialogs.dll</HintPath>
-    </Reference>
-    <Reference Include="Ookii.Dialogs.Wpf">
-      <HintPath>..\Library\Ookii.Dialogs.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="OxyPlot">
       <HintPath>..\Library\Oxyplot\OxyPlot.dll</HintPath>
     </Reference>
@@ -168,10 +162,6 @@
       <DependentUpon>LcmsSpectator.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Views\OpenFile.xaml.cs">
-      <DependentUpon>OpenFile.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
@@ -224,10 +214,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Views\LcmsSpectator.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\OpenFile.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

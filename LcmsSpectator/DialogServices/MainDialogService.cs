@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Forms;
 using LcmsSpectator.Views;
-using Ookii.Dialogs;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace LcmsSpectator.DialogServices
 {
@@ -31,11 +27,11 @@ namespace LcmsSpectator.DialogServices
 
         public string OpenFile(string defaultExt, string filter)
         {
-            var dialog = new VistaOpenFileDialog { DefaultExt = defaultExt, Filter = filter };
+            var dialog = new OpenFileDialog { DefaultExt = defaultExt, Filter = filter };
 
-            DialogResult result = dialog.ShowDialog();
+            var result = dialog.ShowDialog();
             string fileName = "";
-            if (result == DialogResult.OK) fileName = dialog.FileName;
+            if (result == true) fileName = dialog.FileName;
             return fileName;
         }
 
