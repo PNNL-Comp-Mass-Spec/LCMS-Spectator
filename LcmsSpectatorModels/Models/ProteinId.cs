@@ -27,6 +27,11 @@ namespace LcmsSpectatorModels.Models
             proteoform.Add(data);
         }
 
+        public void Remove(PrSm data)
+        {
+            if (Proteoforms.ContainsKey(data.SequenceText)) Proteoforms[data.SequenceText].Remove(data);
+        }
+
         public PrSm GetHighestScoringPrSm()
         {
             PrSm highest = null;

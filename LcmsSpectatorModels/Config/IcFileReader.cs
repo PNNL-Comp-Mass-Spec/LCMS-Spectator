@@ -38,7 +38,6 @@ namespace LcmsSpectatorModels.Config
                     continue;
                 }
                 var idData = new PrSm(line, headers, _lcms);
-                if (idData.QValue > QValueThreshold) continue;
                 idTree.Add(idData);
             }
 
@@ -48,6 +47,6 @@ namespace LcmsSpectatorModels.Config
 
         private readonly LcMsRun _lcms;
         private readonly string _tsvFile;
-        private const double QValueThreshold = 0.01;
+//        private const double QValueThreshold = 0.01;
     }
 }

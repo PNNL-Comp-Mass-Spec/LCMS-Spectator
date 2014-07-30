@@ -33,6 +33,11 @@ namespace LcmsSpectatorModels.Models
             else throw new ArgumentException("Cannot insert duplicate PrSm.");
         }
 
+        public void Remove(PrSm data)
+        {
+            if (PrSms.ContainsKey(data.Scan)) PrSms.Remove(data.Scan);
+        }
+
         public PrSm GetHighestScoringPrSm()
         {
             PrSm highest = null;

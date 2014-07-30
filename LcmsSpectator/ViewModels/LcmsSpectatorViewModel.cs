@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Threading;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -77,12 +76,10 @@ namespace LcmsSpectator.ViewModels
             NeutralLosses = NeutralLoss.CommonNeutralLosses.ToArray();
             SelectedNeutralLosses = new List<NeutralLoss> {NeutralLoss.NoLoss};
 
-            _minFragmentIonCharge = 1;
-            _maxFragmentIonCharge = 15;
-            _minSelectedFragmentIonCharge = _minFragmentIonCharge;
-            _maxSelectedFragmentIonCharge = _maxFragmentIonCharge;
-            MinCharge = _minFragmentIonCharge;
-            MaxCharge = _maxFragmentIonCharge;
+            _minSelectedFragmentIonCharge = 1;
+            _maxSelectedFragmentIonCharge = 15;
+            MinCharge = 1;
+            MaxCharge = 15;
 
             IsLoading = false;
             FileOpen = false;
@@ -126,10 +123,9 @@ namespace LcmsSpectator.ViewModels
                     _selectedChargeState.SequenceText != value.SequenceText || 
                     _selectedChargeState.Charge != value.Charge)
                 {
-                    _maxFragmentIonCharge = Math.Min(Math.Max(value.Charge - 1, 2), 15);
                     MinCharge = 1;
-                    MaxCharge = _maxFragmentIonCharge;
-                    _colors.BuildColorDictionary(_maxFragmentIonCharge);
+                    MaxCharge = Math.Min(Math.Max(value.Charge - 1, 2), 15);
+                    _colors.BuildColorDictionary(MaxCharge);
                     _selectedChargeState = value;
                     foreach (var xicVm in XicViewModels) xicVm.Reset();
                     SetFragmentLabels();
@@ -320,7 +316,7 @@ namespace LcmsSpectator.ViewModels
             }
             if (xicVm == null)
             {
-                MessageBox.Show("Cannot find raw file corresponding to this ID file.");
+                _dialogService.MessageBox("Cannot find raw file corresponding to this ID file.");
                 return;
             }
             IsLoading = true;
@@ -329,12 +325,7 @@ namespace LcmsSpectator.ViewModels
                 var reader = new IcFileReader(tsvFileName, xicVm.Lcms);
                 var ids = reader.Read();
                 Ids.Add(ids);
-                var prsms = Ids.AllPrSms;
-                prsms.Sort();
-                PrSms = prsms;
-                ProteinIds = Ids.Proteins.Values.ToList();
-                OnPropertyChanged("ProteinIds");
-                OnPropertyChanged("PrSms");
+                FilterIds();
                 SelectedPrSm = null;
                 if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
                 SelectedCharge = 2;
@@ -346,7 +337,25 @@ namespace LcmsSpectator.ViewModels
 
         public void OpenSettings()
         {
-            var settingsChanged = _dialogService.OpenSettings();
+            var qValue = IcParameters.Instance.QValueThreshold;
+            var saved = _dialogService.OpenSettings();
+            var newQValue = IcParameters.Instance.QValueThreshold;
+            if (saved && !qValue.Equals(newQValue))
+            {
+                FilterIds();
+            }
+        }
+
+        private void FilterIds()
+        {
+            var qValue = IcParameters.Instance.QValueThreshold;
+            var ids = Ids.GetTreeFilteredByQValue(qValue);
+            ProteinIds = ids.Proteins.Values.ToList();
+            var prsms = ids.AllPrSms;
+            prsms.Sort();
+            PrSms = prsms;
+            OnPropertyChanged("ProteinIds");
+            OnPropertyChanged("PrSms");
         }
 
         private void CreatePrSm()
@@ -354,12 +363,12 @@ namespace LcmsSpectator.ViewModels
             var sequence = Sequence.GetSequenceFromMsGfPlusPeptideStr(SequenceText);
             if (sequence == null)
             {
-                MessageBox.Show("Invalid sequence");
+                _dialogService.MessageBox("Invalid sequence.");
                 return;
             }
             if (SelectedCharge < 1)
             {
-                MessageBox.Show("Invalid Charge.");
+                _dialogService.MessageBox("Invalid Charge.");
                 return;
             }
             var prsm = new PrSm
@@ -401,16 +410,15 @@ namespace LcmsSpectator.ViewModels
         {
             try
             {
-                if (MinCharge < _minFragmentIonCharge ||
-                    MaxCharge > _maxFragmentIonCharge ||
-                    MinCharge > MaxCharge) throw new FormatException();
+
+                if (MinCharge < 1) throw new FormatException("Min charge must be at least 1.");
+                if (MinCharge > MaxCharge) throw new FormatException("Max charge cannot be less than min charge.");
                 _minSelectedFragmentIonCharge = MinCharge;
                 _maxSelectedFragmentIonCharge = MaxCharge;
             }
-            catch (FormatException)
+            catch (FormatException f)
             {
-                MessageBox.Show("Min and Max must be integers between " +
-                                _minFragmentIonCharge + " and " + _maxFragmentIonCharge + ", inclusive.");
+                _dialogService.ExceptionAlert(f);
                 MinCharge = _minSelectedFragmentIonCharge;
                 MaxCharge = _maxSelectedFragmentIonCharge;
             }
@@ -436,7 +444,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private IMainDialogService _dialogService;
+        private readonly IMainDialogService _dialogService;
         private PrSm _selectedPrSm;
         private List<BaseIonType> _selectedBaseIonTypes;
         private readonly ColorDictionary _colors;
@@ -444,8 +452,6 @@ namespace LcmsSpectator.ViewModels
         private bool _isLoading;
         private int _minSelectedFragmentIonCharge;
         private int _maxSelectedFragmentIonCharge;
-        private int _minFragmentIonCharge;
-        private int _maxFragmentIonCharge;
         private int _minCharge;
         private int _maxCharge;
         private bool _fileOpen;

@@ -8,8 +8,9 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50*" />
-            <RowDefinition Height="50*" />
+            <RowDefinition Height="60*" />
+            <RowDefinition Height="1" />
+            <RowDefinition Height="40*" />
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
         <oxy:Plot Name="FragmentIonXic" Grid.Row="0" Model="{Binding Path=FragmentPlotModel}">
@@ -17,7 +18,8 @@
                 <MouseBinding Command="{Binding Path=SelectFragmentScanNumberCommand}" MouseAction="LeftDoubleClick" />
             </oxy:Plot.InputBindings>
         </oxy:Plot>
-        <oxy:Plot Name="PrecursorIonXic" Grid.Row="1" Model="{Binding Path=PrecursorPlotModel}"/>
-        <CheckBox Grid.Row="2" IsChecked="{Binding ShowScanMarkers}">Show Scan Markers</CheckBox>
+        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ShowsPreview="True" />
+        <oxy:Plot Name="PrecursorIonXic" Grid.Row="2" Model="{Binding Path=PrecursorPlotModel}"/>
+        <CheckBox Grid.Row="3" IsChecked="{Binding ShowScanMarkers}">Show Scan Markers</CheckBox>
     </Grid>
 </UserControl>

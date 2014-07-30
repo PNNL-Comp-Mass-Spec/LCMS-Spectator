@@ -38,5 +38,11 @@ namespace LcmsSpectator.DialogServices
             if (result == DialogResult.OK) fileName = dialog.FileName;
             return fileName;
         }
+
+
+        public void ExceptionAlert(Exception e)
+        {
+            System.Windows.MessageBox.Show(e.Message, "", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 }

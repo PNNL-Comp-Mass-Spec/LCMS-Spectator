@@ -23,8 +23,6 @@ namespace LcmsSpectatorModels.Config
         public List<SearchModification> Modifications { get; set; }
         public IonTypeFactory IonTypeFactory { get; set; }
 
-        public event EventHandler SettingsUpdated;
-
         public static IcParameters Instance
         {
             get { return _instance ?? (_instance = new IcParameters()); }
@@ -58,18 +56,13 @@ namespace LcmsSpectatorModels.Config
             return IonTypeFactory.GetIonType(name);
         }
 
-        public void Update()
-        {
-//            SettingsUpdated(this, null);
-        }
-
         private IcParameters()
         {
             Modifications = new List<SearchModification>();
 
             PrecursorTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
             ProductIonTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
-            QValueThreshold = 0.1;
+            QValueThreshold = 0.01;
             IonCorrelationThreshold = 0.7;
             MaxDynamicModificationsPerSequence = 0;
             IonTypeFactory = new IonTypeFactory(15);

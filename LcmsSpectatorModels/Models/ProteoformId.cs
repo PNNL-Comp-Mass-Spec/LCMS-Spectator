@@ -25,6 +25,11 @@ namespace LcmsSpectatorModels.Models
             chargeState.Add(data);
         }
 
+        public void Remove(PrSm data)
+        {
+            if (ChargeStates.ContainsKey(data.Charge)) ChargeStates[data.Charge].Remove(data);
+        }
+
         public bool Contains(PrSm data)
         {
             return ChargeStates.Values.Any(chargeState => chargeState.Contains(data));
