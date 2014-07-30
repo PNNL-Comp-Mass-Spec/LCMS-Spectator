@@ -322,8 +322,8 @@ namespace LcmsSpectator.ViewModels
             IsLoading = true;
             Task.Factory.StartNew(() =>
             {
-                var reader = new IcFileReader(tsvFileName, xicVm.Lcms);
-                var ids = reader.Read();
+                var reader = IdFileReaderFactory.CreateReader(tsvFileName);
+                var ids = reader.Read(xicVm.Lcms);
                 Ids.Add(ids);
                 FilterIds();
                 SelectedPrSm = null;

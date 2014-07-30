@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Models;
 
 namespace LcmsSpectatorModels.Config
 {
-    interface IIdFileReader
+    public interface IIdFileReader
     {
-        IdentificationTree Read();
+        IdentificationTree Read(LcMsRun lcms);
     }
 }

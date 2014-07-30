@@ -68,15 +68,6 @@
     <Reference Include="InformedProteomics.Backend">
       <HintPath>..\Library\InformedProteomics.Backend.dll</HintPath>
     </Reference>
-    <Reference Include="MigraDoc.DocumentObjectModel">
-      <HintPath>..\Library\Oxyplot\MigraDoc.DocumentObjectModel.dll</HintPath>
-    </Reference>
-    <Reference Include="MigraDoc.Rendering">
-      <HintPath>..\Library\Oxyplot\MigraDoc.Rendering.dll</HintPath>
-    </Reference>
-    <Reference Include="MigraDoc.RtfRendering">
-      <HintPath>..\Library\Oxyplot\MigraDoc.RtfRendering.dll</HintPath>
-    </Reference>
     <Reference Include="MultiDimensionalPeakFinding">
       <HintPath>..\Library\MultiDimensionalPeakFinding.dll</HintPath>
     </Reference>
@@ -103,9 +94,6 @@
     </Reference>
     <Reference Include="OxyPlot.Xps">
       <HintPath>..\Library\Oxyplot\OxyPlot.Xps.dll</HintPath>
-    </Reference>
-    <Reference Include="PdfSharp">
-      <HintPath>..\Library\Oxyplot\PdfSharp.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>

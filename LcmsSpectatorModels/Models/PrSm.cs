@@ -194,7 +194,7 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
-        private void SetModifications(string modifications)
+        public void SetModifications(string modifications)
         {
             Modifications = new List<Tuple<int, Modification>>();
             // Build Sequence AminoAcid list

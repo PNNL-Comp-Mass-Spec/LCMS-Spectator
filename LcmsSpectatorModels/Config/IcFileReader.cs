@@ -1,25 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Models;
 
 namespace LcmsSpectatorModels.Config
 {
-    public class IcFileReader
+    public class IcFileReader: IIdFileReader
     {
-        public IcFileReader(string tsvFile, string rawFile)
+        public IcFileReader(string tsvFile)
         {
-            IcParameters.Instance.RawFile = rawFile;
             _tsvFile = tsvFile;
         }
 
-        public IcFileReader(string tsvFile, LcMsRun lcms)
-        {
-            _lcms = lcms;
-            _tsvFile = tsvFile;
-        }
-
-        public IdentificationTree Read()
+        public IdentificationTree Read(LcMsRun lcms)
         {
             var idTree = new IdentificationTree();
             var file = File.ReadLines(_tsvFile);
@@ -37,16 +32,51 @@ namespace LcmsSpectatorModels.Config
                     }
                     continue;
                 }
-                var idData = new PrSm(line, headers, _lcms);
+                var idData = CreatePrSm(line, headers, lcms);
                 idTree.Add(idData);
             }
 
             return idTree;
         }
 
+        private PrSm CreatePrSm(string line, Dictionary<string, int> headers, LcMsRun lcms)
+        {
+                var parts = line.Split('\t');
+            var scoreLabel = "IcScore";
+            if (!headers.ContainsKey(scoreLabel)) scoreLabel = "#MatchedFragments";
+            var score = Convert.ToDouble(parts[headers[scoreLabel]]);
+            var prsm = new PrSm
+            {
+                Lcms = lcms,
+                Scan = Convert.ToInt32(parts[headers["Scan"]]),
+                Pre = parts[headers["Pre"]],
+                Protein = parts[headers["Sequence"]],
+                Post = parts[headers["Post"]],
+                Annotation = (parts[headers["Pre"]] + "." + parts[headers["Sequence"]] + "." + parts[headers["Post"]]).Replace('-', '_'),
+                SequenceLabel = new List<string>(),
+                Composition = parts[headers["Composition"]],
+                ProteinName = parts[headers["ProteinName"]],
+                ProteinDesc = parts[headers["ProteinDesc"]].Split(';').FirstOrDefault(),
+                ProteinNameDesc = parts[headers["ProteinName"]] + "; " + parts[headers["ProteinDesc"]],
+                ProteinLength = Convert.ToInt32(parts[headers["ProteinLength"]]),
+                Start = Convert.ToInt32(parts[headers["Start"]]),
+                End = Convert.ToInt32(parts[headers["End"]]),
+                Charge = Convert.ToInt32(parts[headers["Charge"]]),
+                MostAbundantIsotopeMz = Convert.ToDouble(parts[headers["MostAbundantIsotopeMz"]]),
+                Mass = Convert.ToDouble(parts[headers["Mass"]]),
+                MatchedFragments = Math.Round(score, 3),
+//              IsotopeCorrPrevMs1 = Convert.ToDouble(parts[headers["IsotopeCorrPrevMs1"]]),
+//              IsotopeCorrNextMs1 = Convert.ToDouble(parts[headers["IsotopeCorrNextMs1"]]),
+//              CorrMostAbundantPlusOneIsoptope = Convert.ToDouble(parts[headers["CorrMostAbundantPlusOneIsotope"]]),
+//              ChargeCorrMinusOne = Convert.ToDouble(parts[headers["ChargeCorrMinusOne"]]),
+//              ChargeCorrPlusOne = Convert.ToDouble(parts[headers["ChargeCorrPlusOne"]]),
+                QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),
+                PepQValue = Convert.ToDouble(parts[headers["PepQValue"]]),
+            };
+            prsm.SetModifications(parts[headers["Modifications"]]);
+            return prsm;
+        }
 
-        private readonly LcMsRun _lcms;
         private readonly string _tsvFile;
-//        private const double QValueThreshold = 0.01;
     }
 }
