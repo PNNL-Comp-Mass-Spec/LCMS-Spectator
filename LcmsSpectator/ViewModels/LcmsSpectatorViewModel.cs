@@ -9,6 +9,7 @@ using System.Windows.Threading;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
@@ -32,28 +33,34 @@ namespace LcmsSpectator.ViewModels
 
         public string SequenceText { get; set; }
         public int SelectedCharge { get; set; }
+
         public DelegateCommand CreatePrSmCommand { get; set; }
+        public DelegateCommand OpenRawFileCommand { get; set; }
+        public DelegateCommand OpenTsvFileCommand { get; set; }
+        public DelegateCommand OpenSettingsCommand { get; set; }
 
         public event EventHandler UpdateSelections;
 
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
 
-        public LcmsSpectatorViewModel()
+        public LcmsSpectatorViewModel(IMainDialogService dialogService)
         {
+            _dialogService = dialogService;
             Ids = new IdentificationTree();
             ProteinIds = Ids.Proteins.Values.ToList();
             PrSms = new List<PrSm>();
             _colors = new ColorDictionary(2);
             Ms2SpectrumViewModel = new SpectrumViewModel(_colors);
             XicViewModels = new ObservableCollection<XicViewModel>();
-//            var XicViewModel = new XicViewModel(_colors);
-//            XicViewModels.Add(XicViewModel);
 
             _spectrumChanged = false;
 
             SetIonChargesCommand = new DelegateCommand(SetIonCharges);
             CreatePrSmCommand = new DelegateCommand(CreatePrSm);
+            OpenRawFileCommand = new DelegateCommand(OpenRawFile);
+            OpenTsvFileCommand = new DelegateCommand(OpenTsvFile);
+            OpenSettingsCommand = new DelegateCommand(OpenSettings);
 
             _guiThread = Dispatcher.CurrentDispatcher;
 
@@ -278,8 +285,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        public void OpenRawFile(string rawFileName)
+        public void OpenRawFile()
         {
+            var rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");
             if (rawFileName == "") return;
             IsLoading = true;
             Task.Factory.StartNew(() =>
@@ -301,8 +309,9 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
-        public void OpenTsvFile(string tsvFileName)
+        public void OpenTsvFile()
         {
+            var tsvFileName = _dialogService.OpenFile(".txt", @"IC ID Files (*.tsv)|*.tsv");
             var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
             XicViewModel xicVm = null;
             foreach (var xic in XicViewModels)
@@ -335,47 +344,9 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
-        /// <summary>
-        /// Open a raw file, parameter file, and identification file
-        /// </summary>
-        /// <param name="idFile">Name of the identification list file to open.</param>
-        /// <param name="rawFile">Name of the raw file to open.</param>
-        public void OpenFile(string idFile, string rawFile)
+        public void OpenSettings()
         {
-            if (idFile == "") return;
-            IsLoading = true;
-            Task.Factory.StartNew(() =>
-            {
-                var reader = new IcFileReader(idFile, rawFile);
-                var ids = reader.Read();
-                var rawFileWithoutPath = Path.GetFileNameWithoutExtension(rawFile);
-                var xicViewModel = new XicViewModel(rawFileWithoutPath, _colors)
-                {
-                    Lcms = IcParameters.Instance.Lcms
-                };
-                xicViewModel.SelectedScanNumberChanged += XicScanNumberChanged;
-                var addXicAction = new Action<XicViewModel>(XicViewModels.Add);
-                _guiThread.Invoke(addXicAction, xicViewModel);
-                _minFragmentIonCharge = 1;
-                _maxFragmentIonCharge = 15;
-                MinCharge = _minFragmentIonCharge;
-                MaxCharge = _maxFragmentIonCharge;
-                _selectedPrSm = null;
-                _selectedChargeState = null;
-                SetIonCharges();
-                Ids = ids;
-                var prsms = Ids.AllPrSms;
-                PrSms = prsms;
-                prsms.Sort();
-                OnPropertyChanged("Ids");
-                OnPropertyChanged("PrSms");
-                SelectedPrSm = null;
-                if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
-                SelectedCharge = 2;
-                OnPropertyChanged("SelectedCharge");
-                FileOpen = true;
-                IsLoading = false;
-            });
+            var settingsChanged = _dialogService.OpenSettings();
         }
 
         private void CreatePrSm()
@@ -465,6 +436,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private IMainDialogService _dialogService;
         private PrSm _selectedPrSm;
         private List<BaseIonType> _selectedBaseIonTypes;
         private readonly ColorDictionary _colors;

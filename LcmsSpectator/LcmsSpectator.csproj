@@ -161,6 +161,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DialogServices\IDialogService.cs" />
+    <Compile Include="DialogServices\IMainDialogService.cs" />
+    <Compile Include="DialogServices\MainDialogService.cs" />
     <Compile Include="SequenceGraph\DataGraph.cs" />
     <Compile Include="SequenceGraph\GraphXSequenceGraph.cs" />
     <Compile Include="SequenceGraph\SequenceGraphArea.cs" />

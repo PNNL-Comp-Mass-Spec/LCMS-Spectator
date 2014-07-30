@@ -7,9 +7,6 @@
         xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
         xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
         Title="LcMsSpectator" WindowState="Maximized">
-    <Window.DataContext>
-        <viewModels:LcmsSpectatorViewModel/>
-    </Window.DataContext>
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:NeutralLossToStringConverter x:Key="NeutralLossToString" />
@@ -18,10 +15,9 @@
         <!-- Menu -->
         <Menu VerticalAlignment="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="Open _Raw File" Click="OpenRawFile" />
-                <MenuItem Header="Open _Id File" Click="OpenIdFile" />
-<!--                <MenuItem Header="_Open" Click="OpenFile" />    -->
-                <MenuItem Header="_Settings" Click="Settings"></MenuItem>
+                <MenuItem Header="Open _Raw File" Command="{Binding OpenRawFileCommand}" />
+                <MenuItem Header="Open _Id File" Command="{Binding OpenTsvFileCommand}" />
+                <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
             </MenuItem>
         </Menu>
         <!-- End Menu -->
