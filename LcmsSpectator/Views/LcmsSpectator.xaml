@@ -18,7 +18,9 @@
         <!-- Menu -->
         <Menu VerticalAlignment="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" Click="OpenFile" />
+                <MenuItem Header="Open _Raw File" Click="OpenRawFile" />
+                <MenuItem Header="Open _Id File" Click="OpenIdFile" />
+<!--                <MenuItem Header="_Open" Click="OpenFile" />    -->
                 <MenuItem Header="_Settings" Click="Settings"></MenuItem>
             </MenuItem>
         </Menu>
@@ -116,10 +118,10 @@
                     <xcad:LayoutRoot>
                         <xcad:LayoutPanel>
                             <xcad:LayoutAnchorablePane>
-                                <xcad:LayoutAnchorable Title="Spectrum View" CanClose="False">
+                                <xcad:LayoutAnchorable Title="Spectrum View" CanClose="False" CanHide="False">
                                     <views:SpectrumView DataContext="{Binding Ms2SpectrumViewModel}" />
                                 </xcad:LayoutAnchorable>
-                                <xcad:LayoutAnchorable Title="XIC View" CanClose="False">
+                                <xcad:LayoutAnchorable Title="XIC View" CanClose="False" CanHide="False">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="50*" />
@@ -179,7 +181,7 @@
                     <TabControl>
                         <!-- ID Tree -->
                         <TabItem Header="ID Tree">
-                            <TreeView ItemsSource="{Binding Ids.Proteins.Values}" SelectedItemChanged="ScanSelectionChange">
+                            <TreeView ItemsSource="{Binding ProteinIds}" SelectedItemChanged="ScanSelectionChange">
                                 <TreeView.Resources>
                                     <HierarchicalDataTemplate DataType="{x:Type models:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
                                         <TextBlock Text="{Binding ProteinNameDesc}" />

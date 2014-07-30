@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Threading;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
@@ -19,6 +20,7 @@ namespace LcmsSpectator.ViewModels
     public class LcmsSpectatorViewModel: ViewModelBase
     {
         public IdentificationTree Ids { get; set; }
+        public List<ProteinId> ProteinIds { get; set; }
         public List<PrSm> PrSms { get; set; } 
         public List<IonType> IonTypes { get; set; }
         public BaseIonType[] BaseIonTypes { get; set; }
@@ -40,6 +42,7 @@ namespace LcmsSpectator.ViewModels
         public LcmsSpectatorViewModel()
         {
             Ids = new IdentificationTree();
+            ProteinIds = Ids.Proteins.Values.ToList();
             PrSms = new List<PrSm>();
             _colors = new ColorDictionary(2);
             Ms2SpectrumViewModel = new SpectrumViewModel(_colors);
@@ -111,7 +114,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 if (value == null) return;
-                XicViewModels[0].SelectedScanNumber = _selectedPrSm.Scan;
+                foreach (var xicVm in XicViewModels) xicVm.SelectedScanNumber = _selectedPrSm.Scan;
                 if (_selectedChargeState == null || 
                     _selectedChargeState.SequenceText != value.SequenceText || 
                     _selectedChargeState.Charge != value.Charge)
@@ -121,10 +124,10 @@ namespace LcmsSpectator.ViewModels
                     MaxCharge = _maxFragmentIonCharge;
                     _colors.BuildColorDictionary(_maxFragmentIonCharge);
                     _selectedChargeState = value;
-                    if (XicViewModels.Count > 0) XicViewModels[0].Reset();
+                    foreach (var xicVm in XicViewModels) xicVm.Reset();
                     SetFragmentLabels();
                     SetPrecursorLabels();
-                    if (XicViewModels.Count > 0) XicViewModels[0].ZoomToScan(SelectedPrSm.Scan);
+                    foreach (var xicVm in XicViewModels) xicVm.ZoomToScan(SelectedPrSm.Scan);
                 }
                 UpdateSpectrum();
                 OnPropertyChanged("SelectedChargeState");
@@ -162,7 +165,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedFragmentLabels = value;
-                if (XicViewModels.Count > 0)  XicViewModels[0].SelectedFragments = _selectedFragmentLabels;
+                foreach (var xicVm in XicViewModels) xicVm.SelectedFragments = _selectedFragmentLabels;
                 OnPropertyChanged("SelectedFragmentLabels");
             }
         }
@@ -173,7 +176,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedPrecursorLabels = value;
-                if (XicViewModels.Count > 0)  XicViewModels[0].SelectedPrecursors = _selectedPrecursorLabels;
+                foreach (var xicVm in XicViewModels) xicVm.SelectedPrecursors = _selectedPrecursorLabels;
                 OnPropertyChanged("SelectedPrecursorLabels");
             }
         }
@@ -275,6 +278,63 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public void OpenRawFile(string rawFileName)
+        {
+            if (rawFileName == "") return;
+            IsLoading = true;
+            Task.Factory.StartNew(() =>
+            {
+                var fileNameWithoutPath = Path.GetFileNameWithoutExtension(rawFileName);
+                var lcms = LcMsRun.GetLcMsRun(rawFileName, MassSpecDataType.XCaliburRun, 0, 0);
+                var xicVm = new XicViewModel(fileNameWithoutPath, _colors)
+                {
+                    Lcms = lcms
+                };
+                xicVm.SelectedScanNumberChanged += XicScanNumberChanged;
+                xicVm.ZoomToScan(0);
+                var addXicAction = new Action<XicViewModel>(XicViewModels.Add);
+                _guiThread.Invoke(addXicAction, xicVm);
+                SetFragmentLabels();
+                SetPrecursorLabels();
+                FileOpen = true;
+                IsLoading = false;
+            });
+        }
+
+        public void OpenTsvFile(string tsvFileName)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
+            XicViewModel xicVm = null;
+            foreach (var xic in XicViewModels)
+            {
+                if (xic.RawFileName == fileName) xicVm = xic;
+            }
+            if (xicVm == null)
+            {
+                MessageBox.Show("Cannot find raw file corresponding to this ID file.");
+                return;
+            }
+            IsLoading = true;
+            Task.Factory.StartNew(() =>
+            {
+                var reader = new IcFileReader(tsvFileName, xicVm.Lcms);
+                var ids = reader.Read();
+                Ids.Add(ids);
+                var prsms = Ids.AllPrSms;
+                prsms.Sort();
+                PrSms = prsms;
+                ProteinIds = Ids.Proteins.Values.ToList();
+                OnPropertyChanged("ProteinIds");
+                OnPropertyChanged("PrSms");
+                SelectedPrSm = null;
+                if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
+                SelectedCharge = 2;
+                OnPropertyChanged("SelectedCharge");
+                FileOpen = true;
+                IsLoading = false;
+            });
+        }
+
         /// <summary>
         /// Open a raw file, parameter file, and identification file
         /// </summary>
@@ -288,7 +348,7 @@ namespace LcmsSpectator.ViewModels
             {
                 var reader = new IcFileReader(idFile, rawFile);
                 var ids = reader.Read();
-                var rawFileWithoutPath = Path.GetFileName(rawFile);
+                var rawFileWithoutPath = Path.GetFileNameWithoutExtension(rawFile);
                 var xicViewModel = new XicViewModel(rawFileWithoutPath, _colors)
                 {
                     Lcms = IcParameters.Instance.Lcms
@@ -333,6 +393,9 @@ namespace LcmsSpectator.ViewModels
             }
             var prsm = new PrSm
             {
+                ProteinName = "",
+                ProteinNameDesc = "",
+                ProteinDesc = "",
                 Scan = 0,
                 Sequence = sequence,
                 SequenceText = SequenceText,

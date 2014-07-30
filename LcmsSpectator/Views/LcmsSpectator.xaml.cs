@@ -1,10 +1,15 @@
 ﻿using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.ViewModels;
 using LcmsSpectatorModels.Models;
 using MsPathViewer.Views;
+using Ookii.Dialogs;
+using DataGrid = System.Windows.Controls.DataGrid;
+using TreeView = System.Windows.Controls.TreeView;
 
 namespace LcmsSpectator.Views
 {
@@ -38,6 +43,33 @@ namespace LcmsSpectator.Views
                 PrecursorIsotopes.SelectedItems.Add(precursorIon);
             }
             _updatePlots = true;
+        }
+
+        private void OpenRawFile(object sender, RoutedEventArgs e)
+        {
+            OpenRawFile();
+        }
+
+        private void OpenRawFile()
+        {
+            var dialog = new VistaOpenFileDialog { DefaultExt = ".raw", Filter = @"Raw Files (*.raw)|*.raw" };
+
+            DialogResult result = dialog.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                Ms2ViewerViewModel.OpenRawFile(dialog.FileName);
+            }   
+        }
+
+        private void OpenIdFile(object sender, RoutedEventArgs e)
+        {
+            var dialog = new VistaOpenFileDialog { DefaultExt = ".txt", Filter = @"IC ID Files (*.tsv)|*.tsv" };
+
+            DialogResult result = dialog.ShowDialog();
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                Ms2ViewerViewModel.OpenTsvFile(dialog.FileName);
+            }   
         }
 
         private void OpenFile(object sender, RoutedEventArgs e)

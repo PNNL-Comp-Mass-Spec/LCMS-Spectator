@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Models;
 
 namespace LcmsSpectatorModels.Config
@@ -9,6 +10,12 @@ namespace LcmsSpectatorModels.Config
         public IcFileReader(string tsvFile, string rawFile)
         {
             IcParameters.Instance.RawFile = rawFile;
+            _tsvFile = tsvFile;
+        }
+
+        public IcFileReader(string tsvFile, LcMsRun lcms)
+        {
+            _lcms = lcms;
             _tsvFile = tsvFile;
         }
 
@@ -30,7 +37,7 @@ namespace LcmsSpectatorModels.Config
                     }
                     continue;
                 }
-                var idData = new PrSm(line, headers, IcParameters.Instance.Lcms);
+                var idData = new PrSm(line, headers, _lcms);
                 if (idData.QValue > QValueThreshold) continue;
                 idTree.Add(idData);
             }
@@ -38,6 +45,8 @@ namespace LcmsSpectatorModels.Config
             return idTree;
         }
 
+
+        private readonly LcMsRun _lcms;
         private readonly string _tsvFile;
         private const double QValueThreshold = 0.01;
     }
