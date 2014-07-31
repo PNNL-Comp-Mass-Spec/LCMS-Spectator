@@ -4,68 +4,133 @@ using System.Linq;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.PlotModels;
 using LcmsSpectatorModels.Models;
-using OxyPlot;
 using OxyPlot.Axes;
 
 namespace LcmsSpectator.ViewModels
 {
     public class SpectrumViewModel: ViewModelBase
     {
-        public PlotModel Ms2SpectrumPlotModel { get; set; }
-        public PlotModel PreviousMs1PlotModel { get; set; }
-        public PlotModel NextMs1PlotModel { get; set; }
-
-        public ColorDictionary Colors { get; set; }
+        public SpectrumPlotViewModel Ms2SpectrumViewModel { get; set; }
+        public SpectrumPlotViewModel PreviousMs1ViewModel { get; set; }
+        public SpectrumPlotViewModel NextMs1ViewModel { get; set; }
 
         public SpectrumViewModel(ColorDictionary colors)
         {
-            Colors = colors;
-            Ms2SpectrumPlotModel = new PlotModel();
-            PreviousMs1PlotModel = new PlotModel();
-            NextMs1PlotModel = new PlotModel();
+            Ms2SpectrumViewModel = new SpectrumPlotViewModel(1.05, colors);
+            PreviousMs1ViewModel = new SpectrumPlotViewModel(1.1, colors);
+            NextMs1ViewModel = new SpectrumPlotViewModel(1.1, colors);
         }
 
-        public void UpdatePlots(PrSm prsm, IList<BaseIonType> baseIons, IList<NeutralLoss> neutralLosses, int minCharge, int maxCharge)
+        /// <summary>
+        /// Ms2 Spectrum.
+        /// </summary>
+        public Spectrum Ms2Spectrum
         {
-            var ms2 = prsm.Ms2Spectrum;
-            if (ms2 == null)
+            get { return _ms2Spectrum; }
+            set
             {
-                Ms2SpectrumPlotModel = new PlotModel(); OnPropertyChanged("Ms2SpectrumPlotModel");
-                PreviousMs1PlotModel = new PlotModel(); OnPropertyChanged("PreviousMs1PlotModel");
-                NextMs1PlotModel = new PlotModel(); OnPropertyChanged("NextMs1PlotModel");
-                return;
+                if (_ms2Spectrum == value) return;
+                _ms2Spectrum = value;
+                Ms2SpectrumViewModel.Spectrum = _ms2Spectrum;
+                Ms2SpectrumViewModel.Title = String.Format("Ms2 Spectrum (Scan: {0})", _ms2Spectrum.ScanNum);
+                OnPropertyChanged("Ms2Spectrum");
             }
-
-            var prevms1 = prsm.PreviousMs1;
-            var nextms1 = prsm.NextMs1;
-            LabeledIonPeaks prevms1Ion = null;
-            LabeledIonPeaks nextms1Ion = null;
-            var ms2PrecursorIon = prsm.PrecursorIonPeaks();
-            List<LabeledIonPeaks> ms2Ions = prsm.GetFragmentIons(baseIons, neutralLosses, minCharge, maxCharge);
-            ms2Ions.Add(ms2PrecursorIon);
-
-            InitSpectrumPlots(ms2, prevms1, nextms1);
-            if (nextms1 != null) nextms1Ion = prsm.NextMs1PrecursorIonPeaks;
-            if (prevms1 != null) prevms1Ion = prsm.PrevMs1PrecursorIonPeaks;
-            LoadMs2SpectrumPlot(ms2, ms2Ions);
-            LoadPreviousMs1PlotModel(prevms1, prevms1Ion);
-            LoadNextMs1PlotModel(nextms1, nextms1Ion);
         }
 
-        public void InitSpectrumPlots(Spectrum ms2, Spectrum prevms1, Spectrum nextms1)
+        /// <summary>
+        /// Ms2 fragment ions to highlight
+        /// </summary>
+        public List<LabeledIon> ProductIons
         {
-            if (ms2 == null) return;
-            var ms2MaxMz = ms2.Peaks.Max().Mz * 1.2;
-            _ms2XAxis = new LinearAxis(AxisPosition.Bottom, "M/Z")
+            get { return _productIons; }
+            set
             {
-                Minimum = 0,
-                Maximum = ms2MaxMz,
-                AbsoluteMinimum = 0,
-                AbsoluteMaximum = ms2MaxMz
-            };
-            _ms2XAxis.Zoom(0, ms2MaxMz);
-            var ms2Prod = ms2 as ProductSpectrum;
-            if (ms2Prod == null) return;
+                _productIons = value;
+                Ms2SpectrumViewModel.Ions = _productIons;
+                Ms2SpectrumViewModel.AddIonHighlight(PrecursorIon);
+                OnPropertyChanged("ProductIons");
+            }
+        }
+
+        /// <summary>
+        /// Closest Ms1 Spectrum before Ms2 Spectrum.
+        /// </summary>
+        public Spectrum PreviousMs1Spectrum
+        {
+            get { return _previousMs1Spectrum; }
+            set
+            {
+                if (_previousMs1Spectrum == value) return;
+                _previousMs1Spectrum = value;
+                PreviousMs1ViewModel.Spectrum = _previousMs1Spectrum;
+                PreviousMs1ViewModel.Title = String.Format("Previous Ms1 Spectrum (Scan: {0})", _previousMs1Spectrum.ScanNum);
+                OnPropertyChanged("PreviousMs1Spectrum");
+            }
+        }
+
+        /// <summary>
+        /// Closest Ms1 Spectrum after Ms2 Spectrum.
+        /// </summary>
+        public Spectrum NextMs1Spectrum
+        {
+            get { return _nextMs1Spectrum; }
+            set
+            {
+                if (_nextMs1Spectrum == value) return;
+                _nextMs1Spectrum = value;
+                NextMs1ViewModel.Spectrum = _nextMs1Spectrum;
+                NextMs1ViewModel.Title = String.Format("Next Ms1 Spectrum (Scan: {0})", _nextMs1Spectrum.ScanNum);
+                OnPropertyChanged("NextMs1Spectrum");
+            }
+        }
+
+        /// <summary>
+        /// Precursor ion to highlight on Ms1 plots.
+        /// </summary>
+        public LabeledIon PrecursorIon
+        {
+            get { return _precursorIon; }
+            set
+            {
+                if (_precursorIon == value) return;
+                _precursorIon = value;
+                var ionList = new List<LabeledIon> { _precursorIon };
+                PreviousMs1ViewModel.Ions = ionList;
+                NextMs1ViewModel.Ions = ionList;
+                OnPropertyChanged("PrecursorIon");
+            }
+        }
+
+        /// <summary>
+        /// Update Spectrum plots.
+        /// </summary>
+        /// <param name="ms2">New Ms2 Spectrum.</param>
+        /// <param name="productIons">Ms2 fragment ions to highlight.</param>
+        /// <param name="prevms1">New Previous Ms1 Spectrum.</param>
+        /// <param name="nextms1">New Next Ms1 Spectrum</param>
+        /// <param name="precursorIon">Precursor ion to highlight on all plots.</param>
+        public void UpdatePlots(Spectrum ms2, List<LabeledIon> productIons, Spectrum prevms1, Spectrum nextms1, LabeledIon precursorIon)
+        {
+            PrecursorIon = precursorIon;
+            Ms2Spectrum = ms2;
+            ProductIons = productIons;
+            var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);
+            PreviousMs1ViewModel.XAxis = xAxis;
+            NextMs1ViewModel.XAxis = xAxis;
+            PreviousMs1Spectrum = prevms1;
+            NextMs1Spectrum = nextms1;
+        }
+
+        /// <summary>
+        /// Generate Shared XAxis for Ms1 spectra plots
+        /// </summary>
+        /// <param name="ms2">Ms2 Spectrum to get Isoloation Window bounds from.</param>
+        /// <param name="prevms1">Closest Ms1 Spectrum before Ms2 Spectrum.</param>
+        /// <param name="nextms1">Closest Ms1 Spectrum after Ms2 Spectrum.</param>
+        /// <returns>XAxis</returns>
+        private LinearAxis GenerateMs1XAxis(Spectrum ms2, Spectrum prevms1, Spectrum nextms1)
+        {
+            var ms2Prod = (ProductSpectrum) ms2 ;
             var prevms1AbsMax = prevms1.Peaks.Max().Mz;
             var nextms1AbsMax = nextms1.Peaks.Max().Mz;
             var ms1AbsoluteMaximum = (prevms1AbsMax >= nextms1AbsMax) ? prevms1AbsMax : nextms1AbsMax;
@@ -74,63 +139,21 @@ namespace LcmsSpectator.ViewModels
             var diff = ms1Max - ms1Min;
             var ms1MinMz = ms2Prod.IsolationWindow.MinMz - 0.25*diff;
             var ms1MaxMz = ms2Prod.IsolationWindow.MaxMz + 0.25*diff;
-            _ms1XAxis = new LinearAxis(AxisPosition.Bottom, "M/Z")
+            var xAxis = new LinearAxis(AxisPosition.Bottom, "M/Z")
             {
                 Minimum = ms1MinMz,
                 Maximum = ms1MaxMz,
                 AbsoluteMinimum = 0,
                 AbsoluteMaximum = ms1AbsoluteMaximum * 1.25
             };
-            _ms1XAxis.Zoom(ms1MinMz, ms1MaxMz);
+            xAxis.Zoom(ms1MinMz, ms1MaxMz);
+            return xAxis;
         }
 
-        private void LoadMs2SpectrumPlot(Spectrum spectrum, IEnumerable<LabeledIonPeaks> ions)
-        {
-            if (spectrum == null)
-            {
-                Ms2SpectrumPlotModel = new PlotModel();
-                OnPropertyChanged("Ms2SpectrumPlotModel");
-                return;
-            }
-            var title = String.Format("Ms2 Spectrum (Scan {0})", spectrum.ScanNum);
-            var plotModel = new SpectrumPlotModel(title, spectrum, ions, Colors, _ms2XAxis, 1.05);
-            Ms2SpectrumPlotModel = plotModel;
-            OnPropertyChanged("Ms2SpectrumPlotModel");
-        }
-
-        private void LoadPreviousMs1PlotModel(Spectrum spectrum, LabeledIonPeaks precursorIon)
-        {
-            if (spectrum == null)
-            {
-                PreviousMs1PlotModel = new PlotModel();
-                OnPropertyChanged("PreviousMs1PlotModel");
-                return;
-            }
-            var ions = new List<LabeledIonPeaks>();
-            if (precursorIon != null) ions.Add(precursorIon);
-            var title = String.Format("Previous Ms1 Spectrum (Scan {0})", spectrum.ScanNum);
-            var plotModel = new SpectrumPlotModel(title, spectrum, ions, Colors, _ms1XAxis, 1.1);
-            PreviousMs1PlotModel = plotModel;
-            OnPropertyChanged("PreviousMs1PlotModel");
-        }
-
-        private void LoadNextMs1PlotModel(Spectrum spectrum, LabeledIonPeaks precursorIon)
-        {
-            if (spectrum == null)
-            {
-                NextMs1PlotModel = new PlotModel();
-                OnPropertyChanged("NextMs1PlotModel");
-                return;
-            }
-            var ions = new List<LabeledIonPeaks>();
-            if (precursorIon != null) ions.Add(precursorIon);
-            var title = String.Format("Next Ms1 Spectrum (Scan {0})", spectrum.ScanNum);
-            var plotModel = new SpectrumPlotModel(title, spectrum, ions, Colors, _ms1XAxis, 1.1);
-            NextMs1PlotModel = plotModel;
-            OnPropertyChanged("NextMs1PlotModel");
-        }
-
-        private LinearAxis _ms2XAxis;
-        private LinearAxis _ms1XAxis;
+        private Spectrum _ms2Spectrum;
+        private List<LabeledIon> _productIons;
+        private Spectrum _previousMs1Spectrum;
+        private Spectrum _nextMs1Spectrum;
+        private LabeledIon _precursorIon;
     }
 }

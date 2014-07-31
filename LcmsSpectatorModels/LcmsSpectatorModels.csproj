@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\IcFileReader.cs" />
+    <Compile Include="Config\IcFileWriter.cs" />
     <Compile Include="Config\IcParameters.cs" />
     <Compile Include="Config\IdFileReaderFactory.cs" />
     <Compile Include="Config\IIdFileReader.cs" />

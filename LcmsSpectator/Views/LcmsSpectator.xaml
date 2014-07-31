@@ -5,10 +5,10 @@
         xmlns:utils="clr-namespace:LcmsSpectator.Utils"
         xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
         xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
+        xmlns:views1="clr-namespace:LcmsSpectator.Views"
         Title="LcMsSpectator" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
-        <utils:NeutralLossToStringConverter x:Key="NeutralLossToString" />
     </Window.Resources>
     <Grid>
         <!-- Menu -->
@@ -65,50 +65,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <!-- Ion type selector -->
-                <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
-                        Grid.Row="0" ItemsSource="{Binding BaseIonTypes}"
-                        SelectionChanged="IonTypeSelectionChange"
-                        Name="IonTypes">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Ion Type" Width="*" Binding="{Binding Symbol}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-                <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
-                        Grid.Row="1" ItemsSource="{Binding NeutralLosses}"
-                        SelectionChanged="NeutralLossSelectionChange"
-                        Name="NeutralLosses">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Neutral Loss" Width="*" Binding="{Binding Converter={StaticResource NeutralLossToString}}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-                <GroupBox Grid.Column="0" Grid.Row="2" ToolTip="Select Charges [Min, Max]">
-                    <GroupBox.Header>
-                        <Label>Ion Charges</Label>
-                    </GroupBox.Header>
-                    <ScrollViewer VerticalAlignment="Top"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock>Min:</TextBlock>
-                            <TextBox Height="20" TextAlignment="Right"
-                                    Margin="0,0,0,20"
-                                    Text="{Binding Path=MinCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                <TextBox.InputBindings>
-                                    <KeyBinding Command="{Binding Path=SetIonChargesCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
-                                </TextBox.InputBindings>
-                            </TextBox>
-                            <TextBlock>Max:</TextBlock>
-                            <TextBox Height="20" TextAlignment="Right"
-                                    Text="{Binding Path=MaxCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                <TextBox.InputBindings>
-                                    <KeyBinding Command="{Binding Path=SetIonChargesCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
-                                </TextBox.InputBindings>
-                            </TextBox>
-                        </StackPanel>
-                    </ScrollViewer>
-                </GroupBox>
+                <views1:IonTypeSelector DataContext="{Binding IonTypeSelectorViewModel}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" />
                 <!-- End Ion type selector -->
                 <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" ShowsPreview="True" />
                 <!-- Plots -->

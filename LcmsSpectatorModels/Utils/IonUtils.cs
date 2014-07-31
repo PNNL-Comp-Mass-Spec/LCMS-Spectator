@@ -59,6 +59,13 @@ namespace LcmsSpectatorModels.Utils
             return new Ion(composition, charge);
         }
 
+        public static LabeledIon GetLabeledPrecursorIon(Sequence sequence, int charge, int isotopeIndex = 0)
+        {
+            var precursorIonType = new IonType("Precursor", Composition.H2O, charge, false);
+            var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
+            return new LabeledIon(composition, isotopeIndex, precursorIonType, false);
+        }
+
         public static List<LabeledIon> GetFragmentIonLabels(Sequence sequence, int charge, IList<IonType> ionTypes)
         {
             var ions = new List<LabeledIon>();
@@ -76,11 +83,9 @@ namespace LcmsSpectatorModels.Utils
         public static List<LabeledIon> GetPrecursorIonLabels(Sequence sequence, int charge, int minIsotopeIndex, int maxIsotopeIndex)
         {
             var ions = new List<LabeledIon>();
-            var precursorIonType = new IonType("Precursor", Composition.H2O, charge, false);
-            var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             for (int i = minIsotopeIndex; i <= maxIsotopeIndex; i++)
             {
-                ions.Add(new LabeledIon(composition, i, precursorIonType, false));
+                ions.Add(GetLabeledPrecursorIon(sequence, charge, i));
             }
             return ions;
         }

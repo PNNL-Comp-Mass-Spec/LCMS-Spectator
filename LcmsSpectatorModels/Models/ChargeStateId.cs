@@ -30,7 +30,6 @@ namespace LcmsSpectatorModels.Models
         public void Add(PrSm data)
         {
             if (!PrSms.ContainsKey(data.Scan)) PrSms.Add(data.Scan, data);
-            else throw new ArgumentException("Cannot insert duplicate PrSm.");
         }
 
         public void Remove(PrSm data)

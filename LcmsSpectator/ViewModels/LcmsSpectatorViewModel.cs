@@ -14,7 +14,6 @@ using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
-using Microsoft.Win32;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -24,9 +23,6 @@ namespace LcmsSpectator.ViewModels
         public List<ProteinId> ProteinIds { get; set; }
         public List<PrSm> PrSms { get; set; } 
         public List<IonType> IonTypes { get; set; }
-        public BaseIonType[] BaseIonTypes { get; set; }
-        public NeutralLoss[] NeutralLosses { get; set; }
-        public DelegateCommand SetIonChargesCommand { get; set; }
 
         public List<LabeledIon> FragmentLabels { get; set; }
         public List<LabeledIon> PrecursorLabels { get; set; }
@@ -42,6 +38,7 @@ namespace LcmsSpectator.ViewModels
 
         public event EventHandler UpdateSelections;
 
+        public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
 
@@ -52,12 +49,13 @@ namespace LcmsSpectator.ViewModels
             ProteinIds = Ids.Proteins.Values.ToList();
             PrSms = new List<PrSm>();
             _colors = new ColorDictionary(2);
+            IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
+            IonTypeSelectorViewModel.IonTypesUpdated += SetIonCharges;
             Ms2SpectrumViewModel = new SpectrumViewModel(_colors);
             XicViewModels = new ObservableCollection<XicViewModel>();
 
             _spectrumChanged = false;
 
-            SetIonChargesCommand = new DelegateCommand(SetIonCharges);
             CreatePrSmCommand = new DelegateCommand(CreatePrSm);
             OpenRawFileCommand = new DelegateCommand(OpenRawFile);
             OpenTsvFileCommand = new DelegateCommand(OpenTsvFile);
@@ -69,19 +67,6 @@ namespace LcmsSpectator.ViewModels
             SelectedFragmentLabels = new List<LabeledIon>();
             PrecursorLabels = new List<LabeledIon>();
             SelectedPrecursorLabels = new List<LabeledIon>();
-
-            _selectedBaseIonTypes = new List<BaseIonType>();
-            BaseIonTypes = BaseIonType.AllBaseIonTypes.ToArray();
-            SelectedBaseIonTypes.Add(BaseIonType.B);
-            SelectedBaseIonTypes.Add(BaseIonType.Y);
-
-            NeutralLosses = NeutralLoss.CommonNeutralLosses.ToArray();
-            SelectedNeutralLosses = new List<NeutralLoss> {NeutralLoss.NoLoss};
-
-            _minSelectedFragmentIonCharge = 1;
-            _maxSelectedFragmentIonCharge = 15;
-            MinCharge = 1;
-            MaxCharge = 15;
 
             IsLoading = false;
             FileOpen = false;
@@ -125,15 +110,17 @@ namespace LcmsSpectator.ViewModels
                     _selectedChargeState.SequenceText != value.SequenceText || 
                     _selectedChargeState.Charge != value.Charge)
                 {
-                    MinCharge = 1;
-                    MaxCharge = Math.Min(Math.Max(value.Charge - 1, 2), 15);
-                    _colors.BuildColorDictionary(MaxCharge);
+                    var absoluteMaxCharge = Math.Min(Math.Max(value.Charge - 1, 2), 15);
+                    _colors.BuildColorDictionary(absoluteMaxCharge);
+                    IonTypeSelectorViewModel.AbsoluteMaxCharge = absoluteMaxCharge;
+                    IonTypeSelectorViewModel.MinCharge = 1;
                     _selectedChargeState = value;
                     foreach (var xicVm in XicViewModels) xicVm.Reset();
                     SetFragmentLabels();
                     SetPrecursorLabels();
                     foreach (var xicVm in XicViewModels) xicVm.ZoomToScan(SelectedPrSm.Scan);
                 }
+
                 UpdateSpectrum();
                 OnPropertyChanged("SelectedChargeState");
             }
@@ -187,64 +174,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Neutral losses selected for fragment ion display on spectrum and XIC
-        /// </summary>
-        public List<NeutralLoss> SelectedNeutralLosses
-        {
-            get { return _selectedNeutralLosses; }
-            set
-            {
-                _selectedNeutralLosses = value;
-                OnPropertyChanged("SelectedNeutralLosses");
-                _spectrumChanged = true;
-                UpdateSpectrum();
-                SetFragmentLabels();
-            }
-        }
-
-        /// <summary>
-        /// Ion types selected for fragment ion display on spectrum and XIC
-        /// </summary>
-        public List<BaseIonType> SelectedBaseIonTypes
-        {
-            get { return _selectedBaseIonTypes; }
-            set
-            {
-                _selectedBaseIonTypes = value;
-                OnPropertyChanged("SelectedBaseIonTypes");
-                _spectrumChanged = true;
-                UpdateSpectrum();
-                SetFragmentLabels();
-            }
-        }
-
-        /// <summary>
-        /// Minimum fragment ion charge selected
-        /// </summary>
-        public int MinCharge
-        {
-            get { return _minCharge; }
-            set
-            {
-                _minCharge = value;
-                OnPropertyChanged("MinCharge");
-            }
-        }
-
-        /// <summary>
-        /// Maximum fragment ion selected
-        /// </summary>
-        public int MaxCharge
-        {
-            get { return _maxCharge; }
-            set
-            {
-                _maxCharge = value;
-                OnPropertyChanged("MaxCharge");
-            }
-        }
-
-        /// <summary>
         /// A file is currently being loaded
         /// </summary>
         public bool IsLoading
@@ -277,8 +206,9 @@ namespace LcmsSpectator.ViewModels
         {
             if (_spectrumChanged)
             {
-                if (SelectedPrSm == null) return;
-                Ms2SpectrumViewModel.UpdatePlots(SelectedPrSm, SelectedBaseIonTypes, SelectedNeutralLosses, MinCharge, MaxCharge);
+                if (SelectedPrSm == null || SelectedPrSm.Ms2Spectrum == null) return;
+                Ms2SpectrumViewModel.UpdatePlots(SelectedPrSm.Ms2Spectrum, FragmentLabels, SelectedPrSm.PreviousMs1, SelectedPrSm.NextMs1, 
+                                                 IonUtils.GetLabeledPrecursorIon(SelectedPrSm.Sequence, SelectedPrSm.Charge));
                 _spectrumChanged = false;
             }
         }
@@ -394,8 +324,9 @@ namespace LcmsSpectator.ViewModels
         private void SetFragmentLabels()
         {
             if (SelectedChargeState == null) return;
-            var ionTypes = IonUtils.GetIonTypes(IcParameters.Instance.IonTypeFactory, SelectedBaseIonTypes,
-                SelectedNeutralLosses, MinCharge, MaxCharge);
+            var ionTypes = IonUtils.GetIonTypes(IcParameters.Instance.IonTypeFactory, IonTypeSelectorViewModel.SelectedBaseIonTypes,
+                                                IonTypeSelectorViewModel.SelectedNeutralLosses, IonTypeSelectorViewModel.MinCharge,
+                                                IonTypeSelectorViewModel.MaxCharge);
             var fragmentLabels = IonUtils.GetFragmentIonLabels(SelectedChargeState.Sequence, SelectedChargeState.Charge, ionTypes);
             FragmentLabels = fragmentLabels;
             OnPropertyChanged("FragmentLabels");
@@ -413,27 +344,14 @@ namespace LcmsSpectator.ViewModels
             _guiThread.Invoke(UpdateSelections, this, null);
         }
 
-        private void SetIonCharges()
+        private void SetIonCharges(object sender, EventArgs e)
         {
-            try
-            {
-
-                if (MinCharge < 1) throw new FormatException("Min charge must be at least 1.");
-                if (MinCharge > MaxCharge) throw new FormatException("Max charge cannot be less than min charge.");
-                _minSelectedFragmentIonCharge = MinCharge;
-                _maxSelectedFragmentIonCharge = MaxCharge;
-            }
-            catch (FormatException f)
-            {
-                _dialogService.ExceptionAlert(f);
-                MinCharge = _minSelectedFragmentIonCharge;
-                MaxCharge = _maxSelectedFragmentIonCharge;
-            }
             if (SelectedPrSm == null || SelectedChargeState == null) return;
             _spectrumChanged = true;
             UpdateSpectrum();
             SetFragmentLabels();
             SetPrecursorLabels();
+            Ms2SpectrumViewModel.ProductIons = FragmentLabels;
         }
 
         private void XicScanNumberChanged(object sender, EventArgs e)
@@ -453,20 +371,15 @@ namespace LcmsSpectator.ViewModels
 
         private readonly IMainDialogService _dialogService;
         private PrSm _selectedPrSm;
-        private List<BaseIonType> _selectedBaseIonTypes;
         private readonly ColorDictionary _colors;
 
         private bool _isLoading;
-        private int _minSelectedFragmentIonCharge;
-        private int _maxSelectedFragmentIonCharge;
-        private int _minCharge;
-        private int _maxCharge;
+
         private bool _fileOpen;
         private ProteinId _selectedProtein;
 
         private readonly Dispatcher _guiThread;
 
-        private List<NeutralLoss> _selectedNeutralLosses;
         private ChargeStateId _selectedChargeState;
 
         private bool _spectrumChanged;

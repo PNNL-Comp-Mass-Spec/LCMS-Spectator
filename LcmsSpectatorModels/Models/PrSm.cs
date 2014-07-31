@@ -6,7 +6,6 @@ using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
-using LcmsSpectatorModels.Config;
 
 namespace LcmsSpectatorModels.Models
 {
@@ -34,98 +33,26 @@ namespace LcmsSpectatorModels.Models
         public double MostAbundantIsotopeMz { get; set; }
         public double Mass { get; set; }
         public double MatchedFragments { get; set; }
-        //public double IsotopeCorrPrevMs1 { get; set; }
-        //public double IsotopeCorrNextMs1 { get; set; }
-        //public double CorrMostAbundantPlusOneIsoptope { get; private set; }
-        //public double ChargeCorrMinusOne { get; set; }
-        //public double ChargeCorrPlusOne { get; set; }
         public double QValue { get; set; }
         public double PepQValue { get; set; }
         public static double CorrelationThreshold = 0.7;
 
-        public PrSm(string line, IDictionary<string, int> headers, LcMsRun lcms)
+        public Spectrum PreviousMs1 
         {
-            Lcms = lcms;
-            var parts = line.Split('\t');
-            Scan = Convert.ToInt32(parts[headers["Scan"]]);
-            Pre = parts[headers["Pre"]];
-            Protein = parts[headers["Sequence"]];
-            Post = parts[headers["Post"]];
-            Annotation = (Pre + "." + Protein + "." + Post).Replace('-','_');
-            SequenceLabel = new List<string>();
-            SetModifications(parts[headers["Modifications"]]);
-            Composition = parts[headers["Composition"]];
-            ProteinName = parts[headers["ProteinName"]];
-            ProteinDesc = parts[headers["ProteinDesc"]].Split(';').FirstOrDefault();
-            ProteinNameDesc = ProteinName + "; " + ProteinDesc;
-            ProteinLength = Convert.ToInt32(parts[headers["ProteinLength"]]);
-            Start = Convert.ToInt32(parts[headers["Start"]]);
-            End = Convert.ToInt32(parts[headers["End"]]);
-            Charge = Convert.ToInt32(parts[headers["Charge"]]);
-            MostAbundantIsotopeMz = Convert.ToDouble(parts[headers["MostAbundantIsotopeMz"]]);
-            Mass = Convert.ToDouble(parts[headers["Mass"]]);
-            var scoreLabel = "IcScore";
-            if (!headers.ContainsKey(scoreLabel)) scoreLabel = "#MatchedFragments";
-            MatchedFragments = Convert.ToDouble(parts[headers[scoreLabel]]);
-            MatchedFragments = Math.Round(MatchedFragments, 3);
-//            IsotopeCorrPrevMs1 = Convert.ToDouble(parts[headers["IsotopeCorrPrevMs1"]]);
-//            IsotopeCorrNextMs1 = Convert.ToDouble(parts[headers["IsotopeCorrNextMs1"]]);
-//            CorrMostAbundantPlusOneIsoptope = Convert.ToDouble(parts[headers["CorrMostAbundantPlusOneIsotope"]]);
-//            ChargeCorrMinusOne = Convert.ToDouble(parts[headers["ChargeCorrMinusOne"]]);
-//            ChargeCorrPlusOne = Convert.ToDouble(parts[headers["ChargeCorrPlusOne"]]);
-            QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4);
-            PepQValue = Convert.ToDouble(parts[headers["PepQValue"]]);
-        }
-
-        public PrSm() {}
-
-        public List<LabeledIonPeaks> GetFragmentIons(BaseIonType baseIon, NeutralLoss neutralLoss, int charge)
-        {
-            var ionType = IcParameters.Instance.GetIonType(baseIon, neutralLoss, charge);
-            var fragments = Utils.IonUtils.GetCompositions(Sequence, ionType.BaseIonType.IsPrefix);
-            var peaks = new List<LabeledIonPeaks>();
-
-            for (int i = 0; i < fragments.Count; i++) 
+            get
             {
-                var ion = ionType.GetIon(fragments[i]);
-                var correlationScore = Ms2Spectrum.GetCorrScore(ion, IcParameters.Instance.ProductIonTolerancePpm);
-                var isotopePeaks = Ms2Spectrum.GetAllIsotopePeaks(ion, IcParameters.Instance.ProductIonTolerancePpm, RelativeIntensityThreshold);
-                var index = i + 1;
-                if (isotopePeaks == null)   isotopePeaks = new Peak[0];
-                peaks.Add(new LabeledIonPeaks(fragments[i], index, isotopePeaks, correlationScore, ionType));
+                var prevms1Scan = Lcms.GetPrevScanNum(Scan, 1);
+                return Lcms.GetSpectrum(prevms1Scan);
             }
-            return peaks;
         }
 
-        public List<LabeledIonPeaks> GetFragmentIons(IList<BaseIonType> baseIons, IList<NeutralLoss> neutralLosses, int minCharge, int maxCharge)
+        public Spectrum NextMs1
         {
-            var fragmentIons = new List<LabeledIonPeaks>();
-            foreach (var neutralLoss in neutralLosses)
+            get
             {
-                foreach (var baseIonType in baseIons)
-                {
-                    for (var charge = minCharge;
-                        charge <= maxCharge;
-                        charge++)
-                    {
-                        fragmentIons.AddRange(GetFragmentIons(baseIonType, neutralLoss, charge));
-                    }
-                }
+                var nextms1Scan = Lcms.GetNextScanNum(Scan, 1);
+                return Lcms.GetSpectrum(nextms1Scan);
             }
-            return fragmentIons;
-        }
-
-        public LabeledIonPeaks PrecursorIonPeaks(Spectrum spectrum=null)
-        {
-            if (spectrum == null) spectrum = Ms2Spectrum;
-            var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
-            var precursorIonType = new IonType("Precursor", InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge, false);
-            var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
-            var isotopePeaks = spectrum.GetAllIsotopePeaks(ion, IcParameters.Instance.PrecursorTolerancePpm,
-                RelativeIntensityThreshold);
-            var correlationScore = spectrum.GetCorrScore(ion, IcParameters.Instance.ProductIonTolerancePpm);
-            if (isotopePeaks == null) isotopePeaks = new Peak[0];
-            return new LabeledIonPeaks(composition, 0, isotopePeaks, correlationScore, precursorIonType, false);
         }
 
         public double PrecursorMz
@@ -138,60 +65,9 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
-        public Spectrum PreviousMs1
-        {
-            get
-            {
-                var prevms1ScanNum = Lcms.GetPrevScanNum(Scan, 1);
-                return Lcms.GetSpectrum(prevms1ScanNum);
-            }
-        }
-
-        public LabeledIonPeaks PrevMs1PrecursorIonPeaks
-        {
-            get
-            {
-                var spectrum = PreviousMs1;
-                if (spectrum == null) return null;
-                return PrecursorIonPeaks(spectrum);
-            }
-        }
-
-        public Spectrum NextMs1
-        {
-            get
-            {
-                var nextms1ScanNum = Lcms.GetNextScanNum(Scan, 1);
-                return Lcms.GetSpectrum(nextms1ScanNum);
-            }
-        }
-
-        public LabeledIonPeaks NextMs1PrecursorIonPeaks
-        {
-            get
-            {
-                var spectrum = NextMs1;
-                if (spectrum == null) return null;
-                return PrecursorIonPeaks(spectrum);
-            }
-        }
-
         public int CompareTo(PrSm other)
         {
             return Scan.CompareTo(other.Scan);
-        }
-
-        private void ParseModifications(string modifications)
-        {
-            var mods = modifications.Split(',');
-            if (mods.Length < 1 || mods[0] == "") return;
-            foreach (var modParts in mods.Select(mod => mod.Split(' ')))
-            {
-                if (modParts.Length < 0) throw new FormatException("Invalid modification.");
-                var modName = modParts[0];
-                var modPos = Convert.ToInt32(modParts[1]);
-                Modifications.Add(new Tuple<int, Modification>(modPos, Modification.Get(modName)));
-            }
         }
 
         public void SetModifications(string modifications)
@@ -218,7 +94,26 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
-        private const double RelativeIntensityThreshold = 0.1;
+        private void ParseModifications(string modifications)
+        {
+            var mods = modifications.Split(',');
+            if (mods.Length < 1 || mods[0] == "") return;
+            foreach (var modParts in mods.Select(mod => mod.Split(' ')))
+            {
+                if (modParts.Length < 0) throw new FormatException("Invalid modification.");
+                var modName = modParts[0];
+                var modPos = Convert.ToInt32(modParts[1]);
+                Modifications.Add(new Tuple<int, Modification>(modPos, Modification.Get(modName)));
+            }
+        }
+    }
+
+    public class PrSmScoreComparer : IComparer<PrSm>
+    {
+        public int Compare(PrSm x, PrSm y)
+        {
+            return (x.MatchedFragments.CompareTo(y.MatchedFragments));
+        }
     }
 
     internal class CompareModByHighestPosition : IComparer<Tuple<int, Modification>>

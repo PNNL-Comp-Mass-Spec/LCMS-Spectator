@@ -15,22 +15,7 @@ namespace LcmsSpectator.PlotModels
             xAxis.AxisChanged += XAxisChanged;
         }
 
-        public virtual void AdjustForZoom()
-        {
-            var minX = XAxis.ActualMinimum;
-            var maxX = XAxis.ActualMaximum;
-            SetBounds(minX, maxX);
-        }
-
-        public virtual void SetBounds(double minX, double maxX)
-        {
-            var maxY = GetMaxYInRange(minX, maxX);
-            var yaxis = DefaultYAxis ?? YAxis;
-            yaxis.Maximum = maxY * Multiplier;
-            InvalidatePlot(false);
-        }
-
-        protected virtual void GenerateYAxis(string title, string format)
+        public virtual void GenerateYAxis(string title, string format)
         {
             var maxY = GetMaxYInRange(XAxis.ActualMinimum, XAxis.ActualMaximum);
             var absoluteMaxY = GetMaxYInRange(0, XAxis.AbsoluteMaximum);
@@ -45,6 +30,21 @@ namespace LcmsSpectator.PlotModels
                 IsPanEnabled = false
             };
             Axes.Add(YAxis);
+        }
+
+        public virtual void AdjustForZoom()
+        {
+            var minX = XAxis.ActualMinimum;
+            var maxX = XAxis.ActualMaximum;
+            SetBounds(minX, maxX);
+        }
+
+        public virtual void SetBounds(double minX, double maxX)
+        {
+            var maxY = GetMaxYInRange(minX, maxX);
+            var yaxis = DefaultYAxis ?? YAxis;
+            yaxis.Maximum = maxY * Multiplier;
+            InvalidatePlot(false);
         }
 
         protected double GetMaxYInRange(double minX, double maxX)
