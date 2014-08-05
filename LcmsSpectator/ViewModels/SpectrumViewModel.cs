@@ -13,6 +13,7 @@ namespace LcmsSpectator.ViewModels
         public SpectrumPlotViewModel Ms2SpectrumViewModel { get; set; }
         public SpectrumPlotViewModel PreviousMs1ViewModel { get; set; }
         public SpectrumPlotViewModel NextMs1ViewModel { get; set; }
+        public string RawFileName { get; set; }
         public SpectrumViewModel(ColorDictionary colors)
         {
             _showUnexplainedPeaks = true;
@@ -46,7 +47,7 @@ namespace LcmsSpectator.ViewModels
                 if (_ms2Spectrum == value) return;
                 _ms2Spectrum = value;
                 Ms2SpectrumViewModel.Spectrum = _ms2Spectrum;
-                Ms2SpectrumViewModel.Title = String.Format("Ms2 Spectrum (Scan: {0})", _ms2Spectrum.ScanNum);
+                Ms2SpectrumViewModel.Title = String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1})", _ms2Spectrum.ScanNum, RawFileName);
                 OnPropertyChanged("Ms2Spectrum");
             }
         }
@@ -129,7 +130,7 @@ namespace LcmsSpectator.ViewModels
             _ms2Spectrum = ms2;
             _productIons = new List<LabeledIon>(productIons) {precursorIon};
             Ms2SpectrumViewModel.Update(ms2, _productIons);
-            Ms2SpectrumViewModel.Title = String.Format("Ms2 Spectrum (Scan: {0})", ms2.ScanNum);
+            Ms2SpectrumViewModel.Title = String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1})", ms2.ScanNum, RawFileName);
             var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);
             PreviousMs1ViewModel.XAxis = xAxis;
             NextMs1ViewModel.XAxis = xAxis;

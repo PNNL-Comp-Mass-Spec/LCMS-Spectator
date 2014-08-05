@@ -55,6 +55,11 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public double Area
+        {
+            get { return Xics.Where(lxic => lxic.Index >= 0).Sum(lxic => lxic.Area); }
+        }
+
         private void GeneratePlot()
         {
             // add XICs
@@ -89,8 +94,7 @@ namespace LcmsSpectator.ViewModels
                 GuiInvoker.Invoke(Plot.Series.Add, series);
             }
 
-            var area = Xics.Where(lxic => lxic.Index >= 0).Sum(lxic => lxic.Area);
-            Plot.Title = String.Format("{0} (Area: {1})", _title, area);
+            Plot.Title = String.Format("{0} (Area: {1})", _title, Area);
             Plot.GenerateYAxis("Intensity", "0e0");
             GuiInvoker.Invoke(() => { Plot.IsLegendVisible = _showLegend; });
         }

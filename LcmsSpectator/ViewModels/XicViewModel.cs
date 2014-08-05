@@ -207,6 +207,7 @@ namespace LcmsSpectator.ViewModels
             var selectedScanNumber = scanNum;
             var newPrsm = new PrSm
             {
+                RawFileName = RawFileName,
                 Lcms = Lcms,
                 Scan = selectedScanNumber,
             };

@@ -42,9 +42,7 @@ namespace LcmsSpectatorModels.Config
         private PrSm CreatePrSm(string line, Dictionary<string, int> headers, LcMsRun lcms, string rawFileName)
         {
             var parts = line.Split('\t');
-            var scoreLabel = "IcScore";
-            if (!headers.ContainsKey(scoreLabel)) scoreLabel = "MSGFScore";
-            var score = Convert.ToDouble(parts[headers[scoreLabel]]);
+            var score = Convert.ToDouble(parts[headers["MSGFScore"]]);
             var prsm = new PrSm
             {
                 RawFileName = rawFileName,
@@ -54,10 +52,10 @@ namespace LcmsSpectatorModels.Config
                 Sequence = Sequence.GetSequenceFromMsGfPlusPeptideStr(parts[headers["Peptide"]]),
                 SequenceText = parts[headers["Peptide"]],
                 Annotation = parts[headers["Peptide"]],
-                Composition = Composition.Parse(parts[headers["Formula"]]).ToString(),
+                Composition = (headers.ContainsKey("Formula") ? Composition.Parse(parts[headers["Formula"]]).ToString() : ""),
                 ProteinName = parts[headers["Protein"]].Split('(')[0],
                 ProteinDesc = "",
-                ProteinNameDesc = parts[headers["Protein"]],
+                ProteinNameDesc = parts[headers["Protein"]].Split('(')[0],
                 Charge = Convert.ToInt32(parts[headers["Charge"]]),
                 MatchedFragments = Math.Round(score, 3),
                 QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),

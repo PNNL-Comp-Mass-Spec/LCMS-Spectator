@@ -209,6 +209,7 @@ namespace LcmsSpectator.ViewModels
             if (_spectrumChanged)
             {
                 if (SelectedPrSm == null || SelectedPrSm.Ms2Spectrum == null) return;
+                Ms2SpectrumViewModel.RawFileName = SelectedPrSm.RawFileName;
                 Ms2SpectrumViewModel.UpdatePlots(SelectedPrSm.Ms2Spectrum, FragmentLabels, SelectedPrSm.PreviousMs1, SelectedPrSm.NextMs1, 
                                                  IonUtils.GetLabeledPrecursorIon(SelectedPrSm.Sequence, SelectedPrSm.Charge));
                 _spectrumChanged = false;
@@ -345,6 +346,7 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
             if (SelectedXicViewModel == null || SelectedXicViewModel.Lcms == null) SelectedScan = 0;
+            else if (SelectedScan == 0) lcms = null;
             else lcms = SelectedXicViewModel.Lcms;
             var prsm = new PrSm
             {
