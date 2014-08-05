@@ -14,7 +14,7 @@ namespace LcmsSpectatorModels.Config
             _tsvFile = tsvFile;
         }
 
-        public IdentificationTree Read(LcMsRun lcms)
+        public IdentificationTree Read(LcMsRun lcms, string rawFileName)
         {
             var idTree = new IdentificationTree();
             var file = File.ReadLines(_tsvFile);
@@ -32,21 +32,22 @@ namespace LcmsSpectatorModels.Config
                     }
                     continue;
                 }
-                var idData = CreatePrSm(line, headers, lcms);
+                var idData = CreatePrSm(line, headers, lcms, rawFileName);
                 idTree.Add(idData);
             }
 
             return idTree;
         }
 
-        private PrSm CreatePrSm(string line, Dictionary<string, int> headers, LcMsRun lcms)
+        private PrSm CreatePrSm(string line, Dictionary<string, int> headers, LcMsRun lcms, string rawFileName)
         {
-                var parts = line.Split('\t');
+            var parts = line.Split('\t');
             var scoreLabel = "IcScore";
             if (!headers.ContainsKey(scoreLabel)) scoreLabel = "#MatchedFragments";
             var score = Convert.ToDouble(parts[headers[scoreLabel]]);
             var prsm = new PrSm
             {
+                RawFileName = rawFileName,
                 Lcms = lcms,
                 Scan = Convert.ToInt32(parts[headers["Scan"]]),
                 Pre = parts[headers["Pre"]],

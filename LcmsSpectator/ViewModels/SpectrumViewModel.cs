@@ -13,12 +13,26 @@ namespace LcmsSpectator.ViewModels
         public SpectrumPlotViewModel Ms2SpectrumViewModel { get; set; }
         public SpectrumPlotViewModel PreviousMs1ViewModel { get; set; }
         public SpectrumPlotViewModel NextMs1ViewModel { get; set; }
-
         public SpectrumViewModel(ColorDictionary colors)
         {
+            _showUnexplainedPeaks = true;
             Ms2SpectrumViewModel = new SpectrumPlotViewModel(1.05, colors);
             PreviousMs1ViewModel = new SpectrumPlotViewModel(1.1, colors);
             NextMs1ViewModel = new SpectrumPlotViewModel(1.1, colors);
+        }
+
+        public bool ShowUnexplainedPeaks
+        {
+            get { return _showUnexplainedPeaks; }
+            set
+            {
+                if (_showUnexplainedPeaks == value) return;
+                _showUnexplainedPeaks = value;
+                Ms2SpectrumViewModel.ShowUnexplainedPeaks = _showUnexplainedPeaks;
+                PreviousMs1ViewModel.ShowUnexplainedPeaks = _showUnexplainedPeaks;
+                NextMs1ViewModel.ShowUnexplainedPeaks = _showUnexplainedPeaks;
+                OnPropertyChanged("ShowUnexplainedPeaks");
+            }
         }
 
         /// <summary>
@@ -112,8 +126,10 @@ namespace LcmsSpectator.ViewModels
         public void UpdatePlots(Spectrum ms2, List<LabeledIon> productIons, Spectrum prevms1, Spectrum nextms1, LabeledIon precursorIon)
         {
             PrecursorIon = precursorIon;
-            Ms2Spectrum = ms2;
-            ProductIons = productIons;
+            _ms2Spectrum = ms2;
+            _productIons = new List<LabeledIon>(productIons) {precursorIon};
+            Ms2SpectrumViewModel.Update(ms2, _productIons);
+            Ms2SpectrumViewModel.Title = String.Format("Ms2 Spectrum (Scan: {0})", ms2.ScanNum);
             var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);
             PreviousMs1ViewModel.XAxis = xAxis;
             NextMs1ViewModel.XAxis = xAxis;
@@ -130,7 +146,7 @@ namespace LcmsSpectator.ViewModels
         /// <returns>XAxis</returns>
         private LinearAxis GenerateMs1XAxis(Spectrum ms2, Spectrum prevms1, Spectrum nextms1)
         {
-            var ms2Prod = (ProductSpectrum) ms2 ;
+            var ms2Prod = (ProductSpectrum) ms2;
             var prevms1AbsMax = prevms1.Peaks.Max().Mz;
             var nextms1AbsMax = nextms1.Peaks.Max().Mz;
             var ms1AbsoluteMaximum = (prevms1AbsMax >= nextms1AbsMax) ? prevms1AbsMax : nextms1AbsMax;
@@ -155,5 +171,6 @@ namespace LcmsSpectator.ViewModels
         private Spectrum _previousMs1Spectrum;
         private Spectrum _nextMs1Spectrum;
         private LabeledIon _precursorIon;
+        private bool _showUnexplainedPeaks;
     }
 }

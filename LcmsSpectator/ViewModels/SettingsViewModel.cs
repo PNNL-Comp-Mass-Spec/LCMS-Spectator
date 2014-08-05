@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using DocumentFormat.OpenXml.Wordprocessing;
+﻿using System.Collections.Generic;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectatorModels.Config;
 
@@ -11,16 +7,12 @@ namespace LcmsSpectator.ViewModels
     public class SettingsViewModel: ViewModelBase
     {
         public List<ToleranceUnit> ToleranceUnits { get; set; }
-
         public double PrecursorIonTolerance { get; set; }
         public ToleranceUnit PrecursorIonToleranceUnit { get; set; }
-
         public double ProductIonTolerance { get; set; }
         public ToleranceUnit ProductIonToleranceUnit { get; set; }
-
         public double QValueThreshold { get; set; }
         public int ModificationsPerSequence { get; set; }
-
         public double IonCorrelationThreshold { get; set; }
 
         public DelegateCommand SaveCommand { get; set; }
@@ -52,6 +44,7 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.ProductIonTolerancePpm = new Tolerance(ProductIonTolerance, ProductIonToleranceUnit);
             IcParameters.Instance.QValueThreshold = QValueThreshold;
             IcParameters.Instance.MaxDynamicModificationsPerSequence = ModificationsPerSequence;
+            IcParameters.Instance.IonCorrelationThreshold = IonCorrelationThreshold;
         }
 
         private void Cancel()

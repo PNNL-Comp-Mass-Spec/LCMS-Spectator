@@ -14,11 +14,12 @@ namespace LcmsSpectator.PlotModels
         private readonly ColorDictionary _colors;
         private readonly bool _showScanMarkers;
         public DataPoint SelectedDataPoint { get; set; }
-        public XicPlotModel(string title, Axis xAxis, IEnumerable<LabeledXic> xics, ColorDictionary colors, bool showScanMarkers, double mult=1.05): base(xAxis, mult)
+        public XicPlotModel(string title, Axis xAxis, IEnumerable<LabeledXic> xics, ColorDictionary colors, bool showScanMarkers, bool showLegend, double mult=1.05): base(xAxis, mult)
         {
             _title = title;
             _colors = colors;
             _showScanMarkers = showScanMarkers;
+            _showLegend = showLegend;
             MouseDown += XicPlotModel_MouseDown;
             GeneratePlot(xics);
         }
@@ -110,9 +111,10 @@ namespace LcmsSpectator.PlotModels
             var area = labeledXics.Where(lxic => lxic.Index >= 0).Sum(lxic => lxic.Area);
             Title = String.Format("{0} (Area: {1})", _title, area);
             GenerateYAxis("Intensity", "0e0");
-            IsLegendVisible = true;   
+            IsLegendVisible = _showLegend;   
         }
 
         private StemSeries _pointMarkers;
+        private bool _showLegend;
     }
 }

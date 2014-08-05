@@ -6,11 +6,13 @@ using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using Microsoft.SqlServer.Server;
 
 namespace LcmsSpectatorModels.Models
 {
     public class PrSm: IComparable<PrSm>
     {
+        public String RawFileName { get; set; }
         public LcMsRun Lcms { get; set; }
         public int Scan { get; set; }
         public Spectrum Ms2Spectrum { get { return (Lcms == null) ? null : Lcms.GetSpectrum(Scan); } }
@@ -36,6 +38,11 @@ namespace LcmsSpectatorModels.Models
         public double QValue { get; set; }
         public double PepQValue { get; set; }
         public static double CorrelationThreshold = 0.7;
+
+        public string ScanText
+        {
+            get { return String.Format("{0} ({1})", Scan, RawFileName); }
+        }
 
         public Spectrum PreviousMs1 
         {

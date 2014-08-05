@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+             xmlns:controls="clr-namespace:LcmsSpectator.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
@@ -15,24 +16,22 @@
             <RowDefinition Height="33*" />
             <RowDefinition Height="33*" />
         </Grid.RowDefinitions>
-        <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+        <controls:MultiSelectDataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                         IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
                         Grid.Row="0" ItemsSource="{Binding BaseIonTypes}"
-                        SelectionChanged="IonTypeSelectionChange"
-                        Name="IonTypes">
+                                     SelectedItemsSource="{Binding SelectedBaseIonTypes, Mode=TwoWay}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Ion Type" Width="*" Binding="{Binding Symbol}"/>
             </DataGrid.Columns>
-        </DataGrid>
-        <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+        </controls:MultiSelectDataGrid>
+        <controls:MultiSelectDataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                         IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
                         Grid.Row="1" ItemsSource="{Binding NeutralLosses}"
-                        SelectionChanged="NeutralLossSelectionChange"
-                        Name="NeutralLosses">
+                                     SelectedItemsSource="{Binding SelectedNeutralLosses, Mode=TwoWay}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Neutral Loss" Width="*" Binding="{Binding Converter={StaticResource NeutralLossToString}}"/>
             </DataGrid.Columns>
-        </DataGrid>
+        </controls:MultiSelectDataGrid>
         <GroupBox Grid.Column="0" Grid.Row="2" ToolTip="Select Charges [Min, Max]">
             <GroupBox.Header>
                 <Label>Ion Charges</Label>

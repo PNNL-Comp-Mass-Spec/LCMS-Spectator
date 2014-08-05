@@ -172,9 +172,9 @@ namespace LcmsSpectator.ViewModels
 
         private void FragmentUpdate()
         {
-            if (_selectedFragmentXics.Count == 0) return;
+            if (_selectedFragmentXics == null || _selectedFragmentXics.Count == 0) return;
             var fragmentPlotModel = new XicPlotModel("Fragment Ion XIC", XicXAxis,
-                                                        _selectedFragmentXics, Colors, ShowScanMarkers);
+                                                        _selectedFragmentXics, Colors, ShowScanMarkers, false);
             fragmentPlotModel.SetPointMarker(SelectedScanNumber);   // preserve marker
             FragmentPlotModel = fragmentPlotModel;
         }
@@ -183,7 +183,7 @@ namespace LcmsSpectator.ViewModels
         {
             if (_selectedPrecursorXics.Count == 0) return;
             var precursorPlotModel = new XicPlotModel("Precursor Ion XIC", XicXAxis,
-                                                        _selectedPrecursorXics, Colors, ShowScanMarkers);
+                                                        _selectedPrecursorXics, Colors, ShowScanMarkers, true);
             PrecursorPlotModel = precursorPlotModel;
         }
 

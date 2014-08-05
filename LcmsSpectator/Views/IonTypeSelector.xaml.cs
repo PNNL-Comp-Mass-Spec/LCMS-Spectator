@@ -25,7 +25,7 @@ namespace LcmsSpectator.Views
         public IonTypeSelector()
         {
             InitializeComponent();
-            var vm = DataContext as IonTypeSelectorViewModel;
+/*            var vm = DataContext as IonTypeSelectorViewModel;
             _updateVm = false;
             if (vm != null)
             {
@@ -38,10 +38,10 @@ namespace LcmsSpectator.Views
                     NeutralLosses.SelectedItems.Add(neutralLoss);
                 }
             }
-            _updateVm = true;
+            _updateVm = true; */
         }
 
-        private void IonTypeSelectionChange(object sender, SelectionChangedEventArgs e)
+/*        private void IonTypeSelectionChange(object sender, SelectionChangedEventArgs e)
         {
             if (!_updateVm) return;
             var vm = DataContext as IonTypeSelectorViewModel;
@@ -67,8 +67,8 @@ namespace LcmsSpectator.Views
                 var neutralLossList = selectedneutralLosses.Cast<NeutralLoss>().ToList();
                 vm.SelectedNeutralLosses = neutralLossList;
             }
-        }
+        } */
 
-        private readonly bool _updateVm;
+//        private readonly bool _updateVm;
     }
 }

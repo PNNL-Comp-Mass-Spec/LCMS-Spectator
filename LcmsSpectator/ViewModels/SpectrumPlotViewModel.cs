@@ -16,8 +16,9 @@ namespace LcmsSpectator.ViewModels
     public class SpectrumPlotViewModel: ViewModelBase
     {
         public AutoAdjustedYPlotModel Plot { get; set; }
-        public SpectrumPlotViewModel(double multiplier, ColorDictionary colors)
+        public SpectrumPlotViewModel(double multiplier, ColorDictionary colors, bool showUnexplainedPeaks=true)
         {
+            _showUnexplainedPeaks = showUnexplainedPeaks;
             _multiplier = multiplier;
             _colors = colors;
             Title = "";
@@ -31,6 +32,24 @@ namespace LcmsSpectator.ViewModels
                 _title = value;
                 if (Plot != null) Plot.Title = _title;
                 OnPropertyChanged("Title");
+            }
+        }
+
+        public bool ShowUnexplainedPeaks
+        {
+            get { return _showUnexplainedPeaks; }
+            set
+            {
+                if (_showUnexplainedPeaks == value) return;
+                _showUnexplainedPeaks = value;
+                if (_showUnexplainedPeaks == false && Plot.Series.Count > 0)
+                {
+                    GuiInvoker.Invoke(Plot.Series.RemoveAt, 0);
+                    GuiInvoker.Invoke(Plot.AdjustForZoom);
+                    GuiInvoker.Invoke(Plot.InvalidatePlot, true);
+                }
+                else GuiInvoker.Invoke(BuildSpectrumPlot);
+                OnPropertyChanged("ShowUnexplainedPeaks");
             }
         }
 
@@ -80,6 +99,13 @@ namespace LcmsSpectator.ViewModels
                 Plot.InvalidatePlot(true);
                 OnPropertyChanged("XAxis");
             }
+        }
+
+        public void Update(Spectrum spectrum, List<LabeledIon> ions)
+        {
+            _spectrum = spectrum;
+            _ions = ions;
+            BuildSpectrumPlot();
         }
 
         private void BuildSpectrumPlot()
@@ -174,5 +200,6 @@ namespace LcmsSpectator.ViewModels
 
         private Spectrum _spectrum;
         private List<LabeledIon> _ions;
+        private bool _showUnexplainedPeaks;
     }
 }

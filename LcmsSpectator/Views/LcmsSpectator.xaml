@@ -2,21 +2,23 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:MsPathViewer.Views"
-        xmlns:utils="clr-namespace:LcmsSpectator.Utils"
         xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
         xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
         xmlns:views1="clr-namespace:LcmsSpectator.Views"
+        xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
         Title="LcMsSpectator" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <DataTemplate DataType="{x:Type viewModels:XicViewModel}" x:Key="XicDataTemplate">
+            <TextBlock Text="{Binding RawFileName}" />
+        </DataTemplate>
     </Window.Resources>
     <Grid>
         <!-- Menu -->
         <Menu VerticalAlignment="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="Open _Raw File" Command="{Binding OpenRawFileCommand}" />
                 <MenuItem Header="Open _Id File" Command="{Binding OpenTsvFileCommand}" />
-                <MenuItem Header="Save _As" />
+                <MenuItem Header="Open _Raw File" Command="{Binding OpenRawFileCommand}" />
                 <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
             </MenuItem>
         </Menu>
@@ -73,9 +75,6 @@
                     <xcad:LayoutRoot>
                         <xcad:LayoutPanel>
                             <xcad:LayoutAnchorablePane>
-                                <xcad:LayoutAnchorable Title="Spectrum View" CanClose="False" CanHide="False">
-                                    <views:SpectrumView DataContext="{Binding Ms2SpectrumViewModel}" />
-                                </xcad:LayoutAnchorable>
                                 <xcad:LayoutAnchorable Title="XIC View" CanClose="False" CanHide="False">
                                     <Grid>
                                         <Grid.RowDefinitions>
@@ -125,6 +124,9 @@
                                         </DataGrid>
                                     </Grid>
                                 </xcad:LayoutAnchorable>
+                                <xcad:LayoutAnchorable Title="Spectrum View" CanClose="False" CanHide="False">
+                                    <views:SpectrumView DataContext="{Binding Ms2SpectrumViewModel}" />
+                                </xcad:LayoutAnchorable>
                             </xcad:LayoutAnchorablePane>
                         </xcad:LayoutPanel>
                     </xcad:LayoutRoot>
@@ -148,7 +150,7 @@
                                         <TextBlock Text="{Binding Charge}" />
                                     </HierarchicalDataTemplate>
                                     <HierarchicalDataTemplate DataType="{x:Type models:PrSm}">
-                                        <TextBlock Text="{Binding Scan}" />
+                                        <TextBlock Text="{Binding ScanText}" />
                                     </HierarchicalDataTemplate>
                                 </TreeView.Resources>
                             </TreeView>
@@ -160,13 +162,14 @@
                                   IsReadOnly="True" RowHeaderWidth="0" 
                                   ItemsSource="{Binding PrSms}" SelectedItem="{Binding SelectedPrSm}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Scan" Width="10*" Binding="{Binding Scan}"/>
+                                    <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}"/>
                                     <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" />
                                     <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
-                                    <DataGridTextColumn Header="Precursor m/z" Width="10*" Binding="{Binding PrecursorMz}" />
-                                    <DataGridTextColumn Header="Charge" Width="15*" Binding="{Binding Charge}" />
-                                    <DataGridTextColumn Header="Score" Width="10*" Binding="{Binding MatchedFragments}" />
-                                    <DataGridTextColumn Header="QValue" Width="10*" Binding="{Binding QValue}" />
+                                    <DataGridTextColumn Header="Precursor m/z" Width="5*" Binding="{Binding PrecursorMz}" />
+                                    <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge}" />
+                                    <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding MatchedFragments}" />
+                                    <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue}" />
+                                    <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
                                 </DataGrid.Columns>
                             </DataGrid>
                         </TabItem>
@@ -205,11 +208,13 @@
                         <!-- End Sequence Graph -->
                         <!-- PrSm Creator -->
                         <TabItem Header="Create Sequence">
-                            <Grid Height="66" Width="300" VerticalAlignment="Top" HorizontalAlignment="Left">
+                            <Grid Height="120" Width="300" VerticalAlignment="Top" HorizontalAlignment="Left">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="33*" />
-                                    <RowDefinition Height="33*" />
-                                    <RowDefinition Height="33*" />
+                                    <RowDefinition Height="20*" />
+                                    <RowDefinition Height="20*" />
+                                    <RowDefinition Height="20*" />
+                                    <RowDefinition Height="20*" />
+                                    <RowDefinition Height="20*" />
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30*" />
@@ -227,7 +232,15 @@
                                         <KeyBinding Command="{Binding Path=CreatePrSmCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
                                     </TextBox.InputBindings>
                                 </TextBox>
-                                <Button Command="{Binding CreatePrSmCommand}" Grid.Row="2" Grid.Column="1">Create</Button>
+                                <TextBlock Text="Scan #" FontWeight="Bold" Grid.Row="2" Grid.Column="0" />
+                                <TextBox Text="{Binding SelectedScan, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" TextAlignment="Right">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Command="{Binding Path=CreatePrSmCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                                <TextBlock Text="Raw file" FontWeight="Bold" Grid.Row="3" Grid.Column="0" />
+                                <ComboBox ItemsSource="{Binding XicViewModels}" SelectedItem="{Binding SelectedXicViewModel}" ItemTemplate="{StaticResource ResourceKey=XicDataTemplate}" Grid.Row="3" Grid.Column="1" />
+                                <Button Command="{Binding CreatePrSmCommand}" Grid.Row="4" Grid.Column="1">Create</Button>
                             </Grid>
                         </TabItem>
                         <!-- End PrSm Creator -->
