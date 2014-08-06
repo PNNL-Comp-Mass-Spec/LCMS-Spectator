@@ -20,7 +20,7 @@ namespace LcmsSpectator.ViewModels
 
         public SettingsViewModel()
         {
-            ToleranceUnits = new List<ToleranceUnit> {ToleranceUnit.Ppm, ToleranceUnit.Da, ToleranceUnit.Th};
+            ToleranceUnits = new List<ToleranceUnit> {ToleranceUnit.Ppm, ToleranceUnit.Th};
 
             PrecursorIonTolerance = IcParameters.Instance.PrecursorTolerancePpm.GetValue();
             PrecursorIonToleranceUnit = IcParameters.Instance.PrecursorTolerancePpm.GetUnit();

@@ -358,7 +358,7 @@ namespace LcmsSpectator.ViewModels
             }
             string rawFileName = "";
             if (SelectedXicViewModel == null || SelectedXicViewModel.Lcms == null) SelectedScan = 0;
-            else if (SelectedScan == 0) lcms = null;
+//            else if (SelectedScan == 0) lcms = null;
             else
             {
                 rawFileName = SelectedXicViewModel.RawFileName;

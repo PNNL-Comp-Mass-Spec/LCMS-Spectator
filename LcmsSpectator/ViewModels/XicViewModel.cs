@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Composition;
-using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
