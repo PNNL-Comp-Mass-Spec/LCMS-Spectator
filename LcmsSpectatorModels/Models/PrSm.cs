@@ -48,6 +48,7 @@ namespace LcmsSpectatorModels.Models
         {
             get
             {
+                if (Lcms == null) return null;
                 var prevms1Scan = Lcms.GetPrevScanNum(Scan, 1);
                 return Lcms.GetSpectrum(prevms1Scan);
             }
@@ -57,6 +58,7 @@ namespace LcmsSpectatorModels.Models
         {
             get
             {
+                if (Lcms == null) return null;
                 var nextms1Scan = Lcms.GetNextScanNum(Scan, 1);
                 return Lcms.GetSpectrum(nextms1Scan);
             }

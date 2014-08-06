@@ -47,7 +47,7 @@ namespace LcmsSpectator.ViewModels
                 if (_ms2Spectrum == value) return;
                 _ms2Spectrum = value;
                 Ms2SpectrumViewModel.Spectrum = _ms2Spectrum;
-                Ms2SpectrumViewModel.Title = String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1})", _ms2Spectrum.ScanNum, RawFileName);
+                Ms2SpectrumViewModel.Title = (_ms2Spectrum == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1})", _ms2Spectrum.ScanNum, RawFileName);
                 OnPropertyChanged("Ms2Spectrum");
             }
         }
@@ -78,7 +78,7 @@ namespace LcmsSpectator.ViewModels
                 if (_previousMs1Spectrum == value) return;
                 _previousMs1Spectrum = value;
                 PreviousMs1ViewModel.Spectrum = _previousMs1Spectrum;
-                PreviousMs1ViewModel.Title = String.Format("Previous Ms1 Spectrum (Scan: {0})", _previousMs1Spectrum.ScanNum);
+                PreviousMs1ViewModel.Title = _previousMs1Spectrum == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", _previousMs1Spectrum.ScanNum);
                 OnPropertyChanged("PreviousMs1Spectrum");
             }
         }
@@ -94,7 +94,7 @@ namespace LcmsSpectator.ViewModels
                 if (_nextMs1Spectrum == value) return;
                 _nextMs1Spectrum = value;
                 NextMs1ViewModel.Spectrum = _nextMs1Spectrum;
-                NextMs1ViewModel.Title = String.Format("Next Ms1 Spectrum (Scan: {0})", _nextMs1Spectrum.ScanNum);
+                NextMs1ViewModel.Title = _nextMs1Spectrum == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", _nextMs1Spectrum.ScanNum);
                 OnPropertyChanged("NextMs1Spectrum");
             }
         }
@@ -126,16 +126,23 @@ namespace LcmsSpectator.ViewModels
         /// <param name="precursorIon">Precursor ion to highlight on all plots.</param>
         public void UpdatePlots(Spectrum ms2, List<LabeledIon> productIons, Spectrum prevms1, Spectrum nextms1, LabeledIon precursorIon)
         {
-            PrecursorIon = precursorIon;
+            _precursorIon = precursorIon;
             _ms2Spectrum = ms2;
             _productIons = new List<LabeledIon>(productIons) {precursorIon};
             Ms2SpectrumViewModel.Update(ms2, _productIons);
-            Ms2SpectrumViewModel.Title = String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1})", ms2.ScanNum, RawFileName);
+            Ms2SpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1})", ms2.ScanNum, RawFileName);
             var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);
             PreviousMs1ViewModel.XAxis = xAxis;
             NextMs1ViewModel.XAxis = xAxis;
-            PreviousMs1Spectrum = prevms1;
-            NextMs1Spectrum = nextms1;
+            PreviousMs1ViewModel.Update(prevms1, new List<LabeledIon>{precursorIon});
+            NextMs1ViewModel.Update(nextms1, new List<LabeledIon>{precursorIon});
+        }
+
+        public void ClearPlots()
+        {
+            Ms2SpectrumViewModel.ClearPlot();
+            NextMs1ViewModel.ClearPlot();
+            PreviousMs1ViewModel.ClearPlot();
         }
 
         /// <summary>
@@ -147,7 +154,8 @@ namespace LcmsSpectator.ViewModels
         /// <returns>XAxis</returns>
         private LinearAxis GenerateMs1XAxis(Spectrum ms2, Spectrum prevms1, Spectrum nextms1)
         {
-            var ms2Prod = (ProductSpectrum) ms2;
+            var ms2Prod = ms2 as ProductSpectrum;
+            if (ms2Prod == null || prevms1 == null || nextms1 == null) return new LinearAxis {Minimum = 0, Maximum = 100};
             var prevms1AbsMax = prevms1.Peaks.Max().Mz;
             var nextms1AbsMax = nextms1.Peaks.Max().Mz;
             var ms1AbsoluteMaximum = (prevms1AbsMax >= nextms1AbsMax) ? prevms1AbsMax : nextms1AbsMax;

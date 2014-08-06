@@ -70,6 +70,8 @@ namespace LcmsSpectator.ViewModels
             PrecursorLabels = new List<LabeledIon>();
             SelectedPrecursorLabels = new List<LabeledIon>();
 
+            SelectedScan = 0;
+
             IsLoading = false;
             FileOpen = false;
 
@@ -107,7 +109,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 if (value == null) return;
-                foreach (var xicVm in XicViewModels) xicVm.SelectedScanNumber = _selectedPrSm.Scan;
+                foreach (var xicVm in XicViewModels) xicVm.SelectedScanNumber = SelectedPrSm.Scan;
                 if (_selectedChargeState == null || 
                     _selectedChargeState.SequenceText != value.SequenceText || 
                     _selectedChargeState.Charge != value.Charge)
@@ -208,7 +210,12 @@ namespace LcmsSpectator.ViewModels
         {
             if (_spectrumChanged)
             {
-                if (SelectedPrSm == null || SelectedPrSm.Ms2Spectrum == null) return;
+                if (SelectedPrSm == null || SelectedPrSm.Ms2Spectrum == null || SelectedPrSm.NextMs1 == null ||
+                    SelectedPrSm.PreviousMs1 == null)
+                {
+                    Ms2SpectrumViewModel.ClearPlots();
+                    return;
+                }
                 Ms2SpectrumViewModel.RawFileName = SelectedPrSm.RawFileName;
                 Ms2SpectrumViewModel.UpdatePlots(SelectedPrSm.Ms2Spectrum, FragmentLabels, SelectedPrSm.PreviousMs1, SelectedPrSm.NextMs1, 
                                                  IonUtils.GetLabeledPrecursorIon(SelectedPrSm.Sequence, SelectedPrSm.Charge));
@@ -221,7 +228,7 @@ namespace LcmsSpectator.ViewModels
             var rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");
             if (rawFileName == "") return;
             IsLoading = true;
-            RawFileOpener(rawFileName);
+            Task.Factory.StartNew(() => RawFileOpener(rawFileName));
         }
 
         public void OpenTsvFile()
@@ -243,18 +250,20 @@ namespace LcmsSpectator.ViewModels
                 if (directoryName != null)
                 {
                     var directory = Directory.GetFiles(directoryName);
-                    foreach (var file in directory)         // Raw file in same directory as tsv file?
+                    foreach (var file in directory) // Raw file in same directory as tsv file?
                         if (file == path + ".raw") rawFileName = path + ".raw";
                     if (rawFileName == "")
                     {
                         _dialogService.MessageBox("Please select raw file.");
-                        rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw"); // manually find raw file
+                        rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");
+                            // manually find raw file
                     }
                 }
             }
+            else rawFileName = xicVm.RawFileName;
             Task.Factory.StartNew(() =>
             {
-                if (rawFileName != "")
+                if (rawFileName != "" && xicVm == null)
                 {
                     RawFileOpener(rawFileName);
                     var rawFile = Path.GetFileNameWithoutExtension(rawFileName);
@@ -268,7 +277,8 @@ namespace LcmsSpectator.ViewModels
                         return;
                     }
                 }
-                else return;
+                else if (rawFileName == "") return;
+                if (xicVm == null) return;
                 IsLoading = true;
                 var reader = IdFileReaderFactory.CreateReader(tsvFileName);
                 var ids = reader.Read(xicVm.Lcms, xicVm.RawFileName);
@@ -298,6 +308,7 @@ namespace LcmsSpectator.ViewModels
             GuiInvoker.Invoke(addXicAction, xicVm);
             GuiInvoker.Invoke(SetFragmentLabels);
             GuiInvoker.Invoke(SetPrecursorLabels);
+            GuiInvoker.Invoke(() => { SelectedXicViewModel = XicViewModels[0]; OnPropertyChanged("SelectedXicViewModel"); });
             GuiInvoker.Invoke(() => { CreatePrSmCommand.Executable = true; });
             FileOpen = true;
             IsLoading = false;
@@ -345,11 +356,17 @@ namespace LcmsSpectator.ViewModels
                 _dialogService.MessageBox("Invalid Scan.");
                 return;
             }
+            string rawFileName = "";
             if (SelectedXicViewModel == null || SelectedXicViewModel.Lcms == null) SelectedScan = 0;
             else if (SelectedScan == 0) lcms = null;
-            else lcms = SelectedXicViewModel.Lcms;
+            else
+            {
+                rawFileName = SelectedXicViewModel.RawFileName;
+                lcms = SelectedXicViewModel.Lcms;
+            }
             var prsm = new PrSm
             {
+                RawFileName = rawFileName,
                 ProteinName = "",
                 ProteinNameDesc = "",
                 ProteinDesc = "",
@@ -359,6 +376,12 @@ namespace LcmsSpectator.ViewModels
                 SequenceText = SequenceText,
                 Charge = SelectedCharge
             };
+            var ms2Prod = prsm.Ms2Spectrum as ProductSpectrum;
+            if (ms2Prod == null)
+            {
+                prsm.Scan = 0;
+                prsm.Lcms = null;
+            }
             SelectedPrSm = prsm;
         }
 

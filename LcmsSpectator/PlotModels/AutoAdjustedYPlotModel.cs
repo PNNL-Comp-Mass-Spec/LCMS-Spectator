@@ -12,7 +12,7 @@ namespace LcmsSpectator.PlotModels
             Axes.Add(xAxis);
             XAxis = xAxis;
             YAxis = new LinearAxis();
-            xAxis.AxisChanged += XAxisChanged;
+            if (xAxis != null) xAxis.AxisChanged += XAxisChanged;
         }
 
         public virtual void GenerateYAxis(string title, string format)

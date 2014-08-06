@@ -108,9 +108,19 @@ namespace LcmsSpectator.ViewModels
             BuildSpectrumPlot();
         }
 
+        public void ClearPlot()
+        {
+            Plot = new AutoAdjustedYPlotModel(new LinearAxis { Minimum = 0, Maximum = 100, IsAxisVisible = false }, _multiplier);
+            OnPropertyChanged("Plot");
+        }
+
         private void BuildSpectrumPlot()
         {
-            if (Spectrum == null) return;
+            if (Spectrum == null)
+            {
+                ClearPlot();
+                return;
+            }
             var xAxis = _xAxis ?? GenerateXAxis();
             Plot = new AutoAdjustedYPlotModel(xAxis, _multiplier) {Title = Title};
             var spectrumSeries = new StemSeries(OxyColors.Black, 0.5);

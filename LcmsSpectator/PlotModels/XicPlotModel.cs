@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -31,18 +32,19 @@ namespace LcmsSpectator.PlotModels
             _showScanMarkers = false;
         }
 
-        public void SetPointMarker(double x)
+        public void SetPointMarker(double x, OxyColor color=null)
         {
+            if (color == null) color = OxyColors.Black;
             var y = YAxis.Maximum;
-            if (_pointMarkers != null) Series.Remove(_pointMarkers);
+            if (_pointMarkers != null) GuiInvoker.Invoke(() => Series.Remove(_pointMarkers));
             if (x.Equals(0)) return;
-            _pointMarkers = new StemSeries(OxyColors.Black, 3)
+            _pointMarkers = new StemSeries(color, 3)
             {
                 LineStyle = LineStyle.Dash
             };
-            _pointMarkers.Points.Add(new DataPoint(x, y));
-            Series.Add(_pointMarkers);
-            InvalidatePlot(true);
+            GuiInvoker.Invoke(() => _pointMarkers.Points.Add(new DataPoint(x, y)));
+            GuiInvoker.Invoke(Series.Add, _pointMarkers);
+            GuiInvoker.Invoke(InvalidatePlot, true);
         }
 
         public override void SetBounds(double minX, double maxX)
@@ -52,7 +54,7 @@ namespace LcmsSpectator.PlotModels
             {
                 var point = _pointMarkers.Points[0];
                 xPoint = point.X;
-                Series.Remove(_pointMarkers);
+                GuiInvoker.Invoke(() => Series.Remove(_pointMarkers));
             }
             base.SetBounds(minX, maxX);
             SetPointMarker(xPoint);
@@ -115,6 +117,6 @@ namespace LcmsSpectator.PlotModels
         }
 
         private StemSeries _pointMarkers;
-        private bool _showLegend;
+        private readonly bool _showLegend;
     }
 }

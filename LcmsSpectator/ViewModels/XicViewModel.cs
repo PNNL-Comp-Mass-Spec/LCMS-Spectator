@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
@@ -71,25 +73,28 @@ namespace LcmsSpectator.ViewModels
             {
                 if (SelectedPrecursors == value) return;
                 _selectedPrecursors = value;
-                var precursorXics = new List<LabeledXic>();
-                // get precursor xics
-                foreach (var label in SelectedPrecursors)
+                Task.Factory.StartNew(() =>
                 {
-                    var ion = label.Ion;
-                    LabeledXic lXic;
-                    if (_precursorXicCache.ContainsKey(label.Composition)) lXic = _precursorXicCache[label.Composition];
-                    else
+                    var precursorXics = new List<LabeledXic>();
+                    // get precursor xics
+                    foreach (var label in SelectedPrecursors)
                     {
-                        var xic = Lcms.GetFullExtractedIonChromatogram(ion.GetIsotopeMz(label.Index),
-                                                   IcParameters.Instance.PrecursorTolerancePpm);
-                        lXic = (_precursorXicCache.ContainsKey(label.Composition)) ?
-                                    _precursorXicCache[label.Composition] :
-                                    new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);   
+                        var ion = label.Ion;
+                        LabeledXic lXic;
+                        if (_precursorXicCache.ContainsKey(label.Composition)) lXic = _precursorXicCache[label.Composition];
+                        else
+                        {
+                            var xic = Lcms.GetFullExtractedIonChromatogram(ion.GetIsotopeMz(label.Index),
+                                                       IcParameters.Instance.PrecursorTolerancePpm);
+                            lXic = (_precursorXicCache.ContainsKey(label.Composition)) ?
+                                        _precursorXicCache[label.Composition] :
+                                        new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
+                        }
+                        precursorXics.Add(lXic);
                     }
-                    precursorXics.Add(lXic);
-                }
-                _selectedPrecursorXics = precursorXics;
-                PrecursorUpdate();
+                    _selectedPrecursorXics = precursorXics;
+                    PrecursorUpdate();
+                });
                 OnPropertyChanged("SelectedPrecursors");
             }
         }
@@ -100,24 +105,27 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedFragments = value;
-                var fragmentXics = new List<LabeledXic>();
-                // get fragment xics
-                foreach (var label in SelectedFragments)
+                Task.Factory.StartNew(() =>
                 {
-                    var ion = label.Ion;
-                    LabeledXic lXic;
-                    if (_fragmentXicCache.ContainsKey(label.Composition)) lXic = _fragmentXicCache[label.Composition];
-                    else
+                    var fragmentXics = new List<LabeledXic>();
+                    // get fragment xics
+                    foreach (var label in SelectedFragments)
                     {
-                        var xic = Lcms.GetFullFragmentExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
-                                                       IcParameters.Instance.ProductIonTolerancePpm,
-                                                       label.PrecursorIon.GetMostAbundantIsotopeMz());
-                        lXic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
+                        var ion = label.Ion;
+                        LabeledXic lXic;
+                        if (_fragmentXicCache.ContainsKey(label.Composition)) lXic = _fragmentXicCache[label.Composition];
+                        else
+                        {
+                            var xic = Lcms.GetFullFragmentExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
+                                                           IcParameters.Instance.ProductIonTolerancePpm,
+                                                           label.PrecursorIon.GetMostAbundantIsotopeMz());
+                            lXic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
+                        }
+                        fragmentXics.Add(lXic);
                     }
-                    fragmentXics.Add(lXic);
-                }
-                _selectedFragmentXics = fragmentXics;
-                FragmentUpdate();
+                    _selectedFragmentXics = fragmentXics;
+                    FragmentUpdate();
+                });
                 OnPropertyChanged("SelectedFragments");
             }
         }
@@ -141,14 +149,15 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_xicXAxis == null)
                 {
+                    var maxLcScan = Math.Max(Lcms.MaxLcScan+1, 1);
                     _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Scan #")
                     {
-                        Maximum = Lcms.MaxLcScan,
+                        Maximum = maxLcScan,
                         Minimum = 0,
                         AbsoluteMinimum = 0,
-                        AbsoluteMaximum = Lcms.MaxLcScan
+                        AbsoluteMaximum = maxLcScan
                     };
-                    _xicXAxis.Zoom(0, Lcms.MaxLcScan);
+                    _xicXAxis.Zoom(0, maxLcScan);
                 }
                 return _xicXAxis;
             }
