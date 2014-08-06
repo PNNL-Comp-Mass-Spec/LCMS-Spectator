@@ -12,12 +12,14 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicPlotViewModel: ViewModelBase
     {
-        public AutoAdjustedYPlotModel Plot { get; set; }
-
+        public SelectablePlotModel Plot { get; set; }
+        public DelegateCommand SetScanChangedCommand { get; set; }
+        public event EventHandler SelectedScanChanged;
         public XicPlotViewModel(ColorDictionary colors, bool showLegend=true)
         {
             _colors = colors;
             _showLegend = showLegend;
+            SetScanChangedCommand = new DelegateCommand(SetSelectedScan);
         }
 
         public string Title
@@ -55,9 +57,26 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public int SelectedScan
+        {
+            get { return _selectedScan;  }
+            set
+            {
+                _selectedScan = value;
+                Plot.SetPointMarker(_selectedScan);
+                OnPropertyChanged("SelectedScan");
+            }
+        }
+
         public double Area
         {
             get { return Xics.Where(lxic => lxic.Index >= 0).Sum(lxic => lxic.Area); }
+        }
+
+        public void SetSelectedScan()
+        {
+            SelectedScan = (int) Plot.SelectedDataPoint.X;
+            if (SelectedScanChanged != null) SelectedScanChanged(this, null);
         }
 
         private void GeneratePlot()
@@ -104,5 +123,6 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledXic> _xics;
         private readonly ColorDictionary _colors;
         private bool _showScanMarkers;
+        private int _selectedScan;
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -9,19 +8,17 @@ using OxyPlot.Series;
 
 namespace LcmsSpectator.PlotModels
 {
-    public class XicPlotModel: AutoAdjustedYPlotModel
+    public class XicPlotModel: SelectablePlotModel
     {
         private readonly string _title;
         private readonly ColorDictionary _colors;
         private readonly bool _showScanMarkers;
-        public DataPoint SelectedDataPoint { get; set; }
         public XicPlotModel(string title, Axis xAxis, IEnumerable<LabeledXic> xics, ColorDictionary colors, bool showScanMarkers, bool showLegend, double mult=1.05): base(xAxis, mult)
         {
             _title = title;
             _colors = colors;
             _showScanMarkers = showScanMarkers;
             _showLegend = showLegend;
-            MouseDown += XicPlotModel_MouseDown;
             GeneratePlot(xics);
         }
 
@@ -30,49 +27,6 @@ namespace LcmsSpectator.PlotModels
             _title = "";
             _colors = new ColorDictionary(2);
             _showScanMarkers = false;
-        }
-
-        public void SetPointMarker(double x, OxyColor color=null)
-        {
-            if (color == null) color = OxyColors.Black;
-            var y = YAxis.Maximum;
-            if (_pointMarkers != null) GuiInvoker.Invoke(() => Series.Remove(_pointMarkers));
-            if (x.Equals(0)) return;
-            _pointMarkers = new StemSeries(color, 3)
-            {
-                LineStyle = LineStyle.Dash
-            };
-            GuiInvoker.Invoke(() => _pointMarkers.Points.Add(new DataPoint(x, y)));
-            GuiInvoker.Invoke(Series.Add, _pointMarkers);
-            GuiInvoker.Invoke(InvalidatePlot, true);
-        }
-
-        public override void SetBounds(double minX, double maxX)
-        {
-            double xPoint = 0;
-            if (_pointMarkers != null && _pointMarkers.Points.Count != 0)
-            {
-                var point = _pointMarkers.Points[0];
-                xPoint = point.X;
-                GuiInvoker.Invoke(() => Series.Remove(_pointMarkers));
-            }
-            base.SetBounds(minX, maxX);
-            SetPointMarker(xPoint);
-        }
-
-        void XicPlotModel_MouseDown(object sender, OxyMouseEventArgs args)
-        {
-            switch (args.ChangedButton)
-            {
-                case OxyMouseButton.Left:
-                    var series = GetSeriesFromPoint(args.Position, 10);
-                    if (series != null)
-                    {
-                        var result = series.GetNearestPoint(args.Position, false);
-                        if (result != null && result.DataPoint != null) SelectedDataPoint = (DataPoint) result.DataPoint;
-                    }
-                    break;
-            }
         }
 
         private void GeneratePlot(IEnumerable<LabeledXic> xics)
@@ -116,7 +70,6 @@ namespace LcmsSpectator.PlotModels
             IsLegendVisible = _showLegend;   
         }
 
-        private StemSeries _pointMarkers;
         private readonly bool _showLegend;
     }
 }

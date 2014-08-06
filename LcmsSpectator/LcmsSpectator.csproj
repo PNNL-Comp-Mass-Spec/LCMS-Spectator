@@ -148,6 +148,7 @@
     <Compile Include="DialogServices\IDialogService.cs" />
     <Compile Include="DialogServices\IMainDialogService.cs" />
     <Compile Include="DialogServices\MainDialogService.cs" />
+    <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="SequenceGraph\DataGraph.cs" />
     <Compile Include="SequenceGraph\GraphXSequenceGraph.cs" />
     <Compile Include="SequenceGraph\SequenceGraphArea.cs" />
