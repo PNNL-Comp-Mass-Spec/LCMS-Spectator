@@ -156,6 +156,7 @@
     <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
     <Compile Include="Utils\PrSmChangedEventArgs.cs" />
+    <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\DelegateCommand.cs" />
     <Compile Include="ViewModels\IonTypeSelectorViewModel.cs" />
     <Compile Include="ViewModels\LcmsSpectatorViewModel.cs" />
@@ -165,6 +166,9 @@
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\XicPlotViewModel.cs" />
     <Compile Include="ViewModels\XicViewModel.cs" />
+    <Compile Include="Views\CreateSequenceView.xaml.cs">
+      <DependentUpon>CreateSequenceView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\IonTypeSelector.xaml.cs">
       <DependentUpon>IonTypeSelector.xaml</DependentUpon>
     </Compile>
@@ -187,8 +191,6 @@
   <ItemGroup>
     <Compile Include="PlotModels\AutoAdjustedYPlotModel.cs" />
     <Compile Include="PlotModels\ColorDictionary.cs" />
-    <Compile Include="PlotModels\SpectrumPlotModel.cs" />
-    <Compile Include="PlotModels\XicPlotModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -223,6 +225,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\CreateSequenceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\IonTypeSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

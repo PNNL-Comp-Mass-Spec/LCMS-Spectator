@@ -42,9 +42,10 @@ namespace LcmsSpectatorModels.Config
         private PrSm CreatePrSm(string line, Dictionary<string, int> headers, LcMsRun lcms, string rawFileName)
         {
             var parts = line.Split('\t');
-            var score = Convert.ToDouble(parts[headers["MSGFScore"]]);
+            var score = Convert.ToDouble(parts[headers["SpecEValue"]]);
             var prsm = new PrSm
             {
+                Heavy = false,
                 RawFileName = rawFileName,
                 Lcms = lcms,
                 Scan = Convert.ToInt32(parts[headers["ScanNum"]]),

@@ -21,17 +21,12 @@ namespace LcmsSpectator.ViewModels
         public SettingsViewModel()
         {
             ToleranceUnits = new List<ToleranceUnit> {ToleranceUnit.Ppm, ToleranceUnit.Th};
-
             PrecursorIonTolerance = IcParameters.Instance.PrecursorTolerancePpm.GetValue();
             PrecursorIonToleranceUnit = IcParameters.Instance.PrecursorTolerancePpm.GetUnit();
-
             ProductIonTolerance = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
             ProductIonToleranceUnit = IcParameters.Instance.ProductIonTolerancePpm.GetUnit();
-
             QValueThreshold = IcParameters.Instance.QValueThreshold;
-
             IonCorrelationThreshold = IcParameters.Instance.IonCorrelationThreshold;
-
             ModificationsPerSequence = IcParameters.Instance.MaxDynamicModificationsPerSequence;
 
             SaveCommand = new DelegateCommand(Save);

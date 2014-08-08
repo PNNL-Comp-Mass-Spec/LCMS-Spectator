@@ -4,8 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Threading;
-using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
@@ -25,27 +23,25 @@ namespace LcmsSpectator.ViewModels
         public List<IonType> IonTypes { get; set; }
 
         public List<LabeledIon> FragmentLabels { get; set; }
+        public List<LabeledIon> HeavyFragmentLabels { get; set; } 
         public List<LabeledIon> PrecursorLabels { get; set; }
+        public List<LabeledIon> HeavyPrecursorLabels { get; set; } 
 
-        public string SequenceText { get; set; }
-        public int SelectedCharge { get; set; }
-        public int SelectedScan { get; set; }
-        public XicViewModel SelectedXicViewModel { get; set; }
-
-        public DelegateCommand CreatePrSmCommand { get; set; }
         public DelegateCommand OpenRawFileCommand { get; set; }
         public DelegateCommand OpenTsvFileCommand { get; set; }
         public DelegateCommand SaveCommand { get; set; }
         public DelegateCommand OpenSettingsCommand { get; set; }
 
-        public event EventHandler UpdateSelections;
-
+        public CreateSequenceViewModel CreateSequenceViewModel { get; set; }
         public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
 
+        public event EventHandler UpdateSelections;
+
         public LcmsSpectatorViewModel(IMainDialogService dialogService)
         {
+            _xicChanged = false;
             _dialogService = dialogService;
             Ids = new IdentificationTree();
             ProteinIds = Ids.Proteins.Values.ToList();
@@ -55,22 +51,19 @@ namespace LcmsSpectator.ViewModels
             IonTypeSelectorViewModel.IonTypesUpdated += SetIonCharges;
             Ms2SpectrumViewModel = new SpectrumViewModel(_colors);
             XicViewModels = new ObservableCollection<XicViewModel>();
+            CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
+            CreateSequenceViewModel.SequenceCreated += UpdatePrSm;
 
             _spectrumChanged = false;
 
-            CreatePrSmCommand = new DelegateCommand(CreatePrSm, false);
             OpenRawFileCommand = new DelegateCommand(OpenRawFile);
             OpenTsvFileCommand = new DelegateCommand(OpenTsvFile);
             OpenSettingsCommand = new DelegateCommand(OpenSettings);
-
-            _guiThread = Dispatcher.CurrentDispatcher;
 
             FragmentLabels = new List<LabeledIon>();
             SelectedFragmentLabels = new List<LabeledIon>();
             PrecursorLabels = new List<LabeledIon>();
             SelectedPrecursorLabels = new List<LabeledIon>();
-
-            SelectedScan = 0;
 
             IsLoading = false;
             FileOpen = false;
@@ -93,7 +86,8 @@ namespace LcmsSpectator.ViewModels
                 if (chargeState != null && chargeState.Sequence.Equals(_selectedPrSm.Sequence)) SelectedChargeState = chargeState;
                 else
                 {
-                    var newChargeState = new ChargeStateId(_selectedPrSm.Charge, _selectedPrSm.Sequence, _selectedPrSm.SequenceText, _selectedProtein.ProteinNameDesc, _selectedPrSm.PrecursorMz);
+                    var newChargeState = new ChargeStateId(_selectedPrSm.Charge, _selectedPrSm.Sequence, _selectedPrSm.HeavySequence,
+                                                           _selectedPrSm.SequenceText, _selectedProtein.ProteinNameDesc, _selectedPrSm.PrecursorMz);
                     if (chargeState != null) newChargeState.PrSms = chargeState.PrSms;
                     SelectedChargeState = newChargeState;
                 }
@@ -109,23 +103,22 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 if (value == null) return;
-                foreach (var xicVm in XicViewModels) xicVm.SelectedScanNumber = SelectedPrSm.Scan;
                 if (_selectedChargeState == null || 
                     _selectedChargeState.SequenceText != value.SequenceText || 
-                    _selectedChargeState.Charge != value.Charge)
+                    _selectedChargeState.Charge != value.Charge || _xicChanged)
                 {
                     var absoluteMaxCharge = Math.Min(Math.Max(value.Charge - 1, 2), 15);
                     _colors.BuildColorDictionary(absoluteMaxCharge);
                     IonTypeSelectorViewModel.AbsoluteMaxCharge = absoluteMaxCharge;
                     IonTypeSelectorViewModel.MinCharge = 1;
                     _selectedChargeState = value;
-                    foreach (var xicVm in XicViewModels) xicVm.Reset();
+                    foreach (var xicVm in XicViewModels) xicVm.ZoomToScan(SelectedPrSm.Scan);
                     SetFragmentLabels();
                     SetPrecursorLabels();
-                    foreach (var xicVm in XicViewModels) xicVm.ZoomToScan(SelectedPrSm.Scan);
+                    _xicChanged = false;
                 }
-
                 UpdateSpectrum();
+                foreach (var xicVm in XicViewModels) xicVm.HighlightScan(SelectedPrSm.Scan, xicVm.RawFileName == SelectedPrSm.RawFileName, SelectedPrSm.Heavy);
                 OnPropertyChanged("SelectedChargeState");
             }
         }
@@ -139,6 +132,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 if (value == null) return;
+                if (_xicChanged || _selectedPrSm == null || _selectedPrSm.RawFileName != value.RawFileName) _xicChanged = true;
                 _selectedPrSm = value;
                 OnPropertyChanged("SelectedPrSm");
                 _spectrumChanged = true;
@@ -146,7 +140,7 @@ namespace LcmsSpectator.ViewModels
                 if (protein != null) SelectedProtein = protein;
                 else
                 {
-                    var newChargeState = new ChargeStateId(_selectedPrSm.Charge, _selectedPrSm.Sequence, 
+                    var newChargeState = new ChargeStateId(_selectedPrSm.Charge, _selectedPrSm.Sequence, _selectedPrSm.HeavySequence,
                                                            _selectedPrSm.SequenceText, _selectedPrSm.ProteinNameDesc, 
                                                            _selectedPrSm.PrecursorMz);
                     newChargeState.Add(_selectedPrSm);
@@ -161,7 +155,14 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedFragmentLabels = value;
-                foreach (var xicVm in XicViewModels) xicVm.SelectedFragments = _selectedFragmentLabels;
+                if (_fragmentXicChanged)
+                {
+                    foreach (var xicVm in XicViewModels)
+                    {
+                        xicVm.SelectedFragments = _selectedFragmentLabels;
+                        xicVm.SelectedHeavyFragments = IonUtils.ReduceLabels(HeavyFragmentLabels, _selectedFragmentLabels);
+                    }
+                }
                 OnPropertyChanged("SelectedFragmentLabels");
             }
         }
@@ -172,7 +173,14 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedPrecursorLabels = value;
-                foreach (var xicVm in XicViewModels) xicVm.SelectedPrecursors = _selectedPrecursorLabels;
+                if (_precursorXicChanged)
+                {
+                    foreach (var xicVm in XicViewModels)
+                    {
+                        xicVm.SelectedPrecursors = _selectedPrecursorLabels;
+                        xicVm.SelectedHeavyPrecursors = IonUtils.ReduceLabels(HeavyPrecursorLabels, _selectedPrecursorLabels);
+                    }
+                }
                 OnPropertyChanged("SelectedPrecursorLabels");
             }
         }
@@ -216,9 +224,12 @@ namespace LcmsSpectator.ViewModels
                     Ms2SpectrumViewModel.ClearPlots();
                     return;
                 }
+                var fragmentLabels = SelectedPrSm.Heavy ? HeavyFragmentLabels : FragmentLabels;
+                var precursorIon = SelectedPrSm.Heavy
+                                 ? IonUtils.GetLabeledPrecursorIon(SelectedPrSm.HeavySequence, SelectedPrSm.Charge)
+                                 : IonUtils.GetLabeledPrecursorIon(SelectedPrSm.Sequence, SelectedPrSm.Charge);
                 Ms2SpectrumViewModel.RawFileName = SelectedPrSm.RawFileName;
-                Ms2SpectrumViewModel.UpdatePlots(SelectedPrSm.Ms2Spectrum, FragmentLabels, SelectedPrSm.PreviousMs1, SelectedPrSm.NextMs1, 
-                                                 IonUtils.GetLabeledPrecursorIon(SelectedPrSm.Sequence, SelectedPrSm.Charge));
+                Ms2SpectrumViewModel.UpdatePlots(SelectedPrSm.Ms2Spectrum, fragmentLabels, SelectedPrSm.PreviousMs1, SelectedPrSm.NextMs1, precursorIon, SelectedPrSm.Heavy);
                 _spectrumChanged = false;
             }
         }
@@ -285,9 +296,8 @@ namespace LcmsSpectator.ViewModels
                 Ids.Add(ids);
                 FilterIds();
                 SelectedPrSm = null;
+                _xicChanged = true;
                 if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
-                SelectedCharge = 2;
-                OnPropertyChanged("SelectedCharge");
                 FileOpen = true;
                 IsLoading = false;
             });
@@ -298,18 +308,16 @@ namespace LcmsSpectator.ViewModels
             IsLoading = true;
             var fileNameWithoutPath = Path.GetFileNameWithoutExtension(rawFileName);
             var lcms = LcMsRun.GetLcMsRun(rawFileName, MassSpecDataType.XCaliburRun, 0, 0);
-            var xicVm = new XicViewModel(fileNameWithoutPath, _colors)
-            {
-                Lcms = lcms
-            };
-            xicVm.SelectedScanNumberChanged += XicScanNumberChanged;
+            var xicVm = new XicViewModel(fileNameWithoutPath, lcms, _colors);
+            xicVm.SelectedScanNumberChanged += UpdatePrSm;
+            xicVm.XicClosing += CloseXic;
             xicVm.ZoomToScan(0);
             var addXicAction = new Action<XicViewModel>(XicViewModels.Add);
             GuiInvoker.Invoke(addXicAction, xicVm);
             GuiInvoker.Invoke(SetFragmentLabels);
             GuiInvoker.Invoke(SetPrecursorLabels);
-            GuiInvoker.Invoke(() => { SelectedXicViewModel = XicViewModels[0]; OnPropertyChanged("SelectedXicViewModel"); });
-            GuiInvoker.Invoke(() => { CreatePrSmCommand.Executable = true; });
+            GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0]; });
+            GuiInvoker.Invoke(() => { CreateSequenceViewModel.CreatePrSmCommand.Executable = true; });
             FileOpen = true;
             IsLoading = false;
         }
@@ -337,72 +345,34 @@ namespace LcmsSpectator.ViewModels
             OnPropertyChanged("PrSms");
         }
 
-        private void CreatePrSm()
-        {
-            var sequence = Sequence.GetSequenceFromMsGfPlusPeptideStr(SequenceText);
-            LcMsRun lcms = null;
-            if (sequence == null)
-            {
-                _dialogService.MessageBox("Invalid sequence.");
-                return;
-            }
-            if (SelectedCharge < 1)
-            {
-                _dialogService.MessageBox("Invalid Charge.");
-                return;
-            }
-            if (SelectedScan < 0)
-            {
-                _dialogService.MessageBox("Invalid Scan.");
-                return;
-            }
-            string rawFileName = "";
-            if (SelectedXicViewModel == null || SelectedXicViewModel.Lcms == null) SelectedScan = 0;
-//            else if (SelectedScan == 0) lcms = null;
-            else
-            {
-                rawFileName = SelectedXicViewModel.RawFileName;
-                lcms = SelectedXicViewModel.Lcms;
-            }
-            var prsm = new PrSm
-            {
-                RawFileName = rawFileName,
-                ProteinName = "",
-                ProteinNameDesc = "",
-                ProteinDesc = "",
-                Scan = SelectedScan,
-                Lcms = lcms,
-                Sequence = sequence,
-                SequenceText = SequenceText,
-                Charge = SelectedCharge
-            };
-            var ms2Prod = prsm.Ms2Spectrum as ProductSpectrum;
-            if (ms2Prod == null)
-            {
-                prsm.Scan = 0;
-                prsm.Lcms = null;
-            }
-            SelectedPrSm = prsm;
-        }
-
         private void SetFragmentLabels()
         {
             if (SelectedChargeState == null) return;
             var fragmentLabels = IonUtils.GetFragmentIonLabels(SelectedChargeState.Sequence, SelectedChargeState.Charge, IonTypeSelectorViewModel.IonTypes);
+            var heavyFragmentLabels = IonUtils.GetFragmentIonLabels(SelectedChargeState.HeavySequence, SelectedChargeState.Charge, IonTypeSelectorViewModel.IonTypes);
             FragmentLabels = fragmentLabels;
+            HeavyFragmentLabels = heavyFragmentLabels;
+            _fragmentXicChanged = false;
             OnPropertyChanged("FragmentLabels");
+            OnPropertyChanged("HeavyFragmentLabels");
+            _fragmentXicChanged = true;
             SelectedFragmentLabels = fragmentLabels;
-            _guiThread.Invoke(UpdateSelections, this, null);
+            GuiInvoker.Invoke(() => UpdateSelections(this, null));
         }
 
         private void SetPrecursorLabels()
         {
             if (SelectedChargeState == null) return;
             var precursorLabels = IonUtils.GetPrecursorIonLabels(SelectedChargeState.Sequence, SelectedChargeState.Charge, -1, 2);
+            var heavyPrecursorLabels = IonUtils.GetPrecursorIonLabels(SelectedChargeState.HeavySequence, SelectedChargeState.Charge, -1, 2);
             PrecursorLabels = precursorLabels;
+            HeavyPrecursorLabels = heavyPrecursorLabels;
+            _precursorXicChanged = false;
             OnPropertyChanged("PrecursorLabels");
+            OnPropertyChanged("HeavyPrecursorLabels");
+            _precursorXicChanged = true;
             SelectedPrecursorLabels = precursorLabels;
-            _guiThread.Invoke(UpdateSelections, this, null);
+            GuiInvoker.Invoke(() => UpdateSelections(this, null));
         }
 
         private void SetIonCharges(object sender, EventArgs e)
@@ -411,41 +381,74 @@ namespace LcmsSpectator.ViewModels
             _spectrumChanged = true;
             UpdateSpectrum();
             SetFragmentLabels();
-            SetPrecursorLabels();
-            Ms2SpectrumViewModel.ProductIons = FragmentLabels;
+            Ms2SpectrumViewModel.ProductIons = SelectedPrSm.Heavy ? HeavyFragmentLabels : FragmentLabels;
         }
 
-        private void XicScanNumberChanged(object sender, EventArgs e)
+        private void CloseXic(object sender, EventArgs e)
+        {
+            var xicVm = sender as XicViewModel;
+            if (xicVm != null)
+            {
+                var rawFileName = xicVm.RawFileName;
+                Ids.RemovePrSmsFromRawFile(rawFileName);
+                FilterIds();
+                XicViewModels.Remove(xicVm);
+                if (XicViewModels.Count == 0) CreateSequenceViewModel.CreatePrSmCommand.Executable = false;
+                if (SelectedPrSm.RawFileName == rawFileName)
+                {
+                    if (PrSms.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
+                    else
+                    {
+                        _selectedPrSm = null;
+                        OnPropertyChanged("SelectedPrSm");
+                        FragmentLabels = new List<LabeledIon>(); OnPropertyChanged("FragmentLabels");
+                        HeavyFragmentLabels = new List<LabeledIon>(); OnPropertyChanged("HeavyFragmentLabels");
+                        PrecursorLabels = new List<LabeledIon>(); OnPropertyChanged("PrecursorLabels");
+                        HeavyPrecursorLabels = new List<LabeledIon>(); OnPropertyChanged("HeavyPrecursorLabels");
+                        SelectedFragmentLabels = FragmentLabels;
+                        SelectedPrecursorLabels = PrecursorLabels;
+                        _spectrumChanged = true;
+                        UpdateSpectrum();
+                    }
+                }
+            }
+        }
+
+        private void UpdatePrSm(object sender, EventArgs e)
         {
             var prsmChangedEventArgs = e as PrSmChangedEventArgs;
+
             if (prsmChangedEventArgs != null)
             {
                 var prsm = prsmChangedEventArgs.PrSm;
-                prsm.Sequence = SelectedPrSm.Sequence;
-                prsm.SequenceText = SelectedPrSm.SequenceText;
-                prsm.Charge = SelectedPrSm.Charge;
-                prsm.ProteinName = SelectedPrSm.ProteinName;
-                prsm.ProteinNameDesc = SelectedPrSm.ProteinNameDesc;
+                if (prsm.Sequence == null)
+                {
+                    prsm.Sequence = SelectedPrSm.Sequence;
+                    prsm.SequenceText = SelectedPrSm.SequenceText;
+                    prsm.Charge = SelectedPrSm.Charge;
+                    prsm.ProteinName = SelectedPrSm.ProteinName;
+                    prsm.ProteinNameDesc = SelectedPrSm.ProteinNameDesc;
+                }
                 SelectedPrSm = prsm;
             }
         }
 
         private readonly IMainDialogService _dialogService;
-        private PrSm _selectedPrSm;
         private readonly ColorDictionary _colors;
 
         private bool _isLoading;
-
         private bool _fileOpen;
+
         private ProteinId _selectedProtein;
-
-        private readonly Dispatcher _guiThread;
-
         private ChargeStateId _selectedChargeState;
-
-        private bool _spectrumChanged;
+        private PrSm _selectedPrSm;
         private List<LabeledIon> _selectedFragmentLabels;
         private List<LabeledIon> _selectedPrecursorLabels;
+
+        private bool _xicChanged;
+        private bool _spectrumChanged;
+        private bool _fragmentXicChanged;
+        private bool _precursorXicChanged;
     }
 }
 

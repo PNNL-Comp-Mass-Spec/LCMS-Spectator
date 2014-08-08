@@ -124,13 +124,14 @@ namespace LcmsSpectator.ViewModels
         /// <param name="prevms1">New Previous Ms1 Spectrum.</param>
         /// <param name="nextms1">New Next Ms1 Spectrum</param>
         /// <param name="precursorIon">Precursor ion to highlight on all plots.</param>
-        public void UpdatePlots(Spectrum ms2, List<LabeledIon> productIons, Spectrum prevms1, Spectrum nextms1, LabeledIon precursorIon)
+        public void UpdatePlots(Spectrum ms2, List<LabeledIon> productIons, Spectrum prevms1, Spectrum nextms1, LabeledIon precursorIon, bool heavy=false)
         {
             _precursorIon = precursorIon;
             _ms2Spectrum = ms2;
             _productIons = new List<LabeledIon>(productIons) {precursorIon};
             Ms2SpectrumViewModel.Update(ms2, _productIons);
-            Ms2SpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1})", ms2.ScanNum, RawFileName);
+            var heavyStr = heavy ? ", Heavy" : "";
+            Ms2SpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1}{2})", ms2.ScanNum, RawFileName, heavyStr);
             var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);
             PreviousMs1ViewModel.XAxis = xAxis;
             NextMs1ViewModel.XAxis = xAxis;

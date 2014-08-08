@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
@@ -13,44 +14,37 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicViewModel: ViewModelBase
     {
+        public XicPlotViewModel FragmentPlotViewModel { get; set; }
+        public XicPlotViewModel HeavyFragmentPlotViewModel { get; set; }
+        public XicPlotViewModel PrecursorPlotViewModel { get; set; }
+        public XicPlotViewModel HeavyPrecursorPlotViewModel { get; set; }
         public string RawFileName { get; set; }
         public LcMsRun Lcms { get; set; }
         public ColorDictionary Colors { get; set; }
-        public DelegateCommand SelectFragmentScanNumberCommand { get; set; }
+        public DelegateCommand CloseCommand { get; set; }
+        public event EventHandler XicClosing;
         public event EventHandler SelectedScanNumberChanged;
-        public XicViewModel(string rawFileName, ColorDictionary colors)
+        public XicViewModel(string rawFileName, LcMsRun lcms, ColorDictionary colors, IDialogService dialogService=null)
         {
+            if (dialogService == null) dialogService = new DialogService();
+            _dialogService = dialogService;
             RawFileName = rawFileName;
+            Lcms = lcms;
             Colors = colors;
-            _precursorXicCache = new Dictionary<Composition, LabeledXic>();
-            _fragmentXicCache = new Dictionary<Composition, LabeledXic>();
-            FragmentPlotModel = new XicPlotModel();
-            PrecursorPlotModel = new XicPlotModel();
-            SelectFragmentScanNumberCommand = new DelegateCommand(SelectFragmentScanNumber);
+            FragmentPlotViewModel = new XicPlotViewModel("Fragment XIC", colors, XicXAxis, false, true, false);
+            FragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
+            HeavyFragmentPlotViewModel = new XicPlotViewModel("Heavy Fragment XIC", colors, XicXAxis, true, true, false);
+            HeavyFragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
+            PrecursorPlotViewModel = new XicPlotViewModel("Precursor XIC", colors, XicXAxis, false, false);
+            HeavyPrecursorPlotViewModel = new XicPlotViewModel("Heavy Precursor XIC", colors, XicXAxis, true, false);
             SelectedScanNumber = 0;
             _showScanMarkers = false;
-        }
-
-        public XicPlotModel FragmentPlotModel
-        {
-            get { return _fragmentPlotModel; }
-            private set
+            _showHeavy = false;
+            CloseCommand = new DelegateCommand(() =>
             {
-                if (_fragmentPlotModel == value) return;
-                _fragmentPlotModel = value;
-                OnPropertyChanged("FragmentPlotModel");
-            }
-        }
-
-        public XicPlotModel PrecursorPlotModel
-        {
-            get { return _precursorPlotModel; }
-            private set
-            {
-                if (_precursorPlotModel == value) return;
-                _precursorPlotModel = value;
-                OnPropertyChanged("PrecursorPlotModel");
-            }
+                if (_dialogService.ConfirmationBox(String.Format("Are you sure you would like to close {0}?", RawFileName), "") && XicClosing != null)
+                    XicClosing(this, EventArgs.Empty);
+            });
         }
 
         public int SelectedScanNumber
@@ -60,7 +54,10 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_selectedScanNumber == value) return;
                 _selectedScanNumber = value;
-                FragmentPlotModel.SetPointMarker(value);
+                FragmentPlotViewModel.SelectedScan = value;
+                HeavyFragmentPlotViewModel.SelectedScan = value;
+                PrecursorPlotViewModel.SelectedScan = value;
+                HeavyPrecursorPlotViewModel.SelectedScan = value;
                 OnPropertyChanged("SelectedScanNumber");
             }
         }
@@ -74,27 +71,24 @@ namespace LcmsSpectator.ViewModels
                 _selectedPrecursors = value;
                 Task.Factory.StartNew(() =>
                 {
-                    var precursorXics = new List<LabeledXic>();
-                    // get precursor xics
-                    foreach (var label in SelectedPrecursors)
-                    {
-                        var ion = label.Ion;
-                        LabeledXic lXic;
-                        if (_precursorXicCache.ContainsKey(label.Composition)) lXic = _precursorXicCache[label.Composition];
-                        else
-                        {
-                            var xic = Lcms.GetFullExtractedIonChromatogram(ion.GetIsotopeMz(label.Index),
-                                                       IcParameters.Instance.PrecursorTolerancePpm);
-                            lXic = (_precursorXicCache.ContainsKey(label.Composition)) ?
-                                        _precursorXicCache[label.Composition] :
-                                        new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
-                        }
-                        precursorXics.Add(lXic);
-                    }
-                    _selectedPrecursorXics = precursorXics;
-                    PrecursorUpdate();
+                     PrecursorPlotViewModel.Xics = GetXics(_selectedPrecursors);
                 });
                 OnPropertyChanged("SelectedPrecursors");
+            }
+        }
+
+        public List<LabeledIon> SelectedHeavyPrecursors
+        {
+            get { return _selectedHeavyPrecursors; }
+            set
+            {
+                if (SelectedHeavyPrecursors == value) return;
+                _selectedHeavyPrecursors = value;
+                Task.Factory.StartNew(() =>
+                {
+                    if (_showHeavy) HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors);
+                });
+                OnPropertyChanged("SelectedHeavyPrecursors");
             }
         }
 
@@ -106,26 +100,23 @@ namespace LcmsSpectator.ViewModels
                 _selectedFragments = value;
                 Task.Factory.StartNew(() =>
                 {
-                    var fragmentXics = new List<LabeledXic>();
-                    // get fragment xics
-                    foreach (var label in SelectedFragments)
-                    {
-                        var ion = label.Ion;
-                        LabeledXic lXic;
-                        if (_fragmentXicCache.ContainsKey(label.Composition)) lXic = _fragmentXicCache[label.Composition];
-                        else
-                        {
-                            var xic = Lcms.GetFullFragmentExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
-                                                           IcParameters.Instance.ProductIonTolerancePpm,
-                                                           label.PrecursorIon.GetMostAbundantIsotopeMz());
-                            lXic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
-                        }
-                        fragmentXics.Add(lXic);
-                    }
-                    _selectedFragmentXics = fragmentXics;
-                    FragmentUpdate();
+                    FragmentPlotViewModel.Xics = GetXics(_selectedFragments);
                 });
                 OnPropertyChanged("SelectedFragments");
+            }
+        }
+
+        public List<LabeledIon> SelectedHeavyFragments
+        {
+            get { return _selectedHeavyFragments; }
+            set
+            {
+                _selectedHeavyFragments = value;
+                Task.Factory.StartNew(() =>
+                {
+                    if (_showHeavy) HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
+                });
+                OnPropertyChanged("SelectedHeavyFragments");
             }
         }
 
@@ -135,10 +126,26 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showScanMarkers = value;
-                FragmentUpdate();
-                PrecursorUpdate();
-                FragmentPlotModel.SetPointMarker(SelectedScanNumber); // preserve scan marker
+                FragmentPlotViewModel.ShowScanMarkers = _showScanMarkers;
+                HeavyFragmentPlotViewModel.ShowScanMarkers = _showScanMarkers;
+                PrecursorPlotViewModel.ShowScanMarkers = _showScanMarkers;
+                HeavyPrecursorPlotViewModel.ShowScanMarkers = _showScanMarkers;
                 OnPropertyChanged("ShowScanMarkers");
+            }
+        }
+
+        public bool ShowHeavy
+        {
+            get { return _showHeavy; }
+            set
+            {
+                _showHeavy = value;
+                if (_showHeavy)
+                {
+                    Task.Factory.StartNew(() => { HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors); });
+                    Task.Factory.StartNew(() => { HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments); });
+                }
+                OnPropertyChanged("ShowHeavy");
             }
         }
 
@@ -165,41 +172,38 @@ namespace LcmsSpectator.ViewModels
         public void ZoomToScan(int scanNumber)
         {
             int minX, maxX;
+            SelectedScanNumber = scanNumber;
             CalculateBounds(out minX, out maxX);
             XicXAxis.Minimum = minX;
             XicXAxis.Maximum = maxX;
             XicXAxis.Zoom(minX, maxX);
-            SelectedScanNumber = scanNumber;
         }
 
-        public void Reset()
+        public void HighlightScan(int scanNum, bool unique, bool heavy)
         {
-            _fragmentXicCache.Clear();
-            _precursorXicCache.Clear();
+            FragmentPlotViewModel.HighlightScan(scanNum, unique && !heavy);
+            HeavyFragmentPlotViewModel.HighlightScan(scanNum, unique && heavy);
         }
 
-        private void FragmentUpdate()
+        private void SelectFragmentScanNumber(object sender, EventArgs e)
         {
-            if (_selectedFragmentXics == null || _selectedFragmentXics.Count == 0) return;
-            var fragmentPlotModel = new XicPlotModel("Fragment Ion XIC", XicXAxis,
-                                                        _selectedFragmentXics, Colors, ShowScanMarkers, false);
-            fragmentPlotModel.SetPointMarker(SelectedScanNumber);   // preserve marker
-            FragmentPlotModel = fragmentPlotModel;
-        }
+            var vm = sender as XicPlotViewModel;
+            if (vm == null) return;
+            _selectedScanNumber = vm.SelectedScan;
 
-        private void PrecursorUpdate()
-        {
-            if (_selectedPrecursorXics.Count == 0) return;
-            var precursorPlotModel = new XicPlotModel("Precursor Ion XIC", XicXAxis,
-                                                        _selectedPrecursorXics, Colors, ShowScanMarkers, true);
-            PrecursorPlotModel = precursorPlotModel;
-        }
+            var otherVm = vm.Heavy ? FragmentPlotViewModel : HeavyFragmentPlotViewModel;
+            otherVm.SelectedScan = _selectedScanNumber;
 
-        private void SelectFragmentScanNumber()
-        {
-            var x = FragmentPlotModel.SelectedDataPoint.X;
-            SelectedScanNumber = (int) Math.Round(x);
-            SelectedScanNumberChanged(this, new PrSmChangedEventArgs(CreatePrSm(SelectedScanNumber)));
+            // Create prsm
+            var selectedScanNumber = _selectedScanNumber;
+            var newPrsm = new PrSm
+            {
+                Heavy = vm.Heavy,
+                RawFileName = RawFileName,
+                Lcms = Lcms,
+                Scan = selectedScanNumber,
+            };
+            if (SelectedScanNumberChanged != null) SelectedScanNumberChanged(this, new PrSmChangedEventArgs(newPrsm));
         }
 
         private void CalculateBounds(out int minS, out int maxS)
@@ -207,33 +211,44 @@ namespace LcmsSpectator.ViewModels
             minS = SelectedScanNumber - 1000;
             maxS = SelectedScanNumber + 1000;
             if (SelectedScanNumber < 1000) minS = 0;
-            if (SelectedScanNumber == 0) maxS = Lcms.MaxLcScan;   
+            minS = Math.Max(minS, Lcms.MinLcScan);
+            if (SelectedScanNumber == 0) maxS = Lcms.MaxLcScan;
+            if (SelectedScanNumber > Lcms.MaxLcScan)
+            {
+                minS = 0;
+                maxS = Lcms.MaxLcScan;
+            }
         }
 
-        private PrSm CreatePrSm(int scanNum)
+        private List<LabeledXic> GetXics(IEnumerable<LabeledIon> ions)
         {
-            var selectedScanNumber = scanNum;
-            var newPrsm = new PrSm
+            var xics = new List<LabeledXic>();
+            // get fragment xics
+            foreach (var label in ions)
             {
-                RawFileName = RawFileName,
-                Lcms = Lcms,
-                Scan = selectedScanNumber,
-            };
-            return newPrsm;
+                var ion = label.Ion;
+                Xic xic;
+                if (label.IsFragmentIon) xic = Lcms.GetFullFragmentExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
+                                                                                            IcParameters.Instance.ProductIonTolerancePpm,
+                                                                                            label.PrecursorIon.GetMostAbundantIsotopeMz());
+                else xic = Lcms.GetFullExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);   
+                var lXic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
+                xics.Add(lXic);
+            }
+            return xics;
         }
+
+        private IDialogService _dialogService;
 
         private List<LabeledIon> _selectedFragments;
-        private List<LabeledXic> _selectedFragmentXics;
-        private List<LabeledXic> _selectedPrecursorXics; 
+        private List<LabeledIon> _selectedPrecursors;
 
         private LinearAxis _xicXAxis;
         
         private bool _showScanMarkers;
-        private List<LabeledIon> _selectedPrecursors;
         private int _selectedScanNumber;
-        private XicPlotModel _fragmentPlotModel;
-        private XicPlotModel _precursorPlotModel;
-        private readonly Dictionary<Composition, LabeledXic> _precursorXicCache;
-        private readonly Dictionary<Composition, LabeledXic> _fragmentXicCache;
+        private List<LabeledIon> _selectedHeavyPrecursors;
+        private List<LabeledIon> _selectedHeavyFragments;
+        private bool _showHeavy;
     }
 }

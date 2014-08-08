@@ -47,6 +47,7 @@ namespace LcmsSpectatorModels.Config
             var score = Convert.ToDouble(parts[headers[scoreLabel]]);
             var prsm = new PrSm
             {
+                Heavy = false,
                 RawFileName = rawFileName,
                 Lcms = lcms,
                 Scan = Convert.ToInt32(parts[headers["Scan"]]),

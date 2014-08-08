@@ -20,7 +20,7 @@ namespace LcmsSpectatorModels.Models
 
         public void Add(PrSm data)
         {
-            if (!ChargeStates.ContainsKey(data.Charge)) ChargeStates.Add(data.Charge, new ChargeStateId(data.Charge, data.Sequence, data.SequenceText, data.ProteinNameDesc, data.PrecursorMz));
+            if (!ChargeStates.ContainsKey(data.Charge)) ChargeStates.Add(data.Charge, new ChargeStateId(data.Charge, data.Sequence, data.HeavySequence, data.SequenceText, data.ProteinNameDesc, data.PrecursorMz));
             var chargeState = ChargeStates[data.Charge];
             chargeState.Add(data);
         }
@@ -49,6 +49,16 @@ namespace LcmsSpectatorModels.Models
             return highest;
         }
 
+        public void RemovePrSmsFromRawFile(string rawFileName)
+        {
+            var newChargeStates = new Dictionary<int, ChargeStateId>();
+            foreach (var chargeState in ChargeStates)
+            {
+                chargeState.Value.RemovePrSmsFromRawFile(rawFileName);
+                if (chargeState.Value.PrSms.Count > 0) newChargeStates.Add(chargeState.Key, chargeState.Value);
+            }
+            ChargeStates = newChargeStates;
+        }
     }
 
     internal class SequenceComparer : IComparer<ProteoformId>

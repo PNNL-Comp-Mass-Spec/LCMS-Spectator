@@ -50,6 +50,17 @@ namespace LcmsSpectatorModels.Models
         {
             return Proteoforms.Values.Any(proteoform => proteoform.Contains(data));
         }
+
+        public void RemovePrSmsFromRawFile(string rawFileName)
+        {
+            var newProteoforms = new Dictionary<string, ProteoformId>();
+            foreach (var proteoform in Proteoforms)
+            {
+                proteoform.Value.RemovePrSmsFromRawFile(rawFileName);
+                if (proteoform.Value.ChargeStates.Count > 0) newProteoforms.Add(proteoform.Key, proteoform.Value);
+            }
+            Proteoforms = newProteoforms;
+        }
     }
 
     class ProteinIdNameDescComparer : IComparer<ProteinId>

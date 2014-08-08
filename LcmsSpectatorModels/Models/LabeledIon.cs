@@ -5,7 +5,7 @@ using InformedProteomics.Backend.Data.Spectrometry;
 
 namespace LcmsSpectatorModels.Models
 {
-    public class LabeledIon
+    public class LabeledIon: IComparable<LabeledIon>, IEquatable<LabeledIon>
     {
         public Composition Composition { get; private set; }
         public Ion PrecursorIon { get; private set; }
@@ -51,6 +51,16 @@ namespace LcmsSpectatorModels.Models
         public override string ToString()
         {
             return Label;
+        }
+
+        public int CompareTo(LabeledIon other)
+        {
+            return String.Compare(Label, other.Label, StringComparison.Ordinal);
+        }
+
+        public bool Equals(LabeledIon other)
+        {
+            return Label.Equals(other.Label);
         }
     }
 }

@@ -89,5 +89,10 @@ namespace LcmsSpectatorModels.Utils
             }
             return ions;
         }
+
+        public static List<LabeledIon> ReduceLabels(List<LabeledIon> source, List<LabeledIon> target)
+        {
+            return source.Where(target.Contains).ToList();
+        }
     }
 }

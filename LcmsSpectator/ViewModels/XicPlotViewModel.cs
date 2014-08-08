@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using LcmsSpectator.PlotModels;
-using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
 using OxyPlot;
+using OxyPlot.Axes;
 using OxyPlot.Series;
 
 namespace LcmsSpectator.ViewModels
@@ -14,24 +15,18 @@ namespace LcmsSpectator.ViewModels
     {
         public SelectablePlotModel Plot { get; set; }
         public DelegateCommand SetScanChangedCommand { get; set; }
+        public bool Heavy { get; set; }
         public event EventHandler SelectedScanChanged;
-        public XicPlotViewModel(ColorDictionary colors, bool showLegend=true)
+        public XicPlotViewModel(string title, ColorDictionary colors, LinearAxis xAxis, bool heavy, bool showMarker=true, bool showLegend=true)
         {
+            _title = title;
             _colors = colors;
             _showLegend = showLegend;
+            _xAxis = xAxis;
+            Heavy = heavy;
+            _showMarker = showMarker;
             SetScanChangedCommand = new DelegateCommand(SetSelectedScan);
-        }
-
-        public string Title
-        {
-            get { return _title; }
-            set
-            {
-                if (_title == value) return;
-                _title = value;
-                Task.Factory.StartNew(GeneratePlot);
-                OnPropertyChanged("Title");
-            }
+            Xics = new List<LabeledXic>();
         }
 
         public bool ShowScanMarkers
@@ -53,7 +48,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _xics = value;
                 Task.Factory.StartNew(GeneratePlot);
-                OnPropertyChanged("Ions");
+                OnPropertyChanged("Xics");
             }
         }
 
@@ -63,26 +58,39 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedScan = value;
-                Plot.SetPointMarker(_selectedScan);
+                if (_showMarker) Plot.SetOrdinaryPointMarker(_selectedScan);
+                Plot.AdjustForZoom();
                 OnPropertyChanged("SelectedScan");
             }
         }
 
         public double Area
         {
-            get { return Xics.Where(lxic => lxic.Index >= 0).Sum(lxic => lxic.Area); }
+            get
+            {
+                var area = Xics.Where(lxic => lxic.Index >= 0).Sum(lxic => lxic.Area);
+                return Math.Round(area, 2);
+            }
+        }
+
+        public void HighlightScan(int scanNum, bool unique)
+        {
+            _selectedScan = scanNum;
+            if (unique) Plot.SetUniquePointMarker(scanNum);
         }
 
         public void SetSelectedScan()
         {
-            SelectedScan = (int) Plot.SelectedDataPoint.X;
+            _selectedScan = (int) Plot.SelectedDataPoint.X;
             if (SelectedScanChanged != null) SelectedScanChanged(this, null);
+            Plot.SetUniquePointMarker(SelectedScan);
         }
 
         private void GeneratePlot()
         {
             // add XICs
             if (Xics == null) return;
+            var plot = new SelectablePlotModel(_xAxis, 1.05);
             foreach (var lxic in Xics)
             {
                 var xic = lxic.Xic;
@@ -110,19 +118,25 @@ namespace LcmsSpectator.ViewModels
                     if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) && xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
                     series.Points.Add(new DataPoint(xicPoint.ScanNum, xicPoint.Intensity));
                 }
-                GuiInvoker.Invoke(Plot.Series.Add, series);
+                plot.Series.Add(series);
             }
-
-            Plot.Title = String.Format("{0} (Area: {1})", _title, Area);
-            Plot.GenerateYAxis("Intensity", "0e0");
-            GuiInvoker.Invoke(() => { Plot.IsLegendVisible = _showLegend; });
+            var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", Area);
+            plot.Title = String.Format("{0} (Area: {1})", _title, areaStr);
+            plot.GenerateYAxis("Intensity", "0e0");
+            plot.IsLegendVisible = _showLegend;
+            plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
+            if (_showMarker) plot.SetPointMarker(SelectedScan);
+            Plot = plot;
+            OnPropertyChanged("Plot");
         }
 
-        private string _title;
+        private readonly string _title;
         private readonly bool _showLegend;
         private List<LabeledXic> _xics;
         private readonly ColorDictionary _colors;
         private bool _showScanMarkers;
+        private readonly bool _showMarker;
         private int _selectedScan;
+        private readonly LinearAxis _xAxis;
     }
 }

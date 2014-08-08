@@ -6,7 +6,6 @@ using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
-using Microsoft.SqlServer.Server;
 
 namespace LcmsSpectatorModels.Models
 {
@@ -37,11 +36,33 @@ namespace LcmsSpectatorModels.Models
         public double MatchedFragments { get; set; }
         public double QValue { get; set; }
         public double PepQValue { get; set; }
-        public static double CorrelationThreshold = 0.7;
+        public bool Heavy { get; set; }
 
         public string ScanText
         {
             get { return String.Format("{0} ({1})", Scan, RawFileName); }
+        }
+
+        public Sequence HeavySequence
+        {
+            get
+            {
+                Sequence heavySequence;
+                if (Sequence.Count > 0 && Sequence[Sequence.Count - 1].Residue == 'K')
+                {
+                    var tempSequence = Sequence.ToList();
+                    tempSequence[tempSequence.Count-1] = new ModifiedAminoAcid(tempSequence[tempSequence.Count-1], Modification.LysToHeavyLys);
+                    heavySequence = new Sequence(tempSequence);
+                }
+                else if (Sequence.Count > 0 && Sequence[Sequence.Count - 1].Residue == 'R')
+                {
+                    var tempSequence = Sequence.ToList();
+                    tempSequence[tempSequence.Count - 1] = new ModifiedAminoAcid(tempSequence[tempSequence.Count - 1], Modification.ArgToHeavyArg);
+                    heavySequence = new Sequence(tempSequence);
+                }
+                else heavySequence = Sequence;
+                return heavySequence;
+            }
         }
 
         public Spectrum PreviousMs1 
@@ -69,6 +90,16 @@ namespace LcmsSpectatorModels.Models
             get
             {
                 var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
+                var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
+                return Math.Round(ion.GetMonoIsotopicMz(), 2);
+            }
+        }
+
+        public double HeavyPrecursorMz
+        {
+            get
+            {
+                var composition = HeavySequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
                 var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
                 return Math.Round(ion.GetMonoIsotopicMz(), 2);
             }

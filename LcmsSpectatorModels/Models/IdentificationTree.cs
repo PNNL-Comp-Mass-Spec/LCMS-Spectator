@@ -109,5 +109,16 @@ namespace LcmsSpectatorModels.Models
             }
             return idTree;
         }
+
+        public void RemovePrSmsFromRawFile(string rawFileName)
+        {
+            var newProteins = new Dictionary<string, ProteinId>();
+            foreach (var protein in Proteins)
+            {
+                protein.Value.RemovePrSmsFromRawFile(rawFileName);
+                if (protein.Value.Proteoforms.Count > 0) newProteins.Add(protein.Key, protein.Value);
+            }
+            Proteins = newProteins;
+        }
     }
 }

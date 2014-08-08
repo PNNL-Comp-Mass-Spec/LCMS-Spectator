@@ -10,6 +10,7 @@ namespace LcmsSpectatorModels.Models
         public int Charge { get; private set; }
         public string ProteinNameDesc { get; private set; }
         public Sequence Sequence { get; private set; }
+        public Sequence HeavySequence { get; private set; }
         public string SequenceText { get; private set; }
         public double PrecursorMz { get; private set; }
 
@@ -17,12 +18,13 @@ namespace LcmsSpectatorModels.Models
         public List<LabeledXic> SelectedFragmentXics { get; set; }
         public List<LabeledXic> SelectedPrecursorXics { get; set; } 
 
-        public ChargeStateId(int charge, Sequence sequence, string sequenceText, string proteinNameDesc, double precMz)
+        public ChargeStateId(int charge, Sequence sequence, Sequence heavySequence, string sequenceText, string proteinNameDesc, double precMz)
         {
             ProteinNameDesc = proteinNameDesc;
             PrecursorMz = precMz;
             Charge = charge;
             Sequence = sequence;
+            HeavySequence = heavySequence;
             SequenceText = sequenceText;
             PrSms = new Dictionary<int, PrSm>();
         }
@@ -53,6 +55,13 @@ namespace LcmsSpectatorModels.Models
         public bool Contains(PrSm data)
         {
             return PrSms.Values.Any(prsm => (prsm.CompareTo(data) == 0));
+        }
+
+
+        public void RemovePrSmsFromRawFile(string rawFileName)
+        {
+            var newPrsms = PrSms.Where(prsm => prsm.Value.RawFileName != rawFileName).ToDictionary(prsm => prsm.Key, prsm => prsm.Value);
+            PrSms = newPrsms;
         }
     }
 

@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="LcmsSpectator.Views.CreateSequenceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type viewModels:XicViewModel}" x:Key="XicDataTemplate">
+            <TextBlock Text="{Binding RawFileName}" />
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid Height="120" Width="300" VerticalAlignment="Top" HorizontalAlignment="Left">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20*" />
+            <RowDefinition Height="20*" />
+            <RowDefinition Height="20*" />
+            <RowDefinition Height="20*" />
+            <RowDefinition Height="20*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30*" />
+            <ColumnDefinition Width="70*" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="Sequence" FontWeight="Bold" Grid.Row="0" Grid.Column="0" />
+        <TextBox Text="{Binding SequenceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1">
+            <TextBox.InputBindings>
+                <KeyBinding Command="{Binding Path=CreatePrSmCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+            </TextBox.InputBindings>
+        </TextBox>
+        <TextBlock Text="Charge" FontWeight="Bold" Grid.Row="1" Grid.Column="0" />
+        <TextBox Text="{Binding SelectedCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" TextAlignment="Right">
+            <TextBox.InputBindings>
+                <KeyBinding Command="{Binding Path=CreatePrSmCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+            </TextBox.InputBindings>
+        </TextBox>
+        <TextBlock Text="Scan #" FontWeight="Bold" Grid.Row="2" Grid.Column="0" />
+        <TextBox Text="{Binding SelectedScan, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" TextAlignment="Right">
+            <TextBox.InputBindings>
+                <KeyBinding Command="{Binding Path=CreatePrSmCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+            </TextBox.InputBindings>
+        </TextBox>
+        <TextBlock Text="Raw file" FontWeight="Bold" Grid.Row="3" Grid.Column="0" />
+        <ComboBox ItemsSource="{Binding XicViewModels}" SelectedItem="{Binding SelectedXicViewModel}" ItemTemplate="{StaticResource ResourceKey=XicDataTemplate}" Grid.Row="3" Grid.Column="1" />
+        <Button Command="{Binding CreatePrSmCommand}" Grid.Row="4" Grid.Column="1">Create</Button>
+    </Grid>
+</UserControl>

@@ -85,6 +85,7 @@ namespace LcmsSpectator.Views
                 else
                 {
                     var selected = (IIdData) treeView.SelectedItem;
+                    if (selected == null) return;
                     var highest = selected.GetHighestScoringPrSm();
                     Ms2ViewerViewModel.SelectedPrSm = highest;
                 }

@@ -7,14 +7,31 @@ namespace LcmsSpectator.PlotModels
 {
     public class SelectablePlotModel: AutoAdjustedYPlotModel
     {
-        private LineSeries _pointMarkers;
         public DataPoint SelectedDataPoint { get; set; }
+        public bool UniqueHighlight { get; set; }
         public SelectablePlotModel(Axis xAxis, double multiplier) : base(xAxis, multiplier)
         {
             MouseDown += SelectablePlotModel_MouseDown;
         }
 
-        public void SetPointMarker(double x, OxyColor color = null)
+        public void SetUniquePointMarker(double x)
+        {
+            UniqueHighlight = true;
+            SetPointMarker(x, GetMarkerColor());
+        }
+
+        public void SetOrdinaryPointMarker(double x)
+        {
+            UniqueHighlight = false;
+            SetPointMarker(x, GetMarkerColor());
+        }
+
+        public void SetPointMarker(double x)
+        {
+            SetPointMarker(x, GetMarkerColor());
+        }
+        
+        public void SetPointMarker(double x, OxyColor color)
         {
             if (color == null) color = OxyColors.Black;
             var y = YAxis.Maximum;
@@ -39,7 +56,7 @@ namespace LcmsSpectator.PlotModels
                 GuiInvoker.Invoke(() => Series.Remove(_pointMarkers));
             }
             base.SetBounds(minX, maxX);
-            SetPointMarker(xPoint);
+            SetPointMarker(xPoint, GetMarkerColor());
         }
 
         void SelectablePlotModel_MouseDown(object sender, OxyMouseEventArgs args)
@@ -56,5 +73,12 @@ namespace LcmsSpectator.PlotModels
                     break;
             }
         }
+
+        private OxyColor GetMarkerColor()
+        {
+            return UniqueHighlight ? OxyColors.Black : OxyColors.LightGray;
+        }
+
+        private LineSeries _pointMarkers;
     }
 }
