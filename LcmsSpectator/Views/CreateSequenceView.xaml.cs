@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using InformedProteomics.Backend.Data.Sequence;
 
 namespace LcmsSpectator.Views
 {
@@ -22,6 +23,33 @@ namespace LcmsSpectator.Views
         public CreateSequenceView()
         {
             InitializeComponent();
+        }
+
+        private void InsertModButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            InsertModification();
+        }
+
+        private void InsertModification()
+        {
+            var selectedMod = ModificationList.SelectedItem as Modification;
+            if (selectedMod == null)
+            {
+                MessageBox.Show("Invalid modification.");
+                return;
+            }
+            var position = Sequence.CaretIndex;
+            var modStr = String.Format("[{0}]", selectedMod.Name);
+            Sequence.Text = Sequence.Text.Insert(position, modStr);
+        }
+
+        private void ModificationList_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            var key = e.Key;
+            if (key == Key.Enter)
+            {
+                InsertModification();
+            }
         }
     }
 }

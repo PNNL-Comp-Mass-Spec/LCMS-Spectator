@@ -5,13 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="600">
     <UserControl.Resources>
         <DataTemplate DataType="{x:Type viewModels:XicViewModel}" x:Key="XicDataTemplate">
             <TextBlock Text="{Binding RawFileName}" />
         </DataTemplate>
     </UserControl.Resources>
-    <Grid Height="120" Width="300" VerticalAlignment="Top" HorizontalAlignment="Left">
+    <Grid Height="120" Width="600" VerticalAlignment="Top" HorizontalAlignment="Left">
         <Grid.RowDefinitions>
             <RowDefinition Height="20*" />
             <RowDefinition Height="20*" />
@@ -20,15 +20,20 @@
             <RowDefinition Height="20*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="30*" />
-            <ColumnDefinition Width="70*" />
+            <ColumnDefinition Width="80" />
+            <ColumnDefinition Width="50*" />
+            <ColumnDefinition Width="30" />
+            <ColumnDefinition Width="20*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <TextBlock Text="Sequence" FontWeight="Bold" Grid.Row="0" Grid.Column="0" />
-        <TextBox Text="{Binding SequenceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1">
+        <TextBox Text="{Binding SequenceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" Name="Sequence">
             <TextBox.InputBindings>
                 <KeyBinding Command="{Binding Path=CreatePrSmCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
             </TextBox.InputBindings>
         </TextBox>
+        <Button Grid.Row="0" Grid.Column="2" Click="InsertModButton_OnClick" Name="InsertModButton">&lt;-</Button>
+        <ComboBox Grid.Row="0" Grid.Column="3" ItemsSource="{Binding Modifications}" IsEditable="True" Name="ModificationList" KeyDown="ModificationList_OnKeyDown" />
+        
         <TextBlock Text="Charge" FontWeight="Bold" Grid.Row="1" Grid.Column="0" />
         <TextBox Text="{Binding SelectedCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" TextAlignment="Right">
             <TextBox.InputBindings>

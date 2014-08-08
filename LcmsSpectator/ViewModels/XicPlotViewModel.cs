@@ -23,10 +23,22 @@ namespace LcmsSpectator.ViewModels
             _colors = colors;
             _showLegend = showLegend;
             _xAxis = xAxis;
+            _xAxis.AxisChanged += UpdatePlotTitle;
             Heavy = heavy;
             _showMarker = showMarker;
             SetScanChangedCommand = new DelegateCommand(SetSelectedScan);
             Xics = new List<LabeledXic>();
+        }
+
+        private void UpdatePlotTitle(object sender, AxisChangedEventArgs e)
+        {
+            if (Plot != null && _xAxis != null)
+            {
+                var min = _xAxis.ActualMinimum;
+                var max = _xAxis.ActualMaximum;
+                var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", GetAreaOfRange((int)min, (int)max));
+                Plot.Title = String.Format("{0} (Area: {1})", _title, areaStr);
+            }
         }
 
         public bool ShowScanMarkers
@@ -62,6 +74,11 @@ namespace LcmsSpectator.ViewModels
                 Plot.AdjustForZoom();
                 OnPropertyChanged("SelectedScan");
             }
+        }
+
+        public double GetAreaOfRange(int min, int max)
+        {
+            return (from lxic in Xics from point in lxic.Xic where point.ScanNum >= min && point.ScanNum <= max select point.Intensity).Sum();
         }
 
         public double Area

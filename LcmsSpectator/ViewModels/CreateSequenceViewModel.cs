@@ -6,6 +6,7 @@ using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
+using LcmsSpectatorModels.SequenceReaders;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -13,18 +14,43 @@ namespace LcmsSpectator.ViewModels
     {
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
         public string SequenceText { get; set; }
+        public int SequencePosition { get; set; }
         public int SelectedCharge { get; set; }
         public int SelectedScan { get; set; }
         public DelegateCommand CreatePrSmCommand { get; private set; }
+        public DelegateCommand InsertModificationCommand { get; private set; }
+        public ObservableCollection<Modification> Modifications { get; private set; }
+        public Modification SelectedModification { get; set; }
         public event EventHandler SequenceCreated;
         public CreateSequenceViewModel(ObservableCollection<XicViewModel> xicViewModels, IDialogService dialogService)
         {
             XicViewModels = xicViewModels;
             _dialogService = dialogService;
+            SequenceText = "";
             CreatePrSmCommand = new DelegateCommand(CreatePrSm, false);
+            InsertModificationCommand = new DelegateCommand(InsertModification);
             SelectedCharge = 2;
             SelectedScan = 0;
             if (XicViewModels.Count > 0) SelectedXicViewModel = XicViewModels[0];
+
+            Modifications = new ObservableCollection<Modification>
+            {
+                Modification.Acetylation,               
+                Modification.Carbamidomethylation,      Modification.Carbamylation,
+                Modification.Carboxymethylation,        Modification.Cysteinyl,
+                Modification.Deamidation,               Modification.Dehydro,
+                Modification.DelC2H2,                   Modification.Dethiomethyl,
+                Modification.DiMethylation,             Modification.Glutathione,
+                Modification.Itraq4Plex,                
+                Modification.Methylation,               Modification.Nethylmaleimide,
+                Modification.NipCam,                    Modification.Nitrosyl,
+                Modification.Oxidation,                 Modification.Phosphorylation,
+                Modification.PyroCarbamidomethyl,       Modification.PyroGluE,
+                Modification.PyroGluQ,                  Modification.SerToAsn,
+                Modification.SerToAsp,                  Modification.SerToXle,
+                Modification.TevFp2,                    Modification.ThrToAla,
+                Modification.Tmt6Plex,                  Modification.TriMethylation
+            };
         }
 
         public XicViewModel SelectedXicViewModel
@@ -38,15 +64,28 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private void InsertModification()
+        {
+            var modStr = String.Format("[{0}]", SelectedModification.Name);
+            SequenceText = SequenceText.Insert(SequencePosition, modStr);
+            OnPropertyChanged("SequenceText");
+        }
+
         private void CreatePrSm()
         {
-            var sequence = Sequence.GetSequenceFromMsGfPlusPeptideStr(SequenceText);
-            LcMsRun lcms = null;
-            if (sequence == null)
+            var sequenceReader = new SequenceReader();
+            Sequence sequence;
+            try
             {
-                _dialogService.MessageBox("Invalid sequence.");
+                sequence = sequenceReader.Read(SequenceText);
+                if (sequence == null) throw new FormatException("Invalid Sequence.");
+            }
+            catch (FormatException e)
+            {
+                _dialogService.ExceptionAlert(e);
                 return;
             }
+            LcMsRun lcms = null;
             if (SelectedCharge < 1)
             {
                 _dialogService.MessageBox("Invalid Charge.");
