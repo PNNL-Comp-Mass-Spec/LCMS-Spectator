@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using LcmsSpectator.PlotModels;
+using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -34,10 +35,14 @@ namespace LcmsSpectator.ViewModels
         {
             if (Plot != null && _xAxis != null)
             {
-                var min = _xAxis.ActualMinimum;
-                var max = _xAxis.ActualMaximum;
-                var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", GetAreaOfRange((int)min, (int)max));
-                Plot.Title = String.Format("{0} (Area: {1})", _title, areaStr);
+                Task.Factory.StartNew(() =>
+                {
+                    var min = _xAxis.ActualMinimum;
+                    var max = _xAxis.ActualMaximum;
+                    var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", GetAreaOfRange((int)min, (int)max));
+                    var newTitle = String.Format("{0} (Area: {1})", _title, areaStr);
+                    GuiInvoker.Invoke(() => { Plot.Title = newTitle; });
+                });
             }
         }
 
