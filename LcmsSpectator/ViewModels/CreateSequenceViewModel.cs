@@ -33,24 +33,7 @@ namespace LcmsSpectator.ViewModels
             SelectedScan = 0;
             if (XicViewModels.Count > 0) SelectedXicViewModel = XicViewModels[0];
 
-            Modifications = new ObservableCollection<Modification>
-            {
-                Modification.Acetylation,               
-                Modification.Carbamidomethylation,      Modification.Carbamylation,
-                Modification.Carboxymethylation,        Modification.Cysteinyl,
-                Modification.Deamidation,               Modification.Dehydro,
-                Modification.DelC2H2,                   Modification.Dethiomethyl,
-                Modification.DiMethylation,             Modification.Glutathione,
-                Modification.Itraq4Plex,                
-                Modification.Methylation,               Modification.Nethylmaleimide,
-                Modification.NipCam,                    Modification.Nitrosyl,
-                Modification.Oxidation,                 Modification.Phosphorylation,
-                Modification.PyroCarbamidomethyl,       Modification.PyroGluE,
-                Modification.PyroGluQ,                  Modification.SerToAsn,
-                Modification.SerToAsp,                  Modification.SerToXle,
-                Modification.TevFp2,                    Modification.ThrToAla,
-                Modification.Tmt6Plex,                  Modification.TriMethylation
-            };
+            Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
         }
 
         public XicViewModel SelectedXicViewModel
