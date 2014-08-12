@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Utils;
+using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.SequenceReaders;
 
@@ -13,10 +15,12 @@ namespace LcmsSpectator.ViewModels
     public class CreateSequenceViewModel: ViewModelBase
     {
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
+        public ObservableCollection<Target> Targets { get; private set; } 
         public string SequenceText { get; set; }
         public int SequencePosition { get; set; }
         public int SelectedCharge { get; set; }
         public int SelectedScan { get; set; }
+        public DelegateCommand OpenTargetListCommand { get; private set; }
         public DelegateCommand CreatePrSmCommand { get; private set; }
         public DelegateCommand InsertModificationCommand { get; private set; }
         public ObservableCollection<Modification> Modifications { get; private set; }
@@ -25,8 +29,10 @@ namespace LcmsSpectator.ViewModels
         public CreateSequenceViewModel(ObservableCollection<XicViewModel> xicViewModels, IDialogService dialogService)
         {
             XicViewModels = xicViewModels;
+            Targets = new ObservableCollection<Target>();
             _dialogService = dialogService;
             SequenceText = "";
+            OpenTargetListCommand = new DelegateCommand(OpenTargetList);
             CreatePrSmCommand = new DelegateCommand(CreatePrSm, false);
             InsertModificationCommand = new DelegateCommand(InsertModification);
             SelectedCharge = 2;
@@ -45,6 +51,27 @@ namespace LcmsSpectator.ViewModels
                 _selectedXicViewModel = value;
                 OnPropertyChanged("SelectedXicViewModel");
             }
+        }
+
+        public Target SelectedTarget
+        {
+            get { return _selectedTarget; }
+            set
+            {
+                _selectedTarget = value;
+                SequenceText = _selectedTarget.SequenceText;
+                OnPropertyChanged("SequenceText");
+                OnPropertyChanged("SelectedTarget");
+            }
+        }
+
+        public void OpenTargetList()
+        {
+            var targetFileName = _dialogService.OpenFile(".txt", @"Target Files (*.txt)|*.txt");
+            if (targetFileName == "") return;
+            var targetReader = new TargetFileReader(targetFileName);
+            var targets = targetReader.Read();
+            foreach (var target in targets) Targets.Add(target);
         }
 
         private void InsertModification()
@@ -110,5 +137,6 @@ namespace LcmsSpectator.ViewModels
 
         private readonly IDialogService _dialogService;
         private XicViewModel _selectedXicViewModel;
+        private Target _selectedTarget;
     }
 }

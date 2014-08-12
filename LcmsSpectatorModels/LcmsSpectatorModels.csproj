@@ -71,6 +71,7 @@
     <Compile Include="Config\IdFileReaderFactory.cs" />
     <Compile Include="Config\IIdFileReader.cs" />
     <Compile Include="Config\MsgfFileReader.cs" />
+    <Compile Include="Config\TargetFileReader.cs" />
     <Compile Include="Models\ChargeStateId.cs" />
     <Compile Include="Models\IdData.cs" />
     <Compile Include="Models\IdentificationTree.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Models\ProteinId.cs" />
     <Compile Include="Models\ProteoformId.cs" />
     <Compile Include="Models\PrSm.cs" />
+    <Compile Include="Models\Target.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SequenceReaders\ISequenceReader.cs" />
     <Compile Include="SequenceReaders\LcmsSpectatorSequenceReader.cs" />
