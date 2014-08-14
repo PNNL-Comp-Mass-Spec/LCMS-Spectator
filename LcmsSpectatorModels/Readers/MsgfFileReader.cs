@@ -58,7 +58,7 @@ namespace LcmsSpectatorModels.Readers
                 ProteinDesc = "",
                 ProteinNameDesc = parts[headers["Protein"]].Split('(')[0],
                 Charge = Convert.ToInt32(parts[headers["Charge"]]),
-                MatchedFragments = Math.Round(score, 3),
+                MatchedFragments = score,
                 QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),
                 PepQValue = Convert.ToDouble(parts[headers["PepQValue"]]),
             };

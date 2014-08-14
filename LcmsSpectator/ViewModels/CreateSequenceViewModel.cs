@@ -64,6 +64,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _selectedTarget = value;
                 SequenceText = _selectedTarget.SequenceText;
+                InsertStaticModifications();
                 OnPropertyChanged("SequenceText");
                 OnPropertyChanged("SelectedTarget");
             }
