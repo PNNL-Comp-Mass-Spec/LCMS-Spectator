@@ -13,7 +13,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="33*" />
+            <RowDefinition Height="1" />
             <RowDefinition Height="33*" />
+            <RowDefinition Height="1" />
             <RowDefinition Height="33*" />
         </Grid.RowDefinitions>
         <controls:MultiSelectDataGrid   AutoGenerateColumns="False" SelectionMode="Extended"
@@ -24,15 +26,17 @@
                 <DataGridTextColumn Header="Ion Type" Width="*" Binding="{Binding Symbol}"/>
             </DataGrid.Columns>
         </controls:MultiSelectDataGrid>
+        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ShowsPreview="True" Height="1" />
         <controls:MultiSelectDataGrid   AutoGenerateColumns="False" SelectionMode="Extended"
                                         IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
-                                        Grid.Row="1" ItemsSource="{Binding NeutralLosses}"
+                                        Grid.Row="2" ItemsSource="{Binding NeutralLosses}"
                                         SelectedItemsSource="{Binding SelectedNeutralLosses, Mode=TwoWay}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Neutral Loss" Width="*" Binding="{Binding Converter={StaticResource NeutralLossToString}}"/>
             </DataGrid.Columns>
         </controls:MultiSelectDataGrid>
-        <GroupBox Grid.Column="0" Grid.Row="2" ToolTip="Select Charges [Min, Max]">
+        <GridSplitter Grid.Row="3" HorizontalAlignment="Stretch" ShowsPreview="True" Height="1" />
+        <GroupBox Grid.Row="4" ToolTip="Select Charges [Min, Max]">
             <GroupBox.Header>
                 <Label>Ion Charges</Label>
             </GroupBox.Header>
