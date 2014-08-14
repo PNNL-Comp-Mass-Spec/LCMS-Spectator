@@ -172,7 +172,8 @@ namespace LcmsSpectator.ViewModels
                 {
                     if (searchModification.IsFixedModification && searchModification.TargetResidue == residue)
                     {
-                        matchStr += String.Format("+{0}", Math.Round(searchModification.Modification.GetMass(), 3));
+                        var modStr = String.Format("+{0}", Math.Round(searchModification.Modification.GetMass(), 3));
+                        if (!matchStr.Contains(modStr)) matchStr += modStr;
                     }
                 }
                 newSequence.Add(matchStr);
@@ -198,7 +199,8 @@ namespace LcmsSpectator.ViewModels
                 {
                     if (searchModification.IsFixedModification && searchModification.TargetResidue == residue)
                     {
-                        matchStr += String.Format("[{0}]", searchModification.Modification);
+                        var modStr = String.Format("[{0}]", searchModification.Modification);
+                        if (!matchStr.Contains(modStr)) matchStr += modStr;
                     }
                 }
                 newSequence.Add(matchStr);
