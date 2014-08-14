@@ -22,6 +22,7 @@ namespace LcmsSpectatorModels.Config
         public double IonCorrelationThreshold { get; set; }
         public List<SearchModification> Modifications { get; set; }
         public int PointsToSmooth { get; set; }
+        public List<SearchModification> SearchModifications { get; set; } 
         public IonTypeFactory IonTypeFactory { get; set; }
 
         public static IcParameters Instance
@@ -67,6 +68,7 @@ namespace LcmsSpectatorModels.Config
             IonCorrelationThreshold = 0.7;
             MaxDynamicModificationsPerSequence = 0;
             PointsToSmooth = 9;
+            SearchModifications = new List<SearchModification>();
             IonTypeFactory = new IonTypeFactory(15);
         }
 

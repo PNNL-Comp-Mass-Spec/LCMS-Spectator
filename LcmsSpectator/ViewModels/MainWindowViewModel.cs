@@ -12,6 +12,7 @@ using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
+using LcmsSpectatorModels.Readers;
 using LcmsSpectatorModels.Utils;
 
 namespace LcmsSpectator.ViewModels

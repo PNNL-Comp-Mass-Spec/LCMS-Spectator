@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.InteropServices;
-using System.Windows.Documents;
+using System.Text.RegularExpressions;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -10,7 +9,8 @@ using LcmsSpectator.DialogServices;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
-using LcmsSpectatorModels.SequenceReaders;
+using LcmsSpectatorModels.Readers;
+using LcmsSpectatorModels.Readers.SequenceReaders;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -25,6 +25,7 @@ namespace LcmsSpectator.ViewModels
         public DelegateCommand OpenTargetListCommand { get; private set; }
         public DelegateCommand CreatePrSmCommand { get; private set; }
         public DelegateCommand InsertModificationCommand { get; private set; }
+        public DelegateCommand InsertStaticModificationsCommand { get; private set; }
         public ObservableCollection<Modification> Modifications { get; private set; }
         public Modification SelectedModification { get; set; }
         public event EventHandler SequenceCreated;
@@ -37,6 +38,7 @@ namespace LcmsSpectator.ViewModels
             OpenTargetListCommand = new DelegateCommand(OpenTargetList);
             CreatePrSmCommand = new DelegateCommand(CreatePrSm, false);
             InsertModificationCommand = new DelegateCommand(InsertModification);
+            InsertStaticModificationsCommand = new DelegateCommand(InsertStaticModifications);
             SelectedCharge = 2;
             SelectedScan = 0;
             if (XicViewModels.Count > 0) SelectedXicViewModel = XicViewModels[0];
@@ -144,6 +146,66 @@ namespace LcmsSpectator.ViewModels
                 prsm.Lcms = null;
             }
             if (SequenceCreated != null) SequenceCreated(this, new PrSmChangedEventArgs(prsm));
+        }
+
+        private void InsertStaticModifications()
+        {
+            if (SequenceText == "" || IcParameters.Instance.SearchModifications.Count == 0) return;
+            if (SequenceText.Contains("+")) InsertStaticMsgfPlusModifications();
+            else InsertStaticLcmsSpectatorModifications();
+            OnPropertyChanged("SequenceText");
+        }
+
+        private void InsertStaticMsgfPlusModifications()
+        {
+            const string pattern = @"[A-Z](\+[0-9]+\.[0-9]+)*";
+
+            var matches = Regex.Matches(SequenceText, pattern);
+
+            var newSequence = new List<string>();
+
+            foreach (Match match in matches)
+            {
+                var matchStr = match.Value;
+                var residue = matchStr[0];
+                foreach (var searchModification in IcParameters.Instance.SearchModifications)
+                {
+                    if (searchModification.IsFixedModification && searchModification.TargetResidue == residue)
+                    {
+                        matchStr += String.Format("+{0}", Math.Round(searchModification.Modification.GetMass(), 3));
+                    }
+                }
+                newSequence.Add(matchStr);
+            }
+
+            SequenceText = "";
+            foreach (var aa in newSequence) SequenceText += aa;
+        }
+
+        private void InsertStaticLcmsSpectatorModifications()
+        {
+            const string pattern = @"[A-Z](\[[A-Z][a-z]+\])*";
+
+            var matches = Regex.Matches(SequenceText, pattern);
+
+            var newSequence = new List<string>();
+
+            foreach (Match match in matches)
+            {
+                var matchStr = match.Value;
+                var residue = matchStr[0];
+                foreach (var searchModification in IcParameters.Instance.SearchModifications)
+                {
+                    if (searchModification.IsFixedModification && searchModification.TargetResidue == residue)
+                    {
+                        matchStr += String.Format("[{0}]", searchModification.Modification);
+                    }
+                }
+                newSequence.Add(matchStr);
+            }
+
+            SequenceText = "";
+            foreach (var aa in newSequence) SequenceText += aa;
         }
 
         private readonly IDialogService _dialogService;

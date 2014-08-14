@@ -1,6 +1,6 @@
 ﻿using InformedProteomics.Backend.Data.Sequence;
 
-namespace LcmsSpectatorModels.SequenceReaders
+namespace LcmsSpectatorModels.Readers.SequenceReaders
 {
     public class SequenceReader: ISequenceReader
     {

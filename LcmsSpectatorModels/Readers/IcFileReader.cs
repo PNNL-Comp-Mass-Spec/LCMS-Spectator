@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 
-namespace LcmsSpectatorModels.Config
+namespace LcmsSpectatorModels.Readers
 {
     public class IcFileReader: IIdFileReader
     {

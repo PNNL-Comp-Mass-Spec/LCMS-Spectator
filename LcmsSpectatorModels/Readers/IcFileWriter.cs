@@ -1,6 +1,6 @@
 ﻿using LcmsSpectatorModels.Models;
 
-namespace LcmsSpectatorModels.Config
+namespace LcmsSpectatorModels.Readers
 {
     public class IcFileWriter
     {

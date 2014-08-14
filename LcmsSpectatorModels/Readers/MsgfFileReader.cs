@@ -6,7 +6,7 @@ using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Models;
 
-namespace LcmsSpectatorModels.Config
+namespace LcmsSpectatorModels.Readers
 {
     public class MsgfFileReader: IIdFileReader
     {

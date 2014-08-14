@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using InformedProteomics.Backend.Data.Sequence;
-using LcmsSpectatorModels.SequenceReaders;
+using LcmsSpectatorModels.Readers.SequenceReaders;
 
 namespace LcmsSpectatorModels.Models
 {

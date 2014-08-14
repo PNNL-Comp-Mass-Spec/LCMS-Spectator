@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using LcmsSpectatorModels.Models;
 
-namespace LcmsSpectatorModels.Config
+namespace LcmsSpectatorModels.Readers
 {
     public class TargetFileReader
     {

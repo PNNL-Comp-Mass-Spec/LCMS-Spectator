@@ -1,6 +1,7 @@
 ﻿using System.IO;
+using LcmsSpectatorModels.Config;
 
-namespace LcmsSpectatorModels.Config
+namespace LcmsSpectatorModels.Readers
 {
     public class IdFileReaderFactory
     {

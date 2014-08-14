@@ -1,4 +1,4 @@
-﻿namespace LcmsSpectatorModels.SequenceReaders
+﻿namespace LcmsSpectatorModels.Readers.SequenceReaders
 {
     public interface ISequenceReader
     {

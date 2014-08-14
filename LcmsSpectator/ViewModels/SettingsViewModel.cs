@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectatorModels.Config;
@@ -18,8 +20,11 @@ namespace LcmsSpectator.ViewModels
         public double IonCorrelationThreshold { get; set; }
         public int PointsToSmooth { get; set; }
 
-        public DelegateCommand SaveCommand { get; set; }
-        public DelegateCommand CancelCommand { get; set; }
+        public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
+        public DelegateCommand AddModificationCommand { get; set; }
+
+        public DelegateCommand SaveCommand { get; private set; }
+        public DelegateCommand CancelCommand { get; private set; }
 
         public event EventHandler ReadyToClose;
 
@@ -38,10 +43,26 @@ namespace LcmsSpectator.ViewModels
             ModificationsPerSequence = IcParameters.Instance.MaxDynamicModificationsPerSequence;
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
 
+            Modifications = new ObservableCollection<ModificationViewModel>();
+            foreach (var searchModification in IcParameters.Instance.SearchModifications)
+            {
+                var modificationVm = new ModificationViewModel(searchModification);
+                modificationVm.RequestModificationRemoval += RemoveModification;
+                Modifications.Add(modificationVm);
+            }
+            AddModificationCommand = new DelegateCommand(AddModification);
+
             SaveCommand = new DelegateCommand(Save);
             CancelCommand = new DelegateCommand(Cancel);
 
             Status = false;
+        }
+
+        private void AddModification()
+        {
+            var modVm = new ModificationViewModel();
+            modVm.RequestModificationRemoval += RemoveModification;
+            Modifications.Add(modVm);
         }
 
         private void Save()
@@ -59,6 +80,14 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.IonCorrelationThreshold = IonCorrelationThreshold;
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
 
+            var modificationList = new List<SearchModification>();
+            foreach (var searchModificationVm in Modifications)
+            {
+                var searchModification = searchModificationVm.SearchModification;
+                if (searchModification != null) modificationList.Add(searchModification);
+            }
+            IcParameters.Instance.SearchModifications = modificationList;
+
             Status = true;
             if (ReadyToClose != null) ReadyToClose(this, null);
         }
@@ -66,6 +95,12 @@ namespace LcmsSpectator.ViewModels
         private void Cancel()
         {
             if (ReadyToClose != null) ReadyToClose(this, null);
+        }
+
+        private void RemoveModification(object sender, EventArgs e)
+        {
+            var modVm = sender as ModificationViewModel;
+            if (modVm != null) Modifications.Remove(modVm);
         }
 
         private readonly IDialogService _dialogService;
