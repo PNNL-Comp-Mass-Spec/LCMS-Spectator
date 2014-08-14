@@ -76,15 +76,16 @@
                                 <xcad:LayoutAnchorable Title="XIC View" CanClose="False" CanHide="False">
                                     <Grid>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="50*" />
-                                            <RowDefinition Height="50*" />
+                                            <RowDefinition Height="80*" />
+                                            <RowDefinition Height="1" />
+                                            <RowDefinition Height="20*" />
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="3" />
-                                            <ColumnDefinition Width="98" />
+                                            <ColumnDefinition Width="120" />
                                         </Grid.ColumnDefinitions>
-                                        <xcad:DockingManager Grid.RowSpan="2" AllowMixedOrientation="True" DocumentsSource="{Binding XicViewModels}">
+                                        <xcad:DockingManager Grid.RowSpan="3" AllowMixedOrientation="True" DocumentsSource="{Binding XicViewModels}">
                                             <xcad:DockingManager.LayoutItemTemplate>
                                                 <DataTemplate>
                                                     <views1:XicView />
@@ -111,10 +112,11 @@
                                                 <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding Label}"/>
                                             </DataGrid.Columns>
                                         </controls:MultiSelectDataGrid>
+                                        <GridSplitter Grid.Row="1" Grid.Column="2" HorizontalAlignment="Stretch" ShowsPreview="True" Height="1" />
                                         <controls:MultiSelectDataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                                                                        ItemsSource="{Binding PrecursorLabels}"
                                                                        SelectedItemsSource="{Binding SelectedPrecursorLabels, Mode=TwoWay}"
-                                                                       IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" Grid.Row="1">
+                                                                       IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" Grid.Row="2">
                                             <DataGrid.Columns>
                                                 <DataGridTextColumn Header="Isotope" Width="*" Binding="{Binding Label}" />
                                             </DataGrid.Columns>

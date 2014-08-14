@@ -20,6 +20,8 @@ namespace LcmsSpectator.ViewModels
         public XicPlotViewModel HeavyFragmentPlotViewModel { get; set; }
         public XicPlotViewModel PrecursorPlotViewModel { get; set; }
         public XicPlotViewModel HeavyPrecursorPlotViewModel { get; set; }
+        public string FragmentAreaRatioLabel { get; private set; }
+        public string PrecursorAreaRatioLabel { get; private set; }
         public string RawFileName { get; set; }
         public LcMsRun Lcms { get; set; }
         public ColorDictionary Colors { get; set; }
@@ -42,6 +44,7 @@ namespace LcmsSpectator.ViewModels
             SelectedScanNumber = 0;
             _showScanMarkers = false;
             _showHeavy = false;
+            XicXAxis.AxisChanged += UpdateAreaRatioLabels;
             CloseCommand = new DelegateCommand(() =>
             {
                 if (_dialogService.ConfirmationBox(String.Format("Are you sure you would like to close {0}?", RawFileName), "") && XicClosing != null)
@@ -73,7 +76,8 @@ namespace LcmsSpectator.ViewModels
                 _selectedPrecursors = value;
                 Task.Factory.StartNew(() =>
                 {
-                     PrecursorPlotViewModel.Xics = GetXics(_selectedPrecursors);
+                    PrecursorPlotViewModel.Xics = GetXics(_selectedPrecursors);
+                    UpdatePrecursorAreaRatioLabels();
                 });
                 OnPropertyChanged("SelectedPrecursors");
             }
@@ -89,6 +93,7 @@ namespace LcmsSpectator.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     if (_showHeavy) HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors);
+                    UpdatePrecursorAreaRatioLabels();
                 });
                 OnPropertyChanged("SelectedHeavyPrecursors");
             }
@@ -103,6 +108,7 @@ namespace LcmsSpectator.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     FragmentPlotViewModel.Xics = GetXics(_selectedFragments);
+                    UpdateFragmentAreaRatioLabels(); 
                 });
                 OnPropertyChanged("SelectedFragments");
             }
@@ -117,6 +123,7 @@ namespace LcmsSpectator.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     if (_showHeavy) HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
+                    UpdateFragmentAreaRatioLabels(); 
                 });
                 OnPropertyChanged("SelectedHeavyFragments");
             }
@@ -144,30 +151,18 @@ namespace LcmsSpectator.ViewModels
                 _showHeavy = value;
                 if (_showHeavy)
                 {
-                    if (_selectedHeavyPrecursors != null) Task.Factory.StartNew(() => { HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors); });
-                    if (_selectedHeavyFragments != null) Task.Factory.StartNew(() => { HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments); });
+                    if (_selectedHeavyPrecursors != null) Task.Factory.StartNew(() => 
+                    { 
+                        HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors); 
+                        UpdatePrecursorAreaRatioLabels(); 
+                    });
+                    if (_selectedHeavyFragments != null) Task.Factory.StartNew(() =>
+                    {
+                        HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
+                        UpdateFragmentAreaRatioLabels();
+                    });
                 }
                 OnPropertyChanged("ShowHeavy");
-            }
-        }
-
-        private LinearAxis XicXAxis
-        {
-            get
-            {
-                if (_xicXAxis == null)
-                {
-                    var maxLcScan = Math.Max(Lcms.MaxLcScan+1, 1);
-                    _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Scan #")
-                    {
-                        Maximum = maxLcScan,
-                        Minimum = 0,
-                        AbsoluteMinimum = 0,
-                        AbsoluteMaximum = maxLcScan
-                    };
-                    _xicXAxis.Zoom(0, maxLcScan);
-                }
-                return _xicXAxis;
             }
         }
 
@@ -185,6 +180,70 @@ namespace LcmsSpectator.ViewModels
         {
             FragmentPlotViewModel.HighlightScan(scanNum, unique && !heavy);
             HeavyFragmentPlotViewModel.HighlightScan(scanNum, unique && heavy);
+        }
+
+        private LinearAxis XicXAxis
+        {
+            get
+            {
+                if (_xicXAxis == null)
+                {
+                    var maxLcScan = Math.Max(Lcms.MaxLcScan + 1, 1);
+                    _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Scan #")
+                    {
+                        Maximum = maxLcScan,
+                        Minimum = 0,
+                        AbsoluteMinimum = 0,
+                        AbsoluteMaximum = maxLcScan
+                    };
+                    _xicXAxis.Zoom(0, maxLcScan);
+                }
+                return _xicXAxis;
+            }
+        }
+
+        private void UpdateFragmentAreaRatioLabels()
+        {
+            if (!ShowHeavy) return;
+            if (FragmentPlotViewModel == null || FragmentPlotViewModel.Plot == null) return;
+            if (XicXAxis == null) return;
+            var min = (int)XicXAxis.ActualMinimum;
+            var max = (int)XicXAxis.ActualMaximum;
+            Task.Factory.StartNew(() =>
+            {
+                var fragmentArea = FragmentPlotViewModel.GetAreaOfRange(min, max);
+                var heavyFragmentArea = HeavyFragmentPlotViewModel.GetAreaOfRange(min, max);
+                var ratio = fragmentArea / heavyFragmentArea;
+                if (ratio.Equals(Double.NaN) || ratio < 0) ratio = 0.0;
+                ratio = Math.Round(ratio, 4);
+                FragmentAreaRatioLabel = String.Format("Area ratio: {0}", ratio);
+                OnPropertyChanged("FragmentAreaRatioLabel");
+            });
+        }
+
+        private void UpdatePrecursorAreaRatioLabels()
+        {
+            if (!ShowHeavy) return;
+            if (PrecursorPlotViewModel == null || PrecursorPlotViewModel.Plot == null) return;
+            if (XicXAxis == null) return;
+            var min = (int)XicXAxis.ActualMinimum;
+            var max = (int)XicXAxis.ActualMaximum;
+            Task.Factory.StartNew(() =>
+            {
+                var precursorArea = PrecursorPlotViewModel.GetAreaOfRange(min, max);
+                var heavyPrecursorArea = HeavyPrecursorPlotViewModel.GetAreaOfRange(min, max);
+                var ratio = precursorArea / heavyPrecursorArea;
+                if (ratio.Equals(Double.NaN) || ratio < 0) ratio = 0.0;
+                ratio = Math.Round(ratio, 4);
+                PrecursorAreaRatioLabel = String.Format("Area ratio: {0}", ratio);
+                OnPropertyChanged("PrecursorAreaRatioLabel");
+            });
+        }
+
+        private void UpdateAreaRatioLabels(object sender, AxisChangedEventArgs e)
+        {
+            Task.Factory.StartNew(UpdateFragmentAreaRatioLabels);
+            Task.Factory.StartNew(UpdatePrecursorAreaRatioLabels);
         }
 
         private void SelectFragmentScanNumber(object sender, EventArgs e)

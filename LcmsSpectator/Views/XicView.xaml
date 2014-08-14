@@ -4,11 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:oxy="http://oxyplot.codeplex.com"
-             mc:Ignorable="d" 
+             mc:Ignorable="d" Background="White"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60*" />
+            <RowDefinition Height="20"  Name="FragmentAreaRow" />
             <RowDefinition Height="2" />
             <RowDefinition Height="40*" />
             <RowDefinition Height="20" />
@@ -27,10 +28,12 @@
                 <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
             </oxy:Plot.InputBindings>
         </oxy:Plot>
-        <GridSplitter Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" ShowsPreview="True" />
-        <oxy:Plot Name="PrecursorIonXic" Grid.Row="2" Grid.Column="0" DataContext="{Binding PrecursorPlotViewModel}"  Model="{Binding Path=Plot}"/>
-        <oxy:Plot Name="HeavyPrecursorIonXic" Grid.Row="2" Grid.Column="1" DataContext="{Binding HeavyPrecursorPlotViewModel}"  Model="{Binding Path=Plot}" />
-        <Grid Grid.Row="3" Grid.Column="0">
+        <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" Text="{Binding FragmentAreaRatioLabel}" />
+        <GridSplitter Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" ShowsPreview="True" />
+        <oxy:Plot Name="PrecursorIonXic" Grid.Row="3" Grid.Column="0" DataContext="{Binding PrecursorPlotViewModel}"  Model="{Binding Path=Plot}"/>
+        <oxy:Plot Name="HeavyPrecursorIonXic" Grid.Row="3" Grid.Column="1" DataContext="{Binding HeavyPrecursorPlotViewModel}"  Model="{Binding Path=Plot}" />
+        <TextBlock Grid.Row="4" Grid.Column="1" FontWeight="Bold" Text="{Binding PrecursorAreaRatioLabel}" />
+        <Grid Grid.Row="4" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50*" />
                 <ColumnDefinition Width="50*" />

@@ -40,9 +40,9 @@ namespace LcmsSpectatorModels.Models
                 }
                 else
                 {
-                    if (Index < 0) annotation = String.Format("Precursor{0} ({1}+)", Index, IonType.Charge);
+                    if (Index < 0) annotation = String.Format("Precursor [M{0}] ({1}+)", Index, IonType.Charge);
                     else if (Index == 0) annotation = String.Format("Precursor ({0}+)", IonType.Charge);
-                    else if (Index > 0) annotation = String.Format("Precursor+{0} ({1}+)", Index, IonType.Charge);
+                    else if (Index > 0) annotation = String.Format("Precursor [M+{0}] ({1}+)", Index, IonType.Charge);
                 }
                 return annotation;
             }
