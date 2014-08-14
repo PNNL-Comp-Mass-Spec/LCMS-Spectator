@@ -427,11 +427,14 @@ namespace LcmsSpectator.ViewModels
                     {
                         _selectedPrSm = null;
                         OnPropertyChanged("SelectedPrSm");
+                        _selectedChargeState = null;
                         FragmentLabels = new List<LabeledIon>(); OnPropertyChanged("FragmentLabels");
                         HeavyFragmentLabels = new List<LabeledIon>(); OnPropertyChanged("HeavyFragmentLabels");
                         PrecursorLabels = new List<LabeledIon>(); OnPropertyChanged("PrecursorLabels");
                         HeavyPrecursorLabels = new List<LabeledIon>(); OnPropertyChanged("HeavyPrecursorLabels");
+                        _fragmentXicChanged = true;
                         SelectedFragmentLabels = FragmentLabels;
+                        _precursorXicChanged = true;
                         SelectedPrecursorLabels = PrecursorLabels;
                         _spectrumChanged = true;
                         UpdateSpectrum();
