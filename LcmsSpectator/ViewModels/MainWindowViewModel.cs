@@ -422,6 +422,7 @@ namespace LcmsSpectator.ViewModels
                 if (XicViewModels.Count == 0) CreateSequenceViewModel.CreatePrSmCommand.Executable = false;
                 if (SelectedPrSm.RawFileName == rawFileName)
                 {
+                    if (XicViewModels.Count > 0) CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0];
                     if (PrSms.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
                     else
                     {
