@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -15,7 +16,7 @@ using LcmsSpectatorModels.Utils;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class LcmsSpectatorViewModel: ViewModelBase
+    public class MainWindowViewModel: ViewModelBase
     {
         public IdentificationTree Ids { get; set; }
         public List<ProteinId> ProteinIds { get; set; }
@@ -37,9 +38,7 @@ namespace LcmsSpectator.ViewModels
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
 
-        public event EventHandler UpdateSelections;
-
-        public LcmsSpectatorViewModel(IMainDialogService dialogService)
+        public MainWindowViewModel(IMainDialogService dialogService)
         {
             _xicChanged = false;
             _dialogService = dialogService;
@@ -69,6 +68,31 @@ namespace LcmsSpectator.ViewModels
             FileOpen = false;
 
             SelectedPrSm = null;
+        }
+
+        public object TreeViewSelectedItem
+        {
+            get { return _treeViewSelectedItem; }
+            set
+            {
+                if (value != null)
+                {
+                    _treeViewSelectedItem = value;
+                    if ((_treeViewSelectedItem as PrSm) != null)
+                    {
+                        var selectedPrSm = _treeViewSelectedItem as PrSm;
+                        SelectedPrSm = selectedPrSm;
+                    }
+                    else
+                    {
+                        var selected = (IIdData) _treeViewSelectedItem;
+                        if (selected == null) return;
+                        var highest = selected.GetHighestScoringPrSm();
+                        SelectedPrSm = highest;
+                    }
+                    OnPropertyChanged("TreeViewSelectedItem");
+                }
+            }
         }
 
         /// <summary>
@@ -118,7 +142,8 @@ namespace LcmsSpectator.ViewModels
                     _xicChanged = false;
                 }
                 UpdateSpectrum();
-                foreach (var xicVm in XicViewModels) xicVm.HighlightScan(SelectedPrSm.Scan, xicVm.RawFileName == SelectedPrSm.RawFileName, SelectedPrSm.Heavy);
+                foreach (var xicVm in XicViewModels)
+                    xicVm.HighlightScan(SelectedPrSm.Scan, xicVm.RawFileName == SelectedPrSm.RawFileName, SelectedPrSm.Heavy);
                 OnPropertyChanged("SelectedChargeState");
             }
         }
@@ -132,7 +157,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 if (value == null) return;
-                if (_xicChanged || _selectedPrSm == null || _selectedPrSm.RawFileName != value.RawFileName) _xicChanged = true;
+                if (_xicChanged || _selectedPrSm == null) _xicChanged = true;
                 _selectedPrSm = value;
                 OnPropertyChanged("SelectedPrSm");
                 _spectrumChanged = true;
@@ -149,7 +174,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        public List<LabeledIon> SelectedFragmentLabels
+        public IList SelectedFragmentLabels
         {
             get { return _selectedFragmentLabels; }
             set
@@ -157,17 +182,18 @@ namespace LcmsSpectator.ViewModels
                 _selectedFragmentLabels = value;
                 if (_fragmentXicChanged)
                 {
+                    var fragmentLabelList = _selectedFragmentLabels.Cast<LabeledIon>().ToList();
                     foreach (var xicVm in XicViewModels)
                     {
-                        xicVm.SelectedFragments = _selectedFragmentLabels;
-                        xicVm.SelectedHeavyFragments = IonUtils.ReduceLabels(HeavyFragmentLabels, _selectedFragmentLabels);
+                        xicVm.SelectedFragments = fragmentLabelList;
+                        xicVm.SelectedHeavyFragments = IonUtils.ReduceLabels(HeavyFragmentLabels, fragmentLabelList);
                     }
                 }
                 OnPropertyChanged("SelectedFragmentLabels");
             }
         }
 
-        public List<LabeledIon> SelectedPrecursorLabels
+        public IList SelectedPrecursorLabels
         {
             get { return _selectedPrecursorLabels; }
             set
@@ -175,10 +201,11 @@ namespace LcmsSpectator.ViewModels
                 _selectedPrecursorLabels = value;
                 if (_precursorXicChanged)
                 {
+                    var precursorLabelList = _selectedPrecursorLabels.Cast<LabeledIon>().ToList();
                     foreach (var xicVm in XicViewModels)
                     {
-                        xicVm.SelectedPrecursors = _selectedPrecursorLabels;
-                        xicVm.SelectedHeavyPrecursors = IonUtils.ReduceLabels(HeavyPrecursorLabels, _selectedPrecursorLabels);
+                        xicVm.SelectedPrecursors = precursorLabelList;
+                        xicVm.SelectedHeavyPrecursors = IonUtils.ReduceLabels(HeavyPrecursorLabels, precursorLabelList);
                     }
                 }
                 OnPropertyChanged("SelectedPrecursorLabels");
@@ -325,7 +352,7 @@ namespace LcmsSpectator.ViewModels
         public void OpenSettings()
         {
             var qValue = IcParameters.Instance.QValueThreshold;
-            var saved = _dialogService.OpenSettings();
+            var saved = _dialogService.OpenSettings(new SettingsViewModel(_dialogService));
             var newQValue = IcParameters.Instance.QValueThreshold;
             if (saved && !qValue.Equals(newQValue))
             {
@@ -357,7 +384,6 @@ namespace LcmsSpectator.ViewModels
             OnPropertyChanged("HeavyFragmentLabels");
             _fragmentXicChanged = true;
             SelectedFragmentLabels = fragmentLabels;
-            GuiInvoker.Invoke(() => UpdateSelections(this, null));
         }
 
         private void SetPrecursorLabels()
@@ -372,7 +398,6 @@ namespace LcmsSpectator.ViewModels
             OnPropertyChanged("HeavyPrecursorLabels");
             _precursorXicChanged = true;
             SelectedPrecursorLabels = precursorLabels;
-            GuiInvoker.Invoke(() => UpdateSelections(this, null));
         }
 
         private void SetIonCharges(object sender, EventArgs e)
@@ -442,13 +467,14 @@ namespace LcmsSpectator.ViewModels
         private ProteinId _selectedProtein;
         private ChargeStateId _selectedChargeState;
         private PrSm _selectedPrSm;
-        private List<LabeledIon> _selectedFragmentLabels;
-        private List<LabeledIon> _selectedPrecursorLabels;
+        private IList _selectedFragmentLabels;
+        private IList _selectedPrecursorLabels;
 
         private bool _xicChanged;
         private bool _spectrumChanged;
         private bool _fragmentXicChanged;
         private bool _precursorXicChanged;
+        private object _treeViewSelectedItem;
     }
 }
 

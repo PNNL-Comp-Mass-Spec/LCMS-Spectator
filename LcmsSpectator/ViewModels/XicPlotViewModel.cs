@@ -31,21 +31,6 @@ namespace LcmsSpectator.ViewModels
             Xics = new List<LabeledXic>();
         }
 
-        private void UpdatePlotTitle(object sender, AxisChangedEventArgs e)
-        {
-            if (Plot != null && _xAxis != null)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    var min = _xAxis.ActualMinimum;
-                    var max = _xAxis.ActualMaximum;
-                    var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", GetAreaOfRange((int)min, (int)max));
-                    var newTitle = String.Format("{0} (Area: {1})", _title, areaStr);
-                    GuiInvoker.Invoke(() => { Plot.Title = newTitle; });
-                });
-            }
-        }
-
         public bool ShowScanMarkers
         {
             get { return _showScanMarkers; }
@@ -99,6 +84,7 @@ namespace LcmsSpectator.ViewModels
         {
             _selectedScan = scanNum;
             if (unique) Plot.SetUniquePointMarker(scanNum);
+            else Plot.SetOrdinaryPointMarker(scanNum);
         }
 
         public void SetSelectedScan()
@@ -108,11 +94,42 @@ namespace LcmsSpectator.ViewModels
             Plot.SetUniquePointMarker(SelectedScan);
         }
 
+        private void UpdatePlotTitle(object sender, AxisChangedEventArgs e)
+        {
+            if (Plot != null && _xAxis != null)
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    var title = GetPlotTitleWithArea();
+                    GuiInvoker.Invoke(() => { Plot.Title = title; });
+                });
+            }
+        }
+
+        private string GetPlotTitleWithArea()
+        {
+            string title;
+            if (Plot != null && _xAxis != null)
+            {
+                var min = _xAxis.ActualMinimum;
+                var max = _xAxis.ActualMaximum;
+                var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}",
+                    GetAreaOfRange((int) min, (int) max));
+                title = String.Format("{0} (Area: {1})", _title, areaStr);
+            }
+            else title = _title;
+            return title;
+        }
+
         private void GeneratePlot()
         {
             // add XICs
             if (Xics == null) return;
-            var plot = new SelectablePlotModel(_xAxis, 1.05);
+            var plot = new SelectablePlotModel(_xAxis, 1.05)
+            {
+                TitleFontSize = 14,
+                TitlePadding = 0,
+            };
             foreach (var lxic in Xics)
             {
                 var xic = lxic.Xic;
@@ -130,7 +147,11 @@ namespace LcmsSpectator.ViewModels
                     MarkerSize = 3,
                     MarkerStroke = color,
                     MarkerStrokeThickness = 1,
-                    MarkerFill = OxyColors.White
+                    MarkerFill = OxyColors.White,
+                    TrackerFormatString = 
+                            "{0}" + Environment.NewLine +
+                            "{1}: {2}" + Environment.NewLine +
+                            "{3}: {4:0.##E0}"
                 };
                 // Add XIC points
                 for (int i = 0; i < xic.Count; i++)
@@ -142,8 +163,7 @@ namespace LcmsSpectator.ViewModels
                 }
                 plot.Series.Add(series);
             }
-            var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", Area);
-            plot.Title = String.Format("{0} (Area: {1})", _title, areaStr);
+            plot.Title = GetPlotTitleWithArea();
             plot.GenerateYAxis("Intensity", "0e0");
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;

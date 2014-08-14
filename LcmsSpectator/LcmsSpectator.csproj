@@ -144,6 +144,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controls\MultiSelectDataGrid.cs" />
+    <Compile Include="Controls\MvvmTreeView.cs" />
     <Compile Include="DialogServices\DialogService.cs" />
     <Compile Include="DialogServices\IDialogService.cs" />
     <Compile Include="DialogServices\IMainDialogService.cs" />
@@ -159,7 +160,7 @@
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\DelegateCommand.cs" />
     <Compile Include="ViewModels\IonTypeSelectorViewModel.cs" />
-    <Compile Include="ViewModels\LcmsSpectatorViewModel.cs" />
+    <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SpectrumPlotViewModel.cs" />
     <Compile Include="ViewModels\SpectrumViewModel.cs" />
@@ -172,8 +173,8 @@
     <Compile Include="Views\IonTypeSelector.xaml.cs">
       <DependentUpon>IonTypeSelector.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\LcmsSpectator.xaml.cs">
-      <DependentUpon>LcmsSpectator.xaml</DependentUpon>
+    <Compile Include="Views\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Views\Settings.xaml.cs">
@@ -233,7 +234,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\LcmsSpectator.xaml">
+    <Page Include="Views\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

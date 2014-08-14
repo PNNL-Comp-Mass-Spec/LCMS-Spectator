@@ -124,10 +124,13 @@ namespace LcmsSpectator.ViewModels
         /// <param name="prevms1">New Previous Ms1 Spectrum.</param>
         /// <param name="nextms1">New Next Ms1 Spectrum</param>
         /// <param name="precursorIon">Precursor ion to highlight on all plots.</param>
+        /// <param name="heavy">Is the spectrum from a heavy peptide?</param>
         public void UpdatePlots(Spectrum ms2, List<LabeledIon> productIons, Spectrum prevms1, Spectrum nextms1, LabeledIon precursorIon, bool heavy=false)
         {
             _precursorIon = precursorIon;
             _ms2Spectrum = ms2;
+            _previousMs1Spectrum = prevms1;
+            _nextMs1Spectrum = nextms1;
             _productIons = new List<LabeledIon>(productIons) {precursorIon};
             Ms2SpectrumViewModel.Update(ms2, _productIons);
             var heavyStr = heavy ? ", Heavy" : "";
@@ -135,7 +138,9 @@ namespace LcmsSpectator.ViewModels
             var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);
             PreviousMs1ViewModel.XAxis = xAxis;
             NextMs1ViewModel.XAxis = xAxis;
+            PreviousMs1ViewModel.Title = _previousMs1Spectrum == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", prevms1.ScanNum);
             PreviousMs1ViewModel.Update(prevms1, new List<LabeledIon>{precursorIon});
+            NextMs1ViewModel.Title = _nextMs1Spectrum == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
             NextMs1ViewModel.Update(nextms1, new List<LabeledIon>{precursorIon});
         }
 

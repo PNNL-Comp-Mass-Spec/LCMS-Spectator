@@ -1,7 +1,10 @@
-﻿namespace LcmsSpectator.DialogServices
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using LcmsSpectator.ViewModels;
+
+namespace LcmsSpectator.DialogServices
 {
     public interface IMainDialogService: IDialogService
     {
-        bool OpenSettings();
+        bool OpenSettings(SettingsViewModel settingsViewModel);
     }
 }

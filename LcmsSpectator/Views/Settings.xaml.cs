@@ -19,23 +19,9 @@ namespace LcmsSpectator.Views
     /// </summary>
     public partial class Settings : Window
     {
-        public bool Status { get; set; }
         public Settings()
         {
             InitializeComponent();
-            Status = false;
-        }
-
-        private void Save(object sender, RoutedEventArgs e)
-        {
-            Status = true;
-            Close();
-        }
-
-        private void Close(object sender, RoutedEventArgs e)
-        {
-            Status = false;
-            Close();
         }
     }
 }

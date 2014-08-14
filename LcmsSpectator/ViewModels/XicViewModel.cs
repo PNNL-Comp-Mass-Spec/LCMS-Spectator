@@ -8,6 +8,8 @@ using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
+using LcmsSpectatorModels.Utils;
+using MultiDimensionalPeakFinding;
 using OxyPlot.Axes;
 
 namespace LcmsSpectator.ViewModels
@@ -142,8 +144,8 @@ namespace LcmsSpectator.ViewModels
                 _showHeavy = value;
                 if (_showHeavy)
                 {
-                    Task.Factory.StartNew(() => { HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors); });
-                    Task.Factory.StartNew(() => { HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments); });
+                    if (_selectedHeavyPrecursors != null) Task.Factory.StartNew(() => { HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors); });
+                    if (_selectedHeavyFragments != null) Task.Factory.StartNew(() => { HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments); });
                 }
                 OnPropertyChanged("ShowHeavy");
             }
@@ -223,6 +225,7 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledXic> GetXics(IEnumerable<LabeledIon> ions)
         {
             var xics = new List<LabeledXic>();
+            var smoother = new SavitzkyGolaySmoother(IcParameters.Instance.PointsToSmooth, 2);
             // get fragment xics
             foreach (var label in ions)
             {
@@ -231,14 +234,16 @@ namespace LcmsSpectator.ViewModels
                 if (label.IsFragmentIon) xic = Lcms.GetFullFragmentExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
                                                                                             IcParameters.Instance.ProductIonTolerancePpm,
                                                                                             label.PrecursorIon.GetMostAbundantIsotopeMz());
-                else xic = Lcms.GetFullExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);   
-                var lXic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
+                else xic = Lcms.GetFullExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
+                // smooth
+                var smoothedXic = IonUtils.SmoothXic(smoother, xic);
+                var lXic = new LabeledXic(label.Composition, label.Index, smoothedXic, label.IonType, label.IsFragmentIon);
                 xics.Add(lXic);
             }
             return xics;
         }
 
-        private IDialogService _dialogService;
+        private readonly IDialogService _dialogService;
 
         private List<LabeledIon> _selectedFragments;
         private List<LabeledIon> _selectedPrecursors;

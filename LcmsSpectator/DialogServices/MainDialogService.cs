@@ -1,14 +1,16 @@
-﻿using LcmsSpectator.Views;
+﻿using LcmsSpectator.ViewModels;
+using LcmsSpectator.Views;
 
 namespace LcmsSpectator.DialogServices
 {
     public class MainDialogService: DialogService, IMainDialogService
     {
-        public bool OpenSettings()
+        public bool OpenSettings(SettingsViewModel settingsViewModel)
         {
-            var settingsDialog = new Settings();
+            var settingsDialog = new Settings {DataContext = settingsViewModel};
+            settingsViewModel.ReadyToClose += (o, e) => settingsDialog.Close();
             settingsDialog.ShowDialog();
-            return settingsDialog.Status;
+            return settingsViewModel.Status;
         }
     }
 }

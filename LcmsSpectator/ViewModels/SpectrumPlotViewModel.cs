@@ -122,7 +122,12 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
             var xAxis = _xAxis ?? GenerateXAxis();
-            Plot = new AutoAdjustedYPlotModel(xAxis, _multiplier) {Title = Title};
+            Plot = new AutoAdjustedYPlotModel(xAxis, _multiplier)
+            {
+                Title = Title,
+                TitleFontSize = 14,
+                TitlePadding = 0
+            };
             var spectrumSeries = new StemSeries(OxyColors.Black, 0.5);
             foreach (var peak in Spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
             GuiInvoker.Invoke(Plot.Series.Add, spectrumSeries);

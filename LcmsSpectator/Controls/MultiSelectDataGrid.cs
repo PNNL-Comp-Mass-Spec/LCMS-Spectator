@@ -46,7 +46,6 @@ namespace LcmsSpectator.Controls
 
         public static DependencyProperty SelectedItemsSourceProperty = DependencyProperty.Register("SelectedItemsSource", typeof(IList), typeof(MultiSelectDataGrid),
                                                                    new FrameworkPropertyMetadata(OnSelectedItemsSourceChanged));
-
         private bool _internalChange;
     }
 }

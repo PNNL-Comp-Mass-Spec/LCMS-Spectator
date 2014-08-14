@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace MsPathViewer.Views
+namespace LcmsSpectator.Views
 {
     /// <summary>
     /// Interaction logic for SpectrumView.xaml

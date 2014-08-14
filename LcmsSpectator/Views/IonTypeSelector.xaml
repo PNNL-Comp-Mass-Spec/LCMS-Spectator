@@ -16,18 +16,18 @@
             <RowDefinition Height="33*" />
             <RowDefinition Height="33*" />
         </Grid.RowDefinitions>
-        <controls:MultiSelectDataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
-                        Grid.Row="0" ItemsSource="{Binding BaseIonTypes}"
-                                     SelectedItemsSource="{Binding SelectedBaseIonTypes, Mode=TwoWay}">
+        <controls:MultiSelectDataGrid   AutoGenerateColumns="False" SelectionMode="Extended"
+                                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
+                                        Grid.Row="0" ItemsSource="{Binding BaseIonTypes}"
+                                        SelectedItemsSource="{Binding SelectedBaseIonTypes, Mode=TwoWay}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Ion Type" Width="*" Binding="{Binding Symbol}"/>
             </DataGrid.Columns>
         </controls:MultiSelectDataGrid>
-        <controls:MultiSelectDataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
-                        Grid.Row="1" ItemsSource="{Binding NeutralLosses}"
-                                     SelectedItemsSource="{Binding SelectedNeutralLosses, Mode=TwoWay}">
+        <controls:MultiSelectDataGrid   AutoGenerateColumns="False" SelectionMode="Extended"
+                                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
+                                        Grid.Row="1" ItemsSource="{Binding NeutralLosses}"
+                                        SelectedItemsSource="{Binding SelectedNeutralLosses, Mode=TwoWay}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Neutral Loss" Width="*" Binding="{Binding Converter={StaticResource NeutralLossToString}}"/>
             </DataGrid.Columns>

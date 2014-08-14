@@ -7,6 +7,7 @@ using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectatorModels.Models;
+using MultiDimensionalPeakFinding;
 
 namespace LcmsSpectatorModels.Utils
 {
@@ -93,6 +94,19 @@ namespace LcmsSpectatorModels.Utils
         public static List<LabeledIon> ReduceLabels(List<LabeledIon> source, List<LabeledIon> target)
         {
             return source.Where(target.Contains).ToList();
+        }
+
+        public static Xic SmoothXic(SavitzkyGolaySmoother smoother, Xic xic)
+        {
+            var xicP = new double[xic.Count];
+            for (int i = 0; i < xic.Count; i++)
+            {
+                xicP[i] = xic[i].Intensity;
+            }
+            var smoothedPoints = smoother.Smooth(xicP);
+            var smoothedXic = new Xic();
+            smoothedXic.AddRange(xic.Select((t, i) => new XicPoint(t.ScanNum, t.Mz, smoothedPoints[i])));
+            return smoothedXic;
         }
     }
 }

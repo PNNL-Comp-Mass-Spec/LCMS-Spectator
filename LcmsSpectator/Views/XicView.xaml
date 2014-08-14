@@ -6,9 +6,6 @@
              xmlns:oxy="http://oxyplot.codeplex.com"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60*" />
@@ -25,14 +22,14 @@
                 <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
             </oxy:Plot.InputBindings>
         </oxy:Plot>
-        <oxy:Plot Name="HeavyFragmentIonXic" Grid.Row="0" Grid.Column="2" DataContext="{Binding HeavyFragmentPlotViewModel}" Model="{Binding Path=Plot}">
+        <oxy:Plot Name="HeavyFragmentIonXic" Grid.Row="0" Grid.Column="1" DataContext="{Binding HeavyFragmentPlotViewModel}" Model="{Binding Path=Plot}">
             <oxy:Plot.InputBindings>
                 <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
             </oxy:Plot.InputBindings>
         </oxy:Plot>
         <GridSplitter Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" ShowsPreview="True" />
         <oxy:Plot Name="PrecursorIonXic" Grid.Row="2" Grid.Column="0" DataContext="{Binding PrecursorPlotViewModel}"  Model="{Binding Path=Plot}"/>
-        <oxy:Plot Name="HeavyPrecursorIonXic" Grid.Row="2" Grid.Column="2" DataContext="{Binding HeavyPrecursorPlotViewModel}"  Model="{Binding Path=Plot}" />
+        <oxy:Plot Name="HeavyPrecursorIonXic" Grid.Row="2" Grid.Column="1" DataContext="{Binding HeavyPrecursorPlotViewModel}"  Model="{Binding Path=Plot}" />
         <Grid Grid.Row="3" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50*" />

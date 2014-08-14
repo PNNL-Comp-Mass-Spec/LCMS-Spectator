@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
+using System.Windows.Documents;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -70,7 +72,16 @@ namespace LcmsSpectator.ViewModels
             var targetFileName = _dialogService.OpenFile(".txt", @"Target Files (*.txt)|*.txt");
             if (targetFileName == "") return;
             var targetReader = new TargetFileReader(targetFileName);
-            var targets = targetReader.Read();
+            List<Target> targets;
+            try
+            {
+                targets = targetReader.Read();
+            }
+            catch (Exception e)
+            {
+                _dialogService.ExceptionAlert(e);
+                return;
+            }
             foreach (var target in targets) Targets.Add(target);
         }
 
