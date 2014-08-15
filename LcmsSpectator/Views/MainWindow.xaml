@@ -6,9 +6,11 @@
         xmlns:views1="clr-namespace:LcmsSpectator.Views"
         xmlns:controls="clr-namespace:LcmsSpectator.Controls"
         xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
+        xmlns:utils="clr-namespace:LcmsSpectator.Utils"
         Title="LcMsSpectator" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <utils:ScoreToStringConverter x:Key="ScoreFormatter" />
     </Window.Resources>
     <Grid>
         <!-- Menu -->
@@ -43,7 +45,7 @@
                         <TextBlock Text="Precursor M/z: " FontWeight="Bold" />
                         <TextBlock Text="{Binding Path=SelectedPrSm.PrecursorMz}" FontWeight="Bold" Width="75" />
                         <TextBlock Text="Score: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.MatchedFragments}" FontWeight="Bold" Width="75"/>
+                        <TextBlock Text="{Binding Path=SelectedPrSm.MatchedFragments, Converter={StaticResource ScoreFormatter}}" FontWeight="Bold" Width="75"/>
                         <TextBlock Text="QValue: " FontWeight="Bold" />
                         <TextBlock Text="{Binding Path=SelectedPrSm.QValue}" FontWeight="Bold" Width="75"/>
                     </StackPanel>
@@ -166,7 +168,7 @@
                                     <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
                                     <DataGridTextColumn Header="Precursor m/z" Width="5*" Binding="{Binding PrecursorMz}" />
                                     <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge}" />
-                                    <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding MatchedFragments}" />
+                                    <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding MatchedFragments, Converter={StaticResource ScoreFormatter}}" />
                                     <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue}" />
                                     <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
                                 </DataGrid.Columns>

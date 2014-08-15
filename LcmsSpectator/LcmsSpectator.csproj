@@ -154,6 +154,7 @@
     <Compile Include="SequenceGraph\GraphXSequenceGraph.cs" />
     <Compile Include="SequenceGraph\SequenceGraphArea.cs" />
     <Compile Include="SequenceGraph\SequencePath.cs" />
+    <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
     <Compile Include="Utils\PrSmChangedEventArgs.cs" />
