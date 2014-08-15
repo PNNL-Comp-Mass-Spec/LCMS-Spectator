@@ -1,4 +1,5 @@
-﻿using LcmsSpectator.Utils;
+﻿using System;
+using LcmsSpectator.Utils;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -7,7 +8,7 @@ namespace LcmsSpectator.PlotModels
 {
     public class SelectablePlotModel: AutoAdjustedYPlotModel
     {
-        public DataPoint SelectedDataPoint { get; set; }
+        public IDataPoint SelectedDataPoint { get; set; }
         public bool UniqueHighlight { get; set; }
         public SelectablePlotModel(Axis xAxis, double multiplier) : base(xAxis, multiplier)
         {
@@ -39,7 +40,10 @@ namespace LcmsSpectator.PlotModels
             if (x.Equals(0)) return;
             _pointMarkers = new StemSeries(color, 3)
             {
-                LineStyle = LineStyle.Dash
+                LineStyle = LineStyle.Dash,
+                TrackerFormatString = 
+                        "{0}" + Environment.NewLine +
+                        "{1}: {2}" + Environment.NewLine
             };
             GuiInvoker.Invoke(() => _pointMarkers.Points.Add(new DataPoint(x, y)));
             GuiInvoker.Invoke(Series.Add, _pointMarkers);
@@ -68,7 +72,7 @@ namespace LcmsSpectator.PlotModels
                     if (series != null)
                     {
                         var result = series.GetNearestPoint(args.Position, false);
-                        if (result != null && result.DataPoint != null) SelectedDataPoint = (DataPoint)result.DataPoint;
+                        if (result != null && result.DataPoint != null) SelectedDataPoint = result.DataPoint;
                     }
                     break;
             }

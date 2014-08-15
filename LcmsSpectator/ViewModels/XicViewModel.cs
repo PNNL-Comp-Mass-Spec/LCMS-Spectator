@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -22,18 +24,16 @@ namespace LcmsSpectator.ViewModels
         public XicPlotViewModel HeavyPrecursorPlotViewModel { get; set; }
         public string FragmentAreaRatioLabel { get; private set; }
         public string PrecursorAreaRatioLabel { get; private set; }
-        public string RawFileName { get; set; }
-        public LcMsRun Lcms { get; set; }
         public ColorDictionary Colors { get; set; }
+        public RtLcMsRun Lcms { get; private set; }
         public DelegateCommand CloseCommand { get; set; }
         public event EventHandler XicClosing;
         public event EventHandler SelectedScanNumberChanged;
-        public XicViewModel(string rawFileName, LcMsRun lcms, ColorDictionary colors, IDialogService dialogService=null)
+        public XicViewModel(string rawFilePath, ColorDictionary colors, IDialogService dialogService=null)
         {
             if (dialogService == null) dialogService = new DialogService();
             _dialogService = dialogService;
-            RawFileName = rawFileName;
-            Lcms = lcms;
+            RawFilePath = rawFilePath;
             Colors = colors;
             FragmentPlotViewModel = new XicPlotViewModel("Fragment XIC", colors, XicXAxis, false, true, false);
             FragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
@@ -41,7 +41,7 @@ namespace LcmsSpectator.ViewModels
             HeavyFragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
             PrecursorPlotViewModel = new XicPlotViewModel("Precursor XIC", colors, XicXAxis, false, false);
             HeavyPrecursorPlotViewModel = new XicPlotViewModel("Heavy Precursor XIC", colors, XicXAxis, true, false);
-            SelectedScanNumber = 0;
+            SelectedRetentionTime = 0;
             _showScanMarkers = false;
             _showHeavy = false;
             XicXAxis.AxisChanged += UpdateAreaRatioLabels;
@@ -52,18 +52,33 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
-        public int SelectedScanNumber
+        public string RawFileName
         {
-            get { return _selectedScanNumber; }
+            get { return Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(RawFilePath)); }
+        }
+
+        public string RawFilePath
+        {
+            get { return _rawFilePath; }
             set
             {
-                if (_selectedScanNumber == value) return;
-                _selectedScanNumber = value;
-                FragmentPlotViewModel.SelectedScan = value;
-                HeavyFragmentPlotViewModel.SelectedScan = value;
-                PrecursorPlotViewModel.SelectedScan = value;
-                HeavyPrecursorPlotViewModel.SelectedScan = value;
-                OnPropertyChanged("SelectedScanNumber");
+                _rawFilePath = value;
+                Lcms = RtLcMsRun.GetRtLcMsRun(_rawFilePath, MassSpecDataType.XCaliburRun, 0, 0);
+                OnPropertyChanged("RawFilePath");
+            }
+        }
+
+        public double SelectedRetentionTime
+        {
+            get { return _selectedRetentionTime; }
+            set
+            {
+                if (_selectedRetentionTime.Equals(value)) return;
+                _selectedRetentionTime = value;
+                FragmentPlotViewModel.SelectedRt = value;
+                HeavyFragmentPlotViewModel.SelectedRt = value;
+                PrecursorPlotViewModel.SelectedRt = value;
+                HeavyPrecursorPlotViewModel.SelectedRt = value;
             }
         }
 
@@ -166,20 +181,20 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        public void ZoomToScan(int scanNumber)
+        public void ZoomToRt(double rt)
         {
-            int minX, maxX;
-            SelectedScanNumber = scanNumber;
+            double minX, maxX;
+            SelectedRetentionTime = rt;
             CalculateBounds(out minX, out maxX);
             XicXAxis.Minimum = minX;
             XicXAxis.Maximum = maxX;
             XicXAxis.Zoom(minX, maxX);
         }
 
-        public void HighlightScan(int scanNum, bool unique, bool heavy)
+        public void HighlightRetentionTime(double rt, bool unique, bool heavy)
         {
-            FragmentPlotViewModel.HighlightScan(scanNum, unique && !heavy);
-            HeavyFragmentPlotViewModel.HighlightScan(scanNum, unique && heavy);
+            FragmentPlotViewModel.HighlightRt(rt, unique && !heavy);
+            HeavyFragmentPlotViewModel.HighlightRt(rt, unique && heavy);
         }
 
         private LinearAxis XicXAxis
@@ -188,15 +203,15 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_xicXAxis == null)
                 {
-                    var maxLcScan = Math.Max(Lcms.MaxLcScan + 1, 1);
-                    _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Scan #")
+                    var maxRt = Math.Max(Lcms.MaxRetentionTime, 1.0);
+                    _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Retention Time")
                     {
-                        Maximum = maxLcScan,
+                        Maximum = maxRt + 0.0001,
                         Minimum = 0,
                         AbsoluteMinimum = 0,
-                        AbsoluteMaximum = maxLcScan
+                        AbsoluteMaximum = maxRt + 0.0001
                     };
-                    _xicXAxis.Zoom(0, maxLcScan);
+                    _xicXAxis.Zoom(0, maxRt);
                 }
                 return _xicXAxis;
             }
@@ -250,13 +265,12 @@ namespace LcmsSpectator.ViewModels
         {
             var vm = sender as XicPlotViewModel;
             if (vm == null) return;
-            _selectedScanNumber = vm.SelectedScan;
+            var selectedScanNumber = vm.SelectedScan;
 
             var otherVm = vm.Heavy ? FragmentPlotViewModel : HeavyFragmentPlotViewModel;
-            otherVm.SelectedScan = _selectedScanNumber;
+            otherVm.SelectedRt = selectedScanNumber;
 
             // Create prsm
-            var selectedScanNumber = _selectedScanNumber;
             var newPrsm = new PrSm
             {
                 Heavy = vm.Heavy,
@@ -267,17 +281,19 @@ namespace LcmsSpectator.ViewModels
             if (SelectedScanNumberChanged != null) SelectedScanNumberChanged(this, new PrSmChangedEventArgs(newPrsm));
         }
 
-        private void CalculateBounds(out int minS, out int maxS)
+        private void CalculateBounds(out double minRt, out double maxRt)
         {
-            minS = SelectedScanNumber - 1000;
-            maxS = SelectedScanNumber + 1000;
-            if (SelectedScanNumber < 1000) minS = 0;
-            minS = Math.Max(minS, Lcms.MinLcScan);
-            if (SelectedScanNumber == 0) maxS = Lcms.MaxLcScan;
-            if (SelectedScanNumber > Lcms.MaxLcScan)
+            var minLcmsRt = Lcms.MinRetentionTime;
+            var maxLcmsRt = Lcms.MaxRetentionTime;
+            minRt = SelectedRetentionTime - 1;
+            maxRt = SelectedRetentionTime + 1;
+            if (SelectedRetentionTime < 1) minRt = 0;
+            minRt = Math.Max(minRt, minLcmsRt);
+            if (SelectedRetentionTime.Equals(0)) maxRt = maxLcmsRt;
+            if (SelectedRetentionTime > maxLcmsRt)
             {
-                minS = 0;
-                maxS = Lcms.MaxLcScan;
+                minRt = 0;
+                maxRt = maxLcmsRt;
             }
         }
 
@@ -294,8 +310,11 @@ namespace LcmsSpectator.ViewModels
                                                                                             IcParameters.Instance.ProductIonTolerancePpm,
                                                                                             label.PrecursorIon.GetMostAbundantIsotopeMz());
                 else xic = Lcms.GetFullExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
+                // add retention time
+                var rtXic = new List<XicRetPoint>();
+                rtXic.AddRange(xic.Select(xicPoint => new XicRetPoint(xicPoint.ScanNum, Lcms.GetRetentionTime(xicPoint.ScanNum), xicPoint.Mz, xicPoint.Intensity)));
                 // smooth
-                var smoothedXic = IonUtils.SmoothXic(smoother, xic);
+                var smoothedXic = IonUtils.SmoothXic(smoother, rtXic).ToList();
                 var lXic = new LabeledXic(label.Composition, label.Index, smoothedXic, label.IonType, label.IsFragmentIon);
                 xics.Add(lXic);
             }
@@ -310,9 +329,10 @@ namespace LcmsSpectator.ViewModels
         private LinearAxis _xicXAxis;
         
         private bool _showScanMarkers;
-        private int _selectedScanNumber;
         private List<LabeledIon> _selectedHeavyPrecursors;
         private List<LabeledIon> _selectedHeavyFragments;
         private bool _showHeavy;
+        private string _rawFilePath;
+        private double _selectedRetentionTime;
     }
 }

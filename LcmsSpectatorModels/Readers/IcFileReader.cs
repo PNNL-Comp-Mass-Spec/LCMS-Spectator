@@ -15,7 +15,7 @@ namespace LcmsSpectatorModels.Readers
             _tsvFile = tsvFile;
         }
 
-        public IdentificationTree Read(LcMsRun lcms, string rawFileName)
+        public IdentificationTree Read(RtLcMsRun lcms, string rawFileName)
         {
             var idTree = new IdentificationTree();
             var file = File.ReadLines(_tsvFile);
@@ -40,7 +40,7 @@ namespace LcmsSpectatorModels.Readers
             return idTree;
         }
 
-        private PrSm CreatePrSm(string line, Dictionary<string, int> headers, LcMsRun lcms, string rawFileName)
+        private PrSm CreatePrSm(string line, Dictionary<string, int> headers, RtLcMsRun lcms, string rawFileName)
         {
             var parts = line.Split('\t');
             var scoreLabel = "IcScore";

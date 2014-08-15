@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
-using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
@@ -137,14 +136,14 @@ namespace LcmsSpectator.ViewModels
                     IonTypeSelectorViewModel.AbsoluteMaxCharge = absoluteMaxCharge;
                     IonTypeSelectorViewModel.MinCharge = 1;
                     _selectedChargeState = value;
-                    foreach (var xicVm in XicViewModels) xicVm.ZoomToScan(SelectedPrSm.Scan);
+                    foreach (var xicVm in XicViewModels) xicVm.ZoomToRt(SelectedPrSm.RetentionTime);
                     SetFragmentLabels();
                     SetPrecursorLabels();
                     _xicChanged = false;
                 }
                 UpdateSpectrum();
                 foreach (var xicVm in XicViewModels)
-                    xicVm.HighlightScan(SelectedPrSm.Scan, xicVm.RawFileName == SelectedPrSm.RawFileName, SelectedPrSm.Heavy);
+                    xicVm.HighlightRetentionTime(SelectedPrSm.RetentionTime, xicVm.RawFileName == SelectedPrSm.RawFileName, SelectedPrSm.Heavy);
                 OnPropertyChanged("SelectedChargeState");
             }
         }
@@ -334,12 +333,10 @@ namespace LcmsSpectator.ViewModels
         public void RawFileOpener(string rawFileName)
         {
             IsLoading = true;
-            var fileNameWithoutPath = Path.GetFileNameWithoutExtension(rawFileName);
-            var lcms = LcMsRun.GetLcMsRun(rawFileName, MassSpecDataType.XCaliburRun, 0, 0);
-            var xicVm = new XicViewModel(fileNameWithoutPath, lcms, _colors);
+            var xicVm = new XicViewModel(rawFileName, _colors);
             xicVm.SelectedScanNumberChanged += UpdatePrSm;
             xicVm.XicClosing += CloseXic;
-            xicVm.ZoomToScan(0);
+            xicVm.ZoomToRt(0);
             var addXicAction = new Action<XicViewModel>(XicViewModels.Add);
             GuiInvoker.Invoke(addXicAction, xicVm);
             GuiInvoker.Invoke(SetFragmentLabels);
@@ -420,7 +417,7 @@ namespace LcmsSpectator.ViewModels
                 FilterIds();
                 XicViewModels.Remove(xicVm);
                 if (XicViewModels.Count == 0) CreateSequenceViewModel.CreatePrSmCommand.Executable = false;
-                if (SelectedPrSm.RawFileName == rawFileName)
+                if (SelectedPrSm == null || SelectedPrSm.RawFileName == rawFileName)
                 {
                     if (XicViewModels.Count > 0) CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0];
                     if (PrSms.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();

@@ -6,6 +6,8 @@ using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using MultiDimensionalPeakFinding;
 
@@ -96,7 +98,7 @@ namespace LcmsSpectatorModels.Utils
             return source.Where(target.Contains).ToList();
         }
 
-        public static Xic SmoothXic(SavitzkyGolaySmoother smoother, Xic xic)
+        public static IList<XicRetPoint> SmoothXic(SavitzkyGolaySmoother smoother, IList<XicRetPoint> xic)
         {
             var xicP = new double[xic.Count];
             for (int i = 0; i < xic.Count; i++)
@@ -104,8 +106,11 @@ namespace LcmsSpectatorModels.Utils
                 xicP[i] = xic[i].Intensity;
             }
             var smoothedPoints = smoother.Smooth(xicP);
-            var smoothedXic = new Xic();
-            smoothedXic.AddRange(xic.Select((t, i) => new XicPoint(t.ScanNum, t.Mz, smoothedPoints[i])));
+            var smoothedXic = new List<XicRetPoint>();
+            for (int i = 0; i < xicP.Length; i++)
+            {
+                smoothedXic.Add(new XicRetPoint(xic[i].ScanNum, xic[i].RetentionTime, xic[i].Mz, smoothedPoints[i]));
+            }
             return smoothedXic;
         }
     }

@@ -5,15 +5,15 @@ using System.Linq;
 using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
-using InformedProteomics.Backend.MassSpecData;
 
 namespace LcmsSpectatorModels.Models
 {
     public class PrSm: IComparable<PrSm>
     {
         public String RawFileName { get; set; }
-        public LcMsRun Lcms { get; set; }
+        public RtLcMsRun Lcms { get; set; }
         public int Scan { get; set; }
+        public double RetentionTime { get { return (Lcms == null) ? 0.0 : Lcms.GetRetentionTime(Scan);  } }
         public Spectrum Ms2Spectrum { get { return (Lcms == null) ? null : Lcms.GetSpectrum(Scan); } }
         public string Protein { get; set; }
         public string Annotation { get; set; }

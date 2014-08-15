@@ -65,6 +65,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\RtLcMsRun.cs" />
+    <Compile Include="Models\XicRetPoint.cs" />
     <Compile Include="Readers\IcFileReader.cs" />
     <Compile Include="Readers\IcFileWriter.cs" />
     <Compile Include="Config\IcParameters.cs" />

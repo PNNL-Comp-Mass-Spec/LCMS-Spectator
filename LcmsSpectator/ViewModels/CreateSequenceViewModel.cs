@@ -109,7 +109,7 @@ namespace LcmsSpectator.ViewModels
                 _dialogService.ExceptionAlert(e);
                 return;
             }
-            LcMsRun lcms = null;
+            RtLcMsRun lcms = null;
             if (SelectedCharge < 1)
             {
                 _dialogService.MessageBox("Invalid Charge.");

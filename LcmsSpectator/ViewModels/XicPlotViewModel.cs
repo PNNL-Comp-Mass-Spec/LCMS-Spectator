@@ -27,7 +27,7 @@ namespace LcmsSpectator.ViewModels
             _xAxis.AxisChanged += UpdatePlotTitle;
             Heavy = heavy;
             _showMarker = showMarker;
-            SetScanChangedCommand = new DelegateCommand(SetSelectedScan);
+            SetScanChangedCommand = new DelegateCommand(SetSelectedRt);
             Xics = new List<LabeledXic>();
         }
 
@@ -56,19 +56,29 @@ namespace LcmsSpectator.ViewModels
 
         public int SelectedScan
         {
-            get { return _selectedScan;  }
-            set
+            get { return _selectedScan; }
+            private set
             {
                 _selectedScan = value;
-                if (_showMarker) Plot.SetOrdinaryPointMarker(_selectedScan);
-                Plot.AdjustForZoom();
                 OnPropertyChanged("SelectedScan");
             }
         }
 
-        public double GetAreaOfRange(int min, int max)
+        public double SelectedRt
         {
-            return (from lxic in Xics from point in lxic.Xic where point.ScanNum >= min && point.ScanNum <= max select point.Intensity).Sum();
+            get { return _selectedRt;  }
+            set
+            {
+                _selectedRt = value;
+                if (_showMarker) Plot.SetOrdinaryPointMarker(_selectedRt);
+                Plot.AdjustForZoom();
+                OnPropertyChanged("SelectedRt");
+            }
+        }
+
+        public double GetAreaOfRange(double min, double max)
+        {
+            return (from lxic in Xics from point in lxic.Xic where point.RetentionTime >= min && point.RetentionTime <= max select point.Intensity).Sum();
         }
 
         public double Area
@@ -80,18 +90,20 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        public void HighlightScan(int scanNum, bool unique)
+        public void HighlightRt(double rtTime, bool unique)
         {
-            _selectedScan = scanNum;
-            if (unique) Plot.SetUniquePointMarker(scanNum);
-            else Plot.SetOrdinaryPointMarker(scanNum);
+            _selectedRt = rtTime;
+            if (unique) Plot.SetUniquePointMarker(rtTime);
+            else Plot.SetOrdinaryPointMarker(rtTime);
         }
 
-        public void SetSelectedScan()
+        public void SetSelectedRt()
         {
-            _selectedScan = (int) Plot.SelectedDataPoint.X;
+            var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
+            _selectedRt = Plot.SelectedDataPoint.X;
+            if (dataPoint != null) SelectedScan = dataPoint.ScanNum;
             if (SelectedScanChanged != null) SelectedScanChanged(this, null);
-            Plot.SetUniquePointMarker(SelectedScan);
+            Plot.SetUniquePointMarker(SelectedRt);
         }
 
         private void UpdatePlotTitle(object sender, AxisChangedEventArgs e)
@@ -113,8 +125,7 @@ namespace LcmsSpectator.ViewModels
             {
                 var min = _xAxis.ActualMinimum;
                 var max = _xAxis.ActualMaximum;
-                var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}",
-                    GetAreaOfRange((int) min, (int) max));
+                var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", GetAreaOfRange(min, max));
                 title = String.Format("{0} (Area: {1})", _title, areaStr);
             }
             else title = _title;
@@ -150,16 +161,16 @@ namespace LcmsSpectator.ViewModels
                     MarkerFill = OxyColors.White,
                     TrackerFormatString = 
                             "{0}" + Environment.NewLine +
-                            "{1}: {2}" + Environment.NewLine +
+                            "{1}: {2:0.###}" + Environment.NewLine +
+                            "Scan #: {ScanNum}" + Environment.NewLine +
                             "{3}: {4:0.##E0}"
                 };
                 // Add XIC points
                 for (int i = 0; i < xic.Count; i++)
                 {
-                    var xicPoint = xic[i];
                     // remove plateau points (line will connect them anyway)
                     if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) && xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
-                    series.Points.Add(new DataPoint(xicPoint.ScanNum, xicPoint.Intensity));
+                    if (xic[i] != null) series.Points.Add(new XicDataPoint(xic[i].RetentionTime, xic[i].ScanNum, xic[i].Intensity));
                 }
                 plot.Series.Add(series);
             }
@@ -167,7 +178,7 @@ namespace LcmsSpectator.ViewModels
             plot.GenerateYAxis("Intensity", "0e0");
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
-            if (_showMarker) plot.SetPointMarker(SelectedScan);
+            if (_showMarker) plot.SetPointMarker(SelectedRt);
             Plot = plot;
             OnPropertyChanged("Plot");
         }
@@ -178,7 +189,8 @@ namespace LcmsSpectator.ViewModels
         private readonly ColorDictionary _colors;
         private bool _showScanMarkers;
         private readonly bool _showMarker;
-        private int _selectedScan;
+        private double _selectedRt;
         private readonly LinearAxis _xAxis;
+        private int _selectedScan;
     }
 }
