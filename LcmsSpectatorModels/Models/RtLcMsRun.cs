@@ -11,7 +11,7 @@ namespace LcmsSpectatorModels.Models
                             base(massSpecDataReader, precursorSignalToNoiseRatioThreshold, productSignalToNoiseRatioThreshold)
         {
             var xcal = new XCaliburReader(filePath);
-            _scanToRtMap = new Dictionary<int, double>();
+            _scanToRtMap = new Dictionary<int, double> { {0, 0.0} };
             var scanList = new List<int>();
             scanList.AddRange(GetScanNumbers(1));
             scanList.AddRange(GetScanNumbers(2));
