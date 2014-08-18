@@ -60,8 +60,9 @@
                     <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">Ion Correlation Threshold</TextBlock>
                     <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding IonCorrelationThreshold}" Height="25" VerticalAlignment="Top" />
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold">Points To Smooth</TextBlock>
-                    <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PointsToSmooth}" Height="25" VerticalAlignment="Top" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" ToolTip="Must be an odd integer of at least 3. 0 = No smoothing.">Points To Smooth</TextBlock>
+                    <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PointsToSmooth}" Height="25" VerticalAlignment="Top"
+                             ToolTip="Must be an odd integer of at least 3. 0 = No smoothing."/>
                 </Grid>
             </TabItem>
             <TabItem Header="Modifications">

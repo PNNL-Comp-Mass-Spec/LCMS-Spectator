@@ -67,9 +67,9 @@ namespace LcmsSpectator.ViewModels
 
         private void Save()
         {
-            if (PointsToSmooth % 2 == 0 || PointsToSmooth < 3)
+            if (PointsToSmooth != 0 && (PointsToSmooth % 2 == 0 || PointsToSmooth < 3))
             {
-                _dialogService.MessageBox("Points To Smooth must be an odd number greater than 1.");
+                _dialogService.MessageBox("Points To Smooth must be an odd number of at least 3. 0 = No smoothing.");
                 return;
             }
 

@@ -450,6 +450,7 @@ namespace LcmsSpectator.ViewModels
                 var prsm = prsmChangedEventArgs.PrSm;
                 if (prsm.Sequence == null)
                 {
+                    prsm.MatchedFragments = -1.0;
                     prsm.Sequence = SelectedPrSm.Sequence;
                     prsm.SequenceText = SelectedPrSm.SequenceText;
                     prsm.Charge = SelectedPrSm.Charge;

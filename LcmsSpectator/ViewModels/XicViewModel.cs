@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -222,16 +223,18 @@ namespace LcmsSpectator.ViewModels
             if (!ShowHeavy) return;
             if (FragmentPlotViewModel == null || FragmentPlotViewModel.Plot == null) return;
             if (XicXAxis == null) return;
-            var min = (int)XicXAxis.ActualMinimum;
-            var max = (int)XicXAxis.ActualMaximum;
+            var min = XicXAxis.ActualMinimum;
+            var max = XicXAxis.ActualMaximum;
             Task.Factory.StartNew(() =>
             {
                 var fragmentArea = FragmentPlotViewModel.GetAreaOfRange(min, max);
                 var heavyFragmentArea = HeavyFragmentPlotViewModel.GetAreaOfRange(min, max);
                 var ratio = fragmentArea / heavyFragmentArea;
                 if (ratio.Equals(Double.NaN) || ratio < 0) ratio = 0.0;
-                ratio = Math.Round(ratio, 4);
-                FragmentAreaRatioLabel = String.Format("Area ratio: {0}", ratio);
+                string formatted;
+                if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
+                else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
+                FragmentAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
                 OnPropertyChanged("FragmentAreaRatioLabel");
             });
         }
@@ -241,16 +244,18 @@ namespace LcmsSpectator.ViewModels
             if (!ShowHeavy) return;
             if (PrecursorPlotViewModel == null || PrecursorPlotViewModel.Plot == null) return;
             if (XicXAxis == null) return;
-            var min = (int)XicXAxis.ActualMinimum;
-            var max = (int)XicXAxis.ActualMaximum;
+            var min = XicXAxis.ActualMinimum;
+            var max = XicXAxis.ActualMaximum;
             Task.Factory.StartNew(() =>
             {
                 var precursorArea = PrecursorPlotViewModel.GetAreaOfRange(min, max);
                 var heavyPrecursorArea = HeavyPrecursorPlotViewModel.GetAreaOfRange(min, max);
                 var ratio = precursorArea / heavyPrecursorArea;
                 if (ratio.Equals(Double.NaN) || ratio < 0) ratio = 0.0;
-                ratio = Math.Round(ratio, 4);
-                PrecursorAreaRatioLabel = String.Format("Area ratio: {0}", ratio);
+                string formatted;
+                if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
+                else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
+                PrecursorAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
                 OnPropertyChanged("PrecursorAreaRatioLabel");
             });
         }
@@ -300,7 +305,8 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledXic> GetXics(IEnumerable<LabeledIon> ions)
         {
             var xics = new List<LabeledXic>();
-            var smoother = new SavitzkyGolaySmoother(IcParameters.Instance.PointsToSmooth, 2);
+            var smoother = (IcParameters.Instance.PointsToSmooth == 0) ? 
+                            null : new SavitzkyGolaySmoother(IcParameters.Instance.PointsToSmooth, 2);
             // get fragment xics
             foreach (var label in ions)
             {
@@ -314,8 +320,8 @@ namespace LcmsSpectator.ViewModels
                 var rtXic = new List<XicRetPoint>();
                 rtXic.AddRange(xic.Select(xicPoint => new XicRetPoint(xicPoint.ScanNum, Lcms.GetRetentionTime(xicPoint.ScanNum), xicPoint.Mz, xicPoint.Intensity)));
                 // smooth
-                var smoothedXic = IonUtils.SmoothXic(smoother, rtXic).ToList();
-                var lXic = new LabeledXic(label.Composition, label.Index, smoothedXic, label.IonType, label.IsFragmentIon);
+                if (smoother != null) rtXic = IonUtils.SmoothXic(smoother, rtXic).ToList();
+                var lXic = new LabeledXic(label.Composition, label.Index, rtXic, label.IonType, label.IsFragmentIon);
                 xics.Add(lXic);
             }
             return xics;

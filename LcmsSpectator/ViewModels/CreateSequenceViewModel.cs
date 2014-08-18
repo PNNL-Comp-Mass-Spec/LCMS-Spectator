@@ -138,7 +138,8 @@ namespace LcmsSpectator.ViewModels
                 Lcms = lcms,
                 Sequence = sequence,
                 SequenceText = SequenceText,
-                Charge = SelectedCharge
+                Charge = SelectedCharge,
+                MatchedFragments = -1.0,
             };
             var ms2Prod = prsm.Ms2Spectrum as ProductSpectrum;
             if (ms2Prod == null)

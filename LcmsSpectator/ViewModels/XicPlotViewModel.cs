@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using LcmsSpectator.PlotModels;
-using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -24,11 +23,12 @@ namespace LcmsSpectator.ViewModels
             _colors = colors;
             _showLegend = showLegend;
             _xAxis = xAxis;
-            _xAxis.AxisChanged += UpdatePlotTitle;
             Heavy = heavy;
+            PlotTitle = _title;
             _showMarker = showMarker;
             SetScanChangedCommand = new DelegateCommand(SetSelectedRt);
             Xics = new List<LabeledXic>();
+            _xAxis.AxisChanged += UpdatePlotTitle;
         }
 
         public bool ShowScanMarkers
@@ -76,18 +76,20 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        public double GetAreaOfRange(double min, double max)
+        public string PlotTitle
         {
-            return (from lxic in Xics from point in lxic.Xic where point.RetentionTime >= min && point.RetentionTime <= max select point.Intensity).Sum();
+            get { return _plotTitle; }
+            set
+            {
+                _plotTitle = value;
+                OnPropertyChanged("PlotTitle");
+            }
         }
 
-        public double Area
+        public double GetAreaOfRange(double min, double max)
         {
-            get
-            {
-                var area = Xics.Where(lxic => lxic.Index >= 0).Sum(lxic => lxic.Area);
-                return Math.Round(area, 2);
-            }
+            return (from lxic in Xics where lxic.Index >= 0
+                    from point in lxic.Xic where point.RetentionTime >= min && point.RetentionTime <= max select point.Intensity).Sum();
         }
 
         public void HighlightRt(double rtTime, bool unique)
@@ -113,7 +115,7 @@ namespace LcmsSpectator.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     var title = GetPlotTitleWithArea();
-                    GuiInvoker.Invoke(() => { Plot.Title = title; });
+                    PlotTitle = title;
                 });
             }
         }
@@ -174,12 +176,12 @@ namespace LcmsSpectator.ViewModels
                 }
                 plot.Series.Add(series);
             }
-            plot.Title = GetPlotTitleWithArea();
             plot.GenerateYAxis("Intensity", "0e0");
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
             if (_showMarker) plot.SetPointMarker(SelectedRt);
             Plot = plot;
+            PlotTitle = GetPlotTitleWithArea();
             OnPropertyChanged("Plot");
         }
 
@@ -192,5 +194,6 @@ namespace LcmsSpectator.ViewModels
         private double _selectedRt;
         private readonly LinearAxis _xAxis;
         private int _selectedScan;
+        private string _plotTitle;
     }
 }

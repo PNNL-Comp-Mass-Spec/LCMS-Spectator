@@ -8,9 +8,10 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="4*" />
             <RowDefinition Height="60*" />
             <RowDefinition Height="20"  Name="FragmentAreaRow" />
-            <RowDefinition Height="2" />
+            <RowDefinition Height="4*" />
             <RowDefinition Height="40*" />
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
@@ -18,22 +19,33 @@
             <ColumnDefinition Width="Auto" Name="LightColumn" />
             <ColumnDefinition Width="Auto" Name ="HeavyColumn" />
         </Grid.ColumnDefinitions>
-        <oxy:Plot Name="FragmentIonXic" Grid.Row="0" DataContext="{Binding FragmentPlotViewModel}" Model="{Binding Path=Plot}">
+        <Viewbox Grid.Row="0" Grid.Column="0" StretchDirection="Both" HorizontalAlignment="Stretch">
+            <TextBlock TextAlignment="Center" FontWeight="Bold" DataContext="{Binding FragmentPlotViewModel}" Text="{Binding PlotTitle}" />
+        </Viewbox>
+        <oxy:Plot Name="FragmentIonXic" Grid.Row="1" Grid.Column="0" DataContext="{Binding FragmentPlotViewModel}" Model="{Binding Path=Plot}">
             <oxy:Plot.InputBindings>
                 <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
             </oxy:Plot.InputBindings>
         </oxy:Plot>
-        <oxy:Plot Name="HeavyFragmentIonXic" Grid.Row="0" Grid.Column="1" DataContext="{Binding HeavyFragmentPlotViewModel}" Model="{Binding Path=Plot}">
+        <Viewbox Grid.Row="0" Grid.Column="1"  StretchDirection="Both" HorizontalAlignment="Stretch">
+            <TextBlock  TextAlignment="Center" FontWeight="Bold" DataContext="{Binding HeavyFragmentPlotViewModel}" Text="{Binding PlotTitle}" />
+        </Viewbox>
+        <oxy:Plot Name="HeavyFragmentIonXic" Grid.Row="1" Grid.Column="1" DataContext="{Binding HeavyFragmentPlotViewModel}" Model="{Binding Path=Plot}">
             <oxy:Plot.InputBindings>
                 <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
             </oxy:Plot.InputBindings>
         </oxy:Plot>
-        <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" Text="{Binding FragmentAreaRatioLabel}" />
-        <GridSplitter Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" ShowsPreview="True" />
-        <oxy:Plot Name="PrecursorIonXic" Grid.Row="3" Grid.Column="0" DataContext="{Binding PrecursorPlotViewModel}"  Model="{Binding Path=Plot}"/>
-        <oxy:Plot Name="HeavyPrecursorIonXic" Grid.Row="3" Grid.Column="1" DataContext="{Binding HeavyPrecursorPlotViewModel}"  Model="{Binding Path=Plot}" />
-        <TextBlock Grid.Row="4" Grid.Column="1" FontWeight="Bold" Text="{Binding PrecursorAreaRatioLabel}" />
-        <Grid Grid.Row="4" Grid.Column="0">
+        <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="Bold" Text="{Binding FragmentAreaRatioLabel}" />
+        <Viewbox Grid.Row="3" Grid.Column="0"  StretchDirection="Both" HorizontalAlignment="Stretch">
+            <TextBlock  TextAlignment="Center" FontWeight="Bold" DataContext="{Binding PrecursorPlotViewModel}" Text="{Binding PlotTitle}" />
+        </Viewbox>
+        <oxy:Plot Name="PrecursorIonXic" Grid.Row="4" Grid.Column="0" DataContext="{Binding PrecursorPlotViewModel}" Model="{Binding Path=Plot}"/>
+        <Viewbox Grid.Row="3" Grid.Column="1" StretchDirection="Both" HorizontalAlignment="Stretch">
+            <TextBlock TextAlignment="Center" FontWeight="Bold" DataContext="{Binding HeavyPrecursorPlotViewModel}" Text="{Binding PlotTitle}"/>
+        </Viewbox>
+        <oxy:Plot Name="HeavyPrecursorIonXic" Grid.Row="4" Grid.Column="1" DataContext="{Binding HeavyPrecursorPlotViewModel}" Model="{Binding Path=Plot}" />
+        <TextBlock Grid.Row="5" Grid.Column="1" FontWeight="Bold" Text="{Binding PrecursorAreaRatioLabel}" />
+        <Grid Grid.Row="5" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50*" />
                 <ColumnDefinition Width="50*" />

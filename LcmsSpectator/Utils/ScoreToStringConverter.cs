@@ -12,14 +12,15 @@ namespace LcmsSpectator.Utils
             try
             {
                 var d = (double) value;
-                if (d > 1000 || d < 0.001) formatted = String.Format("{0:0.###E0}", d);
+                if (d.Equals(-1.0)) formatted = "N/A";
+                else if (d > 1000 || d < 0.001) formatted = String.Format("{0:0.###EE0}", d);
                 else formatted = Math.Round(d, 3).ToString(CultureInfo.InvariantCulture);
-                return formatted;
             }
             catch (InvalidCastException)
             {
-                return formatted;
+                formatted = "N/A";
             }
+            return formatted;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
