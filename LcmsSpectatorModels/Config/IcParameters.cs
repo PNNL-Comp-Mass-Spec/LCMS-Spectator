@@ -68,7 +68,10 @@ namespace LcmsSpectatorModels.Config
             IonCorrelationThreshold = 0.7;
             MaxDynamicModificationsPerSequence = 0;
             PointsToSmooth = 9;
-            SearchModifications = new List<SearchModification>();
+            SearchModifications = new List<SearchModification>
+            {
+                new SearchModification(Modification.Carbamidomethylation, 'C', SequenceLocation.Everywhere, true)
+            };
             IonTypeFactory = new IonTypeFactory(15);
         }
 

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
-using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
@@ -171,7 +171,9 @@ namespace LcmsSpectator.ViewModels
                 var residue = matchStr[0];
                 foreach (var searchModification in IcParameters.Instance.SearchModifications)
                 {
-                    if (searchModification.IsFixedModification && searchModification.TargetResidue == residue)
+                    if (searchModification.IsFixedModification && 
+                        searchModification.Location == SequenceLocation.Everywhere &&
+                        searchModification.TargetResidue == residue)
                     {
                         var modStr = String.Format("+{0}", Math.Round(searchModification.Modification.GetMass(), 3));
                         if (!matchStr.Contains(modStr)) matchStr += modStr;
@@ -198,7 +200,9 @@ namespace LcmsSpectator.ViewModels
                 var residue = matchStr[0];
                 foreach (var searchModification in IcParameters.Instance.SearchModifications)
                 {
-                    if (searchModification.IsFixedModification && searchModification.TargetResidue == residue)
+                    if (searchModification.IsFixedModification &&
+                        searchModification.Location == SequenceLocation.Everywhere &&
+                        searchModification.TargetResidue == residue)
                     {
                         var modStr = String.Format("[{0}]", searchModification.Modification);
                         if (!matchStr.Contains(modStr)) matchStr += modStr;
