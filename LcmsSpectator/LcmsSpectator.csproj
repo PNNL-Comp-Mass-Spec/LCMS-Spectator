@@ -53,18 +53,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DocumentFormat.OpenXml">
-      <HintPath>..\Library\Oxyplot\DocumentFormat.OpenXml.dll</HintPath>
-    </Reference>
-    <Reference Include="GraphX.Common">
-      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="GraphX.Controls">
-      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Controls.dll</HintPath>
-    </Reference>
-    <Reference Include="GraphX.Logic">
-      <HintPath>..\packages\GraphX.2.0.2\lib\net40\GraphX.Logic.dll</HintPath>
-    </Reference>
     <Reference Include="InformedProteomics.Backend">
       <HintPath>..\Library\InformedProteomics.Backend.dll</HintPath>
     </Reference>
@@ -74,41 +62,15 @@
     <Reference Include="OxyPlot">
       <HintPath>..\Library\Oxyplot\OxyPlot.dll</HintPath>
     </Reference>
-    <Reference Include="OxyPlot.OpenXml">
-      <HintPath>..\Library\Oxyplot\OxyPlot.OpenXml.dll</HintPath>
-    </Reference>
-    <Reference Include="OxyPlot.Pdf">
-      <HintPath>..\Library\Oxyplot\OxyPlot.Pdf.dll</HintPath>
-    </Reference>
-    <Reference Include="OxyPlot.WindowsForms">
-      <HintPath>..\Library\Oxyplot\OxyPlot.WindowsForms.dll</HintPath>
-    </Reference>
     <Reference Include="OxyPlot.Wpf">
       <HintPath>..\Library\Oxyplot\OxyPlot.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="OxyPlot.Xps">
-      <HintPath>..\Library\Oxyplot\OxyPlot.Xps.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Data">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Graphviz">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Serialization">
-      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -117,21 +79,6 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="Xceed.Wpf.AvalonDock">
       <HintPath>..\packages\AvalonDock.2.0.2000\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero">
-      <HintPath>..\packages\AvalonDock.2.0.2000\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Expression">
-      <HintPath>..\packages\AvalonDock.2.0.2000\lib\net40\Xceed.Wpf.AvalonDock.Themes.Expression.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro">
-      <HintPath>..\packages\AvalonDock.2.0.2000\lib\net40\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
-    </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010">
-      <HintPath>..\packages\AvalonDock.2.0.2000\lib\net40\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
-    </Reference>
-    <Reference Include="YAXLib">
-      <HintPath>..\packages\YAXLib.2.13\lib\YAXLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -151,10 +98,6 @@
     <Compile Include="DialogServices\MainDialogService.cs" />
     <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="PlotModels\XicDataPoint.cs" />
-    <Compile Include="SequenceGraph\DataGraph.cs" />
-    <Compile Include="SequenceGraph\GraphXSequenceGraph.cs" />
-    <Compile Include="SequenceGraph\SequenceGraphArea.cs" />
-    <Compile Include="SequenceGraph\SequencePath.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />

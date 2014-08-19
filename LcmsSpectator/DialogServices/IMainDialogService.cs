@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using LcmsSpectator.ViewModels;
+﻿using LcmsSpectator.ViewModels;
 
 namespace LcmsSpectator.DialogServices
 {
