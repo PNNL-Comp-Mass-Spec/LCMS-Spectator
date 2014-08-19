@@ -59,5 +59,15 @@ namespace LcmsSpectator.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon iconSmall {
+            get {
+                object obj = ResourceManager.GetObject("iconSmall", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
     }
 }
