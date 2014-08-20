@@ -41,6 +41,9 @@ namespace LcmsSpectator.ViewModels
             AbsoluteMaxCharge = 2;
         }
 
+        /// <summary>
+        /// All ion types currently selected
+        /// </summary>
         public List<IonType> IonTypes
         {
             get

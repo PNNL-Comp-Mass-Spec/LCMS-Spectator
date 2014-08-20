@@ -73,7 +73,11 @@ namespace LcmsSpectator.Views
         {
             LightColumn.Width = new GridLength(50, GridUnitType.Star);
             HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
-            if (ShowFragment.IsChecked == true) FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+            if (ShowFragment.IsChecked == true)
+            {
+                HeavyFragmentIonXic.Visibility = Visibility.Visible;
+                FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+            }
         }
 
         private void ShowHeavy_OnUnchecked(object sender, RoutedEventArgs e)

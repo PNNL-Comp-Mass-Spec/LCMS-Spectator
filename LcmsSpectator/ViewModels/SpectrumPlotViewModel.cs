@@ -24,6 +24,9 @@ namespace LcmsSpectator.ViewModels
             Title = "";
         }
 
+        /// <summary>
+        /// Title of plot.
+        /// </summary>
         public string Title
         {
             get { return _title; }
@@ -35,6 +38,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Toggle "Unexplained Peaks" (spectrum series)
+        /// </summary>
         public bool ShowUnexplainedPeaks
         {
             get { return _showUnexplainedPeaks; }
@@ -53,6 +59,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Spectrum to display.
+        /// </summary>
         public Spectrum Spectrum
         {
             get { return _spectrum; }
@@ -65,6 +74,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Ions to get peak highlights for
+        /// </summary>
         public List<LabeledIon> Ions
         {
             get { return _ions;  }
@@ -76,6 +88,10 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Explicitely highlight ion peaks
+        /// </summary>
+        /// <param name="labeledIon"></param>
         public void AddIonHighlight(LabeledIon labeledIon)
         {
             if (labeledIon == null) return;
@@ -86,6 +102,9 @@ namespace LcmsSpectator.ViewModels
             GuiInvoker.Invoke(Plot.InvalidatePlot, true);
         }
 
+        /// <summary>
+        /// Plot's x axis
+        /// </summary>
         public LinearAxis XAxis
         {
             get { return _xAxis; }
@@ -101,6 +120,11 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Update spectrum and ion highlights
+        /// </summary>
+        /// <param name="spectrum">New spectrum</param>
+        /// <param name="ions">Ions to highlight</param>
         public void Update(Spectrum spectrum, List<LabeledIon> ions)
         {
             _spectrum = spectrum;
@@ -108,6 +132,9 @@ namespace LcmsSpectator.ViewModels
             BuildSpectrumPlot();
         }
 
+        /// <summary>
+        /// Clear spectrum plot
+        /// </summary>
         public void ClearPlot()
         {
             Plot = new AutoAdjustedYPlotModel(new LinearAxis { Minimum = 0, Maximum = 100, IsAxisVisible = false }, _multiplier);
@@ -128,7 +155,13 @@ namespace LcmsSpectator.ViewModels
                 TitleFontSize = 14,
                 TitlePadding = 0
             };
-            var spectrumSeries = new StemSeries(OxyColors.Black, 0.5);
+            var spectrumSeries = new StemSeries(OxyColors.Black, 0.5)
+            {
+                TrackerFormatString =
+                    "{0}" + Environment.NewLine +
+                    "{1}: {2:0.###}" + Environment.NewLine +
+                    "{3}: {4:0.##E0}"
+            };
             foreach (var peak in Spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
             GuiInvoker.Invoke(Plot.Series.Add, spectrumSeries);
             Plot.GenerateYAxis("Intensity", "0e0");
@@ -161,7 +194,13 @@ namespace LcmsSpectator.ViewModels
             var labeledIonPeaks = GetIonPeaks(labeledIon);
             // create plots
             var color = _colors.GetColor(labeledIon);
-            var ionSeries = new StemSeries(color, 1.5);
+            var ionSeries = new StemSeries(color, 1.5)
+            {
+                TrackerFormatString =
+                    "{0}" + Environment.NewLine +
+                    "{1}: {2:0.###}" + Environment.NewLine +
+                    "{3}: {4:0.##E0}"
+            };
             var isotopePeaks = labeledIonPeaks.Peaks;
             if (isotopePeaks == null || isotopePeaks.Length < 1) return null;
             Peak maxPeak = null;

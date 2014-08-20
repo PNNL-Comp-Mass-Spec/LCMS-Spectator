@@ -22,6 +22,9 @@ namespace LcmsSpectator.ViewModels
 
         public event EventHandler RequestModificationRemoval;
 
+        /// <summary>
+        /// Create new ModificationViewModel with default values for all properties.
+        /// </summary>
         public ModificationViewModel()
         {
             Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
@@ -40,6 +43,10 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
+        /// <summary>
+        /// Create new ModificationViewModel from searchModification
+        /// </summary>
+        /// <param name="searchModification"></param>
         public ModificationViewModel(SearchModification searchModification): this()
         {
             SearchModification = searchModification;

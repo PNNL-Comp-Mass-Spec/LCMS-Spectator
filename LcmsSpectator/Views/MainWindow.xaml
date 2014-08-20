@@ -11,6 +11,7 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:ScoreToStringConverter x:Key="ScoreFormatter" />
+        <utils:ChargeToStringConverter x:Key="ChargeFormatter" />
     </Window.Resources>
     <Grid>
         <!-- Menu -->
@@ -148,7 +149,7 @@
                                         <TextBlock Text="{Binding SequenceText}" />
                                     </HierarchicalDataTemplate>
                                     <HierarchicalDataTemplate DataType="{x:Type models:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
-                                        <TextBlock Text="{Binding Charge}" />
+                                        <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
                                     </HierarchicalDataTemplate>
                                     <HierarchicalDataTemplate DataType="{x:Type models:PrSm}">
                                         <TextBlock Text="{Binding ScanText}" />

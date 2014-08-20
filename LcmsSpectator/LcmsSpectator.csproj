@@ -102,6 +102,7 @@
     <Compile Include="DialogServices\MainDialogService.cs" />
     <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="PlotModels\XicDataPoint.cs" />
+    <Compile Include="Utils\ChargeToStringConverter.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />

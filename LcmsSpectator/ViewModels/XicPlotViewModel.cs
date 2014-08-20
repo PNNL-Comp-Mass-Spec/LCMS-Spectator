@@ -17,7 +17,7 @@ namespace LcmsSpectator.ViewModels
         public DelegateCommand SetScanChangedCommand { get; set; }
         public bool Heavy { get; set; }
         public event EventHandler SelectedScanChanged;
-        public XicPlotViewModel(string title, ColorDictionary colors, LinearAxis xAxis, bool heavy, bool showMarker=true, bool showLegend=true)
+        public XicPlotViewModel(string title, ColorDictionary colors, LinearAxis xAxis, bool heavy, bool showLegend=true)
         {
             _title = title;
             _colors = colors;
@@ -25,7 +25,6 @@ namespace LcmsSpectator.ViewModels
             _xAxis = xAxis;
             Heavy = heavy;
             PlotTitle = _title;
-            _showMarker = showMarker;
             SetScanChangedCommand = new DelegateCommand(SetSelectedRt);
             Xics = new List<LabeledXic>();
             _xAxis.AxisChanged += UpdatePlotTitle;
@@ -84,7 +83,8 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedRt = value;
-                if (_showMarker) Plot.SetOrdinaryPointMarker(_selectedRt);
+                //if (_showMarker) 
+                Plot.SetOrdinaryPointMarker(_selectedRt);
                 Plot.AdjustForZoom();
                 OnPropertyChanged("SelectedRt");
             }
@@ -212,7 +212,8 @@ namespace LcmsSpectator.ViewModels
             plot.GenerateYAxis("Intensity", "0e0");
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
-            if (_showMarker) plot.SetPointMarker(SelectedRt);
+            //if (_showMarker)
+            plot.SetPointMarker(SelectedRt);
             Plot = plot;
             PlotTitle = GetPlotTitleWithArea();
             OnPropertyChanged("Plot");
@@ -223,7 +224,6 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledXic> _xics;
         private readonly ColorDictionary _colors;
         private bool _showScanMarkers;
-        private readonly bool _showMarker;
         private double _selectedRt;
         private readonly LinearAxis _xAxis;
         private int _selectedScan;

@@ -36,16 +36,16 @@ namespace LcmsSpectator.ViewModels
             _dialogService = dialogService;
             RawFilePath = rawFilePath;
             Colors = colors;
-            FragmentPlotViewModel = new XicPlotViewModel("Fragment XIC", colors, XicXAxis, false, true, false);
+            FragmentPlotViewModel = new XicPlotViewModel("Fragment XIC", colors, XicXAxis, false, false);
             FragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
-            HeavyFragmentPlotViewModel = new XicPlotViewModel("Heavy Fragment XIC", colors, XicXAxis, true, true, false);
+            HeavyFragmentPlotViewModel = new XicPlotViewModel("Heavy Fragment XIC", colors, XicXAxis, true, false);
             HeavyFragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
-            PrecursorPlotViewModel = new XicPlotViewModel("Precursor XIC", colors, XicXAxis, false, false);
-            HeavyPrecursorPlotViewModel = new XicPlotViewModel("Heavy Precursor XIC", colors, XicXAxis, true, false);
+            PrecursorPlotViewModel = new XicPlotViewModel("Precursor XIC", colors, XicXAxis, false);
+            HeavyPrecursorPlotViewModel = new XicPlotViewModel("Heavy Precursor XIC", colors, XicXAxis, true);
             SelectedRetentionTime = 0;
             _showScanMarkers = false;
             _showHeavy = false;
-            _showFragmentXic = false;
+            _showFragmentXic = true;
             XicXAxis.AxisChanged += UpdateAreaRatioLabels;
             CloseCommand = new DelegateCommand(() =>
             {
@@ -187,6 +187,10 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+
+        /// <summary>
+        /// Toggle fragment XICs.
+        /// </summary>
         public bool ShowFragmentXic
         {
             get { return _showFragmentXic; }
@@ -223,7 +227,7 @@ namespace LcmsSpectator.ViewModels
                 {
                     if (_selectedHeavyPrecursors != null) Task.Factory.StartNew(() => 
                     { 
-                        HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors); 
+                        HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors);
                         UpdatePrecursorAreaRatioLabels(); 
                     });
                     if (_selectedHeavyFragments != null && _showFragmentXic) Task.Factory.StartNew(() =>
@@ -259,7 +263,9 @@ namespace LcmsSpectator.ViewModels
         public void HighlightRetentionTime(double rt, bool unique, bool heavy)
         {
             FragmentPlotViewModel.HighlightRt(rt, unique && !heavy);
+            PrecursorPlotViewModel.HighlightRt(rt, false);
             HeavyFragmentPlotViewModel.HighlightRt(rt, unique && heavy);
+            HeavyPrecursorPlotViewModel.HighlightRt(rt, false);
         }
 
         /// <summary>
