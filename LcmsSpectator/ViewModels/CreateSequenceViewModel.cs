@@ -21,7 +21,6 @@ namespace LcmsSpectator.ViewModels
         public string SequenceText { get; set; }
         public int SequencePosition { get; set; }
         public int SelectedCharge { get; set; }
-        public int SelectedScan { get; set; }
         public DelegateCommand OpenTargetListCommand { get; private set; }
         public DelegateCommand CreatePrSmCommand { get; private set; }
         public DelegateCommand InsertModificationCommand { get; private set; }
@@ -44,6 +43,16 @@ namespace LcmsSpectator.ViewModels
             if (XicViewModels.Count > 0) SelectedXicViewModel = XicViewModels[0];
 
             Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
+        }
+
+        public int SelectedScan
+        {
+            get { return _selectedScan; }
+            set
+            {
+                _selectedScan = value;
+                OnPropertyChanged("SelectedScan");
+            }
         }
 
         public XicViewModel SelectedXicViewModel
@@ -219,5 +228,6 @@ namespace LcmsSpectator.ViewModels
         private readonly IDialogService _dialogService;
         private XicViewModel _selectedXicViewModel;
         private Target _selectedTarget;
+        private int _selectedScan;
     }
 }

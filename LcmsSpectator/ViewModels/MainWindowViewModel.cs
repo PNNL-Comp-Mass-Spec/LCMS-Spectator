@@ -160,6 +160,7 @@ namespace LcmsSpectator.ViewModels
                 if (_xicChanged || _selectedPrSm == null) _xicChanged = true;
                 _selectedPrSm = value;
                 OnPropertyChanged("SelectedPrSm");
+                CreateSequenceViewModel.SelectedScan = SelectedPrSm.Scan;
                 _spectrumChanged = true;
                 ProteinId protein = Ids.GetProtein(_selectedPrSm);
                 if (protein != null) SelectedProtein = protein;

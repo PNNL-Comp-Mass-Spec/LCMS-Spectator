@@ -8,11 +8,11 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="4*" />
-            <RowDefinition Height="60*" />
+            <RowDefinition Height="4*" Name="FragmentTitleRow" />
+            <RowDefinition Height="60*" Name="FragmentPlotRow" />
             <RowDefinition Height="20"  Name="FragmentAreaRow" />
             <RowDefinition Height="4*" />
-            <RowDefinition Height="40*" />
+            <RowDefinition Height="40*" Name="PrecursorPlotRow" />
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -47,11 +47,13 @@
         <TextBlock Grid.Row="5" Grid.Column="1" FontWeight="Bold" Text="{Binding PrecursorAreaRatioLabel}" />
         <Grid Grid.Row="5" Grid.Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50*" />
-                <ColumnDefinition Width="50*" />
+                <ColumnDefinition Width="33*" />
+                <ColumnDefinition Width="33*" />
+                <ColumnDefinition Width="33*" />
             </Grid.ColumnDefinitions>
-            <CheckBox Grid.Column="0" IsChecked="{Binding ShowScanMarkers}">Show Scan Markers</CheckBox>
+            <CheckBox Grid.Column="0" IsChecked="{Binding ShowFragmentXic}" Checked="ShowFragment_OnChecked" Unchecked="ShowFragment_OnUnChecked" Name="ShowFragment" >Show Fragment XIC</CheckBox>
             <CheckBox Grid.Column="1" IsChecked="{Binding ShowHeavy}" Checked="ShowHeavy_OnChecked" Unchecked="ShowHeavy_OnUnchecked" Name="ShowHeavy">Show Heavy</CheckBox>
+            <CheckBox Grid.Column="2" IsChecked="{Binding ShowScanMarkers}">Show Scan Markers</CheckBox>
         </Grid>
     </Grid>
 </UserControl>

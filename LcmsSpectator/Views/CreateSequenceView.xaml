@@ -65,6 +65,9 @@
         <DataGrid AutoGenerateColumns="False" SelectionMode="Extended" Grid.Column="2"
                   IsReadOnly="True" RowHeaderWidth="0" 
                   ItemsSource="{Binding Targets}" SelectedItem="{Binding SelectedTarget}">
+            <DataGrid.InputBindings>
+                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding CreatePrSmCommand}" />
+            </DataGrid.InputBindings>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Target Sequence" Width="30*" Binding="{Binding SequenceText}" />
             </DataGrid.Columns>

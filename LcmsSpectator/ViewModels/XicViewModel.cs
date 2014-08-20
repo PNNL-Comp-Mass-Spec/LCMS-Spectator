@@ -45,6 +45,7 @@ namespace LcmsSpectator.ViewModels
             SelectedRetentionTime = 0;
             _showScanMarkers = false;
             _showHeavy = false;
+            _showFragmentXic = false;
             XicXAxis.AxisChanged += UpdateAreaRatioLabels;
             CloseCommand = new DelegateCommand(() =>
             {
@@ -143,7 +144,7 @@ namespace LcmsSpectator.ViewModels
                 _selectedFragments = value;
                 Task.Factory.StartNew(() =>
                 {
-                    FragmentPlotViewModel.Xics = GetXics(_selectedFragments);
+                    if (ShowFragmentXic) FragmentPlotViewModel.Xics = GetXics(_selectedFragments);
                     UpdateFragmentAreaRatioLabels();        // XIC changed, update area
                 });
                 OnPropertyChanged("SelectedFragments");
@@ -162,7 +163,7 @@ namespace LcmsSpectator.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     // Only create heavy xics if the heavy xics are visible
-                    if (_showHeavy) HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
+                    if (_showHeavy && _showFragmentXic) HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
                     UpdateFragmentAreaRatioLabels();    // XIC changed, update area
                 });
                 OnPropertyChanged("SelectedHeavyFragments");
@@ -186,6 +187,28 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public bool ShowFragmentXic
+        {
+            get { return _showFragmentXic; }
+            set
+            {
+                _showFragmentXic = value;
+                if (_showFragmentXic)
+                {
+                    if (_selectedFragments != null) Task.Factory.StartNew(() =>
+                    {
+                        FragmentPlotViewModel.Xics = GetXics(_selectedFragments);
+                    });
+                    if (_showHeavy && _selectedHeavyFragments != null) Task.Factory.StartNew(() =>
+                    {
+                        HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
+                        UpdateFragmentAreaRatioLabels();
+                    });
+                }
+                OnPropertyChanged("ShowFragmentXic");
+            }
+        }
+
         /// <summary>
         /// Shows and hides the heavy XICs.
         /// If the heavy XICs are being toggled on, it updates them.
@@ -203,7 +226,7 @@ namespace LcmsSpectator.ViewModels
                         HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors); 
                         UpdatePrecursorAreaRatioLabels(); 
                     });
-                    if (_selectedHeavyFragments != null) Task.Factory.StartNew(() =>
+                    if (_selectedHeavyFragments != null && _showFragmentXic) Task.Factory.StartNew(() =>
                     {
                         HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
                         UpdateFragmentAreaRatioLabels();
@@ -268,7 +291,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void UpdateFragmentAreaRatioLabels()
         {
-            if (!ShowHeavy) return;
+            if (!ShowHeavy || !ShowFragmentXic) return;
             if (FragmentPlotViewModel == null || FragmentPlotViewModel.Plot == null) return;
             if (XicXAxis == null) return;
             var min = XicXAxis.ActualMinimum;
@@ -414,5 +437,6 @@ namespace LcmsSpectator.ViewModels
         private bool _showHeavy;
         private string _rawFilePath;
         private double _selectedRetentionTime;
+        private bool _showFragmentXic;
     }
 }
