@@ -31,6 +31,10 @@ namespace LcmsSpectator.ViewModels
             _xAxis.AxisChanged += UpdatePlotTitle;
         }
 
+        /// <summary>
+        /// Shows and hides the point markers on the XIC plots.
+        /// Regenerates the plot with or without markers.
+        /// </summary>
         public bool ShowScanMarkers
         {
             get { return _showScanMarkers; }
@@ -43,6 +47,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Xics to generate plot from.
+        /// </summary>
         public List<LabeledXic> Xics
         {
             get { return _xics; }
@@ -54,6 +61,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Scan number currently selected in the plot.
+        /// </summary>
         public int SelectedScan
         {
             get { return _selectedScan; }
@@ -64,6 +74,10 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Retention time currently selected in the plot.
+        /// Sets a ordinary point marker at this point.
+        /// </summary>
         public double SelectedRt
         {
             get { return _selectedRt;  }
@@ -76,6 +90,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Title of plot, including area
+        /// </summary>
         public string PlotTitle
         {
             get { return _plotTitle; }
@@ -86,12 +103,25 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Calculate area under curve of XIC in range.
+        /// </summary>
+        /// <param name="min">Min x limit</param>
+        /// <param name="max">Max x limit</param>
+        /// <returns>Area under the curve of the range</returns>
         public double GetAreaOfRange(double min, double max)
         {
             return (from lxic in Xics where lxic.Index >= 0
-                    from point in lxic.Xic where point.RetentionTime >= min && point.RetentionTime <= max select point.Intensity).Sum();
+                    from point in lxic.Xic 
+                        where point.RetentionTime >= min && point.RetentionTime <= max 
+                        select point.Intensity).Sum();
         }
 
+        /// <summary>
+        /// Highlight retention time in plot
+        /// </summary>
+        /// <param name="rtTime">Retention time to highlight</param>
+        /// <param name="unique">Is it a unique marker (highlighted different color)</param>
         public void HighlightRt(double rtTime, bool unique)
         {
             _selectedRt = rtTime;
@@ -99,6 +129,9 @@ namespace LcmsSpectator.ViewModels
             else Plot.SetOrdinaryPointMarker(rtTime);
         }
 
+        /// <summary>
+        /// Highlight Rt and call SelectedScanChanged to inform XicViewModel
+        /// </summary>
         public void SetSelectedRt()
         {
             var dataPoint = Plot.SelectedDataPoint as XicDataPoint;

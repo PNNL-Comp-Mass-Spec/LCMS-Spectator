@@ -10,28 +10,51 @@ namespace LcmsSpectator.PlotModels
     {
         public IDataPoint SelectedDataPoint { get; set; }
         public bool UniqueHighlight { get; set; }
+
+        public OxyColor UniqueColor { get; set; }
+        public OxyColor OrdinaryColor { get; set; }
+
         public SelectablePlotModel(Axis xAxis, double multiplier) : base(xAxis, multiplier)
         {
             MouseDown += SelectablePlotModel_MouseDown;
+            UniqueColor = OxyColors.Black;
+            OrdinaryColor = OxyColors.LightGray;
         }
 
+        /// <summary>
+        /// Set point marker highlighted with UniqueColor.
+        /// </summary>
+        /// <param name="x">x value to set marker at</param>
         public void SetUniquePointMarker(double x)
         {
             UniqueHighlight = true;
             SetPointMarker(x, GetMarkerColor());
         }
 
+        /// <summary>
+        /// Set point marker highlighted with OrdinaryColor.
+        /// </summary>
+        /// <param name="x">x value to set marker at</param>
         public void SetOrdinaryPointMarker(double x)
         {
             UniqueHighlight = false;
             SetPointMarker(x, GetMarkerColor());
         }
 
+        /// <summary>
+        /// Set point marker highlighted with current color.
+        /// </summary>
+        /// <param name="x">x value to set marker at</param>
         public void SetPointMarker(double x)
         {
             SetPointMarker(x, GetMarkerColor());
         }
         
+        /// <summary>
+        /// Set point marker highlighted with a particular color.
+        /// </summary>
+        /// <param name="x">x value to set marker at</param>
+        /// <param name="color">color of marker</param>
         public void SetPointMarker(double x, OxyColor color)
         {
             if (color == null) color = OxyColors.Black;
@@ -50,6 +73,11 @@ namespace LcmsSpectator.PlotModels
             GuiInvoker.Invoke(InvalidatePlot, true);
         }
 
+        /// <summary>
+        /// Override SetBounds to height of marker isn't included in maxY calculation.
+        /// </summary>
+        /// <param name="minX">minimum x value</param>
+        /// <param name="maxX">maximum x value</param>
         public override void SetBounds(double minX, double maxX)
         {
             double xPoint = 0;
@@ -63,6 +91,11 @@ namespace LcmsSpectator.PlotModels
             SetPointMarker(xPoint, GetMarkerColor());
         }
 
+        /// <summary>
+        /// Event handler for mouse click event to set SelectedDataPoint
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         void SelectablePlotModel_MouseDown(object sender, OxyMouseEventArgs args)
         {
             switch (args.ChangedButton)
@@ -80,7 +113,7 @@ namespace LcmsSpectator.PlotModels
 
         private OxyColor GetMarkerColor()
         {
-            return UniqueHighlight ? OxyColors.Black : OxyColors.LightGray;
+            return UniqueHighlight ? UniqueColor : OrdinaryColor;
         }
 
         private LineSeries _pointMarkers;

@@ -53,11 +53,18 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
+        /// <summary>
+        /// Raw file name without path or extension. For displaying on tab header.
+        /// </summary>
         public string RawFileName
         {
             get { return Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(RawFilePath)); }
         }
 
+
+        /// <summary>
+        /// Full path to the raw file including extension.
+        /// </summary>
         public string RawFilePath
         {
             get { return _rawFilePath; }
@@ -69,6 +76,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Retention currently selected and highlighted in all plots.
+        /// </summary>
         public double SelectedRetentionTime
         {
             get { return _selectedRetentionTime; }
@@ -83,6 +93,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Precursor ions to create precursor XICs from.
+        /// </summary>
         public List<LabeledIon> SelectedPrecursors
         {
             get { return _selectedPrecursors; }
@@ -93,12 +106,15 @@ namespace LcmsSpectator.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     PrecursorPlotViewModel.Xics = GetXics(_selectedPrecursors);
-                    UpdatePrecursorAreaRatioLabels();
+                    UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
                 });
                 OnPropertyChanged("SelectedPrecursors");
             }
         }
 
+        /// <summary>
+        /// Heavy precursor ions to create heavy precursor XICs from.
+        /// </summary>
         public List<LabeledIon> SelectedHeavyPrecursors
         {
             get { return _selectedHeavyPrecursors; }
@@ -108,13 +124,17 @@ namespace LcmsSpectator.ViewModels
                 _selectedHeavyPrecursors = value;
                 Task.Factory.StartNew(() =>
                 {
+                    // Only create heavy xics if the heavy xics are visible
                     if (_showHeavy) HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors);
-                    UpdatePrecursorAreaRatioLabels();
+                    UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
                 });
                 OnPropertyChanged("SelectedHeavyPrecursors");
             }
         }
 
+        /// <summary>
+        /// Fragment ions to create fragment XICs from.
+        /// </summary>
         public List<LabeledIon> SelectedFragments
         {
             get { return _selectedFragments; }
@@ -124,12 +144,15 @@ namespace LcmsSpectator.ViewModels
                 Task.Factory.StartNew(() =>
                 {
                     FragmentPlotViewModel.Xics = GetXics(_selectedFragments);
-                    UpdateFragmentAreaRatioLabels(); 
+                    UpdateFragmentAreaRatioLabels();        // XIC changed, update area
                 });
                 OnPropertyChanged("SelectedFragments");
             }
         }
 
+        /// <summary>
+        /// Heavy fragment ions to create heavy fragment XICs from.
+        /// </summary>
         public List<LabeledIon> SelectedHeavyFragments
         {
             get { return _selectedHeavyFragments; }
@@ -138,13 +161,17 @@ namespace LcmsSpectator.ViewModels
                 _selectedHeavyFragments = value;
                 Task.Factory.StartNew(() =>
                 {
+                    // Only create heavy xics if the heavy xics are visible
                     if (_showHeavy) HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
-                    UpdateFragmentAreaRatioLabels(); 
+                    UpdateFragmentAreaRatioLabels();    // XIC changed, update area
                 });
                 OnPropertyChanged("SelectedHeavyFragments");
             }
         }
 
+        /// <summary>
+        /// Shows and hides the point markers on the XIC plots.
+        /// </summary>
         public bool ShowScanMarkers
         {
             get { return _showScanMarkers; }
@@ -159,6 +186,10 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Shows and hides the heavy XICs.
+        /// If the heavy XICs are being toggled on, it updates them.
+        /// </summary>
         public bool ShowHeavy
         {
             get { return _showHeavy; }
@@ -182,6 +213,10 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Zoom all plots to a particular retention time.
+        /// </summary>
+        /// <param name="rt">Retention time to zoom to.</param>
         public void ZoomToRt(double rt)
         {
             double minX, maxX;
@@ -192,12 +227,21 @@ namespace LcmsSpectator.ViewModels
             XicXAxis.Zoom(minX, maxX);
         }
 
+        /// <summary>
+        /// Highlight a particular retention time for all plots.
+        /// </summary>
+        /// <param name="rt">Retention time to highlight.</param>
+        /// <param name="unique">Is this XicViewModel for the raw file that is selected?</param>
+        /// <param name="heavy">Was the light (false) or heavy (true) plot selected?</param>
         public void HighlightRetentionTime(double rt, bool unique, bool heavy)
         {
             FragmentPlotViewModel.HighlightRt(rt, unique && !heavy);
             HeavyFragmentPlotViewModel.HighlightRt(rt, unique && heavy);
         }
 
+        /// <summary>
+        /// Shared x axis for all plots. Sharing an X axis allows all plots to zoom and pan together.
+        /// </summary>
         private LinearAxis XicXAxis
         {
             get
@@ -218,6 +262,10 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Update the ratio labels for the fragment ion Xics.
+        /// Ratios are (light / heavy)
+        /// </summary>
         private void UpdateFragmentAreaRatioLabels()
         {
             if (!ShowHeavy) return;
@@ -239,6 +287,10 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
+        /// <summary>
+        /// Update the ratio labels for the precursor ion Xics.
+        /// Ratios are (light / heavy)
+        /// </summary>
         private void UpdatePrecursorAreaRatioLabels()
         {
             if (!ShowHeavy) return;
@@ -260,12 +312,24 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
+        /// <summary>
+        /// Event handler to update area ratio labels when shared x axis is zoomed or panned.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void UpdateAreaRatioLabels(object sender, AxisChangedEventArgs e)
         {
             Task.Factory.StartNew(UpdateFragmentAreaRatioLabels);
             Task.Factory.StartNew(UpdatePrecursorAreaRatioLabels);
         }
 
+        /// <summary>
+        /// Event handler to handle when a retention time slice is selected on one of the XICs.
+        /// Creates a PrSm and then triggers the SelectedScanNumberChanged event to pass it up
+        /// to the MainWindowViewModel.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SelectFragmentScanNumber(object sender, EventArgs e)
         {
             var vm = sender as XicPlotViewModel;
@@ -286,6 +350,11 @@ namespace LcmsSpectator.ViewModels
             if (SelectedScanNumberChanged != null) SelectedScanNumberChanged(this, new PrSmChangedEventArgs(newPrsm));
         }
 
+        /// <summary>
+        /// Calculate the default min and max on the X Axis for when it is zoomed to a point.
+        /// </summary>
+        /// <param name="minRt">Value calculated for x axis minimum.</param>
+        /// <param name="maxRt">Value calculated for x axis maximum.</param>
         private void CalculateBounds(out double minRt, out double maxRt)
         {
             var minLcmsRt = Lcms.MinRetentionTime;
@@ -302,6 +371,11 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Create Xics from list of ions. Smooths XICs and adds retention time to each point.
+        /// </summary>
+        /// <param name="ions">Ions to create XICs from.</param>
+        /// <returns>Labeled XICs</returns>
         private List<LabeledXic> GetXics(IEnumerable<LabeledIon> ions)
         {
             var xics = new List<LabeledXic>();
