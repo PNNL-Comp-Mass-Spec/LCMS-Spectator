@@ -15,9 +15,18 @@ namespace LcmsSpectatorModels.Models
             var scanList = new List<int>();
             scanList.AddRange(GetScanNumbers(1));
             scanList.AddRange(GetScanNumbers(2));
-            foreach (var scan in scanList)
+
+            MaxRetentionTimeDelta = 0.0;
+            for (int i = 0; i < scanList.Count; i++)
             {
-                _scanToRtMap.Add(scan, xcal.RtFromScanNum(scan));                
+                var rtTime = xcal.RtFromScanNum(scanList[i]);
+                _scanToRtMap.Add(scanList[i], rtTime);
+
+                if (i < scanList.Count - 1)
+                {
+                    var rtDiff = xcal.RtFromScanNum(scanList[i + 1]) - rtTime;
+                    if (rtDiff >= MaxRetentionTimeDelta) MaxRetentionTimeDelta = rtDiff;
+                }
             }
         }
 
@@ -37,6 +46,7 @@ namespace LcmsSpectatorModels.Models
 
         public double MinRetentionTime { get { return _scanToRtMap[MinLcScan]; } }
         public double MaxRetentionTime { get { return _scanToRtMap[MaxLcScan];  } }
+        public double MaxRetentionTimeDelta { get; private set; }
         
         public double GetRetentionTime(int scanNum)
         {

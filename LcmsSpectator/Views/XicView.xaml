@@ -44,7 +44,14 @@
             <TextBlock TextAlignment="Center" FontWeight="Bold" DataContext="{Binding HeavyPrecursorPlotViewModel}" Text="{Binding PlotTitle}"/>
         </Viewbox>
         <oxy:Plot Name="HeavyPrecursorIonXic" Grid.Row="4" Grid.Column="1" DataContext="{Binding HeavyPrecursorPlotViewModel}" Model="{Binding Path=Plot}" />
-        <TextBlock Grid.Row="5" Grid.Column="1" FontWeight="Bold" Text="{Binding PrecursorAreaRatioLabel}" />
+        <Grid Grid.Row="5" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50*" />
+                <ColumnDefinition Width="50*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" FontWeight="Bold" Text="{Binding PrecursorAreaRatioLabel}" />
+            <Button Grid.Column="1" HorizontalAlignment="Right" Width="190">Set Light/Heavy Modifications</Button>
+        </Grid>
         <Grid Grid.Row="5" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="33*" />

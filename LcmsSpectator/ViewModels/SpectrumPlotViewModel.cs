@@ -181,6 +181,7 @@ namespace LcmsSpectator.ViewModels
             // add new ion series
             foreach (var labeledIon in Ions)
             {
+                if (labeledIon.IonType.Charge == 0) continue;
                 var ionSeries = GetIonSeries(labeledIon);
                 if (ionSeries == null) continue;
                 GuiInvoker.Invoke(Plot.Series.Add, ionSeries.Item1);
@@ -235,9 +236,20 @@ namespace LcmsSpectator.ViewModels
 
         private LinearAxis GenerateXAxis()
         {
-            var ms2MaxMz = Spectrum.Peaks.Max().Mz * 1.2;
+            var peaks = Spectrum.Peaks;
+            var ms2MaxMz = peaks.Max().Mz * 1.1;
+            var maxMzDelta = 0.0;
+            for (int i = 0; i < peaks.Length; i++)
+            {
+                if (i < peaks.Length - 1)
+                {
+                    var mzDiff = peaks[i+1].Mz - peaks[i].Mz;
+                    if (mzDiff >= maxMzDelta) maxMzDelta = mzDiff;
+                }
+            }
             var xAxis = new LinearAxis(AxisPosition.Bottom, "M/Z")
             {
+                MinimumRange = maxMzDelta,
                 Minimum = 0,
                 Maximum = ms2MaxMz,
                 AbsoluteMinimum = 0,

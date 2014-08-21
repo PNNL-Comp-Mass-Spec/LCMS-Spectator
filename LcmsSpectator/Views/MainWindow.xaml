@@ -12,6 +12,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:ScoreToStringConverter x:Key="ScoreFormatter" />
         <utils:ChargeToStringConverter x:Key="ChargeFormatter" />
+        <utils:QValueToStringConverter x:Key="QValueToStringConverter" />
     </Window.Resources>
     <Grid>
         <!-- Menu -->
@@ -160,20 +161,28 @@
                         <!-- End ID Tree -->
                         <!-- Scan View -->
                         <TabItem Header="Scan View">
-                            <DataGrid AutoGenerateColumns="False" SelectionMode="Extended"
-                                  IsReadOnly="True" RowHeaderWidth="0"
-                                  ItemsSource="{Binding PrSms}" SelectedItem="{Binding SelectedPrSm}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}"/>
-                                    <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" />
-                                    <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
-                                    <DataGridTextColumn Header="Precursor m/z" Width="5*" Binding="{Binding PrecursorMz}" />
-                                    <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge}" />
-                                    <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding MatchedFragments, Converter={StaticResource ScoreFormatter}}" />
-                                    <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue}" />
-                                    <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
-                                </DataGrid.Columns>
-                            </DataGrid>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="100*" />
+                                    <RowDefinition Height="20" />
+                                </Grid.RowDefinitions>
+                                <DataGrid AutoGenerateColumns="False" SelectionMode="Extended"
+                                          IsReadOnly="True" RowHeaderWidth="0"
+                                          ItemsSource="{Binding PrSms}" SelectedItem="{Binding SelectedPrSm}"
+                                          Grid.Row="0">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}"/>
+                                        <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" />
+                                        <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
+                                        <DataGridTextColumn Header="Precursor m/z" Width="5*" Binding="{Binding PrecursorMz}" />
+                                        <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
+                                        <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding MatchedFragments, Converter={StaticResource ScoreFormatter}}" />
+                                        <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue, Converter={StaticResource QValueToStringConverter}}" />
+                                        <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <CheckBox Grid.Row="1" IsChecked="{Binding ShowUnidentifiedScans}">Show Unidentified Scans</CheckBox>
+                            </Grid>
                         </TabItem>
                         <!-- End Scan View -->
                         <!-- PrSm Creator -->

@@ -89,6 +89,7 @@ namespace LcmsSpectatorModels.Models
         {
             get
             {
+                if (Sequence.Count == 0) return 0.0;
                 var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
                 var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
                 return Math.Round(ion.GetMonoIsotopicMz(), 2);
@@ -99,6 +100,7 @@ namespace LcmsSpectatorModels.Models
         {
             get
             {
+                if (Sequence.Count == 0) return 0.0;
                 var composition = HeavySequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
                 var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
                 return Math.Round(ion.GetMonoIsotopicMz(), 2);

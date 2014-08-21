@@ -280,6 +280,7 @@ namespace LcmsSpectator.ViewModels
                     var maxRt = Math.Max(Lcms.MaxRetentionTime, 1.0);
                     _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Retention Time")
                     {
+                        MinimumRange = Lcms.MaxRetentionTimeDelta,
                         Maximum = maxRt + 0.0001,
                         Minimum = 0,
                         AbsoluteMinimum = 0,

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LcmsSpectatorModels.Models
@@ -12,8 +13,19 @@ namespace LcmsSpectatorModels.Models
             Proteins = new Dictionary<string, ProteinId>();
         }
 
+        public IEnumerable<ProteinId> ProteinIds
+        {
+            get
+            {
+                return (from protein in Proteins.Values
+                            where protein.Sequence.Count != 0
+                            select protein);
+            }
+        }
+
         public void Add(PrSm data)
         {
+            RemoveUnidentifiedScan(data);
             if (!Proteins.ContainsKey(data.ProteinName)) Proteins.Add(data.ProteinName, new ProteinId(data.Sequence, data.SequenceText, data.ProteinNameDesc));
             var protein = Proteins[data.ProteinName];
             protein.Add(data);
@@ -32,6 +44,16 @@ namespace LcmsSpectatorModels.Models
         public void Remove(PrSm data)
         {
             if (Proteins.ContainsKey(data.ProteinName)) Proteins[data.ProteinName].Remove(data);
+        }
+
+        public void RemoveUnidentifiedScan(PrSm data)
+        {
+            ProteinId protein;
+            ProteoformId proteoform;
+            ChargeStateId chargeState;
+            if (Proteins.TryGetValue("", out protein) &&
+                protein.Proteoforms.TryGetValue("", out proteoform) &&
+                proteoform.ChargeStates.TryGetValue(0, out chargeState)) chargeState.Remove(data);
         }
 
         public bool Contains(PrSm data)
@@ -83,7 +105,7 @@ namespace LcmsSpectatorModels.Models
             var chargeState = GetChargeState(data);
             if (chargeState == null) return null;
             PrSm prsm = null;
-            if (chargeState.PrSms.ContainsKey(data.Scan)) prsm = chargeState.PrSms[data.Scan];
+            if (chargeState.Contains(data)) prsm = chargeState.PrSms[new Tuple<int, string>(data.Scan, data.RawFileName)];
             return prsm;
         }
 
@@ -95,7 +117,20 @@ namespace LcmsSpectatorModels.Models
                         from proteoform in protein.Proteoforms.Values
                         from charge in proteoform.ChargeStates.Values
                         from prsm in charge.PrSms.Values
-                        select prsm).ToList();
+                            select prsm).ToList();
+            }
+        }
+
+        public List<PrSm> IdentifiedPrSms
+        {
+            get
+            {
+                return (from protein in Proteins.Values
+                        from proteoform in protein.Proteoforms.Values
+                        from charge in proteoform.ChargeStates.Values
+                        from prsm in charge.PrSms.Values
+                            where prsm.MatchedFragments >= 0
+                            select prsm).ToList();
             }
         }
 

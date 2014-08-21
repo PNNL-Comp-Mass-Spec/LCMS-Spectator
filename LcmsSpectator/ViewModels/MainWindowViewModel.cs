@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
@@ -43,7 +44,7 @@ namespace LcmsSpectator.ViewModels
             _xicChanged = false;
             _dialogService = dialogService;
             Ids = new IdentificationTree();
-            ProteinIds = Ids.Proteins.Values.ToList();
+            ProteinIds = Ids.ProteinIds.ToList();
             PrSms = new List<PrSm>();
             _colors = new ColorDictionary(2);
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
@@ -92,6 +93,18 @@ namespace LcmsSpectator.ViewModels
                     }
                     OnPropertyChanged("TreeViewSelectedItem");
                 }
+            }
+        }
+
+        public bool ShowUnidentifiedScans
+        {
+            get { return _showUnidentifiedScans; }
+            set
+            {
+                _showUnidentifiedScans = value;
+                PrSms = _showUnidentifiedScans ? Ids.AllPrSms : Ids.IdentifiedPrSms;
+                OnPropertyChanged("PrSms");
+                OnPropertyChanged("ShowUnidentifiedScans");
             }
         }
 
@@ -267,7 +280,11 @@ namespace LcmsSpectator.ViewModels
             var rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");
             if (rawFileName == "") return;
             IsLoading = true;
-            Task.Factory.StartNew(() => RawFileOpener(rawFileName));
+            Task.Factory.StartNew(() =>
+            {
+                RawFileOpener(rawFileName);
+                if (XicViewModels.Count == 1) ShowUnidentifiedScans = true;
+            });
         }
 
         public void OpenTsvFile()
@@ -326,6 +343,7 @@ namespace LcmsSpectator.ViewModels
                 SelectedPrSm = null;
                 _xicChanged = true;
                 if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
+                ShowUnidentifiedScans = false;
                 FileOpen = true;
                 IsLoading = false;
             });
@@ -335,6 +353,25 @@ namespace LcmsSpectator.ViewModels
         {
             IsLoading = true;
             var xicVm = new XicViewModel(rawFileName, _colors);
+            var lcms = xicVm.Lcms;
+            var scans = lcms.GetScanNumbers(2);
+            foreach (var scan in scans)
+            {
+                var prsm = new PrSm
+                {
+                    Scan = scan,
+                    RawFileName = xicVm.RawFileName,
+                    Lcms = lcms,
+                    QValue = 1.0,
+                    MatchedFragments = -1.0,
+                    Sequence = new Sequence(new List<AminoAcid>()),
+                    SequenceText = "",
+                    ProteinName = "",
+                    ProteinDesc = "",
+                    Charge = 0
+                };
+                Ids.Add(prsm);
+            }
             xicVm.SelectedScanNumberChanged += UpdatePrSm;
             xicVm.XicClosing += CloseXic;
             xicVm.ZoomToRt(0);
@@ -363,7 +400,7 @@ namespace LcmsSpectator.ViewModels
         {
             var qValue = IcParameters.Instance.QValueThreshold;
             var ids = Ids.GetTreeFilteredByQValue(qValue);
-            ProteinIds = ids.Proteins.Values.ToList();
+            ProteinIds = ids.ProteinIds.ToList();
             var prsms = ids.AllPrSms;
             prsms.Sort();
             PrSms = prsms;
@@ -479,6 +516,7 @@ namespace LcmsSpectator.ViewModels
         private bool _fragmentXicChanged;
         private bool _precursorXicChanged;
         private object _treeViewSelectedItem;
+        private bool _showUnidentifiedScans;
     }
 }
 

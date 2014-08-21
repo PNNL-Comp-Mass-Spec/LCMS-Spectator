@@ -14,7 +14,7 @@ namespace LcmsSpectatorModels.Models
         public string SequenceText { get; private set; }
         public double PrecursorMz { get; private set; }
 
-        public Dictionary<int, PrSm> PrSms { get; set; }
+        public Dictionary<Tuple<int, string>, PrSm> PrSms { get; set; }
         public List<LabeledXic> SelectedFragmentXics { get; set; }
         public List<LabeledXic> SelectedPrecursorXics { get; set; } 
 
@@ -26,17 +26,20 @@ namespace LcmsSpectatorModels.Models
             Sequence = sequence;
             HeavySequence = heavySequence;
             SequenceText = sequenceText;
-            PrSms = new Dictionary<int, PrSm>();
+            PrSms = new Dictionary<Tuple<int, string>, PrSm>();
         }
 
         public void Add(PrSm data)
         {
-            if (!PrSms.ContainsKey(data.Scan)) PrSms.Add(data.Scan, data);
+            var key = new Tuple<int, string>(data.Scan, data.RawFileName);
+            if (!PrSms.ContainsKey(key)) PrSms.Add(key, data);
+            else PrSms[key] = data;
         }
 
         public void Remove(PrSm data)
         {
-            if (PrSms.ContainsKey(data.Scan)) PrSms.Remove(data.Scan);
+            var key = new Tuple<int, string>(data.Scan, data.RawFileName);
+            if (PrSms.ContainsKey(key)) PrSms.Remove(key);
         }
 
         public PrSm GetHighestScoringPrSm()
@@ -54,7 +57,8 @@ namespace LcmsSpectatorModels.Models
 
         public bool Contains(PrSm data)
         {
-            return PrSms.Values.Any(prsm => (prsm.CompareTo(data) == 0));
+            var key = new Tuple<int, string>(data.Scan, data.RawFileName);
+            return PrSms.ContainsKey(key);
         }
 
 
