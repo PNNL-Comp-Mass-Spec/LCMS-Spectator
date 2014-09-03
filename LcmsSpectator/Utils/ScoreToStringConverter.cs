@@ -12,7 +12,7 @@ namespace LcmsSpectator.Utils
             try
             {
                 var d = (double) value;
-                if (d.Equals(-1.0)) formatted = "N/A";
+                if (d.Equals(-1.0) || d.Equals(Double.NaN)) formatted = "N/A";
                 else if (d > 1000 || d < 0.001) formatted = String.Format("{0:0.###EE0}", d);
                 else formatted = Math.Round(d, 3).ToString(CultureInfo.InvariantCulture);
             }

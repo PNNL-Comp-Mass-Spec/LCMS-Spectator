@@ -26,6 +26,8 @@ namespace LcmsSpectator.ViewModels
         public DelegateCommand SaveCommand { get; private set; }
         public DelegateCommand CancelCommand { get; private set; }
 
+        public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
+
         public event EventHandler ReadyToClose;
 
         public bool Status { get; private set; }
@@ -51,6 +53,8 @@ namespace LcmsSpectator.ViewModels
                 Modifications.Add(modificationVm);
             }
             AddModificationCommand = new DelegateCommand(AddModification);
+
+            HeavyModificationsViewModel = new HeavyModificationsViewModel();
 
             SaveCommand = new DelegateCommand(Save);
             CancelCommand = new DelegateCommand(Cancel);
@@ -87,6 +91,10 @@ namespace LcmsSpectator.ViewModels
                 if (searchModification != null) modificationList.Add(searchModification);
             }
             IcParameters.Instance.SearchModifications = modificationList;
+
+            HeavyModificationsViewModel.Save();
+
+            IcParameters.Instance.Update();
 
             Status = true;
             if (ReadyToClose != null) ReadyToClose(this, null);

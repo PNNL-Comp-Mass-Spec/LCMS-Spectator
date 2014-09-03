@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace LcmsSpectator.Views
@@ -11,6 +12,10 @@ namespace LcmsSpectator.Views
         public XicView()
         {
             InitializeComponent();
+            FragmentIonXic.Loaded += (o, e) => { FragmentIonXic.ContextMenu.DataContext = FragmentIonXic.DataContext; };
+            HeavyFragmentIonXic.Loaded += (o, e) => { HeavyFragmentIonXic.ContextMenu.DataContext = HeavyFragmentIonXic.DataContext; };
+            PrecursorIonXic.Loaded += (o, e) => { PrecursorIonXic.ContextMenu.DataContext = PrecursorIonXic.DataContext; };
+            HeavyPrecursorIonXic.Loaded += (o, e) => { HeavyPrecursorIonXic.ContextMenu.DataContext = HeavyPrecursorIonXic.DataContext; };
             if (ShowHeavy.IsChecked == true)
             {
                 LightColumn.Width = new GridLength(50, GridUnitType.Star);
@@ -44,6 +49,11 @@ namespace LcmsSpectator.Views
                 PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
                 FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
             }
+        }
+
+        private void FragmentIonXicOnLoaded(object sender, RoutedEventArgs routedEventArgs)
+        {
+
         }
 
         private void ShowFragment_OnChecked(object sender, RoutedEventArgs e)

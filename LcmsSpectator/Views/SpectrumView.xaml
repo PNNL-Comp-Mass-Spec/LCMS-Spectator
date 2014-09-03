@@ -10,15 +10,34 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50*" />
             <RowDefinition Height="50*" />
-            <RowDefinition Height="20" />
         </Grid.RowDefinitions> 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="75*" />
             <ColumnDefinition Width="25*" />
         </Grid.ColumnDefinitions>
-        <oxy:Plot Name="Ms2Spectrum" DataContext="{Binding Ms2SpectrumViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" />
-        <oxy:Plot Name="PreviousMs1" DataContext="{Binding PreviousMs1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="1" />
-        <oxy:Plot Name="NextMs1" DataContext="{Binding NextMs1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="1" Grid.Column="1" />
-        <CheckBox IsChecked="{Binding ShowUnexplainedPeaks}" Grid.Row="2" Grid.Column="0">Show Unexplained Peaks</CheckBox>
+        <oxy:Plot Name="Ms2Spectrum" DataContext="{Binding Ms2SpectrumViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
+            <oxy:Plot.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                    <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                </ContextMenu>
+            </oxy:Plot.ContextMenu>
+        </oxy:Plot>
+        <oxy:Plot Name="PreviousMs1" DataContext="{Binding PreviousMs1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="1">
+            <oxy:Plot.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                    <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                </ContextMenu>
+            </oxy:Plot.ContextMenu>
+        </oxy:Plot>
+        <oxy:Plot Name="NextMs1" DataContext="{Binding NextMs1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="1" Grid.Column="1">
+            <oxy:Plot.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                    <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                </ContextMenu>
+            </oxy:Plot.ContextMenu>
+        </oxy:Plot>
     </Grid>
 </UserControl>

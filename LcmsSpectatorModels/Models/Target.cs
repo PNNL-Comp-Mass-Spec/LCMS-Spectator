@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectatorModels.Readers.SequenceReaders;
 
@@ -9,13 +6,33 @@ namespace LcmsSpectatorModels.Models
 {
     public class Target
     {
-        public string SequenceText { get; private set; }
+        private string _sequenceText;
         public Sequence Sequence { get; private set; }
-        public Target(string sequence)
+        public Target(string sequence, int charge=0)
         {
-            var seqReader = new SequenceReader();
             SequenceText = sequence;
-            Sequence = seqReader.Read(sequence);
+            Charge = charge;
+        }
+
+        public int Charge { get; set; }
+
+        public string SequenceText
+        {
+            get { return _sequenceText; }
+            set
+            {
+                var seqReader = new SequenceReader();
+                var seq = Sequence;
+                try
+                {
+                    Sequence = seqReader.Read(value);
+                    _sequenceText = value;
+                }
+                catch (Exception)
+                {
+                    Sequence = seq;
+                }
+            }
         }
     }
 }

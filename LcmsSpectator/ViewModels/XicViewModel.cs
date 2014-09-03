@@ -2,17 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
-using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
-using LcmsSpectatorModels.Utils;
-using MultiDimensionalPeakFinding;
 using OxyPlot.Axes;
 
 namespace LcmsSpectator.ViewModels
@@ -26,32 +21,38 @@ namespace LcmsSpectator.ViewModels
         public string FragmentAreaRatioLabel { get; private set; }
         public string PrecursorAreaRatioLabel { get; private set; }
         public ColorDictionary Colors { get; set; }
-        public RtLcMsRun Lcms { get; private set; }
-        public DelegateCommand CloseCommand { get; set; }
+        public ILcMsRun Lcms { get; private set; }
+        public DelegateCommand CloseCommand { get; private set; }
+        public DelegateCommand OpenHeavyModificationsCommand { get; private set; }
         public event EventHandler XicClosing;
         public event EventHandler SelectedScanNumberChanged;
-        public XicViewModel(string rawFilePath, ColorDictionary colors, IDialogService dialogService=null)
+        public XicViewModel(string rawFilePath, ColorDictionary colors, IMainDialogService dialogService=null)
         {
-            if (dialogService == null) dialogService = new DialogService();
+            if (dialogService == null) dialogService = new MainDialogService();
             _dialogService = dialogService;
             RawFilePath = rawFilePath;
             Colors = colors;
-            FragmentPlotViewModel = new XicPlotViewModel("Fragment XIC", colors, XicXAxis, false, false);
+            FragmentPlotViewModel = new XicPlotViewModel(_dialogService, Lcms, "Fragment XIC", colors, XicXAxis, false, false);
             FragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
-            HeavyFragmentPlotViewModel = new XicPlotViewModel("Heavy Fragment XIC", colors, XicXAxis, true, false);
+            FragmentPlotViewModel.PlotChanged += PlotChanged;
+            HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, Lcms, "Heavy Fragment XIC", colors, XicXAxis, true, false);
             HeavyFragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
-            PrecursorPlotViewModel = new XicPlotViewModel("Precursor XIC", colors, XicXAxis, false);
-            HeavyPrecursorPlotViewModel = new XicPlotViewModel("Heavy Precursor XIC", colors, XicXAxis, true);
+            HeavyFragmentPlotViewModel.PlotChanged += PlotChanged;
+            PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, Lcms, "Precursor XIC", colors, XicXAxis, false);
+            PrecursorPlotViewModel.PlotChanged += PlotChanged;
+            HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, Lcms, "Heavy Precursor XIC", colors, XicXAxis, true);
+            HeavyPrecursorPlotViewModel.PlotChanged += PlotChanged;
             SelectedRetentionTime = 0;
             _showScanMarkers = false;
             _showHeavy = false;
-            _showFragmentXic = true;
-            XicXAxis.AxisChanged += UpdateAreaRatioLabels;
+            _showFragmentXic = false;
+            XicXAxis.AxisChanged += XAxisChanged;
             CloseCommand = new DelegateCommand(() =>
             {
                 if (_dialogService.ConfirmationBox(String.Format("Are you sure you would like to close {0}?", RawFileName), "") && XicClosing != null)
                     XicClosing(this, EventArgs.Empty);
             });
+            OpenHeavyModificationsCommand = new DelegateCommand(OpenHeavyModifications);
         }
 
         /// <summary>
@@ -72,7 +73,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _rawFilePath = value;
-                Lcms = RtLcMsRun.GetRtLcMsRun(_rawFilePath, MassSpecDataType.XCaliburRun, 0, 0);
+                Lcms = RafLcMsRun.GetLcMsRun(_rawFilePath, MassSpecDataType.XCaliburRun, 0, 0);
                 OnPropertyChanged("RawFilePath");
             }
         }
@@ -102,14 +103,26 @@ namespace LcmsSpectator.ViewModels
             get { return _selectedPrecursors; }
             set
             {
-                if (SelectedPrecursors == value) return;
                 _selectedPrecursors = value;
-                Task.Factory.StartNew(() =>
-                {
-                    PrecursorPlotViewModel.Xics = GetXics(_selectedPrecursors);
-                    UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
-                });
+                if (!_showHeavy) PrecursorPlotViewModel.Ions = _selectedPrecursors;
+                UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
                 OnPropertyChanged("SelectedPrecursors");
+            }
+        }
+
+        /// <summary>
+        /// Light precursor ions to create light precursor XICs from.
+        /// </summary>
+        public List<LabeledIon> SelectedLightPrecursors
+        {
+            get { return _selectedLightPrecursors; }
+            set
+            {
+                _selectedLightPrecursors = value;
+                // Only create light xics if the heavy xics are visible
+                if (_showHeavy) PrecursorPlotViewModel.Ions = _selectedLightPrecursors;
+                UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
+                OnPropertyChanged("SelectedLightPrecursors");
             }
         }
 
@@ -121,14 +134,10 @@ namespace LcmsSpectator.ViewModels
             get { return _selectedHeavyPrecursors; }
             set
             {
-                if (SelectedHeavyPrecursors == value) return;
                 _selectedHeavyPrecursors = value;
-                Task.Factory.StartNew(() =>
-                {
-                    // Only create heavy xics if the heavy xics are visible
-                    if (_showHeavy) HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors);
-                    UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
-                });
+                // Only create heavy xics if the heavy xics are visible
+                if (_showHeavy) HeavyPrecursorPlotViewModel.Ions = _selectedHeavyPrecursors;
+                UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
                 OnPropertyChanged("SelectedHeavyPrecursors");
             }
         }
@@ -142,12 +151,25 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedFragments = value;
-                Task.Factory.StartNew(() =>
-                {
-                    if (ShowFragmentXic) FragmentPlotViewModel.Xics = GetXics(_selectedFragments);
-                    UpdateFragmentAreaRatioLabels();        // XIC changed, update area
-                });
+                if (ShowFragmentXic && !ShowHeavy) FragmentPlotViewModel.Ions = _selectedFragments;
+                UpdateFragmentAreaRatioLabels();        // XIC changed, update area
                 OnPropertyChanged("SelectedFragments");
+            }
+        }
+
+        /// <summary>
+        /// Heavy fragment ions to create heavy fragment XICs from.
+        /// </summary>
+        public List<LabeledIon> SelectedLightFragments
+        {
+            get { return _selectedLightFragments; }
+            set
+            {
+                _selectedLightFragments = value;
+                // Only create heavy xics if the heavy xics are visible
+                if (_showHeavy && _showFragmentXic) FragmentPlotViewModel.Ions = _selectedLightFragments;
+                UpdateFragmentAreaRatioLabels();    // XIC changed, update area
+                OnPropertyChanged("SelectedLightFragments");
             }
         }
 
@@ -160,12 +182,9 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedHeavyFragments = value;
-                Task.Factory.StartNew(() =>
-                {
-                    // Only create heavy xics if the heavy xics are visible
-                    if (_showHeavy && _showFragmentXic) HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
-                    UpdateFragmentAreaRatioLabels();    // XIC changed, update area
-                });
+                // Only create heavy xics if the heavy xics are visible
+                if (_showHeavy && _showFragmentXic) HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
+                UpdateFragmentAreaRatioLabels();    // XIC changed, update area
                 OnPropertyChanged("SelectedHeavyFragments");
             }
         }
@@ -199,15 +218,29 @@ namespace LcmsSpectator.ViewModels
                 _showFragmentXic = value;
                 if (_showFragmentXic)
                 {
-                    if (_selectedFragments != null) Task.Factory.StartNew(() =>
+                    if (_showHeavy && _selectedHeavyFragments != null)
                     {
-                        FragmentPlotViewModel.Xics = GetXics(_selectedFragments);
-                    });
-                    if (_showHeavy && _selectedHeavyFragments != null) Task.Factory.StartNew(() =>
-                    {
-                        HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
+                        FragmentPlotViewModel.Ions = _selectedLightFragments;
+                        HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
                         UpdateFragmentAreaRatioLabels();
-                    });
+                    }
+                    else if (_selectedFragments != null)
+                    {
+                        FragmentPlotViewModel.Ions = _selectedFragments;
+                    }
+                }
+                else
+                {
+
+                    if (_showHeavy && _selectedHeavyFragments != null)
+                    {
+                        HeavyFragmentPlotViewModel.Ions = new List<LabeledIon>();
+                        UpdateFragmentAreaRatioLabels();
+                    }
+                    else if (_selectedFragments != null)
+                    {
+                        FragmentPlotViewModel.Ions = new List<LabeledIon>();
+                    }
                 }
                 OnPropertyChanged("ShowFragmentXic");
             }
@@ -225,16 +258,33 @@ namespace LcmsSpectator.ViewModels
                 _showHeavy = value;
                 if (_showHeavy)
                 {
-                    if (_selectedHeavyPrecursors != null) Task.Factory.StartNew(() => 
-                    { 
-                        HeavyPrecursorPlotViewModel.Xics = GetXics(_selectedHeavyPrecursors);
-                        UpdatePrecursorAreaRatioLabels(); 
-                    });
-                    if (_selectedHeavyFragments != null && _showFragmentXic) Task.Factory.StartNew(() =>
+                    if (_selectedHeavyPrecursors != null)
                     {
-                        HeavyFragmentPlotViewModel.Xics = GetXics(_selectedHeavyFragments);
+                        PrecursorPlotViewModel.Ions = _selectedLightPrecursors;
+                        HeavyPrecursorPlotViewModel.Ions = _selectedHeavyPrecursors;
+                        UpdatePrecursorAreaRatioLabels(); 
+                    }
+                    if (_selectedHeavyFragments != null && _showFragmentXic)
+                    {
+                        FragmentPlotViewModel.Ions = _selectedLightFragments;
+                        HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
                         UpdateFragmentAreaRatioLabels();
-                    });
+                    }
+                }
+                else
+                {
+                    if (_selectedHeavyPrecursors != null)
+                    {
+                        PrecursorPlotViewModel.Ions = _selectedPrecursors;
+                        HeavyPrecursorPlotViewModel.Ions = new List<LabeledIon>();
+                        UpdatePrecursorAreaRatioLabels();
+                    }
+                    if (_selectedHeavyFragments != null && _showFragmentXic)
+                    {
+                        FragmentPlotViewModel.Ions = _selectedFragments;
+                        HeavyFragmentPlotViewModel.Ions = new List<LabeledIon>();
+                        UpdateFragmentAreaRatioLabels();
+                    }
                 }
                 OnPropertyChanged("ShowHeavy");
             }
@@ -269,6 +319,41 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Update and regenerate all plots
+        /// </summary>
+        public void UpdatePlots()
+        {
+            if (_showHeavy)
+            {
+                if (_selectedHeavyPrecursors != null)
+                {
+                    PrecursorPlotViewModel.Ions = _selectedLightPrecursors;
+                    HeavyPrecursorPlotViewModel.Ions = _selectedHeavyPrecursors;
+                    UpdatePrecursorAreaRatioLabels();
+                }
+                if (_selectedHeavyFragments != null && _showFragmentXic)
+                {
+                    FragmentPlotViewModel.Ions = _selectedLightFragments;
+                    HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
+                }
+            }
+            else
+            {
+                if (_selectedHeavyPrecursors != null)
+                {
+                    PrecursorPlotViewModel.Ions = _selectedPrecursors;
+                    HeavyPrecursorPlotViewModel.Ions = new List<LabeledIon>();
+                    UpdatePrecursorAreaRatioLabels();
+                }
+                if (_selectedHeavyFragments != null && _showFragmentXic)
+                {
+                    FragmentPlotViewModel.Ions = _selectedFragments;
+                    HeavyFragmentPlotViewModel.Ions = new List<LabeledIon>();
+                }
+            }
+        }
+
+        /// <summary>
         /// Shared x axis for all plots. Sharing an X axis allows all plots to zoom and pan together.
         /// </summary>
         private LinearAxis XicXAxis
@@ -277,10 +362,9 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_xicXAxis == null)
                 {
-                    var maxRt = Math.Max(Lcms.MaxRetentionTime, 1.0);
+                    var maxRt = Math.Max(Lcms.GetElutionTime(Lcms.MaxLcScan), 1.0);
                     _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Retention Time")
                     {
-                        MinimumRange = Lcms.MaxRetentionTimeDelta,
                         Maximum = maxRt + 0.0001,
                         Minimum = 0,
                         AbsoluteMinimum = 0,
@@ -343,14 +427,31 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Event handler to update area ratio labels when shared x axis is zoomed or panned.
+        /// Event handler for XAxis changed to update area ratio labels when shared x axis is zoomed or panned.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void UpdateAreaRatioLabels(object sender, AxisChangedEventArgs e)
+        private void XAxisChanged(object sender, AxisChangedEventArgs e)
         {
-            Task.Factory.StartNew(UpdateFragmentAreaRatioLabels);
-            Task.Factory.StartNew(UpdatePrecursorAreaRatioLabels);
+            UpdateFragmentAreaRatioLabels();
+            UpdatePrecursorAreaRatioLabels();
+        }
+
+        /// <summary>
+        /// Event handler for Plot changed to update area ratio labels when plots are updated.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PlotChanged(object sender, EventArgs e)
+        {
+            var plotvm = sender as XicPlotViewModel;
+            if (plotvm == null || plotvm == FragmentPlotViewModel || plotvm == HeavyFragmentPlotViewModel) UpdateFragmentAreaRatioLabels();
+            if (plotvm == null || plotvm == PrecursorPlotViewModel || plotvm == HeavyPrecursorPlotViewModel) UpdatePrecursorAreaRatioLabels();
+        }
+
+        private void OpenHeavyModifications()
+        {
+            _dialogService.OpenHeavyModifications(new HeavyModificationsWindowViewModel());
         }
 
         /// <summary>
@@ -387,8 +488,8 @@ namespace LcmsSpectator.ViewModels
         /// <param name="maxRt">Value calculated for x axis maximum.</param>
         private void CalculateBounds(out double minRt, out double maxRt)
         {
-            var minLcmsRt = Lcms.MinRetentionTime;
-            var maxLcmsRt = Lcms.MaxRetentionTime;
+            var minLcmsRt = Lcms.GetElutionTime(Lcms.MaxLcScan);
+            var maxLcmsRt = Lcms.GetElutionTime(Lcms.MaxLcScan);
             minRt = SelectedRetentionTime - 1;
             maxRt = SelectedRetentionTime + 1;
             if (SelectedRetentionTime < 1) minRt = 0;
@@ -401,37 +502,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        /// <summary>
-        /// Create Xics from list of ions. Smooths XICs and adds retention time to each point.
-        /// </summary>
-        /// <param name="ions">Ions to create XICs from.</param>
-        /// <returns>Labeled XICs</returns>
-        private List<LabeledXic> GetXics(IEnumerable<LabeledIon> ions)
-        {
-            var xics = new List<LabeledXic>();
-            var smoother = (IcParameters.Instance.PointsToSmooth == 0) ? 
-                            null : new SavitzkyGolaySmoother(IcParameters.Instance.PointsToSmooth, 2);
-            // get fragment xics
-            foreach (var label in ions)
-            {
-                var ion = label.Ion;
-                Xic xic;
-                if (label.IsFragmentIon) xic = Lcms.GetFullFragmentExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
-                                                                                            IcParameters.Instance.ProductIonTolerancePpm,
-                                                                                            label.PrecursorIon.GetMostAbundantIsotopeMz());
-                else xic = Lcms.GetFullExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
-                // add retention time
-                var rtXic = new List<XicRetPoint>();
-                rtXic.AddRange(xic.Select(xicPoint => new XicRetPoint(xicPoint.ScanNum, Lcms.GetRetentionTime(xicPoint.ScanNum), xicPoint.Mz, xicPoint.Intensity)));
-                // smooth
-                if (smoother != null) rtXic = IonUtils.SmoothXic(smoother, rtXic).ToList();
-                var lXic = new LabeledXic(label.Composition, label.Index, rtXic, label.IonType, label.IsFragmentIon);
-                xics.Add(lXic);
-            }
-            return xics;
-        }
-
-        private readonly IDialogService _dialogService;
+        private readonly IMainDialogService _dialogService;
 
         private List<LabeledIon> _selectedFragments;
         private List<LabeledIon> _selectedPrecursors;
@@ -445,5 +516,7 @@ namespace LcmsSpectator.ViewModels
         private string _rawFilePath;
         private double _selectedRetentionTime;
         private bool _showFragmentXic;
+        private List<LabeledIon> _selectedLightPrecursors;
+        private List<LabeledIon> _selectedLightFragments;
     }
 }

@@ -5,15 +5,17 @@ using System.Linq;
 using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectatorModels.Config;
 
 namespace LcmsSpectatorModels.Models
 {
     public class PrSm: IComparable<PrSm>
     {
         public String RawFileName { get; set; }
-        public RtLcMsRun Lcms { get; set; }
+        public ILcMsRun Lcms { get; set; }
         public int Scan { get; set; }
-        public double RetentionTime { get { return (Lcms == null) ? 0.0 : Lcms.GetRetentionTime(Scan);  } }
+        public double RetentionTime { get { return (Lcms == null) ? 0.0 : Lcms.GetElutionTime(Scan);  } }
         public Spectrum Ms2Spectrum { get { return (Lcms == null) ? null : Lcms.GetSpectrum(Scan); } }
         public string Protein { get; set; }
         public string Annotation { get; set; }
@@ -34,9 +36,15 @@ namespace LcmsSpectatorModels.Models
         public double MostAbundantIsotopeMz { get; set; }
         public double Mass { get; set; }
         public double MatchedFragments { get; set; }
+        public bool UseGolfScoring { get; set; } // lower the score the better
         public double QValue { get; set; }
         public double PepQValue { get; set; }
         public bool Heavy { get; set; }
+
+        public PrSm()
+        {
+            UseGolfScoring = false;
+        }
 
         public string ScanText
         {
@@ -47,21 +55,52 @@ namespace LcmsSpectatorModels.Models
         {
             get
             {
-                Sequence heavySequence;
-                if (Sequence.Count > 0 && Sequence[Sequence.Count - 1].Residue == 'K')
+                var mods = IcParameters.Instance.HeavyModifications;
+                if (Sequence.Count == 0) return Sequence;
+                var lastAa = Sequence[Sequence.Count - 1];
+
+                foreach (var mod in mods)
                 {
-                    var tempSequence = Sequence.ToList();
-                    tempSequence[tempSequence.Count-1] = new ModifiedAminoAcid(tempSequence[tempSequence.Count-1], Modification.LysToHeavyLys);
-                    heavySequence = new Sequence(tempSequence);
+                    if (mod.Equals(Modification.ArgToHeavyArg) && lastAa.Residue == 'R')
+                    {
+                        lastAa = new ModifiedAminoAcid(lastAa, mod);
+                    }
+                    else if (mod.Equals(Modification.LysToHeavyLys) && lastAa.Residue == 'K')
+                    {
+                        lastAa = new ModifiedAminoAcid(lastAa, mod);
+                    }
                 }
-                else if (Sequence.Count > 0 && Sequence[Sequence.Count - 1].Residue == 'R')
-                {
-                    var tempSequence = Sequence.ToList();
-                    tempSequence[tempSequence.Count - 1] = new ModifiedAminoAcid(tempSequence[tempSequence.Count - 1], Modification.ArgToHeavyArg);
-                    heavySequence = new Sequence(tempSequence);
-                }
-                else heavySequence = Sequence;
+
+                var tempSequence = Sequence.ToList();
+                tempSequence[tempSequence.Count - 1] = lastAa;
+                var heavySequence = new Sequence(tempSequence);
                 return heavySequence;
+            }
+        }
+
+        public Sequence LightSequence
+        {
+            get
+            {
+                var mods = IcParameters.Instance.LightModifications;
+                if (Sequence.Count == 0) return Sequence;
+                var lastAa = Sequence[Sequence.Count - 1];
+
+                foreach (var mod in mods)
+                {
+                    if (mod.Equals(Modification.ArgToHeavyArg) && lastAa.Residue == 'R')
+                    {
+                        lastAa = new ModifiedAminoAcid(lastAa, mod);
+                    }
+                    else if (mod.Equals(Modification.LysToHeavyLys) && lastAa.Residue == 'K')
+                    {
+                        lastAa = new ModifiedAminoAcid(lastAa, mod);
+                    }
+                }
+
+                var tempSequence = Sequence.ToList();
+                tempSequence[tempSequence.Count - 1] = lastAa;
+                return new Sequence(tempSequence);
             }
         }
 
@@ -96,20 +135,10 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
-        public double HeavyPrecursorMz
-        {
-            get
-            {
-                if (Sequence.Count == 0) return 0.0;
-                var composition = HeavySequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
-                var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
-                return Math.Round(ion.GetMonoIsotopicMz(), 2);
-            }
-        }
-
         public int CompareTo(PrSm other)
         {
-            return Scan.CompareTo(other.Scan);
+            var comp = UseGolfScoring ? other.MatchedFragments.CompareTo(MatchedFragments) : MatchedFragments.CompareTo(other.MatchedFragments);
+            return comp;
         }
 
         public void SetModifications(string modifications)

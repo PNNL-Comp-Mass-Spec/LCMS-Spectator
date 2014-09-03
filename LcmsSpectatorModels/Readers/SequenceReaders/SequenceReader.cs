@@ -6,9 +6,9 @@ namespace LcmsSpectatorModels.Readers.SequenceReaders
     {
         public Sequence Read(string sequence)
         {
-            if (!sequence.Contains("[")) 
-                return Sequence.GetSequenceFromMsGfPlusPeptideStr(sequence);
-            var reader = new LcmsSpectatorSequenceReader();
+            ISequenceReader reader;
+            if (!sequence.Contains("[")) reader = new MsgfPlusSequenceReader();
+            else reader = new LcmsSpectatorSequenceReader();
             return reader.Read(sequence);
         }
     }

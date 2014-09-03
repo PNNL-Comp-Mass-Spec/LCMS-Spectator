@@ -22,8 +22,12 @@ namespace LcmsSpectatorModels.Config
         public double IonCorrelationThreshold { get; set; }
         public List<SearchModification> Modifications { get; set; }
         public int PointsToSmooth { get; set; }
-        public List<SearchModification> SearchModifications { get; set; } 
+        public List<SearchModification> SearchModifications { get; set; }
+        public List<Modification> LightModifications { get; set; } 
+        public List<Modification> HeavyModifications { get; set; } 
         public IonTypeFactory IonTypeFactory { get; set; }
+
+        public event Action IcParametersUpdated;
 
         public static IcParameters Instance
         {
@@ -58,6 +62,11 @@ namespace LcmsSpectatorModels.Config
             return IonTypeFactory.GetIonType(name);
         }
 
+        public void Update()
+        {
+            if (IcParametersUpdated != null) IcParametersUpdated();
+        }
+
         private IcParameters()
         {
             Modifications = new List<SearchModification>();
@@ -72,6 +81,8 @@ namespace LcmsSpectatorModels.Config
             {
                 new SearchModification(Modification.Carbamidomethylation, 'C', SequenceLocation.Everywhere, true)
             };
+            LightModifications = new List<Modification>();
+            HeavyModifications = new List<Modification> { Modification.LysToHeavyLys, Modification.ArgToHeavyArg };
             IonTypeFactory = new IonTypeFactory(15);
         }
 

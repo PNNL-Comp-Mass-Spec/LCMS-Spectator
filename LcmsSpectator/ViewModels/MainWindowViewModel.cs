@@ -25,16 +25,19 @@ namespace LcmsSpectator.ViewModels
         public List<IonType> IonTypes { get; set; }
 
         public List<LabeledIon> FragmentLabels { get; set; }
+        public List<LabeledIon> LightFragmentLabels { get; set; } 
         public List<LabeledIon> HeavyFragmentLabels { get; set; } 
         public List<LabeledIon> PrecursorLabels { get; set; }
+        public List<LabeledIon> LightPrecursorLabels { get; set; } 
         public List<LabeledIon> HeavyPrecursorLabels { get; set; } 
 
-        public DelegateCommand OpenRawFileCommand { get; set; }
-        public DelegateCommand OpenTsvFileCommand { get; set; }
-        public DelegateCommand SaveCommand { get; set; }
-        public DelegateCommand OpenSettingsCommand { get; set; }
+        public DelegateCommand OpenRawFileCommand { get; private set; }
+        public DelegateCommand OpenTsvFileCommand { get; private set; }
+        public DelegateCommand OpenFromDmsCommand { get; private set; }
+        public DelegateCommand OpenSettingsCommand { get; private set; }
+        public DelegateCommand OpenAboutBoxCommand { get; private set; }
 
-        public CreateSequenceViewModel CreateSequenceViewModel { get; set; }
+        public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
         public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
@@ -43,13 +46,14 @@ namespace LcmsSpectator.ViewModels
         {
             _xicChanged = false;
             _dialogService = dialogService;
+            IcParameters.Instance.IcParametersUpdated += SettingsChanged;
             Ids = new IdentificationTree();
             ProteinIds = Ids.ProteinIds.ToList();
             PrSms = new List<PrSm>();
             _colors = new ColorDictionary(2);
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
-            IonTypeSelectorViewModel.IonTypesUpdated += SetIonCharges;
-            Ms2SpectrumViewModel = new SpectrumViewModel(_colors);
+            IonTypeSelectorViewModel.IonTypesUpdated += SetIonTypes;
+            Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, _colors);
             XicViewModels = new ObservableCollection<XicViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
             CreateSequenceViewModel.SequenceCreated += UpdatePrSm;
@@ -57,8 +61,10 @@ namespace LcmsSpectator.ViewModels
             _spectrumChanged = false;
 
             OpenRawFileCommand = new DelegateCommand(OpenRawFile);
-            OpenTsvFileCommand = new DelegateCommand(OpenTsvFile);
+            OpenTsvFileCommand = new DelegateCommand(OpenIdFile);
+            OpenFromDmsCommand = new DelegateCommand(OpenFromDms, ShowOpenFromDms);
             OpenSettingsCommand = new DelegateCommand(OpenSettings);
+            OpenAboutBoxCommand = new DelegateCommand(OpenAboutBox);
 
             FragmentLabels = new List<LabeledIon>();
             SelectedFragmentLabels = new List<LabeledIon>();
@@ -79,7 +85,7 @@ namespace LcmsSpectator.ViewModels
                 if (value != null)
                 {
                     _treeViewSelectedItem = value;
-                    if ((_treeViewSelectedItem as PrSm) != null)
+                    if (_treeViewSelectedItem is PrSm)
                     {
                         var selectedPrSm = _treeViewSelectedItem as PrSm;
                         SelectedPrSm = selectedPrSm;
@@ -108,57 +114,10 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        /// <summary>
-        /// Currently selected protein in ID Tree and Sequence Graph
-        /// </summary>
-        public ProteinId SelectedProtein
-        {
-            get { return _selectedProtein; }
-            set
-            {
-                _selectedProtein = value;
-                OnPropertyChanged("SelectedProtein");
-                if (_selectedProtein == null) return;
-                var chargeState = Ids.GetChargeState(_selectedPrSm);
-                if (chargeState != null && chargeState.Sequence.Equals(_selectedPrSm.Sequence)) SelectedChargeState = chargeState;
-                else
-                {
-                    var newChargeState = new ChargeStateId(_selectedPrSm.Charge, _selectedPrSm.Sequence, _selectedPrSm.HeavySequence,
-                                                           _selectedPrSm.SequenceText, _selectedProtein.ProteinNameDesc, _selectedPrSm.PrecursorMz);
-                    if (chargeState != null) newChargeState.PrSms = chargeState.PrSms;
-                    SelectedChargeState = newChargeState;
-                }
-            }
-        }
 
-        /// <summary>
-        /// Currently selected charge state and XICs
-        /// </summary>
-        public ChargeStateId SelectedChargeState
+        public bool ShowOpenFromDms
         {
-            get { return _selectedChargeState; }
-            set
-            {
-                if (value == null) return;
-                if (_selectedChargeState == null || 
-                    _selectedChargeState.SequenceText != value.SequenceText || 
-                    _selectedChargeState.Charge != value.Charge || _xicChanged)
-                {
-                    var absoluteMaxCharge = Math.Min(Math.Max(value.Charge - 1, 2), 15);
-                    _colors.BuildColorDictionary(absoluteMaxCharge);
-                    IonTypeSelectorViewModel.AbsoluteMaxCharge = absoluteMaxCharge;
-                    IonTypeSelectorViewModel.MinCharge = 1;
-                    _selectedChargeState = value;
-                    foreach (var xicVm in XicViewModels) xicVm.ZoomToRt(SelectedPrSm.RetentionTime);
-                    SetFragmentLabels();
-                    SetPrecursorLabels();
-                    _xicChanged = false;
-                }
-                UpdateSpectrum();
-                foreach (var xicVm in XicViewModels)
-                    xicVm.HighlightRetentionTime(SelectedPrSm.RetentionTime, xicVm.RawFileName == SelectedPrSm.RawFileName, SelectedPrSm.Heavy);
-                OnPropertyChanged("SelectedChargeState");
-            }
+            get { return System.Net.Dns.GetHostEntry("").HostName.Contains("pnl.gov"); }
         }
 
         /// <summary>
@@ -170,21 +129,27 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 if (value == null) return;
-                if (_xicChanged || _selectedPrSm == null) _xicChanged = true;
-                _selectedPrSm = value;
-                OnPropertyChanged("SelectedPrSm");
-                CreateSequenceViewModel.SelectedScan = SelectedPrSm.Scan;
+                CreateSequenceViewModel.SelectedScan = value.Scan;
                 _spectrumChanged = true;
-                ProteinId protein = Ids.GetProtein(_selectedPrSm);
-                if (protein != null) SelectedProtein = protein;
-                else
+                if (_selectedPrSm == null ||
+                    _selectedPrSm.SequenceText != value.SequenceText ||
+                    _selectedPrSm.Charge != value.Charge || _xicChanged)
                 {
-                    var newChargeState = new ChargeStateId(_selectedPrSm.Charge, _selectedPrSm.Sequence, _selectedPrSm.HeavySequence,
-                                                           _selectedPrSm.SequenceText, _selectedPrSm.ProteinNameDesc, 
-                                                           _selectedPrSm.PrecursorMz);
-                    newChargeState.Add(_selectedPrSm);
-                    SelectedChargeState = newChargeState;
+                    _selectedPrSm = value;
+                    var absoluteMaxCharge = Math.Min(Math.Max(value.Charge - 1, 2), 15);
+                    _colors.BuildColorDictionary(absoluteMaxCharge);
+                    IonTypeSelectorViewModel.AbsoluteMaxCharge = absoluteMaxCharge;
+                    IonTypeSelectorViewModel.MinCharge = 1;
+                    foreach (var xicVm in XicViewModels) xicVm.ZoomToRt(value.RetentionTime);
+                    SetFragmentLabels();
+                    SetPrecursorLabels();
+                    _xicChanged = false;
                 }
+                _selectedPrSm = value;
+                UpdateSpectrum();
+                foreach (var xicVm in XicViewModels)
+                    xicVm.HighlightRetentionTime(SelectedPrSm.RetentionTime, xicVm.RawFileName == SelectedPrSm.RawFileName, SelectedPrSm.Heavy);
+                OnPropertyChanged("SelectedPrSm");
             }
         }
 
@@ -200,6 +165,7 @@ namespace LcmsSpectator.ViewModels
                     foreach (var xicVm in XicViewModels)
                     {
                         xicVm.SelectedFragments = fragmentLabelList;
+                        xicVm.SelectedLightFragments = IonUtils.ReduceLabels(LightFragmentLabels, fragmentLabelList);
                         xicVm.SelectedHeavyFragments = IonUtils.ReduceLabels(HeavyFragmentLabels, fragmentLabelList);
                     }
                 }
@@ -219,6 +185,7 @@ namespace LcmsSpectator.ViewModels
                     foreach (var xicVm in XicViewModels)
                     {
                         xicVm.SelectedPrecursors = precursorLabelList;
+                        xicVm.SelectedLightPrecursors = IonUtils.ReduceLabels(LightPrecursorLabels, precursorLabelList);
                         xicVm.SelectedHeavyPrecursors = IonUtils.ReduceLabels(HeavyPrecursorLabels, precursorLabelList);
                     }
                 }
@@ -275,6 +242,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Prompt user for raw file and call ReadRawFile() to open file.
+        /// </summary>
         public void OpenRawFile()
         {
             var rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");
@@ -282,14 +252,19 @@ namespace LcmsSpectator.ViewModels
             IsLoading = true;
             Task.Factory.StartNew(() =>
             {
-                RawFileOpener(rawFileName);
+                ReadRawFile(rawFileName);
                 if (XicViewModels.Count == 1) ShowUnidentifiedScans = true;
             });
         }
 
-        public void OpenTsvFile()
+        /// <summary>
+        /// Open identification file. Checks to ensure that there is a raw file open
+        /// corresponding to this ID file.
+        /// </summary>
+        public void OpenIdFile()
         {
-            var tsvFileName = _dialogService.OpenFile(".txt", @"IC ID Files (*.tsv)|*.tsv");
+            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId)|*.mzId|MzId GZip Files (*.mzId.gz)|*.mzId.gz";
+            var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
             if (tsvFileName == "") return;
             var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
             var ext = Path.GetExtension(tsvFileName);
@@ -298,9 +273,13 @@ namespace LcmsSpectator.ViewModels
             XicViewModel xicVm = null;
             foreach (var xic in XicViewModels)      // Raw file already open?
             {
-                if (xic.RawFileName == fileName) xicVm = xic;
+                if (xic.RawFileName == fileName)
+                {   // xicVm with correct raw file name was found. Raw file is already open
+                    xicVm = xic;
+                    rawFileName = xicVm.RawFileName;
+                }
             }
-            if (xicVm == null)
+            if (xicVm == null)  // Raw file not already open
             {
                 var directoryName = Path.GetDirectoryName(tsvFileName);
                 if (directoryName != null)
@@ -308,51 +287,64 @@ namespace LcmsSpectator.ViewModels
                     var directory = Directory.GetFiles(directoryName);
                     foreach (var file in directory) // Raw file in same directory as tsv file?
                         if (file == path + ".raw") rawFileName = path + ".raw";
-                    if (rawFileName == "")
-                    {
+                    if (rawFileName == "")  // Raw file was not in the same directory.
+                    {   // prompt user for raw file path
                         _dialogService.MessageBox("Please select raw file.");
                         rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");
                             // manually find raw file
                     }
                 }
             }
-            else rawFileName = xicVm.RawFileName;
-            Task.Factory.StartNew(() =>
-            {
-                if (rawFileName != "" && xicVm == null)
-                {
-                    RawFileOpener(rawFileName);
-                    var rawFile = Path.GetFileNameWithoutExtension(rawFileName);
-                    foreach (var xic in XicViewModels)
-                    {
-                        if (xic.RawFileName == rawFile) xicVm = xic;
-                    }
-                    if (xicVm == null)
-                    {
-                        _dialogService.MessageBox("Cannot open id file.");
-                        return;
-                    }
-                }
-                else if (rawFileName == "") return;
-                if (xicVm == null) return;
-                IsLoading = true;
-                var reader = IdFileReaderFactory.CreateReader(tsvFileName);
-                var ids = reader.Read(xicVm.Lcms, xicVm.RawFileName);
-                Ids.Add(ids);
-                FilterIds();
-                SelectedPrSm = null;
-                _xicChanged = true;
-                if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
-                ShowUnidentifiedScans = false;
-                FileOpen = true;
-                IsLoading = false;
+            if (!String.IsNullOrEmpty(rawFileName)) Task.Factory.StartNew(() =>
+            {   // Name of raw file was found
+                if (xicVm == null) xicVm = ReadRawFile(rawFileName);    // raw file isn't open yet
+                ReadIdFile(tsvFileName, rawFileName, xicVm);    // finally read the TSV file
             });
+            else _dialogService.MessageBox("Cannot open ID file.");
         }
 
-        public void RawFileOpener(string rawFileName)
+
+        /// <summary>
+        /// Attempt to open Ids from identification file and associate raw file with them.
+        /// </summary>
+        /// <param name="idFileName">Name of id file.</param>
+        /// <param name="rawFileName">Name of raw file to associate with id file.</param>
+        /// <param name="xicVm">Xic View model to associate with id file.</param>
+        public void ReadIdFile(string idFileName, string rawFileName, XicViewModel xicVm)
         {
             IsLoading = true;
-            var xicVm = new XicViewModel(rawFileName, _colors);
+            IdentificationTree ids;
+            try
+            {
+                var reader = IdFileReaderFactory.CreateReader(idFileName);
+                ids = reader.Read(xicVm.Lcms, xicVm.RawFileName);
+            }
+            catch (IOException e)
+            {
+                _dialogService.ExceptionAlert(e);
+                FileOpen = false;
+                IsLoading = false;
+                return;
+            }
+            Ids.Add(ids);
+            Ids.Tool = ids.Tool; // assign new tool
+            FilterIds();    // filter Ids by qvalue threshold
+            SelectedPrSm = null;
+            _xicChanged = true;
+            ShowUnidentifiedScans = false;
+            if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
+            FileOpen = true;
+            IsLoading = false;
+        }
+
+        /// <summary>
+        /// Open raw file
+        /// </summary>
+        /// <param name="rawFilePath">Path to raw file to open</param>
+        public XicViewModel ReadRawFile(string rawFilePath)
+        {
+            IsLoading = true;
+            var xicVm = new XicViewModel(rawFilePath, _colors);
             var lcms = xicVm.Lcms;
             var scans = lcms.GetScanNumbers(2);
             foreach (var scan in scans)
@@ -363,7 +355,7 @@ namespace LcmsSpectator.ViewModels
                     RawFileName = xicVm.RawFileName,
                     Lcms = lcms,
                     QValue = 1.0,
-                    MatchedFragments = -1.0,
+                    MatchedFragments = Double.NaN,
                     Sequence = new Sequence(new List<AminoAcid>()),
                     SequenceText = "",
                     ProteinName = "",
@@ -383,19 +375,71 @@ namespace LcmsSpectator.ViewModels
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.CreatePrSmCommand.Executable = true; });
             FileOpen = true;
             IsLoading = false;
+            return xicVm;
         }
 
-        public void OpenSettings()
+        /// <summary>
+        /// Open data set (raw file and ID files) from PNNL DMS system
+        /// </summary>
+        public void OpenFromDms()
         {
-            var qValue = IcParameters.Instance.QValueThreshold;
-            var saved = _dialogService.OpenSettings(new SettingsViewModel(_dialogService));
-            var newQValue = IcParameters.Instance.QValueThreshold;
-            if (saved && !qValue.Equals(newQValue))
+            var data = _dialogService.OpenDmsLookup(new DmsLookupViewModel(_dialogService));
+            if (data == null) return;
+            var dataSetDirName = data.Item1;
+            var dataSetDir = Directory.GetFiles(dataSetDirName);
+            var jobDirName = data.Item2;
+            var jobDir = Directory.GetFiles(jobDirName);
+            var idFilePath = (from idFp in jobDir let ext = Path.GetExtension(idFp) where ext == ".mzid" || ext == ".gz" select idFp).FirstOrDefault();
+            var rawFileNames = (from filePath in dataSetDir let ext = Path.GetExtension(filePath) where ext == ".raw" select filePath).ToList();
+            if (rawFileNames.Count == 0)
             {
-                FilterIds();
+                _dialogService.MessageBox("No raw files found for that data set.");
+                IsLoading = false;
+            }
+            foreach (var rawFilePath in rawFileNames)
+            {
+                var raw = rawFilePath;
+                var filePath = idFilePath;
+                Task.Factory.StartNew(() =>
+                {
+                    var xicVm = ReadRawFile(raw);
+                    if (!String.IsNullOrEmpty(filePath)) ReadIdFile(filePath, xicVm.RawFileName, xicVm);
+                });
             }
         }
 
+        /// <summary>
+        /// Open settings window
+        /// </summary>
+        public void OpenSettings()
+        {
+            _dialogService.OpenSettings(new SettingsViewModel(_dialogService));
+        }
+
+        /// <summary>
+        /// Open about box
+        /// </summary>
+        private void OpenAboutBox()
+        {
+            _dialogService.OpenAboutBox();
+        }
+
+        /// <summary>
+        /// Event handler for IcParametersChanged in IcParameters
+        /// </summary>
+        private void SettingsChanged()
+        {
+            Task.Factory.StartNew(FilterIds);
+            SetFragmentLabels();
+            SetPrecursorLabels();
+            foreach (var xicVm in XicViewModels) xicVm.UpdatePlots();
+            _spectrumChanged = true;
+            UpdateSpectrum();
+        }
+
+        /// <summary>
+        /// Filter Ids by QValue threshold set in settings
+        /// </summary>
         private void FilterIds()
         {
             var qValue = IcParameters.Instance.QValueThreshold;
@@ -408,43 +452,66 @@ namespace LcmsSpectator.ViewModels
             OnPropertyChanged("PrSms");
         }
 
+        /// <summary>
+        /// Set fragment ion labels for currently selected sequence
+        /// </summary>
         private void SetFragmentLabels()
         {
-            if (SelectedChargeState == null) return;
-            var fragmentLabels = IonUtils.GetFragmentIonLabels(SelectedChargeState.Sequence, SelectedChargeState.Charge, IonTypeSelectorViewModel.IonTypes);
-            var heavyFragmentLabels = IonUtils.GetFragmentIonLabels(SelectedChargeState.HeavySequence, SelectedChargeState.Charge, IonTypeSelectorViewModel.IonTypes);
+            if (SelectedPrSm == null) return;
+            var fragmentLabels = IonUtils.GetFragmentIonLabels(SelectedPrSm.Sequence, SelectedPrSm.Charge, IonTypeSelectorViewModel.IonTypes);
+            var lightFragmentLabels = IonUtils.GetFragmentIonLabels(SelectedPrSm.LightSequence, SelectedPrSm.Charge, IonTypeSelectorViewModel.IonTypes);
+            var heavyFragmentLabels = IonUtils.GetFragmentIonLabels(SelectedPrSm.HeavySequence, SelectedPrSm.Charge, IonTypeSelectorViewModel.IonTypes);
             FragmentLabels = fragmentLabels;
+            LightFragmentLabels = lightFragmentLabels;
             HeavyFragmentLabels = heavyFragmentLabels;
             _fragmentXicChanged = false;
             OnPropertyChanged("FragmentLabels");
+            OnPropertyChanged("LightFragmentLabels");
             OnPropertyChanged("HeavyFragmentLabels");
             _fragmentXicChanged = true;
             SelectedFragmentLabels = fragmentLabels;
         }
 
+        /// <summary>
+        /// Set precursor ion labels for currently selected sequence
+        /// </summary>
         private void SetPrecursorLabels()
         {
-            if (SelectedChargeState == null) return;
-            var precursorLabels = IonUtils.GetPrecursorIonLabels(SelectedChargeState.Sequence, SelectedChargeState.Charge, -1, 2);
-            var heavyPrecursorLabels = IonUtils.GetPrecursorIonLabels(SelectedChargeState.HeavySequence, SelectedChargeState.Charge, -1, 2);
+            if (SelectedPrSm == null) return;
+            var precursorLabels = IonUtils.GetPrecursorIonLabels(SelectedPrSm.Sequence, SelectedPrSm.Charge, -1, 2);
+            var lightPrecursorLabels = IonUtils.GetPrecursorIonLabels(SelectedPrSm.LightSequence, SelectedPrSm.Charge, -1, 2);
+            var heavyPrecursorLabels = IonUtils.GetPrecursorIonLabels(SelectedPrSm.HeavySequence, SelectedPrSm.Charge, -1, 2);
             PrecursorLabels = precursorLabels;
+            LightPrecursorLabels = lightPrecursorLabels;
             HeavyPrecursorLabels = heavyPrecursorLabels;
             _precursorXicChanged = false;
             OnPropertyChanged("PrecursorLabels");
+            OnPropertyChanged("LightPrecursorLabels");
             OnPropertyChanged("HeavyPrecursorLabels");
             _precursorXicChanged = true;
             SelectedPrecursorLabels = precursorLabels;
         }
 
-        private void SetIonCharges(object sender, EventArgs e)
+        /// <summary>
+        /// Event handler for ion types changing in IonTypeSelectorViewModel
+        /// </summary>
+        /// <param name="sender">The IonTypeSelectorViewModel</param>
+        /// <param name="e"></param>
+        private void SetIonTypes(object sender, EventArgs e)
         {
-            if (SelectedPrSm == null || SelectedChargeState == null) return;
+            if (SelectedPrSm == null) return;
             _spectrumChanged = true;
             UpdateSpectrum();
             SetFragmentLabels();
             Ms2SpectrumViewModel.ProductIons = SelectedPrSm.Heavy ? HeavyFragmentLabels : FragmentLabels;
         }
 
+        /// <summary>
+        /// Event handler for RequestClose in XicViewModel
+        /// Closes the raw file and cleans up IDs pointing to that raw file
+        /// </summary>
+        /// <param name="sender">The XicViewModel</param>
+        /// <param name="e"></param>
         private void CloseXic(object sender, EventArgs e)
         {
             var xicVm = sender as XicViewModel;
@@ -463,7 +530,6 @@ namespace LcmsSpectator.ViewModels
                     {
                         _selectedPrSm = null;
                         OnPropertyChanged("SelectedPrSm");
-                        _selectedChargeState = null;
                         FragmentLabels = new List<LabeledIon>(); OnPropertyChanged("FragmentLabels");
                         HeavyFragmentLabels = new List<LabeledIon>(); OnPropertyChanged("HeavyFragmentLabels");
                         PrecursorLabels = new List<LabeledIon>(); OnPropertyChanged("PrecursorLabels");
@@ -479,6 +545,12 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Event handler to set PrSm when a new scan is selected in XicViewModel or
+        /// CreatePrSmViewModel
+        /// </summary>
+        /// <param name="sender">The XicViewModel or PrSmViewModel</param>
+        /// <param name="e"></param>
         private void UpdatePrSm(object sender, EventArgs e)
         {
             var prsmChangedEventArgs = e as PrSmChangedEventArgs;
@@ -505,8 +577,6 @@ namespace LcmsSpectator.ViewModels
         private bool _isLoading;
         private bool _fileOpen;
 
-        private ProteinId _selectedProtein;
-        private ChargeStateId _selectedChargeState;
         private PrSm _selectedPrSm;
         private IList _selectedFragmentLabels;
         private IList _selectedPrecursorLabels;

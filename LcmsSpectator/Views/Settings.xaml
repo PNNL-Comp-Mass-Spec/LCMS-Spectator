@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:views="clr-namespace:LcmsSpectator.Views"
              mc:Ignorable="d" Title="LcMsSpectator: Settings"
              Height="310" Width="650">
     <Window.Resources>
@@ -60,7 +61,7 @@
                     <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">Ion Correlation Threshold</TextBlock>
                     <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding IonCorrelationThreshold}" Height="25" VerticalAlignment="Top" />
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" ToolTip="Must be an odd integer of at least 3. 0 = No smoothing.">Points To Smooth</TextBlock>
+                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" ToolTip="Must be an odd integer of at least 3. 0 = No smoothing.">Default Points To Smooth</TextBlock>
                     <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PointsToSmooth}" Height="25" VerticalAlignment="Top"
                              ToolTip="Must be an odd integer of at least 3. 0 = No smoothing."/>
                 </Grid>
@@ -95,6 +96,9 @@
                         </ListBox.ItemContainerStyle>
                     </ListBox>
                 </Grid>
+            </TabItem>
+            <TabItem Header="Heavy Modifications">
+                <views:HeavyModificationsView DataContext="{Binding HeavyModificationsViewModel}" />
             </TabItem>
         </TabControl>
 

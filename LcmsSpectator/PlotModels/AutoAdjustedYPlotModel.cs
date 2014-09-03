@@ -15,6 +15,11 @@ namespace LcmsSpectator.PlotModels
             if (xAxis != null) xAxis.AxisChanged += XAxisChanged;
         }
 
+        /// <summary>
+        /// Generate Y axis. Set Max Y axis to highest point in current visible x range.
+        /// </summary>
+        /// <param name="title">Title of the axis</param>
+        /// <param name="format">String format of axis</param>
         public virtual void GenerateYAxis(string title, string format)
         {
             var maxY = GetMaxYInRange(XAxis.ActualMinimum, XAxis.ActualMaximum);
@@ -32,6 +37,9 @@ namespace LcmsSpectator.PlotModels
             Axes.Add(YAxis);
         }
 
+        /// <summary>
+        /// Update Y axis for current x axis.
+        /// </summary>
         public virtual void AdjustForZoom()
         {
             var minX = XAxis.ActualMinimum;
@@ -39,6 +47,11 @@ namespace LcmsSpectator.PlotModels
             SetBounds(minX, maxX);
         }
 
+        /// <summary>
+        /// Set min visibile x and y bounds and update y axis max by highest point in that range.
+        /// </summary>
+        /// <param name="minX">Min visible x</param>
+        /// <param name="maxX">Max visible x</param>
         public virtual void SetBounds(double minX, double maxX)
         {
             var maxY = GetMaxYInRange(minX, maxX);
@@ -47,6 +60,12 @@ namespace LcmsSpectator.PlotModels
             InvalidatePlot(false);
         }
 
+        /// <summary>
+        /// Get maximum y point in a given x range.
+        /// </summary>
+        /// <param name="minX">Min x of range</param>
+        /// <param name="maxX">Max x of range</param>
+        /// <returns></returns>
         protected double GetMaxYInRange(double minX, double maxX)
         {
             var maxY = 0.0;
@@ -65,6 +84,11 @@ namespace LcmsSpectator.PlotModels
         protected Axis XAxis;
         protected double Multiplier;
 
+        /// <summary>
+        /// Update Y axis when X axis changes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void XAxisChanged(object sender, AxisChangedEventArgs e)
         {
             AdjustForZoom();

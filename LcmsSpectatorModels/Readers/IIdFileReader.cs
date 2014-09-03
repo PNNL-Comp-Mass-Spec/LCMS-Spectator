@@ -5,6 +5,6 @@ namespace LcmsSpectatorModels.Readers
 {
     public interface IIdFileReader
     {
-        IdentificationTree Read(RtLcMsRun lcms, string rawFileName);
+        IdentificationTree Read(ILcMsRun lcms, string rawFileName);
     }
 }

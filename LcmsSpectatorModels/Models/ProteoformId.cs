@@ -20,7 +20,7 @@ namespace LcmsSpectatorModels.Models
 
         public void Add(PrSm data)
         {
-            if (!ChargeStates.ContainsKey(data.Charge)) ChargeStates.Add(data.Charge, new ChargeStateId(data.Charge, data.Sequence, data.HeavySequence, data.SequenceText, data.ProteinNameDesc, data.PrecursorMz));
+            if (!ChargeStates.ContainsKey(data.Charge)) ChargeStates.Add(data.Charge, new ChargeStateId(data.Charge, data.Sequence, data.LightSequence, data.HeavySequence, data.SequenceText, data.ProteinNameDesc, data.PrecursorMz));
             var chargeState = ChargeStates[data.Charge];
             chargeState.Add(data);
         }
@@ -41,7 +41,7 @@ namespace LcmsSpectatorModels.Models
             foreach (var chargeState in ChargeStates.Values)
             {
                 var chargeStateHighest = chargeState.GetHighestScoringPrSm();
-                if (highest == null || chargeStateHighest.MatchedFragments >= highest.MatchedFragments)
+                if (highest == null || chargeStateHighest.CompareTo(highest) >= 0)
                 {
                     highest = chargeStateHighest;
                 }

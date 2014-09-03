@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Windows;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
@@ -25,6 +28,7 @@ namespace LcmsSpectator.ViewModels
         public DelegateCommand CreatePrSmCommand { get; private set; }
         public DelegateCommand InsertModificationCommand { get; private set; }
         public DelegateCommand InsertStaticModificationsCommand { get; private set; }
+        public DelegateCommand PasteCommand { get; private set; }
         public ObservableCollection<Modification> Modifications { get; private set; }
         public Modification SelectedModification { get; set; }
         public event EventHandler SequenceCreated;
@@ -38,6 +42,7 @@ namespace LcmsSpectator.ViewModels
             CreatePrSmCommand = new DelegateCommand(CreatePrSm, false);
             InsertModificationCommand = new DelegateCommand(InsertModification);
             InsertStaticModificationsCommand = new DelegateCommand(InsertStaticModifications);
+            PasteCommand = new DelegateCommand(Paste);
             SelectedCharge = 2;
             SelectedScan = 0;
             if (XicViewModels.Count > 0) SelectedXicViewModel = XicViewModels[0];
@@ -74,6 +79,11 @@ namespace LcmsSpectator.ViewModels
                 _selectedTarget = value;
                 SequenceText = _selectedTarget.SequenceText;
                 InsertStaticModifications();
+                if (_selectedTarget.Charge != 0)
+                {
+                    SelectedCharge = _selectedTarget.Charge;
+                    OnPropertyChanged("SelectedCharge");
+                }
                 OnPropertyChanged("SequenceText");
                 OnPropertyChanged("SelectedTarget");
             }
@@ -118,7 +128,7 @@ namespace LcmsSpectator.ViewModels
                 _dialogService.ExceptionAlert(e);
                 return;
             }
-            RtLcMsRun lcms = null;
+            ILcMsRun lcms = null;
             if (SelectedCharge < 1)
             {
                 _dialogService.MessageBox("Invalid Charge.");
@@ -223,6 +233,29 @@ namespace LcmsSpectator.ViewModels
 
             SequenceText = "";
             foreach (var aa in newSequence) SequenceText += aa;
+        }
+
+        private void Paste()
+        {
+            var clipboardText = Clipboard.GetText();
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(clipboardText);
+            writer.Flush();
+            stream.Position = 0;
+
+            var targetReader = new TargetFileReader(stream);
+            List<Target> targets;
+            try
+            {
+                targets = targetReader.Read();
+            }
+            catch (Exception e)
+            {
+                _dialogService.ExceptionAlert(e);
+                return;
+            }
+            foreach (var target in targets) Targets.Add(target);
         }
 
         private readonly IDialogService _dialogService;

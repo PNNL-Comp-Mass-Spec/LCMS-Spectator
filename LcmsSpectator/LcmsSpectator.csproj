@@ -14,6 +14,21 @@
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -71,6 +86,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -95,6 +111,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controls\MultiSelectDataGrid.cs" />
+    <Compile Include="Controls\MultiSelectListBox.cs" />
     <Compile Include="Controls\MvvmTreeView.cs" />
     <Compile Include="DialogServices\DialogService.cs" />
     <Compile Include="DialogServices\IDialogService.cs" />
@@ -108,7 +125,12 @@
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
     <Compile Include="Utils\PrSmChangedEventArgs.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
+    <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\DelegateCommand.cs" />
+    <Compile Include="ViewModels\DmsJobViewModel.cs" />
+    <Compile Include="ViewModels\DmsLookupViewModel.cs" />
+    <Compile Include="ViewModels\HeavyModificationsViewModel.cs" />
+    <Compile Include="ViewModels\HeavyModificationsWindowViewModel.cs" />
     <Compile Include="ViewModels\IonTypeSelectorViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModificationViewModel.cs" />
@@ -118,8 +140,23 @@
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\XicPlotViewModel.cs" />
     <Compile Include="ViewModels\XicViewModel.cs" />
+    <Compile Include="Views\AboutBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\AboutBox.Designer.cs">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\CreateSequenceView.xaml.cs">
       <DependentUpon>CreateSequenceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DmsLookupView.xaml.cs">
+      <DependentUpon>DmsLookupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\HeavyModificationsView.xaml.cs">
+      <DependentUpon>HeavyModificationsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\HeavyModificationsWindow.xaml.cs">
+      <DependentUpon>HeavyModificationsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\IonTypeSelector.xaml.cs">
       <DependentUpon>IonTypeSelector.xaml</DependentUpon>
@@ -160,6 +197,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\AboutBox.resx">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -178,6 +218,18 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Views\CreateSequenceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DmsLookupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\HeavyModificationsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\HeavyModificationsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -207,6 +259,28 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\iconSmall.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 4.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

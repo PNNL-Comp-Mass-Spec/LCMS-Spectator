@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectatorModels.Models;
 using OxyPlot.Axes;
@@ -14,12 +15,12 @@ namespace LcmsSpectator.ViewModels
         public SpectrumPlotViewModel PreviousMs1ViewModel { get; set; }
         public SpectrumPlotViewModel NextMs1ViewModel { get; set; }
         public string RawFileName { get; set; }
-        public SpectrumViewModel(ColorDictionary colors)
+        public SpectrumViewModel(IDialogService dialogService, ColorDictionary colors)
         {
             _showUnexplainedPeaks = true;
-            Ms2SpectrumViewModel = new SpectrumPlotViewModel(1.05, colors);
-            PreviousMs1ViewModel = new SpectrumPlotViewModel(1.1, colors);
-            NextMs1ViewModel = new SpectrumPlotViewModel(1.1, colors);
+            Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05, colors);
+            PreviousMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, colors);
+            NextMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, colors);
         }
 
         public bool ShowUnexplainedPeaks

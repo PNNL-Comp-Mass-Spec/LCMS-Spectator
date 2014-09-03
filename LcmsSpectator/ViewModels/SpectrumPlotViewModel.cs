@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
@@ -10,14 +12,22 @@ using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using OxyPlot.Wpf;
+using Annotation = OxyPlot.Annotations.Annotation;
+using LinearAxis = OxyPlot.Axes.LinearAxis;
+using Series = OxyPlot.Series.Series;
+using TextAnnotation = OxyPlot.Annotations.TextAnnotation;
 
 namespace LcmsSpectator.ViewModels
 {
     public class SpectrumPlotViewModel: ViewModelBase
     {
+        public DelegateCommand SaveAsImageCommand { get; private set; }
         public AutoAdjustedYPlotModel Plot { get; set; }
-        public SpectrumPlotViewModel(double multiplier, ColorDictionary colors, bool showUnexplainedPeaks=true)
+        public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, ColorDictionary colors, bool showUnexplainedPeaks=true)
         {
+            SaveAsImageCommand = new DelegateCommand(SaveAsImage);
+            _dialogService = dialogService;
             _showUnexplainedPeaks = showUnexplainedPeaks;
             _multiplier = multiplier;
             _colors = colors;
@@ -69,7 +79,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_spectrum == value) return;
                 _spectrum = value;
-                BuildSpectrumPlot();
+                Task.Factory.StartNew(BuildSpectrumPlot);
                 OnPropertyChanged("Spectrum");
             }
         }
@@ -83,7 +93,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _ions = value;
-                SetPlotSeries();
+                Task.Factory.StartNew(SetPlotSeries);
                 OnPropertyChanged("Ions");
             }
         }
@@ -129,7 +139,7 @@ namespace LcmsSpectator.ViewModels
         {
             _spectrum = spectrum;
             _ions = ions;
-            BuildSpectrumPlot();
+            Task.Factory.StartNew(BuildSpectrumPlot);
         }
 
         /// <summary>
@@ -204,6 +214,8 @@ namespace LcmsSpectator.ViewModels
             };
             var isotopePeaks = labeledIonPeaks.Peaks;
             if (isotopePeaks == null || isotopePeaks.Length < 1) return null;
+            if (labeledIonPeaks.IsFragmentIon &&
+                labeledIonPeaks.CorrelationScore < IcParameters.Instance.IonCorrelationThreshold) return null;
             Peak maxPeak = null;
             foreach (var peak in isotopePeaks.Where(peak => peak != null))
             {
@@ -237,7 +249,8 @@ namespace LcmsSpectator.ViewModels
         private LinearAxis GenerateXAxis()
         {
             var peaks = Spectrum.Peaks;
-            var ms2MaxMz = peaks.Max().Mz * 1.1;
+            var ms2MaxMz = 1.0;    // plot maximum needs to be bigger than 0
+            if (peaks.Length > 0) ms2MaxMz = peaks.Max().Mz * 1.1;
             var maxMzDelta = 0.0;
             for (int i = 0; i < peaks.Length; i++)
             {
@@ -259,6 +272,20 @@ namespace LcmsSpectator.ViewModels
             return xAxis;
         }
 
+        private void SaveAsImage()
+        {
+            if (Plot == null) return;
+            var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            try
+            {
+                if (fileName != "") PngExporter.Export(Plot, fileName, (int)Plot.Width, (int)Plot.Height);
+            }
+            catch (Exception e)
+            {
+                _dialogService.ExceptionAlert(e);
+            }
+        }
+
         private readonly ColorDictionary _colors;
         private string _title;
         private LinearAxis _xAxis;
@@ -267,5 +294,6 @@ namespace LcmsSpectator.ViewModels
         private Spectrum _spectrum;
         private List<LabeledIon> _ions;
         private bool _showUnexplainedPeaks;
+        private readonly IDialogService _dialogService;
     }
 }

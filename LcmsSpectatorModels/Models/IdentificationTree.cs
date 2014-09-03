@@ -8,8 +8,11 @@ namespace LcmsSpectatorModels.Models
     {
         public Dictionary<string, ProteinId> Proteins { get; private set; }
 
-        public IdentificationTree()
+        public ToolType Tool { get; set; }
+
+        public IdentificationTree(ToolType tool=ToolType.Other)
         {
+            Tool = tool;
             Proteins = new Dictionary<string, ProteinId>();
         }
 
@@ -67,7 +70,7 @@ namespace LcmsSpectatorModels.Models
             foreach (var protein in Proteins.Values)
             {
                 var pHighest = protein.GetHighestScoringPrSm();
-                if (highest == null || pHighest.MatchedFragments >= highest.MatchedFragments)
+                if (highest == null || pHighest.CompareTo(highest) >= 0)
                 {
                     highest = pHighest;
                 }

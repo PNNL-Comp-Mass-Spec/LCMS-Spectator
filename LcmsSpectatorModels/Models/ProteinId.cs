@@ -10,7 +10,7 @@ namespace LcmsSpectatorModels.Models
         public string SequenceText { get; private set; }
         public Sequence Sequence { get; private set; }
         public string ProteinNameDesc { get; private set; }
-        public SequenceGraph SequenceGraph { get; private set; }
+//        public SequenceGraph SequenceGraph { get; private set; }
         public Dictionary<string, ProteoformId> Proteoforms { get; private set; }
         public ProteinId(Sequence sequence, string sequenceText, string proteinNameDesc)
         {
@@ -38,7 +38,7 @@ namespace LcmsSpectatorModels.Models
             foreach (var proteoform in Proteoforms.Values)
             {
                 var pfHighest = proteoform.GetHighestScoringPrSm();
-                if (highest == null || pfHighest.MatchedFragments >= highest.MatchedFragments)
+                if (highest == null || pfHighest.CompareTo(highest) >= 0)
                 {
                     highest = pfHighest;
                 }

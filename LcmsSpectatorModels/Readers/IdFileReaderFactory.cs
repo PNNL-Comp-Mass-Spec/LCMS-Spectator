@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using LcmsSpectatorModels.Config;
 
 namespace LcmsSpectatorModels.Readers
 {
@@ -20,6 +19,10 @@ namespace LcmsSpectatorModels.Readers
                     if (line != null && line.Contains("MSGFScore")) reader = new MsgfFileReader(fileName);
                     if (line != null && line.Contains("#MatchedFragments")) reader = new IcFileReader(fileName);
                     streamReader.Close();
+                    break;
+                case ".gz":
+                case ".mzId":
+                    reader = new MzIdentMlReader(fileName);
                     break;
             }
             return reader;

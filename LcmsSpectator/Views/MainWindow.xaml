@@ -21,7 +21,14 @@
                 <MenuItem Header="Open _Raw File" Command="{Binding OpenRawFileCommand}" />
                 <MenuItem Header="Open _Id File" Command="{Binding OpenTsvFileCommand}" />
                 <MenuItem Header="Open _Target List" DataContext="{Binding CreateSequenceViewModel}" Command="{Binding OpenTargetListCommand}" />
+                <MenuItem Header="Search _DMS" Command="{Binding OpenFromDmsCommand}"
+                          Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}" />
+            </MenuItem>
+            <MenuItem Header="_Config">
                 <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Command="{Binding OpenAboutBoxCommand}" />
             </MenuItem>
         </Menu>
         <!-- End Menu -->
@@ -29,7 +36,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="7*" />
                 <RowDefinition Height="3" />
-                <RowDefinition Height="93*"></RowDefinition>
+                <RowDefinition Height="93*" />
             </Grid.RowDefinitions>
             <!-- Header -->
             <ScrollViewer VerticalAlignment="Top" Grid.Row="0"
@@ -164,12 +171,17 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="100*" />
-                                    <RowDefinition Height="20" />
+                                  <!--  <RowDefinition Height="20" /> -->
                                 </Grid.RowDefinitions>
                                 <DataGrid AutoGenerateColumns="False" SelectionMode="Extended"
                                           IsReadOnly="True" RowHeaderWidth="0"
                                           ItemsSource="{Binding PrSms}" SelectedItem="{Binding SelectedPrSm}"
-                                          Grid.Row="0">
+                                          Grid.Row="0" Name="ScanView">
+                                    <DataGrid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Show _Unidentified Scans" IsCheckable="True" IsChecked="{Binding ShowUnidentifiedScans}" />
+                                        </ContextMenu>
+                                    </DataGrid.ContextMenu>
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}"/>
                                         <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" />
@@ -181,7 +193,7 @@
                                         <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
                                     </DataGrid.Columns>
                                 </DataGrid>
-                                <CheckBox Grid.Row="1" IsChecked="{Binding ShowUnidentifiedScans}">Show Unidentified Scans</CheckBox>
+                              <!--  <CheckBox Grid.Row="1" IsChecked="{Binding ShowUnidentifiedScans}">Show Unidentified Scans</CheckBox> -->
                             </Grid>
                         </TabItem>
                         <!-- End Scan View -->

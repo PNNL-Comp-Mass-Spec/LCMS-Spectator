@@ -8,9 +8,9 @@ namespace LcmsSpectatorModels.Models
 {
     public class LabeledXic: LabeledIon
     { 
-        public List<XicRetPoint> Xic { get; private set; }
+        public List<XicPoint> Xic { get; private set; }
 
-        public LabeledXic(Composition composition, int index, List<XicRetPoint> xic, IonType ionType,  bool isFragmentIon=true): 
+        public LabeledXic(Composition composition, int index, List<XicPoint> xic, IonType ionType,  bool isFragmentIon=true): 
                base(composition, index, ionType, isFragmentIon)
         {
             Xic = xic;

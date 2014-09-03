@@ -53,6 +53,10 @@
     <Reference Include="InformedProteomics.Backend">
       <HintPath>..\Library\InformedProteomics.Backend.dll</HintPath>
     </Reference>
+    <Reference Include="MTDBFramework, Version=1.0.5359.21660, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\MTDBFramework\MTDBFramework.dll</HintPath>
+    </Reference>
     <Reference Include="MultiDimensionalPeakFinding">
       <HintPath>..\Library\MultiDimensionalPeakFinding.dll</HintPath>
     </Reference>
@@ -66,13 +70,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\RtLcMsRun.cs" />
-    <Compile Include="Models\XicRetPoint.cs" />
+    <Compile Include="Models\ToolType.cs" />
+    <Compile Include="Readers\DmsLookupUtility.cs" />
     <Compile Include="Readers\IcFileReader.cs" />
     <Compile Include="Readers\IcFileWriter.cs" />
     <Compile Include="Config\IcParameters.cs" />
     <Compile Include="Readers\IdFileReaderFactory.cs" />
     <Compile Include="Readers\IIdFileReader.cs" />
     <Compile Include="Readers\MsgfFileReader.cs" />
+    <Compile Include="Readers\MzIdentMlReader.cs" />
+    <Compile Include="Readers\SequenceReaders\MsgfPlusSequenceReader.cs" />
     <Compile Include="Readers\TargetFileReader.cs" />
     <Compile Include="Models\ChargeStateId.cs" />
     <Compile Include="Models\IdData.cs" />
@@ -91,7 +98,9 @@
     <Compile Include="Readers\SequenceReaders\SequenceReader.cs" />
     <Compile Include="Utils\IonUtils.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
