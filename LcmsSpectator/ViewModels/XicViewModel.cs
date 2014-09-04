@@ -488,7 +488,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="maxRt">Value calculated for x axis maximum.</param>
         private void CalculateBounds(out double minRt, out double maxRt)
         {
-            var minLcmsRt = Lcms.GetElutionTime(Lcms.MaxLcScan);
+            var minLcmsRt = Lcms.GetElutionTime(Lcms.MinLcScan);
             var maxLcmsRt = Lcms.GetElutionTime(Lcms.MaxLcScan);
             minRt = SelectedRetentionTime - 1;
             maxRt = SelectedRetentionTime + 1;

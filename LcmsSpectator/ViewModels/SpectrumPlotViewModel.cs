@@ -93,7 +93,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _ions = value;
-                Task.Factory.StartNew(SetPlotSeries);
+                Task.Factory.StartNew(() => SetPlotSeries(Plot));
                 OnPropertyChanged("Ions");
             }
         }
@@ -159,7 +159,7 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
             var xAxis = _xAxis ?? GenerateXAxis();
-            Plot = new AutoAdjustedYPlotModel(xAxis, _multiplier)
+            var plot = new AutoAdjustedYPlotModel(xAxis, _multiplier)
             {
                 Title = Title,
                 TitleFontSize = 14,
@@ -173,31 +173,32 @@ namespace LcmsSpectator.ViewModels
                     "{3}: {4:0.##E0}"
             };
             foreach (var peak in Spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
-            GuiInvoker.Invoke(Plot.Series.Add, spectrumSeries);
-            Plot.GenerateYAxis("Intensity", "0e0");
-            SetPlotSeries();
+            GuiInvoker.Invoke(plot.Series.Add, spectrumSeries);
+            plot.GenerateYAxis("Intensity", "0e0");
+            SetPlotSeries(plot);
+            Plot = plot;
             OnPropertyChanged("Plot");
         }
 
-        private void SetPlotSeries()
+        private void SetPlotSeries(AutoAdjustedYPlotModel plot)
         {
-            if (Plot == null || Ions == null) return;
+            if (plot == null || Ions == null) return;
             // remove old ion series
-            while (Plot.Series.Count > 1)
+            while (plot.Series.Count > 1)
             {
-                GuiInvoker.Invoke(Plot.Series.RemoveAt, Plot.Series.Count-1);
+                GuiInvoker.Invoke(plot.Series.RemoveAt, Plot.Series.Count-1);
             }
-            Plot.Annotations.Clear();
+            GuiInvoker.Invoke(plot.Annotations.Clear);
             // add new ion series
             foreach (var labeledIon in Ions)
             {
                 if (labeledIon.IonType.Charge == 0) continue;
                 var ionSeries = GetIonSeries(labeledIon);
                 if (ionSeries == null) continue;
-                GuiInvoker.Invoke(Plot.Series.Add, ionSeries.Item1);
-                GuiInvoker.Invoke(Plot.Annotations.Add, ionSeries.Item2);
+                GuiInvoker.Invoke(plot.Series.Add, ionSeries.Item1);
+                GuiInvoker.Invoke(plot.Annotations.Add, ionSeries.Item2);
             }
-            Plot.InvalidatePlot(true);
+            plot.InvalidatePlot(true);
         }
 
         private Tuple<Series, Annotation> GetIonSeries(LabeledIon labeledIon)
@@ -251,18 +252,8 @@ namespace LcmsSpectator.ViewModels
             var peaks = Spectrum.Peaks;
             var ms2MaxMz = 1.0;    // plot maximum needs to be bigger than 0
             if (peaks.Length > 0) ms2MaxMz = peaks.Max().Mz * 1.1;
-            var maxMzDelta = 0.0;
-            for (int i = 0; i < peaks.Length; i++)
-            {
-                if (i < peaks.Length - 1)
-                {
-                    var mzDiff = peaks[i+1].Mz - peaks[i].Mz;
-                    if (mzDiff >= maxMzDelta) maxMzDelta = mzDiff;
-                }
-            }
             var xAxis = new LinearAxis(AxisPosition.Bottom, "M/Z")
             {
-                MinimumRange = maxMzDelta,
                 Minimum = 0,
                 Maximum = ms2MaxMz,
                 AbsoluteMinimum = 0,

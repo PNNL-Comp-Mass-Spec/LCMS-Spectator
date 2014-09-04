@@ -47,7 +47,7 @@
             </TextBox.InputBindings>
         </TextBox>
 
-        <Button Grid.Row="1" Grid.Column="2" Command="{Binding LookUpCommand}" Height="25">Search</Button>
+        <Button Grid.Row="1" Grid.Column="2" Command="{Binding LookupCommand}" Height="25">Search</Button>
 
         <ComboBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Height="25" 
                   ItemsSource="{Binding Datasets}" SelectedItem="{Binding SelectedDataset}"

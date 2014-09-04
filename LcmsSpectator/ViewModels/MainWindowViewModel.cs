@@ -386,15 +386,30 @@ namespace LcmsSpectator.ViewModels
             var data = _dialogService.OpenDmsLookup(new DmsLookupViewModel(_dialogService));
             if (data == null) return;
             var dataSetDirName = data.Item1;
-            var dataSetDir = Directory.GetFiles(dataSetDirName);
             var jobDirName = data.Item2;
-            var jobDir = Directory.GetFiles(jobDirName);
-            var idFilePath = (from idFp in jobDir let ext = Path.GetExtension(idFp) where ext == ".mzid" || ext == ".gz" select idFp).FirstOrDefault();
-            var rawFileNames = (from filePath in dataSetDir let ext = Path.GetExtension(filePath) where ext == ".raw" select filePath).ToList();
-            if (rawFileNames.Count == 0)
+            string idFilePath = "";
+            List<string> rawFileNames = null;
+            if (!String.IsNullOrEmpty(dataSetDirName))      // did the user actually choose a dataset?
             {
+                var dataSetDir = Directory.GetFiles(dataSetDirName);
+                rawFileNames = (from filePath in dataSetDir
+                                let ext = Path.GetExtension(filePath)
+                                where ext == ".raw"
+                                select filePath).ToList();
+            }
+            if (!String.IsNullOrEmpty(jobDirName))      // did the user actually choose a job?
+            {
+                var jobDir = Directory.GetFiles(jobDirName);
+                idFilePath = (from idFp in jobDir
+                              let ext = Path.GetExtension(idFp)
+                              where ext == ".mzid" || ext == ".gz"
+                                select idFp).FirstOrDefault();
+            }
+            if (rawFileNames == null || rawFileNames.Count == 0)
+            {   // no data set chosen or no raw files found for data set
                 _dialogService.MessageBox("No raw files found for that data set.");
                 IsLoading = false;
+                return;
             }
             foreach (var rawFilePath in rawFileNames)
             {
@@ -501,9 +516,9 @@ namespace LcmsSpectator.ViewModels
         {
             if (SelectedPrSm == null) return;
             _spectrumChanged = true;
-            UpdateSpectrum();
             SetFragmentLabels();
             Ms2SpectrumViewModel.ProductIons = SelectedPrSm.Heavy ? HeavyFragmentLabels : FragmentLabels;
+            UpdateSpectrum();
         }
 
         /// <summary>
