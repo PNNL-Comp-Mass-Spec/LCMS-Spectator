@@ -4,6 +4,7 @@ using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.ViewModels;
+using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
 using LcmsSpectatorModels.Utils;
@@ -19,7 +20,7 @@ namespace LcmsSpectatorTests
         private const string IdFilePath = @"C:\Users\wilk011\Documents\DataFiles\Data\BottomUp\HCD_QCShew\tsv\QC_Shew_13_04_A_17Feb14_Samwise_13-07-28.tsv";
 
         [Test]
-        public void TestDisplaySpectrum()
+        public async void TestDisplaySpectrum()
         {
             // init SpectrumPlotViewModel
             var colorDictionary = new ColorDictionary(2);
@@ -34,7 +35,7 @@ namespace LcmsSpectatorTests
 
             // init test ions
             var ions = new List<LabeledIon>();
-            spectrumPlotViewModel.Update(id.Ms2Spectrum, ions);
+            await spectrumPlotViewModel.Update(id.Ms2Spectrum, ions);
 
             // plot should not be null
             Assert.True(spectrumPlotViewModel.Plot != null);
@@ -44,7 +45,7 @@ namespace LcmsSpectatorTests
         }
 
         [Test]
-        public void TestAddIons()
+        public async void TestAddIons()
         {
             // init SpectrumPlotViewModel
             var colorDictionary = new ColorDictionary(2);
@@ -65,19 +66,25 @@ namespace LcmsSpectatorTests
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
             var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-            spectrumPlotViewModel.Update(id.Ms2Spectrum, ions);
+            var expectedIons = IonUtils.GetIonPeaks(ions, id.Ms2Spectrum, IcParameters.Instance.ProductIonTolerancePpm,
+                                                    IcParameters.Instance.PrecursorTolerancePpm,
+                                                    IcParameters.Instance.IonCorrelationThreshold);
+            await spectrumPlotViewModel.Update(id.Ms2Spectrum, ions);
 
             // there should be ions.count + 1 (spectrum series) plot series
-            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (ions.Count + 1));
+            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
 
             // Remove ion types
             baseIonTypes = new List<BaseIonType> { BaseIonType.Y };
             ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
             ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-            spectrumPlotViewModel.Update(id.Ms2Spectrum, ions);
+            expectedIons = IonUtils.GetIonPeaks(ions, id.Ms2Spectrum, IcParameters.Instance.ProductIonTolerancePpm,
+                                        IcParameters.Instance.PrecursorTolerancePpm,
+                                        IcParameters.Instance.IonCorrelationThreshold);
+            await spectrumPlotViewModel.Update(id.Ms2Spectrum, ions);
 
             // there should be ions.count + 1 (spectrum series) plot series
-            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (ions.Count + 1));
+            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
         }
     }
 }

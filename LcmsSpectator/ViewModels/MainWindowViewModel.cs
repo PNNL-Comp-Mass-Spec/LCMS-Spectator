@@ -517,7 +517,6 @@ namespace LcmsSpectator.ViewModels
             if (SelectedPrSm == null) return;
             _spectrumChanged = true;
             SetFragmentLabels();
-            Ms2SpectrumViewModel.ProductIons = SelectedPrSm.Heavy ? HeavyFragmentLabels : FragmentLabels;
             UpdateSpectrum();
         }
 

@@ -11,110 +11,15 @@ namespace LcmsSpectator.ViewModels
 {
     public class SpectrumViewModel: ViewModelBase
     {
-        public SpectrumPlotViewModel Ms2SpectrumViewModel { get; set; }
-        public SpectrumPlotViewModel PreviousMs1ViewModel { get; set; }
-        public SpectrumPlotViewModel NextMs1ViewModel { get; set; }
+        public SpectrumPlotViewModel Ms2SpectrumViewModel { get; private set; }
+        public SpectrumPlotViewModel PreviousMs1ViewModel { get; private set; }
+        public SpectrumPlotViewModel NextMs1ViewModel { get; private set; }
         public string RawFileName { get; set; }
         public SpectrumViewModel(IDialogService dialogService, ColorDictionary colors)
         {
-            _showUnexplainedPeaks = true;
             Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05, colors);
             PreviousMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, colors);
             NextMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, colors);
-        }
-
-        public bool ShowUnexplainedPeaks
-        {
-            get { return _showUnexplainedPeaks; }
-            set
-            {
-                if (_showUnexplainedPeaks == value) return;
-                _showUnexplainedPeaks = value;
-                Ms2SpectrumViewModel.ShowUnexplainedPeaks = _showUnexplainedPeaks;
-                PreviousMs1ViewModel.ShowUnexplainedPeaks = _showUnexplainedPeaks;
-                NextMs1ViewModel.ShowUnexplainedPeaks = _showUnexplainedPeaks;
-                OnPropertyChanged("ShowUnexplainedPeaks");
-            }
-        }
-
-        /// <summary>
-        /// Ms2 Spectrum.
-        /// </summary>
-        public Spectrum Ms2Spectrum
-        {
-            get { return _ms2Spectrum; }
-            set
-            {
-                if (_ms2Spectrum == value) return;
-                _ms2Spectrum = value;
-                Ms2SpectrumViewModel.Spectrum = _ms2Spectrum;
-                Ms2SpectrumViewModel.Title = (_ms2Spectrum == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1})", _ms2Spectrum.ScanNum, RawFileName);
-                OnPropertyChanged("Ms2Spectrum");
-            }
-        }
-
-        /// <summary>
-        /// Ms2 fragment ions to highlight
-        /// </summary>
-        public List<LabeledIon> ProductIons
-        {
-            get { return _productIons; }
-            set
-            {
-                _productIons = value;
-                Ms2SpectrumViewModel.Ions = _productIons;
-                Ms2SpectrumViewModel.AddIonHighlight(PrecursorIon);
-                OnPropertyChanged("ProductIons");
-            }
-        }
-
-        /// <summary>
-        /// Closest Ms1 Spectrum before Ms2 Spectrum.
-        /// </summary>
-        public Spectrum PreviousMs1Spectrum
-        {
-            get { return _previousMs1Spectrum; }
-            set
-            {
-                if (_previousMs1Spectrum == value) return;
-                _previousMs1Spectrum = value;
-                PreviousMs1ViewModel.Spectrum = _previousMs1Spectrum;
-                PreviousMs1ViewModel.Title = _previousMs1Spectrum == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", _previousMs1Spectrum.ScanNum);
-                OnPropertyChanged("PreviousMs1Spectrum");
-            }
-        }
-
-        /// <summary>
-        /// Closest Ms1 Spectrum after Ms2 Spectrum.
-        /// </summary>
-        public Spectrum NextMs1Spectrum
-        {
-            get { return _nextMs1Spectrum; }
-            set
-            {
-                if (_nextMs1Spectrum == value) return;
-                _nextMs1Spectrum = value;
-                NextMs1ViewModel.Spectrum = _nextMs1Spectrum;
-                NextMs1ViewModel.Title = _nextMs1Spectrum == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", _nextMs1Spectrum.ScanNum);
-                OnPropertyChanged("NextMs1Spectrum");
-            }
-        }
-
-        /// <summary>
-        /// Precursor ion to highlight on Ms1 plots.
-        /// </summary>
-        public LabeledIon PrecursorIon
-        {
-            get { return _precursorIon; }
-            set
-            {
-                if (_precursorIon == value) return;
-                _precursorIon = value;
-                var ionList = new List<LabeledIon> { _precursorIon };
-                PreviousMs1ViewModel.Ions = ionList;
-                NextMs1ViewModel.Ions = ionList;
-                OnPropertyChanged("PrecursorIon");
-            }
         }
 
         /// <summary>
@@ -128,21 +33,27 @@ namespace LcmsSpectator.ViewModels
         /// <param name="heavy">Is the spectrum from a heavy peptide?</param>
         public void UpdatePlots(Spectrum ms2, List<LabeledIon> productIons, Spectrum prevms1, Spectrum nextms1, LabeledIon precursorIon, bool heavy=false)
         {
-            _precursorIon = precursorIon;
-            _ms2Spectrum = ms2;
-            _previousMs1Spectrum = prevms1;
-            _nextMs1Spectrum = nextms1;
-            _productIons = new List<LabeledIon>(productIons) {precursorIon};
-            Ms2SpectrumViewModel.Update(ms2, _productIons);
+            productIons = new List<LabeledIon>(productIons) {precursorIon};
+            // Ms2 spectrum plot
             var heavyStr = heavy ? ", Heavy" : "";
             Ms2SpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1}{2})", ms2.ScanNum, RawFileName, heavyStr);
-            var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);
+            Ms2SpectrumViewModel.Spectrum = ms2;
+            Ms2SpectrumViewModel.Ions = productIons;
+            Ms2SpectrumViewModel.Update();
+            // Ms1 spectrum plots
+            var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);    // shared x axis
+            // previous Ms1
             PreviousMs1ViewModel.XAxis = xAxis;
+            PreviousMs1ViewModel.Title = prevms1 == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", prevms1.ScanNum);
+            PreviousMs1ViewModel.Spectrum = prevms1;
+            PreviousMs1ViewModel.Ions = new List<LabeledIon> {precursorIon};
+            PreviousMs1ViewModel.Update();
+            // next Ms1
             NextMs1ViewModel.XAxis = xAxis;
-            PreviousMs1ViewModel.Title = _previousMs1Spectrum == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", prevms1.ScanNum);
-            PreviousMs1ViewModel.Update(prevms1, new List<LabeledIon>{precursorIon});
-            NextMs1ViewModel.Title = _nextMs1Spectrum == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
-            NextMs1ViewModel.Update(nextms1, new List<LabeledIon>{precursorIon});
+            NextMs1ViewModel.Title = nextms1 == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
+            NextMs1ViewModel.Spectrum = nextms1;
+            NextMs1ViewModel.Ions = new List<LabeledIon> {precursorIon};
+            NextMs1ViewModel.Update();
         }
 
         public void ClearPlots()
@@ -182,12 +93,5 @@ namespace LcmsSpectator.ViewModels
             xAxis.Zoom(ms1MinMz, ms1MaxMz);
             return xAxis;
         }
-
-        private Spectrum _ms2Spectrum;
-        private List<LabeledIon> _productIons;
-        private Spectrum _previousMs1Spectrum;
-        private Spectrum _nextMs1Spectrum;
-        private LabeledIon _precursorIon;
-        private bool _showUnexplainedPeaks;
     }
 }

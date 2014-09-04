@@ -8,6 +8,7 @@ using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
+using LcmsSpectatorModels.Utils;
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
@@ -79,7 +80,6 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_spectrum == value) return;
                 _spectrum = value;
-                Task.Factory.StartNew(BuildSpectrumPlot);
                 OnPropertyChanged("Spectrum");
             }
         }
@@ -93,7 +93,6 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _ions = value;
-                Task.Factory.StartNew(() => SetPlotSeries(Plot));
                 OnPropertyChanged("Ions");
             }
         }
@@ -133,13 +132,9 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Update spectrum and ion highlights
         /// </summary>
-        /// <param name="spectrum">New spectrum</param>
-        /// <param name="ions">Ions to highlight</param>
-        public void Update(Spectrum spectrum, List<LabeledIon> ions)
+        public Task Update()
         {
-            _spectrum = spectrum;
-            _ions = ions;
-            Task.Factory.StartNew(BuildSpectrumPlot);
+            return Task.Factory.StartNew(BuildSpectrumPlot);
         }
 
         /// <summary>
@@ -203,7 +198,9 @@ namespace LcmsSpectator.ViewModels
 
         private Tuple<Series, Annotation> GetIonSeries(LabeledIon labeledIon)
         {
-            var labeledIonPeaks = GetIonPeaks(labeledIon);
+            var labeledIonPeaks = IonUtils.GetIonPeaks(labeledIon, Spectrum,
+                                                       IcParameters.Instance.ProductIonTolerancePpm,
+                                                       IcParameters.Instance.PrecursorTolerancePpm);
             // create plots
             var color = _colors.GetColor(labeledIon);
             var ionSeries = new StemSeries(color, 1.5)
@@ -238,13 +235,6 @@ namespace LcmsSpectator.ViewModels
                 StrokeThickness = 0
             };
             return new Tuple<Series, Annotation>(ionSeries, annotation);
-        }
-
-        private LabeledIonPeaks GetIonPeaks(LabeledIon ion)
-        {
-            var ionCorrelation = Spectrum.GetCorrScore(ion.Ion, IcParameters.Instance.ProductIonTolerancePpm);
-            var isotopePeaks = Spectrum.GetAllIsotopePeaks(ion.Ion, IcParameters.Instance.PrecursorTolerancePpm, 0.1);
-            return new LabeledIonPeaks(ion.Composition, ion.Index, isotopePeaks, ionCorrelation, ion.IonType, ion.IsFragmentIon);
         }
 
         private LinearAxis GenerateXAxis()

@@ -10,7 +10,7 @@ namespace LcmsSpectator.Utils
         /// <param name="action">Action to invoke</param>
         public static void Invoke(Action action)
         {
-            if (System.Windows.Application.Current.Dispatcher != null)
+            if (System.Windows.Application.Current != null && System.Windows.Application.Current.Dispatcher != null)
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(action);
             }
@@ -28,7 +28,7 @@ namespace LcmsSpectator.Utils
         /// <param name="argument">Paramter of action</param>
         public static void Invoke<T>(Action<T> action, T argument)
         {
-            if (System.Windows.Application.Current.Dispatcher != null)
+            if (System.Windows.Application.Current != null && System.Windows.Application.Current.Dispatcher != null)
             {
                 System.Windows.Application.Current.Dispatcher.Invoke(action, argument);
             }

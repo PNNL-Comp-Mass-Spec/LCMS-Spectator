@@ -96,6 +96,26 @@ namespace LcmsSpectatorModels.Utils
             return source.Where(target.Contains).ToList();
         }
 
+        public static LabeledIonPeaks GetIonPeaks(LabeledIon ion, Spectrum spectrum, Tolerance productIonTolerance, Tolerance precursorIonTolerance)
+        {
+            var ionCorrelation = spectrum.GetCorrScore(ion.Ion, productIonTolerance);
+            var isotopePeaks = spectrum.GetAllIsotopePeaks(ion.Ion, precursorIonTolerance, 0.1);
+            return new LabeledIonPeaks(ion.Composition, ion.Index, isotopePeaks, ionCorrelation, ion.IonType, ion.IsFragmentIon);
+        }
+
+        public static List<LabeledIonPeaks> GetIonPeaks(List<LabeledIon> ions, Spectrum spectrum,
+                                                        Tolerance productIonTolerance, Tolerance precursorIonTolerance,
+                                                        double corrThreshold)
+        {
+            var labeledIonPeaks = new List<LabeledIonPeaks>();
+            foreach (var ion in ions)
+            {
+                var labeledIon = GetIonPeaks(ion, spectrum, productIonTolerance, precursorIonTolerance);
+                if (labeledIon.CorrelationScore >= corrThreshold) labeledIonPeaks.Add(labeledIon);
+            }
+            return labeledIonPeaks;
+        }
+
         public static IList<XicPoint> SmoothXic(SavitzkyGolaySmoother smoother, IList<XicPoint> xic)
         {
             var xicP = new double[xic.Count];
