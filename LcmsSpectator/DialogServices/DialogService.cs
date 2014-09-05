@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using Microsoft.Win32;
 
@@ -25,6 +26,19 @@ namespace LcmsSpectator.DialogServices
             string fileName = "";
             if (result == true) fileName = dialog.FileName;
             return fileName;
+        }
+
+        public IEnumerable<string> MultiSelectOpenFile(string defaultExt, string filter)
+        {
+            var dialog = new OpenFileDialog
+            {
+                DefaultExt = defaultExt, Filter = filter, Multiselect = true
+            };
+
+            var result = dialog.ShowDialog();
+            IEnumerable<string> fileNames = null;
+            if (result == true) fileNames = dialog.FileNames;
+            return fileNames;
         }
 
         public virtual string SaveFile(string defaultExt, string filter)

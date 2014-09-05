@@ -243,18 +243,22 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Prompt user for raw file and call ReadRawFile() to open file.
+        /// Prompt user for raw files and call ReadRawFile() to open file.
         /// </summary>
         public void OpenRawFile()
         {
-            var rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");
-            if (rawFileName == "") return;
+            var rawFileNames = _dialogService.MultiSelectOpenFile(".raw", @"Raw Files (*.raw)|*.raw");
+            if (rawFileNames == null) return;
             IsLoading = true;
-            Task.Factory.StartNew(() =>
+            foreach (var rawFileName in rawFileNames)
             {
-                ReadRawFile(rawFileName);
-                if (XicViewModels.Count == 1) ShowUnidentifiedScans = true;
-            });
+                var name = rawFileName;
+                Task.Factory.StartNew(() =>
+                {
+                    ReadRawFile(name);
+                    if (XicViewModels.Count > 0) ShowUnidentifiedScans = true;
+                });
+            }
         }
 
         /// <summary>
