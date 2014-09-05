@@ -13,11 +13,16 @@ using NUnit.Framework;
 
 namespace LcmsSpectatorTests
 {
-    [TestFixture]
+    [TestFixture(@"C:\Users\wilk011\Documents\DataFiles\Data\BottomUp\HCD_QCShew\raw\QC_Shew_13_04_A_17Feb14_Samwise_13-07-28.raw",
+                 @"C:\Users\wilk011\Documents\DataFiles\Data\BottomUp\HCD_QCShew\tsv\QC_Shew_13_04_A_17Feb14_Samwise_13-07-28.tsv")]
     public class SpectrumPlotTest
     {
-        private const string RawFilePath = @"C:\Users\wilk011\Documents\DataFiles\Data\BottomUp\HCD_QCShew\raw\QC_Shew_13_04_A_17Feb14_Samwise_13-07-28.raw";
-        private const string IdFilePath = @"C:\Users\wilk011\Documents\DataFiles\Data\BottomUp\HCD_QCShew\tsv\QC_Shew_13_04_A_17Feb14_Samwise_13-07-28.tsv";
+        public SpectrumPlotTest(string rawFilePath, string idFilePath)
+        {
+            var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
+            var lcms = RafLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
+            _ids = idFileReader.Read(lcms, Path.GetFileNameWithoutExtension(rawFilePath));
+        }
 
         [Test]
         public async void TestDisplaySpectrum()
@@ -28,14 +33,13 @@ namespace LcmsSpectatorTests
             var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, 1.05, colorDictionary);
 
             // init test data
-            var idFileReader = IdFileReaderFactory.CreateReader(IdFilePath);
-            var lcms = RafLcMsRun.GetLcMsRun(RawFilePath, MassSpecDataType.XCaliburRun);
-            var ids = idFileReader.Read(lcms, Path.GetFileNameWithoutExtension(RawFilePath));
-            var id = ids.GetHighestScoringPrSm();
+            var id = _ids.GetHighestScoringPrSm();
 
             // init test ions
             var ions = new List<LabeledIon>();
-            await spectrumPlotViewModel.Update(id.Ms2Spectrum, ions);
+            spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
+            spectrumPlotViewModel.Ions = ions;
+            await spectrumPlotViewModel.Update();
 
             // plot should not be null
             Assert.True(spectrumPlotViewModel.Plot != null);
@@ -53,10 +57,7 @@ namespace LcmsSpectatorTests
             var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, 1.05, colorDictionary);
 
             // init test data
-            var idFileReader = IdFileReaderFactory.CreateReader(IdFilePath);
-            var lcms = RafLcMsRun.GetLcMsRun(RawFilePath, MassSpecDataType.XCaliburRun);
-            var ids = idFileReader.Read(lcms, Path.GetFileNameWithoutExtension(RawFilePath));
-            var id = ids.GetHighestScoringPrSm();
+            var id = _ids.GetHighestScoringPrSm();
 
             // init test ions
             var baseIonTypes = new List<BaseIonType> { BaseIonType.B, BaseIonType.Y };
@@ -69,7 +70,9 @@ namespace LcmsSpectatorTests
             var expectedIons = IonUtils.GetIonPeaks(ions, id.Ms2Spectrum, IcParameters.Instance.ProductIonTolerancePpm,
                                                     IcParameters.Instance.PrecursorTolerancePpm,
                                                     IcParameters.Instance.IonCorrelationThreshold);
-            await spectrumPlotViewModel.Update(id.Ms2Spectrum, ions);
+            spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
+            spectrumPlotViewModel.Ions = ions;
+            await spectrumPlotViewModel.Update();
 
             // there should be ions.count + 1 (spectrum series) plot series
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
@@ -81,10 +84,14 @@ namespace LcmsSpectatorTests
             expectedIons = IonUtils.GetIonPeaks(ions, id.Ms2Spectrum, IcParameters.Instance.ProductIonTolerancePpm,
                                         IcParameters.Instance.PrecursorTolerancePpm,
                                         IcParameters.Instance.IonCorrelationThreshold);
-            await spectrumPlotViewModel.Update(id.Ms2Spectrum, ions);
+            spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
+            spectrumPlotViewModel.Ions = ions;
+            await spectrumPlotViewModel.Update();
 
             // there should be ions.count + 1 (spectrum series) plot series
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
         }
+
+        private readonly IdentificationTree _ids;
     }
 }

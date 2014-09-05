@@ -81,14 +81,14 @@ namespace LcmsSpectator.PlotModels
         public override void SetBounds(double minX, double maxX)
         {
             double xPoint = 0;
-            if (_pointMarkers != null && _pointMarkers.Points.Count != 0)
+            if (_pointMarkers != null && _pointMarkers.Points.Count != 0) // remove marker
             {
                 var point = _pointMarkers.Points[0];
                 xPoint = point.X;
                 GuiInvoker.Invoke(() => Series.Remove(_pointMarkers));
             }
             base.SetBounds(minX, maxX);
-            SetPointMarker(xPoint, GetMarkerColor());
+            SetPointMarker(xPoint, GetMarkerColor()); // add marker
         }
 
         /// <summary>

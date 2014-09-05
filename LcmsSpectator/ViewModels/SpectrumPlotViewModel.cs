@@ -24,7 +24,7 @@ namespace LcmsSpectator.ViewModels
     public class SpectrumPlotViewModel: ViewModelBase
     {
         public DelegateCommand SaveAsImageCommand { get; private set; }
-        public AutoAdjustedYPlotModel Plot { get; set; }
+        public AutoAdjustedYPlotModel Plot { get; private set; }
         public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, ColorDictionary colors, bool showUnexplainedPeaks=true)
         {
             SaveAsImageCommand = new DelegateCommand(SaveAsImage);
@@ -208,18 +208,28 @@ namespace LcmsSpectator.ViewModels
                 TrackerFormatString =
                     "{0}" + Environment.NewLine +
                     "{1}: {2:0.###}" + Environment.NewLine +
-                    "{3}: {4:0.##E0}"
+                    "{3}: {4:0.##E0}" + Environment.NewLine +
+                    "Error: {Error:0.##E0}ppm" + Environment.NewLine +
+                    "Correlation: {Correlation:0.###}"
             };
-            var isotopePeaks = labeledIonPeaks.Peaks;
-            if (isotopePeaks == null || isotopePeaks.Length < 1) return null;
             if (labeledIonPeaks.IsFragmentIon &&
                 labeledIonPeaks.CorrelationScore < IcParameters.Instance.IonCorrelationThreshold) return null;
+            var obsPeaks = labeledIonPeaks.Peaks;
+            if (obsPeaks == null || obsPeaks.Length < 1) return null;
             Peak maxPeak = null;
-            foreach (var peak in isotopePeaks.Where(peak => peak != null))
+            var theoIsotopes = labeledIon.Ion.GetIsotopes(obsPeaks.Length).ToArray();
+            for (int i = 0; i < obsPeaks.Length; i++)
             {
-                ionSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
-                // Find most intense peak
-                if (maxPeak == null || peak.Intensity >= maxPeak.Intensity) maxPeak = peak;
+                if (obsPeaks[i] != null)
+                {
+                    // calculate error
+                    var theoIsotopeMz = labeledIon.Ion.GetIsotopeMz(theoIsotopes[i].Index);
+                    // error = (observed - theo)/(observed*10e6)
+                    var ppmError = (obsPeaks[i].Mz - theoIsotopeMz) / (obsPeaks[i].Mz * 10e6);
+                    ionSeries.Points.Add(new PeakDataPoint(obsPeaks[i].Mz, obsPeaks[i].Intensity, ppmError, labeledIonPeaks.CorrelationScore));
+                    // Find most intense peak
+                    if (maxPeak == null || obsPeaks[i].Intensity >= maxPeak.Intensity) maxPeak = obsPeaks[i];
+                }
             }
             if (maxPeak == null) return null;
             // Create ion name annotation

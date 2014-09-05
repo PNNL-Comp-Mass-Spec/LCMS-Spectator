@@ -117,6 +117,7 @@
     <Compile Include="DialogServices\IDialogService.cs" />
     <Compile Include="DialogServices\IMainDialogService.cs" />
     <Compile Include="DialogServices\MainDialogService.cs" />
+    <Compile Include="PlotModels\PeakDataPoint.cs" />
     <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="PlotModels\XicDataPoint.cs" />
     <Compile Include="Utils\ChargeToStringConverter.cs" />
