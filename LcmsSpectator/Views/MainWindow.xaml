@@ -148,22 +148,41 @@
                     <TabControl>
                         <!-- ID Tree -->
                         <TabItem Header="ID Tree">
-                            <controls:MvvmTreeView ItemsSource="{Binding ProteinIds}" SelectedItemTarget="{Binding TreeViewSelectedItem, Mode=TwoWay}">
-                                <controls:MvvmTreeView.Resources>
-                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
-                                        <TextBlock Text="{Binding ProteinNameDesc}" />
-                                    </HierarchicalDataTemplate>
-                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
-                                        <TextBlock Text="{Binding SequenceText}" />
-                                    </HierarchicalDataTemplate>
-                                    <HierarchicalDataTemplate DataType="{x:Type models:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
-                                        <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
-                                    </HierarchicalDataTemplate>
-                                    <HierarchicalDataTemplate DataType="{x:Type models:PrSm}">
-                                        <TextBlock Text="{Binding ScanText}" />
-                                    </HierarchicalDataTemplate>
-                                </controls:MvvmTreeView.Resources>
-                            </controls:MvvmTreeView>
+                            <Grid>
+                                <controls:MvvmTreeView ItemsSource="{Binding ProteinIds}" SelectedItemTarget="{Binding TreeViewSelectedItem, Mode=TwoWay}">
+                                    <controls:MvvmTreeView.Resources>
+                                        <HierarchicalDataTemplate DataType="{x:Type models:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
+                                            <TextBlock Text="{Binding ProteinNameDesc}" />
+                                        </HierarchicalDataTemplate>
+                                        <HierarchicalDataTemplate DataType="{x:Type models:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
+                                            <TextBlock Text="{Binding SequenceText}" />
+                                        </HierarchicalDataTemplate>
+                                        <HierarchicalDataTemplate DataType="{x:Type models:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
+                                            <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
+                                        </HierarchicalDataTemplate>
+                                        <HierarchicalDataTemplate DataType="{x:Type models:PrSm}">
+                                            <TextBlock Text="{Binding ScanText}" />
+                                        </HierarchicalDataTemplate>
+                                    </controls:MvvmTreeView.Resources>
+                                </controls:MvvmTreeView>
+                                <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" 
+                                        VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="50*"/>
+                                            <RowDefinition Height="50*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Margin="0"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Bottom"
+                                                   Grid.Row="0"
+                                                   TextAlignment="Center"
+                                                   FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
+                                            Loading<LineBreak />Please Wait...
+                                        </TextBlock >
+                                    </Grid>
+                                </Border>
+                            </Grid>
                         </TabItem>
                         <!-- End ID Tree -->
                         <!-- Scan View -->
@@ -193,7 +212,23 @@
                                         <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
                                     </DataGrid.Columns>
                                 </DataGrid>
-                              <!--  <CheckBox Grid.Row="1" IsChecked="{Binding ShowUnidentifiedScans}">Show Unidentified Scans</CheckBox> -->
+                                <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" 
+                                        VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="50*"/>
+                                            <RowDefinition Height="50*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Margin="0"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Bottom"
+                                                   Grid.Row="0"
+                                                   TextAlignment="Center"
+                                                   FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
+                                            Loading<LineBreak />Please Wait...
+                                        </TextBlock >
+                                    </Grid>
+                                </Border>
                             </Grid>
                         </TabItem>
                         <!-- End Scan View -->
@@ -206,22 +241,5 @@
                 </Grid>
             </Grid>
         </Grid>
-        <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" 
-                Name="LoadingScreen" VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
-            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="50*"/>
-                    <RowDefinition Height="50*"/>
-                </Grid.RowDefinitions>
-                <TextBlock Margin="0"
-                           TextWrapping="Wrap"
-                           VerticalAlignment="Bottom"
-                           Grid.Row="0"
-                           TextAlignment="Center"
-                           FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
-                    Loading<LineBreak />Please Wait...
-                </TextBlock >
-            </Grid>
-        </Border>
     </Grid>
 </Window>

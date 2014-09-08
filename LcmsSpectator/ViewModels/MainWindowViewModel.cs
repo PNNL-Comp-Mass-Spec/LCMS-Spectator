@@ -322,6 +322,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="xicVm">Xic View model to associate with id file.</param>
         public void ReadIdFile(string idFileName, string rawFileName, XicViewModel xicVm)
         {
+            IsLoading = true;
             IdentificationTree ids;
             try
             {
@@ -343,6 +344,7 @@ namespace LcmsSpectator.ViewModels
             ShowUnidentifiedScans = false;
             if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
             FileOpen = true;
+            IsLoading = false;
         }
 
         /// <summary>
@@ -452,7 +454,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void SettingsChanged()
         {
-            Task.Factory.StartNew(FilterIds);
+            if (!FilteredIds.QValueFilter.Equals(IcParameters.Instance.QValueThreshold)) Task.Factory.StartNew(FilterIds);
             SetFragmentLabels();
             SetPrecursorLabels();
             foreach (var xicVm in XicViewModels) xicVm.UpdatePlots();
@@ -466,7 +468,6 @@ namespace LcmsSpectator.ViewModels
         private void FilterIds()
         {
             var qValue = IcParameters.Instance.QValueThreshold;
-            if (FilteredIds.QValueFilter.Equals(qValue)) return;    // Already filtered
             FilteredIds = Ids.GetTreeFilteredByQValue(qValue);
             ProteinIds = FilteredIds.ProteinIds.ToList();
             var prsms = _showUnidentifiedScans ? FilteredIds.AllPrSms : FilteredIds.IdentifiedPrSms;
