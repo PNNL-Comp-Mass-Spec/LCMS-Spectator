@@ -20,9 +20,10 @@ namespace LcmsSpectator.ViewModels
 {
     public class MainWindowViewModel: ViewModelBase
     {
-        public IdentificationTree Ids { get; set; }
-        public List<ProteinId> ProteinIds { get; set; }
-        public List<PrSm> PrSms { get; set; } 
+        public IdentificationTree Ids { get; private set; }
+        public IdentificationTree FilteredIds { get; private set; }
+        public List<ProteinId> ProteinIds { get; private set; }
+        public List<PrSm> PrSms { get; private set; } 
         public List<IonType> IonTypes { get; set; }
 
         public List<LabeledIon> FragmentLabels { get; set; }
@@ -49,6 +50,7 @@ namespace LcmsSpectator.ViewModels
             _dialogService = dialogService;
             IcParameters.Instance.IcParametersUpdated += SettingsChanged;
             Ids = new IdentificationTree();
+            FilteredIds = new IdentificationTree();
             ProteinIds = Ids.ProteinIds.ToList();
             PrSms = new List<PrSm>();
             _colors = new ColorDictionary(2);
@@ -112,7 +114,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _showUnidentifiedScans = value;
                 _idTreeMutex.WaitOne();
-                PrSms = _showUnidentifiedScans ? Ids.AllPrSms : Ids.IdentifiedPrSms;
+                PrSms = _showUnidentifiedScans ? FilteredIds.AllPrSms : FilteredIds.IdentifiedPrSms;
                 _idTreeMutex.ReleaseMutex();
                 OnPropertyChanged("PrSms");
                 OnPropertyChanged("ShowUnidentifiedScans");
@@ -464,9 +466,9 @@ namespace LcmsSpectator.ViewModels
         private void FilterIds()
         {
             var qValue = IcParameters.Instance.QValueThreshold;
-            var ids = Ids.GetTreeFilteredByQValue(qValue);
-            ProteinIds = ids.ProteinIds.ToList();
-            var prsms = ids.AllPrSms;
+            FilteredIds = Ids.GetTreeFilteredByQValue(qValue);
+            ProteinIds = FilteredIds.ProteinIds.ToList();
+            var prsms = FilteredIds.AllPrSms;
             prsms.Sort();
             PrSms = prsms;
             OnPropertyChanged("ProteinIds");

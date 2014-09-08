@@ -143,7 +143,7 @@ namespace LcmsSpectatorModels.Models
             var prsms = AllPrSms;
             foreach (var prsm in prsms)
             {
-                if (prsm.QValue <= qValue) idTree.Add(prsm);
+                if (prsm.QValue <= qValue || prsm.Sequence.Count == 0) idTree.Add(prsm);
             }
             return idTree;
         }
