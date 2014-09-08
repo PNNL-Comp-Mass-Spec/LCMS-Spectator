@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -75,6 +76,8 @@ namespace LcmsSpectator.ViewModels
             FileOpen = false;
 
             SelectedPrSm = null;
+
+            _idTreeMutex = new Mutex();
         }
 
         public object TreeViewSelectedItem
@@ -108,7 +111,9 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showUnidentifiedScans = value;
+                _idTreeMutex.WaitOne();
                 PrSms = _showUnidentifiedScans ? Ids.AllPrSms : Ids.IdentifiedPrSms;
+                _idTreeMutex.ReleaseMutex();
                 OnPropertyChanged("PrSms");
                 OnPropertyChanged("ShowUnidentifiedScans");
             }
@@ -249,7 +254,6 @@ namespace LcmsSpectator.ViewModels
         {
             var rawFileNames = _dialogService.MultiSelectOpenFile(".raw", @"Raw Files (*.raw)|*.raw");
             if (rawFileNames == null) return;
-            IsLoading = true;
             foreach (var rawFileName in rawFileNames)
             {
                 var name = rawFileName;
@@ -316,7 +320,6 @@ namespace LcmsSpectator.ViewModels
         /// <param name="xicVm">Xic View model to associate with id file.</param>
         public void ReadIdFile(string idFileName, string rawFileName, XicViewModel xicVm)
         {
-            IsLoading = true;
             IdentificationTree ids;
             try
             {
@@ -338,7 +341,6 @@ namespace LcmsSpectator.ViewModels
             ShowUnidentifiedScans = false;
             if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
             FileOpen = true;
-            IsLoading = false;
         }
 
         /// <summary>
@@ -347,8 +349,9 @@ namespace LcmsSpectator.ViewModels
         /// <param name="rawFilePath">Path to raw file to open</param>
         public XicViewModel ReadRawFile(string rawFilePath)
         {
-            IsLoading = true;
-            var xicVm = new XicViewModel(rawFilePath, _colors);
+            var xicVm = new XicViewModel(_colors); // create xic view model
+            GuiInvoker.Invoke(() => XicViewModels.Add(xicVm)); // add xic view model to gui
+            xicVm.RawFilePath = rawFilePath;
             var lcms = xicVm.Lcms;
             var scans = lcms.GetScanNumbers(2);
             foreach (var scan in scans)
@@ -366,19 +369,18 @@ namespace LcmsSpectator.ViewModels
                     ProteinDesc = "",
                     Charge = 0
                 };
+                _idTreeMutex.WaitOne();
                 Ids.Add(prsm);
+                _idTreeMutex.ReleaseMutex();
             }
             xicVm.SelectedScanNumberChanged += UpdatePrSm;
             xicVm.XicClosing += CloseXic;
             xicVm.ZoomToRt(0);
-            var addXicAction = new Action<XicViewModel>(XicViewModels.Add);
-            GuiInvoker.Invoke(addXicAction, xicVm);
             GuiInvoker.Invoke(SetFragmentLabels);
             GuiInvoker.Invoke(SetPrecursorLabels);
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0]; });
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.CreatePrSmCommand.Executable = true; });
             FileOpen = true;
-            IsLoading = false;
             return xicVm;
         }
 
@@ -576,7 +578,7 @@ namespace LcmsSpectator.ViewModels
             if (prsmChangedEventArgs != null)
             {
                 var prsm = prsmChangedEventArgs.PrSm;
-                if (prsm.Sequence == null)
+                if (prsm.Sequence.Count == 0)
                 {
                     prsm.MatchedFragments = -1.0;
                     prsm.Sequence = SelectedPrSm.Sequence;
@@ -591,6 +593,7 @@ namespace LcmsSpectator.ViewModels
 
         private readonly IMainDialogService _dialogService;
         private readonly ColorDictionary _colors;
+        private readonly Mutex _idTreeMutex;
 
         private bool _isLoading;
         private bool _fileOpen;

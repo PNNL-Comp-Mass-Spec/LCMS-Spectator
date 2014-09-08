@@ -84,7 +84,6 @@ namespace LcmsSpectator.ViewModels
             var ms1MaxMz = ms2Prod.IsolationWindow.MaxMz + 0.25*diff;
             var xAxis = new LinearAxis(AxisPosition.Bottom, "M/Z")
             {
-                MinimumRange = diff,
                 Minimum = ms1MinMz,
                 Maximum = ms1MaxMz,
                 AbsoluteMinimum = 0,

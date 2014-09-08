@@ -43,7 +43,21 @@ namespace LcmsSpectatorModels.Models
 
         public PrSm()
         {
+            RawFileName = "";
+            Protein = "";
+            Annotation = "";
+            SequenceText = "";
+            SequenceLabel = new List<string>();
+            Sequence = new Sequence(new List<AminoAcid>());
+            Pre = "";
+            Post = "";
+            Modifications = new List<Tuple<int, Modification>>();
+            Composition = "";
+            ProteinName = "";
+            ProteinDesc = "";
+            ProteinNameDesc = "";
             UseGolfScoring = false;
+            Heavy = false;
         }
 
         public string ScanText

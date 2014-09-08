@@ -14,6 +14,7 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicViewModel: ViewModelBase
     {
+        public bool IsLoading { get; private set; }
         public XicPlotViewModel FragmentPlotViewModel { get; set; }
         public XicPlotViewModel HeavyFragmentPlotViewModel { get; set; }
         public XicPlotViewModel PrecursorPlotViewModel { get; set; }
@@ -26,21 +27,22 @@ namespace LcmsSpectator.ViewModels
         public DelegateCommand OpenHeavyModificationsCommand { get; private set; }
         public event EventHandler XicClosing;
         public event EventHandler SelectedScanNumberChanged;
-        public XicViewModel(string rawFilePath, ColorDictionary colors, IMainDialogService dialogService=null)
+        public XicViewModel(ColorDictionary colors, IMainDialogService dialogService=null)
         {
+            IsLoading = true;
             if (dialogService == null) dialogService = new MainDialogService();
             _dialogService = dialogService;
-            RawFilePath = rawFilePath;
             Colors = colors;
-            FragmentPlotViewModel = new XicPlotViewModel(_dialogService, Lcms, "Fragment XIC", colors, XicXAxis, false, false);
+            _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Retention Time");
+            FragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Fragment XIC", colors, XicXAxis, false, false);
             FragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
             FragmentPlotViewModel.PlotChanged += PlotChanged;
-            HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, Lcms, "Heavy Fragment XIC", colors, XicXAxis, true, false);
+            HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Fragment XIC", colors, XicXAxis, true, false);
             HeavyFragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
             HeavyFragmentPlotViewModel.PlotChanged += PlotChanged;
-            PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, Lcms, "Precursor XIC", colors, XicXAxis, false);
+            PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Precursor XIC", colors, XicXAxis, false);
             PrecursorPlotViewModel.PlotChanged += PlotChanged;
-            HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, Lcms, "Heavy Precursor XIC", colors, XicXAxis, true);
+            HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Precursor XIC", colors, XicXAxis, true);
             HeavyPrecursorPlotViewModel.PlotChanged += PlotChanged;
             SelectedRetentionTime = 0;
             _showScanMarkers = false;
@@ -73,7 +75,24 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _rawFilePath = value;
+                OnPropertyChanged("RawFileName"); // make gui update raw file name label
+                IsLoading = true;
+                // load raw file
                 Lcms = RafLcMsRun.GetLcMsRun(_rawFilePath, MassSpecDataType.XCaliburRun, 0, 0);
+                FragmentPlotViewModel.Lcms = Lcms;
+                HeavyFragmentPlotViewModel.Lcms = Lcms;
+                PrecursorPlotViewModel.Lcms = Lcms;
+                HeavyPrecursorPlotViewModel.Lcms = Lcms;
+                // set bounds for shared x axis
+                var maxRt = Math.Max(Lcms.GetElutionTime(Lcms.MaxLcScan), 1.0);
+                _xicXAxis.Maximum = maxRt + 0.0001;
+                _xicXAxis.Minimum = 0;
+                _xicXAxis.AbsoluteMaximum = maxRt + 0.0001;
+                _xicXAxis.AbsoluteMinimum = 0;
+                _xicXAxis.Zoom(0, maxRt);
+                IsLoading = false;
+                UpdatePlots();  // update plots in case things were changed during loading
+                OnPropertyChanged("IsLoading"); // get rid of loading screen
                 OnPropertyChanged("RawFilePath");
             }
         }
@@ -88,6 +107,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_selectedRetentionTime.Equals(value)) return;
                 _selectedRetentionTime = value;
+                if (IsLoading) return;  // don't update everything if file is being loaded
                 FragmentPlotViewModel.SelectedRt = value;
                 HeavyFragmentPlotViewModel.SelectedRt = value;
                 PrecursorPlotViewModel.SelectedRt = value;
@@ -104,6 +124,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedPrecursors = value;
+                if (IsLoading) return;  // don't update everything if file is being loaded
                 if (!_showHeavy) PrecursorPlotViewModel.Ions = _selectedPrecursors;
                 UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
                 OnPropertyChanged("SelectedPrecursors");
@@ -119,6 +140,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedLightPrecursors = value;
+                if (IsLoading) return;  // don't update everything if file is being loaded
                 // Only create light xics if the heavy xics are visible
                 if (_showHeavy) PrecursorPlotViewModel.Ions = _selectedLightPrecursors;
                 UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
@@ -135,6 +157,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedHeavyPrecursors = value;
+                if (IsLoading) return;  // don't update everything if file is being loaded
                 // Only create heavy xics if the heavy xics are visible
                 if (_showHeavy) HeavyPrecursorPlotViewModel.Ions = _selectedHeavyPrecursors;
                 UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
@@ -151,6 +174,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedFragments = value;
+                if (IsLoading) return;  // don't update everything if file is being loaded
                 if (ShowFragmentXic && !ShowHeavy) FragmentPlotViewModel.Ions = _selectedFragments;
                 UpdateFragmentAreaRatioLabels();        // XIC changed, update area
                 OnPropertyChanged("SelectedFragments");
@@ -166,6 +190,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedLightFragments = value;
+                if (IsLoading) return;  // don't update everything if file is being loaded
                 // Only create heavy xics if the heavy xics are visible
                 if (_showHeavy && _showFragmentXic) FragmentPlotViewModel.Ions = _selectedLightFragments;
                 UpdateFragmentAreaRatioLabels();    // XIC changed, update area
@@ -182,6 +207,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedHeavyFragments = value;
+                if (IsLoading) return;  // don't update everything if file is being loaded
                 // Only create heavy xics if the heavy xics are visible
                 if (_showHeavy && _showFragmentXic) HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
                 UpdateFragmentAreaRatioLabels();    // XIC changed, update area
@@ -296,6 +322,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="rt">Retention time to zoom to.</param>
         public void ZoomToRt(double rt)
         {
+            if (IsLoading) return;  // don't update everything if file is being loaded
             double minX, maxX;
             SelectedRetentionTime = rt;
             CalculateBounds(out minX, out maxX);
@@ -323,6 +350,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void UpdatePlots()
         {
+            if (IsLoading) return;  // don't update everything if file is being loaded
             if (_showHeavy)
             {
                 if (_selectedHeavyPrecursors != null)
@@ -360,18 +388,6 @@ namespace LcmsSpectator.ViewModels
         {
             get
             {
-                if (_xicXAxis == null)
-                {
-                    var maxRt = Math.Max(Lcms.GetElutionTime(Lcms.MaxLcScan), 1.0);
-                    _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Retention Time")
-                    {
-                        Maximum = maxRt + 0.0001,
-                        Minimum = 0,
-                        AbsoluteMinimum = 0,
-                        AbsoluteMaximum = maxRt + 0.0001
-                    };
-                    _xicXAxis.Zoom(0, maxRt);
-                }
                 return _xicXAxis;
             }
         }

@@ -22,15 +22,15 @@ namespace LcmsSpectator.ViewModels
     public class XicPlotViewModel: ViewModelBase
     {
         public SelectablePlotModel Plot { get; private set; }
+        public ILcMsRun Lcms { get; set; }
         public DelegateCommand SetScanChangedCommand { get; private set; }
         public DelegateCommand SaveAsImageCommand { get; private set; }
         public bool Heavy { get; private set; }
         public event EventHandler PlotChanged;
         public event EventHandler SelectedScanChanged;
-        public XicPlotViewModel(IDialogService dialogService, ILcMsRun lcms, string title, ColorDictionary colors, LinearAxis xAxis, bool heavy, bool showLegend=true)
+        public XicPlotViewModel(IDialogService dialogService, string title, ColorDictionary colors, LinearAxis xAxis, bool heavy, bool showLegend=true)
         {
             _dialogService = dialogService;
-            _lcms = lcms;
             _title = title;
             _colors = colors;
             _showLegend = showLegend;
@@ -173,7 +173,7 @@ namespace LcmsSpectator.ViewModels
         {
             return (from lxic in _xics where lxic.Index >= 0
                     from point in lxic.Xic 
-                        where _lcms.GetElutionTime(point.ScanNum) >= min && _lcms.GetElutionTime(point.ScanNum) <= max 
+                        where Lcms.GetElutionTime(point.ScanNum) >= min && Lcms.GetElutionTime(point.ScanNum) <= max 
                         select point.Intensity).Sum();
         }
 
@@ -282,7 +282,7 @@ namespace LcmsSpectator.ViewModels
                 {
                     // remove plateau points (line will connect them anyway)
                     if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) && xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
-                    if (xic[i] != null) series.Points.Add(new XicDataPoint(_lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum, xic[i].Intensity));
+                    if (xic[i] != null) series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum, xic[i].Intensity));
                 }
                 plot.Series.Add(series);
             }
@@ -309,10 +309,10 @@ namespace LcmsSpectator.ViewModels
             {
                 var ion = label.Ion;
                 Xic xic;
-                if (label.IsFragmentIon) xic = _lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
+                if (label.IsFragmentIon) xic = Lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
                                                                                             IcParameters.Instance.ProductIonTolerancePpm,
                                                                                             label.PrecursorIon.GetMostAbundantIsotopeMz());
-                else xic = _lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
+                else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
                 var lXic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
                 xics.Add(lXic);
             }
@@ -336,7 +336,6 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private readonly ILcMsRun _lcms;
         private readonly IDialogService _dialogService;
         private readonly string _title;
         private bool _showLegend;

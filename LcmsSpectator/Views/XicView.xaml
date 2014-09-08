@@ -6,6 +6,9 @@
              xmlns:oxy="http://oxyplot.codeplex.com"
              mc:Ignorable="d" Background="White"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="4*" Name="FragmentTitleRow" />
@@ -126,5 +129,22 @@
             <CheckBox Grid.Column="0" IsChecked="{Binding ShowFragmentXic}" Checked="ShowFragment_OnChecked" Unchecked="ShowFragment_OnUnChecked" Name="ShowFragment" >Show Fragment XIC</CheckBox>
             <CheckBox Grid.Column="1" IsChecked="{Binding ShowHeavy}" Checked="ShowHeavy_OnChecked" Unchecked="ShowHeavy_OnUnchecked" Name="ShowHeavy">Show Heavy</CheckBox>
         </Grid>
+        <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" Grid.Row="0" Grid.Column="0" Grid.RowSpan="6" Grid.ColumnSpan="2"
+                Name="LoadingScreen" VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*"/>
+                    <RowDefinition Height="50*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Margin="0"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Bottom"
+                           Grid.Row="0"
+                           TextAlignment="Center"
+                           FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
+                    Loading<LineBreak />Please Wait...
+                </TextBlock >
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>
