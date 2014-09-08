@@ -466,9 +466,10 @@ namespace LcmsSpectator.ViewModels
         private void FilterIds()
         {
             var qValue = IcParameters.Instance.QValueThreshold;
+            if (FilteredIds.QValueFilter.Equals(qValue)) return;    // Already filtered
             FilteredIds = Ids.GetTreeFilteredByQValue(qValue);
             ProteinIds = FilteredIds.ProteinIds.ToList();
-            var prsms = FilteredIds.AllPrSms;
+            var prsms = _showUnidentifiedScans ? FilteredIds.AllPrSms : FilteredIds.IdentifiedPrSms;
             prsms.Sort();
             PrSms = prsms;
             OnPropertyChanged("ProteinIds");

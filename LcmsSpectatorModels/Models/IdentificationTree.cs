@@ -10,10 +10,13 @@ namespace LcmsSpectatorModels.Models
 
         public ToolType Tool { get; set; }
 
-        public IdentificationTree(ToolType tool=ToolType.Other)
+        public double QValueFilter { get; private set; }
+
+        public IdentificationTree(ToolType tool=ToolType.Other, double qValueFilter=Double.PositiveInfinity)
         {
             Tool = tool;
             Proteins = new Dictionary<string, ProteinId>();
+            QValueFilter = qValueFilter;
         }
 
         public IEnumerable<ProteinId> ProteinIds
@@ -139,7 +142,7 @@ namespace LcmsSpectatorModels.Models
 
         public IdentificationTree GetTreeFilteredByQValue(double qValue)
         {
-            var idTree = new IdentificationTree();
+            var idTree = new IdentificationTree(Tool, qValue);
             var prsms = AllPrSms;
             foreach (var prsm in prsms)
             {

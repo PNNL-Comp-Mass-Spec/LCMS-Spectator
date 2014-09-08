@@ -209,7 +209,7 @@ namespace LcmsSpectator.ViewModels
                     "{0}" + Environment.NewLine +
                     "{1}: {2:0.###}" + Environment.NewLine +
                     "{3}: {4:0.##E0}" + Environment.NewLine +
-                    "Error: {Error:0.##E0}ppm" + Environment.NewLine +
+                    "Error: {Error:G4}ppm" + Environment.NewLine +
                     "Correlation: {Correlation:0.###}"
             };
             if (labeledIonPeaks.IsFragmentIon &&
@@ -225,7 +225,7 @@ namespace LcmsSpectator.ViewModels
                     // calculate error
                     var theoIsotopeMz = labeledIon.Ion.GetIsotopeMz(theoIsotopes[i].Index);
                     // error = (observed - theo)/(observed*10e6)
-                    var ppmError = (obsPeaks[i].Mz - theoIsotopeMz) / (obsPeaks[i].Mz * 10e6);
+                    var ppmError = (obsPeaks[i].Mz - theoIsotopeMz) / obsPeaks[i].Mz * Math.Pow(10, 6);
                     ionSeries.Points.Add(new PeakDataPoint(obsPeaks[i].Mz, obsPeaks[i].Intensity, ppmError, labeledIonPeaks.CorrelationScore));
                     // Find most intense peak
                     if (maxPeak == null || obsPeaks[i].Intensity >= maxPeak.Intensity) maxPeak = obsPeaks[i];
