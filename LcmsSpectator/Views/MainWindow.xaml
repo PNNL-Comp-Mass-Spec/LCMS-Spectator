@@ -147,7 +147,7 @@
                 <Grid Grid.Row="4" Grid.Column="0" ColumnSpan="3">
                     <TabControl>
                         <!-- ID Tree -->
-                        <TabItem Header="ID Tree">
+                        <TabItem Header="Protein Tree">
                             <Grid>
                                 <controls:MvvmTreeView ItemsSource="{Binding ProteinIds}" SelectedItemTarget="{Binding TreeViewSelectedItem, Mode=TwoWay}">
                                     <controls:MvvmTreeView.Resources>
