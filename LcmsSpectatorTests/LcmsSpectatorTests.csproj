@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DialogServices\TestableMainDialogService.cs" />
+    <Compile Include="MainWindowTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpectrumPlotTest.cs" />
   </ItemGroup>

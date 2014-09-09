@@ -13,8 +13,8 @@ using NUnit.Framework;
 
 namespace LcmsSpectatorTests
 {
-    [TestFixture(@"C:\Users\wilk011\Documents\DataFiles\Data\BottomUp\HCD_QCShew\raw\QC_Shew_13_04_A_17Feb14_Samwise_13-07-28.raw",
-                 @"C:\Users\wilk011\Documents\DataFiles\Data\BottomUp\HCD_QCShew\tsv\QC_Shew_13_04_A_17Feb14_Samwise_13-07-28.tsv")]
+    [TestFixture(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                 @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
     public class SpectrumPlotTest
     {
         public SpectrumPlotTest(string rawFilePath, string idFilePath)

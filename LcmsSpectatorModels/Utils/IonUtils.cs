@@ -116,6 +116,35 @@ namespace LcmsSpectatorModels.Utils
             return labeledIonPeaks;
         }
 
+        /// <summary>
+        /// Calculate M/Z error of peaks in isotope envelope.
+        /// </summary>
+        /// <param name="peaks">The peaks to calculate error for.</param>
+        /// <param name="ion">The ion to calculate theoretical isotope envelope for.</param>
+        /// <returns>Array of ppm errors for each peak.</returns>
+        public static double[] GetIsotopePpmError(Peak[] peaks, Ion ion)
+        {
+            var theoIsotopes = ion.GetIsotopes(peaks.Length).ToArray();
+            var ppmErrors = new double[peaks.Length];
+            for (int i = 0; i < peaks.Length; i++)
+            {
+                ppmErrors[i] = GetPeakPpmError(peaks[i], ion.GetIsotopeMz(theoIsotopes[i].Index));
+            }
+            return ppmErrors;
+        }
+
+        /// <summary>
+        /// Calculate the error in ppm of a peak and its theoretical M/Z
+        /// </summary>
+        /// <param name="peak">The peak to calculate the error for</param>
+        /// <param name="theoMz">Theoretical M/Z</param>
+        /// <returns>The error in ppm.</returns>
+        public static double GetPeakPpmError(Peak peak, double theoMz)
+        {
+            // error = (observed - theo)/(observed*10e6)
+            return (peak.Mz - theoMz) / peak.Mz * Math.Pow(10, 6);
+        }
+
         public static IList<XicPoint> SmoothXic(SavitzkyGolaySmoother smoother, IList<XicPoint> xic)
         {
             var xicP = new double[xic.Count];

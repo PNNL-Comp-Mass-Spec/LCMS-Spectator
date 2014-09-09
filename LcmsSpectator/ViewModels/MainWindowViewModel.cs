@@ -44,6 +44,10 @@ namespace LcmsSpectator.ViewModels
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
 
+        /// <summary>
+        /// Constructor for creating a new, empty MainWindowViewModel
+        /// </summary>
+        /// <param name="dialogService">Service for MVVM-friendly dialogs</param>
         public MainWindowViewModel(IMainDialogService dialogService)
         {
             _xicChanged = false;
@@ -63,9 +67,9 @@ namespace LcmsSpectator.ViewModels
 
             _spectrumChanged = false;
 
-            OpenRawFileCommand = new DelegateCommand(OpenRawFile);
-            OpenTsvFileCommand = new DelegateCommand(OpenIdFile);
-            OpenFromDmsCommand = new DelegateCommand(OpenFromDms, ShowOpenFromDms);
+            OpenRawFileCommand = new DelegateCommand(() => OpenRawFile());
+            OpenTsvFileCommand = new DelegateCommand(() => OpenIdFile());
+            OpenFromDmsCommand = new DelegateCommand(() => OpenFromDms(), ShowOpenFromDms);
             OpenSettingsCommand = new DelegateCommand(OpenSettings);
             OpenAboutBoxCommand = new DelegateCommand(OpenAboutBox);
 
@@ -82,6 +86,20 @@ namespace LcmsSpectator.ViewModels
             _idTreeMutex = new Mutex();
         }
 
+        /// <summary>
+        /// Constructor for creating MainWindowViewModel with existing IDs
+        /// </summary>
+        /// <param name="dialogService">Service for MVVM-friendly dialogs</param>
+        /// <param name="idTree">Existing IDs</param>
+        public MainWindowViewModel(IMainDialogService dialogService, IdentificationTree idTree) : this(dialogService)
+        {
+            Ids = idTree;
+            FilterIds();
+        }
+
+        /// <summary>
+        /// Object selected in Treeview. Uses weak typing because each level TreeView is a different data type.
+        /// </summary>
         public object TreeViewSelectedItem
         {
             get { return _treeViewSelectedItem; }
@@ -107,6 +125,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Toggle whether or not the Scan View shows Scans that do not have a sequence ID
+        /// </summary>
         public bool ShowUnidentifiedScans
         {
             get { return _showUnidentifiedScans; }
@@ -121,7 +142,10 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-
+        /// <summary>
+        /// Determine whether or not "Open From DMS" should be shown on the menu based on whether
+        /// or not the user is on the PNNL network or not.
+        /// </summary>
         public bool ShowOpenFromDms
         {
             get { return System.Net.Dns.GetHostEntry("").HostName.Contains("pnl.gov"); }
@@ -160,6 +184,11 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Fragment ion labels selected for display in fragment XICs.
+        /// When SelectedFragmentLabels are set, SelectedHeavyFragmentLabels and
+        /// SelectedLightFragmentLabels are updated.
+        /// </summary>
         public IList SelectedFragmentLabels
         {
             get { return _selectedFragmentLabels; }
@@ -180,6 +209,11 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Precursor ion labels selected for display in Precursor XICs.
+        /// When SelectedPrecursorLabels are set, SelectedHeavyPrecursorLabels and
+        /// SelectedLightPrecursorLabels are updated.
+        /// </summary>
         public IList SelectedPrecursorLabels
         {
             get { return _selectedPrecursorLabels; }
@@ -252,30 +286,33 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Prompt user for raw files and call ReadRawFile() to open file.
         /// </summary>
-        public void OpenRawFile()
+        public Task OpenRawFile()
         {
+            Task task = null;
             var rawFileNames = _dialogService.MultiSelectOpenFile(".raw", @"Raw Files (*.raw)|*.raw");
-            if (rawFileNames == null) return;
+            if (rawFileNames == null) return null;
             foreach (var rawFileName in rawFileNames)
             {
                 var name = rawFileName;
-                Task.Factory.StartNew(() =>
+                task = Task.Factory.StartNew(() =>
                 {
                     ReadRawFile(name);
                     if (XicViewModels.Count > 0) ShowUnidentifiedScans = true;
                 });
             }
+            return task;
         }
 
         /// <summary>
         /// Open identification file. Checks to ensure that there is a raw file open
         /// corresponding to this ID file.
         /// </summary>
-        public void OpenIdFile()
+        public Task OpenIdFile()
         {
+            Task task = null;
             const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId)|*.mzId|MzId GZip Files (*.mzId.gz)|*.mzId.gz";
             var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
-            if (tsvFileName == "") return;
+            if (tsvFileName == "") return null;
             var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
             var ext = Path.GetExtension(tsvFileName);
             string path = ext != null ? tsvFileName.Remove(tsvFileName.IndexOf(ext, StringComparison.Ordinal)) : tsvFileName;
@@ -305,12 +342,17 @@ namespace LcmsSpectator.ViewModels
                     }
                 }
             }
-            if (!String.IsNullOrEmpty(rawFileName)) Task.Factory.StartNew(() =>
-            {   // Name of raw file was found
-                if (xicVm == null) xicVm = ReadRawFile(rawFileName);    // raw file isn't open yet
-                ReadIdFile(tsvFileName, rawFileName, xicVm);    // finally read the TSV file
-            });
+            if (!String.IsNullOrEmpty(rawFileName))
+            {
+                task = Task.Factory.StartNew(() =>
+                {
+                    // Name of raw file was found
+                    if (xicVm == null) xicVm = ReadRawFile(rawFileName); // raw file isn't open yet
+                    ReadIdFile(tsvFileName, rawFileName, xicVm); // finally read the TSV file
+                });
+            }
             else _dialogService.MessageBox("Cannot open ID file.");
+            return task;
         }
 
 
@@ -377,6 +419,9 @@ namespace LcmsSpectator.ViewModels
                 Ids.Add(prsm);
                 _idTreeMutex.ReleaseMutex();
             }
+            _idTreeMutex.WaitOne();
+            FilterIds();
+            _idTreeMutex.ReleaseMutex();
             xicVm.SelectedScanNumberChanged += UpdatePrSm;
             xicVm.XicClosing += CloseXic;
             xicVm.ZoomToRt(0);
@@ -391,10 +436,11 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Open data set (raw file and ID files) from PNNL DMS system
         /// </summary>
-        public void OpenFromDms()
+        public Task OpenFromDms()
         {
+            Task task = null;
             var data = _dialogService.OpenDmsLookup(new DmsLookupViewModel(_dialogService));
-            if (data == null) return;
+            if (data == null) return null;
             var dataSetDirName = data.Item1;
             var jobDirName = data.Item2;
             string idFilePath = "";
@@ -419,18 +465,19 @@ namespace LcmsSpectator.ViewModels
             {   // no data set chosen or no raw files found for data set
                 _dialogService.MessageBox("No raw files found for that data set.");
                 IsLoading = false;
-                return;
+                return null;
             }
             foreach (var rawFilePath in rawFileNames)
             {
                 var raw = rawFilePath;
                 var filePath = idFilePath;
-                Task.Factory.StartNew(() =>
+                task = Task.Factory.StartNew(() =>
                 {
                     var xicVm = ReadRawFile(raw);
                     if (!String.IsNullOrEmpty(filePath)) ReadIdFile(filePath, xicVm.RawFileName, xicVm);
                 });
             }
+            return task;
         }
 
         /// <summary>
