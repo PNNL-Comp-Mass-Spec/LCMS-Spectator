@@ -106,6 +106,11 @@ namespace LcmsSpectatorModels.Models
             return chargeState;
         }
 
+        /// <summary>
+        /// Get PrSms with the same Protein Name, Sequence, Charge, and Scan number
+        /// </summary>
+        /// <param name="data">PrSm object to search for</param>
+        /// <returns>PrSm found in tree with parameters specified by data</returns>
         public PrSm GetPrSm(PrSm data)
         {
             var chargeState = GetChargeState(data);
@@ -115,6 +120,9 @@ namespace LcmsSpectatorModels.Models
             return prsm;
         }
 
+        /// <summary>
+        /// Get list of all prsms
+        /// </summary>
         public List<PrSm> AllPrSms
         {
             get
@@ -127,6 +135,9 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
+        /// <summary>
+        /// Get list of PrSms that have a sequence identified
+        /// </summary>
         public List<PrSm> IdentifiedPrSms
         {
             get
@@ -135,11 +146,16 @@ namespace LcmsSpectatorModels.Models
                         from proteoform in protein.Proteoforms.Values
                         from charge in proteoform.ChargeStates.Values
                         from prsm in charge.PrSms.Values
-                            where prsm.MatchedFragments >= 0
+                            where prsm.Sequence.Count > 0
                             select prsm).ToList();
             }
         }
 
+        /// <summary>
+        /// Get an IdentificationTree filtered by IDs with QValue smaller than QValue
+        /// </summary>
+        /// <param name="qValue">QValue to filter by</param>
+        /// <returns>IDs to filter by</returns>
         public IdentificationTree GetTreeFilteredByQValue(double qValue)
         {
             var idTree = new IdentificationTree(Tool, qValue);
@@ -151,6 +167,10 @@ namespace LcmsSpectatorModels.Models
             return idTree;
         }
 
+        /// <summary>
+        /// Remove PrSms from IDTree that are associated with raw file
+        /// </summary>
+        /// <param name="rawFileName">Name of raw file</param>
         public void RemovePrSmsFromRawFile(string rawFileName)
         {
             var newProteins = new Dictionary<string, ProteinId>();
