@@ -102,7 +102,7 @@ namespace LcmsSpectatorTests
         }
 
         private readonly string _rawFilePath;
-        private string _idFilePath;
+        private readonly string _idFilePath;
         private readonly IdentificationTree _ids;
     }
 }
