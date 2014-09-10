@@ -43,7 +43,7 @@ namespace LcmsSpectatorModels.Readers
                         Scan = evidence.Scan,
                         ProteinName = protein.ProteinName,
                         Charge = evidence.Charge,
-                        MatchedFragments = evidence.SpecProb,
+                        Score = evidence.SpecProb,
                         QValue = msgfPlusEvidence.QValue,
                         UseGolfScoring = true,
                     };

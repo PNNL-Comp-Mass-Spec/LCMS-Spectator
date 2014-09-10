@@ -70,7 +70,7 @@ namespace LcmsSpectatorModels.Readers
                     ProteinName = protein,
                     ProteinDesc = "",
                     Charge = Convert.ToInt32(parts[headers["Charge"]]),
-                    MatchedFragments = score,
+                    Score = score,
                     UseGolfScoring = true,
                     QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),
                     PepQValue = Convert.ToDouble(parts[headers["PepQValue"]]),

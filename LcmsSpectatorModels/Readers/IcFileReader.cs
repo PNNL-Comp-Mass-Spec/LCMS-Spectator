@@ -73,7 +73,7 @@ namespace LcmsSpectatorModels.Readers
                     Charge = Convert.ToInt32(parts[headers["Charge"]]),
                     MostAbundantIsotopeMz = Convert.ToDouble(parts[headers["MostAbundantIsotopeMz"]]),
                     Mass = Convert.ToDouble(parts[headers["Mass"]]),
-                    MatchedFragments = Math.Round(score, 3),
+                    Score = Math.Round(score, 3),
 //              IsotopeCorrPrevMs1 = Convert.ToDouble(parts[headers["IsotopeCorrPrevMs1"]]),
 //              IsotopeCorrNextMs1 = Convert.ToDouble(parts[headers["IsotopeCorrNextMs1"]]),
 //              CorrMostAbundantPlusOneIsoptope = Convert.ToDouble(parts[headers["CorrMostAbundantPlusOneIsotope"]]),

@@ -35,7 +35,7 @@ namespace LcmsSpectatorModels.Models
         public int Charge { get; set; }
         public double MostAbundantIsotopeMz { get; set; }
         public double Mass { get; set; }
-        public double MatchedFragments { get; set; }
+        public double Score { get; set; }
         public bool UseGolfScoring { get; set; } // lower the score the better
         public double QValue { get; set; }
         public double PepQValue { get; set; }
@@ -150,7 +150,7 @@ namespace LcmsSpectatorModels.Models
 
         public int CompareTo(PrSm other)
         {
-            var comp = UseGolfScoring ? other.MatchedFragments.CompareTo(MatchedFragments) : MatchedFragments.CompareTo(other.MatchedFragments);
+            var comp = UseGolfScoring ? other.Score.CompareTo(Score) : Score.CompareTo(other.Score);
             return comp;
         }
 
@@ -196,7 +196,7 @@ namespace LcmsSpectatorModels.Models
     {
         public int Compare(PrSm x, PrSm y)
         {
-            return (x.MatchedFragments.CompareTo(y.MatchedFragments));
+            return (x.Score.CompareTo(y.Score));
         }
     }
 

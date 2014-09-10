@@ -50,7 +50,7 @@ namespace LcmsSpectatorModels.Models
             PrSm highest = null;
             foreach (var prsm in PrSms.Values)
             {
-                if (!prsm.MatchedFragments.Equals(Double.NaN) && (highest == null || prsm.CompareTo(highest) >= 0))
+                if (!prsm.Score.Equals(Double.NaN) && (highest == null || prsm.CompareTo(highest) >= 0))
                 {
                     highest = prsm;
                 }

@@ -409,7 +409,7 @@ namespace LcmsSpectator.ViewModels
                     RawFileName = xicVm.RawFileName,
                     Lcms = lcms,
                     QValue = 1.0,
-                    MatchedFragments = Double.NaN,
+                    Score = Double.NaN,
                     Sequence = new Sequence(new List<AminoAcid>()),
                     SequenceText = "",
                     ProteinName = "",
@@ -632,7 +632,7 @@ namespace LcmsSpectator.ViewModels
                 var prsm = prsmChangedEventArgs.PrSm;
                 if (prsm.Sequence.Count == 0)
                 {
-                    prsm.MatchedFragments = -1.0;
+                    prsm.Score = -1.0;
                     prsm.Sequence = SelectedPrSm.Sequence;
                     prsm.SequenceText = SelectedPrSm.SequenceText;
                     prsm.Charge = SelectedPrSm.Charge;
