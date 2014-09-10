@@ -15,13 +15,13 @@ namespace LcmsSpectatorModels.Readers
             _filePath = tsvFile;
         }
 
-        public IdentificationTree Read(ILcMsRun lcms, string rawFileName)
+        public IdentificationTree Read()
         {
             var ext = Path.GetFileNameWithoutExtension(_filePath);
-            return (ext == ".gz") ? ReadFromMzId(lcms, rawFileName) : ReadFromTsvFile(lcms, rawFileName);
+            return (ext == ".gz") ? ReadFromMzId() : ReadFromTsvFile();
         }
 
-        private IdentificationTree ReadFromTsvFile(ILcMsRun lcms, string rawFileName)
+        private IdentificationTree ReadFromTsvFile()
         {
             var idTree = new IdentificationTree(ToolType.MsgfPlus);
             var file = new StreamReader(File.Open(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -41,13 +41,13 @@ namespace LcmsSpectatorModels.Readers
                     }
                     continue;
                 }
-                var idData = CreatePrSms(line, headers, lcms, rawFileName);
+                var idData = CreatePrSms(line, headers);
                 idTree.Add(idData);
             }
             return idTree;
         }
 
-        private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers, ILcMsRun lcms, string rawFileName)
+        private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers)
         {
             var parts = line.Split('\t');
             var score = Convert.ToDouble(parts[headers["SpecEValue"]]);
@@ -60,8 +60,6 @@ namespace LcmsSpectatorModels.Readers
                 var prsm = new PrSm
                 {
                     Heavy = false,
-                    RawFileName = rawFileName,
-                    Lcms = lcms,
                     Scan = Convert.ToInt32(parts[headers["ScanNum"]]),
                     Protein = parts[headers["Peptide"]],
                     Sequence = Sequence.GetSequenceFromMsGfPlusPeptideStr(parts[headers["Peptide"]]),
@@ -71,7 +69,6 @@ namespace LcmsSpectatorModels.Readers
                         (headers.ContainsKey("Formula") ? Composition.Parse(parts[headers["Formula"]]).ToString() : ""),
                     ProteinName = protein,
                     ProteinDesc = "",
-                    ProteinNameDesc = parts[headers["Protein"]].Split('(')[0],
                     Charge = Convert.ToInt32(parts[headers["Charge"]]),
                     MatchedFragments = score,
                     UseGolfScoring = true,
@@ -83,7 +80,7 @@ namespace LcmsSpectatorModels.Readers
             return prsms;
         }
 
-        private IdentificationTree ReadFromMzId(ILcMsRun lcms, string rawFileName)
+        private IdentificationTree ReadFromMzId()
         {
             throw new NotImplementedException();
         /*     var oReader = new PHRPReader.clsPHRPReader(_filePath) {SkipDuplicatePSMs = true};

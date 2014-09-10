@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Models;
 
 namespace LcmsSpectatorModels.Readers
@@ -14,7 +13,7 @@ namespace LcmsSpectatorModels.Readers
             _tsvFile = tsvFile;
         }
 
-        public IdentificationTree Read(ILcMsRun lcms, string rawFileName)
+        public IdentificationTree Read()
         {
             var idTree = new IdentificationTree(ToolType.MsPathFinder);
             var file = new StreamReader(File.Open(_tsvFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -34,7 +33,7 @@ namespace LcmsSpectatorModels.Readers
                     }
                     continue;
                 }
-                var idData = CreatePrSms(line, headers, lcms, rawFileName);
+                var idData = CreatePrSms(line, headers);
                 idTree.Add(idData);
             }
             file.Close();
@@ -42,7 +41,7 @@ namespace LcmsSpectatorModels.Readers
             return idTree;
         }
 
-        private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers, ILcMsRun lcms, string rawFileName)
+        private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers)
         {
             var parts = line.Split('\t');
             var scoreLabel = "IcScore";
@@ -57,8 +56,6 @@ namespace LcmsSpectatorModels.Readers
                 var prsm = new PrSm
                 {
                     Heavy = false,
-                    RawFileName = rawFileName,
-                    Lcms = lcms,
                     Scan = Convert.ToInt32(parts[headers["Scan"]]),
                     Pre = parts[headers["Pre"]],
                     Protein = parts[headers["Sequence"]],
@@ -70,7 +67,6 @@ namespace LcmsSpectatorModels.Readers
                     Composition = parts[headers["Composition"]],
                     ProteinName = protein,
                     ProteinDesc = parts[headers["ProteinDesc"]].Split(';').FirstOrDefault(),
-                    ProteinNameDesc = parts[headers["ProteinName"]] + "; " + parts[headers["ProteinDesc"]],
                     ProteinLength = Convert.ToInt32(parts[headers["ProteinLength"]]),
                     Start = Convert.ToInt32(parts[headers["Start"]]),
                     End = Convert.ToInt32(parts[headers["End"]]),

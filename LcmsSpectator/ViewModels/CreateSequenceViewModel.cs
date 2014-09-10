@@ -151,7 +151,6 @@ namespace LcmsSpectator.ViewModels
                 Heavy = false,
                 RawFileName = rawFileName,
                 ProteinName = "",
-                ProteinNameDesc = "",
                 ProteinDesc = "",
                 Scan = SelectedScan,
                 Lcms = lcms,

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.MassSpecData;
 
 namespace LcmsSpectatorModels.Models
 {
@@ -44,6 +45,14 @@ namespace LcmsSpectatorModels.Models
                 }
             }
             return highest;
+        }
+
+        public void SetLcmsRun(ILcMsRun lcms, string rawFileName)
+        {
+            foreach (var proteoform in Proteoforms.Values)
+            {
+                proteoform.SetLcmsRun(lcms, rawFileName);
+            }
         }
 
         public bool Contains(PrSm data)

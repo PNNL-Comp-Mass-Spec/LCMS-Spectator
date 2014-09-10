@@ -369,7 +369,8 @@ namespace LcmsSpectator.ViewModels
             try
             {
                 var reader = IdFileReaderFactory.CreateReader(idFileName);
-                ids = reader.Read(xicVm.Lcms, xicVm.RawFileName);
+                ids = reader.Read();
+                ids.SetLcmsRun(xicVm.Lcms, xicVm.RawFileName);
             }
             catch (IOException e)
             {
@@ -636,7 +637,7 @@ namespace LcmsSpectator.ViewModels
                     prsm.SequenceText = SelectedPrSm.SequenceText;
                     prsm.Charge = SelectedPrSm.Charge;
                     prsm.ProteinName = SelectedPrSm.ProteinName;
-                    prsm.ProteinNameDesc = SelectedPrSm.ProteinNameDesc;
+                    prsm.ProteinDesc = SelectedPrSm.ProteinDesc;
                 }
                 SelectedPrSm = prsm;
             }

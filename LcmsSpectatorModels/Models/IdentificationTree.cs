@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using InformedProteomics.Backend.MassSpecData;
 
 namespace LcmsSpectatorModels.Models
 {
@@ -50,6 +51,14 @@ namespace LcmsSpectatorModels.Models
         public void Remove(PrSm data)
         {
             if (Proteins.ContainsKey(data.ProteinName)) Proteins[data.ProteinName].Remove(data);
+        }
+
+        public void SetLcmsRun(ILcMsRun lcms, string rawFileName)
+        {
+            foreach (var protein in Proteins.Values)
+            {
+                protein.SetLcmsRun(lcms, rawFileName);
+            }
         }
 
         public void RemoveUnidentifiedScan(PrSm data)

@@ -28,7 +28,7 @@ namespace LcmsSpectatorModels.Models
         public string Composition { get; set; }
         public string ProteinName { get; set; }
         public string ProteinDesc { get; set; }
-        public string ProteinNameDesc { get; set; }
+        public string ProteinNameDesc { get { return String.Format("{0} {1}", ProteinName, ProteinDesc); } }
         public int ProteinLength { get; set; }
         public int Start { get; set; }
         public int End { get; set; }
@@ -55,7 +55,6 @@ namespace LcmsSpectatorModels.Models
             Composition = "";
             ProteinName = "";
             ProteinDesc = "";
-            ProteinNameDesc = "";
             UseGolfScoring = false;
             Heavy = false;
         }

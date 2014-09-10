@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.MassSpecData;
 
 namespace LcmsSpectatorModels.Models
 {
@@ -28,6 +29,14 @@ namespace LcmsSpectatorModels.Models
         public void Remove(PrSm data)
         {
             if (ChargeStates.ContainsKey(data.Charge)) ChargeStates[data.Charge].Remove(data);
+        }
+
+        public void SetLcmsRun(ILcMsRun lcms, string rawFileName)
+        {
+            foreach (var chargeState in ChargeStates.Values)
+            {
+                chargeState.SetLcmsRun(lcms, rawFileName);
+            }
         }
 
         public bool Contains(PrSm data)

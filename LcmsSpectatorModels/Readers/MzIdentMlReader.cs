@@ -17,7 +17,7 @@ namespace LcmsSpectatorModels.Readers
             _mzIdentMlReader = new MTDBFramework.IO.MzIdentMlReader(options);
         }
 
-        public IdentificationTree Read(ILcMsRun lcms, string rawFileName)
+        public IdentificationTree Read()
         {
             var dataSet = _mzIdentMlReader.Read(_fileName);
             var idTree = new IdentificationTree(ToolType.MsgfPlus);
@@ -41,10 +41,7 @@ namespace LcmsSpectatorModels.Readers
                         SequenceText = sequenceText,
                         Sequence = sequenceReader.Read(sequenceText),
                         Scan = evidence.Scan,
-                        Lcms = lcms,
-                        RawFileName = rawFileName,
                         ProteinName = protein.ProteinName,
-                        ProteinNameDesc = protein.ProteinName,
                         Charge = evidence.Charge,
                         MatchedFragments = evidence.SpecProb,
                         QValue = msgfPlusEvidence.QValue,
