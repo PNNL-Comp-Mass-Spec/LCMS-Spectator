@@ -71,6 +71,20 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Toggle whether or not the filtered spectrum is showed
+        /// </summary>
+        public bool ShowFilteredSpectrum
+        {
+            get { return _showFilteredSpectrum; }
+            set
+            {
+                _showFilteredSpectrum = value;
+                Update();
+                OnPropertyChanged("FilterSpectrum");
+            }
+        }
+
+        /// <summary>
         /// Spectrum to display.
         /// </summary>
         public Spectrum Spectrum
@@ -282,7 +296,11 @@ namespace LcmsSpectator.ViewModels
         private LinearAxis _xAxis;
         private readonly double _multiplier;
 
+        private bool _showFilteredSpectrum;
+        private Spectrum _filteredSpectrum;
+        private Spectrum _unFilteredSpectrum;
         private Spectrum _spectrum;
+
         private List<LabeledIon> _ions;
         private bool _showUnexplainedPeaks;
         private readonly IDialogService _dialogService;
