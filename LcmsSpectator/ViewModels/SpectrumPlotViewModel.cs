@@ -298,7 +298,6 @@ namespace LcmsSpectator.ViewModels
 
         private bool _showFilteredSpectrum;
         private Spectrum _filteredSpectrum;
-        private Spectrum _unFilteredSpectrum;
         private Spectrum _spectrum;
 
         private List<LabeledIon> _ions;
