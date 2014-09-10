@@ -1,6 +1,8 @@
-﻿using InformedProteomics.Backend.MassSpecData;
+﻿using System;
+using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers.SequenceReaders;
+using MTDBFramework.Algorithms;
 using MTDBFramework.Data;
 
 namespace LcmsSpectatorModels.Readers
@@ -10,15 +12,15 @@ namespace LcmsSpectatorModels.Readers
         public MzIdentMlReader(string fileName)
         {
             _fileName = fileName;
-            _mzIdentMlReader = new MTDBFramework.IO.MzIdentMlReader(new Options());
+            var options = new Options();
+            options.TargetFilterType = TargetWorkflowType.BOTTOM_UP;
+            _mzIdentMlReader = new MTDBFramework.IO.MzIdentMlReader(options);
         }
 
         public IdentificationTree Read(ILcMsRun lcms, string rawFileName)
         {
             var dataSet = _mzIdentMlReader.Read(_fileName);
-            var tool = dataSet.Tool;
-            var toolType = tool == LcmsIdentificationTool.MsgfPlus ? ToolType.MsgfPlus : ToolType.Other;
-            var idTree = new IdentificationTree(toolType);
+            var idTree = new IdentificationTree(ToolType.MsgfPlus);
 
             var evidences = dataSet.Evidences;
 
@@ -26,6 +28,7 @@ namespace LcmsSpectatorModels.Readers
 
             foreach (var evidence in evidences)
             {
+                var msgfPlusEvidence = (MsgfPlusResult) evidence;
                 var sequenceText = evidence.SeqWithNumericMods;
                 var index = sequenceText.IndexOf('.');
                 var lastIndex = sequenceText.LastIndexOf('.');
@@ -41,7 +44,11 @@ namespace LcmsSpectatorModels.Readers
                         Lcms = lcms,
                         RawFileName = rawFileName,
                         ProteinName = protein.ProteinName,
+                        ProteinNameDesc = protein.ProteinName,
                         Charge = evidence.Charge,
+                        MatchedFragments = evidence.SpecProb,
+                        QValue = msgfPlusEvidence.QValue,
+                        UseGolfScoring = true,
                     };
                     idTree.Add(prsm);
                 }
