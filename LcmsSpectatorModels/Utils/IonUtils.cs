@@ -98,8 +98,9 @@ namespace LcmsSpectatorModels.Utils
 
         public static LabeledIonPeaks GetIonPeaks(LabeledIon ion, Spectrum spectrum, Tolerance productIonTolerance, Tolerance precursorIonTolerance)
         {
-            var ionCorrelation = spectrum.GetCorrScore(ion.Ion, productIonTolerance);
-            var isotopePeaks = spectrum.GetAllIsotopePeaks(ion.Ion, precursorIonTolerance, 0.1);
+            var tolerance = ion.IsFragmentIon ? productIonTolerance : precursorIonTolerance;
+            var ionCorrelation = spectrum.GetCorrScore(ion.Ion, tolerance);
+            var isotopePeaks = spectrum.GetAllIsotopePeaks(ion.Ion, tolerance, 0.1);
             return new LabeledIonPeaks(ion.Composition, ion.Index, isotopePeaks, ionCorrelation, ion.IonType, ion.IsFragmentIon);
         }
 
