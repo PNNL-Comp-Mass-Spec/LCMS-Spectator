@@ -43,6 +43,8 @@ namespace LcmsSpectator.ViewModels
             {
                 _selectedDataset = value;
                 Jobs.Clear();
+                OnPropertyChanged("SelectedDataset");
+                if (_selectedDataset == null) return;
                 var jobMap = _dmsLookupUtility.GetJobsByDataset(new List<DmsLookupUtility.UdtDatasetInfo>{ _selectedDataset.UdtDatasetInfo});
                 List<DmsLookupUtility.UdtJobInfo> jobs;
                 if (jobMap.TryGetValue(_selectedDataset.DatasetId, out jobs))
@@ -53,7 +55,6 @@ namespace LcmsSpectator.ViewModels
                     }
                 }
                 if (Jobs.Count > 0) SelectedJob = Jobs[0];
-                OnPropertyChanged("SelectedDataset");
             }
         }
 
