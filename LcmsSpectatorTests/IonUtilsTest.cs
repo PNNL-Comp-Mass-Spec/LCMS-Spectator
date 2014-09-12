@@ -35,7 +35,7 @@ namespace LcmsSpectatorTests
         public void TestIsotopePeakAlignment(string rawFilePath, string idFilePath)
         {
             var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
-            var lcms = RafLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
             var ids = idFileReader.Read(lcms, Path.GetFileNameWithoutExtension(rawFilePath));
 
             var prsms = ids.IdentifiedPrSms;

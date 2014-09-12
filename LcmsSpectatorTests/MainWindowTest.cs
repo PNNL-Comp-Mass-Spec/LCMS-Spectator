@@ -18,7 +18,7 @@ namespace LcmsSpectatorTests
             _rawFilePath = rawFilePath;
             _idFilePath = idFilePath;
             var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
-            var lcms = RafLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
             _ids = idFileReader.Read(lcms, Path.GetFileNameWithoutExtension(rawFilePath));
         }
 

@@ -20,7 +20,7 @@ namespace LcmsSpectatorTests
         public SpectrumPlotTest(string rawFilePath, string idFilePath)
         {
             var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
-            var lcms = RafLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
             _ids = idFileReader.Read(lcms, Path.GetFileNameWithoutExtension(rawFilePath));
         }
 

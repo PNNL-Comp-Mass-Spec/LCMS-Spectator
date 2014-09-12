@@ -78,7 +78,7 @@ namespace LcmsSpectator.ViewModels
                 OnPropertyChanged("RawFileName"); // make gui update raw file name label
                 IsLoading = true;
                 // load raw file
-                Lcms = RafLcMsRun.GetLcMsRun(_rawFilePath, MassSpecDataType.XCaliburRun, 0, 0);
+                Lcms = PbfLcMsRun.GetLcMsRun(_rawFilePath, MassSpecDataType.XCaliburRun, 0, 0);
                 FragmentPlotViewModel.Lcms = Lcms;
                 HeavyFragmentPlotViewModel.Lcms = Lcms;
                 PrecursorPlotViewModel.Lcms = Lcms;
