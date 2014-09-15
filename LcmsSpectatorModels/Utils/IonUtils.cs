@@ -122,14 +122,20 @@ namespace LcmsSpectatorModels.Utils
         /// </summary>
         /// <param name="peaks">The peaks to calculate error for.</param>
         /// <param name="ion">The ion to calculate theoretical isotope envelope for.</param>
+        /// <param name="relativeIntensityThreshold">Relative intensity threshold for calculating isotopes</param>
         /// <returns>Array of ppm errors for each peak.</returns>
-        public static double[] GetIsotopePpmError(Peak[] peaks, Ion ion)
+        public static double?[] GetIsotopePpmError(Peak[] peaks, Ion ion, double relativeIntensityThreshold)
         {
-            var theoIsotopes = ion.GetIsotopes(peaks.Length).ToArray();
-            var ppmErrors = new double[peaks.Length];
-            for (int i = 0; i < peaks.Length; i++)
+            var isotopes = ion.GetIsotopes(relativeIntensityThreshold).ToArray();
+            var ppmErrors = new double?[isotopes.Length];
+            for (int i = 0; i < isotopes.Length; i++)
             {
-                ppmErrors[i] = GetPeakPpmError(peaks[i], ion.GetIsotopeMz(theoIsotopes[i].Index));
+                if (peaks[i] == null)
+                {
+                    ppmErrors[i] = null;
+                    continue;
+                }
+                ppmErrors[i] = GetPeakPpmError(peaks[i], ion.GetIsotopeMz(isotopes[i].Index));
             }
             return ppmErrors;
         }

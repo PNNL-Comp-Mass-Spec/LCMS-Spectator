@@ -12,6 +12,7 @@ using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
+using LcmsSpectatorModels.Utils;
 using NUnit.Framework;
 
 namespace LcmsSpectatorTests
@@ -36,13 +37,14 @@ namespace LcmsSpectatorTests
         {
             var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
             var lcms = PbfLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
-            var ids = idFileReader.Read(lcms, Path.GetFileNameWithoutExtension(rawFilePath));
+            var ids = idFileReader.Read();
+            ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFilePath));
 
             var prsms = ids.IdentifiedPrSms;
 
             const double relIntThres = 0.1;
-
-            const int maxCharge = 15;   // 15 is the maximum charge that MS-PathFinder reports
+            var tolerance = new Tolerance(10, ToleranceUnit.Ppm);
+            const int maxCharge = 15;
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = ionTypeFactory.GetAllKnownIonTypes().ToArray();
             foreach (var prsm in prsms)
@@ -51,8 +53,14 @@ namespace LcmsSpectatorTests
                 {
                     var composition = prsm.Sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
                     var ion = ionType.GetIon(composition);
-                    
-                    var observedPeaks = prsm.Ms2Spectrum.GetAllIsotopePeaks(ion, new Tolerance(10, ToleranceUnit.Ppm), relIntThres);
+                    var observedPeaks = prsm.Ms2Spectrum.GetAllIsotopePeaks(ion, tolerance, relIntThres);
+                    if (observedPeaks == null) continue;
+                    var errors = IonUtils.GetIsotopePpmError(observedPeaks, ion, relIntThres);
+                    foreach (var error in errors)
+                    {
+                        if (error == null) continue;
+                        Assert.True(error <= tolerance.GetValue());
+                    }
                 }
             }
         }

@@ -231,16 +231,12 @@ namespace LcmsSpectator.ViewModels
             var obsPeaks = labeledIonPeaks.Peaks;
             if (obsPeaks == null || obsPeaks.Length < 1) return null;
             Peak maxPeak = null;
-            var theoIsotopes = labeledIon.Ion.GetIsotopes(obsPeaks.Length).ToArray();
-            for (int i = 0; i < obsPeaks.Length; i++)
+            var errors = IonUtils.GetIsotopePpmError(obsPeaks, labeledIonPeaks.Ion, 0.1);
+            for (int i = 0; i < errors.Length; i++)
             {
-                if (obsPeaks[i] != null)
+                if (errors[i] != null)
                 {
-                    // calculate error
-                    var theoIsotopeMz = labeledIon.Ion.GetIsotopeMz(theoIsotopes[i].Index);
-                    // error = (observed - theo)/(observed*10e6)
-                    var ppmError = (obsPeaks[i].Mz - theoIsotopeMz) / obsPeaks[i].Mz * Math.Pow(10, 6);
-                    ionSeries.Points.Add(new PeakDataPoint(obsPeaks[i].Mz, obsPeaks[i].Intensity, ppmError, labeledIonPeaks.CorrelationScore));
+                    ionSeries.Points.Add(new PeakDataPoint(obsPeaks[i].Mz, obsPeaks[i].Intensity, errors[i].Value, labeledIonPeaks.CorrelationScore));
                     // Find most intense peak
                     if (maxPeak == null || obsPeaks[i].Intensity >= maxPeak.Intensity) maxPeak = obsPeaks[i];
                 }
