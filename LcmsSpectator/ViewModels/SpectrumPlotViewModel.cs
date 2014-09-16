@@ -30,6 +30,7 @@ namespace LcmsSpectator.ViewModels
             SaveAsImageCommand = new DelegateCommand(SaveAsImage);
             _dialogService = dialogService;
             _showUnexplainedPeaks = showUnexplainedPeaks;
+            _showFilteredSpectrum = false;
             _multiplier = multiplier;
             _colors = colors;
             Title = "";
@@ -80,7 +81,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _showFilteredSpectrum = value;
                 Update();
-                OnPropertyChanged("FilterSpectrum");
+                OnPropertyChanged("ShowFilteredSpectrum");
             }
         }
 
@@ -94,6 +95,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_spectrum == value) return;
                 _spectrum = value;
+                _filteredSpectrum = null; // reset filtered spectrum
                 OnPropertyChanged("Spectrum");
             }
         }
@@ -167,8 +169,18 @@ namespace LcmsSpectator.ViewModels
                 ClearPlot();
                 return;
             }
-            var xAxis = _xAxis ?? GenerateXAxis();
-            _xAxis = xAxis;
+            // Filtered spectrum?
+            var spectrum = Spectrum;
+            if (ShowFilteredSpectrum)
+            {
+                if (_filteredSpectrum == null)
+                {
+                    _filteredSpectrum = Spectrum.GetFilteredSpectrumBySlope(IcParameters.Instance.SpectrumFilterSlope);
+                }
+                spectrum = _filteredSpectrum;
+            }
+            // Create XAxis if there is none
+            var xAxis = _xAxis ?? GenerateXAxis(spectrum);
             var plot = new AutoAdjustedYPlotModel(xAxis, _multiplier)
             {
                 Title = Title,
@@ -182,7 +194,7 @@ namespace LcmsSpectator.ViewModels
                     "{1}: {2:0.###}" + Environment.NewLine +
                     "{3}: {4:0.##E0}"
             };
-            foreach (var peak in Spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
+            foreach (var peak in spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
             GuiInvoker.Invoke(plot.Series.Add, spectrumSeries);
             plot.GenerateYAxis("Intensity", "0e0");
             SetPlotSeries(plot);
@@ -258,9 +270,9 @@ namespace LcmsSpectator.ViewModels
             return new Tuple<Series, Annotation>(ionSeries, annotation);
         }
 
-        private LinearAxis GenerateXAxis()
+        private LinearAxis GenerateXAxis(Spectrum spectrum)
         {
-            var peaks = Spectrum.Peaks;
+            var peaks = spectrum.Peaks;
             var ms2MaxMz = 1.0;    // plot maximum needs to be bigger than 0
             if (peaks.Length > 0) ms2MaxMz = peaks.Max().Mz * 1.1;
             var xAxis = new LinearAxis(AxisPosition.Bottom, "M/Z")

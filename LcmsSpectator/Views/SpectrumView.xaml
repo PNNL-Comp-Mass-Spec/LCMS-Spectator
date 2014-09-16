@@ -18,6 +18,7 @@
         <oxy:Plot Name="Ms2Spectrum" DataContext="{Binding Ms2SpectrumViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
             <oxy:Plot.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                     <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                 </ContextMenu>
@@ -26,6 +27,7 @@
         <oxy:Plot Name="PreviousMs1" DataContext="{Binding PreviousMs1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="1">
             <oxy:Plot.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                     <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                 </ContextMenu>
@@ -34,6 +36,7 @@
         <oxy:Plot Name="NextMs1" DataContext="{Binding NextMs1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="1" Grid.Column="1">
             <oxy:Plot.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                     <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                 </ContextMenu>

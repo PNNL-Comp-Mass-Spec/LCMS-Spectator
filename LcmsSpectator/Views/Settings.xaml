@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:views="clr-namespace:LcmsSpectator.Views"
              mc:Ignorable="d" Title="LcMsSpectator: Settings"
-             Height="310" Width="650">
+             Height="360" Width="650">
     <Window.Resources>
         <DataTemplate x:Key="ModItemTemplate">
             <Grid>
@@ -24,7 +24,7 @@
             </Grid>
         </DataTemplate>
     </Window.Resources>
-    <Grid Height="250" Margin="10,10,10,10" VerticalAlignment="Top">
+    <Grid Height="300" Margin="10,10,10,10" VerticalAlignment="Top">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="10" /> <!-- Spacer -->
@@ -34,11 +34,12 @@
             <TabItem Header="Data">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="20*" />
-                        <RowDefinition Height="20*" />
-                        <RowDefinition Height="20*" />
-                        <RowDefinition Height="20*" />
-                        <RowDefinition Height="20*" />
+                        <RowDefinition Height="16*" />
+                        <RowDefinition Height="16*" />
+                        <RowDefinition Height="16*" />
+                        <RowDefinition Height="16*" />
+                        <RowDefinition Height="16*" />
+                        <RowDefinition Height="16*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="40*" />
@@ -64,6 +65,9 @@
                     <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" ToolTip="Must be an odd integer of at least 3. 0 = No smoothing.">Default Points To Smooth</TextBlock>
                     <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PointsToSmooth}" Height="25" VerticalAlignment="Top"
                              ToolTip="Must be an odd integer of at least 3. 0 = No smoothing."/>
+
+                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Spectrum Filter Slope</TextBlock>
+                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterSlope}" Height="25" VerticalAlignment="Top" />
                 </Grid>
             </TabItem>
             <TabItem Header="Modifications">

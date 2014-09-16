@@ -19,6 +19,7 @@ namespace LcmsSpectator.ViewModels
         public int ModificationsPerSequence { get; set; }
         public double IonCorrelationThreshold { get; set; }
         public int PointsToSmooth { get; set; }
+        public double SpectrumFilterSlope { get; set; }
 
         public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
         public DelegateCommand AddModificationCommand { get; set; }
@@ -44,6 +45,7 @@ namespace LcmsSpectator.ViewModels
             IonCorrelationThreshold = IcParameters.Instance.IonCorrelationThreshold;
             ModificationsPerSequence = IcParameters.Instance.MaxDynamicModificationsPerSequence;
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
+            SpectrumFilterSlope = IcParameters.Instance.SpectrumFilterSlope;
 
             Modifications = new ObservableCollection<ModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
@@ -83,6 +85,7 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.MaxDynamicModificationsPerSequence = ModificationsPerSequence;
             IcParameters.Instance.IonCorrelationThreshold = IonCorrelationThreshold;
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
+            IcParameters.Instance.SpectrumFilterSlope = SpectrumFilterSlope;
 
             var modificationList = new List<SearchModification>();
             foreach (var searchModificationVm in Modifications)
