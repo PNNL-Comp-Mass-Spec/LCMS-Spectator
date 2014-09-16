@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection.Emit;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.PlotModels;
@@ -9,32 +11,32 @@ using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
 using LcmsSpectatorModels.Utils;
 using LcmsSpectatorTests.DialogServices;
+using MultiDimensionalPeakFinding.PeakDetection;
 using NUnit.Framework;
+using OxyPlot.Series;
 
 namespace LcmsSpectatorTests
 {
-    [TestFixture(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
-                 @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+    [TestFixture]
     public class SpectrumPlotTest
     {
-        public SpectrumPlotTest(string rawFilePath, string idFilePath)
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                 @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        public async void TestDisplaySpectrum(string rawFile, string tsvFile)
         {
-            var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
-            var lcms = PbfLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
-            _ids = idFileReader.Read();
-            _ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFilePath));
-        }
+            // init
+            var idFileReader = IdFileReaderFactory.CreateReader(tsvFile);
+            var ids = idFileReader.Read();
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile, MassSpecDataType.XCaliburRun);
+            ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
 
-        [Test]
-        public async void TestDisplaySpectrum()
-        {
             // init SpectrumPlotViewModel
             var colorDictionary = new ColorDictionary(2);
             var dialogService = new TestableMainDialogService();
             var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, 1.05, colorDictionary);
 
             // init test data
-            var id = _ids.GetHighestScoringPrSm();
+            var id = ids.GetHighestScoringPrSm();
 
             // init test ions
             var ions = new List<LabeledIon>();
@@ -49,16 +51,23 @@ namespace LcmsSpectatorTests
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == 1);
         }
 
-        [Test]
-        public async void TestAddIons()
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                 @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        public async void TestAddIons(string rawFile, string tsvFile)
         {
+            // init
+            var idFileReader = IdFileReaderFactory.CreateReader(tsvFile);
+            var ids = idFileReader.Read();
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile, MassSpecDataType.XCaliburRun);
+            ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
+
             // init SpectrumPlotViewModel
             var colorDictionary = new ColorDictionary(2);
             var dialogService = new TestableMainDialogService();
             var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, 1.05, colorDictionary);
 
             // init test data
-            var id = _ids.GetHighestScoringPrSm();
+            var id = ids.GetHighestScoringPrSm();
 
             // init test ions
             var baseIonTypes = new List<BaseIonType> { BaseIonType.B, BaseIonType.Y };
@@ -93,6 +102,62 @@ namespace LcmsSpectatorTests
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
         }
 
-        private readonly IdentificationTree _ids;
+        /// <summary>
+        /// This test checks to see if the spectrum plot is showing a valid ppm error for the ion highlights
+        /// </summary>
+        /// <param name="rawFile"></param>
+        /// <param name="tsvFile"></param>
+        [TestCase(@"\\protoapps\UserData\Wilkins\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3.raw",
+          @"\\protoapps\UserData\Wilkins\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3_IcTda.tsv")]
+        // bottom up (dia) data
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        // bottom up (dda) data
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DDA\Q_2014_0523_1_0_amol_uL_DDA.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DDA\Q_2014_0523_1_0_amol_uL_DDA_IcTda.tsv")]
+        public async void TestIonError(string rawFile, string tsvFile)
+        {
+            // init
+            var idFileReader = IdFileReaderFactory.CreateReader(tsvFile);
+            var ids = idFileReader.Read();
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile, MassSpecDataType.XCaliburRun);
+            ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
+            var prsms = ids.IdentifiedPrSms;
+
+            // init SpectrumPlotViewModel
+            var colorDictionary = new ColorDictionary(2);
+            var dialogService = new TestableMainDialogService();
+            var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, 1.05, colorDictionary);
+
+            // init ionTypes
+            const int maxCharge = 15;
+            var ionTypeFactory = new IonTypeFactory(maxCharge);
+            var ionTypes = ionTypeFactory.GetAllKnownIonTypes().ToArray();
+
+            foreach (var prsm in prsms)
+            {
+                var ions = IonUtils.GetFragmentIonLabels(prsm.Sequence, prsm.Charge, ionTypes);
+                spectrumPlotViewModel.Ions = ions;
+                spectrumPlotViewModel.Spectrum = prsm.Ms2Spectrum;
+                await spectrumPlotViewModel.Update();
+
+                foreach (var series in spectrumPlotViewModel.Plot.Series)
+                {
+                    if (series is StemSeries)
+                    {
+                        var stemSeries = series as StemSeries;
+                        foreach (var dataPoint in stemSeries.Points)
+                        {
+                            if (dataPoint is PeakDataPoint)
+                            {
+                                var peakDataPoint = dataPoint as PeakDataPoint;
+                                Assert.True(peakDataPoint.Error <= IcParameters.Instance.ProductIonTolerancePpm.GetValue());
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
     }
 }

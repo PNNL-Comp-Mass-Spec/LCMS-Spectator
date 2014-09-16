@@ -168,6 +168,7 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
             var xAxis = _xAxis ?? GenerateXAxis();
+            _xAxis = xAxis;
             var plot = new AutoAdjustedYPlotModel(xAxis, _multiplier)
             {
                 Title = Title,
