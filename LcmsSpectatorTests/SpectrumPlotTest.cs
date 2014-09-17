@@ -122,16 +122,17 @@ namespace LcmsSpectatorTests
             foreach (var scan in scans)
             {
                 var spectrum = lcms.GetSpectrum(scan);
-                var filteredSpectrum = spectrum.GetFilteredSpectrumBySlope();
+                var filteredSpectrum = spectrum.GetFilteredSpectrumBySlope();   // filtered spectrum to test against
                 specPlotVm.Spectrum = spectrum;
 
                 // check unfiltered spectrum
                 specPlotVm.ShowFilteredSpectrum = false;
                 if (!specPlotVm.PlotService.IsCompleted) await specPlotVm.PlotService.Task;
                 var spectrumSeries = specPlotVm.Plot.Series[0] as StemSeries;
-                Assert.True(spectrumSeries.Points.Count == spectrum.Peaks.Length);
+                Assert.True(spectrumSeries.Points.Count == spectrum.Peaks.Length);  // should be the same length
                 for (int i = 0; i < spectrumSeries.Points.Count; i++)
                 {
+                    // compare each peak in spectrum plot to actual spectrum
                     Assert.True(spectrumSeries.Points[i].X == spectrum.Peaks[i].Mz);
                     Assert.True(spectrumSeries.Points[i].Y == spectrum.Peaks[i].Intensity);
                 }
@@ -140,9 +141,10 @@ namespace LcmsSpectatorTests
                 specPlotVm.ShowFilteredSpectrum = true;
                 if (!specPlotVm.PlotService.IsCompleted) await specPlotVm.PlotService.Task;
                 var filteredSeries = specPlotVm.Plot.Series[0] as StemSeries;
-                Assert.True(filteredSeries.Points.Count == filteredSpectrum.Peaks.Length);
+                Assert.True(filteredSeries.Points.Count == filteredSpectrum.Peaks.Length);   // should be the same length
                 for (int i = 0; i < filteredSeries.Points.Count; i++)
                 {
+                    // compare each peak in spectrum plot to actual filtered spectrum
                     Assert.True(filteredSeries.Points[i].X == filteredSpectrum.Peaks[i].Mz);
                     Assert.True(filteredSeries.Points[i].Y == filteredSpectrum.Peaks[i].Intensity);
                 }
