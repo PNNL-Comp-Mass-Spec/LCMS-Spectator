@@ -46,10 +46,10 @@ namespace LcmsSpectatorTests
             await spectrumPlotViewModel.Update();
 
             // plot should not be null
-            Assert.True(spectrumPlotViewModel.Plot != null);
+            Assert.True(spectrumPlotViewModel.PlotService != null);
 
             // plot should contain 1 stem series (the spectrum stem series)
-            Assert.True(spectrumPlotViewModel.Plot.Series.Count == 1);
+            Assert.True(spectrumPlotViewModel.PlotService.Series.Count == 1);
         }
 
         [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
@@ -86,7 +86,7 @@ namespace LcmsSpectatorTests
             await spectrumPlotViewModel.Update();
 
             // there should be ions.count + 1 (spectrum series) plot series
-            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
+            Assert.True(spectrumPlotViewModel.PlotService.Series.Count == (expectedIons.Count + 1));
 
             // Remove ion types
             baseIonTypes = new List<BaseIonType> { BaseIonType.Y };
@@ -100,7 +100,7 @@ namespace LcmsSpectatorTests
             await spectrumPlotViewModel.Update();
 
             // there should be ions.count + 1 (spectrum series) plot series
-            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
+            Assert.True(spectrumPlotViewModel.PlotService.Series.Count == (expectedIons.Count + 1));
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace LcmsSpectatorTests
                 spectrumPlotViewModel.Spectrum = prsm.Ms2Spectrum;
                 await spectrumPlotViewModel.Update();
 
-                foreach (var series in spectrumPlotViewModel.Plot.Series)
+                foreach (var series in spectrumPlotViewModel.PlotService.Series)
                 {
                     if (series is StemSeries)
                     {

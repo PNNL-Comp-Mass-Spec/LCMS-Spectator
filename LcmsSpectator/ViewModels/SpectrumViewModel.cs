@@ -58,9 +58,9 @@ namespace LcmsSpectator.ViewModels
 
         public void ClearPlots()
         {
-            Ms2SpectrumViewModel.ClearPlot();
-            NextMs1ViewModel.ClearPlot();
-            PreviousMs1ViewModel.ClearPlot();
+            Ms2SpectrumViewModel.Clear();
+            NextMs1ViewModel.Clear();
+            PreviousMs1ViewModel.Clear();
         }
 
         /// <summary>
