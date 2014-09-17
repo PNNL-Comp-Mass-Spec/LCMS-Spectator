@@ -204,7 +204,7 @@ namespace LcmsSpectator.ViewModels
         {
             if (!PlotService.IsCompleted) await PlotService.Task;
             if (Plot == null || Plot.Series.Count == 0) return;
-            Plot.SetOrdinaryPointMarker(_selectedRt);
+            Plot.SetOrdinaryPointMarker(rt);
             Plot.AdjustForZoom();
         }
 
