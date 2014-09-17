@@ -78,6 +78,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showFilteredSpectrum = value;
+                _ionCache.Clear();
                 Update();
                 OnPropertyChanged("ShowFilteredSpectrum");
             }

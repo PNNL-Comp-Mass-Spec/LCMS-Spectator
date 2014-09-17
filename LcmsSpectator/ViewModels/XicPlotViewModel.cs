@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -22,6 +23,8 @@ namespace LcmsSpectator.ViewModels
     public class XicPlotViewModel: ViewModelBase
     {
         public SelectablePlotModel Plot { get; private set; }
+        public NotifyTaskCompletion<SelectablePlotModel> PlotService { get; private set; }
+        public NotifyTaskCompletion<string> AreaService { get; private set; } 
         public ILcMsRun Lcms { get; set; }
         public DelegateCommand SetScanChangedCommand { get; private set; }
         public DelegateCommand SaveAsImageCommand { get; private set; }
@@ -42,8 +45,12 @@ namespace LcmsSpectator.ViewModels
             _pointsToSmooth = IcParameters.Instance.PointsToSmooth;
             Plot = new SelectablePlotModel(xAxis, 1.05);
             _ions = new List<LabeledIon>();
-            _xics = new List<LabeledXic>();
+            _smoothedXics = new List<LabeledXic>();
             _xAxis.AxisChanged += AxisChanged_UpdatePlotTitle;
+            _seriesCache = new Dictionary<string, LineSeries>();
+            _xicCache = new Dictionary<string, LabeledXic>();
+            _xicCacheLock = new Mutex();
+            UpdatePlot();
         }
 
         /// <summary>
@@ -57,17 +64,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_showScanMarkers == value) return;
                 _showScanMarkers = value;
-                if (Plot == null || Plot.Series.Count == 0) return;
-                var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
-                foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
-                {
-                    if (series is LineSeries)
-                    {
-                        var lineSeries = series as LineSeries;
-                        lineSeries.MarkerType = markerType;
-                    }
-                }
-                Plot.InvalidatePlot(false);
+                ToggleScanMarkers(value);
                 OnPropertyChanged("ShowScanMarkers");
             }
         }
@@ -82,9 +79,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_showLegend == value) return;
                 _showLegend = value;
-                Plot.IsLegendVisible = _showLegend;
-                Plot.InvalidatePlot(false);
-      
+                ToggleLegend(value);
                 OnPropertyChanged("ShowLegend");
             }
         }
@@ -98,7 +93,11 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _pointsToSmooth = value;
-                Task.Factory.StartNew(GeneratePlot);
+                _xicCacheLock.WaitOne();
+                _seriesCache.Clear();
+                _smoothedXics.Clear();
+                _xicCacheLock.ReleaseMutex();
+                UpdatePlot();
                 OnPropertyChanged("PointsToSmooth");
             }
         }
@@ -112,11 +111,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _ions = value;
-                Task.Factory.StartNew(() =>
-                {
-                    _xics = GetXics(_ions);
-                    GeneratePlot();
-                });
+                UpdatePlot();
                 OnPropertyChanged("Ions");
             }
         }
@@ -144,8 +139,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedRt = value;
-                Plot.SetOrdinaryPointMarker(_selectedRt);
-                Plot.AdjustForZoom();   
+                SetSelectedRt(_selectedRt);
                 OnPropertyChanged("SelectedRt");
             }
         }
@@ -171,10 +165,13 @@ namespace LcmsSpectator.ViewModels
         /// <returns>Area under the curve of the range</returns>
         public double GetAreaOfRange(double min, double max)
         {
-            return (from lxic in _xics where lxic.Index >= 0
-                    from point in lxic.Xic 
+            _xicCacheLock.WaitOne();
+            var area = (from lxic in _smoothedXics where lxic.Index >= 0
+                        from point in lxic.Xic 
                         where Lcms.GetElutionTime(point.ScanNum) >= min && Lcms.GetElutionTime(point.ScanNum) <= max 
                         select point.Intensity).Sum();
+            _xicCacheLock.ReleaseMutex();
+            return area;
         }
 
         /// <summary>
@@ -182,8 +179,10 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         /// <param name="rtTime">Retention time to highlight</param>
         /// <param name="unique">Is it a unique marker (highlighted different color)</param>
-        public void HighlightRt(double rtTime, bool unique)
+        public async void HighlightRt(double rtTime, bool unique)
         {
+            if (!PlotService.IsCompleted) await PlotService.Task;
+            if (Plot == null || Plot.Series.Count == 0) return;
             _selectedRt = rtTime;
             if (unique) Plot.SetUniquePointMarker(rtTime);
             else Plot.SetOrdinaryPointMarker(rtTime);
@@ -201,21 +200,79 @@ namespace LcmsSpectator.ViewModels
             Plot.SetUniquePointMarker(SelectedRt);
         }
 
+        private async void SetSelectedRt(double rt)
+        {
+            if (!PlotService.IsCompleted) await PlotService.Task;
+            if (Plot == null || Plot.Series.Count == 0) return;
+            Plot.SetOrdinaryPointMarker(_selectedRt);
+            Plot.AdjustForZoom();
+        }
+
+        private async void ToggleScanMarkers(bool value)
+        {
+            if (!PlotService.IsCompleted) await PlotService.Task;
+            if (Plot == null || Plot.Series.Count == 0) return;
+            var markerType = (value) ? MarkerType.Circle : MarkerType.None;
+            foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
+            {
+                if (series is LineSeries)
+                {
+                    var lineSeries = series as LineSeries;
+                    lineSeries.MarkerType = markerType;
+                }
+            }
+            Plot.InvalidatePlot(false);
+        }
+
+        private async void ToggleLegend(bool value)
+        {
+            if (!PlotService.IsCompleted) await PlotService.Task;
+            Plot.IsLegendVisible = value;
+            Plot.InvalidatePlot(false);
+        }
+
         /// <summary>
         /// Update plot title when XAxis axis changed to reflect updated area of the currently
         /// visible portion of the plot.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AxisChanged_UpdatePlotTitle(object sender, AxisChangedEventArgs e)
+        private async void AxisChanged_UpdatePlotTitle(object sender, AxisChangedEventArgs e)
         {
-            if (Plot != null && _xAxis != null)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    PlotTitle = GetPlotTitleWithArea();
-                });
-            }
+            if (!PlotService.IsCompleted) await PlotService.Task;
+            if (Plot == null || Plot.Series.Count == 0) return;
+            UpdateArea();
+        }
+
+        public void ClearCache()
+        {
+            _xicCacheLock.WaitOne();
+            _seriesCache.Clear();
+            _smoothedXics.Clear();
+            _xicCache.Clear();
+            _xicCacheLock.ReleaseMutex();
+        }
+
+        public void UpdatePlot()
+        {
+            PlotService = new NotifyTaskCompletion<SelectablePlotModel>(UpdatePlotTask());
+            PlotService.TaskComplete += (o, e) => { Plot = PlotService.Result; OnPropertyChanged("Plot"); };
+        }
+
+        public Task<SelectablePlotModel> UpdatePlotTask()
+        {
+            return Task.Run(() => GeneratePlot());
+        }
+
+        public void UpdateArea()
+        {
+            AreaService = new NotifyTaskCompletion<string>(UpdateAreaTask());
+            AreaService.TaskComplete += (o, e) => { PlotTitle = AreaService.Result; };
+        }
+
+        public Task<string> UpdateAreaTask()
+        {
+            return Task.Run(() => GetPlotTitleWithArea());
         }
 
         /// <summary>
@@ -224,25 +281,19 @@ namespace LcmsSpectator.ViewModels
         /// <returns>Plot title with area as a string.</returns>
         private string GetPlotTitleWithArea()
         {
-            string title;
-            if (Plot != null && _xAxis != null)
-            {
-                var min = _xAxis.ActualMinimum;
-                var max = _xAxis.ActualMaximum;
-                var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", GetAreaOfRange(min, max));
-                title = String.Format("{0} (Area: {1})", _title, areaStr);
-            }
-            else title = _title;
+            var min = _xAxis.ActualMinimum;
+            var max = _xAxis.ActualMaximum;
+            var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", GetAreaOfRange(min, max));
+            var title = String.Format("{0} (Area: {1})", _title, areaStr);
             return title;
         }
 
         /// <summary>
         /// Generate plot by smoothing XICs, creating a LineSeries for each xic, and adding it to the Plot
         /// </summary>
-        private void GeneratePlot()
+        private SelectablePlotModel GeneratePlot()
         {
             // add XICs
-            if (_xics == null) return;
             var plot = new SelectablePlotModel(_xAxis, 1.05)
             {
                 TitleFontSize = 14,
@@ -250,73 +301,77 @@ namespace LcmsSpectator.ViewModels
             };
             var smoother = (PointsToSmooth == 0 || PointsToSmooth == 1) ?
                 null : new SavitzkyGolaySmoother(PointsToSmooth, 2);
-            foreach (var lxic in _xics)
+            foreach (var ion in Ions)
             {
-                var xic = lxic.Xic;
-                if (xic == null) continue;
-                // smooth
-                if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic).ToList();
-                var color = _colors.GetColor(lxic);
-                var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
-                var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
-                // create line series for xic
-                var series = new LineSeries
+                LineSeries series;
+                _xicCacheLock.WaitOne();
+                if (_seriesCache.ContainsKey(ion.Label)) series = _seriesCache[ion.Label];
+                else
                 {
-                    StrokeThickness = 3,
-                    Title = lxic.Label,
-                    Color = color,
-                    LineStyle = lineStyle,
-                    MarkerType = markerType,
-                    MarkerSize = 3,
-                    MarkerStroke = color,
-                    MarkerStrokeThickness = 1,
-                    MarkerFill = OxyColors.White,
-                    TrackerFormatString = 
-                            "{0}" + Environment.NewLine +
-                            "{1}: {2:0.###}" + Environment.NewLine +
-                            "Scan #: {ScanNum}" + Environment.NewLine +
-                            "{3}: {4:0.##E0}"
-                };
-                // Add XIC points
-                for (int i = 0; i < xic.Count; i++)
-                {
-                    // remove plateau points (line will connect them anyway)
-                    if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) && xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
-                    if (xic[i] != null) series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum, xic[i].Intensity));
+                    LabeledXic lxic;
+                    if (_xicCache.ContainsKey(ion.Label)) lxic = _xicCache[ion.Label];
+                    else
+                    {
+                        lxic = GetXic(ion);
+                        _xicCache.Add(ion.Label, lxic);
+                    }
+                    var xic = lxic.Xic;
+                    if (xic == null) continue;
+                    // smooth
+                    if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic).ToList();
+                    _smoothedXics.Add(new LabeledXic(ion.Composition, ion.Index, xic, ion.IonType, ion.IsFragmentIon));
+                    var color = _colors.GetColor(lxic);
+                    var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
+                    var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
+                    // create line series for xic
+                    series = new LineSeries
+                    {
+                        StrokeThickness = 3,
+                        Title = lxic.Label,
+                        Color = color,
+                        LineStyle = lineStyle,
+                        MarkerType = markerType,
+                        MarkerSize = 3,
+                        MarkerStroke = color,
+                        MarkerStrokeThickness = 1,
+                        MarkerFill = OxyColors.White,
+                        TrackerFormatString = 
+                                "{0}" + Environment.NewLine +
+                                "{1}: {2:0.###}" + Environment.NewLine +
+                                "Scan #: {ScanNum}" + Environment.NewLine +
+                                "{3}: {4:0.##E0}"
+                    };
+                    // Add XIC points
+                    for (int i = 0; i < xic.Count; i++)
+                    {
+                        // remove plateau points (line will connect them anyway)
+                        if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) && xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
+                        if (xic[i] != null) series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum, xic[i].Intensity));
+                    }
+                    _seriesCache.Add(ion.Label, series);
                 }
+                _xicCacheLock.ReleaseMutex();
                 plot.Series.Add(series);
             }
             plot.GenerateYAxis("Intensity", "0e0");
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
             plot.SetPointMarker(SelectedRt);
-            Plot = plot;
             if (PlotChanged != null) PlotChanged(this, EventArgs.Empty);
             PlotTitle = GetPlotTitleWithArea();
-            OnPropertyChanged("Plot");
+            return plot;
         }
 
-        /// <summary>
-        /// Create Xics from list of ions. Smooths XICs and adds retention time to each point.
-        /// </summary>
-        /// <param name="ions">Ions to create XICs from.</param>
-        /// <returns>Labeled XICs</returns>
-        private List<LabeledXic> GetXics(IEnumerable<LabeledIon> ions)
+        private LabeledXic GetXic(LabeledIon label)
         {
-            var xics = new List<LabeledXic>();
-            // get fragment xics
-            foreach (var label in ions)
-            {
-                var ion = label.Ion;
-                Xic xic;
-                if (label.IsFragmentIon) xic = Lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
-                                                                                            IcParameters.Instance.ProductIonTolerancePpm,
-                                                                                            label.PrecursorIon.GetMostAbundantIsotopeMz());
-                else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
-                var lXic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
-                xics.Add(lXic);
-            }
-            return xics;
+            var ion = label.Ion;
+            Xic xic;
+            if (label.IsFragmentIon) xic = Lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
+                                                                                        IcParameters.Instance.ProductIonTolerancePpm,
+                                                                                        label.PrecursorIon.GetMostAbundantIsotopeMz());
+            else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
+            var lXic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
+            return lXic;
         }
 
         /// <summary>
@@ -339,7 +394,6 @@ namespace LcmsSpectator.ViewModels
         private readonly IDialogService _dialogService;
         private readonly string _title;
         private bool _showLegend;
-        private List<LabeledXic> _xics;
         private readonly ColorDictionary _colors;
         private bool _showScanMarkers;
         private double _selectedRt;
@@ -348,5 +402,10 @@ namespace LcmsSpectator.ViewModels
         private string _plotTitle;
         private List<LabeledIon> _ions;
         private int _pointsToSmooth;
+
+        private readonly Mutex _xicCacheLock;
+        private readonly List<LabeledXic> _smoothedXics;
+        private readonly Dictionary<string, LabeledXic> _xicCache;  
+        private readonly Dictionary<string, LineSeries> _seriesCache;
     }
 }

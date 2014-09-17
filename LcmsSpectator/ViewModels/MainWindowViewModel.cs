@@ -171,7 +171,11 @@ namespace LcmsSpectator.ViewModels
                     _colors.BuildColorDictionary(absoluteMaxCharge);
                     IonTypeSelectorViewModel.AbsoluteMaxCharge = absoluteMaxCharge;
                     IonTypeSelectorViewModel.MinCharge = 1;
-                    foreach (var xicVm in XicViewModels) xicVm.ZoomToRt(value.RetentionTime);
+                    foreach (var xicVm in XicViewModels)
+                    {
+                        xicVm.ZoomToRt(value.RetentionTime);
+                        xicVm.ClearCache();
+                    }
                     SetFragmentLabels();
                     SetPrecursorLabels();
                     _xicChanged = false;

@@ -345,6 +345,14 @@ namespace LcmsSpectator.ViewModels
             HeavyPrecursorPlotViewModel.HighlightRt(rt, false);
         }
 
+        public void ClearCache()
+        {
+            FragmentPlotViewModel.ClearCache();
+            PrecursorPlotViewModel.ClearCache();
+            HeavyFragmentPlotViewModel.ClearCache();
+            HeavyPrecursorPlotViewModel.ClearCache();
+        }
+
         /// <summary>
         /// Update and regenerate all plots
         /// </summary>
