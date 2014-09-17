@@ -43,13 +43,14 @@ namespace LcmsSpectatorTests
             var ions = new List<LabeledIon>();
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
-            await spectrumPlotViewModel.Update();
+            spectrumPlotViewModel.Update();
+            if (!spectrumPlotViewModel.PlotService.IsCompleted) await spectrumPlotViewModel.PlotService.Task;
 
             // plot should not be null
             Assert.True(spectrumPlotViewModel.PlotService != null);
 
             // plot should contain 1 stem series (the spectrum stem series)
-            Assert.True(spectrumPlotViewModel.PlotService.Series.Count == 1);
+            Assert.True(spectrumPlotViewModel.Plot.Series.Count == 1);
         }
 
         [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
@@ -83,10 +84,11 @@ namespace LcmsSpectatorTests
                                                     IcParameters.Instance.IonCorrelationThreshold);
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
-            await spectrumPlotViewModel.Update();
+            spectrumPlotViewModel.Update();
+            if (!spectrumPlotViewModel.PlotService.IsCompleted) await spectrumPlotViewModel.PlotService.Task;
 
             // there should be ions.count + 1 (spectrum series) plot series
-            Assert.True(spectrumPlotViewModel.PlotService.Series.Count == (expectedIons.Count + 1));
+            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
 
             // Remove ion types
             baseIonTypes = new List<BaseIonType> { BaseIonType.Y };
@@ -97,10 +99,54 @@ namespace LcmsSpectatorTests
                                         IcParameters.Instance.IonCorrelationThreshold);
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
-            await spectrumPlotViewModel.Update();
+            spectrumPlotViewModel.Update();
+            if (!spectrumPlotViewModel.PlotService.IsCompleted) await spectrumPlotViewModel.PlotService.Task;
 
             // there should be ions.count + 1 (spectrum series) plot series
-            Assert.True(spectrumPlotViewModel.PlotService.Series.Count == (expectedIons.Count + 1));
+            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
+        }
+
+        /// <summary>
+        /// This test checks to see if the correct spectrum is shown when setting ShowFilteredSpectrum
+        /// </summary>
+        /// <param name="rawFile"></param>
+        [TestCase(@"\\protoapps\UserData\Wilkins\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3.raw")]
+        public async void TestShowFilteredSpectrum(string rawFile)
+        {
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile, MassSpecDataType.XCaliburRun);
+            var scans = lcms.GetScanNumbers(2);
+
+            const int maxCharge = 15;
+            var specPlotVm = new SpectrumPlotViewModel(new TestableMainDialogService(), 1.05, new ColorDictionary(maxCharge));
+
+            foreach (var scan in scans)
+            {
+                var spectrum = lcms.GetSpectrum(scan);
+                var filteredSpectrum = spectrum.GetFilteredSpectrumBySlope();
+                specPlotVm.Spectrum = spectrum;
+
+                // check unfiltered spectrum
+                specPlotVm.ShowFilteredSpectrum = false;
+                if (!specPlotVm.PlotService.IsCompleted) await specPlotVm.PlotService.Task;
+                var spectrumSeries = specPlotVm.Plot.Series[0] as StemSeries;
+                Assert.True(spectrumSeries.Points.Count == spectrum.Peaks.Length);
+                for (int i = 0; i < spectrumSeries.Points.Count; i++)
+                {
+                    Assert.True(spectrumSeries.Points[i].X == spectrum.Peaks[i].Mz);
+                    Assert.True(spectrumSeries.Points[i].Y == spectrum.Peaks[i].Intensity);
+                }
+
+                // check filtered spectrum
+                specPlotVm.ShowFilteredSpectrum = true;
+                if (!specPlotVm.PlotService.IsCompleted) await specPlotVm.PlotService.Task;
+                var filteredSeries = specPlotVm.Plot.Series[0] as StemSeries;
+                Assert.True(filteredSeries.Points.Count == filteredSpectrum.Peaks.Length);
+                for (int i = 0; i < filteredSeries.Points.Count; i++)
+                {
+                    Assert.True(filteredSeries.Points[i].X == filteredSpectrum.Peaks[i].Mz);
+                    Assert.True(filteredSeries.Points[i].Y == filteredSpectrum.Peaks[i].Intensity);
+                }
+            }
         }
 
         /// <summary>
@@ -140,9 +186,10 @@ namespace LcmsSpectatorTests
                 var ions = IonUtils.GetFragmentIonLabels(prsm.Sequence, prsm.Charge, ionTypes);
                 spectrumPlotViewModel.Ions = ions;
                 spectrumPlotViewModel.Spectrum = prsm.Ms2Spectrum;
-                await spectrumPlotViewModel.Update();
+                spectrumPlotViewModel.Update();
+                if (!spectrumPlotViewModel.PlotService.IsCompleted) await spectrumPlotViewModel.PlotService.Task;
 
-                foreach (var series in spectrumPlotViewModel.PlotService.Series)
+                foreach (var series in spectrumPlotViewModel.Plot.Series)
                 {
                     if (series is StemSeries)
                     {

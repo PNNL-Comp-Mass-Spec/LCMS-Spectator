@@ -150,7 +150,7 @@ namespace LcmsSpectator.ViewModels
             OnPropertyChanged("Plot");
         }
 
-        private Task<AutoAdjustedYPlotModel> UpdateTask()
+        public Task<AutoAdjustedYPlotModel> UpdateTask()
         {
             return Task.Run(() => BuildSpectrumPlot());
         }
