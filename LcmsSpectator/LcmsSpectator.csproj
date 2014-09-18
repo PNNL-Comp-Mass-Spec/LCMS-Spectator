@@ -74,6 +74,9 @@
     <Reference Include="InformedProteomics.Backend">
       <HintPath>..\Library\InformedProteomics.Backend.dll</HintPath>
     </Reference>
+    <Reference Include="InformedProteomics.TopDown">
+      <HintPath>..\Library\InformedProteomics.TopDown.dll</HintPath>
+    </Reference>
     <Reference Include="MultiDimensionalPeakFinding">
       <HintPath>..\Library\MultiDimensionalPeakFinding.dll</HintPath>
     </Reference>

@@ -19,6 +19,7 @@
             <oxy:Plot.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+                    <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                     <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                 </ContextMenu>
@@ -28,6 +29,7 @@
             <oxy:Plot.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+                    <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                     <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                 </ContextMenu>
@@ -37,6 +39,7 @@
             <oxy:Plot.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+                    <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                     <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                 </ContextMenu>

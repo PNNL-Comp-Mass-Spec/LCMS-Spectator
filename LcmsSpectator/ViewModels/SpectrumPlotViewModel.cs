@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
@@ -31,6 +32,7 @@ namespace LcmsSpectator.ViewModels
             _dialogService = dialogService;
             _showUnexplainedPeaks = showUnexplainedPeaks;
             _showFilteredSpectrum = false;
+            _showDeconvolutedSpectrum = false;
             _multiplier = multiplier;
             _colors = colors;
             Title = "";
@@ -86,6 +88,20 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Toggle whether or not deconvoluted spectrum is shown
+        /// </summary>
+        public bool ShowDeconvolutedSpectrum
+        {
+            get { return _showDeconvolutedSpectrum; }
+            set
+            {
+                _showDeconvolutedSpectrum = value;
+                Update();
+                OnPropertyChanged("ShowDeconvolutedSpectrum");
+            }
+        }
+
+        /// <summary>
         /// Spectrum to display.
         /// </summary>
         public Spectrum Spectrum
@@ -96,6 +112,8 @@ namespace LcmsSpectator.ViewModels
                 if (_spectrum == value) return;
                 _spectrum = value;
                 _filteredSpectrum = null; // reset filtered spectrum
+                _deconvolutedSpectrum = null;
+                _filtDeconSpectrum = null;
                 OnPropertyChanged("Spectrum");
             }
         }
@@ -111,20 +129,6 @@ namespace LcmsSpectator.ViewModels
                 _ions = value;
                 OnPropertyChanged("Ions");
             }
-        }
-
-        /// <summary>
-        /// Explicitely highlight ion peaks
-        /// </summary>
-        /// <param name="labeledIon"></param>
-        public void AddIonHighlight(LabeledIon labeledIon)
-        {
-            if (labeledIon == null) return;
-            var ionSeries = GetIonSeries(labeledIon);
-            if (ionSeries == null) return;
-            GuiInvoker.Invoke(Plot.Series.Add, ionSeries.Item1);
-            GuiInvoker.Invoke(Plot.Annotations.Add, ionSeries.Item2);
-            GuiInvoker.Invoke(Plot.InvalidatePlot, true);
         }
 
         /// <summary>
@@ -169,15 +173,31 @@ namespace LcmsSpectator.ViewModels
                 ClearPlot();
                 return;
             }
-            // Filtered spectrum?
+            // Filtered/Deconvoluted Spectrum?
             var spectrum = Spectrum;
-            if (ShowFilteredSpectrum)
+            var tolerance = (Spectrum is ProductSpectrum)
+                                ? IcParameters.Instance.ProductIonTolerancePpm
+                                : IcParameters.Instance.PrecursorTolerancePpm;
+            if (ShowFilteredSpectrum && ShowDeconvolutedSpectrum)
+            {
+                if (_filtDeconSpectrum == null)
+                {
+                    var filteredSpectrum = Spectrum.GetFilteredSpectrumBySlope(IcParameters.Instance.SpectrumFilterSlope);
+                    _filtDeconSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(filteredSpectrum, 1, 15, tolerance, 0.1, 2);
+                }
+                spectrum = _filtDeconSpectrum;
+            }
+            else if (ShowFilteredSpectrum)
             {
                 if (_filteredSpectrum == null)
-                {
                     _filteredSpectrum = Spectrum.GetFilteredSpectrumBySlope(IcParameters.Instance.SpectrumFilterSlope);
-                }
                 spectrum = _filteredSpectrum;
+            }
+            else if (ShowDeconvolutedSpectrum)
+            {
+                if (_deconvolutedSpectrum == null)
+                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(Spectrum, 1, 15, tolerance, 0.1, 2);
+                spectrum = _deconvolutedSpectrum;
             }
             // Create XAxis if there is none
             var xAxis = _xAxis ?? GenerateXAxis(spectrum);
@@ -197,12 +217,12 @@ namespace LcmsSpectator.ViewModels
             foreach (var peak in spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
             GuiInvoker.Invoke(plot.Series.Add, spectrumSeries);
             plot.GenerateYAxis("Intensity", "0e0");
-            SetPlotSeries(plot);
+            SetPlotSeries(plot, spectrum);
             Plot = plot;
             OnPropertyChanged("Plot");
         }
 
-        private void SetPlotSeries(AutoAdjustedYPlotModel plot)
+        private void SetPlotSeries(AutoAdjustedYPlotModel plot, Spectrum spectrum)
         {
             if (plot == null || Ions == null) return;
             // remove old ion series
@@ -215,7 +235,7 @@ namespace LcmsSpectator.ViewModels
             foreach (var labeledIon in Ions)
             {
                 if (labeledIon.IonType.Charge == 0) continue;
-                var ionSeries = GetIonSeries(labeledIon);
+                var ionSeries = GetIonSeries(labeledIon, spectrum);
                 if (ionSeries == null) continue;
                 GuiInvoker.Invoke(plot.Series.Add, ionSeries.Item1);
                 GuiInvoker.Invoke(plot.Annotations.Add, ionSeries.Item2);
@@ -223,9 +243,9 @@ namespace LcmsSpectator.ViewModels
             plot.InvalidatePlot(true);
         }
 
-        private Tuple<Series, Annotation> GetIonSeries(LabeledIon labeledIon)
+        private Tuple<Series, Annotation> GetIonSeries(LabeledIon labeledIon, Spectrum spectrum)
         {
-            var labeledIonPeaks = IonUtils.GetIonPeaks(labeledIon, Spectrum,
+            var labeledIonPeaks = IonUtils.GetIonPeaks(labeledIon, spectrum,
                                                        IcParameters.Instance.ProductIonTolerancePpm,
                                                        IcParameters.Instance.PrecursorTolerancePpm);
             // create plots
@@ -307,10 +327,13 @@ namespace LcmsSpectator.ViewModels
 
         private bool _showFilteredSpectrum;
         private Spectrum _filteredSpectrum;
+        private Spectrum _deconvolutedSpectrum;
+        private Spectrum _filtDeconSpectrum;
         private Spectrum _spectrum;
 
         private List<LabeledIon> _ions;
         private bool _showUnexplainedPeaks;
         private readonly IDialogService _dialogService;
+        private bool _showDeconvolutedSpectrum;
     }
 }
