@@ -302,7 +302,7 @@ namespace LcmsSpectator.ViewModels
                 TitleFontSize = 14,
                 TitlePadding = 0,
             };
-            var seriesstore = Ions.ToDictionary(ion => ion.Label, ion => new LineSeries());
+            var seriesstore = Ions.ToDictionary<LabeledIon, string, LineSeries>(ion => ion.Label, ion => null);
             var smoother = (PointsToSmooth == 0 || PointsToSmooth == 1) ?
                 null : new SavitzkyGolaySmoother(PointsToSmooth, 2);
             Parallel.ForEach(Ions, ion =>

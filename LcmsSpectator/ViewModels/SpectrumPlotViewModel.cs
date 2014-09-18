@@ -221,7 +221,7 @@ namespace LcmsSpectator.ViewModels
         {
             if (plot == null || Ions == null) return;
             // add new ion series
-            var seriesstore = Ions.ToDictionary(ion => ion.Label, ion => new Tuple<Series, Annotation>(new StemSeries(), new TextAnnotation()));
+            var seriesstore = Ions.ToDictionary<LabeledIon, string, Tuple<Series, Annotation>>(ion => ion.Label, ion => null);
             Parallel.ForEach(Ions, labeledIon =>
             {
                 if (labeledIon.IonType.Charge == 0) return;
