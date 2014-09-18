@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
@@ -39,7 +38,6 @@ namespace LcmsSpectator.ViewModels
             Title = "";
             _ionCache = new Dictionary<string, Tuple<Series, Annotation>>();
             Update();
-            _ionCacheLock = new Mutex();
         }
 
         /// <summary>
@@ -110,9 +108,9 @@ namespace LcmsSpectator.ViewModels
                 if (_spectrum == value) return;
                 _spectrum = value;
                 _filteredSpectrum = null; // reset filtered spectrum
-                _ionCache.Clear();
                 _deconvolutedSpectrum = null;
                 _filtDeconSpectrum = null;
+                _ionCache.Clear();
                 OnPropertyChanged("Spectrum");
             }
         }
@@ -223,22 +221,20 @@ namespace LcmsSpectator.ViewModels
         {
             if (plot == null || Ions == null) return;
             // add new ion series
+            var seriesstore = Ions.ToDictionary(ion => ion.Label, ion => new Tuple<Series, Annotation>(new StemSeries(), new TextAnnotation()));
             Parallel.ForEach(Ions, labeledIon =>
             {
                 if (labeledIon.IonType.Charge == 0) return;
-                Tuple<Series, Annotation> ionSeries;
-                _ionCacheLock.WaitOne();
-                if (_ionCache.ContainsKey(labeledIon.Label)) ionSeries = _ionCache[labeledIon.Label];
-                else
-                {
-                    ionSeries = GetIonSeries(labeledIon);
-                    _ionCache.Add(labeledIon.Label, ionSeries);
-                }
-                _ionCacheLock.ReleaseMutex();
-                if (ionSeries == null) return;
-                plot.Series.Add(ionSeries.Item1);
-                plot.Annotations.Add(ionSeries.Item2);
+                var ionSeries = _ionCache.ContainsKey(labeledIon.Label) ? _ionCache[labeledIon.Label] : GetIonSeries(labeledIon, spectrum);
+                seriesstore[labeledIon.Label] = ionSeries;
             });
+            foreach (var series in seriesstore.Where(series => series.Value != null))
+            {
+                plot.Series.Add(series.Value.Item1);
+                plot.Annotations.Add(series.Value.Item2);
+                if (!_ionCache.ContainsKey(series.Key)) _ionCache.Add(series.Key, series.Value);
+                else _ionCache[series.Key] = series.Value;
+            }
             plot.InvalidatePlot(true);
         }
 
@@ -337,7 +333,6 @@ namespace LcmsSpectator.ViewModels
         private bool _showUnexplainedPeaks;
         private readonly IDialogService _dialogService;
 
-        private readonly Mutex _ionCacheLock;
         private readonly Dictionary<string, Tuple<Series, Annotation>> _ionCache;
         private bool _showDeconvolutedSpectrum;
     }
