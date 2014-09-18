@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
-using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
@@ -26,7 +25,7 @@ namespace LcmsSpectator.ViewModels
     {
         public DelegateCommand SaveAsImageCommand { get; private set; }
         public AutoAdjustedYPlotModel Plot { get; private set; }
-        public NotifyTaskCompletion<AutoAdjustedYPlotModel> PlotService { get; private set; } 
+        public Task<AutoAdjustedYPlotModel> PlotTask { get; private set; }
         public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, ColorDictionary colors, bool showUnexplainedPeaks=true)
         {
             SaveAsImageCommand = new DelegateCommand(SaveAsImage);
@@ -130,14 +129,11 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Update spectrum and ion highlights
         /// </summary>
-        public void Update()
+        public async void Update()
         {
-            PlotService = new NotifyTaskCompletion<AutoAdjustedYPlotModel>(UpdateTask());
-            PlotService.TaskComplete += (o, e) =>
-            {
-                Plot = PlotService.Result;
-                OnPropertyChanged("Plot");
-            };
+            PlotTask = UpdateTask();
+            Plot = await PlotTask;
+            OnPropertyChanged("Plot");
         }
 
         /// <summary>
@@ -147,7 +143,6 @@ namespace LcmsSpectator.ViewModels
         {
             Spectrum = null;
             Update();
-            OnPropertyChanged("Plot");
         }
 
         public Task<AutoAdjustedYPlotModel> UpdateTask()
@@ -184,7 +179,7 @@ namespace LcmsSpectator.ViewModels
                     "{3}: {4:0.##E0}"
             };
             foreach (var peak in spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
-            GuiInvoker.Invoke(plot.Series.Add, spectrumSeries);
+            plot.Series.Add(spectrumSeries);
             plot.GenerateYAxis("Intensity", "0e0");
             SetPlotSeries(plot);
             return plot;
@@ -194,22 +189,22 @@ namespace LcmsSpectator.ViewModels
         {
             if (plot == null || Ions == null) return;
             // add new ion series
-            foreach (var labeledIon in Ions)
+            Parallel.ForEach(Ions, labeledIon =>
             {
-                if (labeledIon.IonType.Charge == 0) continue;
+                if (labeledIon.IonType.Charge == 0) return;
                 Tuple<Series, Annotation> ionSeries;
                 _ionCacheLock.WaitOne();
-                if (_ionCache.ContainsKey(labeledIon.Label)) ionSeries =  _ionCache[labeledIon.Label];
+                if (_ionCache.ContainsKey(labeledIon.Label)) ionSeries = _ionCache[labeledIon.Label];
                 else
                 {
                     ionSeries = GetIonSeries(labeledIon);
                     _ionCache.Add(labeledIon.Label, ionSeries);
                 }
                 _ionCacheLock.ReleaseMutex();
-                if (ionSeries == null) continue;
-                GuiInvoker.Invoke(plot.Series.Add, ionSeries.Item1);
-                GuiInvoker.Invoke(plot.Annotations.Add, ionSeries.Item2);
-            }
+                if (ionSeries == null) return;
+                plot.Series.Add(ionSeries.Item1);
+                plot.Annotations.Add(ionSeries.Item2);
+            });
             plot.InvalidatePlot(true);
         }
 
@@ -278,14 +273,13 @@ namespace LcmsSpectator.ViewModels
 
         private async void SaveAsImage()
         {
-            if (PlotService == null) return;
             var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
                 if (fileName != "")
                 {
-                    if (!PlotService.IsCompleted) await PlotService.Task;
-                    PngExporter.Export(PlotService.Result, fileName, (int)Plot.Width, (int)Plot.Height);
+                    if (!PlotTask.IsCompleted) await PlotTask;
+                    PngExporter.Export(Plot, fileName, (int)Plot.Width, (int)Plot.Height);
                 }
             }
             catch (Exception e)

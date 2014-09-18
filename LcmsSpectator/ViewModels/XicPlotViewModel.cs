@@ -23,8 +23,8 @@ namespace LcmsSpectator.ViewModels
     public class XicPlotViewModel: ViewModelBase
     {
         public SelectablePlotModel Plot { get; private set; }
-        public NotifyTaskCompletion<SelectablePlotModel> PlotService { get; private set; }
-        public NotifyTaskCompletion<string> AreaService { get; private set; } 
+        public Task<SelectablePlotModel> PlotTask { get; private set; }
+        public Task<string> AreaTask { get; private set; }
         public ILcMsRun Lcms { get; set; }
         public DelegateCommand SetScanChangedCommand { get; private set; }
         public DelegateCommand SaveAsImageCommand { get; private set; }
@@ -181,7 +181,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="unique">Is it a unique marker (highlighted different color)</param>
         public async void HighlightRt(double rtTime, bool unique)
         {
-            if (!PlotService.IsCompleted) await PlotService.Task;
+            if (!PlotTask.IsCompleted) await PlotTask;
             if (Plot == null || Plot.Series.Count == 0) return;
             _selectedRt = rtTime;
             if (unique) Plot.SetUniquePointMarker(rtTime);
@@ -191,8 +191,10 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Highlight Rt and call SelectedScanChanged to inform XicViewModel
         /// </summary>
-        public void SetSelectedRt()
+        public async void SetSelectedRt()
         {
+            if (!PlotTask.IsCompleted) await PlotTask;
+            if (Plot == null || Plot.Series.Count == 0) return;
             var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
             _selectedRt = Plot.SelectedDataPoint.X;
             if (dataPoint != null) SelectedScan = dataPoint.ScanNum;
@@ -202,7 +204,7 @@ namespace LcmsSpectator.ViewModels
 
         private async void SetSelectedRt(double rt)
         {
-            if (!PlotService.IsCompleted) await PlotService.Task;
+            if (!PlotTask.IsCompleted) await PlotTask;
             if (Plot == null || Plot.Series.Count == 0) return;
             Plot.SetOrdinaryPointMarker(rt);
             Plot.AdjustForZoom();
@@ -210,7 +212,7 @@ namespace LcmsSpectator.ViewModels
 
         private async void ToggleScanMarkers(bool value)
         {
-            if (!PlotService.IsCompleted) await PlotService.Task;
+            if (!PlotTask.IsCompleted) await PlotTask;
             if (Plot == null || Plot.Series.Count == 0) return;
             var markerType = (value) ? MarkerType.Circle : MarkerType.None;
             foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
@@ -226,7 +228,7 @@ namespace LcmsSpectator.ViewModels
 
         private async void ToggleLegend(bool value)
         {
-            if (!PlotService.IsCompleted) await PlotService.Task;
+            if (!PlotTask.IsCompleted) await PlotTask;
             Plot.IsLegendVisible = value;
             Plot.InvalidatePlot(false);
         }
@@ -239,7 +241,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="e"></param>
         private async void AxisChanged_UpdatePlotTitle(object sender, AxisChangedEventArgs e)
         {
-            if (!PlotService.IsCompleted) await PlotService.Task;
+            if (!PlotTask.IsCompleted) await PlotTask;
             if (Plot == null || Plot.Series.Count == 0) return;
             UpdateArea();
         }
@@ -253,10 +255,11 @@ namespace LcmsSpectator.ViewModels
             _xicCacheLock.ReleaseMutex();
         }
 
-        public void UpdatePlot()
+        public async void UpdatePlot()
         {
-            PlotService = new NotifyTaskCompletion<SelectablePlotModel>(UpdatePlotTask());
-            PlotService.TaskComplete += (o, e) => { Plot = PlotService.Result; OnPropertyChanged("Plot"); };
+            PlotTask = UpdatePlotTask();
+            Plot = await PlotTask;
+            OnPropertyChanged("Plot");
         }
 
         public Task<SelectablePlotModel> UpdatePlotTask()
@@ -264,10 +267,10 @@ namespace LcmsSpectator.ViewModels
             return Task.Run(() => GeneratePlot());
         }
 
-        public void UpdateArea()
+        public async void UpdateArea()
         {
-            AreaService = new NotifyTaskCompletion<string>(UpdateAreaTask());
-            AreaService.TaskComplete += (o, e) => { PlotTitle = AreaService.Result; };
+            AreaTask = UpdateAreaTask();
+            PlotTitle = await AreaTask;
         }
 
         public Task<string> UpdateAreaTask()
@@ -299,24 +302,32 @@ namespace LcmsSpectator.ViewModels
                 TitleFontSize = 14,
                 TitlePadding = 0,
             };
+            var seriesstore = Ions.ToDictionary(ion => ion.Label, ion => new LineSeries());
             var smoother = (PointsToSmooth == 0 || PointsToSmooth == 1) ?
                 null : new SavitzkyGolaySmoother(PointsToSmooth, 2);
-            foreach (var ion in Ions)
+            Parallel.ForEach(Ions, ion =>
             {
                 LineSeries series;
-                _xicCacheLock.WaitOne();
                 if (_seriesCache.ContainsKey(ion.Label)) series = _seriesCache[ion.Label];
                 else
                 {
                     LabeledXic lxic;
-                    if (_xicCache.ContainsKey(ion.Label)) lxic = _xicCache[ion.Label];
+                    _xicCacheLock.WaitOne();
+                    if (_xicCache.ContainsKey(ion.Label))
+                    {
+                        lxic = _xicCache[ion.Label];
+                        _xicCacheLock.ReleaseMutex();
+                    }
                     else
                     {
+                        _xicCacheLock.ReleaseMutex();
                         lxic = GetXic(ion);
+                        _xicCacheLock.WaitOne();
                         _xicCache.Add(ion.Label, lxic);
+                        _xicCacheLock.ReleaseMutex();
                     }
                     var xic = lxic.Xic;
-                    if (xic == null) continue;
+                    if (xic == null) return;
                     // smooth
                     if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic).ToList();
                     _smoothedXics.Add(new LabeledXic(ion.Composition, ion.Index, xic, ion.IonType, ion.IsFragmentIon));
@@ -335,23 +346,30 @@ namespace LcmsSpectator.ViewModels
                         MarkerStroke = color,
                         MarkerStrokeThickness = 1,
                         MarkerFill = OxyColors.White,
-                        TrackerFormatString = 
-                                "{0}" + Environment.NewLine +
-                                "{1}: {2:0.###}" + Environment.NewLine +
-                                "Scan #: {ScanNum}" + Environment.NewLine +
-                                "{3}: {4:0.##E0}"
+                        TrackerFormatString =
+                            "{0}" + Environment.NewLine +
+                            "{1}: {2:0.###}" + Environment.NewLine +
+                            "Scan #: {ScanNum}" + Environment.NewLine +
+                            "{3}: {4:0.##E0}"
                     };
                     // Add XIC points
                     for (int i = 0; i < xic.Count; i++)
                     {
                         // remove plateau points (line will connect them anyway)
-                        if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) && xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
-                        if (xic[i] != null) series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum, xic[i].Intensity));
+                        if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) &&
+                            xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
+                        if (xic[i] != null)
+                            series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum,
+                                xic[i].Intensity));
                     }
-                    _seriesCache.Add(ion.Label, series);
                 }
-                _xicCacheLock.ReleaseMutex();
-                plot.Series.Add(series);
+                seriesstore[ion.Label] = series;
+            });
+            foreach (var ion in seriesstore)
+            {
+                plot.Series.Add(ion.Value);
+                if (!_seriesCache.ContainsKey(ion.Key)) _seriesCache.Add(ion.Key, ion.Value);
+                else _seriesCache[ion.Key] = ion.Value;
             }
             plot.GenerateYAxis("Intensity", "0e0");
             plot.IsLegendVisible = _showLegend;
