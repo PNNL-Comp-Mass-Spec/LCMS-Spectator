@@ -54,7 +54,7 @@
                         <TextBlock Text="Precursor M/z: " FontWeight="Bold" />
                         <TextBlock Text="{Binding Path=SelectedPrSm.PrecursorMz}" FontWeight="Bold" Width="75" />
                         <TextBlock Text="Score: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.MatchedFragments, Converter={StaticResource ScoreFormatter}}" FontWeight="Bold" Width="75"/>
+                        <TextBlock Text="{Binding Path=SelectedPrSm.Score, Converter={StaticResource ScoreFormatter}}" FontWeight="Bold" Width="75"/>
                         <TextBlock Text="QValue: " FontWeight="Bold" />
                         <TextBlock Text="{Binding Path=SelectedPrSm.QValue}" FontWeight="Bold" Width="75"/>
                     </StackPanel>
@@ -207,7 +207,7 @@
                                         <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
                                         <DataGridTextColumn Header="Precursor m/z" Width="5*" Binding="{Binding PrecursorMz}" />
                                         <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
-                                        <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding MatchedFragments, Converter={StaticResource ScoreFormatter}}" />
+                                        <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" />
                                         <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue, Converter={StaticResource QValueToStringConverter}}" />
                                         <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
                                     </DataGrid.Columns>
