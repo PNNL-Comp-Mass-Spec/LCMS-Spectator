@@ -139,7 +139,6 @@
     <Compile Include="ViewModels\IonTypeSelectorViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModificationViewModel.cs" />
-    <Compile Include="ViewModels\NotifyTaskCompletion.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SpectrumPlotViewModel.cs" />
     <Compile Include="ViewModels\SpectrumViewModel.cs" />
