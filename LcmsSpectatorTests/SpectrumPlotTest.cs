@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.PlotModels;
@@ -12,7 +10,6 @@ using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
 using LcmsSpectatorModels.Utils;
 using LcmsSpectatorTests.DialogServices;
-using MultiDimensionalPeakFinding.PeakDetection;
 using NUnit.Framework;
 using OxyPlot.Series;
 
@@ -28,7 +25,7 @@ namespace LcmsSpectatorTests
             // init
             var idFileReader = IdFileReaderFactory.CreateReader(tsvFile);
             var ids = idFileReader.Read();
-            var lcms = PbfLcMsRun.GetLcMsRun(rawFile, MassSpecDataType.XCaliburRun);
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
             ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
 
             // init SpectrumPlotViewModel
@@ -44,10 +41,10 @@ namespace LcmsSpectatorTests
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
             spectrumPlotViewModel.Update();
-            if (!spectrumPlotViewModel.PlotService.IsCompleted) await spectrumPlotViewModel.PlotService.Task;
+            if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
             // plot should not be null
-            Assert.True(spectrumPlotViewModel.PlotService != null);
+            Assert.True(spectrumPlotViewModel.Plot != null);
 
             // plot should contain 1 stem series (the spectrum stem series)
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == 1);
@@ -60,7 +57,7 @@ namespace LcmsSpectatorTests
             // init
             var idFileReader = IdFileReaderFactory.CreateReader(tsvFile);
             var ids = idFileReader.Read();
-            var lcms = PbfLcMsRun.GetLcMsRun(rawFile, MassSpecDataType.XCaliburRun);
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
             ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
 
             // init SpectrumPlotViewModel
@@ -85,7 +82,7 @@ namespace LcmsSpectatorTests
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
             spectrumPlotViewModel.Update();
-            if (!spectrumPlotViewModel.PlotService.IsCompleted) await spectrumPlotViewModel.PlotService.Task;
+            if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
             // there should be ions.count + 1 (spectrum series) plot series
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
@@ -100,7 +97,7 @@ namespace LcmsSpectatorTests
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
             spectrumPlotViewModel.Update();
-            if (!spectrumPlotViewModel.PlotService.IsCompleted) await spectrumPlotViewModel.PlotService.Task;
+            if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
             // there should be ions.count + 1 (spectrum series) plot series
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
@@ -113,7 +110,7 @@ namespace LcmsSpectatorTests
         [TestCase(@"\\protoapps\UserData\Wilkins\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3.raw")]
         public async void TestShowFilteredSpectrum(string rawFile)
         {
-            var lcms = PbfLcMsRun.GetLcMsRun(rawFile, MassSpecDataType.XCaliburRun);
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
             var scans = lcms.GetScanNumbers(2);
 
             const int maxCharge = 15;
@@ -127,26 +124,26 @@ namespace LcmsSpectatorTests
 
                 // check unfiltered spectrum
                 specPlotVm.ShowFilteredSpectrum = false;
-                if (!specPlotVm.PlotService.IsCompleted) await specPlotVm.PlotService.Task;
+                if (!specPlotVm.PlotTask.IsCompleted) await specPlotVm.PlotTask;
                 var spectrumSeries = specPlotVm.Plot.Series[0] as StemSeries;
                 Assert.True(spectrumSeries.Points.Count == spectrum.Peaks.Length);  // should be the same length
                 for (int i = 0; i < spectrumSeries.Points.Count; i++)
                 {
                     // compare each peak in spectrum plot to actual spectrum
-                    Assert.True(spectrumSeries.Points[i].X == spectrum.Peaks[i].Mz);
-                    Assert.True(spectrumSeries.Points[i].Y == spectrum.Peaks[i].Intensity);
+                    Assert.True(spectrumSeries.Points[i].X.Equals(spectrum.Peaks[i].Mz));
+                    Assert.True(spectrumSeries.Points[i].Y.Equals(spectrum.Peaks[i].Intensity));
                 }
 
                 // check filtered spectrum
                 specPlotVm.ShowFilteredSpectrum = true;
-                if (!specPlotVm.PlotService.IsCompleted) await specPlotVm.PlotService.Task;
+                if (!specPlotVm.PlotTask.IsCompleted) await specPlotVm.PlotTask;
                 var filteredSeries = specPlotVm.Plot.Series[0] as StemSeries;
                 Assert.True(filteredSeries.Points.Count == filteredSpectrum.Peaks.Length);   // should be the same length
                 for (int i = 0; i < filteredSeries.Points.Count; i++)
                 {
                     // compare each peak in spectrum plot to actual filtered spectrum
-                    Assert.True(filteredSeries.Points[i].X == filteredSpectrum.Peaks[i].Mz);
-                    Assert.True(filteredSeries.Points[i].Y == filteredSpectrum.Peaks[i].Intensity);
+                    Assert.True(filteredSeries.Points[i].X.Equals(filteredSpectrum.Peaks[i].Mz));
+                    Assert.True(filteredSeries.Points[i].Y.Equals(filteredSpectrum.Peaks[i].Intensity));
                 }
             }
         }
@@ -169,7 +166,7 @@ namespace LcmsSpectatorTests
             // init
             var idFileReader = IdFileReaderFactory.CreateReader(tsvFile);
             var ids = idFileReader.Read();
-            var lcms = PbfLcMsRun.GetLcMsRun(rawFile, MassSpecDataType.XCaliburRun);
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
             ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
             var prsms = ids.IdentifiedPrSms;
 
@@ -189,7 +186,7 @@ namespace LcmsSpectatorTests
                 spectrumPlotViewModel.Ions = ions;
                 spectrumPlotViewModel.Spectrum = prsm.Ms2Spectrum;
                 spectrumPlotViewModel.Update();
-                if (!spectrumPlotViewModel.PlotService.IsCompleted) await spectrumPlotViewModel.PlotService.Task;
+                if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
                 foreach (var series in spectrumPlotViewModel.Plot.Series)
                 {
