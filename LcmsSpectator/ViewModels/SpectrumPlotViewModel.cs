@@ -182,8 +182,10 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_filtDeconSpectrum == null)
                 {
-                    var filteredSpectrum = Spectrum.GetFilteredSpectrumBySlope(IcParameters.Instance.SpectrumFilterSlope);
-                    _filtDeconSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(filteredSpectrum, 1, 15, tolerance, 0.1, 2);
+                    if (_filteredSpectrum == null) _filteredSpectrum = Spectrum.GetFilteredSpectrumBySlope(IcParameters.Instance.SpectrumFilterSlope);
+                    _filtDeconSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(spectrum,
+                                    Constants.MinCharge, Constants.MaxCharge, tolerance,
+                                    IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
                 }
                 spectrum = _filtDeconSpectrum;
             }
@@ -196,7 +198,9 @@ namespace LcmsSpectator.ViewModels
             else if (ShowDeconvolutedSpectrum)
             {
                 if (_deconvolutedSpectrum == null)
-                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(Spectrum, 1, 15, tolerance, 0.1, 2);
+                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(spectrum,
+                                    Constants.MinCharge, Constants.MaxCharge, tolerance,
+                                    IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
                 spectrum = _deconvolutedSpectrum;
             }
             // Create XAxis if there is none
