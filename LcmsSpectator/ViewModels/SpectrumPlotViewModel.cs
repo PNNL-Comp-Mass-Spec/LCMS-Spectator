@@ -217,7 +217,7 @@ namespace LcmsSpectator.ViewModels
             return plot;
         }
 
-        private void SetPlotSeries(AutoAdjustedYPlotModel plot, Spectrum spectrum)
+        private void SetPlotSeries(PlotModel plot, Spectrum spectrum)
         {
             if (plot == null || Ions == null) return;
             // add new ion series
