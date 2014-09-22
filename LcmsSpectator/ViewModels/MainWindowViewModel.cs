@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
@@ -57,7 +58,6 @@ namespace LcmsSpectator.ViewModels
             PrSms = new List<PrSm>();
             _colors = new ColorDictionary(2);
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
-            IonTypeSelectorViewModel.IonTypesUpdated += SetIonTypes;
             Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, _colors);
             XicViewModels = new ObservableCollection<XicViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
@@ -82,6 +82,8 @@ namespace LcmsSpectator.ViewModels
             SelectedPrSm = null;
 
             _idTreeMutex = new Mutex();
+
+            Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
         }
 
         /// <summary>
@@ -601,9 +603,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Event handler for ion types changing in IonTypeSelectorViewModel
         /// </summary>
-        /// <param name="sender">The IonTypeSelectorViewModel</param>
-        /// <param name="e"></param>
-        private void SetIonTypes(object sender, EventArgs e)
+        private void SelectedIonTypesChanged(PropertyChangedMessage<List<IonType>> message)
         {
             if (SelectedPrSm == null) return;
             _spectrumChanged = true;
