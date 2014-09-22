@@ -26,12 +26,10 @@ namespace LcmsSpectator.ViewModels
         public IdentificationTree FilteredIds { get; private set; }
         public List<IonType> IonTypes { get; set; }
 
-        public List<LabeledIon> FragmentLabels { get; set; }
-        public List<LabeledIon> LightFragmentLabels { get; set; } 
-        public List<LabeledIon> HeavyFragmentLabels { get; set; } 
-        public List<LabeledIon> PrecursorLabels { get; set; }
-        public List<LabeledIon> LightPrecursorLabels { get; set; } 
-        public List<LabeledIon> HeavyPrecursorLabels { get; set; } 
+        public List<LabeledIon> LightFragmentLabels { get; private set; } 
+        public List<LabeledIon> HeavyFragmentLabels { get; private set; } 
+        public List<LabeledIon> LightPrecursorLabels { get; private set; } 
+        public List<LabeledIon> HeavyPrecursorLabels { get; private set; } 
 
         public RelayCommand OpenRawFileCommand { get; private set; }
         public RelayCommand OpenTsvFileCommand { get; private set; }
@@ -207,6 +205,17 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public List<LabeledIon> FragmentLabels
+        {
+            get { return _fragmentLabels; }
+            private set
+            {
+                _fragmentLabels = value;
+                RaisePropertyChanged();
+            }
+
+        }
+
         /// <summary>
         /// Fragment ion labels selected for display in fragment XICs.
         /// When SelectedFragmentLabels are set, SelectedHeavyFragmentLabels and
@@ -228,6 +237,16 @@ namespace LcmsSpectator.ViewModels
                         xicVm.SelectedHeavyFragments = IonUtils.ReduceLabels(HeavyFragmentLabels, fragmentLabelList);
                     }
                 }
+                RaisePropertyChanged();
+            }
+        }
+
+        public List<LabeledIon> PrecursorLabels
+        {
+            get { return _precursorLabels; }
+            private set
+            {
+                _precursorLabels = value;
                 RaisePropertyChanged();
             }
         }
@@ -558,9 +577,6 @@ namespace LcmsSpectator.ViewModels
             LightFragmentLabels = lightFragmentLabels;
             HeavyFragmentLabels = heavyFragmentLabels;
             _fragmentXicChanged = false;
-            RaisePropertyChanged("FragmentLabels");
-            RaisePropertyChanged("LightFragmentLabels");
-            RaisePropertyChanged("HeavyFragmentLabels");
             _fragmentXicChanged = true;
             SelectedFragmentLabels = fragmentLabels;
         }
@@ -578,9 +594,6 @@ namespace LcmsSpectator.ViewModels
             LightPrecursorLabels = lightPrecursorLabels;
             HeavyPrecursorLabels = heavyPrecursorLabels;
             _precursorXicChanged = false;
-            RaisePropertyChanged("PrecursorLabels");
-            RaisePropertyChanged("LightPrecursorLabels");
-            RaisePropertyChanged("HeavyPrecursorLabels");
             _precursorXicChanged = true;
             SelectedPrecursorLabels = precursorLabels;
         }
@@ -621,10 +634,10 @@ namespace LcmsSpectator.ViewModels
                     {
                         _selectedPrSm = null;
                         RaisePropertyChanged("SelectedPrSm");
-                        FragmentLabels = new List<LabeledIon>(); RaisePropertyChanged("FragmentLabels");
-                        HeavyFragmentLabels = new List<LabeledIon>(); RaisePropertyChanged("HeavyFragmentLabels");
-                        PrecursorLabels = new List<LabeledIon>(); RaisePropertyChanged("PrecursorLabels");
-                        HeavyPrecursorLabels = new List<LabeledIon>(); RaisePropertyChanged("HeavyPrecursorLabels");
+                        FragmentLabels = new List<LabeledIon>();
+                        HeavyFragmentLabels = new List<LabeledIon>();
+                        PrecursorLabels = new List<LabeledIon>();
+                        HeavyPrecursorLabels = new List<LabeledIon>();
                         _fragmentXicChanged = true;
                         SelectedFragmentLabels = FragmentLabels;
                         _precursorXicChanged = true;
@@ -681,6 +694,8 @@ namespace LcmsSpectator.ViewModels
         private bool _showUnidentifiedScans;
         private List<PrSm> _prSms;
         private List<ProteinId> _proteinIds;
+        private List<LabeledIon> _fragmentLabels;
+        private List<LabeledIon> _precursorLabels;
     }
 }
 
