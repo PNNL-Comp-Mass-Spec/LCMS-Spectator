@@ -24,7 +24,7 @@ namespace LcmsSpectator.ViewModels
     {
         public SelectablePlotModel Plot { get; private set; }
         public Task<SelectablePlotModel> PlotTask { get; private set; }
-        public Task<string> AreaTask { get; private set; }
+        public Task<double> AreaTask { get; private set; }
         public ILcMsRun Lcms { get; set; }
         public DelegateCommand SetScanChangedCommand { get; private set; }
         public DelegateCommand SaveAsImageCommand { get; private set; }
@@ -269,24 +269,29 @@ namespace LcmsSpectator.ViewModels
 
         public async void UpdateArea()
         {
-            AreaTask = UpdateAreaTask();
-            PlotTitle = await AreaTask;
+            AreaTask = GetAreaTask();
+            PlotTitle = GetPlotTitleWithArea(await GetAreaTask());
         }
 
-        public Task<string> UpdateAreaTask()
+        public Task<double> GetAreaTask()
         {
-            return Task.Run(() => GetPlotTitleWithArea());
+            return Task.Run(() => GetCurrentArea());
+        }
+
+        public double GetCurrentArea()
+        {
+            var min = _xAxis.ActualMinimum;
+            var max = _xAxis.ActualMaximum;
+            return GetAreaOfRange(min, max);
         }
 
         /// <summary>
         /// Get the plot title in the format "[Title] (Area: ###)".
         /// </summary>
         /// <returns>Plot title with area as a string.</returns>
-        private string GetPlotTitleWithArea()
+        private string GetPlotTitleWithArea(double area)
         {
-            var min = _xAxis.ActualMinimum;
-            var max = _xAxis.ActualMaximum;
-            var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", GetAreaOfRange(min, max));
+            var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", area);
             var title = String.Format("{0} (Area: {1})", _title, areaStr);
             return title;
         }
@@ -376,7 +381,7 @@ namespace LcmsSpectator.ViewModels
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
             plot.SetPointMarker(SelectedRt);
             if (PlotChanged != null) PlotChanged(this, EventArgs.Empty);
-            PlotTitle = GetPlotTitleWithArea();
+            PlotTitle = GetPlotTitleWithArea(GetCurrentArea());
             return plot;
         }
 

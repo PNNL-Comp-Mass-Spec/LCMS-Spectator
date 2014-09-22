@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Threading.Tasks;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
@@ -404,50 +403,40 @@ namespace LcmsSpectator.ViewModels
         /// Update the ratio labels for the fragment ion Xics.
         /// Ratios are (light / heavy)
         /// </summary>
-        private void UpdateFragmentAreaRatioLabels()
+        private async void UpdateFragmentAreaRatioLabels()
         {
             if (!ShowHeavy || !ShowFragmentXic) return;
             if (FragmentPlotViewModel == null || FragmentPlotViewModel.Plot == null) return;
             if (XicXAxis == null) return;
-            var min = XicXAxis.ActualMinimum;
-            var max = XicXAxis.ActualMaximum;
-            Task.Factory.StartNew(() =>
-            {
-                var fragmentArea = FragmentPlotViewModel.GetAreaOfRange(min, max);
-                var heavyFragmentArea = HeavyFragmentPlotViewModel.GetAreaOfRange(min, max);
-                var ratio = fragmentArea / heavyFragmentArea;
-                if (ratio.Equals(Double.NaN) || ratio < 0) ratio = 0.0;
-                string formatted;
-                if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
-                else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
-                FragmentAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
-                OnPropertyChanged("FragmentAreaRatioLabel");
-            });
+            var fragmentArea = await FragmentPlotViewModel.GetAreaTask();
+            var heavyFragmentArea = await HeavyFragmentPlotViewModel.GetAreaTask();
+            var ratio = fragmentArea / heavyFragmentArea;
+            if (ratio.Equals(Double.NaN) || ratio < 0) ratio = 0.0;
+            string formatted;
+            if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
+            else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
+            FragmentAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
+            OnPropertyChanged("FragmentAreaRatioLabel");
         }
 
         /// <summary>
         /// Update the ratio labels for the precursor ion Xics.
         /// Ratios are (light / heavy)
         /// </summary>
-        private void UpdatePrecursorAreaRatioLabels()
+        private async void UpdatePrecursorAreaRatioLabels()
         {
             if (!ShowHeavy) return;
             if (PrecursorPlotViewModel == null || PrecursorPlotViewModel.Plot == null) return;
             if (XicXAxis == null) return;
-            var min = XicXAxis.ActualMinimum;
-            var max = XicXAxis.ActualMaximum;
-            Task.Factory.StartNew(() =>
-            {
-                var precursorArea = PrecursorPlotViewModel.GetAreaOfRange(min, max);
-                var heavyPrecursorArea = HeavyPrecursorPlotViewModel.GetAreaOfRange(min, max);
-                var ratio = precursorArea / heavyPrecursorArea;
-                if (ratio.Equals(Double.NaN) || ratio < 0) ratio = 0.0;
-                string formatted;
-                if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
-                else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
-                PrecursorAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
-                OnPropertyChanged("PrecursorAreaRatioLabel");
-            });
+            var precursorArea = await PrecursorPlotViewModel.GetAreaTask();
+            var heavyPrecursorArea = await HeavyPrecursorPlotViewModel.GetAreaTask();
+            var ratio = precursorArea / heavyPrecursorArea;
+            if (ratio.Equals(Double.NaN) || ratio < 0) ratio = 0.0;
+            string formatted;
+            if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
+            else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
+            PrecursorAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
+            OnPropertyChanged("PrecursorAreaRatioLabel");
         }
 
         /// <summary>
@@ -531,7 +520,7 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledIon> _selectedFragments;
         private List<LabeledIon> _selectedPrecursors;
 
-        private LinearAxis _xicXAxis;
+        private readonly LinearAxis _xicXAxis;
         
         private bool _showScanMarkers;
         private List<LabeledIon> _selectedHeavyPrecursors;

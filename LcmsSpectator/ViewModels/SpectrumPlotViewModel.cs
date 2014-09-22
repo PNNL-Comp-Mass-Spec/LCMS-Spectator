@@ -92,6 +92,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showDeconvolutedSpectrum = value;
+                _ionCache.Clear();
                 Update();
                 OnPropertyChanged("ShowDeconvolutedSpectrum");
             }
@@ -178,8 +179,10 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_filtDeconSpectrum == null)
                 {
-                    var filteredSpectrum = Spectrum.GetFilteredSpectrumBySlope(IcParameters.Instance.SpectrumFilterSlope);
-                    _filtDeconSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(filteredSpectrum, 1, 15, tolerance, 0.1, 2);
+                    if (_filteredSpectrum == null) _filteredSpectrum = Spectrum.GetFilteredSpectrumBySlope(IcParameters.Instance.SpectrumFilterSlope);
+                    _filtDeconSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(_filteredSpectrum, 
+                                    Constants.MinCharge, Constants.MaxCharge, tolerance,
+                                    IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
                 }
                 spectrum = _filtDeconSpectrum;
             }
@@ -192,7 +195,9 @@ namespace LcmsSpectator.ViewModels
             else if (ShowDeconvolutedSpectrum)
             {
                 if (_deconvolutedSpectrum == null)
-                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(Spectrum, 1, 15, tolerance, 0.1, 2);
+                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(spectrum,
+                                    Constants.MinCharge, Constants.MaxCharge, tolerance,
+                                    IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
                 spectrum = _deconvolutedSpectrum;
             }
             // Create XAxis if there is none
@@ -210,10 +215,13 @@ namespace LcmsSpectator.ViewModels
                     "{1}: {2:0.###}" + Environment.NewLine +
                     "{3}: {4:0.##E0}"
             };
-            foreach (var peak in spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
-            plot.Series.Add(spectrumSeries);
-            plot.GenerateYAxis("Intensity", "0e0");
+            if (ShowUnexplainedPeaks)
+            {
+                foreach (var peak in spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
+                plot.Series.Add(spectrumSeries);
+            }
             SetPlotSeries(plot, spectrum);
+            plot.GenerateYAxis("Intensity", "0e0");
             return plot;
         }
 
