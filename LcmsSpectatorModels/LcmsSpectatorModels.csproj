@@ -95,6 +95,7 @@
     <Compile Include="Readers\SequenceReaders\ISequenceReader.cs" />
     <Compile Include="Readers\SequenceReaders\LcmsSpectatorSequenceReader.cs" />
     <Compile Include="Readers\SequenceReaders\SequenceReader.cs" />
+    <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\IonUtils.cs" />
   </ItemGroup>
   <ItemGroup>

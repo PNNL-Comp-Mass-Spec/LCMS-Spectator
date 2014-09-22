@@ -140,6 +140,7 @@
     <Compile Include="ViewModels\HeavyModificationsViewModel.cs" />
     <Compile Include="ViewModels\HeavyModificationsWindowViewModel.cs" />
     <Compile Include="ViewModels\IonTypeSelectorViewModel.cs" />
+    <Compile Include="ViewModels\LabeledIonViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModificationViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />

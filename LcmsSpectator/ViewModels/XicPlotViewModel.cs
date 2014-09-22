@@ -47,9 +47,9 @@ namespace LcmsSpectator.ViewModels
             _ions = new List<LabeledIon>();
             _smoothedXics = new List<LabeledXic>();
             _xAxis.AxisChanged += AxisChanged_UpdatePlotTitle;
-            _seriesCache = new Dictionary<string, LineSeries>();
             _xicCache = new Dictionary<string, LabeledXic>();
             _xicCacheLock = new Mutex();
+            _smoothedXicLock = new Mutex();
             UpdatePlot();
         }
 
@@ -93,10 +93,9 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _pointsToSmooth = value;
-                _xicCacheLock.WaitOne();
-                _seriesCache.Clear();
+                _smoothedXicLock.WaitOne();
                 _smoothedXics.Clear();
-                _xicCacheLock.ReleaseMutex();
+                _smoothedXicLock.ReleaseMutex();
                 UpdatePlot();
                 OnPropertyChanged("PointsToSmooth");
             }
@@ -155,23 +154,6 @@ namespace LcmsSpectator.ViewModels
                 _plotTitle = value;
                 OnPropertyChanged("PlotTitle");
             }
-        }
-
-        /// <summary>
-        /// Calculate area under curve of XIC in range.
-        /// </summary>
-        /// <param name="min">Min x limit</param>
-        /// <param name="max">Max x limit</param>
-        /// <returns>Area under the curve of the range</returns>
-        public double GetAreaOfRange(double min, double max)
-        {
-            _xicCacheLock.WaitOne();
-            var area = (from lxic in _smoothedXics where lxic.Index >= 0
-                        from point in lxic.Xic 
-                        where Lcms.GetElutionTime(point.ScanNum) >= min && Lcms.GetElutionTime(point.ScanNum) <= max 
-                        select point.Intensity).Sum();
-            _xicCacheLock.ReleaseMutex();
-            return area;
         }
 
         /// <summary>
@@ -249,10 +231,11 @@ namespace LcmsSpectator.ViewModels
         public void ClearCache()
         {
             _xicCacheLock.WaitOne();
-            _seriesCache.Clear();
-            _smoothedXics.Clear();
             _xicCache.Clear();
             _xicCacheLock.ReleaseMutex();
+            _smoothedXicLock.WaitOne();
+            _smoothedXics.Clear();
+            _smoothedXicLock.ReleaseMutex();
         }
 
         public async void UpdatePlot()
@@ -282,7 +265,13 @@ namespace LcmsSpectator.ViewModels
         {
             var min = _xAxis.ActualMinimum;
             var max = _xAxis.ActualMaximum;
-            return GetAreaOfRange(min, max);
+            _smoothedXicLock.WaitOne();
+            var area =  (from lxic in _smoothedXics where lxic.Index >= 0
+                        from point in lxic.Xic 
+                        where Lcms.GetElutionTime(point.ScanNum) >= min && Lcms.GetElutionTime(point.ScanNum) <= max 
+                        select point.Intensity).Sum();
+            _smoothedXicLock.ReleaseMutex();
+            return area;
         }
 
         /// <summary>
@@ -312,70 +301,48 @@ namespace LcmsSpectator.ViewModels
                 null : new SavitzkyGolaySmoother(PointsToSmooth, 2);
             Parallel.ForEach(Ions, ion =>
             {
-                LineSeries series;
-                if (_seriesCache.ContainsKey(ion.Label)) series = _seriesCache[ion.Label];
-                else
+                var lxic = GetXic(ion);
+                var xic = lxic.Xic;
+                if (xic == null) return;
+                // smooth
+                if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic).ToList();
+                _smoothedXicLock.WaitOne();
+                _smoothedXics.Add(new LabeledXic(ion.Composition, ion.Index, xic, ion.IonType, ion.IsFragmentIon));
+                _smoothedXicLock.ReleaseMutex();
+                var color = _colors.GetColor(lxic);
+                var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
+                var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
+                // create line series for xic
+                var series = new LineSeries
                 {
-                    LabeledXic lxic;
-                    _xicCacheLock.WaitOne();
-                    if (_xicCache.ContainsKey(ion.Label))
-                    {
-                        lxic = _xicCache[ion.Label];
-                        _xicCacheLock.ReleaseMutex();
-                    }
-                    else
-                    {
-                        _xicCacheLock.ReleaseMutex();
-                        lxic = GetXic(ion);
-                        _xicCacheLock.WaitOne();
-                        _xicCache.Add(ion.Label, lxic);
-                        _xicCacheLock.ReleaseMutex();
-                    }
-                    var xic = lxic.Xic;
-                    if (xic == null) return;
-                    // smooth
-                    if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic).ToList();
-                    _smoothedXics.Add(new LabeledXic(ion.Composition, ion.Index, xic, ion.IonType, ion.IsFragmentIon));
-                    var color = _colors.GetColor(lxic);
-                    var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
-                    var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
-                    // create line series for xic
-                    series = new LineSeries
-                    {
-                        StrokeThickness = 3,
-                        Title = lxic.Label,
-                        Color = color,
-                        LineStyle = lineStyle,
-                        MarkerType = markerType,
-                        MarkerSize = 3,
-                        MarkerStroke = color,
-                        MarkerStrokeThickness = 1,
-                        MarkerFill = OxyColors.White,
-                        TrackerFormatString =
-                            "{0}" + Environment.NewLine +
-                            "{1}: {2:0.###}" + Environment.NewLine +
-                            "Scan #: {ScanNum}" + Environment.NewLine +
-                            "{3}: {4:0.##E0}"
-                    };
-                    // Add XIC points
-                    for (int i = 0; i < xic.Count; i++)
-                    {
-                        // remove plateau points (line will connect them anyway)
-                        if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) &&
-                            xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
-                        if (xic[i] != null)
-                            series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum,
-                                xic[i].Intensity));
-                    }
+                    StrokeThickness = 3,
+                    Title = lxic.Label,
+                    Color = color,
+                    LineStyle = lineStyle,
+                    MarkerType = markerType,
+                    MarkerSize = 3,
+                    MarkerStroke = color,
+                    MarkerStrokeThickness = 1,
+                    MarkerFill = OxyColors.White,
+                    TrackerFormatString =
+                        "{0}" + Environment.NewLine +
+                        "{1}: {2:0.###}" + Environment.NewLine +
+                        "Scan #: {ScanNum}" + Environment.NewLine +
+                        "{3}: {4:0.##E0}"
+                };
+                // Add XIC points
+                for (int i = 0; i < xic.Count; i++)
+                {
+                    // remove plateau points (line will connect them anyway)
+                    if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) &&
+                        xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
+                    if (xic[i] != null)
+                        series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum,
+                            xic[i].Intensity));
                 }
                 seriesstore[ion.Label] = series;
             });
-            foreach (var ion in seriesstore)
-            {
-                plot.Series.Add(ion.Value);
-                if (!_seriesCache.ContainsKey(ion.Key)) _seriesCache.Add(ion.Key, ion.Value);
-                else _seriesCache[ion.Key] = ion.Value;
-            }
+            foreach (var ion in seriesstore) plot.Series.Add(ion.Value);
             plot.GenerateYAxis("Intensity", "0e0");
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
@@ -387,14 +354,22 @@ namespace LcmsSpectator.ViewModels
 
         private LabeledXic GetXic(LabeledIon label)
         {
-            var ion = label.Ion;
-            Xic xic;
-            if (label.IsFragmentIon) xic = Lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
-                                                                                        IcParameters.Instance.ProductIonTolerancePpm,
-                                                                                        label.PrecursorIon.GetMostAbundantIsotopeMz());
-            else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
-            var lXic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
-            return lXic;
+            _xicCacheLock.WaitOne();
+            LabeledXic lxic;
+            if (_xicCache.ContainsKey(label.Label)) lxic = _xicCache[label.Label];
+            else
+            {
+                var ion = label.Ion;
+                Xic xic;
+                if (label.IsFragmentIon) xic = Lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
+                                                                                            IcParameters.Instance.ProductIonTolerancePpm,
+                                                                                            label.PrecursorIon.GetMostAbundantIsotopeMz());
+                else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
+                lxic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
+                _xicCache.Add(label.Label, lxic);
+            }
+            _xicCacheLock.ReleaseMutex();
+            return lxic;
         }
 
         /// <summary>
@@ -427,8 +402,8 @@ namespace LcmsSpectator.ViewModels
         private int _pointsToSmooth;
 
         private readonly Mutex _xicCacheLock;
+        private readonly Mutex _smoothedXicLock;
         private readonly List<LabeledXic> _smoothedXics;
-        private readonly Dictionary<string, LabeledXic> _xicCache;  
-        private readonly Dictionary<string, LineSeries> _seriesCache;
+        private readonly Dictionary<string, LabeledXic> _xicCache;
     }
 }
