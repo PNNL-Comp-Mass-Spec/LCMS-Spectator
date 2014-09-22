@@ -83,7 +83,9 @@ namespace LcmsSpectator.ViewModels
 
             _idTreeMutex = new Mutex();
 
+            // register messenger events
             Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
+            Messenger.Default.Register<XicViewModel.XicCloseRequest>(this, XicCloseRequest);
         }
 
         /// <summary>
@@ -468,7 +470,6 @@ namespace LcmsSpectator.ViewModels
             FilterIds();
             _idTreeMutex.ReleaseMutex();
             xicVm.SelectedScanNumberChanged += UpdatePrSm;
-            xicVm.XicClosing += CloseXic;
             xicVm.ZoomToRt(0);
             GuiInvoker.Invoke(SetFragmentLabels);
             GuiInvoker.Invoke(SetPrecursorLabels);
@@ -612,14 +613,13 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Event handler for RequestClose in XicViewModel
+        /// Event handler for XicCloseRequest in XicViewModel
         /// Closes the raw file and cleans up IDs pointing to that raw file
         /// </summary>
-        /// <param name="sender">The XicViewModel</param>
-        /// <param name="e"></param>
-        private void CloseXic(object sender, EventArgs e)
+        /// <param name="message">Message containing sender info</param>
+        private void XicCloseRequest(XicViewModel.XicCloseRequest message)
         {
-            var xicVm = sender as XicViewModel;
+            var xicVm = message.Sender as XicViewModel;
             if (xicVm != null)
             {
                 var rawFileName = xicVm.RawFileName;

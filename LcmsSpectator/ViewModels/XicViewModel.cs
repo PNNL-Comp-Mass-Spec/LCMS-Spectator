@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
@@ -23,8 +24,11 @@ namespace LcmsSpectator.ViewModels
         public ILcMsRun Lcms { get; private set; }
         public RelayCommand CloseCommand { get; private set; }
         public RelayCommand OpenHeavyModificationsCommand { get; private set; }
-        public event EventHandler XicClosing;
         public event EventHandler SelectedScanNumberChanged;
+        public class XicCloseRequest: NotificationMessage
+        {
+            public XicCloseRequest(object sender, string notification = "XicClosing") : base(sender, notification) {}
+        }
         public XicViewModel(ColorDictionary colors, IMainDialogService dialogService=null)
         {
             IsLoading = true;
@@ -49,8 +53,8 @@ namespace LcmsSpectator.ViewModels
             XicXAxis.AxisChanged += XAxisChanged;
             CloseCommand = new RelayCommand(() =>
             {
-                if (_dialogService.ConfirmationBox(String.Format("Are you sure you would like to close {0}?", RawFileName), "") && XicClosing != null)
-                    XicClosing(this, EventArgs.Empty);
+                if (_dialogService.ConfirmationBox(String.Format("Are you sure you would like to close {0}?", RawFileName), ""))
+                    Messenger.Default.Send(new XicCloseRequest(this));
             });
             OpenHeavyModificationsCommand = new RelayCommand(OpenHeavyModifications);
         }

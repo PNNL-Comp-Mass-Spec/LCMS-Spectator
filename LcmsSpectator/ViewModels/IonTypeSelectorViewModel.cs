@@ -52,8 +52,7 @@ namespace LcmsSpectator.ViewModels
             {
                 var oldIonTypes = _ionTypes;
                 _ionTypes = value;
-                Broadcast(oldIonTypes, _ionTypes, "IonTypes");
-                RaisePropertyChanged();
+                RaisePropertyChanged("IonTypes", oldIonTypes, _ionTypes, true);
             }
         }
 
