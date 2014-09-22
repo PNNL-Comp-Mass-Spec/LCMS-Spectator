@@ -26,7 +26,6 @@ namespace LcmsSpectator.ViewModels
     public class SpectrumPlotViewModel: ViewModelBase
     {
         public RelayCommand SaveAsImageCommand { get; private set; }
-        public AutoAdjustedYPlotModel Plot { get; private set; }
         public Task<AutoAdjustedYPlotModel> PlotTask { get; private set; }
         public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, ColorDictionary colors, bool showUnexplainedPeaks=true)
         {
@@ -40,6 +39,16 @@ namespace LcmsSpectator.ViewModels
             Title = "";
             _ionCache = new Dictionary<string, Tuple<Series, Annotation>>();
             Update();
+        }
+
+        public AutoAdjustedYPlotModel Plot
+        {
+            get { return _plot; }
+            private set
+            {
+                _plot = value;
+                RaisePropertyChanged();
+            }
         }
 
         /// <summary>
@@ -152,7 +161,6 @@ namespace LcmsSpectator.ViewModels
         {
             PlotTask = UpdateTask();
             Plot = await PlotTask;
-            RaisePropertyChanged("Plot");
         }
 
         /// <summary>
@@ -345,5 +353,6 @@ namespace LcmsSpectator.ViewModels
 
         private readonly Dictionary<string, Tuple<Series, Annotation>> _ionCache;
         private bool _showDeconvolutedSpectrum;
+        private AutoAdjustedYPlotModel _plot;
     }
 }

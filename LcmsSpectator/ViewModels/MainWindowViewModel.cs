@@ -24,8 +24,6 @@ namespace LcmsSpectator.ViewModels
     {
         public IdentificationTree Ids { get; private set; }
         public IdentificationTree FilteredIds { get; private set; }
-        public List<ProteinId> ProteinIds { get; private set; }
-        public List<PrSm> PrSms { get; private set; } 
         public List<IonType> IonTypes { get; set; }
 
         public List<LabeledIon> FragmentLabels { get; set; }
@@ -139,7 +137,26 @@ namespace LcmsSpectator.ViewModels
                 _idTreeMutex.WaitOne();
                 PrSms = _showUnidentifiedScans ? FilteredIds.AllPrSms : FilteredIds.IdentifiedPrSms;
                 _idTreeMutex.ReleaseMutex();
-                RaisePropertyChanged("PrSms");
+                RaisePropertyChanged();
+            }
+        }
+
+        public List<PrSm> PrSms
+        {
+            get { return _prSms; }
+            private set
+            {
+                _prSms = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public List<ProteinId> ProteinIds
+        {
+            get { return _proteinIds; }
+            private set
+            {
+                _proteinIds = value;
                 RaisePropertyChanged();
             }
         }
@@ -526,8 +543,6 @@ namespace LcmsSpectator.ViewModels
             var prsms = _showUnidentifiedScans ? FilteredIds.AllPrSms : FilteredIds.IdentifiedPrSms;
             prsms.Sort();
             PrSms = prsms;
-            RaisePropertyChanged("ProteinIds");
-            RaisePropertyChanged("PrSms");
         }
 
         /// <summary>
@@ -664,6 +679,8 @@ namespace LcmsSpectator.ViewModels
         private bool _precursorXicChanged;
         private object _treeViewSelectedItem;
         private bool _showUnidentifiedScans;
+        private List<PrSm> _prSms;
+        private List<ProteinId> _proteinIds;
     }
 }
 

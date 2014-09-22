@@ -23,9 +23,7 @@ namespace LcmsSpectator.ViewModels
     {
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
         public ObservableCollection<Target> Targets { get; private set; } 
-        public string SequenceText { get; set; }
         public int SequencePosition { get; set; }
-        public int SelectedCharge { get; set; }
         public RelayCommand OpenTargetListCommand { get; private set; }
         public RelayCommand CreatePrSmCommand { get; private set; }
         public RelayCommand InsertModificationCommand { get; private set; }
@@ -62,6 +60,26 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public int SelectedCharge
+        {
+            get { return _selectedChage; }
+            set
+            {
+                _selectedChage = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string SequenceText
+        {
+            get { return _sequenceText; }
+            set
+            {
+                _sequenceText = value;
+                RaisePropertyChanged();
+            }
+        }
+
         public XicViewModel SelectedXicViewModel
         {
             get { return _selectedXicViewModel; }
@@ -84,9 +102,7 @@ namespace LcmsSpectator.ViewModels
                 if (_selectedTarget.Charge != 0)
                 {
                     SelectedCharge = _selectedTarget.Charge;
-                    RaisePropertyChanged("SelectedCharge");
                 }
-                RaisePropertyChanged("SequenceText");
                 RaisePropertyChanged();
             }
         }
@@ -113,7 +129,6 @@ namespace LcmsSpectator.ViewModels
         {
             var modStr = String.Format("[{0}]", SelectedModification.Name);
             SequenceText = SequenceText.Insert(SequencePosition, modStr);
-            RaisePropertyChanged("SequenceText");
         }
 
         private void CreatePrSm()
@@ -175,7 +190,6 @@ namespace LcmsSpectator.ViewModels
             if (SequenceText == "" || IcParameters.Instance.SearchModifications.Count == 0) return;
             if (SequenceText.Contains("+")) InsertStaticMsgfPlusModifications();
             else InsertStaticLcmsSpectatorModifications();
-            RaisePropertyChanged("SequenceText");
         }
 
         private void InsertStaticMsgfPlusModifications()
@@ -263,5 +277,7 @@ namespace LcmsSpectator.ViewModels
         private XicViewModel _selectedXicViewModel;
         private Target _selectedTarget;
         private int _selectedScan;
+        private int _selectedChage;
+        private string _sequenceText;
     }
 }

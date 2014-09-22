@@ -24,7 +24,6 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicPlotViewModel: ViewModelBase
     {
-        public SelectablePlotModel Plot { get; private set; }
         public Task<SelectablePlotModel> PlotTask { get; private set; }
         public Task<double> AreaTask { get; private set; }
         public ILcMsRun Lcms { get; set; }
@@ -53,6 +52,16 @@ namespace LcmsSpectator.ViewModels
             _xicCacheLock = new Mutex();
             _smoothedXicLock = new Mutex();
             UpdatePlot();
+        }
+
+        public SelectablePlotModel Plot
+        {
+            get { return _plot; }
+            private set
+            {
+                _plot = value;
+                RaisePropertyChanged();
+            }
         }
 
         /// <summary>
@@ -244,7 +253,6 @@ namespace LcmsSpectator.ViewModels
         {
             PlotTask = UpdatePlotTask();
             Plot = await PlotTask;
-            RaisePropertyChanged("Plot");
         }
 
         public Task<SelectablePlotModel> UpdatePlotTask()
@@ -407,5 +415,6 @@ namespace LcmsSpectator.ViewModels
         private readonly Mutex _smoothedXicLock;
         private readonly List<LabeledXic> _smoothedXics;
         private readonly Dictionary<string, LabeledXic> _xicCache;
+        private SelectablePlotModel _plot;
     }
 }

@@ -15,13 +15,10 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicViewModel: ViewModelBase
     {
-        public bool IsLoading { get; private set; }
         public XicPlotViewModel FragmentPlotViewModel { get; set; }
         public XicPlotViewModel HeavyFragmentPlotViewModel { get; set; }
         public XicPlotViewModel PrecursorPlotViewModel { get; set; }
         public XicPlotViewModel HeavyPrecursorPlotViewModel { get; set; }
-        public string FragmentAreaRatioLabel { get; private set; }
-        public string PrecursorAreaRatioLabel { get; private set; }
         public ColorDictionary Colors { get; set; }
         public ILcMsRun Lcms { get; private set; }
         public RelayCommand CloseCommand { get; private set; }
@@ -63,7 +60,12 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string RawFileName
         {
-            get { return Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(RawFilePath)); }
+            get { return _rawFileName; }
+            private set
+            {
+                _rawFileName = value;
+                RaisePropertyChanged();
+            }
         }
 
 
@@ -76,7 +78,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _rawFilePath = value;
-                RaisePropertyChanged("RawFileName"); // make gui update raw file name label
+                RawFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(RawFilePath));
                 IsLoading = true;
                 // load raw file
                 Lcms = PbfLcMsRun.GetLcMsRun(_rawFilePath, MassSpecDataType.XCaliburRun, 0, 0);
@@ -91,9 +93,18 @@ namespace LcmsSpectator.ViewModels
                 _xicXAxis.AbsoluteMaximum = maxRt + 0.0001;
                 _xicXAxis.AbsoluteMinimum = 0;
                 _xicXAxis.Zoom(0, maxRt);
-                IsLoading = false;
                 UpdatePlots();  // update plots in case things were changed during loading
-                RaisePropertyChanged("IsLoading"); // get rid of loading screen
+                IsLoading = false;
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool IsLoading
+        {
+            get { return _isLoading; }
+            set
+            {
+                _isLoading = value;
                 RaisePropertyChanged();
             }
         }
@@ -317,6 +328,26 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public string FragmentAreaRatioLabel
+        {
+            get { return _fragmentAreaRatioLabel; }
+            private set
+            {
+                _fragmentAreaRatioLabel = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string PrecursorAreaRatioLabel
+        {
+            get { return _precursorAreaRatioLabel; }
+            set
+            {
+                _precursorAreaRatioLabel = value;
+                RaisePropertyChanged();
+            }
+        }
+
         /// <summary>
         /// Zoom all plots to a particular retention time.
         /// </summary>
@@ -418,7 +449,6 @@ namespace LcmsSpectator.ViewModels
             if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
             else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
             FragmentAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
-            RaisePropertyChanged("FragmentAreaRatioLabel");
         }
 
         /// <summary>
@@ -438,7 +468,6 @@ namespace LcmsSpectator.ViewModels
             if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
             else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
             PrecursorAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
-            RaisePropertyChanged("PrecursorAreaRatioLabel");
         }
 
         /// <summary>
@@ -533,5 +562,9 @@ namespace LcmsSpectator.ViewModels
         private bool _showFragmentXic;
         private List<LabeledIon> _selectedLightPrecursors;
         private List<LabeledIon> _selectedLightFragments;
+        private string _rawFileName;
+        private bool _isLoading;
+        private string _fragmentAreaRatioLabel;
+        private string _precursorAreaRatioLabel;
     }
 }
