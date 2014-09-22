@@ -24,7 +24,6 @@ namespace LcmsSpectator.ViewModels
         public ILcMsRun Lcms { get; private set; }
         public RelayCommand CloseCommand { get; private set; }
         public RelayCommand OpenHeavyModificationsCommand { get; private set; }
-        public event EventHandler SelectedScanNumberChanged;
         public class XicCloseRequest: NotificationMessage
         {
             public XicCloseRequest(object sender, string notification = "XicClosing") : base(sender, notification) {}
@@ -37,16 +36,13 @@ namespace LcmsSpectator.ViewModels
             Colors = colors;
             _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Retention Time");
             FragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Fragment XIC", colors, XicXAxis, false, false);
-            FragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
             FragmentPlotViewModel.PlotChanged += PlotChanged;
             HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Fragment XIC", colors, XicXAxis, true, false);
-            HeavyFragmentPlotViewModel.SelectedScanChanged += SelectFragmentScanNumber;
             HeavyFragmentPlotViewModel.PlotChanged += PlotChanged;
             PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Precursor XIC", colors, XicXAxis, false);
             PrecursorPlotViewModel.PlotChanged += PlotChanged;
             HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Precursor XIC", colors, XicXAxis, true);
             HeavyPrecursorPlotViewModel.PlotChanged += PlotChanged;
-            SelectedRetentionTime = 0;
             _showScanMarkers = false;
             _showHeavy = false;
             _showFragmentXic = false;
@@ -110,24 +106,6 @@ namespace LcmsSpectator.ViewModels
             {
                 _isLoading = value;
                 RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Retention currently selected and highlighted in all plots.
-        /// </summary>
-        public double SelectedRetentionTime
-        {
-            get { return _selectedRetentionTime; }
-            set
-            {
-                if (_selectedRetentionTime.Equals(value)) return;
-                _selectedRetentionTime = value;
-                if (IsLoading) return;  // don't update everything if file is being loaded
-                FragmentPlotViewModel.SelectedRt = value;
-                HeavyFragmentPlotViewModel.SelectedRt = value;
-                PrecursorPlotViewModel.SelectedRt = value;
-                HeavyPrecursorPlotViewModel.SelectedRt = value;
             }
         }
 
@@ -352,35 +330,6 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        /// <summary>
-        /// Zoom all plots to a particular retention time.
-        /// </summary>
-        /// <param name="rt">Retention time to zoom to.</param>
-        public void ZoomToRt(double rt)
-        {
-            if (IsLoading) return;  // don't update everything if file is being loaded
-            double minX, maxX;
-            SelectedRetentionTime = rt;
-            CalculateBounds(out minX, out maxX);
-            XicXAxis.Minimum = minX;
-            XicXAxis.Maximum = maxX;
-            XicXAxis.Zoom(minX, maxX);
-        }
-
-        /// <summary>
-        /// Highlight a particular retention time for all plots.
-        /// </summary>
-        /// <param name="rt">Retention time to highlight.</param>
-        /// <param name="unique">Is this XicViewModel for the raw file that is selected?</param>
-        /// <param name="heavy">Was the light (false) or heavy (true) plot selected?</param>
-        public void HighlightRetentionTime(double rt, bool unique, bool heavy)
-        {
-            FragmentPlotViewModel.HighlightRt(rt, unique && !heavy);
-            PrecursorPlotViewModel.HighlightRt(rt, false);
-            HeavyFragmentPlotViewModel.HighlightRt(rt, unique && heavy);
-            HeavyPrecursorPlotViewModel.HighlightRt(rt, false);
-        }
-
         public void ClearCache()
         {
             FragmentPlotViewModel.ClearCache();
@@ -500,54 +449,6 @@ namespace LcmsSpectator.ViewModels
         private void OpenHeavyModifications()
         {
             _dialogService.OpenHeavyModifications(new HeavyModificationsWindowViewModel());
-        }
-
-        /// <summary>
-        /// Event handler to handle when a retention time slice is selected on one of the XICs.
-        /// Creates a PrSm and then triggers the SelectedScanNumberChanged event to pass it up
-        /// to the MainWindowViewModel.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SelectFragmentScanNumber(object sender, EventArgs e)
-        {
-            var vm = sender as XicPlotViewModel;
-            if (vm == null) return;
-            var selectedScanNumber = vm.SelectedScan;
-
-            var otherVm = vm.Heavy ? FragmentPlotViewModel : HeavyFragmentPlotViewModel;
-            otherVm.SelectedRt = selectedScanNumber;
-
-            // Create prsm
-            var newPrsm = new PrSm
-            {
-                Heavy = vm.Heavy,
-                RawFileName = RawFileName,
-                Lcms = Lcms,
-                Scan = selectedScanNumber,
-            };
-            if (SelectedScanNumberChanged != null) SelectedScanNumberChanged(this, new PrSmChangedEventArgs(newPrsm));
-        }
-
-        /// <summary>
-        /// Calculate the default min and max on the X Axis for when it is zoomed to a point.
-        /// </summary>
-        /// <param name="minRt">Value calculated for x axis minimum.</param>
-        /// <param name="maxRt">Value calculated for x axis maximum.</param>
-        private void CalculateBounds(out double minRt, out double maxRt)
-        {
-            var minLcmsRt = Lcms.GetElutionTime(Lcms.MinLcScan);
-            var maxLcmsRt = Lcms.GetElutionTime(Lcms.MaxLcScan);
-            minRt = SelectedRetentionTime - 1;
-            maxRt = SelectedRetentionTime + 1;
-            if (SelectedRetentionTime < 1) minRt = 0;
-            minRt = Math.Max(minRt, minLcmsRt);
-            if (SelectedRetentionTime.Equals(0)) maxRt = maxLcmsRt;
-            if (SelectedRetentionTime > maxLcmsRt)
-            {
-                minRt = 0;
-                maxRt = maxLcmsRt;
-            }
         }
 
         private readonly IMainDialogService _dialogService;

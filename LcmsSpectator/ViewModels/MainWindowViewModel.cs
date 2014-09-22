@@ -84,6 +84,7 @@ namespace LcmsSpectator.ViewModels
             _idTreeMutex = new Mutex();
 
             // register messenger events
+            Messenger.Default.Register<XicPlotViewModel.SelectedScanChangedMessage>(this, SelectedScanChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
             Messenger.Default.Register<XicViewModel.XicCloseRequest>(this, XicCloseRequest);
         }
@@ -194,7 +195,6 @@ namespace LcmsSpectator.ViewModels
                     IonTypeSelectorViewModel.MinCharge = 1;
                     foreach (var xicVm in XicViewModels)
                     {
-                        xicVm.ZoomToRt(value.RetentionTime);
                         xicVm.ClearCache();
                     }
                     SetFragmentLabels();
@@ -203,8 +203,6 @@ namespace LcmsSpectator.ViewModels
                 }
                 _selectedPrSm = value;
                 UpdateSpectrum();
-                foreach (var xicVm in XicViewModels)
-                    xicVm.HighlightRetentionTime(SelectedPrSm.RetentionTime, xicVm.RawFileName == SelectedPrSm.RawFileName, SelectedPrSm.Heavy);
                 RaisePropertyChanged();
             }
         }
@@ -469,8 +467,6 @@ namespace LcmsSpectator.ViewModels
             _idTreeMutex.WaitOne();
             FilterIds();
             _idTreeMutex.ReleaseMutex();
-            xicVm.SelectedScanNumberChanged += UpdatePrSm;
-            xicVm.ZoomToRt(0);
             GuiInvoker.Invoke(SetFragmentLabels);
             GuiInvoker.Invoke(SetPrecursorLabels);
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0]; });
@@ -599,6 +595,29 @@ namespace LcmsSpectator.ViewModels
             _precursorXicChanged = false;
             _precursorXicChanged = true;
             SelectedPrecursorLabels = precursorLabels;
+        }
+
+        private void SelectedScanChanged(XicPlotViewModel.SelectedScanChangedMessage message)
+        {
+            var sender = message.Sender as XicPlotViewModel;
+            if (sender != null)
+            {
+                var scan = message.Scan;
+                var lcms = sender.Lcms;
+                var prsm = new PrSm
+                {
+                    Scan = scan,
+                    Lcms = lcms,
+                    Score = -1.0,
+                    Sequence = SelectedPrSm.Sequence,
+                    SequenceText = SelectedPrSm.SequenceText,
+                    Charge = SelectedPrSm.Charge,
+                    ProteinName = SelectedPrSm.ProteinName,
+                    ProteinDesc = SelectedPrSm.ProteinDesc
+                };
+                _selectedPrSm = prsm;
+                RaisePropertyChanged("PrSm");
+            }
         }
 
         /// <summary>

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
@@ -31,7 +32,14 @@ namespace LcmsSpectator.ViewModels
         public RelayCommand SaveAsImageCommand { get; private set; }
         public bool Heavy { get; private set; }
         public event EventHandler PlotChanged;
-        public event EventHandler SelectedScanChanged;
+        public class SelectedScanChangedMessage : NotificationMessage
+        {
+            public int Scan { get; private set; }
+            public SelectedScanChangedMessage(object sender, int scan, string notification="SelectedScanChanged") : base(sender, notification)
+            {
+                Scan = scan;
+            }
+        }
         public XicPlotViewModel(IDialogService dialogService, string title, ColorDictionary colors, LinearAxis xAxis, bool heavy, bool showLegend=true)
         {
             _dialogService = dialogService;
@@ -51,6 +59,7 @@ namespace LcmsSpectator.ViewModels
             _xicCache = new Dictionary<string, LabeledXic>();
             _xicCacheLock = new Mutex();
             _smoothedXicLock = new Mutex();
+            Messenger.Default.Register<SelectedScanChangedMessage>(this, SelectedScanChanged);
             UpdatePlot();
         }
 
@@ -146,10 +155,9 @@ namespace LcmsSpectator.ViewModels
         public double SelectedRt
         {
             get { return _selectedRt;  }
-            set
+            private set
             {
                 _selectedRt = value;
-                SetSelectedRt(_selectedRt);
                 RaisePropertyChanged();
             }
         }
@@ -168,20 +176,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Highlight retention time in plot
-        /// </summary>
-        /// <param name="rtTime">Retention time to highlight</param>
-        /// <param name="unique">Is it a unique marker (highlighted different color)</param>
-        public async void HighlightRt(double rtTime, bool unique)
-        {
-            if (!PlotTask.IsCompleted) await PlotTask;
-            if (Plot == null || Plot.Series.Count == 0) return;
-            _selectedRt = rtTime;
-            if (unique) Plot.SetUniquePointMarker(rtTime);
-            else Plot.SetOrdinaryPointMarker(rtTime);
-        }
-
-        /// <summary>
         /// Highlight Rt and call SelectedScanChanged to inform XicViewModel
         /// </summary>
         public async void SetSelectedRt()
@@ -189,18 +183,22 @@ namespace LcmsSpectator.ViewModels
             if (!PlotTask.IsCompleted) await PlotTask;
             if (Plot == null || Plot.Series.Count == 0) return;
             var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
-            _selectedRt = Plot.SelectedDataPoint.X;
-            if (dataPoint != null) SelectedScan = dataPoint.ScanNum;
-            if (SelectedScanChanged != null) SelectedScanChanged(this, null);
+            if (dataPoint == null) return;
+            SelectedRt = Plot.SelectedDataPoint.X;
+            SelectedScan = dataPoint.ScanNum;
             Plot.SetUniquePointMarker(SelectedRt);
+            Messenger.Default.Send(new SelectedScanChangedMessage(this, dataPoint.ScanNum));
         }
 
-        private async void SetSelectedRt(double rt)
+        private void SelectedScanChanged(SelectedScanChangedMessage message)
         {
-            if (!PlotTask.IsCompleted) await PlotTask;
-            if (Plot == null || Plot.Series.Count == 0) return;
-            Plot.SetOrdinaryPointMarker(rt);
-            Plot.AdjustForZoom();
+            var sender = message.Sender;
+            if (this != sender)
+            {
+                var rt = Lcms.GetElutionTime(message.Scan);
+                _selectedRt = rt;
+                Plot.SetOrdinaryPointMarker(rt);
+            }
         }
 
         private async void ToggleScanMarkers(bool value)
