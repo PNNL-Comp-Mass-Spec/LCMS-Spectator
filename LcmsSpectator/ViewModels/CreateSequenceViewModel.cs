@@ -31,12 +31,12 @@ namespace LcmsSpectator.ViewModels
         public RelayCommand PasteCommand { get; private set; }
         public ObservableCollection<Modification> Modifications { get; private set; }
         public Modification SelectedModification { get; set; }
-        public event EventHandler SequenceCreated;
         public CreateSequenceViewModel(ObservableCollection<XicViewModel> xicViewModels, IDialogService dialogService)
         {
             XicViewModels = xicViewModels;
             Targets = new ObservableCollection<Target>();
             _dialogService = dialogService;
+            _selectedPrSm = null;
             SequenceText = "";
             OpenTargetListCommand = new RelayCommand(OpenTargetList);
             CreatePrSmCommand = new RelayCommand(CreatePrSm, () => (XicViewModels != null && XicViewModels.Count > 0));
@@ -48,6 +48,17 @@ namespace LcmsSpectator.ViewModels
             if (XicViewModels.Count > 0) SelectedXicViewModel = XicViewModels[0];
 
             Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
+        }
+
+        public PrSm SelectedPrSm
+        {
+            get { return _selectedPrSm; }
+            set
+            {
+                var oldPrSm = _selectedPrSm;
+                _selectedPrSm = value;
+                RaisePropertyChanged("SelectedPrSm", oldPrSm, _selectedPrSm, true);
+            }
         }
 
         public int SelectedScan
@@ -182,7 +193,7 @@ namespace LcmsSpectator.ViewModels
                 prsm.Scan = 0;
                 prsm.Lcms = null;
             }
-            if (SequenceCreated != null) SequenceCreated(this, new PrSmChangedEventArgs(prsm));
+            SelectedPrSm = prsm;
         }
 
         private void InsertStaticModifications()
@@ -279,5 +290,6 @@ namespace LcmsSpectator.ViewModels
         private int _selectedScan;
         private int _selectedChage;
         private string _sequenceText;
+        private PrSm _selectedPrSm;
     }
 }

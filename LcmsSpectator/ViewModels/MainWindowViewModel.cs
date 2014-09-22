@@ -61,7 +61,6 @@ namespace LcmsSpectator.ViewModels
             Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, _colors);
             XicViewModels = new ObservableCollection<XicViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
-            CreateSequenceViewModel.SequenceCreated += UpdatePrSm;
 
             _spectrumChanged = false;
 
@@ -85,6 +84,7 @@ namespace LcmsSpectator.ViewModels
 
             // register messenger events
             Messenger.Default.Register<XicPlotViewModel.SelectedScanChangedMessage>(this, SelectedScanChanged);
+            Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
             Messenger.Default.Register<XicViewModel.XicCloseRequest>(this, XicCloseRequest);
         }
@@ -616,7 +616,15 @@ namespace LcmsSpectator.ViewModels
                     ProteinDesc = SelectedPrSm.ProteinDesc
                 };
                 _selectedPrSm = prsm;
-                RaisePropertyChanged("PrSm");
+                RaisePropertyChanged("SelectedPrSm");
+            }
+        }
+
+        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
+        {
+            if (message.Sender != this)
+            {
+                SelectedPrSm = message.NewValue;
             }
         }
 
@@ -665,32 +673,6 @@ namespace LcmsSpectator.ViewModels
                         UpdateSpectrum();
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Event handler to set PrSm when a new scan is selected in XicViewModel or
-        /// CreatePrSmViewModel
-        /// </summary>
-        /// <param name="sender">The XicViewModel or PrSmViewModel</param>
-        /// <param name="e"></param>
-        private void UpdatePrSm(object sender, EventArgs e)
-        {
-            var prsmChangedEventArgs = e as PrSmChangedEventArgs;
-
-            if (prsmChangedEventArgs != null)
-            {
-                var prsm = prsmChangedEventArgs.PrSm;
-                if (prsm.Sequence.Count == 0)
-                {
-                    prsm.Score = -1.0;
-                    prsm.Sequence = SelectedPrSm.Sequence;
-                    prsm.SequenceText = SelectedPrSm.SequenceText;
-                    prsm.Charge = SelectedPrSm.Charge;
-                    prsm.ProteinName = SelectedPrSm.ProteinName;
-                    prsm.ProteinDesc = SelectedPrSm.ProteinDesc;
-                }
-                SelectedPrSm = prsm;
             }
         }
 
