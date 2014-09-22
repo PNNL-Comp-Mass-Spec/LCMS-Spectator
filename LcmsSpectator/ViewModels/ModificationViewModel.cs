@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 
@@ -18,7 +19,7 @@ namespace LcmsSpectator.ViewModels
         public SequenceLocation SelectedSequenceLocation { get; set; }
         public string FixedSelection { get; set; }
 
-        public DelegateCommand RemoveModificationCommand { get; private set; }
+        public RelayCommand RemoveModificationCommand { get; private set; }
 
         public event EventHandler RequestModificationRemoval;
 
@@ -37,7 +38,7 @@ namespace LcmsSpectator.ViewModels
             IsFixed = new ObservableCollection<string> { "Fixed", "Optional" };
             FixedSelection = "Fixed";
 
-            RemoveModificationCommand = new DelegateCommand(() =>
+            RemoveModificationCommand = new RelayCommand(() =>
             {
                 if (RequestModificationRemoval != null) RequestModificationRemoval(this, EventArgs.Empty);
             });

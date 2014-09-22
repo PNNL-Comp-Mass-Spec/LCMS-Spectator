@@ -146,7 +146,6 @@
     <Compile Include="Utils\PrSmChangedEventArgs.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
-    <Compile Include="ViewModels\DelegateCommand.cs" />
     <Compile Include="ViewModels\DmsJobViewModel.cs" />
     <Compile Include="ViewModels\DmsLookupViewModel.cs" />
     <Compile Include="ViewModels\HeavyModificationsViewModel.cs" />

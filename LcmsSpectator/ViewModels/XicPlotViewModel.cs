@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
@@ -26,8 +27,8 @@ namespace LcmsSpectator.ViewModels
         public Task<SelectablePlotModel> PlotTask { get; private set; }
         public Task<double> AreaTask { get; private set; }
         public ILcMsRun Lcms { get; set; }
-        public DelegateCommand SetScanChangedCommand { get; private set; }
-        public DelegateCommand SaveAsImageCommand { get; private set; }
+        public RelayCommand SetScanChangedCommand { get; private set; }
+        public RelayCommand SaveAsImageCommand { get; private set; }
         public bool Heavy { get; private set; }
         public event EventHandler PlotChanged;
         public event EventHandler SelectedScanChanged;
@@ -40,8 +41,8 @@ namespace LcmsSpectator.ViewModels
             _xAxis = xAxis;
             Heavy = heavy;
             PlotTitle = _title;
-            SetScanChangedCommand = new DelegateCommand(SetSelectedRt);
-            SaveAsImageCommand = new DelegateCommand(SaveAsImage);
+            SetScanChangedCommand = new RelayCommand(SetSelectedRt);
+            SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _pointsToSmooth = IcParameters.Instance.PointsToSmooth;
             Plot = new SelectablePlotModel(xAxis, 1.05);
             _ions = new List<LabeledIon>();

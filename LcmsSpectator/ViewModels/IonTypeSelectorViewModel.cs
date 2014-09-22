@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectatorModels.Config;
@@ -13,12 +14,12 @@ namespace LcmsSpectator.ViewModels
     {
         public List<BaseIonType> BaseIonTypes { get; private set; }
         public List<NeutralLoss> NeutralLosses { get; private set; }
-        public DelegateCommand SetIonChargesCommand { get; private set; }
+        public RelayCommand SetIonChargesCommand { get; private set; }
         public event EventHandler IonTypesUpdated;
         public IonTypeSelectorViewModel(IDialogService dialogService)
         {
             _dialogService = dialogService;
-            SetIonChargesCommand = new DelegateCommand(SetIonCharges);
+            SetIonChargesCommand = new RelayCommand(SetIonCharges);
 
             BaseIonTypes = new List<BaseIonType>
             {

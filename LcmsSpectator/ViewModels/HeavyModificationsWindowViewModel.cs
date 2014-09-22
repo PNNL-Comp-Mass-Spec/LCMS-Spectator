@@ -1,4 +1,5 @@
 ﻿using System;
+using GalaSoft.MvvmLight.Command;
 using LcmsSpectatorModels.Config;
 
 namespace LcmsSpectator.ViewModels
@@ -7,8 +8,8 @@ namespace LcmsSpectator.ViewModels
     {
         public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
         
-        public DelegateCommand SaveCommand { get; private set; }
-        public DelegateCommand CancelCommand { get; private set; }
+        public RelayCommand SaveCommand { get; private set; }
+        public RelayCommand CancelCommand { get; private set; }
 
         public bool Status { get; private set; }
 
@@ -18,8 +19,8 @@ namespace LcmsSpectator.ViewModels
         {
             HeavyModificationsViewModel = new HeavyModificationsViewModel();
 
-            SaveCommand = new DelegateCommand(Save);
-            CancelCommand = new DelegateCommand(Cancel);
+            SaveCommand = new RelayCommand(Save);
+            CancelCommand = new RelayCommand(Cancel);
 
             Status = false;
         }

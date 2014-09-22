@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
@@ -22,8 +23,8 @@ namespace LcmsSpectator.ViewModels
         public string PrecursorAreaRatioLabel { get; private set; }
         public ColorDictionary Colors { get; set; }
         public ILcMsRun Lcms { get; private set; }
-        public DelegateCommand CloseCommand { get; private set; }
-        public DelegateCommand OpenHeavyModificationsCommand { get; private set; }
+        public RelayCommand CloseCommand { get; private set; }
+        public RelayCommand OpenHeavyModificationsCommand { get; private set; }
         public event EventHandler XicClosing;
         public event EventHandler SelectedScanNumberChanged;
         public XicViewModel(ColorDictionary colors, IMainDialogService dialogService=null)
@@ -48,12 +49,12 @@ namespace LcmsSpectator.ViewModels
             _showHeavy = false;
             _showFragmentXic = false;
             XicXAxis.AxisChanged += XAxisChanged;
-            CloseCommand = new DelegateCommand(() =>
+            CloseCommand = new RelayCommand(() =>
             {
                 if (_dialogService.ConfirmationBox(String.Format("Are you sure you would like to close {0}?", RawFileName), "") && XicClosing != null)
                     XicClosing(this, EventArgs.Empty);
             });
-            OpenHeavyModificationsCommand = new DelegateCommand(OpenHeavyModifications);
+            OpenHeavyModificationsCommand = new RelayCommand(OpenHeavyModifications);
         }
 
         /// <summary>

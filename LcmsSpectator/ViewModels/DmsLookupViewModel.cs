@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using GalaSoft.MvvmLight.Command;
 using LcmsSpectator.DialogServices;
 using LcmsSpectatorModels.Readers;
 
@@ -14,9 +15,9 @@ namespace LcmsSpectator.ViewModels
         public int NumberOfWeeks { get; set; }
         public string DatasetFilter { get; set; }
 
-        public DelegateCommand LookupCommand { get; private set; }
-        public DelegateCommand OpenCommand { get; private set; }
-        public DelegateCommand CloseCommand { get; private set; }
+        public RelayCommand LookupCommand { get; private set; }
+        public RelayCommand OpenCommand { get; private set; }
+        public RelayCommand CloseCommand { get; private set; }
 
         public bool Status { get; private set; }
         public event EventHandler ReadyToClose;
@@ -29,9 +30,9 @@ namespace LcmsSpectator.ViewModels
             Datasets = new ObservableCollection<DmsDatasetViewModel>();
             Jobs = new ObservableCollection<DmsJobViewModel>();
             _dmsLookupUtility = new DmsLookupUtility();
-            LookupCommand = new DelegateCommand(Lookup);
-            OpenCommand = new DelegateCommand(Open);
-            CloseCommand = new DelegateCommand(Close);
+            LookupCommand = new RelayCommand(Lookup);
+            OpenCommand = new RelayCommand(Open);
+            CloseCommand = new RelayCommand(Close);
             SelectedDataset = new DmsDatasetViewModel();
             SelectedJob = new DmsJobViewModel();
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.DialogServices;
@@ -23,12 +24,12 @@ namespace LcmsSpectator.ViewModels
 {
     public class SpectrumPlotViewModel: ViewModelBase
     {
-        public DelegateCommand SaveAsImageCommand { get; private set; }
+        public RelayCommand SaveAsImageCommand { get; private set; }
         public AutoAdjustedYPlotModel Plot { get; private set; }
         public Task<AutoAdjustedYPlotModel> PlotTask { get; private set; }
         public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, ColorDictionary colors, bool showUnexplainedPeaks=true)
         {
-            SaveAsImageCommand = new DelegateCommand(SaveAsImage);
+            SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _dialogService = dialogService;
             _showUnexplainedPeaks = showUnexplainedPeaks;
             _showFilteredSpectrum = false;

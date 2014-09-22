@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
@@ -33,11 +34,11 @@ namespace LcmsSpectator.ViewModels
         public List<LabeledIon> LightPrecursorLabels { get; set; } 
         public List<LabeledIon> HeavyPrecursorLabels { get; set; } 
 
-        public DelegateCommand OpenRawFileCommand { get; private set; }
-        public DelegateCommand OpenTsvFileCommand { get; private set; }
-        public DelegateCommand OpenFromDmsCommand { get; private set; }
-        public DelegateCommand OpenSettingsCommand { get; private set; }
-        public DelegateCommand OpenAboutBoxCommand { get; private set; }
+        public RelayCommand OpenRawFileCommand { get; private set; }
+        public RelayCommand OpenTsvFileCommand { get; private set; }
+        public RelayCommand OpenFromDmsCommand { get; private set; }
+        public RelayCommand OpenSettingsCommand { get; private set; }
+        public RelayCommand OpenAboutBoxCommand { get; private set; }
 
         public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
         public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
@@ -67,11 +68,11 @@ namespace LcmsSpectator.ViewModels
 
             _spectrumChanged = false;
 
-            OpenRawFileCommand = new DelegateCommand(() => OpenRawFile());
-            OpenTsvFileCommand = new DelegateCommand(() => OpenIdFile());
-            OpenFromDmsCommand = new DelegateCommand(() => OpenFromDms(), ShowOpenFromDms);
-            OpenSettingsCommand = new DelegateCommand(OpenSettings);
-            OpenAboutBoxCommand = new DelegateCommand(OpenAboutBox);
+            OpenRawFileCommand = new RelayCommand(() => OpenRawFile());
+            OpenTsvFileCommand = new RelayCommand(() => OpenIdFile());
+            OpenFromDmsCommand = new RelayCommand(() => OpenFromDms(), () => ShowOpenFromDms);
+            OpenSettingsCommand = new RelayCommand(OpenSettings);
+            OpenAboutBoxCommand = new RelayCommand(OpenAboutBox);
 
             FragmentLabels = new List<LabeledIon>();
             SelectedFragmentLabels = new List<LabeledIon>();
@@ -433,7 +434,6 @@ namespace LcmsSpectator.ViewModels
             GuiInvoker.Invoke(SetFragmentLabels);
             GuiInvoker.Invoke(SetPrecursorLabels);
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0]; });
-            GuiInvoker.Invoke(() => { CreateSequenceViewModel.CreatePrSmCommand.Executable = true; });
             FileOpen = true;
             return xicVm;
         }
@@ -597,7 +597,6 @@ namespace LcmsSpectator.ViewModels
                 Ids.RemovePrSmsFromRawFile(rawFileName);
                 FilterIds();
                 XicViewModels.Remove(xicVm);
-                if (XicViewModels.Count == 0) CreateSequenceViewModel.CreatePrSmCommand.Executable = false;
                 if (SelectedPrSm == null || SelectedPrSm.RawFileName == rawFileName)
                 {
                     if (XicViewModels.Count > 0) CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0];

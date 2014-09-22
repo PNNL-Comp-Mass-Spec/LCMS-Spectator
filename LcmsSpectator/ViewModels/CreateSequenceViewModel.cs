@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
+using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -24,11 +25,11 @@ namespace LcmsSpectator.ViewModels
         public string SequenceText { get; set; }
         public int SequencePosition { get; set; }
         public int SelectedCharge { get; set; }
-        public DelegateCommand OpenTargetListCommand { get; private set; }
-        public DelegateCommand CreatePrSmCommand { get; private set; }
-        public DelegateCommand InsertModificationCommand { get; private set; }
-        public DelegateCommand InsertStaticModificationsCommand { get; private set; }
-        public DelegateCommand PasteCommand { get; private set; }
+        public RelayCommand OpenTargetListCommand { get; private set; }
+        public RelayCommand CreatePrSmCommand { get; private set; }
+        public RelayCommand InsertModificationCommand { get; private set; }
+        public RelayCommand InsertStaticModificationsCommand { get; private set; }
+        public RelayCommand PasteCommand { get; private set; }
         public ObservableCollection<Modification> Modifications { get; private set; }
         public Modification SelectedModification { get; set; }
         public event EventHandler SequenceCreated;
@@ -38,11 +39,11 @@ namespace LcmsSpectator.ViewModels
             Targets = new ObservableCollection<Target>();
             _dialogService = dialogService;
             SequenceText = "";
-            OpenTargetListCommand = new DelegateCommand(OpenTargetList);
-            CreatePrSmCommand = new DelegateCommand(CreatePrSm, false);
-            InsertModificationCommand = new DelegateCommand(InsertModification);
-            InsertStaticModificationsCommand = new DelegateCommand(InsertStaticModifications);
-            PasteCommand = new DelegateCommand(Paste);
+            OpenTargetListCommand = new RelayCommand(OpenTargetList);
+            CreatePrSmCommand = new RelayCommand(CreatePrSm, () => (XicViewModels != null && XicViewModels.Count > 0));
+            InsertModificationCommand = new RelayCommand(InsertModification);
+            InsertStaticModificationsCommand = new RelayCommand(InsertStaticModifications);
+            PasteCommand = new RelayCommand(Paste);
             SelectedCharge = 2;
             SelectedScan = 0;
             if (XicViewModels.Count > 0) SelectedXicViewModel = XicViewModels[0];

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
@@ -22,10 +23,10 @@ namespace LcmsSpectator.ViewModels
         public double SpectrumFilterSlope { get; set; }
 
         public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
-        public DelegateCommand AddModificationCommand { get; set; }
+        public RelayCommand AddModificationCommand { get; set; }
 
-        public DelegateCommand SaveCommand { get; private set; }
-        public DelegateCommand CancelCommand { get; private set; }
+        public RelayCommand SaveCommand { get; private set; }
+        public RelayCommand CancelCommand { get; private set; }
 
         public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
 
@@ -54,12 +55,12 @@ namespace LcmsSpectator.ViewModels
                 modificationVm.RequestModificationRemoval += RemoveModification;
                 Modifications.Add(modificationVm);
             }
-            AddModificationCommand = new DelegateCommand(AddModification);
+            AddModificationCommand = new RelayCommand(AddModification);
 
             HeavyModificationsViewModel = new HeavyModificationsViewModel();
 
-            SaveCommand = new DelegateCommand(Save);
-            CancelCommand = new DelegateCommand(Cancel);
+            SaveCommand = new RelayCommand(Save);
+            CancelCommand = new RelayCommand(Cancel);
 
             Status = false;
         }
