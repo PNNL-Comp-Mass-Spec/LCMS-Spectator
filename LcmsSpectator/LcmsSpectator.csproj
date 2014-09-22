@@ -157,7 +157,6 @@
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SpectrumPlotViewModel.cs" />
     <Compile Include="ViewModels\SpectrumViewModel.cs" />
-    <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\XicPlotViewModel.cs" />
     <Compile Include="ViewModels\XicViewModel.cs" />
     <Compile Include="Views\AboutBox.cs">

@@ -1,4 +1,5 @@
 ﻿using System;
+using GalaSoft.MvvmLight;
 using LcmsSpectatorModels.Readers;
 
 namespace LcmsSpectator.ViewModels
@@ -52,7 +53,7 @@ namespace LcmsSpectator.ViewModels
                 SettingsFile = jobInfo.SettingsFile;
                 ProteinCollection = jobInfo.ProteinCollection;
                 OrganismDb = jobInfo.OrganismDb;
-                OnPropertyChanged("UdtJobInfo");
+                RaisePropertyChanged();
             }
         }
 
@@ -62,7 +63,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _job = value;
-                OnPropertyChanged("Job");
+                RaisePropertyChanged();
             }
         }
 
@@ -72,7 +73,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _datasetId = value;
-                OnPropertyChanged("DatasetId");
+                RaisePropertyChanged();
             }
         }
 
@@ -82,7 +83,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _tool = value;
-                OnPropertyChanged("Tool");
+                RaisePropertyChanged();
             }
         }
 
@@ -92,7 +93,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _completed = value;
-                OnPropertyChanged("Completed");
+                RaisePropertyChanged();
             }
         }
 
@@ -102,7 +103,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _jobFolderPath = value;
-                OnPropertyChanged("JobFolderPath");
+                RaisePropertyChanged();
             }
         }
 
@@ -112,7 +113,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _parameterFile = value;
-                OnPropertyChanged("ParameterFile");
+                RaisePropertyChanged();
             }
         }
 
@@ -122,7 +123,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _settingsFile = value;
-                OnPropertyChanged("SettingsFile");
+                RaisePropertyChanged();
             }
         }
 
@@ -132,7 +133,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _proteinCollection = value;
-                OnPropertyChanged("ProteinCollection");
+                RaisePropertyChanged();
             }
         }
 
@@ -142,7 +143,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _organismDb = value;
-                OnPropertyChanged("OrganismDb");
+                RaisePropertyChanged();
             }
         }
         

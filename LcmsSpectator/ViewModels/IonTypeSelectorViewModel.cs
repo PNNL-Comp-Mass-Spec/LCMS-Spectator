@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
@@ -64,7 +65,7 @@ namespace LcmsSpectator.ViewModels
                 if (value == null) return;
                 _selectedBaseIonTypes = value;
                 if (IonTypesUpdated != null) IonTypesUpdated(this, null);
-                OnPropertyChanged("SelectedBaseIonTypes");
+                RaisePropertyChanged();
             }
         }
 
@@ -76,7 +77,7 @@ namespace LcmsSpectator.ViewModels
                 if (value == null) return;
                 _selectedNeutralLosses = value;
                 if (IonTypesUpdated != null) IonTypesUpdated(this, null);
-                OnPropertyChanged("SelectedNeutralLosses");
+                RaisePropertyChanged();
             }
         }
 
@@ -86,7 +87,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _minCharge = value;
-                OnPropertyChanged("MinCharge");
+                RaisePropertyChanged();
             }
         }
 
@@ -96,7 +97,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _maxCharge = value;
-                OnPropertyChanged("MaxCharge");
+                RaisePropertyChanged();
             }
         }
 
@@ -107,7 +108,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _absoluteMaxCharge = value;
                 MaxCharge = _absoluteMaxCharge;
-                OnPropertyChanged("AbsoluteMaxCharge");
+                RaisePropertyChanged();
             }
         }
 

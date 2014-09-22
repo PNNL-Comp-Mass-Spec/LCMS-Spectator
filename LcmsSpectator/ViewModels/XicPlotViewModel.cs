@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -66,7 +67,7 @@ namespace LcmsSpectator.ViewModels
                 if (_showScanMarkers == value) return;
                 _showScanMarkers = value;
                 ToggleScanMarkers(value);
-                OnPropertyChanged("ShowScanMarkers");
+                RaisePropertyChanged();
             }
         }
 
@@ -81,7 +82,7 @@ namespace LcmsSpectator.ViewModels
                 if (_showLegend == value) return;
                 _showLegend = value;
                 ToggleLegend(value);
-                OnPropertyChanged("ShowLegend");
+                RaisePropertyChanged();
             }
         }
 
@@ -98,7 +99,7 @@ namespace LcmsSpectator.ViewModels
                 _smoothedXics.Clear();
                 _smoothedXicLock.ReleaseMutex();
                 UpdatePlot();
-                OnPropertyChanged("PointsToSmooth");
+                RaisePropertyChanged();
             }
         }
 
@@ -112,7 +113,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _ions = value;
                 UpdatePlot();
-                OnPropertyChanged("Ions");
+                RaisePropertyChanged();
             }
         }
 
@@ -125,7 +126,7 @@ namespace LcmsSpectator.ViewModels
             private set
             {
                 _selectedScan = value;
-                OnPropertyChanged("SelectedScan");
+                RaisePropertyChanged();
             }
         }
 
@@ -140,7 +141,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _selectedRt = value;
                 SetSelectedRt(_selectedRt);
-                OnPropertyChanged("SelectedRt");
+                RaisePropertyChanged();
             }
         }
 
@@ -153,7 +154,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _plotTitle = value;
-                OnPropertyChanged("PlotTitle");
+                RaisePropertyChanged();
             }
         }
 
@@ -243,7 +244,7 @@ namespace LcmsSpectator.ViewModels
         {
             PlotTask = UpdatePlotTask();
             Plot = await PlotTask;
-            OnPropertyChanged("Plot");
+            RaisePropertyChanged("Plot");
         }
 
         public Task<SelectablePlotModel> UpdatePlotTask()

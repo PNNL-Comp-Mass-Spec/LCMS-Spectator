@@ -1,4 +1,5 @@
 ﻿using System;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using LcmsSpectatorModels.Config;
 

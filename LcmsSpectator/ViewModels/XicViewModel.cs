@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
@@ -75,7 +76,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _rawFilePath = value;
-                OnPropertyChanged("RawFileName"); // make gui update raw file name label
+                RaisePropertyChanged("RawFileName"); // make gui update raw file name label
                 IsLoading = true;
                 // load raw file
                 Lcms = PbfLcMsRun.GetLcMsRun(_rawFilePath, MassSpecDataType.XCaliburRun, 0, 0);
@@ -92,8 +93,8 @@ namespace LcmsSpectator.ViewModels
                 _xicXAxis.Zoom(0, maxRt);
                 IsLoading = false;
                 UpdatePlots();  // update plots in case things were changed during loading
-                OnPropertyChanged("IsLoading"); // get rid of loading screen
-                OnPropertyChanged("RawFilePath");
+                RaisePropertyChanged("IsLoading"); // get rid of loading screen
+                RaisePropertyChanged();
             }
         }
 
@@ -127,7 +128,7 @@ namespace LcmsSpectator.ViewModels
                 if (IsLoading) return;  // don't update everything if file is being loaded
                 if (!_showHeavy) PrecursorPlotViewModel.Ions = _selectedPrecursors;
                 UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
-                OnPropertyChanged("SelectedPrecursors");
+                RaisePropertyChanged();
             }
         }
 
@@ -144,7 +145,7 @@ namespace LcmsSpectator.ViewModels
                 // Only create light xics if the heavy xics are visible
                 if (_showHeavy) PrecursorPlotViewModel.Ions = _selectedLightPrecursors;
                 UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
-                OnPropertyChanged("SelectedLightPrecursors");
+                RaisePropertyChanged();
             }
         }
 
@@ -161,7 +162,7 @@ namespace LcmsSpectator.ViewModels
                 // Only create heavy xics if the heavy xics are visible
                 if (_showHeavy) HeavyPrecursorPlotViewModel.Ions = _selectedHeavyPrecursors;
                 UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
-                OnPropertyChanged("SelectedHeavyPrecursors");
+                RaisePropertyChanged();
             }
         }
 
@@ -177,7 +178,7 @@ namespace LcmsSpectator.ViewModels
                 if (IsLoading) return;  // don't update everything if file is being loaded
                 if (ShowFragmentXic && !ShowHeavy) FragmentPlotViewModel.Ions = _selectedFragments;
                 UpdateFragmentAreaRatioLabels();        // XIC changed, update area
-                OnPropertyChanged("SelectedFragments");
+                RaisePropertyChanged();
             }
         }
 
@@ -194,7 +195,7 @@ namespace LcmsSpectator.ViewModels
                 // Only create heavy xics if the heavy xics are visible
                 if (_showHeavy && _showFragmentXic) FragmentPlotViewModel.Ions = _selectedLightFragments;
                 UpdateFragmentAreaRatioLabels();    // XIC changed, update area
-                OnPropertyChanged("SelectedLightFragments");
+                RaisePropertyChanged();
             }
         }
 
@@ -211,7 +212,7 @@ namespace LcmsSpectator.ViewModels
                 // Only create heavy xics if the heavy xics are visible
                 if (_showHeavy && _showFragmentXic) HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
                 UpdateFragmentAreaRatioLabels();    // XIC changed, update area
-                OnPropertyChanged("SelectedHeavyFragments");
+                RaisePropertyChanged();
             }
         }
 
@@ -228,7 +229,7 @@ namespace LcmsSpectator.ViewModels
                 HeavyFragmentPlotViewModel.ShowScanMarkers = _showScanMarkers;
                 PrecursorPlotViewModel.ShowScanMarkers = _showScanMarkers;
                 HeavyPrecursorPlotViewModel.ShowScanMarkers = _showScanMarkers;
-                OnPropertyChanged("ShowScanMarkers");
+                RaisePropertyChanged();
             }
         }
 
@@ -268,7 +269,7 @@ namespace LcmsSpectator.ViewModels
                         FragmentPlotViewModel.Ions = new List<LabeledIon>();
                     }
                 }
-                OnPropertyChanged("ShowFragmentXic");
+                RaisePropertyChanged();
             }
         }
 
@@ -312,7 +313,7 @@ namespace LcmsSpectator.ViewModels
                         UpdateFragmentAreaRatioLabels();
                     }
                 }
-                OnPropertyChanged("ShowHeavy");
+                RaisePropertyChanged();
             }
         }
 
@@ -417,7 +418,7 @@ namespace LcmsSpectator.ViewModels
             if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
             else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
             FragmentAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
-            OnPropertyChanged("FragmentAreaRatioLabel");
+            RaisePropertyChanged("FragmentAreaRatioLabel");
         }
 
         /// <summary>
@@ -437,7 +438,7 @@ namespace LcmsSpectator.ViewModels
             if (ratio > 1000 || ratio < 0.001) formatted = String.Format("{0:0.###EE0}", ratio);
             else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
             PrecursorAreaRatioLabel = String.Format("Area ratio: {0}", formatted);
-            OnPropertyChanged("PrecursorAreaRatioLabel");
+            RaisePropertyChanged("PrecursorAreaRatioLabel");
         }
 
         /// <summary>

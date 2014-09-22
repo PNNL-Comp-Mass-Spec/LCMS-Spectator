@@ -1,4 +1,5 @@
 ﻿using System;
+using GalaSoft.MvvmLight;
 using LcmsSpectatorModels.Readers;
 
 namespace LcmsSpectator.ViewModels
@@ -46,7 +47,7 @@ namespace LcmsSpectator.ViewModels
                 Instrument = datasetInfo.Instrument;
                 Created = datasetInfo.Created;
                 DatasetFolderPath = datasetInfo.DatasetFolderPath;
-                OnPropertyChanged("UdtDatasetInfo");
+                RaisePropertyChanged();
             }
         }
 
@@ -56,7 +57,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _datasetId = value;
-                OnPropertyChanged("DatasetId");
+                RaisePropertyChanged();
             }
         }
 
@@ -66,7 +67,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _dataset = value;
-                OnPropertyChanged("Dataset");
+                RaisePropertyChanged();
             }
         }
 
@@ -76,7 +77,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _experiment = value;
-                OnPropertyChanged("Experiment");
+                RaisePropertyChanged();
             }
         }
 
@@ -86,7 +87,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _organism = value;
-                OnPropertyChanged("Organism");
+                RaisePropertyChanged();
             }
         }
 
@@ -96,7 +97,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _instrument = value;
-                OnPropertyChanged("Instrument");
+                RaisePropertyChanged();
             }
         }
 
@@ -106,7 +107,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _created = value;
-                OnPropertyChanged("Created");
+                RaisePropertyChanged();
             }
         }
 
@@ -116,7 +117,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _datasetFolderPath = value;
-                OnPropertyChanged("DatasetFolderPath");
+                RaisePropertyChanged();
             }
         }
         

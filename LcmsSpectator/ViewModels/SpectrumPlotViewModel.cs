@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
@@ -50,7 +51,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _title = value;
-                OnPropertyChanged("Title");
+                RaisePropertyChanged();
             }
         }
 
@@ -65,7 +66,7 @@ namespace LcmsSpectator.ViewModels
                 if (_showUnexplainedPeaks == value) return;
                 _showUnexplainedPeaks = value;
                 Update();
-                OnPropertyChanged("ShowUnexplainedPeaks");
+                RaisePropertyChanged();
             }
         }
 
@@ -80,7 +81,7 @@ namespace LcmsSpectator.ViewModels
                 _showFilteredSpectrum = value;
                 _ionCache.Clear();
                 Update();
-                OnPropertyChanged("ShowFilteredSpectrum");
+                RaisePropertyChanged();
             }
         }
 
@@ -95,7 +96,7 @@ namespace LcmsSpectator.ViewModels
                 _showDeconvolutedSpectrum = value;
                 _ionCache.Clear();
                 Update();
-                OnPropertyChanged("ShowDeconvolutedSpectrum");
+                RaisePropertyChanged();
             }
         }
 
@@ -113,7 +114,7 @@ namespace LcmsSpectator.ViewModels
                 _deconvolutedSpectrum = null;
                 _filtDeconSpectrum = null;
                 _ionCache.Clear();
-                OnPropertyChanged("Spectrum");
+                RaisePropertyChanged();
             }
         }
 
@@ -126,7 +127,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _ions = value;
-                OnPropertyChanged("Ions");
+                RaisePropertyChanged();
             }
         }
 
@@ -140,7 +141,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _xAxis = value;
                 Update();
-                OnPropertyChanged("XAxis");
+                RaisePropertyChanged();
             }
         }
 
@@ -151,7 +152,7 @@ namespace LcmsSpectator.ViewModels
         {
             PlotTask = UpdateTask();
             Plot = await PlotTask;
-            OnPropertyChanged("Plot");
+            RaisePropertyChanged("Plot");
         }
 
         /// <summary>

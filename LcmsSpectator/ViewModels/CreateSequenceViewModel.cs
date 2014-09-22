@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
@@ -57,7 +58,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedScan = value;
-                OnPropertyChanged("SelectedScan");
+                RaisePropertyChanged();
             }
         }
 
@@ -68,7 +69,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_selectedXicViewModel == value) return;
                 _selectedXicViewModel = value;
-                OnPropertyChanged("SelectedXicViewModel");
+                RaisePropertyChanged();
             }
         }
 
@@ -83,10 +84,10 @@ namespace LcmsSpectator.ViewModels
                 if (_selectedTarget.Charge != 0)
                 {
                     SelectedCharge = _selectedTarget.Charge;
-                    OnPropertyChanged("SelectedCharge");
+                    RaisePropertyChanged("SelectedCharge");
                 }
-                OnPropertyChanged("SequenceText");
-                OnPropertyChanged("SelectedTarget");
+                RaisePropertyChanged("SequenceText");
+                RaisePropertyChanged();
             }
         }
 
@@ -112,7 +113,7 @@ namespace LcmsSpectator.ViewModels
         {
             var modStr = String.Format("[{0}]", SelectedModification.Name);
             SequenceText = SequenceText.Insert(SequencePosition, modStr);
-            OnPropertyChanged("SequenceText");
+            RaisePropertyChanged("SequenceText");
         }
 
         private void CreatePrSm()
@@ -174,7 +175,7 @@ namespace LcmsSpectator.ViewModels
             if (SequenceText == "" || IcParameters.Instance.SearchModifications.Count == 0) return;
             if (SequenceText.Contains("+")) InsertStaticMsgfPlusModifications();
             else InsertStaticLcmsSpectatorModifications();
-            OnPropertyChanged("SequenceText");
+            RaisePropertyChanged("SequenceText");
         }
 
         private void InsertStaticMsgfPlusModifications()

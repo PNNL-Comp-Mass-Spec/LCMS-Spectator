@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -121,7 +122,7 @@ namespace LcmsSpectator.ViewModels
                         var highest = selected.GetHighestScoringPrSm();
                         SelectedPrSm = highest;
                     }
-                    OnPropertyChanged("TreeViewSelectedItem");
+                    RaisePropertyChanged();
                 }
             }
         }
@@ -138,8 +139,8 @@ namespace LcmsSpectator.ViewModels
                 _idTreeMutex.WaitOne();
                 PrSms = _showUnidentifiedScans ? FilteredIds.AllPrSms : FilteredIds.IdentifiedPrSms;
                 _idTreeMutex.ReleaseMutex();
-                OnPropertyChanged("PrSms");
-                OnPropertyChanged("ShowUnidentifiedScans");
+                RaisePropertyChanged("PrSms");
+                RaisePropertyChanged();
             }
         }
 
@@ -185,7 +186,7 @@ namespace LcmsSpectator.ViewModels
                 UpdateSpectrum();
                 foreach (var xicVm in XicViewModels)
                     xicVm.HighlightRetentionTime(SelectedPrSm.RetentionTime, xicVm.RawFileName == SelectedPrSm.RawFileName, SelectedPrSm.Heavy);
-                OnPropertyChanged("SelectedPrSm");
+                RaisePropertyChanged();
             }
         }
 
@@ -210,7 +211,7 @@ namespace LcmsSpectator.ViewModels
                         xicVm.SelectedHeavyFragments = IonUtils.ReduceLabels(HeavyFragmentLabels, fragmentLabelList);
                     }
                 }
-                OnPropertyChanged("SelectedFragmentLabels");
+                RaisePropertyChanged();
             }
         }
 
@@ -235,7 +236,7 @@ namespace LcmsSpectator.ViewModels
                         xicVm.SelectedHeavyPrecursors = IonUtils.ReduceLabels(HeavyPrecursorLabels, precursorLabelList);
                     }
                 }
-                OnPropertyChanged("SelectedPrecursorLabels");
+                RaisePropertyChanged();
             }
         }
 
@@ -248,7 +249,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _isLoading = value;
-                OnPropertyChanged("IsLoading");
+                RaisePropertyChanged();
             }
         }
 
@@ -261,7 +262,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _fileOpen = value;
-                OnPropertyChanged("FileOpen");
+                RaisePropertyChanged();
             }
         }
 
@@ -525,8 +526,8 @@ namespace LcmsSpectator.ViewModels
             var prsms = _showUnidentifiedScans ? FilteredIds.AllPrSms : FilteredIds.IdentifiedPrSms;
             prsms.Sort();
             PrSms = prsms;
-            OnPropertyChanged("ProteinIds");
-            OnPropertyChanged("PrSms");
+            RaisePropertyChanged("ProteinIds");
+            RaisePropertyChanged("PrSms");
         }
 
         /// <summary>
@@ -542,9 +543,9 @@ namespace LcmsSpectator.ViewModels
             LightFragmentLabels = lightFragmentLabels;
             HeavyFragmentLabels = heavyFragmentLabels;
             _fragmentXicChanged = false;
-            OnPropertyChanged("FragmentLabels");
-            OnPropertyChanged("LightFragmentLabels");
-            OnPropertyChanged("HeavyFragmentLabels");
+            RaisePropertyChanged("FragmentLabels");
+            RaisePropertyChanged("LightFragmentLabels");
+            RaisePropertyChanged("HeavyFragmentLabels");
             _fragmentXicChanged = true;
             SelectedFragmentLabels = fragmentLabels;
         }
@@ -562,9 +563,9 @@ namespace LcmsSpectator.ViewModels
             LightPrecursorLabels = lightPrecursorLabels;
             HeavyPrecursorLabels = heavyPrecursorLabels;
             _precursorXicChanged = false;
-            OnPropertyChanged("PrecursorLabels");
-            OnPropertyChanged("LightPrecursorLabels");
-            OnPropertyChanged("HeavyPrecursorLabels");
+            RaisePropertyChanged("PrecursorLabels");
+            RaisePropertyChanged("LightPrecursorLabels");
+            RaisePropertyChanged("HeavyPrecursorLabels");
             _precursorXicChanged = true;
             SelectedPrecursorLabels = precursorLabels;
         }
@@ -604,11 +605,11 @@ namespace LcmsSpectator.ViewModels
                     else
                     {
                         _selectedPrSm = null;
-                        OnPropertyChanged("SelectedPrSm");
-                        FragmentLabels = new List<LabeledIon>(); OnPropertyChanged("FragmentLabels");
-                        HeavyFragmentLabels = new List<LabeledIon>(); OnPropertyChanged("HeavyFragmentLabels");
-                        PrecursorLabels = new List<LabeledIon>(); OnPropertyChanged("PrecursorLabels");
-                        HeavyPrecursorLabels = new List<LabeledIon>(); OnPropertyChanged("HeavyPrecursorLabels");
+                        RaisePropertyChanged("SelectedPrSm");
+                        FragmentLabels = new List<LabeledIon>(); RaisePropertyChanged("FragmentLabels");
+                        HeavyFragmentLabels = new List<LabeledIon>(); RaisePropertyChanged("HeavyFragmentLabels");
+                        PrecursorLabels = new List<LabeledIon>(); RaisePropertyChanged("PrecursorLabels");
+                        HeavyPrecursorLabels = new List<LabeledIon>(); RaisePropertyChanged("HeavyPrecursorLabels");
                         _fragmentXicChanged = true;
                         SelectedFragmentLabels = FragmentLabels;
                         _precursorXicChanged = true;

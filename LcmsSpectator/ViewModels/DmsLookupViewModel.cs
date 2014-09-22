@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using LcmsSpectator.DialogServices;
 using LcmsSpectatorModels.Readers;
@@ -44,7 +45,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _selectedDataset = value;
                 Jobs.Clear();
-                OnPropertyChanged("SelectedDataset");
+                RaisePropertyChanged();
                 if (_selectedDataset == null) return;
                 var jobMap = _dmsLookupUtility.GetJobsByDataset(new List<DmsLookupUtility.UdtDatasetInfo>{ _selectedDataset.UdtDatasetInfo});
                 List<DmsLookupUtility.UdtJobInfo> jobs;
@@ -65,7 +66,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedJob = value;
-                OnPropertyChanged("SelectedJob");
+                RaisePropertyChanged();
             }
         }
 
