@@ -182,7 +182,8 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_filtDeconSpectrum == null)
                 {
-                    if (_filteredSpectrum == null) _filteredSpectrum = Spectrum.GetFilteredSpectrumBySlope(IcParameters.Instance.SpectrumFilterSlope);
+                    if (_filteredSpectrum == null)
+                        _filteredSpectrum = Spectrum.GetFilteredSpectrumByIntensityHistogram();
                     _filtDeconSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(spectrum,
                                     Constants.MinCharge, Constants.MaxCharge, tolerance,
                                     IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
@@ -192,7 +193,7 @@ namespace LcmsSpectator.ViewModels
             else if (ShowFilteredSpectrum)
             {
                 if (_filteredSpectrum == null)
-                    _filteredSpectrum = Spectrum.GetFilteredSpectrumBySlope(IcParameters.Instance.SpectrumFilterSlope);
+                    _filteredSpectrum = Spectrum.GetFilteredSpectrumByIntensityHistogram();
                 spectrum = _filteredSpectrum;
             }
             else if (ShowDeconvolutedSpectrum)
