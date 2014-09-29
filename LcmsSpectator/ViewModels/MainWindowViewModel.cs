@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -12,12 +11,10 @@ using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
-using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
-using LcmsSpectatorModels.Utils;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -26,11 +23,6 @@ namespace LcmsSpectator.ViewModels
         public IdentificationTree Ids { get; private set; }
         public IdentificationTree FilteredIds { get; private set; }
         public List<IonType> IonTypes { get; set; }
-
-        public List<LabeledIon> LightFragmentLabels { get; private set; } 
-        public List<LabeledIon> HeavyFragmentLabels { get; private set; } 
-        public List<LabeledIon> LightPrecursorLabels { get; private set; } 
-        public List<LabeledIon> HeavyPrecursorLabels { get; private set; } 
 
         public RelayCommand OpenRawFileCommand { get; private set; }
         public RelayCommand OpenTsvFileCommand { get; private set; }
@@ -43,26 +35,28 @@ namespace LcmsSpectator.ViewModels
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
 
+        public SelectedPrSmViewModel SelectedPrSmViewModel { get; private set; }
+
         /// <summary>
         /// Constructor for creating a new, empty MainWindowViewModel
         /// </summary>
         /// <param name="dialogService">Service for MVVM-friendly dialogs</param>
         public MainWindowViewModel(IMainDialogService dialogService)
         {
-            _xicChanged = false;
+            // register messenger events
+            Messenger.Default.Register<XicViewModel.XicCloseRequest>(this, XicCloseRequest);
+
             _dialogService = dialogService;
             IcParameters.Instance.IcParametersUpdated += SettingsChanged;
             Ids = new IdentificationTree();
             FilteredIds = new IdentificationTree();
             ProteinIds = Ids.ProteinIds.ToList();
             PrSms = new List<PrSm>();
-            _colors = new ColorDictionary(2);
+            SelectedPrSmViewModel = SelectedPrSmViewModel.Instance;
+            Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService);
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
-            Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, _colors);
             XicViewModels = new ObservableCollection<XicViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
-
-            _spectrumChanged = false;
 
             OpenRawFileCommand = new RelayCommand(() => OpenRawFile());
             OpenTsvFileCommand = new RelayCommand(() => OpenIdFile());
@@ -70,23 +64,10 @@ namespace LcmsSpectator.ViewModels
             OpenSettingsCommand = new RelayCommand(OpenSettings);
             OpenAboutBoxCommand = new RelayCommand(OpenAboutBox);
 
-            FragmentLabels = new List<LabeledIon>();
-            SelectedFragmentLabels = new List<LabeledIon>();
-            PrecursorLabels = new List<LabeledIon>();
-            SelectedPrecursorLabels = new List<LabeledIon>();
-
             IsLoading = false;
             FileOpen = false;
 
-            SelectedPrSm = null;
-
             _idTreeMutex = new Mutex();
-
-            // register messenger events
-            Messenger.Default.Register<XicPlotViewModel.SelectedScanChangedMessage>(this, SelectedScanChanged);
-            Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
-            Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
-            Messenger.Default.Register<XicViewModel.XicCloseRequest>(this, XicCloseRequest);
         }
 
         /// <summary>
@@ -128,6 +109,17 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public PrSm SelectedPrSm
+        {
+            get { return _selectedPrSm; }
+            set
+            {
+                _selectedPrSm = value;
+                SelectedPrSmViewModel.Instance.PrSm = _selectedPrSm;
+                RaisePropertyChanged();
+            }
+        }
+
         /// <summary>
         /// Toggle whether or not the Scan View shows Scans that do not have a sequence ID
         /// </summary>
@@ -144,6 +136,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// List of all PrSms (for display in Scan View)
+        /// </summary>
         public List<PrSm> PrSms
         {
             get { return _prSms; }
@@ -154,6 +149,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// List of all ProteinIds (for display in Protein Tree)
+        /// </summary>
         public List<ProteinId> ProteinIds
         {
             get { return _proteinIds; }
@@ -171,111 +169,6 @@ namespace LcmsSpectator.ViewModels
         public bool ShowOpenFromDms
         {
             get { return System.Net.Dns.GetHostEntry("").HostName.Contains("pnl.gov"); }
-        }
-
-        /// <summary>
-        /// Currently selected sequence and spectrum
-        /// </summary>
-        public PrSm SelectedPrSm
-        {
-            get { return _selectedPrSm; }
-            set
-            {
-                if (value == null) return;
-                CreateSequenceViewModel.SelectedScan = value.Scan;
-                _spectrumChanged = true;
-                if (_selectedPrSm == null ||
-                    _selectedPrSm.SequenceText != value.SequenceText ||
-                    _selectedPrSm.Charge != value.Charge || _xicChanged)
-                {
-                    _selectedPrSm = value;
-                    var absoluteMaxCharge = Math.Min(Math.Max(value.Charge - 1, 2), 15);
-                    _colors.BuildColorDictionary(absoluteMaxCharge);
-                    IonTypeSelectorViewModel.AbsoluteMaxCharge = absoluteMaxCharge;
-                    IonTypeSelectorViewModel.MinCharge = 1;
-                    foreach (var xicVm in XicViewModels)
-                    {
-                        xicVm.ClearCache();
-                    }
-                    SetFragmentLabels();
-                    SetPrecursorLabels();
-                    _xicChanged = false;
-                }
-                _selectedPrSm = value;
-                UpdateSpectrum();
-                RaisePropertyChanged();
-            }
-        }
-
-        public List<LabeledIon> FragmentLabels
-        {
-            get { return _fragmentLabels; }
-            private set
-            {
-                _fragmentLabels = value;
-                RaisePropertyChanged();
-            }
-
-        }
-
-        /// <summary>
-        /// Fragment ion labels selected for display in fragment XICs.
-        /// When SelectedFragmentLabels are set, SelectedHeavyFragmentLabels and
-        /// SelectedLightFragmentLabels are updated.
-        /// </summary>
-        public IList SelectedFragmentLabels
-        {
-            get { return _selectedFragmentLabels; }
-            set
-            {
-                _selectedFragmentLabels = value;
-                if (_fragmentXicChanged)
-                {
-                    var fragmentLabelList = _selectedFragmentLabels.Cast<LabeledIon>().ToList();
-                    foreach (var xicVm in XicViewModels)
-                    {
-                        xicVm.SelectedFragments = fragmentLabelList;
-                        xicVm.SelectedLightFragments = IonUtils.ReduceLabels(LightFragmentLabels, fragmentLabelList);
-                        xicVm.SelectedHeavyFragments = IonUtils.ReduceLabels(HeavyFragmentLabels, fragmentLabelList);
-                    }
-                }
-                RaisePropertyChanged();
-            }
-        }
-
-        public List<LabeledIon> PrecursorLabels
-        {
-            get { return _precursorLabels; }
-            private set
-            {
-                _precursorLabels = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Precursor ion labels selected for display in Precursor XICs.
-        /// When SelectedPrecursorLabels are set, SelectedHeavyPrecursorLabels and
-        /// SelectedLightPrecursorLabels are updated.
-        /// </summary>
-        public IList SelectedPrecursorLabels
-        {
-            get { return _selectedPrecursorLabels; }
-            set
-            {
-                _selectedPrecursorLabels = value;
-                if (_precursorXicChanged)
-                {
-                    var precursorLabelList = _selectedPrecursorLabels.Cast<LabeledIon>().ToList();
-                    foreach (var xicVm in XicViewModels)
-                    {
-                        xicVm.SelectedPrecursors = precursorLabelList;
-                        xicVm.SelectedLightPrecursors = IonUtils.ReduceLabels(LightPrecursorLabels, precursorLabelList);
-                        xicVm.SelectedHeavyPrecursors = IonUtils.ReduceLabels(HeavyPrecursorLabels, precursorLabelList);
-                    }
-                }
-                RaisePropertyChanged();
-            }
         }
 
         /// <summary>
@@ -301,29 +194,6 @@ namespace LcmsSpectator.ViewModels
             {
                 _fileOpen = value;
                 RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Redraws the spectrum if SelectedPrSm or fragment ion selections have changed
-        /// </summary>
-        public void UpdateSpectrum()
-        {
-            if (_spectrumChanged)
-            {
-                if (SelectedPrSm == null || SelectedPrSm.Ms2Spectrum == null || SelectedPrSm.NextMs1 == null ||
-                    SelectedPrSm.PreviousMs1 == null)
-                {
-                    Ms2SpectrumViewModel.ClearPlots();
-                    return;
-                }
-                var fragmentLabels = SelectedPrSm.Heavy ? HeavyFragmentLabels : FragmentLabels;
-                var precursorIon = SelectedPrSm.Heavy
-                                 ? IonUtils.GetLabeledPrecursorIon(SelectedPrSm.HeavySequence, SelectedPrSm.Charge)
-                                 : IonUtils.GetLabeledPrecursorIon(SelectedPrSm.Sequence, SelectedPrSm.Charge);
-                Ms2SpectrumViewModel.RawFileName = SelectedPrSm.RawFileName;
-                Ms2SpectrumViewModel.UpdatePlots(SelectedPrSm.Ms2Spectrum, fragmentLabels, SelectedPrSm.PreviousMs1, SelectedPrSm.NextMs1, precursorIon, SelectedPrSm.Heavy);
-                _spectrumChanged = false;
             }
         }
 
@@ -426,10 +296,8 @@ namespace LcmsSpectator.ViewModels
             Ids.Add(ids);
             Ids.Tool = ids.Tool; // assign new tool
             FilterIds();    // filter Ids by qvalue threshold
-            SelectedPrSm = null;
-            _xicChanged = true;
             ShowUnidentifiedScans = false;
-            if (Ids.Proteins.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
+            if (Ids.Proteins.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
             FileOpen = true;
             IsLoading = false;
         }
@@ -440,7 +308,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="rawFilePath">Path to raw file to open</param>
         public XicViewModel ReadRawFile(string rawFilePath)
         {
-            var xicVm = new XicViewModel(_colors); // create xic view model
+            var xicVm = new XicViewModel(); // create xic view model
             GuiInvoker.Invoke(() => XicViewModels.Add(xicVm)); // add xic view model to gui
             xicVm.RawFilePath = rawFilePath;
             var lcms = xicVm.Lcms;
@@ -467,8 +335,6 @@ namespace LcmsSpectator.ViewModels
             _idTreeMutex.WaitOne();
             FilterIds();
             _idTreeMutex.ReleaseMutex();
-            GuiInvoker.Invoke(SetFragmentLabels);
-            GuiInvoker.Invoke(SetPrecursorLabels);
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0]; });
             FileOpen = true;
             return xicVm;
@@ -543,11 +409,6 @@ namespace LcmsSpectator.ViewModels
         private void SettingsChanged()
         {
             if (!FilteredIds.QValueFilter.Equals(IcParameters.Instance.QValueThreshold)) Task.Factory.StartNew(FilterIds);
-            SetFragmentLabels();
-            SetPrecursorLabels();
-            foreach (var xicVm in XicViewModels) xicVm.UpdatePlots();
-            _spectrumChanged = true;
-            UpdateSpectrum();
         }
 
         /// <summary>
@@ -564,82 +425,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Set fragment ion labels for currently selected sequence
-        /// </summary>
-        private void SetFragmentLabels()
-        {
-            if (SelectedPrSm == null) return;
-            var fragmentLabels = IonUtils.GetFragmentIonLabels(SelectedPrSm.Sequence, SelectedPrSm.Charge, IonTypeSelectorViewModel.IonTypes);
-            var lightFragmentLabels = IonUtils.GetFragmentIonLabels(SelectedPrSm.LightSequence, SelectedPrSm.Charge, IonTypeSelectorViewModel.IonTypes);
-            var heavyFragmentLabels = IonUtils.GetFragmentIonLabels(SelectedPrSm.HeavySequence, SelectedPrSm.Charge, IonTypeSelectorViewModel.IonTypes);
-            FragmentLabels = fragmentLabels;
-            LightFragmentLabels = lightFragmentLabels;
-            HeavyFragmentLabels = heavyFragmentLabels;
-            _fragmentXicChanged = false;
-            _fragmentXicChanged = true;
-            SelectedFragmentLabels = fragmentLabels;
-        }
-
-        /// <summary>
-        /// Set precursor ion labels for currently selected sequence
-        /// </summary>
-        private void SetPrecursorLabels()
-        {
-            if (SelectedPrSm == null) return;
-            var precursorLabels = IonUtils.GetPrecursorIonLabels(SelectedPrSm.Sequence, SelectedPrSm.Charge, -1, 2);
-            var lightPrecursorLabels = IonUtils.GetPrecursorIonLabels(SelectedPrSm.LightSequence, SelectedPrSm.Charge, -1, 2);
-            var heavyPrecursorLabels = IonUtils.GetPrecursorIonLabels(SelectedPrSm.HeavySequence, SelectedPrSm.Charge, -1, 2);
-            PrecursorLabels = precursorLabels;
-            LightPrecursorLabels = lightPrecursorLabels;
-            HeavyPrecursorLabels = heavyPrecursorLabels;
-            _precursorXicChanged = false;
-            _precursorXicChanged = true;
-            SelectedPrecursorLabels = precursorLabels;
-        }
-
-        private void SelectedScanChanged(XicPlotViewModel.SelectedScanChangedMessage message)
-        {
-            var sender = message.Sender as XicPlotViewModel;
-            if (sender != null)
-            {
-                var scan = message.Scan;
-                var lcms = sender.Lcms;
-                var prsm = new PrSm
-                {
-                    Scan = scan,
-                    Lcms = lcms,
-                    Score = -1.0,
-                    Sequence = SelectedPrSm.Sequence,
-                    SequenceText = SelectedPrSm.SequenceText,
-                    Charge = SelectedPrSm.Charge,
-                    ProteinName = SelectedPrSm.ProteinName,
-                    ProteinDesc = SelectedPrSm.ProteinDesc
-                };
-                _selectedPrSm = prsm;
-                RaisePropertyChanged("SelectedPrSm");
-            }
-        }
-
-        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
-        {
-            if (message.Sender != this)
-            {
-                SelectedPrSm = message.NewValue;
-            }
-        }
-
-        /// <summary>
-        /// Event handler for ion types changing in IonTypeSelectorViewModel
-        /// </summary>
-        private void SelectedIonTypesChanged(PropertyChangedMessage<List<IonType>> message)
-        {
-            if (SelectedPrSm == null) return;
-            _spectrumChanged = true;
-            SetFragmentLabels();
-            UpdateSpectrum();
-        }
-
-        /// <summary>
         /// Event handler for XicCloseRequest in XicViewModel
         /// Closes the raw file and cleans up IDs pointing to that raw file
         /// </summary>
@@ -653,50 +438,29 @@ namespace LcmsSpectator.ViewModels
                 Ids.RemovePrSmsFromRawFile(rawFileName);
                 FilterIds();
                 XicViewModels.Remove(xicVm);
-                if (SelectedPrSm == null || SelectedPrSm.RawFileName == rawFileName)
+                if (SelectedPrSmViewModel.Instance.RawFileName == rawFileName)
                 {
                     if (XicViewModels.Count > 0) CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0];
-                    if (PrSms.Count > 0) SelectedPrSm = Ids.GetHighestScoringPrSm();
+                    if (PrSms.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
                     else
                     {
-                        _selectedPrSm = null;
-                        RaisePropertyChanged("SelectedPrSm");
-                        FragmentLabels = new List<LabeledIon>();
-                        HeavyFragmentLabels = new List<LabeledIon>();
-                        PrecursorLabels = new List<LabeledIon>();
-                        HeavyPrecursorLabels = new List<LabeledIon>();
-                        _fragmentXicChanged = true;
-                        SelectedFragmentLabels = FragmentLabels;
-                        _precursorXicChanged = true;
-                        SelectedPrecursorLabels = PrecursorLabels;
-                        _spectrumChanged = true;
-                        UpdateSpectrum();
+                        SelectedPrSmViewModel.Instance.Clear();
                     }
                 }
             }
         }
 
         private readonly IMainDialogService _dialogService;
-        private readonly ColorDictionary _colors;
         private readonly Mutex _idTreeMutex;
 
         private bool _isLoading;
         private bool _fileOpen;
 
-        private PrSm _selectedPrSm;
-        private IList _selectedFragmentLabels;
-        private IList _selectedPrecursorLabels;
-
-        private bool _xicChanged;
-        private bool _spectrumChanged;
-        private bool _fragmentXicChanged;
-        private bool _precursorXicChanged;
         private object _treeViewSelectedItem;
         private bool _showUnidentifiedScans;
         private List<PrSm> _prSms;
         private List<ProteinId> _proteinIds;
-        private List<LabeledIon> _fragmentLabels;
-        private List<LabeledIon> _precursorLabels;
+        private PrSm _selectedPrSm;
     }
 }
 

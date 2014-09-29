@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectatorModels.Config;
@@ -35,6 +36,10 @@ namespace LcmsSpectator.ViewModels
 
             NeutralLosses = NeutralLoss.CommonNeutralLosses.ToList();
             SelectedNeutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
+
+            Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
+
+            UpdateIonTypes();
 
             _minSelectedCharge = 1;
             _minSelectedCharge = 2;
@@ -137,6 +142,18 @@ namespace LcmsSpectator.ViewModels
             var selectedNeutralLosses = SelectedNeutralLosses.Cast<NeutralLoss>().ToList();
             IonTypes = IonUtils.GetIonTypes(IcParameters.Instance.IonTypeFactory, selectedBaseIonTypes,
                 selectedNeutralLosses, MinCharge, MaxCharge);
+        }
+
+        private void SelectedChargeChanged(PropertyChangedMessage<int> message)
+        {
+            var charge = message.NewValue;
+            if (message.PropertyName == "Charge")
+            {
+                MinCharge = 1;
+                var maxCharge = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
+                MaxCharge = maxCharge;
+                UpdateIonTypes();
+            }
         }
 
         private readonly IDialogService _dialogService;

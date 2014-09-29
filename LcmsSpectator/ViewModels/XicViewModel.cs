@@ -5,10 +5,10 @@ using System.IO;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
+using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
-using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
 using OxyPlot.Axes;
 
@@ -28,21 +28,16 @@ namespace LcmsSpectator.ViewModels
         {
             public XicCloseRequest(object sender, string notification = "XicClosing") : base(sender, notification) {}
         }
-        public XicViewModel(ColorDictionary colors, IMainDialogService dialogService=null)
+        public XicViewModel(IMainDialogService dialogService=null)
         {
             IsLoading = true;
             if (dialogService == null) dialogService = new MainDialogService();
             _dialogService = dialogService;
-            Colors = colors;
             _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Retention Time");
-            FragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Fragment XIC", colors, XicXAxis, false, false);
-            FragmentPlotViewModel.PlotChanged += PlotChanged;
-            HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Fragment XIC", colors, XicXAxis, true, false);
-            HeavyFragmentPlotViewModel.PlotChanged += PlotChanged;
-            PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Precursor XIC", colors, XicXAxis, false);
-            PrecursorPlotViewModel.PlotChanged += PlotChanged;
-            HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Precursor XIC", colors, XicXAxis, true);
-            HeavyPrecursorPlotViewModel.PlotChanged += PlotChanged;
+            FragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Fragment XIC", XicXAxis, false, false);
+            HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Fragment XIC", XicXAxis, true, false);
+            PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Precursor XIC", XicXAxis, false);
+            HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Precursor XIC", XicXAxis, true);
             _showScanMarkers = false;
             _showHeavy = false;
             _showFragmentXic = false;
@@ -53,6 +48,9 @@ namespace LcmsSpectator.ViewModels
                     Messenger.Default.Send(new XicCloseRequest(this));
             });
             OpenHeavyModificationsCommand = new RelayCommand(OpenHeavyModifications);
+
+            Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypeChanged);
+            Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
         }
 
         /// <summary>
@@ -109,105 +107,56 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        /// <summary>
-        /// Precursor ions to create precursor XICs from.
-        /// </summary>
-        public List<LabeledIon> SelectedPrecursors
+        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
         {
-            get { return _selectedPrecursors; }
-            set
+            ClearCache();
+
+            // calculate rt bounds
+            var rt = Lcms.GetElutionTime(SelectedPrSmViewModel.Instance.Scan);
+            var minLcmsRt = Lcms.GetElutionTime(Lcms.MinLcScan);
+            var maxLcmsRt = Lcms.GetElutionTime(Lcms.MaxLcScan);
+            var minRt = rt - 1;
+            var maxRt = rt + 1;
+            if (rt < 1) minRt = 0;
+            minRt = Math.Max(minRt, minLcmsRt);
+            if (rt.Equals(0)) maxRt = maxLcmsRt;
+            if (rt > maxLcmsRt)
             {
-                _selectedPrecursors = value;
-                if (IsLoading) return;  // don't update everything if file is being loaded
-                if (!_showHeavy) PrecursorPlotViewModel.Ions = _selectedPrecursors;
-                UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
-                RaisePropertyChanged();
+                minRt = 0;
+                maxRt = maxLcmsRt;
+            }
+            // zoom to rt
+            XicXAxis.Minimum = minRt;
+            XicXAxis.Maximum = maxRt;
+            XicXAxis.Zoom(minRt, maxRt);
+        }
+
+        private async void SelectedIonTypeChanged(PropertyChangedMessage<List<IonType>> message)
+        {
+            if (ShowHeavy)
+            {
+                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
+                HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+                UpdatePrecursorAreaRatioLabels();
+                if (ShowFragmentXic)
+                {
+                    FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
+                    HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                    UpdateFragmentAreaRatioLabels();
+                }
+            }
+            else
+            {
+                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.PrecursorLabelUpdate;
+                if (ShowFragmentXic)
+                {
+                    if (!SelectedPrSmViewModel.Instance.FragmentLabelUpdate.IsCompleted)
+                        await SelectedPrSmViewModel.Instance.FragmentLabelUpdate;
+                    FragmentPlotViewModel.Ions = SelectedPrSmViewModel.Instance.FragmentLabels;
+                }
             }
         }
 
-        /// <summary>
-        /// Light precursor ions to create light precursor XICs from.
-        /// </summary>
-        public List<LabeledIon> SelectedLightPrecursors
-        {
-            get { return _selectedLightPrecursors; }
-            set
-            {
-                _selectedLightPrecursors = value;
-                if (IsLoading) return;  // don't update everything if file is being loaded
-                // Only create light xics if the heavy xics are visible
-                if (_showHeavy) PrecursorPlotViewModel.Ions = _selectedLightPrecursors;
-                UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Heavy precursor ions to create heavy precursor XICs from.
-        /// </summary>
-        public List<LabeledIon> SelectedHeavyPrecursors
-        {
-            get { return _selectedHeavyPrecursors; }
-            set
-            {
-                _selectedHeavyPrecursors = value;
-                if (IsLoading) return;  // don't update everything if file is being loaded
-                // Only create heavy xics if the heavy xics are visible
-                if (_showHeavy) HeavyPrecursorPlotViewModel.Ions = _selectedHeavyPrecursors;
-                UpdatePrecursorAreaRatioLabels();   // XIC changed, update area
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Fragment ions to create fragment XICs from.
-        /// </summary>
-        public List<LabeledIon> SelectedFragments
-        {
-            get { return _selectedFragments; }
-            set
-            {
-                _selectedFragments = value;
-                if (IsLoading) return;  // don't update everything if file is being loaded
-                if (ShowFragmentXic && !ShowHeavy) FragmentPlotViewModel.Ions = _selectedFragments;
-                UpdateFragmentAreaRatioLabels();        // XIC changed, update area
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Heavy fragment ions to create heavy fragment XICs from.
-        /// </summary>
-        public List<LabeledIon> SelectedLightFragments
-        {
-            get { return _selectedLightFragments; }
-            set
-            {
-                _selectedLightFragments = value;
-                if (IsLoading) return;  // don't update everything if file is being loaded
-                // Only create heavy xics if the heavy xics are visible
-                if (_showHeavy && _showFragmentXic) FragmentPlotViewModel.Ions = _selectedLightFragments;
-                UpdateFragmentAreaRatioLabels();    // XIC changed, update area
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Heavy fragment ions to create heavy fragment XICs from.
-        /// </summary>
-        public List<LabeledIon> SelectedHeavyFragments
-        {
-            get { return _selectedHeavyFragments; }
-            set
-            {
-                _selectedHeavyFragments = value;
-                if (IsLoading) return;  // don't update everything if file is being loaded
-                // Only create heavy xics if the heavy xics are visible
-                if (_showHeavy && _showFragmentXic) HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
-                UpdateFragmentAreaRatioLabels();    // XIC changed, update area
-                RaisePropertyChanged();
-            }
-        }
 
         /// <summary>
         /// Shows and hides the point markers on the XIC plots.
@@ -238,29 +187,13 @@ namespace LcmsSpectator.ViewModels
                 _showFragmentXic = value;
                 if (_showFragmentXic)
                 {
-                    if (_showHeavy && _selectedHeavyFragments != null)
-                    {
-                        FragmentPlotViewModel.Ions = _selectedLightFragments;
-                        HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
-                        UpdateFragmentAreaRatioLabels();
-                    }
-                    else if (_selectedFragments != null)
-                    {
-                        FragmentPlotViewModel.Ions = _selectedFragments;
-                    }
+                    EnableFragmentXic();
                 }
                 else
                 {
-
-                    if (_showHeavy && _selectedHeavyFragments != null)
-                    {
-                        HeavyFragmentPlotViewModel.Ions = new List<LabeledIon>();
-                        UpdateFragmentAreaRatioLabels();
-                    }
-                    else if (_selectedFragments != null)
-                    {
-                        FragmentPlotViewModel.Ions = new List<LabeledIon>();
-                    }
+                    FragmentPlotViewModel.Ions = new List<LabeledIonViewModel>();
+                    if (_showHeavy)
+                        HeavyFragmentPlotViewModel.Ions = new List<LabeledIonViewModel>();
                 }
                 RaisePropertyChanged();
             }
@@ -278,33 +211,13 @@ namespace LcmsSpectator.ViewModels
                 _showHeavy = value;
                 if (_showHeavy)
                 {
-                    if (_selectedHeavyPrecursors != null)
-                    {
-                        PrecursorPlotViewModel.Ions = _selectedLightPrecursors;
-                        HeavyPrecursorPlotViewModel.Ions = _selectedHeavyPrecursors;
-                        UpdatePrecursorAreaRatioLabels(); 
-                    }
-                    if (_selectedHeavyFragments != null && _showFragmentXic)
-                    {
-                        FragmentPlotViewModel.Ions = _selectedLightFragments;
-                        HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
-                        UpdateFragmentAreaRatioLabels();
-                    }
+                    EnableHeavyXic();
                 }
                 else
                 {
-                    if (_selectedHeavyPrecursors != null)
-                    {
-                        PrecursorPlotViewModel.Ions = _selectedPrecursors;
-                        HeavyPrecursorPlotViewModel.Ions = new List<LabeledIon>();
-                        UpdatePrecursorAreaRatioLabels();
-                    }
-                    if (_selectedHeavyFragments != null && _showFragmentXic)
-                    {
-                        FragmentPlotViewModel.Ions = _selectedFragments;
-                        HeavyFragmentPlotViewModel.Ions = new List<LabeledIon>();
-                        UpdateFragmentAreaRatioLabels();
-                    }
+                    HeavyPrecursorPlotViewModel.Ions = new List<LabeledIonViewModel>();
+                    if (_showFragmentXic)
+                        HeavyFragmentPlotViewModel.Ions = new List<LabeledIonViewModel>();
                 }
                 RaisePropertyChanged();
             }
@@ -341,36 +254,58 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Update and regenerate all plots
         /// </summary>
-        public void UpdatePlots()
+        public async void UpdatePlots()
         {
-            if (IsLoading) return;  // don't update everything if file is being loaded
-            if (_showHeavy)
+            ClearCache();
+
+            if (ShowHeavy)
             {
-                if (_selectedHeavyPrecursors != null)
+                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
+                HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+                UpdatePrecursorAreaRatioLabels();
+                if (ShowFragmentXic)
                 {
-                    PrecursorPlotViewModel.Ions = _selectedLightPrecursors;
-                    HeavyPrecursorPlotViewModel.Ions = _selectedHeavyPrecursors;
-                    UpdatePrecursorAreaRatioLabels();
-                }
-                if (_selectedHeavyFragments != null && _showFragmentXic)
-                {
-                    FragmentPlotViewModel.Ions = _selectedLightFragments;
-                    HeavyFragmentPlotViewModel.Ions = _selectedHeavyFragments;
+                    FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
+                    HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                    UpdateFragmentAreaRatioLabels();
                 }
             }
             else
             {
-                if (_selectedHeavyPrecursors != null)
+                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.PrecursorLabelUpdate;
+                if (ShowFragmentXic)
                 {
-                    PrecursorPlotViewModel.Ions = _selectedPrecursors;
-                    HeavyPrecursorPlotViewModel.Ions = new List<LabeledIon>();
-                    UpdatePrecursorAreaRatioLabels();
+                    if (!SelectedPrSmViewModel.Instance.FragmentLabelUpdate.IsCompleted)
+                        await SelectedPrSmViewModel.Instance.FragmentLabelUpdate;
+                    FragmentPlotViewModel.Ions = SelectedPrSmViewModel.Instance.FragmentLabels;
                 }
-                if (_selectedHeavyFragments != null && _showFragmentXic)
-                {
-                    FragmentPlotViewModel.Ions = _selectedFragments;
-                    HeavyFragmentPlotViewModel.Ions = new List<LabeledIon>();
-                }
+            }
+        }
+
+        private async void EnableHeavyXic()
+        {
+            HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+            UpdatePrecursorAreaRatioLabels();
+            if (ShowFragmentXic)
+            {
+                HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                UpdateFragmentAreaRatioLabels();
+            }
+        }
+
+        private async void EnableFragmentXic()
+        {
+            if (ShowHeavy)
+            {
+                FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
+                HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                UpdateFragmentAreaRatioLabels();
+            }
+            else
+            {
+                if (!SelectedPrSmViewModel.Instance.FragmentLabelUpdate.IsCompleted)
+                    await SelectedPrSmViewModel.Instance.FragmentLabelUpdate;
+                FragmentPlotViewModel.Ions = SelectedPrSmViewModel.Instance.FragmentLabels;
             }
         }
 
@@ -434,18 +369,6 @@ namespace LcmsSpectator.ViewModels
             UpdatePrecursorAreaRatioLabels();
         }
 
-        /// <summary>
-        /// Event handler for Plot changed to update area ratio labels when plots are updated.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void PlotChanged(object sender, EventArgs e)
-        {
-            var plotvm = sender as XicPlotViewModel;
-            if (plotvm == null || plotvm == FragmentPlotViewModel || plotvm == HeavyFragmentPlotViewModel) UpdateFragmentAreaRatioLabels();
-            if (plotvm == null || plotvm == PrecursorPlotViewModel || plotvm == HeavyPrecursorPlotViewModel) UpdatePrecursorAreaRatioLabels();
-        }
-
         private void OpenHeavyModifications()
         {
             _dialogService.OpenHeavyModifications(new HeavyModificationsWindowViewModel());
@@ -453,20 +376,12 @@ namespace LcmsSpectator.ViewModels
 
         private readonly IMainDialogService _dialogService;
 
-        private List<LabeledIon> _selectedFragments;
-        private List<LabeledIon> _selectedPrecursors;
-
         private readonly LinearAxis _xicXAxis;
         
         private bool _showScanMarkers;
-        private List<LabeledIon> _selectedHeavyPrecursors;
-        private List<LabeledIon> _selectedHeavyFragments;
         private bool _showHeavy;
         private string _rawFilePath;
-        private double _selectedRetentionTime;
         private bool _showFragmentXic;
-        private List<LabeledIon> _selectedLightPrecursors;
-        private List<LabeledIon> _selectedLightFragments;
         private string _rawFileName;
         private bool _isLoading;
         private string _fragmentAreaRatioLabel;

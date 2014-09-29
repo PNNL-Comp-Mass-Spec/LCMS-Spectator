@@ -17,6 +17,7 @@ using LcmsSpectatorModels.Utils;
 using MultiDimensionalPeakFinding;
 using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Series;
 using OxyPlot.Wpf;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
 using LineSeries = OxyPlot.Series.LineSeries;
@@ -31,7 +32,6 @@ namespace LcmsSpectator.ViewModels
         public RelayCommand SetScanChangedCommand { get; private set; }
         public RelayCommand SaveAsImageCommand { get; private set; }
         public bool Heavy { get; private set; }
-        public event EventHandler PlotChanged;
         public class SelectedScanChangedMessage : NotificationMessage
         {
             public int Scan { get; private set; }
@@ -40,11 +40,10 @@ namespace LcmsSpectator.ViewModels
                 Scan = scan;
             }
         }
-        public XicPlotViewModel(IDialogService dialogService, string title, ColorDictionary colors, LinearAxis xAxis, bool heavy, bool showLegend=true)
+        public XicPlotViewModel(IDialogService dialogService, string title, LinearAxis xAxis, bool heavy, bool showLegend=true)
         {
             _dialogService = dialogService;
             _title = title;
-            _colors = colors;
             _showLegend = showLegend;
             _xAxis = xAxis;
             Heavy = heavy;
@@ -53,13 +52,14 @@ namespace LcmsSpectator.ViewModels
             SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _pointsToSmooth = IcParameters.Instance.PointsToSmooth;
             Plot = new SelectablePlotModel(xAxis, 1.05);
-            _ions = new List<LabeledIon>();
+            _ions = new List<LabeledIonViewModel>();
             _smoothedXics = new List<LabeledXic>();
             _xAxis.AxisChanged += AxisChanged_UpdatePlotTitle;
             _xicCache = new Dictionary<string, LabeledXic>();
             _xicCacheLock = new Mutex();
             _smoothedXicLock = new Mutex();
-            Messenger.Default.Register<SelectedScanChangedMessage>(this, SelectedScanChanged);
+            Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
+            Messenger.Default.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
             UpdatePlot();
         }
 
@@ -124,7 +124,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Ions to generate XICs from
         /// </summary>
-        public List<LabeledIon> Ions
+        public List<LabeledIonViewModel> Ions
         {
             get { return _ions; }
             set
@@ -186,18 +186,27 @@ namespace LcmsSpectator.ViewModels
             if (dataPoint == null) return;
             SelectedRt = Plot.SelectedDataPoint.X;
             SelectedScan = dataPoint.ScanNum;
-            Plot.SetUniquePointMarker(SelectedRt);
-            Messenger.Default.Send(new SelectedScanChangedMessage(this, dataPoint.ScanNum));
+            SelectedPrSmViewModel.Instance.Scan = SelectedScan;
         }
 
-        private void SelectedScanChanged(SelectedScanChangedMessage message)
+        public async void HighlightRt(double rt)
         {
-            var sender = message.Sender;
-            if (this != sender)
+            if (!PlotTask.IsCompleted) await PlotTask;
+            if (Plot == null || Plot.Series.Count == 0) return;
+            Plot.SetOrdinaryPointMarker(rt);
+        }
+
+        private void SelectedScanChanged(PropertyChangedMessage<int> message)
+        {
+            if (message.PropertyName == "Scan" && message.Sender == SelectedPrSmViewModel.Instance)
             {
-                var rt = Lcms.GetElutionTime(message.Scan);
+                var rt = Lcms.GetElutionTime(message.NewValue);
                 _selectedRt = rt;
-                Plot.SetOrdinaryPointMarker(rt);
+                if (SelectedPrSmViewModel.Instance.Lcms == Lcms && SelectedPrSmViewModel.Instance.Heavy == Heavy)
+                {
+                    Plot.SetUniquePointMarker(rt);
+                }
+                else Plot.SetOrdinaryPointMarker(rt);
             }
         }
 
@@ -273,12 +282,18 @@ namespace LcmsSpectator.ViewModels
         {
             var min = _xAxis.ActualMinimum;
             var max = _xAxis.ActualMaximum;
-            _smoothedXicLock.WaitOne();
-            var area =  (from lxic in _smoothedXics where lxic.Index >= 0
-                        from point in lxic.Xic 
-                        where Lcms.GetElutionTime(point.ScanNum) >= min && Lcms.GetElutionTime(point.ScanNum) <= max 
-                        select point.Intensity).Sum();
-            _smoothedXicLock.ReleaseMutex();
+            var area = 0.0;
+            foreach (var series in Plot.Series)
+            {
+                var lineSeries = series as LineSeries;
+                if (lineSeries == null || !lineSeries.IsVisible || lineSeries is StemSeries) continue;
+                foreach (var point in lineSeries.Points)
+                {
+                    var xicPoint = point as XicDataPoint;
+                    if (xicPoint == null) continue;
+                    if (xicPoint.X >= min && xicPoint.X <= max) area += xicPoint.Y;
+                }
+            }
             return area;
         }
 
@@ -304,20 +319,22 @@ namespace LcmsSpectator.ViewModels
                 TitleFontSize = 14,
                 TitlePadding = 0,
             };
-            var seriesstore = Ions.ToDictionary<LabeledIon, string, LineSeries>(ion => ion.Label, ion => null);
+            if (Ions == null || Ions.Count == 0) return plot;
+            var seriesstore = Ions.ToDictionary<LabeledIonViewModel, string, LineSeries>(ion => ion.LabeledIon.Label, ion => null);
             var smoother = (PointsToSmooth == 0 || PointsToSmooth == 1) ?
                 null : new SavitzkyGolaySmoother(PointsToSmooth, 2);
+            var colors = new ColorDictionary(Math.Min(Math.Max(SelectedPrSmViewModel.Instance.Charge - 1, 2), 15));
             Parallel.ForEach(Ions, ion =>
             {
-                var lxic = GetXic(ion);
+                var lxic = GetXic(ion.LabeledIon);
                 var xic = lxic.Xic;
                 if (xic == null) return;
                 // smooth
                 if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic).ToList();
                 _smoothedXicLock.WaitOne();
-                _smoothedXics.Add(new LabeledXic(ion.Composition, ion.Index, xic, ion.IonType, ion.IsFragmentIon));
+                _smoothedXics.Add(new LabeledXic(ion.LabeledIon.Composition, ion.LabeledIon.Index, xic, ion.LabeledIon.IonType, ion.LabeledIon.IsFragmentIon));
                 _smoothedXicLock.ReleaseMutex();
-                var color = _colors.GetColor(lxic);
+                var color = colors.GetColor(lxic);
                 var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
                 var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
                 // create line series for xic
@@ -348,14 +365,13 @@ namespace LcmsSpectator.ViewModels
                         series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum,
                             xic[i].Intensity));
                 }
-                seriesstore[ion.Label] = series;
+                seriesstore[ion.LabeledIon.Label] = series;
             });
-            foreach (var ion in seriesstore) plot.Series.Add(ion.Value);
+            foreach (var ion in seriesstore) plot.Series.Insert(0, ion.Value);
             plot.GenerateYAxis("Intensity", "0e0");
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
             plot.SetPointMarker(SelectedRt);
-            if (PlotChanged != null) PlotChanged(this, EventArgs.Empty);
             PlotTitle = GetPlotTitleWithArea(GetCurrentArea());
             return plot;
         }
@@ -380,6 +396,25 @@ namespace LcmsSpectator.ViewModels
             return lxic;
         }
 
+        private async void LabeledIonSelectedChanged(PropertyChangedMessage<bool> message)
+        {
+            if (message.PropertyName == "Selected" && message.Sender is LabeledIonViewModel)
+            {
+                if (!PlotTask.IsCompleted) await PlotTask;
+                var labeledIonVm = message.Sender as LabeledIonViewModel;
+                var label = labeledIonVm.LabeledIon.Label;
+                foreach (var series in Plot.Series)
+                {
+                    var lineSeries = series as LineSeries;
+                    if (lineSeries != null && lineSeries.Title == label)
+                    {
+                        lineSeries.IsVisible = message.NewValue;
+                        Plot.AdjustForZoom();
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Open a save file dialog and save plot as png image to user selected location.
         /// </summary>
@@ -400,13 +435,12 @@ namespace LcmsSpectator.ViewModels
         private readonly IDialogService _dialogService;
         private readonly string _title;
         private bool _showLegend;
-        private readonly ColorDictionary _colors;
         private bool _showScanMarkers;
         private double _selectedRt;
         private readonly LinearAxis _xAxis;
         private int _selectedScan;
         private string _plotTitle;
-        private List<LabeledIon> _ions;
+        private List<LabeledIonViewModel> _ions;
         private int _pointsToSmooth;
 
         private readonly Mutex _xicCacheLock;

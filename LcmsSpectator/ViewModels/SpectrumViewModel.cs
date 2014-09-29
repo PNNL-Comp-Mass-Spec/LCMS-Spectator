@@ -5,7 +5,6 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
-using LcmsSpectator.PlotModels;
 using LcmsSpectatorModels.Models;
 using OxyPlot.Axes;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
@@ -17,47 +16,13 @@ namespace LcmsSpectator.ViewModels
         public SpectrumPlotViewModel Ms2SpectrumViewModel { get; private set; }
         public SpectrumPlotViewModel PreviousMs1ViewModel { get; private set; }
         public SpectrumPlotViewModel NextMs1ViewModel { get; private set; }
-        public string RawFileName { get; set; }
-        public SpectrumViewModel(IDialogService dialogService, ColorDictionary colors)
+        public SpectrumViewModel(IDialogService dialogService)
         {
-            Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05, colors);
-            PreviousMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, colors);
-            NextMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, colors);
-            Messenger.Default.Register<XicPlotViewModel.SelectedScanChangedMessage>(this, SelectedScanChanged);
-        }
-
-        /// <summary>
-        /// Update Spectrum plots.
-        /// </summary>
-        /// <param name="ms2">New Ms2 Spectrum.</param>
-        /// <param name="productIons">Ms2 fragment ions to highlight.</param>
-        /// <param name="prevms1">New Previous Ms1 Spectrum.</param>
-        /// <param name="nextms1">New Next Ms1 Spectrum</param>
-        /// <param name="precursorIon">Precursor ion to highlight on all plots.</param>
-        /// <param name="heavy">Is the spectrum from a heavy peptide?</param>
-        public void UpdatePlots(Spectrum ms2, List<LabeledIon> productIons, Spectrum prevms1, Spectrum nextms1, LabeledIon precursorIon, bool heavy=false)
-        {
-            productIons = new List<LabeledIon>(productIons) {precursorIon};
-            // Ms2 spectrum plot
-            var heavyStr = heavy ? ", Heavy" : "";
-            Ms2SpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1}{2})", ms2.ScanNum, RawFileName, heavyStr);
-            Ms2SpectrumViewModel.Spectrum = ms2;
-            Ms2SpectrumViewModel.Ions = productIons;
-            Ms2SpectrumViewModel.Update();
-            // Ms1 spectrum plots
-            var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);    // shared x axis
-            // previous Ms1
-            PreviousMs1ViewModel.XAxis = xAxis;
-            PreviousMs1ViewModel.Title = prevms1 == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", prevms1.ScanNum);
-            PreviousMs1ViewModel.Spectrum = prevms1;
-            PreviousMs1ViewModel.Ions = new List<LabeledIon> {precursorIon};
-            PreviousMs1ViewModel.Update();
-            // next Ms1
-            NextMs1ViewModel.XAxis = xAxis;
-            NextMs1ViewModel.Title = nextms1 == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
-            NextMs1ViewModel.Spectrum = nextms1;
-            NextMs1ViewModel.Ions = new List<LabeledIon> {precursorIon};
-            NextMs1ViewModel.Update();
+            Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05);
+            PreviousMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1);
+            NextMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1);
+            Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
+            Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
         }
 
         public void ClearPlots()
@@ -97,35 +62,50 @@ namespace LcmsSpectator.ViewModels
             return xAxis;
         }
 
-        private void SelectedScanChanged(XicPlotViewModel.SelectedScanChangedMessage message)
+        private async void SelectedIonTypesChanged(PropertyChangedMessage<List<IonType>> message)
         {
-            var sender = message.Sender as XicPlotViewModel;
-            if (sender != null)
-            {
-                var scan = message.Scan;
-                var lcms = sender.Lcms;
-                var ms2 = lcms.GetSpectrum(scan);
-                var prevms1 = lcms.GetSpectrum(lcms.GetPrevScanNum(scan, 1));
-                var nextms1 = lcms.GetSpectrum(lcms.GetNextScanNum(scan, 1));
+            var heavy = SelectedPrSmViewModel.Instance.Heavy;
+            if (!heavy) Ms2SpectrumViewModel.Ions = await SelectedPrSmViewModel.Instance.FragmentLabelUpdate;
+            else Ms2SpectrumViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+        }
 
-                // Ms2 spectrum plot
-                var heavyStr = sender.Heavy ? ", Heavy" : "";
-                Ms2SpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1}{2})", ms2.ScanNum, RawFileName, heavyStr);
-                Ms2SpectrumViewModel.Spectrum = ms2;
-                Ms2SpectrumViewModel.Update();
-                // Ms1 spectrum plots
-                var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);    // shared x axis
-                // previous Ms1
-                PreviousMs1ViewModel.XAxis = xAxis;
-                PreviousMs1ViewModel.Title = prevms1 == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", prevms1.ScanNum);
-                PreviousMs1ViewModel.Spectrum = prevms1;
-                PreviousMs1ViewModel.Update();
-                // next Ms1
-                NextMs1ViewModel.XAxis = xAxis;
-                NextMs1ViewModel.Title = nextms1 == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
-                NextMs1ViewModel.Spectrum = nextms1;
-                NextMs1ViewModel.Update();
+        private async void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
+        {
+            var prsm = message.NewValue;
+            var scan = prsm.Scan;
+            if (scan == 0)
+            {
+                Ms2SpectrumViewModel.Clear();
+                NextMs1ViewModel.Clear();
+                PreviousMs1ViewModel.Clear();
+                return;
             }
+            var lcms = prsm.Lcms;
+            var rawFileName = prsm.RawFileName;
+            var ms2 = lcms.GetSpectrum(scan);
+            var prevms1 = lcms.GetSpectrum(lcms.GetPrevScanNum(scan, 1));
+            var nextms1 = lcms.GetSpectrum(lcms.GetNextScanNum(scan, 1));
+
+            // get ions
+            var precursors = await SelectedPrSmViewModel.Instance.PrecursorLabelUpdate;
+            var precursorIon = precursors.Count > 2 ? new List<LabeledIonViewModel> { precursors[1] } : new List<LabeledIonViewModel>();
+
+            // Ms2 spectrum plot
+            var heavyStr = prsm.Heavy ? ", Heavy" : "";
+            Ms2SpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1}{2})", ms2.ScanNum, rawFileName, heavyStr);
+            Ms2SpectrumViewModel.Spectrum = ms2;
+            // Ms1 spectrum plots
+            var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);    // shared x axis
+            // previous Ms1
+            PreviousMs1ViewModel.Spectrum = prevms1;
+            PreviousMs1ViewModel.XAxis = xAxis;
+            PreviousMs1ViewModel.Title = prevms1 == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", prevms1.ScanNum);
+            PreviousMs1ViewModel.Ions = precursorIon;
+            // next Ms1
+            NextMs1ViewModel.Spectrum = nextms1;
+            NextMs1ViewModel.XAxis = xAxis;
+            NextMs1ViewModel.Title = nextms1 == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
+            NextMs1ViewModel.Ions = precursorIon;
         }
     }
 }

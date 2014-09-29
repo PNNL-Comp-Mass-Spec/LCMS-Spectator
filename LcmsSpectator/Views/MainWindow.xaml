@@ -50,13 +50,13 @@
                                    FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="Charge: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.Charge}" FontWeight="Bold" Width="75" />
+                        <TextBlock Text="{Binding Path=SelectedPrSmViewModel.Charge}" FontWeight="Bold" Width="75" />
                         <TextBlock Text="Precursor M/z: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.PrecursorMz}" FontWeight="Bold" Width="75" />
+                        <TextBlock Text="{Binding Path=SelectedPrSmViewModel.PrecursorMz}" FontWeight="Bold" Width="75" />
                         <TextBlock Text="Score: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.MatchedFragments, Converter={StaticResource ScoreFormatter}}" FontWeight="Bold" Width="75"/>
+                        <TextBlock Text="{Binding Path=SelectedPrSmViewModel.MatchedFragments, Converter={StaticResource ScoreFormatter}}" FontWeight="Bold" Width="75"/>
                         <TextBlock Text="QValue: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.QValue}" FontWeight="Bold" Width="75"/>
+                        <TextBlock Text="{Binding Path=SelectedPrSmViewModel.QValue}" FontWeight="Bold" Width="75"/>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
@@ -115,23 +115,31 @@
                                             </xcad:LayoutRoot>
                                         </xcad:DockingManager>
                                         <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" ShowsPreview="True" />
-                                        <controls:MultiSelectDataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                                        <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                                                                        IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" Grid.Row="0"
-                                                                       ItemsSource="{Binding FragmentLabels}"
-                                                                       SelectedItemsSource="{Binding  SelectedFragmentLabels, Mode=TwoWay}">
+                                                                       ItemsSource="{Binding SelectedPrSmViewModel.FragmentLabels}">
+                                            <DataGrid.Resources>
+                                                <Style TargetType="DataGridRow">
+                                                    <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                </Style>
+                                            </DataGrid.Resources>
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding Label}"/>
+                                                <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding LabeledIon.Label}"/>
                                             </DataGrid.Columns>
-                                        </controls:MultiSelectDataGrid>
+                                        </DataGrid>
                                         <GridSplitter Grid.Row="1" Grid.Column="2" HorizontalAlignment="Stretch" ShowsPreview="True" Height="1" />
-                                        <controls:MultiSelectDataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                                                                       ItemsSource="{Binding PrecursorLabels}"
-                                                                       SelectedItemsSource="{Binding SelectedPrecursorLabels, Mode=TwoWay}"
+                                        <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                                                                       ItemsSource="{Binding SelectedPrSmViewModel.PrecursorLabels}"
                                                                        IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" Grid.Row="2">
+                                            <DataGrid.Resources>
+                                                <Style TargetType="DataGridRow">
+                                                    <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                </Style>
+                                            </DataGrid.Resources>
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Isotope" Width="*" Binding="{Binding Label}" />
+                                                <DataGridTextColumn Header="Isotope" Width="*" Binding="{Binding LabeledIon.Label}" />
                                             </DataGrid.Columns>
-                                        </controls:MultiSelectDataGrid>
+                                        </DataGrid>
                                     </Grid>
                                 </xcad:LayoutAnchorable>
                                 <xcad:LayoutAnchorable Title="Spectrum View" CanClose="False" CanHide="False">
