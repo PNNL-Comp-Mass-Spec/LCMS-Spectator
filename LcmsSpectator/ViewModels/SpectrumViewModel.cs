@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Documents;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -21,8 +22,9 @@ namespace LcmsSpectator.ViewModels
             Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05);
             PreviousMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1);
             NextMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1);
-            Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
-            Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
+            Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);
+            Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedPrecursorLabelsChanged);
+            Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
         }
 
         public void ClearPlots()
@@ -62,17 +64,32 @@ namespace LcmsSpectator.ViewModels
             return xAxis;
         }
 
-        private async void SelectedIonTypesChanged(PropertyChangedMessage<List<IonType>> message)
+        private async void SelectedFragmentLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
         {
+            if (message.PropertyName != "FragmentLabels") return;
+            var fragmentLabels = message.NewValue;
             var heavy = SelectedPrSmViewModel.Instance.Heavy;
-            if (!heavy) Ms2SpectrumViewModel.Ions = await SelectedPrSmViewModel.Instance.FragmentLabelUpdate;
+            if (!heavy) Ms2SpectrumViewModel.Ions = fragmentLabels;
             else Ms2SpectrumViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
         }
 
-        private async void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
+        private async void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
         {
-            var prsm = message.NewValue;
-            var scan = prsm.Scan;
+            if (message.PropertyName != "PrecursorLabels") return;
+            var heavy = SelectedPrSmViewModel.Instance.Heavy;
+            List<LabeledIonViewModel> precursorLabels;
+            if (!heavy) precursorLabels = message.NewValue;
+            else precursorLabels = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+            if (precursorLabels.Count < 2) return;
+            var currIons = Ms2SpectrumViewModel.Ions;
+            currIons.Add(precursorLabels[1]);
+            Ms2SpectrumViewModel.Ions = currIons;
+        }
+
+        private async void SelectedScanChanged(PropertyChangedMessage<int> message)
+        {
+            if (message.PropertyName != "Scan" || message.Sender != SelectedPrSmViewModel.Instance) return;
+            var scan = message.NewValue;
             if (scan == 0)
             {
                 Ms2SpectrumViewModel.Clear();
@@ -80,8 +97,8 @@ namespace LcmsSpectator.ViewModels
                 PreviousMs1ViewModel.Clear();
                 return;
             }
-            var lcms = prsm.Lcms;
-            var rawFileName = prsm.RawFileName;
+            var lcms = SelectedPrSmViewModel.Instance.Lcms;
+            var rawFileName = SelectedPrSmViewModel.Instance.RawFileName;
             var ms2 = lcms.GetSpectrum(scan);
             var prevms1 = lcms.GetSpectrum(lcms.GetPrevScanNum(scan, 1));
             var nextms1 = lcms.GetSpectrum(lcms.GetNextScanNum(scan, 1));
@@ -91,7 +108,7 @@ namespace LcmsSpectator.ViewModels
             var precursorIon = precursors.Count > 2 ? new List<LabeledIonViewModel> { precursors[1] } : new List<LabeledIonViewModel>();
 
             // Ms2 spectrum plot
-            var heavyStr = prsm.Heavy ? ", Heavy" : "";
+            var heavyStr = SelectedPrSmViewModel.Instance.Heavy ? ", Heavy" : "";
             Ms2SpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1}{2})", ms2.ScanNum, rawFileName, heavyStr);
             Ms2SpectrumViewModel.Spectrum = ms2;
             // Ms1 spectrum plots

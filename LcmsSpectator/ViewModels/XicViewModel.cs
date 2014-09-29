@@ -5,7 +5,6 @@ using System.IO;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
-using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
@@ -49,7 +48,11 @@ namespace LcmsSpectator.ViewModels
             });
             OpenHeavyModificationsCommand = new RelayCommand(OpenHeavyModifications);
 
-            Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypeChanged);
+            _fragmentLabels = new List<LabeledIonViewModel>();
+            _precursorLabels = new List<LabeledIonViewModel>();
+
+            Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedPrecursorLabelsChanged);
+            Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
         }
 
@@ -131,13 +134,12 @@ namespace LcmsSpectator.ViewModels
             XicXAxis.Zoom(minRt, maxRt);
         }
 
-        private async void SelectedIonTypeChanged(PropertyChangedMessage<List<IonType>> message)
+        private async void SelectedFragmentLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
         {
+            if (message.PropertyName != "FragmentLabels") return;
+            _fragmentLabels = message.NewValue;
             if (ShowHeavy)
             {
-                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
-                HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
-                UpdatePrecursorAreaRatioLabels();
                 if (ShowFragmentXic)
                 {
                     FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
@@ -147,13 +149,26 @@ namespace LcmsSpectator.ViewModels
             }
             else
             {
-                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.PrecursorLabelUpdate;
                 if (ShowFragmentXic)
                 {
-                    if (!SelectedPrSmViewModel.Instance.FragmentLabelUpdate.IsCompleted)
-                        await SelectedPrSmViewModel.Instance.FragmentLabelUpdate;
-                    FragmentPlotViewModel.Ions = SelectedPrSmViewModel.Instance.FragmentLabels;
+                    FragmentPlotViewModel.Ions = _fragmentLabels;
                 }
+            }
+        }
+
+        private async void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        {
+            if (message.PropertyName != "PrecursorLabels") return;
+            _precursorLabels = message.NewValue;
+            if (ShowHeavy)
+            {
+                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
+                HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+                UpdatePrecursorAreaRatioLabels();
+            }
+            else
+            {
+                PrecursorPlotViewModel.Ions = _precursorLabels;
             }
         }
 
@@ -260,7 +275,7 @@ namespace LcmsSpectator.ViewModels
 
             if (ShowHeavy)
             {
-                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
+                PrecursorPlotViewModel.Ions = _precursorLabels;
                 HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
                 UpdatePrecursorAreaRatioLabels();
                 if (ShowFragmentXic)
@@ -275,9 +290,7 @@ namespace LcmsSpectator.ViewModels
                 PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.PrecursorLabelUpdate;
                 if (ShowFragmentXic)
                 {
-                    if (!SelectedPrSmViewModel.Instance.FragmentLabelUpdate.IsCompleted)
-                        await SelectedPrSmViewModel.Instance.FragmentLabelUpdate;
-                    FragmentPlotViewModel.Ions = SelectedPrSmViewModel.Instance.FragmentLabels;
+                    FragmentPlotViewModel.Ions = _fragmentLabels;
                 }
             }
         }
@@ -297,15 +310,13 @@ namespace LcmsSpectator.ViewModels
         {
             if (ShowHeavy)
             {
-                FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
+                FragmentPlotViewModel.Ions = _fragmentLabels;
                 HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
                 UpdateFragmentAreaRatioLabels();
             }
             else
             {
-                if (!SelectedPrSmViewModel.Instance.FragmentLabelUpdate.IsCompleted)
-                    await SelectedPrSmViewModel.Instance.FragmentLabelUpdate;
-                FragmentPlotViewModel.Ions = SelectedPrSmViewModel.Instance.FragmentLabels;
+                FragmentPlotViewModel.Ions = _fragmentLabels;
             }
         }
 
@@ -377,7 +388,10 @@ namespace LcmsSpectator.ViewModels
         private readonly IMainDialogService _dialogService;
 
         private readonly LinearAxis _xicXAxis;
-        
+
+        private List<LabeledIonViewModel> _fragmentLabels;
+        private List<LabeledIonViewModel> _precursorLabels; 
+
         private bool _showScanMarkers;
         private bool _showHeavy;
         private string _rawFilePath;

@@ -186,6 +186,7 @@ namespace LcmsSpectator.ViewModels
             if (dataPoint == null) return;
             SelectedRt = Plot.SelectedDataPoint.X;
             SelectedScan = dataPoint.ScanNum;
+            SelectedPrSmViewModel.Instance.Heavy = Heavy;
             SelectedPrSmViewModel.Instance.Scan = SelectedScan;
         }
 
@@ -278,12 +279,13 @@ namespace LcmsSpectator.ViewModels
             return Task.Run(() => GetCurrentArea());
         }
 
-        public double GetCurrentArea()
+        public double GetCurrentArea(SelectablePlotModel plot=null)
         {
+            if (plot == null) plot = Plot;
             var min = _xAxis.ActualMinimum;
             var max = _xAxis.ActualMaximum;
             var area = 0.0;
-            foreach (var series in Plot.Series)
+            foreach (var series in plot.Series)
             {
                 var lineSeries = series as LineSeries;
                 if (lineSeries == null || !lineSeries.IsVisible || lineSeries is StemSeries) continue;
@@ -372,7 +374,7 @@ namespace LcmsSpectator.ViewModels
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
             plot.SetPointMarker(SelectedRt);
-            PlotTitle = GetPlotTitleWithArea(GetCurrentArea());
+            PlotTitle = GetPlotTitleWithArea(GetCurrentArea(plot));
             return plot;
         }
 
@@ -410,6 +412,7 @@ namespace LcmsSpectator.ViewModels
                     {
                         lineSeries.IsVisible = message.NewValue;
                         Plot.AdjustForZoom();
+                        PlotTitle = GetPlotTitleWithArea(await GetAreaTask());
                     }
                 }
             }
