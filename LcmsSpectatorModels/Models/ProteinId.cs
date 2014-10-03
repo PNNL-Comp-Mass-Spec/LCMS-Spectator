@@ -11,7 +11,6 @@ namespace LcmsSpectatorModels.Models
         public string SequenceText { get; private set; }
         public Sequence Sequence { get; private set; }
         public string ProteinNameDesc { get; private set; }
-//        public SequenceGraph SequenceGraph { get; private set; }
         public Dictionary<string, ProteoformId> Proteoforms { get; private set; }
         public ProteinId(Sequence sequence, string sequenceText, string proteinNameDesc)
         {
@@ -23,7 +22,7 @@ namespace LcmsSpectatorModels.Models
 
         public void Add(PrSm data)
         {
-            if (!Proteoforms.ContainsKey(data.SequenceText)) Proteoforms.Add(data.SequenceText, new ProteoformId(data.Sequence, data.SequenceText));
+            if (!Proteoforms.ContainsKey(data.SequenceText)) Proteoforms.Add(data.SequenceText, new ProteoformId(data.SequenceText));
             var proteoform = Proteoforms[data.SequenceText];
             proteoform.Add(data);
         }

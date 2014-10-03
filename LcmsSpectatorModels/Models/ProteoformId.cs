@@ -1,27 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.MassSpecData;
 
 namespace LcmsSpectatorModels.Models
 {
     public class ProteoformId: IIdData
     {
-        public Sequence Sequence { get; private set; }
         public string SequenceText { get; private set; }
         public Dictionary<int, ChargeStateId> ChargeStates { get; private set; }
 
-        public ProteoformId(Sequence sequence, string sequenceText)
+        public ProteoformId(string sequenceText)
         {
-            Sequence = sequence;
             SequenceText = sequenceText;
             ChargeStates = new Dictionary<int, ChargeStateId>();
         }
 
         public void Add(PrSm data)
         {
-            if (!ChargeStates.ContainsKey(data.Charge)) ChargeStates.Add(data.Charge, new ChargeStateId(data.Charge, data.Sequence, data.LightSequence, data.HeavySequence, data.SequenceText, data.ProteinNameDesc, data.PrecursorMz));
+            if (!ChargeStates.ContainsKey(data.Charge)) ChargeStates.Add(data.Charge, new ChargeStateId(data.Charge));
             var chargeState = ChargeStates[data.Charge];
             chargeState.Add(data);
         }

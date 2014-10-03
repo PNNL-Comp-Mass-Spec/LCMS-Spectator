@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectatorModels.Models;
 
 namespace LcmsSpectatorModels.Readers
@@ -53,41 +54,69 @@ namespace LcmsSpectatorModels.Readers
 
             foreach (var protein in proteinNames)
             {
+                var sequenceData = SetModifications(parts[headers["Sequence"]], parts[headers["Modifications"]]);
                 var prsm = new PrSm
                 {
                     Heavy = false,
                     Scan = Convert.ToInt32(parts[headers["Scan"]]),
-                    Pre = parts[headers["Pre"]],
-                    Protein = parts[headers["Sequence"]],
-                    Post = parts[headers["Post"]],
-                    Annotation =
-                        (parts[headers["Pre"]] + "." + parts[headers["Sequence"]] + "." + parts[headers["Post"]])
-                            .Replace('-', '_'),
-                    SequenceLabel = new List<string>(),
-                    Composition = parts[headers["Composition"]],
+                    Sequence = sequenceData.Item1,
+                    SequenceText = sequenceData.Item2,
                     ProteinName = protein,
                     ProteinDesc = parts[headers["ProteinDesc"]].Split(';').FirstOrDefault(),
-                    ProteinLength = Convert.ToInt32(parts[headers["ProteinLength"]]),
-                    Start = Convert.ToInt32(parts[headers["Start"]]),
-                    End = Convert.ToInt32(parts[headers["End"]]),
                     Charge = Convert.ToInt32(parts[headers["Charge"]]),
-                    MostAbundantIsotopeMz = Convert.ToDouble(parts[headers["MostAbundantIsotopeMz"]]),
-                    Mass = Convert.ToDouble(parts[headers["Mass"]]),
                     Score = Math.Round(score, 3),
-//              IsotopeCorrPrevMs1 = Convert.ToDouble(parts[headers["IsotopeCorrPrevMs1"]]),
-//              IsotopeCorrNextMs1 = Convert.ToDouble(parts[headers["IsotopeCorrNextMs1"]]),
-//              CorrMostAbundantPlusOneIsoptope = Convert.ToDouble(parts[headers["CorrMostAbundantPlusOneIsotope"]]),
-//              ChargeCorrMinusOne = Convert.ToDouble(parts[headers["ChargeCorrMinusOne"]]),
-//              ChargeCorrPlusOne = Convert.ToDouble(parts[headers["ChargeCorrPlusOne"]]),
                     QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),
-                    PepQValue = Convert.ToDouble(parts[headers["PepQValue"]]),
                 };
-                prsm.SetModifications(parts[headers["Modifications"]]);
                 prsms.Add(prsm);
             }
             return prsms;
         }
 
+        public Tuple<Sequence, string> SetModifications(string cleanSequence, string modifications)
+        {
+            // Build Sequence AminoAcid list
+            var sequence = new Sequence(cleanSequence, new AminoAcidSet());
+            var sequenceText = cleanSequence;
+            var parsedModifications = ParseModifications(modifications);
+
+            // Add modifications to sequence
+            parsedModifications.Sort(new CompareModByHighestPosition());   // sort in reverse order for insertion
+            foreach (var mod in parsedModifications)
+            {
+                var pos = mod.Item1;
+                if (pos > 0) pos--;
+                var modLabel = String.Format("[{0}]", mod.Item2.Name);
+                sequenceText = sequenceText.Insert(mod.Item1, modLabel);
+                var aa = sequence[pos];
+                var modaa = new ModifiedAminoAcid(aa, mod.Item2);
+                sequence[pos] = modaa;
+            }
+            return new Tuple<Sequence, string>(sequence, sequenceText);
+        }
+
+        private List<Tuple<int, Modification>> ParseModifications(string modifications)
+        {
+            var mods = modifications.Split(',');
+            var parsedMods = new List<Tuple<int, Modification>>();
+            if (mods.Length < 1 || mods[0] == "") return parsedMods;
+            foreach (var modParts in mods.Select(mod => mod.Split(' ')))
+            {
+                if (modParts.Length < 0) throw new FormatException("Invalid modification.");
+                var modName = modParts[0];
+                var modPos = Convert.ToInt32(modParts[1]);
+                parsedMods.Add(new Tuple<int, Modification>(modPos, Modification.Get(modName)));
+            }
+            return parsedMods;
+        }
+
         private readonly string _tsvFile;
+    }
+
+    internal class CompareModByHighestPosition : IComparer<Tuple<int, Modification>>
+    {
+        public int Compare(Tuple<int, Modification> x, Tuple<int, Modification> y)
+        {
+            return (y.Item1.CompareTo(x.Item1));
+        }
     }
 }

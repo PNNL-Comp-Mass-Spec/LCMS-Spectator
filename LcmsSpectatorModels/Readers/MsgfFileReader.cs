@@ -61,19 +61,14 @@ namespace LcmsSpectatorModels.Readers
                 {
                     Heavy = false,
                     Scan = Convert.ToInt32(parts[headers["ScanNum"]]),
-                    Protein = parts[headers["Peptide"]],
                     Sequence = Sequence.GetSequenceFromMsGfPlusPeptideStr(parts[headers["Peptide"]]),
                     SequenceText = parts[headers["Peptide"]],
-                    Annotation = parts[headers["Peptide"]],
-                    Composition =
-                        (headers.ContainsKey("Formula") ? Composition.Parse(parts[headers["Formula"]]).ToString() : ""),
                     ProteinName = protein,
                     ProteinDesc = "",
                     Charge = Convert.ToInt32(parts[headers["Charge"]]),
                     Score = score,
                     UseGolfScoring = true,
                     QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),
-                    PepQValue = Convert.ToDouble(parts[headers["PepQValue"]]),
                 };
                 prsms.Add(prsm);
             }
