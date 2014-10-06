@@ -44,9 +44,9 @@
                               HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Visibility="{Binding FileOpen, Converter={StaticResource BoolToVis}}">
                     <TextBlock TextAlignment="Center" TextWrapping="Wrap"
-                                   Text="{Binding Path=SelectedPrSm.ProteinNameDesc}"
+                                   Text="{Binding Path=SelectedPrSmViewModel.ProteinNameDesc}"
                                    FontSize="14" FontWeight="Bold"/>
-                    <TextBlock TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=SelectedPrSm.SequenceText}"
+                    <TextBlock TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=SelectedPrSmViewModel.SequenceText}"
                                    FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="Charge: " FontWeight="Bold" />

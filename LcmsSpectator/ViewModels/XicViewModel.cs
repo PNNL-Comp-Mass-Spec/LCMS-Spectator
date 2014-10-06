@@ -54,6 +54,7 @@ namespace LcmsSpectator.ViewModels
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedPrecursorLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
+            Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
         }
 
         /// <summary>
@@ -108,6 +109,11 @@ namespace LcmsSpectator.ViewModels
                 _isLoading = value;
                 RaisePropertyChanged();
             }
+        }
+
+        private void SettingsChanged(SettingsChangedNotification notification)
+        {
+            UpdatePlots();
         }
 
         private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
@@ -382,7 +388,12 @@ namespace LcmsSpectator.ViewModels
 
         private void OpenHeavyModifications()
         {
-            _dialogService.OpenHeavyModifications(new HeavyModificationsWindowViewModel());
+            var heavyModificationsWindowVm = new HeavyModificationsWindowViewModel();
+            _dialogService.OpenHeavyModifications(heavyModificationsWindowVm);
+            if (heavyModificationsWindowVm.Status)
+            {
+                Messenger.Default.Send(new SettingsChangedNotification(this, "HeavyModificationsSettingsChanged"));
+            }
         }
 
         private readonly IMainDialogService _dialogService;

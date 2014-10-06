@@ -392,7 +392,12 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void OpenSettings()
         {
-            _dialogService.OpenSettings(new SettingsViewModel(_dialogService));
+            var settingsViewModel = new SettingsViewModel(_dialogService);
+            _dialogService.OpenSettings(settingsViewModel);
+            if (settingsViewModel.Status)
+            {
+                Messenger.Default.Send(new SettingsChangedNotification(this, "SettingsChanged"));
+            }
         }
 
         /// <summary>
@@ -461,6 +466,13 @@ namespace LcmsSpectator.ViewModels
         private List<PrSm> _prSms;
         private List<ProteinId> _proteinIds;
         private PrSm _selectedPrSm;
+    }
+
+    public class SettingsChangedNotification : NotificationMessage
+    {
+        public SettingsChangedNotification(object sender, string notification) : base(sender, notification)
+        {
+        }
     }
 }
 

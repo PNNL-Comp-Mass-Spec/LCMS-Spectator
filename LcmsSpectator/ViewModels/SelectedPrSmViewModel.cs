@@ -66,6 +66,7 @@ namespace LcmsSpectator.ViewModels
                 _heavyPrecursorMz = value.HeavyPrecursorMz;
                 PrecursorMz = Heavy ? _heavyPrecursorMz : _noLabelPrecursorMz;
                 _charge = value.Charge;
+                ProteinNameDesc = value.ProteinNameDesc;
                 Sequence = value.Sequence;
                 SequenceText = value.SequenceText;
                 Charge = value.Charge;
@@ -104,6 +105,17 @@ namespace LcmsSpectator.ViewModels
                 var oldValue = _scan;
                 _scan = value;
                 RaisePropertyChanged("Scan", oldValue, _scan, true);
+            }
+        }
+
+        public string ProteinNameDesc
+        {
+            get { return _proteinNameDesc; }
+            set
+            {
+                var oldValue = _proteinNameDesc;
+                _proteinNameDesc = value;
+                RaisePropertyChanged("ProteinNameDesc", oldValue, _proteinNameDesc, true);
             }
         }
 
@@ -313,5 +325,6 @@ namespace LcmsSpectator.ViewModels
         private double _precursorMz;
         private double _noLabelPrecursorMz;
         private double _heavyPrecursorMz;
+        private string _proteinNameDesc;
     }
 }
