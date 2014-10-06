@@ -13,6 +13,8 @@ namespace LcmsSpectatorModels.Readers
         {
             _fileName = fileName;
             var options = new Options();
+            options.MsgfQValue = 1.0;
+            options.MaxMsgfSpecProb = 1.0;
             options.TargetFilterType = TargetWorkflowType.BOTTOM_UP;
             _mzIdentMlReader = new MTDBFramework.IO.MzIdentMlReader(options);
         }
