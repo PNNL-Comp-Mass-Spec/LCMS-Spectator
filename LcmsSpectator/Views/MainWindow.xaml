@@ -215,7 +215,7 @@
                                         <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
                                         <DataGridTextColumn Header="Precursor m/z" Width="5*" Binding="{Binding PrecursorMz}" />
                                         <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
-                                        <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding MatchedFragments, Converter={StaticResource ScoreFormatter}}" />
+                                        <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" />
                                         <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue, Converter={StaticResource QValueToStringConverter}}" />
                                         <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
                                     </DataGrid.Columns>
