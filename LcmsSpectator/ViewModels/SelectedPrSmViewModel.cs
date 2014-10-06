@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
+using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
+using Constants = LcmsSpectatorModels.Utils.Constants;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -55,19 +57,20 @@ namespace LcmsSpectator.ViewModels
             }
             set
             {
+                if (value == null) value = new PrSm();
                 var oldValue = PrSm;
                 Lcms = value.Lcms;
                 RawFileName = value.RawFileName;
                 Heavy = value.Heavy;
-                _charge = value.Charge;
                 _noLabelPrecursorMz = value.PrecursorMz;
                 _heavyPrecursorMz = value.HeavyPrecursorMz;
                 PrecursorMz = Heavy ? _heavyPrecursorMz : _noLabelPrecursorMz;
+                _charge = value.Charge;
                 Sequence = value.Sequence;
                 SequenceText = value.SequenceText;
+                Charge = value.Charge;
                 Scan = value.Scan;
                 RaisePropertyChanged("PrSm", oldValue, PrSm, true);
-                Charge = value.Charge;
             }
         }
 
@@ -233,12 +236,11 @@ namespace LcmsSpectator.ViewModels
         {
         }
 
-        private void  UpdateFragmentLabels()
+        private async void UpdateFragmentLabels()
         {
-            /*if (FragmentLabelUpdate != null && !FragmentLabelUpdate.IsCompleted) await FragmentLabelUpdate;
+            //if (FragmentLabelUpdate != null && !FragmentLabelUpdate.IsCompleted) await FragmentLabelUpdate;
             FragmentLabelUpdate = Task.Run(() => GenerateFragmentLabels(Sequence, false));
-            FragmentLabels = await FragmentLabelUpdate; */
-            FragmentLabels = GenerateFragmentLabels(Sequence, false);
+            FragmentLabels = await FragmentLabelUpdate;
         }
 
         private List<LabeledIonViewModel> GenerateFragmentLabels(Sequence sequence, bool heavy)
@@ -247,7 +249,7 @@ namespace LcmsSpectator.ViewModels
             if (sequence.Count < 1) return fragmentLabels;
             foreach (var ionType in _ionTypes)
             {
-                for (int i = 1; i <= sequence.Count; i++)
+                for (int i = 1; i < sequence.Count; i++)
                 {
                     LabeledIonViewModel label;
                     var key = new Tuple<string, bool>(ionType.GetName(i), heavy);
@@ -265,12 +267,11 @@ namespace LcmsSpectator.ViewModels
             return fragmentLabels;
         }
 
-        private void UpdatePrecursorLabels()
+        private async void UpdatePrecursorLabels()
         {
-            /*if (PrecursorLabelUpdate != null && !PrecursorLabelUpdate.IsCompleted) await PrecursorLabelUpdate;
+            //if (PrecursorLabelUpdate != null && !PrecursorLabelUpdate.IsCompleted) await PrecursorLabelUpdate;
             PrecursorLabelUpdate = Task.Run(() => GeneratePrecursorLabels(Sequence));
-            PrecursorLabels = await PrecursorLabelUpdate; */
-            PrecursorLabels = GeneratePrecursorLabels(Sequence);
+            PrecursorLabels = await PrecursorLabelUpdate;
         }
 
         private List<LabeledIonViewModel> GeneratePrecursorLabels(Sequence sequence)

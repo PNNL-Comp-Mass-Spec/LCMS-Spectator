@@ -118,7 +118,6 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_spectrum == value) return;
                 _spectrum = value;
-                _xAxis = null;
                 _filteredSpectrum = null; // reset filtered spectrum
                 _deconvolutedSpectrum = null;
                 _filtDeconSpectrum = null;
@@ -151,7 +150,6 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _xAxis = value;
-                SpectrumUpdate();
                 RaisePropertyChanged();
             }
         }
@@ -162,7 +160,7 @@ namespace LcmsSpectator.ViewModels
         public async void SpectrumUpdate()
         {
             if (PlotTask != null && !PlotTask.IsCompleted) await PlotTask;
-            PlotTask = UpdateTask();
+            PlotTask = UpdateSpectrumTask();
             Plot = await PlotTask;
         }
 
@@ -182,7 +180,29 @@ namespace LcmsSpectator.ViewModels
             SpectrumUpdate();
         }
 
-        public Task<AutoAdjustedYPlotModel> UpdateTask()
+        public async void UpdateAll(Spectrum spectrum, List<LabeledIonViewModel> ions, LinearAxis xAxis=null)
+        {
+            if (PlotTask != null && !PlotTask.IsCompleted) await PlotTask;
+            PlotTask = UpdateAllTask(spectrum, ions, xAxis);
+            Plot = await PlotTask;
+        }
+
+        public Task<AutoAdjustedYPlotModel> UpdateAllTask(Spectrum spectrum, List<LabeledIonViewModel> ions, LinearAxis xAxis)
+        {
+            return Task.Run(() =>
+            {
+                _spectrum = spectrum;
+                _xAxis = xAxis;
+                _filteredSpectrum = null; // reset filtered spectrum
+                _deconvolutedSpectrum = null;
+                _filtDeconSpectrum = null;
+                _ionCache.Clear();
+                _ions = ions;
+                return BuildSpectrumPlot();
+            });
+        }
+
+        public Task<AutoAdjustedYPlotModel> UpdateSpectrumTask()
         {
             return Task.Run(() => BuildSpectrumPlot());
         }
