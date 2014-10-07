@@ -51,6 +51,7 @@ namespace LcmsSpectator.ViewModels
             _fragmentLabels = new List<LabeledIonViewModel>();
             _precursorLabels = new List<LabeledIonViewModel>();
 
+            Messenger.Default.Register<ClearAllNotification>(this, ClearAllNotificationHandler);
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedPrecursorLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
@@ -118,8 +119,6 @@ namespace LcmsSpectator.ViewModels
 
         private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
         {
-            ClearCache();
-
             // calculate rt bounds
             var rt = Lcms.GetElutionTime(SelectedPrSmViewModel.Instance.Scan);
             var minLcmsRt = Lcms.GetElutionTime(Lcms.MinLcScan);
@@ -175,6 +174,14 @@ namespace LcmsSpectator.ViewModels
             else
             {
                 PrecursorPlotViewModel.Ions = _precursorLabels;
+            }
+        }
+
+        private void ClearAllNotificationHandler(ClearAllNotification notification)
+        {
+            if (notification.Sender == SelectedPrSmViewModel.Instance)
+            {
+                ClearCache();
             }
         }
 

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
-using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -58,6 +57,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 if (value == null) value = new PrSm();
+                Messenger.Default.Send(new ClearAllNotification(this));
                 var oldValue = PrSm;
                 Lcms = value.Lcms;
                 RawFileName = value.RawFileName;
@@ -250,7 +250,7 @@ namespace LcmsSpectator.ViewModels
 
         private async void UpdateFragmentLabels()
         {
-            //if (FragmentLabelUpdate != null && !FragmentLabelUpdate.IsCompleted) await FragmentLabelUpdate;
+            if (FragmentLabelUpdate != null && !FragmentLabelUpdate.IsCompleted) await FragmentLabelUpdate;
             FragmentLabelUpdate = Task.Run(() => GenerateFragmentLabels(Sequence, false));
             FragmentLabels = await FragmentLabelUpdate;
         }
@@ -285,7 +285,7 @@ namespace LcmsSpectator.ViewModels
 
         private async void UpdatePrecursorLabels()
         {
-            //if (PrecursorLabelUpdate != null && !PrecursorLabelUpdate.IsCompleted) await PrecursorLabelUpdate;
+            if (PrecursorLabelUpdate != null && !PrecursorLabelUpdate.IsCompleted) await PrecursorLabelUpdate;
             PrecursorLabelUpdate = Task.Run(() => GeneratePrecursorLabels(Sequence));
             PrecursorLabels = await PrecursorLabelUpdate;
         }
@@ -330,5 +330,12 @@ namespace LcmsSpectator.ViewModels
         private double _noLabelPrecursorMz;
         private double _heavyPrecursorMz;
         private string _proteinNameDesc;
+    }
+
+    public class ClearAllNotification : NotificationMessage
+    {
+        public ClearAllNotification(object sender, string notification="ClearAll") : base(sender, notification)
+        {
+        }
     }
 }

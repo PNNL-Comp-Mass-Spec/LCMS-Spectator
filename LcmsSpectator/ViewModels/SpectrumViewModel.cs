@@ -21,6 +21,7 @@ namespace LcmsSpectator.ViewModels
             Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05);
             PreviousMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1);
             NextMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1);
+            Messenger.Default.Register<ClearAllNotification>(this, ClearAllNotificationHandler);
             Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedPrecursorLabelsChanged);
@@ -150,10 +151,6 @@ namespace LcmsSpectator.ViewModels
 
         private async void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
         {
-            _updateFragmentIons = false;
-            _updatePrecursorIons = false;
-            _updateSpectrum = false;
-
             var prsm = message.NewValue;
             var scan = prsm.Scan;
             if (scan == 0)
@@ -224,6 +221,16 @@ namespace LcmsSpectator.ViewModels
             NextMs1ViewModel.XAxis = xAxis;
             NextMs1ViewModel.UpdateAll(nextms1, precursorIon, xAxis);
             NextMs1ViewModel.Title = nextms1 == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
+        }
+
+        private void ClearAllNotificationHandler(ClearAllNotification notification)
+        {
+            if (notification.Sender == SelectedPrSmViewModel.Instance)
+            {
+                _updateFragmentIons = false;
+                _updatePrecursorIons = false;
+                _updateSpectrum = false;
+            }
         }
 
         private bool _updateSpectrum;
