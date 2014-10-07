@@ -261,6 +261,7 @@ namespace LcmsSpectator.ViewModels
             if (sequence.Count < 1) return fragmentLabels;
             foreach (var ionType in _ionTypes)
             {
+                var ionFragments = new List<LabeledIonViewModel>();
                 for (int i = 1; i < sequence.Count; i++)
                 {
                     LabeledIonViewModel label;
@@ -269,12 +270,15 @@ namespace LcmsSpectator.ViewModels
                     {
                         var composition = ionType.IsPrefixIon
                             ? PrSm.Sequence.GetComposition(0, i)
-                            : PrSm.Sequence.GetComposition(i, PrSm.Sequence.Count);
-                        label = new LabeledIonViewModel(new LabeledIon(composition, i, ionType, true, IonUtils.GetPrecursorIon(sequence, PrSm.Charge)));
+                            : PrSm.Sequence.GetComposition(i, Sequence.Count);
+                        var labelIndex = ionType.IsPrefixIon ? i : (Sequence.Count - i);
+                        label = new LabeledIonViewModel(new LabeledIon(composition, labelIndex, ionType, true, IonUtils.GetPrecursorIon(sequence, PrSm.Charge)));
                         _fragmentLabelCache.Add(key, label);
                     }
-                    fragmentLabels.Add(label);
+                    ionFragments.Add(label);
                 }
+                if (!ionType.IsPrefixIon) ionFragments.Reverse();
+                fragmentLabels.AddRange(ionFragments);
             }
             return fragmentLabels;
         }
