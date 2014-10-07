@@ -7,7 +7,6 @@ using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
-using LcmsSpectator.PlotModels;
 using LcmsSpectatorModels.Models;
 using OxyPlot.Axes;
 
@@ -19,7 +18,6 @@ namespace LcmsSpectator.ViewModels
         public XicPlotViewModel HeavyFragmentPlotViewModel { get; set; }
         public XicPlotViewModel PrecursorPlotViewModel { get; set; }
         public XicPlotViewModel HeavyPrecursorPlotViewModel { get; set; }
-        public ColorDictionary Colors { get; set; }
         public ILcMsRun Lcms { get; private set; }
         public RelayCommand CloseCommand { get; private set; }
         public RelayCommand OpenHeavyModificationsCommand { get; private set; }
