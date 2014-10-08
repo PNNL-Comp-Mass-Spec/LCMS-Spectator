@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace LcmsSpectator.Utils
 {
-    public class TaskService
+    public class TaskService: ITaskService
     {
         public TaskService()
         {
