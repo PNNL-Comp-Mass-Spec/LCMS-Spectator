@@ -11,6 +11,7 @@ using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
+using LcmsSpectator.TaskServices;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
@@ -41,19 +42,21 @@ namespace LcmsSpectator.ViewModels
         /// Constructor for creating a new, empty MainWindowViewModel
         /// </summary>
         /// <param name="dialogService">Service for MVVM-friendly dialogs</param>
-        public MainWindowViewModel(IMainDialogService dialogService)
+        /// <param name="taskService">Service for task queueing</param>
+        public MainWindowViewModel(IMainDialogService dialogService, ITaskService taskService)
         {
             // register messenger events
             Messenger.Default.Register<XicViewModel.XicCloseRequest>(this, XicCloseRequest);
 
             _dialogService = dialogService;
+            _taskService = taskService;
             IcParameters.Instance.IcParametersUpdated += SettingsChanged;
             Ids = new IdentificationTree();
             FilteredIds = new IdentificationTree();
             ProteinIds = Ids.ProteinIds.ToList();
             PrSms = new List<PrSm>();
             SelectedPrSmViewModel = SelectedPrSmViewModel.Instance;
-            Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService);
+            Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
             XicViewModels = new ObservableCollection<XicViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
@@ -74,8 +77,9 @@ namespace LcmsSpectator.ViewModels
         /// Constructor for creating MainWindowViewModel with existing IDs
         /// </summary>
         /// <param name="dialogService">Service for MVVM-friendly dialogs</param>
+        /// <param name="taskService">Service for task queueing</param>
         /// <param name="idTree">Existing IDs</param>
-        public MainWindowViewModel(IMainDialogService dialogService, IdentificationTree idTree) : this(dialogService)
+        public MainWindowViewModel(IMainDialogService dialogService, ITaskService taskService, IdentificationTree idTree) : this(dialogService, taskService)
         {
             Ids = idTree;
             FilterIds();
@@ -308,7 +312,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="rawFilePath">Path to raw file to open</param>
         public XicViewModel ReadRawFile(string rawFilePath)
         {
-            var xicVm = new XicViewModel(); // create xic view model
+            var xicVm = new XicViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService)); // create xic view model
             GuiInvoker.Invoke(() => XicViewModels.Add(xicVm)); // add xic view model to gui
             xicVm.RawFilePath = rawFilePath;
             var lcms = xicVm.Lcms;
@@ -466,6 +470,7 @@ namespace LcmsSpectator.ViewModels
         private List<PrSm> _prSms;
         private List<ProteinId> _proteinIds;
         private PrSm _selectedPrSm;
+        private ITaskService _taskService;
     }
 
     public class SettingsChangedNotification : NotificationMessage

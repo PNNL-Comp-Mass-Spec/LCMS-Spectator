@@ -27,10 +27,10 @@ namespace LcmsSpectator.ViewModels
     public class SpectrumPlotViewModel: ViewModelBase
     {
         public RelayCommand SaveAsImageCommand { get; private set; }
-        public TaskService PlotTaskService { get; private set; }
-        public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, bool showUnexplainedPeaks=true)
+        public ITaskService PlotTaskService { get; private set; }
+        public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, double multiplier, bool showUnexplainedPeaks=true)
         {
-            PlotTaskService = new TaskService();
+            PlotTaskService = taskService;
             SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _dialogService = dialogService;
             _showUnexplainedPeaks = showUnexplainedPeaks;

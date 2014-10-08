@@ -139,6 +139,7 @@
     <Compile Include="PlotModels\PeakDataPoint.cs" />
     <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="PlotModels\XicDataPoint.cs" />
+    <Compile Include="TaskServices\TaskServiceFactory.cs" />
     <Compile Include="Utils\ChargeToStringConverter.cs" />
     <Compile Include="TaskServices\ITaskService.cs" />
     <Compile Include="TaskServices\MockTaskService.cs" />

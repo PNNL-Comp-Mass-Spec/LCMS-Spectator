@@ -5,6 +5,8 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
+using LcmsSpectator.TaskServices;
+using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
 using OxyPlot.Axes;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
@@ -16,11 +18,11 @@ namespace LcmsSpectator.ViewModels
         public SpectrumPlotViewModel Ms2SpectrumViewModel { get; private set; }
         public SpectrumPlotViewModel PreviousMs1ViewModel { get; private set; }
         public SpectrumPlotViewModel NextMs1ViewModel { get; private set; }
-        public SpectrumViewModel(IDialogService dialogService)
+        public SpectrumViewModel(IDialogService dialogService, ITaskService taskService)
         {
-            Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05);
-            PreviousMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1);
-            NextMs1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1);
+            Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), 1.05);
+            PreviousMs1ViewModel = new SpectrumPlotViewModel(dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), 1.1);
+            NextMs1ViewModel = new SpectrumPlotViewModel(dialogService, taskService, 1.1);
             Messenger.Default.Register<ClearAllNotification>(this, ClearAllNotificationHandler);
             Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);

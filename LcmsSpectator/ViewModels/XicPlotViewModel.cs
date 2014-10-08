@@ -27,8 +27,7 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicPlotViewModel: ViewModelBase
     {
-        public TaskService PlotTaskService { get; private set; }
-        public TaskService AreaTaskService { get; private set; }
+        public ITaskService PlotTaskService { get; private set; }
         public ILcMsRun Lcms { get; set; }
         public RelayCommand SetScanChangedCommand { get; private set; }
         public RelayCommand SaveAsImageCommand { get; private set; }
@@ -41,10 +40,9 @@ namespace LcmsSpectator.ViewModels
                 Scan = scan;
             }
         }
-        public XicPlotViewModel(IDialogService dialogService, string title, LinearAxis xAxis, bool heavy, bool showLegend=true)
+        public XicPlotViewModel(IDialogService dialogService, ITaskService taskService, string title, LinearAxis xAxis, bool heavy, bool showLegend=true)
         {
-            PlotTaskService = new TaskService();
-            AreaTaskService = new TaskService();
+            PlotTaskService = taskService;
             _dialogService = dialogService;
             _title = title;
             _showLegend = showLegend;
@@ -267,7 +265,7 @@ namespace LcmsSpectator.ViewModels
 
         public void UpdateArea()
         {
-            AreaTaskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea());  });
+            PlotTaskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea());  });
         }
 
         public Task<double> GetAreaTask()

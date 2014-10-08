@@ -7,6 +7,8 @@ using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
+using LcmsSpectator.TaskServices;
+using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
 using OxyPlot.Axes;
 
@@ -25,16 +27,15 @@ namespace LcmsSpectator.ViewModels
         {
             public XicCloseRequest(object sender, string notification = "XicClosing") : base(sender, notification) {}
         }
-        public XicViewModel(IMainDialogService dialogService=null)
+        public XicViewModel(IMainDialogService dialogService, ITaskService taskService)
         {
             IsLoading = true;
-            if (dialogService == null) dialogService = new MainDialogService();
             _dialogService = dialogService;
             _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Retention Time");
-            FragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Fragment XIC", XicXAxis, false, false);
-            HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Fragment XIC", XicXAxis, true, false);
-            PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Precursor XIC", XicXAxis, false);
-            HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, "Heavy Precursor XIC", XicXAxis, true);
+            FragmentPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Fragment XIC", XicXAxis, false, false);
+            HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Heavy Fragment XIC", XicXAxis, true, false);
+            PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Precursor XIC", XicXAxis, false);
+            HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Heavy Precursor XIC", XicXAxis, true);
             _showScanMarkers = false;
             _showHeavy = false;
             _showFragmentXic = false;
