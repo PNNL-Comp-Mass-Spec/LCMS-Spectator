@@ -144,6 +144,7 @@
     <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
     <Compile Include="Utils\PrSmChangedEventArgs.cs" />
+    <Compile Include="Utils\TaskService.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\DmsJobViewModel.cs" />

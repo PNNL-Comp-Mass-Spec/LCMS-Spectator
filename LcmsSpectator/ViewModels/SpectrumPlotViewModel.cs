@@ -8,6 +8,7 @@ using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
+using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
@@ -26,9 +27,10 @@ namespace LcmsSpectator.ViewModels
     public class SpectrumPlotViewModel: ViewModelBase
     {
         public RelayCommand SaveAsImageCommand { get; private set; }
-        public Task<AutoAdjustedYPlotModel> PlotTask { get; private set; }
+        public TaskService PlotTaskService { get; private set; }
         public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, bool showUnexplainedPeaks=true)
         {
+            PlotTaskService = new TaskService();
             SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _dialogService = dialogService;
             _showUnexplainedPeaks = showUnexplainedPeaks;
@@ -157,18 +159,22 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Update spectrum and ion highlights
         /// </summary>
-        public async void SpectrumUpdate()
+        public void SpectrumUpdate()
         {
-            if (PlotTask != null && !PlotTask.IsCompleted) await PlotTask;
-            PlotTask = UpdateSpectrumTask();
-            Plot = await PlotTask;
+            PlotTaskService.Enqueue(() => BuildSpectrumPlot());
         }
 
-        public async void IonUpdate()
+        public void IonUpdate()
         {
-            if (PlotTask != null && !PlotTask.IsCompleted) await PlotTask;
-            PlotTask = UpdateIonTask();
-            Plot = await PlotTask;
+            PlotTaskService.Enqueue(() =>
+            {
+                if (Plot != null && Plot.Series.Count > 0)
+                {
+                    var spectrumSeries = Plot.Series[0] as StemSeries;
+                    Plot = BuildSpectrumPlot(spectrumSeries);
+                }
+                else Plot = BuildSpectrumPlot();
+            });
         }
 
         /// <summary>
@@ -180,11 +186,19 @@ namespace LcmsSpectator.ViewModels
             SpectrumUpdate();
         }
 
-        public async void UpdateAll(Spectrum spectrum, List<LabeledIonViewModel> ions, LinearAxis xAxis=null)
+        public void UpdateAll(Spectrum spectrum, List<LabeledIonViewModel> ions, LinearAxis xAxis=null)
         {
-            if (PlotTask != null && !PlotTask.IsCompleted) await PlotTask;
-            PlotTask = UpdateAllTask(spectrum, ions, xAxis);
-            Plot = await PlotTask;
+            PlotTaskService.Enqueue(() =>
+            {
+                _spectrum = spectrum;
+                _xAxis = xAxis;
+                _filteredSpectrum = null; // reset filtered spectrum
+                _deconvolutedSpectrum = null;
+                _filtDeconSpectrum = null;
+                _ionCache.Clear();
+                _ions = ions;
+                Plot = BuildSpectrumPlot();  
+            });
         }
 
         public Task<AutoAdjustedYPlotModel> UpdateAllTask(Spectrum spectrum, List<LabeledIonViewModel> ions, LinearAxis xAxis)
@@ -369,14 +383,13 @@ namespace LcmsSpectator.ViewModels
             return xAxis;
         }
 
-        private async void SaveAsImage()
+        private void SaveAsImage()
         {
             var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
                 if (fileName != "")
                 {
-                    if (!PlotTask.IsCompleted) await PlotTask;
                     PngExporter.Export(Plot, fileName, (int)Plot.Width, (int)Plot.Height);
                 }
             }

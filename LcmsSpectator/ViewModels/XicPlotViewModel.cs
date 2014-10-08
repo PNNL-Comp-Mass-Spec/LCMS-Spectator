@@ -11,6 +11,7 @@ using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
+using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
@@ -26,8 +27,8 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicPlotViewModel: ViewModelBase
     {
-        public Task<SelectablePlotModel> PlotTask { get; private set; }
-        public Task<double> AreaTask { get; private set; }
+        public TaskService PlotTaskService { get; private set; }
+        public TaskService AreaTaskService { get; private set; }
         public ILcMsRun Lcms { get; set; }
         public RelayCommand SetScanChangedCommand { get; private set; }
         public RelayCommand SaveAsImageCommand { get; private set; }
@@ -42,6 +43,8 @@ namespace LcmsSpectator.ViewModels
         }
         public XicPlotViewModel(IDialogService dialogService, string title, LinearAxis xAxis, bool heavy, bool showLegend=true)
         {
+            PlotTaskService = new TaskService();
+            AreaTaskService = new TaskService();
             _dialogService = dialogService;
             _title = title;
             _showLegend = showLegend;
@@ -178,23 +181,22 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Highlight Rt and call SelectedScanChanged to inform XicViewModel
         /// </summary>
-        public async void SetSelectedRt()
+        public void SetSelectedRt()
         {
-            if (!PlotTask.IsCompleted) await PlotTask;
-            if (Plot == null || Plot.Series.Count == 0) return;
-            var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
-            if (dataPoint == null) return;
-            SelectedRt = Plot.SelectedDataPoint.X;
-            SelectedScan = dataPoint.ScanNum;
-            SelectedPrSmViewModel.Instance.Heavy = Heavy;
-            SelectedPrSmViewModel.Instance.Scan = SelectedScan;
+            PlotTaskService.Enqueue(() =>
+            {
+                var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
+                if (dataPoint == null) return;
+                SelectedRt = Plot.SelectedDataPoint.X;
+                SelectedScan = dataPoint.ScanNum;
+                SelectedPrSmViewModel.Instance.Heavy = Heavy;
+                SelectedPrSmViewModel.Instance.Scan = SelectedScan; 
+            });
         }
 
-        public async void HighlightRt(double rt)
+        public void HighlightRt(double rt)
         {
-            if (!PlotTask.IsCompleted) await PlotTask;
-            if (Plot == null || Plot.Series.Count == 0) return;
-            Plot.SetOrdinaryPointMarker(rt);
+            PlotTaskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));
         }
 
         private void SelectedScanChanged(PropertyChangedMessage<int> message)
@@ -205,33 +207,36 @@ namespace LcmsSpectator.ViewModels
                 _selectedRt = rt;
                 if (SelectedPrSmViewModel.Instance.Lcms == Lcms && SelectedPrSmViewModel.Instance.Heavy == Heavy)
                 {
-                    Plot.SetUniquePointMarker(rt);
+                    PlotTaskService.Enqueue(() => Plot.SetUniquePointMarker(rt));
                 }
-                else Plot.SetOrdinaryPointMarker(rt);
+                else PlotTaskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));
             }
         }
 
-        private async void ToggleScanMarkers(bool value)
+        private void ToggleScanMarkers(bool value)
         {
-            if (!PlotTask.IsCompleted) await PlotTask;
-            if (Plot == null || Plot.Series.Count == 0) return;
-            var markerType = (value) ? MarkerType.Circle : MarkerType.None;
-            foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
+            PlotTaskService.Enqueue(() =>
             {
-                if (series is LineSeries)
+                var markerType = (value) ? MarkerType.Circle : MarkerType.None;
+                foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
                 {
-                    var lineSeries = series as LineSeries;
-                    lineSeries.MarkerType = markerType;
+                    if (series is LineSeries)
+                    {
+                        var lineSeries = series as LineSeries;
+                        lineSeries.MarkerType = markerType;
+                    }
                 }
-            }
-            Plot.InvalidatePlot(false);
+                Plot.InvalidatePlot(false); 
+            });
         }
 
-        private async void ToggleLegend(bool value)
+        private void ToggleLegend(bool value)
         {
-            if (!PlotTask.IsCompleted) await PlotTask;
-            Plot.IsLegendVisible = value;
-            Plot.InvalidatePlot(false);
+            PlotTaskService.Enqueue(() =>
+            {
+                Plot.IsLegendVisible = value;
+                Plot.InvalidatePlot(false); 
+            });
         }
 
         /// <summary>
@@ -240,44 +245,35 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void AxisChanged_UpdatePlotTitle(object sender, AxisChangedEventArgs e)
+        private void AxisChanged_UpdatePlotTitle(object sender, AxisChangedEventArgs e)
         {
-            if (!PlotTask.IsCompleted) await PlotTask;
             if (Plot == null || Plot.Series.Count == 0) return;
             UpdateArea();
         }
 
         public void ClearCache()
         {
-            _xicCacheLock.WaitOne();
-            _xicCache.Clear();
-            _xicCacheLock.ReleaseMutex();
-            _smoothedXicLock.WaitOne();
-            _smoothedXics.Clear();
-            _smoothedXicLock.ReleaseMutex();
+            PlotTaskService.Enqueue(() =>
+            {
+                _xicCache.Clear();
+                _smoothedXics.Clear(); 
+            });
         }
 
-        public async void UpdatePlot()
+        public void UpdatePlot()
         {
-            PlotTask = UpdatePlotTask();
-            Plot = await PlotTask;
+            PlotTaskService.Enqueue(() => { Plot = GeneratePlot();  });
         }
 
-        public Task<SelectablePlotModel> UpdatePlotTask()
+        public void UpdateArea()
         {
-            return Task.Run(() => GeneratePlot());
-        }
-
-        public async void UpdateArea()
-        {
-            AreaTask = GetAreaTask();
-            PlotTitle = GetPlotTitleWithArea(await GetAreaTask());
+            AreaTaskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea());  });
         }
 
         public Task<double> GetAreaTask()
         {
             return Task.Run(() => GetCurrentArea());
-        }
+        } 
 
         public double GetCurrentArea(SelectablePlotModel plot=null)
         {
@@ -398,11 +394,10 @@ namespace LcmsSpectator.ViewModels
             return lxic;
         }
 
-        private async void LabeledIonSelectedChanged(PropertyChangedMessage<bool> message)
+        private void LabeledIonSelectedChanged(PropertyChangedMessage<bool> message)
         {
             if (message.PropertyName == "Selected" && message.Sender is LabeledIonViewModel)
             {
-                if (!PlotTask.IsCompleted) await PlotTask;
                 var labeledIonVm = message.Sender as LabeledIonViewModel;
                 var label = labeledIonVm.LabeledIon.Label;
                 foreach (var series in Plot.Series)
@@ -412,7 +407,7 @@ namespace LcmsSpectator.ViewModels
                     {
                         lineSeries.IsVisible = message.NewValue;
                         Plot.AdjustForZoom();
-                        PlotTitle = GetPlotTitleWithArea(await GetAreaTask());
+                        PlotTaskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea()); });
                     }
                 }
             }
