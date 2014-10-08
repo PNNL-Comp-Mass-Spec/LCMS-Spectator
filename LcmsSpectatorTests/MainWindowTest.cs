@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
@@ -31,7 +32,7 @@ namespace LcmsSpectatorTests
         public void TestRawFileOpening()
         {
             // create empty main window view model
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService());
+            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService());
             var xicVm = mainVm.ReadRawFile(_rawFilePath);
 
             // Check to see if xicVm is valid
@@ -52,7 +53,7 @@ namespace LcmsSpectatorTests
             var numLines = file.Length - 1; // subtract one for TSV header
 
             // create MainWindowViewModel
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService());
+            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService());
             //mainVm.ReadIdFile();
         }
 
@@ -66,7 +67,7 @@ namespace LcmsSpectatorTests
         {
             // create main view model and pass it IDs
             // MainWindowViewModel should automatically filter IDs by qvalue
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), _ids);
+            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService(), _ids);
             var qValueThresh = IcParameters.Instance.QValueThreshold;
 
             var prsms = mainVm.PrSms;
@@ -90,7 +91,7 @@ namespace LcmsSpectatorTests
             idTree.Add(prsm);
 
             // create MainWindowViewModel with unidentified scans showing
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), idTree) {ShowUnidentifiedScans = true};
+            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService(), idTree) {ShowUnidentifiedScans = true};
             
             // Should be showing one prsm
             Assert.True(mainVm.PrSms.Count == 1);

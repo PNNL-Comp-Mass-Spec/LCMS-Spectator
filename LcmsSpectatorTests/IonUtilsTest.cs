@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
-using LcmsSpectatorModels.Config;
-using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
 using LcmsSpectatorModels.Utils;
 using NUnit.Framework;
