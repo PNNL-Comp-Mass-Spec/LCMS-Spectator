@@ -72,7 +72,7 @@ namespace LcmsSpectator.PlotModels
             foreach (var series in Series)
             {
                 var lSeries = series as DataPointSeries;
-                if (lSeries == null) continue;
+                if (lSeries == null || lSeries.IsVisible == false) continue;
                 foreach (var point in lSeries.Points)
                 {
                     if (point.Y >= maxY && point.X >= minX && point.X <= maxX) maxY = point.Y;

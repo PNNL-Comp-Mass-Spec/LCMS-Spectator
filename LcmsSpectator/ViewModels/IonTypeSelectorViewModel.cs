@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectatorModels.Config;
@@ -13,12 +16,11 @@ namespace LcmsSpectator.ViewModels
     {
         public List<BaseIonType> BaseIonTypes { get; private set; }
         public List<NeutralLoss> NeutralLosses { get; private set; }
-        public DelegateCommand SetIonChargesCommand { get; private set; }
-        public event EventHandler IonTypesUpdated;
+        public RelayCommand SetIonChargesCommand { get; private set; }
         public IonTypeSelectorViewModel(IDialogService dialogService)
         {
             _dialogService = dialogService;
-            SetIonChargesCommand = new DelegateCommand(SetIonCharges);
+            SetIonChargesCommand = new RelayCommand(SetIonCharges);
 
             BaseIonTypes = new List<BaseIonType>
             {
@@ -26,7 +28,7 @@ namespace LcmsSpectator.ViewModels
                 BaseIonType.X, BaseIonType.Y, BaseIonType.Z
             };
 
-            SelectedBaseIonTypes = new List<BaseIonType>
+            _selectedBaseIonTypes = new List<BaseIonType>
             {
                 BaseIonType.B,
                 BaseIonType.Y
@@ -34,6 +36,10 @@ namespace LcmsSpectator.ViewModels
 
             NeutralLosses = NeutralLoss.CommonNeutralLosses.ToList();
             SelectedNeutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
+
+            Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
+
+            UpdateIonTypes();
 
             _minSelectedCharge = 1;
             _minSelectedCharge = 2;
@@ -46,12 +52,12 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public List<IonType> IonTypes
         {
-            get
+            get { return _ionTypes; }
+            private set
             {
-                var selectedBaseIonTypes = SelectedBaseIonTypes.Cast<BaseIonType>().ToList();
-                var selectedNeutralLosses = SelectedNeutralLosses.Cast<NeutralLoss>().ToList();
-                return IonUtils.GetIonTypes(IcParameters.Instance.IonTypeFactory, selectedBaseIonTypes,
-                    selectedNeutralLosses, MinCharge, MaxCharge);
+                var oldIonTypes = _ionTypes;
+                _ionTypes = value;
+                RaisePropertyChanged("IonTypes", oldIonTypes, _ionTypes, true);
             }
         }
 
@@ -62,8 +68,8 @@ namespace LcmsSpectator.ViewModels
             {
                 if (value == null) return;
                 _selectedBaseIonTypes = value;
-                if (IonTypesUpdated != null) IonTypesUpdated(this, null);
-                OnPropertyChanged("SelectedBaseIonTypes");
+                UpdateIonTypes();
+                RaisePropertyChanged();
             }
         }
 
@@ -74,8 +80,8 @@ namespace LcmsSpectator.ViewModels
             {
                 if (value == null) return;
                 _selectedNeutralLosses = value;
-                if (IonTypesUpdated != null) IonTypesUpdated(this, null);
-                OnPropertyChanged("SelectedNeutralLosses");
+                UpdateIonTypes();
+                RaisePropertyChanged();
             }
         }
 
@@ -85,7 +91,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _minCharge = value;
-                OnPropertyChanged("MinCharge");
+                RaisePropertyChanged();
             }
         }
 
@@ -95,7 +101,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _maxCharge = value;
-                OnPropertyChanged("MaxCharge");
+                RaisePropertyChanged();
             }
         }
 
@@ -106,7 +112,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _absoluteMaxCharge = value;
                 MaxCharge = _absoluteMaxCharge;
-                OnPropertyChanged("AbsoluteMaxCharge");
+                RaisePropertyChanged();
             }
         }
 
@@ -119,13 +125,34 @@ namespace LcmsSpectator.ViewModels
                 if (MinCharge > MaxCharge) throw new FormatException("Max charge cannot be less than min charge.");
                 _minSelectedCharge = MinCharge;
                 _maxSelectedCharge = MaxCharge;
-                if (IonTypesUpdated != null)  IonTypesUpdated(this, null);
+                UpdateIonTypes();
             }
             catch (FormatException f)
             {
                 _dialogService.ExceptionAlert(f);
                 MinCharge = _minSelectedCharge;
                 MaxCharge = _maxSelectedCharge;
+            }
+        }
+
+        private void UpdateIonTypes()
+        {
+            // set ion types
+            var selectedBaseIonTypes = SelectedBaseIonTypes.Cast<BaseIonType>().ToList();
+            var selectedNeutralLosses = SelectedNeutralLosses.Cast<NeutralLoss>().ToList();
+            IonTypes = IonUtils.GetIonTypes(IcParameters.Instance.IonTypeFactory, selectedBaseIonTypes,
+                selectedNeutralLosses, MinCharge, MaxCharge);
+        }
+
+        private void SelectedChargeChanged(PropertyChangedMessage<int> message)
+        {
+            var charge = message.NewValue;
+            if (message.PropertyName == "Charge")
+            {
+                MinCharge = 1;
+                var maxCharge = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
+                MaxCharge = maxCharge;
+                UpdateIonTypes();
             }
         }
 
@@ -137,5 +164,6 @@ namespace LcmsSpectator.ViewModels
         private int _absoluteMaxCharge;
         private int _minSelectedCharge;
         private int _maxSelectedCharge;
+        private List<IonType> _ionTypes;
     }
 }

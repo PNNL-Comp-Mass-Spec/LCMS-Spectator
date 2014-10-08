@@ -75,11 +75,20 @@
     <ApplicationIcon>Resources\iconSmall.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GalaSoft.MvvmLight">
+      <HintPath>..\packages\MvvmLightLibs.4.4.32.2\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Extras">
+      <HintPath>..\packages\MvvmLightLibs.4.4.32.2\lib\net45\GalaSoft.MvvmLight.Extras.dll</HintPath>
+    </Reference>
     <Reference Include="InformedProteomics.Backend">
       <HintPath>..\Library\InformedProteomics.Backend.dll</HintPath>
     </Reference>
     <Reference Include="InformedProteomics.TopDown">
       <HintPath>..\Library\InformedProteomics.TopDown.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation">
+      <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
     <Reference Include="MultiDimensionalPeakFinding">
       <HintPath>..\Library\MultiDimensionalPeakFinding.dll</HintPath>
@@ -94,6 +103,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvvmLightLibs.4.4.32.2\lib\net45\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -132,9 +144,9 @@
     <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
     <Compile Include="Utils\PrSmChangedEventArgs.cs" />
+    <Compile Include="Utils\TaskService.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
-    <Compile Include="ViewModels\DelegateCommand.cs" />
     <Compile Include="ViewModels\DmsJobViewModel.cs" />
     <Compile Include="ViewModels\DmsLookupViewModel.cs" />
     <Compile Include="ViewModels\HeavyModificationsViewModel.cs" />
@@ -143,10 +155,10 @@
     <Compile Include="ViewModels\LabeledIonViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModificationViewModel.cs" />
+    <Compile Include="ViewModels\SelectedPrSmViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SpectrumPlotViewModel.cs" />
     <Compile Include="ViewModels\SpectrumViewModel.cs" />
-    <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="ViewModels\XicPlotViewModel.cs" />
     <Compile Include="ViewModels\XicViewModel.cs" />
     <Compile Include="Views\AboutBox.cs">

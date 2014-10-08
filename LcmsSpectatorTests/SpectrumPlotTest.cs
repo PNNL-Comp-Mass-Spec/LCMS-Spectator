@@ -40,7 +40,7 @@ namespace LcmsSpectatorTests
             var ions = new List<LabeledIon>();
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
-            spectrumPlotViewModel.Update();
+            spectrumPlotViewModel.SpectrumUpdate();
             if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
             // plot should not be null
@@ -81,7 +81,7 @@ namespace LcmsSpectatorTests
                                                     IcParameters.Instance.IonCorrelationThreshold);
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
-            spectrumPlotViewModel.Update();
+            spectrumPlotViewModel.SpectrumUpdate();
             if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
             // there should be ions.count + 1 (spectrum series) plot series
@@ -96,7 +96,7 @@ namespace LcmsSpectatorTests
                                         IcParameters.Instance.IonCorrelationThreshold);
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
-            spectrumPlotViewModel.Update();
+            spectrumPlotViewModel.SpectrumUpdate();
             if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
             // there should be ions.count + 1 (spectrum series) plot series
@@ -185,7 +185,7 @@ namespace LcmsSpectatorTests
                 var ions = IonUtils.GetFragmentIonLabels(prsm.Sequence, prsm.Charge, ionTypes);
                 spectrumPlotViewModel.Ions = ions;
                 spectrumPlotViewModel.Spectrum = prsm.Ms2Spectrum;
-                spectrumPlotViewModel.Update();
+                spectrumPlotViewModel.SpectrumUpdate();
                 if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
                 foreach (var series in spectrumPlotViewModel.Plot.Series)

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.Linq;
+using GalaSoft.MvvmLight;
 using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectatorModels.Config;
 
