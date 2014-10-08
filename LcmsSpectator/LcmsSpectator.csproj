@@ -140,11 +140,13 @@
     <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="PlotModels\XicDataPoint.cs" />
     <Compile Include="Utils\ChargeToStringConverter.cs" />
+    <Compile Include="TaskServices\ITaskService.cs" />
+    <Compile Include="TaskServices\MockTaskService.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
     <Compile Include="Utils\PrSmChangedEventArgs.cs" />
-    <Compile Include="Utils\TaskService.cs" />
+    <Compile Include="TaskServices\TaskService.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\DmsJobViewModel.cs" />
