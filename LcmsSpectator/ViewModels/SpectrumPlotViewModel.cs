@@ -177,16 +177,7 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
-        /// <summary>
-        /// Clear spectrum plot
-        /// </summary>
-        public void Clear()
-        {
-            Spectrum = null;
-            SpectrumUpdate();
-        }
-
-        public void UpdateAll(Spectrum spectrum, List<LabeledIonViewModel> ions, LinearAxis xAxis=null)
+        public void UpdateAll(Spectrum spectrum, List<LabeledIonViewModel> ions, LinearAxis xAxis = null)
         {
             PlotTaskService.Enqueue(() =>
             {
@@ -197,40 +188,17 @@ namespace LcmsSpectator.ViewModels
                 _filtDeconSpectrum = null;
                 _ionCache.Clear();
                 _ions = ions;
-                Plot = BuildSpectrumPlot();  
+                Plot = BuildSpectrumPlot();
             });
         }
 
-        public Task<AutoAdjustedYPlotModel> UpdateAllTask(Spectrum spectrum, List<LabeledIonViewModel> ions, LinearAxis xAxis)
+        /// <summary>
+        /// Clear spectrum plot
+        /// </summary>
+        public void Clear()
         {
-            return Task.Run(() =>
-            {
-                _spectrum = spectrum;
-                _xAxis = xAxis;
-                _filteredSpectrum = null; // reset filtered spectrum
-                _deconvolutedSpectrum = null;
-                _filtDeconSpectrum = null;
-                _ionCache.Clear();
-                _ions = ions;
-                return BuildSpectrumPlot();
-            });
-        }
-
-        public Task<AutoAdjustedYPlotModel> UpdateSpectrumTask()
-        {
-            return Task.Run(() => BuildSpectrumPlot());
-        }
-
-        public Task<AutoAdjustedYPlotModel> UpdateIonTask()
-        {
-            Task<AutoAdjustedYPlotModel> task;
-            if (Plot != null && Plot.Series.Count > 0)
-            {
-                var spectrumSeries = Plot.Series[0] as StemSeries;
-                task = Task.Run(() => BuildSpectrumPlot(spectrumSeries));
-            }
-            else task = Task.Run(() => BuildSpectrumPlot());
-            return task;
+            Spectrum = null;
+            SpectrumUpdate();
         }
         
         private AutoAdjustedYPlotModel BuildSpectrumPlot(StemSeries spectrumSeries = null)
