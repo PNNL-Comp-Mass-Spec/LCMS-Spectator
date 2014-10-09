@@ -9,7 +9,6 @@ using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.TaskServices;
-using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
@@ -28,10 +27,10 @@ namespace LcmsSpectator.ViewModels
     public class SpectrumPlotViewModel: ViewModelBase
     {
         public RelayCommand SaveAsImageCommand { get; private set; }
-        public ITaskService PlotTaskService { get; private set; }
+
         public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, double multiplier, bool showUnexplainedPeaks=true)
         {
-            PlotTaskService = taskService;
+            _taskService = taskService;
             SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _dialogService = dialogService;
             _showUnexplainedPeaks = showUnexplainedPeaks;
@@ -162,12 +161,12 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void SpectrumUpdate()
         {
-            PlotTaskService.Enqueue(() => BuildSpectrumPlot());
+            _taskService.Enqueue(() => BuildSpectrumPlot());
         }
 
         public void IonUpdate()
         {
-            PlotTaskService.Enqueue(() =>
+            _taskService.Enqueue(() =>
             {
                 if (Plot != null && Plot.Series.Count > 0)
                 {
@@ -180,7 +179,7 @@ namespace LcmsSpectator.ViewModels
 
         public void UpdateAll(Spectrum spectrum, List<LabeledIonViewModel> ions, LinearAxis xAxis = null)
         {
-            PlotTaskService.Enqueue(() =>
+            _taskService.Enqueue(() =>
             {
                 _spectrum = spectrum;
                 _xAxis = xAxis;
@@ -368,6 +367,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private readonly IDialogService _dialogService;
+        private readonly ITaskService _taskService;
+
         private string _title;
         private LinearAxis _xAxis;
         private readonly double _multiplier;
@@ -380,7 +382,6 @@ namespace LcmsSpectator.ViewModels
 
         private List<LabeledIonViewModel> _ions;
         private bool _showUnexplainedPeaks;
-        private readonly IDialogService _dialogService;
 
         private readonly Dictionary<string, Tuple<Series, Annotation>> _ionCache;
         private bool _showDeconvolutedSpectrum;

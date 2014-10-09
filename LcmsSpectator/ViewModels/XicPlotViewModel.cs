@@ -12,7 +12,6 @@ using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.TaskServices;
-using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
@@ -28,7 +27,6 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicPlotViewModel: ViewModelBase
     {
-        public ITaskService PlotTaskService { get; private set; }
         public ILcMsRun Lcms { get; set; }
         public RelayCommand SetScanChangedCommand { get; private set; }
         public RelayCommand SaveAsImageCommand { get; private set; }
@@ -43,7 +41,7 @@ namespace LcmsSpectator.ViewModels
         }
         public XicPlotViewModel(IDialogService dialogService, ITaskService taskService, string title, LinearAxis xAxis, bool heavy, bool showLegend=true)
         {
-            PlotTaskService = taskService;
+            _taskService = taskService;
             _dialogService = dialogService;
             _title = title;
             _showLegend = showLegend;
@@ -182,7 +180,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void SetSelectedRt()
         {
-            PlotTaskService.Enqueue(() =>
+            _taskService.Enqueue(() =>
             {
                 var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
                 if (dataPoint == null) return;
@@ -195,7 +193,7 @@ namespace LcmsSpectator.ViewModels
 
         public void HighlightRt(double rt)
         {
-            PlotTaskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));
+            _taskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));
         }
 
         private void SelectedScanChanged(PropertyChangedMessage<int> message)
@@ -206,15 +204,15 @@ namespace LcmsSpectator.ViewModels
                 _selectedRt = rt;
                 if (SelectedPrSmViewModel.Instance.Lcms == Lcms && SelectedPrSmViewModel.Instance.Heavy == Heavy)
                 {
-                    PlotTaskService.Enqueue(() => Plot.SetUniquePointMarker(rt));
+                    _taskService.Enqueue(() => Plot.SetUniquePointMarker(rt));
                 }
-                else PlotTaskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));
+                else _taskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));
             }
         }
 
         private void ToggleScanMarkers(bool value)
         {
-            PlotTaskService.Enqueue(() =>
+            _taskService.Enqueue(() =>
             {
                 var markerType = (value) ? MarkerType.Circle : MarkerType.None;
                 foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
@@ -231,7 +229,7 @@ namespace LcmsSpectator.ViewModels
 
         private void ToggleLegend(bool value)
         {
-            PlotTaskService.Enqueue(() =>
+            _taskService.Enqueue(() =>
             {
                 Plot.IsLegendVisible = value;
                 Plot.InvalidatePlot(false); 
@@ -252,7 +250,7 @@ namespace LcmsSpectator.ViewModels
 
         public void ClearCache()
         {
-            PlotTaskService.Enqueue(() =>
+            _taskService.Enqueue(() =>
             {
                 _xicCache.Clear();
                 _smoothedXics.Clear(); 
@@ -261,12 +259,12 @@ namespace LcmsSpectator.ViewModels
 
         public void UpdatePlot()
         {
-            PlotTaskService.Enqueue(() => { Plot = GeneratePlot();  });
+            _taskService.Enqueue(() => { Plot = GeneratePlot();  });
         }
 
         public void UpdateArea()
         {
-            PlotTaskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea());  });
+            _taskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea());  });
         }
 
         public Task<double> GetAreaTask()
@@ -406,7 +404,7 @@ namespace LcmsSpectator.ViewModels
                     {
                         lineSeries.IsVisible = message.NewValue;
                         Plot.AdjustForZoom();
-                        PlotTaskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea()); });
+                        _taskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea()); });
                     }
                 }
             }
@@ -430,6 +428,8 @@ namespace LcmsSpectator.ViewModels
         }
 
         private readonly IDialogService _dialogService;
+        private readonly ITaskService _taskService;
+
         private readonly string _title;
         private bool _showLegend;
         private bool _showScanMarkers;

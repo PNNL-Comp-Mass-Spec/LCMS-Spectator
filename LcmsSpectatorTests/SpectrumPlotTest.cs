@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.TaskServices;
-using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Readers;
@@ -100,7 +98,6 @@ namespace LcmsSpectatorTests
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ionVms;
             spectrumPlotViewModel.SpectrumUpdate();
-            //if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
             // there should be ions.count + 1 (spectrum series) plot series
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
