@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.PlotModels;
@@ -48,8 +49,7 @@ namespace LcmsSpectatorTests
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
             var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-            var ionVms = new List<LabeledIonViewModel>();
-            foreach (var label in ions) ionVms.Add(new LabeledIonViewModel(label));
+            var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
             xicPlotViewModel.Ions = ionVms;
 
             Assert.True(xicPlotViewModel.Plot != null);
@@ -76,9 +76,9 @@ namespace LcmsSpectatorTests
                 if (xicSeries == null) continue;
                 var xic = xicMap[xicSeries.Label].Xic;
                 Assert.True(xic.Count == xicSeries.Points.Count);
-                for (int i = 0; i < xicSeries.Points.Count; i++)
+                foreach (var point in xicSeries.Points)
                 {
-                    var xicPoint = xicSeries.Points[i] as XicDataPoint;
+                    var xicPoint = point as XicDataPoint;
                     Assert.True(xicPoint != null);
                     Assert.True(xicPoint.ScanNum == xic[0].ScanNum);
                     Assert.True(xicPoint.Y.Equals(xic[0].Intensity));
@@ -114,8 +114,7 @@ namespace LcmsSpectatorTests
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
             var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-            var ionVms = new List<LabeledIonViewModel>();
-            foreach (var label in ions) ionVms.Add(new LabeledIonViewModel(label));
+            var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
             xicPlotViewModel.Ions = ionVms;
 
             foreach (var ionVm in ionVms)
@@ -164,8 +163,7 @@ namespace LcmsSpectatorTests
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
             var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-            var ionVms = new List<LabeledIonViewModel>();
-            foreach (var label in ions) ionVms.Add(new LabeledIonViewModel(label));
+            var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
             xicPlotViewModel.Ions = ionVms;
 
             // Check to ensure all scan markers are off (initial condition)
@@ -226,8 +224,7 @@ namespace LcmsSpectatorTests
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
             var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-            var ionVms = new List<LabeledIonViewModel>();
-            foreach (var label in ions) ionVms.Add(new LabeledIonViewModel(label));
+            var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
             xicPlotViewModel.Ions = ionVms;
 
             // Check to legend is off (initial condition)
@@ -257,7 +254,6 @@ namespace LcmsSpectatorTests
             SelectedPrSmViewModel.Instance.Lcms = lcms;
             SelectedPrSmViewModel.Instance.Heavy = false;
             ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
-            var id = ids.GetHighestScoringPrSm();
 
             // init XicPlotViewModel
             SelectedPrSmViewModel.Instance.Charge = 2;
@@ -309,8 +305,7 @@ namespace LcmsSpectatorTests
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
             var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-            var ionVms = new List<LabeledIonViewModel>();
-            foreach (var label in ions) ionVms.Add(new LabeledIonViewModel(label));
+            var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
             xicPlotViewModel.Ions = ionVms;
 
             var xics = new List<LabeledXic>();
@@ -327,14 +322,7 @@ namespace LcmsSpectatorTests
             }
 
             // calculate area
-            double area = 0.0;
-            foreach (var xic in xics)
-            {
-                foreach (var xicPoint in xic.Xic)
-                {
-                    area += xicPoint.Intensity;
-                }
-            }
+            double area = xics.SelectMany(xic => xic.Xic).Sum(xicPoint => xicPoint.Intensity);
             Assert.True(Math.Abs(area - xicPlotViewModel.Area) < tolerance);
         }
     }
