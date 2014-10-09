@@ -18,7 +18,6 @@ using LcmsSpectatorModels.Utils;
 using MultiDimensionalPeakFinding;
 using OxyPlot;
 using OxyPlot.Axes;
-using OxyPlot.Series;
 using OxyPlot.Wpf;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
 using LineSeries = OxyPlot.Series.LineSeries;
@@ -217,9 +216,9 @@ namespace LcmsSpectator.ViewModels
                 var markerType = (value) ? MarkerType.Circle : MarkerType.None;
                 foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
                 {
-                    if (series is LineSeries)
+                    if (series is XicSeries)
                     {
-                        var lineSeries = series as LineSeries;
+                        var lineSeries = series as XicSeries;
                         lineSeries.MarkerType = markerType;
                     }
                 }
@@ -280,9 +279,9 @@ namespace LcmsSpectator.ViewModels
             var area = 0.0;
             foreach (var series in plot.Series)
             {
-                var lineSeries = series as LineSeries;
-                if (lineSeries == null || !lineSeries.IsVisible || lineSeries is StemSeries) continue;
-                foreach (var point in lineSeries.Points)
+                var xicSeries = series as XicSeries;
+                if (xicSeries == null || !xicSeries.IsVisible) continue;
+                foreach (var point in xicSeries.Points)
                 {
                     var xicPoint = point as XicDataPoint;
                     if (xicPoint == null) continue;
@@ -333,8 +332,9 @@ namespace LcmsSpectator.ViewModels
                 var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
                 var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
                 // create line series for xic
-                var series = new LineSeries
+                var series = new XicSeries
                 {
+                    Label = lxic.Label,
                     StrokeThickness = 3,
                     Title = lxic.Label,
                     Color = color,

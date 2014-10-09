@@ -80,8 +80,6 @@ namespace LcmsSpectatorTests
                                                     IcParameters.Instance.IonCorrelationThreshold);
             spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ionVms;
-            spectrumPlotViewModel.SpectrumUpdate();
-            //if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
             // there should be ions.count + 1 (spectrum series) plot series
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
