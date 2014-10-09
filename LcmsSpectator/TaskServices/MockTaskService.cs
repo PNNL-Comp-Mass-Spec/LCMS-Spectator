@@ -1,11 +1,10 @@
 ﻿using System;
-using LcmsSpectator.Utils;
 
 namespace LcmsSpectator.TaskServices
 {
     public class MockTaskService: ITaskService
     {
-        public void Enqueue(Action action)
+        public void Enqueue(Action action, bool parallel=false)
         {
             action();
         }

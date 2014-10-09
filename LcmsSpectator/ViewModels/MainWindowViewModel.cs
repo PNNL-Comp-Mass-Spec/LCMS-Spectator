@@ -61,8 +61,8 @@ namespace LcmsSpectator.ViewModels
             XicViewModels = new ObservableCollection<XicViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
 
-            OpenRawFileCommand = new RelayCommand(() => OpenRawFile());
-            OpenTsvFileCommand = new RelayCommand(() => OpenIdFile());
+            OpenRawFileCommand = new RelayCommand(OpenRawFile);
+            OpenTsvFileCommand = new RelayCommand(OpenIdFile);
             OpenFromDmsCommand = new RelayCommand(() => OpenFromDms(), () => ShowOpenFromDms);
             OpenSettingsCommand = new RelayCommand(OpenSettings);
             OpenAboutBoxCommand = new RelayCommand(OpenAboutBox);
@@ -204,33 +204,30 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Prompt user for raw files and call ReadRawFile() to open file.
         /// </summary>
-        public Task OpenRawFile()
+        public void OpenRawFile()
         {
-            Task task = null;
             var rawFileNames = _dialogService.MultiSelectOpenFile(".raw", @"Raw Files (*.raw)|*.raw");
-            if (rawFileNames == null) return null;
+            if (rawFileNames == null) return;
             foreach (var rawFileName in rawFileNames)
             {
                 var name = rawFileName;
-                task = Task.Factory.StartNew(() =>
+                _taskService.Enqueue(() =>
                 {
                     ReadRawFile(name);
                     if (XicViewModels.Count > 0) ShowUnidentifiedScans = true;
-                });
+                }, true);
             }
-            return task;
         }
 
         /// <summary>
         /// Open identification file. Checks to ensure that there is a raw file open
         /// corresponding to this ID file.
         /// </summary>
-        public Task OpenIdFile()
+        public void OpenIdFile()
         {
-            Task task = null;
             const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId)|*.mzId|MzId GZip Files (*.mzId.gz)|*.mzId.gz";
             var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
-            if (tsvFileName == "") return null;
+            if (tsvFileName == "") return;
             var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
             var ext = Path.GetExtension(tsvFileName);
             string path = ext != null ? tsvFileName.Remove(tsvFileName.IndexOf(ext, StringComparison.Ordinal)) : tsvFileName;
@@ -262,15 +259,14 @@ namespace LcmsSpectator.ViewModels
             }
             if (!String.IsNullOrEmpty(rawFileName))
             {
-                task = Task.Factory.StartNew(() =>
+                _taskService.Enqueue(() =>
                 {
                     // Name of raw file was found
                     if (xicVm == null) xicVm = ReadRawFile(rawFileName); // raw file isn't open yet
                     ReadIdFile(tsvFileName, rawFileName, xicVm); // finally read the TSV file
-                });
+                }, true);
             }
             else _dialogService.MessageBox("Cannot open ID file.");
-            return task;
         }
 
 
@@ -460,6 +456,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         private readonly IMainDialogService _dialogService;
+        private readonly ITaskService _taskService;
         private readonly Mutex _idTreeMutex;
 
         private bool _isLoading;
@@ -470,7 +467,6 @@ namespace LcmsSpectator.ViewModels
         private List<PrSm> _prSms;
         private List<ProteinId> _proteinIds;
         private PrSm _selectedPrSm;
-        private ITaskService _taskService;
     }
 
     public class SettingsChangedNotification : NotificationMessage

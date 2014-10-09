@@ -10,14 +10,14 @@ namespace LcmsSpectator.TaskServices
         public TaskService()
         {
             _queueLock = new Mutex();
-            _taskQueue = new Queue<Action>();
+            _taskQueue = new Queue<QTask>();
             _runningTasksCount = 0;
         }
 
-        public void Enqueue(Action action)
+        public void Enqueue(Action action, bool parallel=false)
         {
             _queueLock.WaitOne();
-            _taskQueue.Enqueue(action);
+            _taskQueue.Enqueue(new QTask{ Action = action, IsParallel = parallel});
             _queueLock.ReleaseMutex();
             RunTasks();
         }
@@ -25,6 +25,16 @@ namespace LcmsSpectator.TaskServices
         private void RunTasks()
         {
             _queueLock.WaitOne();
+            if (_runningTasksCount != 0)
+            {
+                _queueLock.ReleaseMutex();
+                return;
+            }
+            while (_taskQueue.Count > 0 && _taskQueue.Peek().IsParallel)
+            {
+                var task = _taskQueue.Dequeue();
+                QueueWorkItem(task);
+            }
             if (_taskQueue.Count > 0 && _runningTasksCount == 0)
             {
                 var action = _taskQueue.Dequeue();
@@ -33,11 +43,11 @@ namespace LcmsSpectator.TaskServices
             _queueLock.ReleaseMutex();
         }
 
-        private void QueueWorkItem(Action action)
+        private void QueueWorkItem(QTask task)
         {
             Action workTask = () =>
             {
-                action();
+                task.Action();
                 OnTaskCompleted();
             };
 
@@ -54,7 +64,13 @@ namespace LcmsSpectator.TaskServices
         }
 
         private int _runningTasksCount;
-        private readonly Queue<Action> _taskQueue; 
+        private readonly Queue<QTask> _taskQueue; 
         private readonly Mutex _queueLock;
+
+        private class QTask
+        {
+            public Action Action { get; set; }
+            public bool IsParallel { get; set; }
+        }
     }
 }
