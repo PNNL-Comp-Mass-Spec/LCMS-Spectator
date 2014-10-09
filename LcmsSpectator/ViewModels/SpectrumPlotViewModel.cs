@@ -8,6 +8,7 @@ using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
+using LcmsSpectator.TaskServices;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;

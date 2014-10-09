@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using LcmsSpectator.Utils;
 
-namespace LcmsSpectator.Utils
+namespace LcmsSpectator.TaskServices
 {
     public class MockTaskService: ITaskService
     {

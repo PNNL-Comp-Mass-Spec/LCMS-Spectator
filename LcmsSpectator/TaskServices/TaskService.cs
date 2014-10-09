@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using LcmsSpectator.Utils;
 
-namespace LcmsSpectator.Utils
+namespace LcmsSpectator.TaskServices
 {
     public class TaskService: ITaskService
     {

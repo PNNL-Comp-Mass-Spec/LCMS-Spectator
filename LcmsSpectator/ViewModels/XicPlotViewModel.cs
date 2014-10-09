@@ -11,6 +11,7 @@ using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
+using LcmsSpectator.TaskServices;
 using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
