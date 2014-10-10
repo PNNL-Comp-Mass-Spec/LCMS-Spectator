@@ -310,7 +310,7 @@ namespace LcmsSpectator.ViewModels
         public Task OpenIdFile()
         {
             Task task = null;
-            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId)|*.mzId|MzId GZip Files (*.mzId.gz)|*.mzId.gz";
+            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId)|*.mzId|MzId GZip Files (*.mzId.gz)|*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
             var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
             if (tsvFileName == "") return null;
             var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
@@ -366,19 +366,19 @@ namespace LcmsSpectator.ViewModels
         {
             IsLoading = true;
             IdentificationTree ids;
-            try
-            {
+			try
+			{
                 var reader = IdFileReaderFactory.CreateReader(idFileName);
                 ids = reader.Read();
                 ids.SetLcmsRun(xicVm.Lcms, xicVm.RawFileName);
             }
-            catch (IOException e)
-            {
-                _dialogService.ExceptionAlert(e);
-                FileOpen = false;
-                IsLoading = false;
-                return;
-            }
+			catch (IOException e)
+			{
+				_dialogService.ExceptionAlert(e);
+				FileOpen = false;
+				IsLoading = false;
+				return;
+			}
             Ids.Add(ids);
             Ids.Tool = ids.Tool; // assign new tool
             FilterIds();    // filter Ids by qvalue threshold

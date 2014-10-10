@@ -24,6 +24,9 @@ namespace LcmsSpectatorModels.Readers
                 case ".mzId":
                     reader = new MzIdentMlReader(fileName);
                     break;
+				case ".mtdb":
+					reader = new MtdbReader(fileName);
+		            break;
             }
             return reader;
         }
