@@ -207,6 +207,16 @@
                                     <DataGrid.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem Header="Show _Unidentified Scans" IsCheckable="True" IsChecked="{Binding ShowUnidentifiedScans}" />
+                                            <MenuItem Header="_Filter by">
+                                                <MenuItem Header="Sequence" IsCheckable="True" />
+                                                <MenuItem Header="Protein" IsCheckable="True" />
+                                                <MenuItem Header="Charge" IsCheckable="True" />
+                                                <MenuItem Header="Score" IsCheckable="True" />
+                                                <MenuItem Header="Q Value" IsCheckable="True" />
+                                                <MenuItem Header="Raw File" IsCheckable="True" />
+                                                <Separator />
+                                                <MenuItem Header="Clear Filters" />
+                                            </MenuItem>
                                         </ContextMenu>
                                     </DataGrid.ContextMenu>
                                     <DataGrid.Columns>
