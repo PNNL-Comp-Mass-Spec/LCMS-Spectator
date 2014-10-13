@@ -55,7 +55,6 @@ namespace LcmsSpectator.ViewModels
             _smoothedXics = new List<LabeledXic>();
             _xAxis.AxisChanged += AxisChanged_UpdatePlotTitle;
             _xicCache = new Dictionary<string, LabeledXic>();
-            _xicCacheLock = new Mutex();
             _smoothedXicLock = new Mutex();
             Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
             Messenger.Default.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
@@ -112,9 +111,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _pointsToSmooth = value;
-                _smoothedXicLock.WaitOne();
-                _smoothedXics.Clear();
-                _smoothedXicLock.ReleaseMutex();
+                _taskService.Enqueue(() => _smoothedXics.Clear());
                 UpdatePlot();
                 RaisePropertyChanged();
             }
@@ -370,7 +367,6 @@ namespace LcmsSpectator.ViewModels
 
         private LabeledXic GetXic(LabeledIon label)
         {
-            _xicCacheLock.WaitOne();
             LabeledXic lxic;
             if (_xicCache.ContainsKey(label.Label)) lxic = _xicCache[label.Label];
             else
@@ -384,7 +380,6 @@ namespace LcmsSpectator.ViewModels
                 lxic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
                 _xicCache.Add(label.Label, lxic);
             }
-            _xicCacheLock.ReleaseMutex();
             return lxic;
         }
 
@@ -436,7 +431,6 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledIonViewModel> _ions;
         private int _pointsToSmooth;
 
-        private readonly Mutex _xicCacheLock;
         private readonly Mutex _smoothedXicLock;
         private readonly List<LabeledXic> _smoothedXics;
         private readonly Dictionary<string, LabeledXic> _xicCache;
