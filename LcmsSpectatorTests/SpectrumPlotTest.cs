@@ -38,7 +38,8 @@ namespace LcmsSpectatorTests
 
             // init test ions
             var ions = new List<LabeledIonViewModel>();
-            spectrumPlotViewModel.UpdateAll(id.Ms2Spectrum, ions);
+            spectrumPlotViewModel.SpectrumUpdate(id.Ms2Spectrum);
+            spectrumPlotViewModel.IonUpdate(ions);
 
             // plot should not be null
             Assert.True(spectrumPlotViewModel.Plot != null);
@@ -78,8 +79,8 @@ namespace LcmsSpectatorTests
             var expectedIons = IonUtils.GetIonPeaks(ions, id.Ms2Spectrum, IcParameters.Instance.ProductIonTolerancePpm,
                                                     IcParameters.Instance.PrecursorTolerancePpm,
                                                     IcParameters.Instance.IonCorrelationThreshold);
-            spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
-            spectrumPlotViewModel.Ions = ionVms;
+            spectrumPlotViewModel.SpectrumUpdate(id.Ms2Spectrum);
+            spectrumPlotViewModel.IonUpdate(ionVms);
 
             // there should be ions.count + 1 (spectrum series) plot series
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
@@ -93,9 +94,9 @@ namespace LcmsSpectatorTests
             expectedIons = IonUtils.GetIonPeaks(ions, id.Ms2Spectrum, IcParameters.Instance.ProductIonTolerancePpm,
                                         IcParameters.Instance.PrecursorTolerancePpm,
                                         IcParameters.Instance.IonCorrelationThreshold);
-            spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
-            spectrumPlotViewModel.Ions = ionVms;
-            spectrumPlotViewModel.UpdateSpectrum();
+            spectrumPlotViewModel.SpectrumUpdate(id.Ms2Spectrum);
+            spectrumPlotViewModel.IonUpdate(ionVms);
+            //spectrumPlotViewModel.UpdateSpectrum();
 
             // there should be ions.count + 1 (spectrum series) plot series
             Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
@@ -119,7 +120,7 @@ namespace LcmsSpectatorTests
             {
                 var spectrum = lcms.GetSpectrum(scan);
                 var filteredSpectrum = spectrum.GetFilteredSpectrumBySlope();   // filtered spectrum to test against
-                specPlotVm.Spectrum = spectrum;
+                specPlotVm.SpectrumUpdate(spectrum);
 
                 // check unfiltered spectrum
                 specPlotVm.ShowFilteredSpectrum = false;
@@ -184,9 +185,9 @@ namespace LcmsSpectatorTests
                 var ions = IonUtils.GetFragmentIonLabels(prsm.Sequence, prsm.Charge, ionTypes);
                 var ionVms = new List<LabeledIonViewModel>();
                 foreach (var label in ions) ionVms.Add(new LabeledIonViewModel(label));
-                spectrumPlotViewModel.Ions = ionVms;
-                spectrumPlotViewModel.Spectrum = prsm.Ms2Spectrum;
-                spectrumPlotViewModel.UpdateSpectrum();
+                spectrumPlotViewModel.IonUpdate(ionVms);
+                spectrumPlotViewModel.SpectrumUpdate(prsm.Ms2Spectrum);
+                //spectrumPlotViewModel.UpdateSpectrum();
                 //if (!spectrumPlotViewModel.PlotTask.IsCompleted) await spectrumPlotViewModel.PlotTask;
 
                 foreach (var series in spectrumPlotViewModel.Plot.Series)
