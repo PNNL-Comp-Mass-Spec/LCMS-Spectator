@@ -58,6 +58,17 @@ namespace LcmsSpectator.PlotModels
         {
             SetPointMarker(x, GetMarkerColor());
         }
+
+        /// <summary>
+        /// Get point marker position.
+        /// </summary>
+        public IDataPoint GetPointMarker()
+        {
+            IDataPoint point = null;
+            if (_pointMarkers != null && _pointMarkers.Points.Count > 0)
+                point = _pointMarkers.Points[0];
+            return point;
+        }
         
         /// <summary>
         /// Set point marker highlighted with a particular color.
