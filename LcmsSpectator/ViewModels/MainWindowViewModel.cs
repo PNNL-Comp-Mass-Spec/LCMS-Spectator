@@ -225,7 +225,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void OpenIdFile()
         {
-            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId)|*.mzId|MzId GZip Files (*.mzId.gz)|*.mzId.gz";
+            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz";
             var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
             if (tsvFileName == "") return;
             var fileName = Path.GetFileNameWithoutExtension(tsvFileName);

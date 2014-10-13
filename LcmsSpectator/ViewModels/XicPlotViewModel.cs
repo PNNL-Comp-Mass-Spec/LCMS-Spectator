@@ -135,19 +135,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Scan number currently selected in the plot.
-        /// </summary>
-        public int SelectedScan
-        {
-            get { return _selectedScan; }
-            private set
-            {
-                _selectedScan = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
         /// Retention time currently selected in the plot.
         /// Sets a ordinary point marker at this point.
         /// </summary>
@@ -157,6 +144,17 @@ namespace LcmsSpectator.ViewModels
             private set
             {
                 _selectedRt = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public double Area
+        {
+            get { return _area; }
+            set
+            {
+                _area = value;
+                PlotTitle = GetPlotTitleWithArea(_area);
                 RaisePropertyChanged();
             }
         }
@@ -184,9 +182,8 @@ namespace LcmsSpectator.ViewModels
                 var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
                 if (dataPoint == null) return;
                 SelectedRt = Plot.SelectedDataPoint.X;
-                SelectedScan = dataPoint.ScanNum;
                 SelectedPrSmViewModel.Instance.Heavy = Heavy;
-                SelectedPrSmViewModel.Instance.Scan = SelectedScan; 
+                SelectedPrSmViewModel.Instance.Scan = dataPoint.ScanNum; 
             });
         }
 
@@ -263,7 +260,7 @@ namespace LcmsSpectator.ViewModels
 
         public void UpdateArea()
         {
-            _taskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea());  });
+            _taskService.Enqueue(() => { Area = GetCurrentArea();  });
         }
 
         public Task<double> GetAreaTask()
@@ -367,7 +364,7 @@ namespace LcmsSpectator.ViewModels
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
             plot.SetPointMarker(SelectedRt);
-            PlotTitle = GetPlotTitleWithArea(GetCurrentArea(plot));
+            Area = GetCurrentArea(plot);
             return plot;
         }
 
@@ -435,7 +432,6 @@ namespace LcmsSpectator.ViewModels
         private bool _showScanMarkers;
         private double _selectedRt;
         private readonly LinearAxis _xAxis;
-        private int _selectedScan;
         private string _plotTitle;
         private List<LabeledIonViewModel> _ions;
         private int _pointsToSmooth;
@@ -445,5 +441,6 @@ namespace LcmsSpectator.ViewModels
         private readonly List<LabeledXic> _smoothedXics;
         private readonly Dictionary<string, LabeledXic> _xicCache;
         private SelectablePlotModel _plot;
+        private double _area;
     }
 }

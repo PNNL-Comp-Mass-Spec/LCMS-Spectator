@@ -69,8 +69,8 @@ namespace LcmsSpectator.ViewModels
                 ProteinNameDesc = value.ProteinNameDesc;
                 Sequence = value.Sequence;
                 SequenceText = value.SequenceText;
-                Charge = value.Charge;
                 Scan = value.Scan;
+                Charge = value.Charge;
                 RaisePropertyChanged("PrSm", oldValue, PrSm, true);
             }
         }
