@@ -56,32 +56,6 @@ namespace LcmsSpectatorTests
             //mainVm.ReadIdFile();
         }
 
-        /// <summary>
-        /// This test checks to see if toggling ShowUnidentifiedScans correctly shows/hides
-        /// unidentified scans.
-        /// </summary>
-        [Test]
-        public void TestUnidentifiedScanToggle()
-        {
-            // create ID Tree of prsms without scan #s
-            var idTree = new IdentificationTree();
-            var prsm = new PrSm {Scan = 1, RawFileName = Path.GetFileNameWithoutExtension(_rawFilePath)};
-            idTree.Add(prsm);
-
-            // create MainWindowViewModel with unidentified scans showing
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService(), idTree);
-            mainVm.ScanViewModel.HideUnidentifiedScans = false;
-            
-            // Should be showing one prsm
-            Assert.True(mainVm.ScanViewModel.FilteredData.Count == 1);
-
-            // toggle off unidentified scans
-            mainVm.ScanViewModel.HideUnidentifiedScans = true;
-
-            // Should be showing 0 prsms
-            Assert.True(mainVm.ScanViewModel.FilteredData.Count == 0);
-        }
-
         private readonly string _rawFilePath;
         private readonly string _idFilePath;
         private readonly IdentificationTree _ids;

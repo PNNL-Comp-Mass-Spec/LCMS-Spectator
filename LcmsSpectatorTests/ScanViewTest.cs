@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.TaskServices;
 using LcmsSpectator.ViewModels;
 using LcmsSpectatorModels.Models;
@@ -117,6 +118,29 @@ namespace LcmsSpectatorTests
 
             // All prsms should now be showing
             Assert.True(scanVm.FilteredData.Count == prsms.Count);
+        }
+
+        [Test]
+        public void TestHideUnidentifedScans()
+        {
+            // init test data
+            var idFileReader = IdFileReaderFactory.CreateReader(idFile);
+            var ids = idFileReader.Read();
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
+            ids.SetLcmsRun(null, Path.GetFileNameWithoutExtension(rawFile));
+            var scans = lcms.GetScanNumbers(2);
+            foreach (var scan in scans) ids.Add(new PrSm { Scan = scan, Lcms = lcms, RawFileName = Path.GetFileNameWithoutExtension(rawFile), Score = Double.NaN});
+            var prsms = ids.AllPrSms;
+
+            // init scan vm
+            var scanVm = new ScanViewModel(new TestableMainDialogService(), new MockTaskService(), prsms);
+            scanVm.ClearFilters();
+
+            Assert.True(prsms.Count == scanVm.FilteredData.Count);
+
+            scanVm.HideUnidentifiedScans = true;
+
+            Assert.True(prsms.Count > scanVm.FilteredData.Count);
         }
     }
 }
