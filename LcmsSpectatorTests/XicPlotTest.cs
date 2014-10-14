@@ -325,5 +325,39 @@ namespace LcmsSpectatorTests
             double area = xics.SelectMany(xic => xic.Xic).Sum(xicPoint => xicPoint.Intensity);
             Assert.True(Math.Abs(area - xicPlotViewModel.Area) < tolerance);
         }
+
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+        @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        public void TestM1InAreaCalc(string rawFile, string idFile)
+        {
+            // init
+            var idFileReader = IdFileReaderFactory.CreateReader(idFile);
+            var ids = idFileReader.Read();
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
+            ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
+            var id = ids.GetHighestScoringPrSm();
+
+            // init XicPlotViewModel
+            SelectedPrSmViewModel.Instance.Charge = 2;
+            var dialogService = new TestableMainDialogService();
+            var xicPlotViewModel = new XicPlotViewModel(dialogService, new MockTaskService(), "", new LinearAxis(), false, false)
+            {
+                Lcms = lcms,
+                PointsToSmooth = 0
+            };
+            var ions = IonUtils.GetPrecursorIonLabels(id.Sequence, id.Charge, -1, 2);
+            var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
+            xicPlotViewModel.Ions = ionVms;
+
+            var area = xicPlotViewModel.GetCurrentArea();
+
+            // hide M - 1 precursor
+            ionVms[0].Selected = false;
+
+            var area1 = xicPlotViewModel.GetCurrentArea();
+
+            // areas should be the same if M-1 isn't used in area calculation
+            Assert.True(area.Equals(area1));
+        }
     }
 }
