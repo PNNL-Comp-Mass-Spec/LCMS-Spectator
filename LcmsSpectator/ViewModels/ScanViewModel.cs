@@ -114,9 +114,8 @@ namespace LcmsSpectator.ViewModels
                     var filterBoxVm = new FilterViewModel("Filter by Sequence", "Enter Sequence to filter by:", defaultValue, sequences, o=>true, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
-                        _filters.Add("Sequence", filterBoxVm.SelectedValue);
+                        AddFilter("Sequence", filterBoxVm.SelectedValue);
                         _previousFilters["Sequence"] = filterBoxVm.SelectedValue;
-                        _taskService.Enqueue(FilterData);
                     }
                     else _sequenceFilterChecked = false;
                 }
@@ -143,9 +142,8 @@ namespace LcmsSpectator.ViewModels
                     var filterBoxVm = new FilterViewModel("Filter by Protein", "Enter Sequence to filter by:", defaultValue, proteins, o=>true, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
-                        _filters.Add("Protein", filterBoxVm.SelectedValue);
+                        AddFilter("Protein", filterBoxVm.SelectedValue);
                         _previousFilters["Protein"] = filterBoxVm.SelectedValue;
-                        _taskService.Enqueue(FilterData);
                     }
                     else _proteinFilterChecked = false;
                 }
@@ -177,9 +175,8 @@ namespace LcmsSpectator.ViewModels
                     var filterBoxVm = new FilterViewModel("Filter by Precursor M/Z", "Enter minimum Precursor M/Z to display:", defaultValue, new List<string>(), validator, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
-                        _filters.Add("PrecursorMz", filterBoxVm.SelectedValue);
+                        AddFilter("PrecursorMz", filterBoxVm.SelectedValue);
                         _previousFilters["PrecursorMz"] = filterBoxVm.SelectedValue;
-                        _taskService.Enqueue(FilterData);
                     }
                     else _precursorMzFilterChecked = false;
                 }
@@ -212,9 +209,8 @@ namespace LcmsSpectator.ViewModels
                     var filterBoxVm = new FilterViewModel("Filter by Charge", "Enter Charge to filter by:", defaultValue, charges, validator, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
-                        _filters.Add("Charge", filterBoxVm.SelectedValue);
+                        AddFilter("Charge", filterBoxVm.SelectedValue);
                         _previousFilters["Charge"] = filterBoxVm.SelectedValue;
-                        _taskService.Enqueue(FilterData);
                     }
                     else _chargeFilterChecked = false;
                 }
@@ -246,9 +242,8 @@ namespace LcmsSpectator.ViewModels
                     var filterBoxVm = new FilterViewModel("Filter by Score", "Enter minimum score to display:", defaultValue, new List<string>(), validator, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
-                        _filters.Add("Score", filterBoxVm.SelectedValue);
+                        AddFilter("Score", filterBoxVm.SelectedValue);
                         _previousFilters["Score"] = filterBoxVm.SelectedValue;
-                        _taskService.Enqueue(FilterData);
                     }
                     else _scoreFilterChecked = false;
                 }
@@ -280,9 +275,8 @@ namespace LcmsSpectator.ViewModels
                     var filterBoxVm = new FilterViewModel("Filter by QValue", "Enter minimum QValue to display:", defaultValue, new List<string>(), validator, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
-                        _filters.Add("QValue", filterBoxVm.SelectedValue);
+                        AddFilter("QValue", filterBoxVm.SelectedValue);
                         _previousFilters["QValue"] = filterBoxVm.SelectedValue;
-                        _taskService.Enqueue(FilterData);
                     }
                     else _qValueFilterChecked = false;
                 }
@@ -309,9 +303,8 @@ namespace LcmsSpectator.ViewModels
                     var filterBoxVm = new FilterViewModel("Filter by Sequence", "Enter Sequence to filter by:", defaultValue, rawFiles, o => true, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
-                        _filters.Add("RawFile", filterBoxVm.SelectedValue);
+                        AddFilter("RawFile", filterBoxVm.SelectedValue);
                         _previousFilters["RawFile"] = filterBoxVm.SelectedValue;
-                        _taskService.Enqueue(FilterData);
                     }
                     else _rawFileFilterChecked = false;
                 }
