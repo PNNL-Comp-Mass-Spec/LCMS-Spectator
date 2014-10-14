@@ -88,6 +88,7 @@
     <Compile Include="IonUtilsTest.cs" />
     <Compile Include="MainWindowTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScanViewTest.cs" />
     <Compile Include="SpectrumPlotTest.cs" />
     <Compile Include="SpectrumViewTest.cs" />
     <Compile Include="XicPlotTest.cs" />

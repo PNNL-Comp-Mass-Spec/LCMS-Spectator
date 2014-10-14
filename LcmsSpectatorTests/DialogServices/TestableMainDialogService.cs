@@ -31,6 +31,7 @@ namespace LcmsSpectatorTests.DialogServices
             MessageBoxOpened = false;
             ExceptionAlertOpened = false;
             MultiSelectOpenFileOpened = false;
+            FilterOpened = false;
         }
         
         public bool DmsLookupOpened { get; private set; }
@@ -124,6 +125,13 @@ namespace LcmsSpectatorTests.DialogServices
             MultiSelectOpenFileFilter = filter;
             MultiSelectOpenFileOpened = true;
             return new List<string> { _filePath };
+        }
+
+        public bool FilterOpened { get; private set; }
+        public bool FilterBox(FilterViewModel filterViewModel)
+        {
+            FilterOpened = true;
+            return true;
         }
 
         // private members

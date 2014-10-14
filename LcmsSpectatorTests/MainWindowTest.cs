@@ -1,9 +1,7 @@
 ﻿using System.IO;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.TaskServices;
-using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;
-using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
 using LcmsSpectatorTests.DialogServices;
@@ -59,27 +57,6 @@ namespace LcmsSpectatorTests
         }
 
         /// <summary>
-        /// This test checks to see if IDs are being filtered by QValue.
-        /// The input should be a TSV file with IDs of QValue greater than the QValue threshold
-        /// set in the application settings.
-        /// </summary>
-        [Test]
-        public void TestQValueFilter()
-        {
-            // create main view model and pass it IDs
-            // MainWindowViewModel should automatically filter IDs by qvalue
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService(), _ids);
-            var qValueThresh = IcParameters.Instance.QValueThreshold;
-
-            var prsms = mainVm.PrSms;
-            // Check QValue filteration
-            foreach (var prsm in prsms)
-            {
-                Assert.True(prsm.QValue <= qValueThresh);
-            }
-        }
-
-        /// <summary>
         /// This test checks to see if toggling ShowUnidentifiedScans correctly shows/hides
         /// unidentified scans.
         /// </summary>
@@ -92,16 +69,17 @@ namespace LcmsSpectatorTests
             idTree.Add(prsm);
 
             // create MainWindowViewModel with unidentified scans showing
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService(), idTree) {ShowUnidentifiedScans = true};
+            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService(), idTree);
+            mainVm.ScanViewModel.HideUnidentifiedScans = false;
             
             // Should be showing one prsm
-            Assert.True(mainVm.PrSms.Count == 1);
+            Assert.True(mainVm.ScanViewModel.FilteredData.Count == 1);
 
             // toggle off unidentified scans
-            mainVm.ShowUnidentifiedScans = false;
+            mainVm.ScanViewModel.HideUnidentifiedScans = true;
 
             // Should be showing 0 prsms
-            Assert.True(mainVm.PrSms.Count == 0);
+            Assert.True(mainVm.ScanViewModel.FilteredData.Count == 0);
         }
 
         private readonly string _rawFilePath;
