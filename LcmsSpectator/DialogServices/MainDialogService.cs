@@ -40,6 +40,17 @@ namespace LcmsSpectator.DialogServices
             return heavyModificationsWindowVm.Status;
         }
 
+        public bool FilterBox(FilterViewModel filterViewModel)
+        {
+            var filterDialog = new FilterView
+            {
+                DataContext = filterViewModel, 
+                Title = filterViewModel.Title
+            };
+            filterViewModel.ReadyToClose += (o, e) => filterDialog.Close();
+            filterDialog.ShowDialog();
+            return filterViewModel.Status;
+        }
 
         public void OpenAboutBox()
         {

@@ -14,7 +14,7 @@ namespace LcmsSpectator.Views
         public MainWindow()
         {
             InitializeComponent();
-            Loaded += (o, e) => { ScanView.ContextMenu.DataContext = DataContext;  };
+            //Loaded += (o, e) => { ScanView.ContextMenu.DataContext = DataContext;  };
         }
     }
 }

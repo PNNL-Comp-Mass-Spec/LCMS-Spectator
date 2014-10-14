@@ -13,7 +13,6 @@ using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.TaskServices;
 using LcmsSpectator.Utils;
-using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
 
@@ -21,21 +20,23 @@ namespace LcmsSpectator.ViewModels
 {
     public class MainWindowViewModel: ViewModelBase
     {
+        // Data
         public IdentificationTree Ids { get; private set; }
-        public IdentificationTree FilteredIds { get; private set; }
         public List<IonType> IonTypes { get; set; }
 
+        // Commands
         public RelayCommand OpenRawFileCommand { get; private set; }
         public RelayCommand OpenTsvFileCommand { get; private set; }
         public RelayCommand OpenFromDmsCommand { get; private set; }
         public RelayCommand OpenSettingsCommand { get; private set; }
         public RelayCommand OpenAboutBoxCommand { get; private set; }
 
+        // Child view models
+        public ScanViewModel ScanViewModel { get; private set; }
         public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
         public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
-
         public SelectedPrSmViewModel SelectedPrSmViewModel { get; private set; }
 
         /// <summary>
@@ -50,13 +51,11 @@ namespace LcmsSpectator.ViewModels
 
             _dialogService = dialogService;
             _taskService = taskService;
-            IcParameters.Instance.IcParametersUpdated += SettingsChanged;
             Ids = new IdentificationTree();
-            FilteredIds = new IdentificationTree();
             ProteinIds = Ids.ProteinIds.ToList();
-            PrSms = new List<PrSm>();
             SelectedPrSmViewModel = SelectedPrSmViewModel.Instance;
             Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
+            ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService), new List<PrSm>());
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
             XicViewModels = new ObservableCollection<XicViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
@@ -82,7 +81,8 @@ namespace LcmsSpectator.ViewModels
         public MainWindowViewModel(IMainDialogService dialogService, ITaskService taskService, IdentificationTree idTree) : this(dialogService, taskService)
         {
             Ids = idTree;
-            FilterIds();
+            ScanViewModel.Data = Ids.AllPrSms;
+            ProteinIds = Ids.ProteinIds.ToList();
         }
 
         /// <summary>
@@ -120,35 +120,6 @@ namespace LcmsSpectator.ViewModels
             {
                 _selectedPrSm = value;
                 SelectedPrSmViewModel.Instance.PrSm = _selectedPrSm;
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// Toggle whether or not the Scan View shows Scans that do not have a sequence ID
-        /// </summary>
-        public bool ShowUnidentifiedScans
-        {
-            get { return _showUnidentifiedScans; }
-            set
-            {
-                _showUnidentifiedScans = value;
-                _idTreeMutex.WaitOne();
-                PrSms = _showUnidentifiedScans ? FilteredIds.AllPrSms : FilteredIds.IdentifiedPrSms;
-                _idTreeMutex.ReleaseMutex();
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// List of all PrSms (for display in Scan View)
-        /// </summary>
-        public List<PrSm> PrSms
-        {
-            get { return _prSms; }
-            private set
-            {
-                _prSms = value;
                 RaisePropertyChanged();
             }
         }
@@ -214,7 +185,7 @@ namespace LcmsSpectator.ViewModels
                 _taskService.Enqueue(() =>
                 {
                     ReadRawFile(name);
-                    if (XicViewModels.Count > 0) ShowUnidentifiedScans = true;
+                    if (XicViewModels.Count > 0) ScanViewModel.HideUnidentifiedScans = false;
                 }, true);
             }
         }
@@ -295,8 +266,9 @@ namespace LcmsSpectator.ViewModels
             }
             Ids.Add(ids);
             Ids.Tool = ids.Tool; // assign new tool
-            FilterIds();    // filter Ids by qvalue threshold
-            ShowUnidentifiedScans = false;
+            ProteinIds = Ids.ProteinIds.ToList();
+            ScanViewModel.Data = Ids.AllPrSms;
+            ScanViewModel.HideUnidentifiedScans = true;
             if (Ids.Proteins.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
             FileOpen = true;
             IsLoading = false;
@@ -333,7 +305,7 @@ namespace LcmsSpectator.ViewModels
                 _idTreeMutex.ReleaseMutex();
             }
             _idTreeMutex.WaitOne();
-            FilterIds();
+            ScanViewModel.Data = Ids.AllPrSms;
             _idTreeMutex.ReleaseMutex();
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0]; });
             FileOpen = true;
@@ -409,27 +381,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Event handler for IcParametersChanged in IcParameters
-        /// </summary>
-        private void SettingsChanged()
-        {
-            if (!FilteredIds.QValueFilter.Equals(IcParameters.Instance.QValueThreshold)) Task.Factory.StartNew(FilterIds);
-        }
-
-        /// <summary>
-        /// Filter Ids by QValue threshold set in settings
-        /// </summary>
-        private void FilterIds()
-        {
-            var qValue = IcParameters.Instance.QValueThreshold;
-            FilteredIds = Ids.GetTreeFilteredByQValue(qValue);
-            ProteinIds = FilteredIds.ProteinIds.ToList();
-            var prsms = _showUnidentifiedScans ? FilteredIds.AllPrSms : FilteredIds.IdentifiedPrSms;
-            prsms.Sort();
-            PrSms = prsms;
-        }
-
-        /// <summary>
         /// Event handler for XicCloseRequest in XicViewModel
         /// Closes the raw file and cleans up IDs pointing to that raw file
         /// </summary>
@@ -441,12 +392,13 @@ namespace LcmsSpectator.ViewModels
             {
                 var rawFileName = xicVm.RawFileName;
                 Ids.RemovePrSmsFromRawFile(rawFileName);
-                FilterIds();
+                ScanViewModel.Data = Ids.AllPrSms;
+                ProteinIds = Ids.ProteinIds.ToList();
                 XicViewModels.Remove(xicVm);
                 if (SelectedPrSmViewModel.Instance.RawFileName == rawFileName)
                 {
                     if (XicViewModels.Count > 0) CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0];
-                    if (PrSms.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
+                    if (ScanViewModel.Data.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
                     else
                     {
                         SelectedPrSmViewModel.Instance.Clear();
@@ -463,8 +415,6 @@ namespace LcmsSpectator.ViewModels
         private bool _fileOpen;
 
         private object _treeViewSelectedItem;
-        private bool _showUnidentifiedScans;
-        private List<PrSm> _prSms;
         private List<ProteinId> _proteinIds;
         private PrSm _selectedPrSm;
     }

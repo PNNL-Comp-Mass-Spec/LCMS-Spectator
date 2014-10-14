@@ -154,6 +154,64 @@
                           ShowsPreview="True" />
                 <Grid Grid.Row="4" Grid.Column="0" ColumnSpan="3">
                     <TabControl>
+                        <!-- Scan View -->
+                        <TabItem Header="Scan View">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="100*" />
+                                    <!--  <RowDefinition Height="20" /> -->
+                                </Grid.RowDefinitions>
+                                <DataGrid AutoGenerateColumns="False" SelectionMode="Extended" DataContext="{Binding ScanViewModel}"
+                                          IsReadOnly="True" RowHeaderWidth="0"
+                                          ItemsSource="{Binding FilteredData}" SelectedItem="{Binding SelectedPrSm}"
+                                          Grid.Row="0" Name="ScanView">
+                                    <DataGrid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="_Filter by">
+                                                <MenuItem Header="_Sequence" IsCheckable="True" IsChecked="{Binding SequenceFilterChecked}" />
+                                                <MenuItem Header="_Protein" IsCheckable="True" IsChecked="{Binding ProteinFilterChecked}" />
+                                                <MenuItem Header="Precursor _M/Z" IsCheckable="True" IsChecked="{Binding PrecursorMzFilterChecked}" />
+                                                <MenuItem Header="_Charge" IsCheckable="True" IsChecked="{Binding ChargeFilterChecked}" />
+                                                <MenuItem Header="_Score" IsCheckable="True" IsChecked="{Binding ScoreFilterChecked}"/>
+                                                <MenuItem Header="_Q Value" IsCheckable="True" IsChecked="{Binding QValueFilterChecked}"/>
+                                                <MenuItem Header="_Raw File" IsCheckable="True" IsChecked="{Binding RawFileFilterChecked}"/>
+                                                <MenuItem Header="Hide _Unidentified Scans" IsCheckable="True" IsChecked="{Binding HideUnidentifiedScans}" />
+                                                <Separator />
+                                                <MenuItem Header="Clear Filters" Command="{Binding ClearFiltersCommand}" />
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </DataGrid.ContextMenu>
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}"/>
+                                        <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" />
+                                        <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
+                                        <DataGridTextColumn Header="Precursor M/Z" Width="5*" Binding="{Binding PrecursorMz}" />
+                                        <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
+                                        <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" />
+                                        <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue, Converter={StaticResource QValueToStringConverter}}" />
+                                        <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" 
+                                        VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="50*"/>
+                                            <RowDefinition Height="50*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Margin="0"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Bottom"
+                                                   Grid.Row="0"
+                                                   TextAlignment="Center"
+                                                   FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
+                                            Loading<LineBreak />Please Wait...
+                                        </TextBlock >
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </TabItem>
+                        <!-- End Scan View -->
                         <!-- ID Tree -->
                         <TabItem Header="Protein Tree">
                             <Grid>
@@ -193,63 +251,6 @@
                             </Grid>
                         </TabItem>
                         <!-- End ID Tree -->
-                        <!-- Scan View -->
-                        <TabItem Header="Scan View">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="100*" />
-                                  <!--  <RowDefinition Height="20" /> -->
-                                </Grid.RowDefinitions>
-                                <DataGrid AutoGenerateColumns="False" SelectionMode="Extended"
-                                          IsReadOnly="True" RowHeaderWidth="0"
-                                          ItemsSource="{Binding PrSms}" SelectedItem="{Binding SelectedPrSm}"
-                                          Grid.Row="0" Name="ScanView">
-                                    <DataGrid.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Header="Show _Unidentified Scans" IsCheckable="True" IsChecked="{Binding ShowUnidentifiedScans}" />
-                                            <MenuItem Header="_Filter by">
-                                                <MenuItem Header="Sequence" IsCheckable="True" />
-                                                <MenuItem Header="Protein" IsCheckable="True" />
-                                                <MenuItem Header="Charge" IsCheckable="True" />
-                                                <MenuItem Header="Score" IsCheckable="True" />
-                                                <MenuItem Header="Q Value" IsCheckable="True" />
-                                                <MenuItem Header="Raw File" IsCheckable="True" />
-                                                <Separator />
-                                                <MenuItem Header="Clear Filters" />
-                                            </MenuItem>
-                                        </ContextMenu>
-                                    </DataGrid.ContextMenu>
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}"/>
-                                        <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" />
-                                        <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
-                                        <DataGridTextColumn Header="Precursor m/z" Width="5*" Binding="{Binding PrecursorMz}" />
-                                        <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
-                                        <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" />
-                                        <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue, Converter={StaticResource QValueToStringConverter}}" />
-                                        <DataGridTextColumn Header="Raw File" Width="30*" Binding="{Binding RawFileName}" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                                <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" 
-                                        VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
-                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="50*"/>
-                                            <RowDefinition Height="50*"/>
-                                        </Grid.RowDefinitions>
-                                        <TextBlock Margin="0"
-                                                   TextWrapping="Wrap"
-                                                   VerticalAlignment="Bottom"
-                                                   Grid.Row="0"
-                                                   TextAlignment="Center"
-                                                   FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
-                                            Loading<LineBreak />Please Wait...
-                                        </TextBlock >
-                                    </Grid>
-                                </Border>
-                            </Grid>
-                        </TabItem>
-                        <!-- End Scan View -->
                         <!-- PrSm Creator -->
                         <TabItem Header="Target View">
                             <views1:CreateSequenceView DataContext="{Binding CreateSequenceViewModel}" />
