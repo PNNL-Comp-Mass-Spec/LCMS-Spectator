@@ -4,15 +4,17 @@ namespace LcmsSpectator.PlotModels
 {
     public class XicDataPoint: IDataPoint
     {
-        public XicDataPoint(double x, int scanNum, double y)
+        public XicDataPoint(double x, int scanNum, double y, int index)
         {
             X = x;
             Y = y;
             ScanNum = scanNum;
+            Index = index;
         }
 
         public double X { get; set; }
         public double Y { get; set; }
         public int ScanNum { get; set; }
+        public int Index { get; set; }
     }
 }

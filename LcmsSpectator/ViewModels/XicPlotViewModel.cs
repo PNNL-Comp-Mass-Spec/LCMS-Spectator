@@ -279,7 +279,7 @@ namespace LcmsSpectator.ViewModels
                 {
                     var xicPoint = point as XicDataPoint;
                     if (xicPoint == null) continue;
-                    if (xicPoint.X >= min && xicPoint.X <= max) area += xicPoint.Y;
+                    if (xicPoint.Index >= 0 && xicPoint.X >= min && xicPoint.X <= max) area += xicPoint.Y;
                 }
             }
             return area;
@@ -352,7 +352,7 @@ namespace LcmsSpectator.ViewModels
                         xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
                     if (xic[i] != null)
                         series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum,
-                            xic[i].Intensity));
+                            xic[i].Intensity, ion.LabeledIon.Index));
                 }
                 seriesstore[ion.LabeledIon.Label] = series;
             });
