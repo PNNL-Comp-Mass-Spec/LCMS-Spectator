@@ -206,6 +206,7 @@ namespace LcmsSpectator.ViewModels
                         return Int32.TryParse(str, out conv);
                     };
                     var charges = (from prsm in Data where prsm.Charge > 0 select prsm.Charge.ToString(CultureInfo.InvariantCulture)).Distinct().ToList();
+                    charges.Sort();
                     var filterBoxVm = new FilterViewModel("Filter by Charge", "Enter Charge to filter by:", defaultValue, charges, validator, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
