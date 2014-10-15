@@ -1,6 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Readers;
@@ -55,6 +58,20 @@ namespace LcmsSpectatorTests
                     }
                 }
             }
+        }
+
+        [Test]
+        public void TestITraqMod()
+        {
+            var aminoAcidSet = new AminoAcidSet();
+            var p = aminoAcidSet.GetAminoAcid('C');
+            Console.WriteLine(p.GetMass());
+
+            var itraqMod = Modification.Carbamidomethylation;
+            Console.WriteLine(itraqMod.GetMass());
+
+            var modk = new ModifiedAminoAcid(p, itraqMod);
+            Console.WriteLine(modk.GetMass());
         }
     }
 }
