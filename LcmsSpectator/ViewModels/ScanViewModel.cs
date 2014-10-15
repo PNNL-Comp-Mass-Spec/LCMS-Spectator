@@ -57,6 +57,21 @@ namespace LcmsSpectator.ViewModels
             _taskService.Enqueue(FilterData);
         }
 
+        /// <summary>
+        /// Remove PrSms from IDTree that are associated with raw file
+        /// </summary>
+        /// <param name="rawFileName">Name of raw file</param>
+        public void RemovePrSmsFromRawFile(string rawFileName)
+        {
+            var newProteins = new Dictionary<string, ProteinId>();
+            var data = new List<PrSm>();
+            foreach (var prsm in Data)
+            {
+                if (prsm.RawFileName != rawFileName) data.Add(prsm);
+            }
+            Data = data;
+        }
+
         public List<PrSm> Data
         {
             get { return _data; }
@@ -75,7 +90,45 @@ namespace LcmsSpectator.ViewModels
                 _filteredData = value;
                 RaisePropertyChanged();
             }
-        } 
+        }
+
+        public List<ProteinId> FilteredProteins
+        {
+            get { return _filteredProteins; }
+            set
+            {
+                _filteredProteins = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Object selected in Treeview. Uses weak typing because each level TreeView is a different data type.
+        /// </summary>
+        public object TreeViewSelectedItem
+        {
+            get { return _treeViewSelectedItem; }
+            set
+            {
+                if (value != null)
+                {
+                    _treeViewSelectedItem = value;
+                    if (_treeViewSelectedItem is PrSm)
+                    {
+                        var selectedPrSm = _treeViewSelectedItem as PrSm;
+                        SelectedPrSm = selectedPrSm;
+                    }
+                    else
+                    {
+                        var selected = (IIdData)_treeViewSelectedItem;
+                        if (selected == null) return;
+                        var highest = selected.GetHighestScoringPrSm();
+                        SelectedPrSm = highest;
+                    }
+                    RaisePropertyChanged();
+                }
+            }
+        }
 
         public PrSm SelectedPrSm
         {
@@ -353,6 +406,8 @@ namespace LcmsSpectator.ViewModels
             }
             if (HideUnidentifiedScans) filtered = filtered.Where(datum => !datum.Score.Equals(Double.NaN)).ToList();
             FilteredData = filtered;
+            var filteredIds = new IdentificationTree(FilteredData);
+            FilteredProteins = filteredIds.ProteinIds.ToList();
         }
 
         private readonly IMainDialogService _dialogService;
@@ -364,11 +419,13 @@ namespace LcmsSpectator.ViewModels
         private List<PrSm> _data;
         private PrSm _selectedPrSm;
         private List<PrSm> _filteredData;
+        private List<ProteinId> _filteredProteins;
         private bool _precursorMzFilterChecked;
         private bool _chargeFilterChecked;
         private bool _scoreFilterChecked;
         private bool _qValueFilterChecked;
         private bool _rawFileFilterChecked;
         private bool _hideUnidentifiedScans;
+        private object _treeViewSelectedItem;
     }
 }

@@ -21,7 +21,6 @@ namespace LcmsSpectator.ViewModels
     public class MainWindowViewModel: ViewModelBase
     {
         // Data
-        public IdentificationTree Ids { get; private set; }
         public List<IonType> IonTypes { get; set; }
 
         // Commands
@@ -51,8 +50,6 @@ namespace LcmsSpectator.ViewModels
 
             _dialogService = dialogService;
             _taskService = taskService;
-            Ids = new IdentificationTree();
-            ProteinIds = Ids.ProteinIds.ToList();
             SelectedPrSmViewModel = SelectedPrSmViewModel.Instance;
             Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
             ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService), new List<PrSm>());
@@ -80,61 +77,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="idTree">Existing IDs</param>
         public MainWindowViewModel(IMainDialogService dialogService, ITaskService taskService, IdentificationTree idTree) : this(dialogService, taskService)
         {
-            Ids = idTree;
-            ScanViewModel.Data = Ids.AllPrSms;
-            ProteinIds = Ids.ProteinIds.ToList();
-        }
-
-        /// <summary>
-        /// Object selected in Treeview. Uses weak typing because each level TreeView is a different data type.
-        /// </summary>
-        public object TreeViewSelectedItem
-        {
-            get { return _treeViewSelectedItem; }
-            set
-            {
-                if (value != null)
-                {
-                    _treeViewSelectedItem = value;
-                    if (_treeViewSelectedItem is PrSm)
-                    {
-                        var selectedPrSm = _treeViewSelectedItem as PrSm;
-                        SelectedPrSm = selectedPrSm;
-                    }
-                    else
-                    {
-                        var selected = (IIdData) _treeViewSelectedItem;
-                        if (selected == null) return;
-                        var highest = selected.GetHighestScoringPrSm();
-                        SelectedPrSm = highest;
-                    }
-                    RaisePropertyChanged();
-                }
-            }
-        }
-
-        public PrSm SelectedPrSm
-        {
-            get { return _selectedPrSm; }
-            set
-            {
-                _selectedPrSm = value;
-                SelectedPrSmViewModel.Instance.PrSm = _selectedPrSm;
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
-        /// List of all ProteinIds (for display in Protein Tree)
-        /// </summary>
-        public List<ProteinId> ProteinIds
-        {
-            get { return _proteinIds; }
-            private set
-            {
-                _proteinIds = value;
-                RaisePropertyChanged();
-            }
+            ScanViewModel.Data = idTree.AllPrSms;
         }
 
         /// <summary>
@@ -264,12 +207,11 @@ namespace LcmsSpectator.ViewModels
                 IsLoading = false;
                 return;
             }
-            Ids.Add(ids);
-            Ids.Tool = ids.Tool; // assign new tool
-            ProteinIds = Ids.ProteinIds.ToList();
-            ScanViewModel.Data = Ids.AllPrSms;
+            var data = ScanViewModel.Data;
+            data.AddRange(ids.AllPrSms);
+            ScanViewModel.Data = data;
             ScanViewModel.HideUnidentifiedScans = true;
-            if (Ids.Proteins.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
+            if (ids.Proteins.Count > 0) SelectedPrSmViewModel.Instance.PrSm = ids.GetHighestScoringPrSm();
             FileOpen = true;
             IsLoading = false;
         }
@@ -285,6 +227,7 @@ namespace LcmsSpectator.ViewModels
             xicVm.RawFilePath = rawFilePath;
             var lcms = xicVm.Lcms;
             var scans = lcms.GetScanNumbers(2);
+            var prsmScans = new List<PrSm>();
             foreach (var scan in scans)
             {
                 var prsm = new PrSm
@@ -301,11 +244,12 @@ namespace LcmsSpectator.ViewModels
                     Charge = 0
                 };
                 _idTreeMutex.WaitOne();
-                Ids.Add(prsm);
+                prsmScans.Add(prsm);
                 _idTreeMutex.ReleaseMutex();
             }
             _idTreeMutex.WaitOne();
-            ScanViewModel.Data = Ids.AllPrSms;
+            ScanViewModel.Data.AddRange(prsmScans);
+            ScanViewModel.Data = ScanViewModel.Data;
             _idTreeMutex.ReleaseMutex();
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0]; });
             FileOpen = true;
@@ -391,14 +335,12 @@ namespace LcmsSpectator.ViewModels
             if (xicVm != null)
             {
                 var rawFileName = xicVm.RawFileName;
-                Ids.RemovePrSmsFromRawFile(rawFileName);
-                ScanViewModel.Data = Ids.AllPrSms;
-                ProteinIds = Ids.ProteinIds.ToList();
+                ScanViewModel.RemovePrSmsFromRawFile(rawFileName);
                 XicViewModels.Remove(xicVm);
                 if (SelectedPrSmViewModel.Instance.RawFileName == rawFileName)
                 {
                     if (XicViewModels.Count > 0) CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0];
-                    if (ScanViewModel.Data.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
+                    //if (ScanViewModel.Data.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
                     else
                     {
                         SelectedPrSmViewModel.Instance.Clear();
@@ -413,10 +355,6 @@ namespace LcmsSpectator.ViewModels
 
         private bool _isLoading;
         private bool _fileOpen;
-
-        private object _treeViewSelectedItem;
-        private List<ProteinId> _proteinIds;
-        private PrSm _selectedPrSm;
     }
 
     public class SettingsChangedNotification : NotificationMessage
