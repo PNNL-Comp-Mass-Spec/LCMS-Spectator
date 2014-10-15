@@ -359,9 +359,7 @@ namespace LcmsSpectator.ViewModels
 
     public class SettingsChangedNotification : NotificationMessage
     {
-        public SettingsChangedNotification(object sender, string notification) : base(sender, notification)
-        {
-        }
+        public SettingsChangedNotification(object sender, string notification) : base(sender, notification){}
     }
 }
 
