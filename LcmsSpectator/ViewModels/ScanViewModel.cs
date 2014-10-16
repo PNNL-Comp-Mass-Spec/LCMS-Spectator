@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Windows.Controls;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using LcmsSpectator.DialogServices;
@@ -63,13 +64,11 @@ namespace LcmsSpectator.ViewModels
         /// <param name="rawFileName">Name of raw file</param>
         public void RemovePrSmsFromRawFile(string rawFileName)
         {
-            var newProteins = new Dictionary<string, ProteinId>();
-            var data = new List<PrSm>();
-            foreach (var prsm in Data)
-            {
-                if (prsm.RawFileName != rawFileName) data.Add(prsm);
-            }
-            Data = data;
+            var newData = Data.Where(prsm => prsm.RawFileName != rawFileName).ToList();
+            var max = (newData.Count > 0) ? newData[0] : null;
+            foreach (var item in newData) if (item.CompareTo(max) > 0) max = item;
+            SelectedPrSm = max;
+            Data = newData;
         }
 
         public List<PrSm> Data
