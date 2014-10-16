@@ -54,7 +54,7 @@
                         <TextBlock Text="Precursor M/z: " FontWeight="Bold" />
                         <TextBlock Text="{Binding Path=SelectedPrSmViewModel.PrecursorMz}" FontWeight="Bold" Width="75" />
                         <TextBlock Text="Score: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.Score, Converter={StaticResource ScoreFormatter}}" FontWeight="Bold" Width="75"/>
+                        <TextBlock Text="{Binding Path=SelectedPrSmViewModel.Score, Converter={StaticResource ScoreFormatter}}" FontWeight="Bold" Width="75"/>
                         <TextBlock Text="QValue: " FontWeight="Bold" />
                         <TextBlock Text="{Binding Path=SelectedPrSmViewModel.QValue}" FontWeight="Bold" Width="75"/>
                     </StackPanel>

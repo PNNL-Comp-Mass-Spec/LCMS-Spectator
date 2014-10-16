@@ -62,6 +62,7 @@ namespace LcmsSpectator.ViewModels
                 Lcms = value.Lcms;
                 RawFileName = value.RawFileName;
                 Heavy = value.Heavy;
+                Score = value.Score;
                 _noLabelPrecursorMz = value.PrecursorMz;
                 _heavyPrecursorMz = value.HeavyPrecursorMz;
                 PrecursorMz = Heavy ? _heavyPrecursorMz : _noLabelPrecursorMz;
