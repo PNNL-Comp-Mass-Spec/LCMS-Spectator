@@ -26,10 +26,12 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicPlotViewModel: ViewModelBase
     {
+        public string RawFileName { get; set; }
         public ILcMsRun Lcms { get; set; }
         public RelayCommand SetScanChangedCommand { get; private set; }
         public RelayCommand SaveAsImageCommand { get; private set; }
         public bool Heavy { get; private set; }
+        public event EventHandler XicPlotChanged;
         public class SelectedScanChangedMessage : NotificationMessage
         {
             public int Scan { get; private set; }
@@ -56,6 +58,7 @@ namespace LcmsSpectator.ViewModels
             _xAxis.AxisChanged += AxisChanged_UpdatePlotTitle;
             _xicCache = new Dictionary<string, LabeledXic>();
             _smoothedXicLock = new Mutex();
+            _xicCacheLock = new Mutex();
             Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
             Messenger.Default.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
             UpdatePlot();
@@ -179,8 +182,10 @@ namespace LcmsSpectator.ViewModels
                 var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
                 if (dataPoint == null) return;
                 SelectedRt = Plot.SelectedDataPoint.X;
+                SelectedPrSmViewModel.Instance.Lcms = Lcms;
+                SelectedPrSmViewModel.Instance.RawFileName = RawFileName;
                 SelectedPrSmViewModel.Instance.Heavy = Heavy;
-                SelectedPrSmViewModel.Instance.Scan = dataPoint.ScanNum; 
+                SelectedPrSmViewModel.Instance.Scan = dataPoint.ScanNum;
             });
         }
 
@@ -252,7 +257,11 @@ namespace LcmsSpectator.ViewModels
 
         public void UpdatePlot()
         {
-            _taskService.Enqueue(() => { Plot = GeneratePlot();  });
+            _taskService.Enqueue(() =>
+            { 
+                Plot = GeneratePlot();
+                if (XicPlotChanged != null) XicPlotChanged(this, EventArgs.Empty);
+            });
         }
 
         public void UpdateArea()
@@ -368,9 +377,11 @@ namespace LcmsSpectator.ViewModels
         private LabeledXic GetXic(LabeledIon label)
         {
             LabeledXic lxic;
+            _xicCacheLock.WaitOne();
             if (_xicCache.ContainsKey(label.Label)) lxic = _xicCache[label.Label];
             else
             {
+                _xicCacheLock.ReleaseMutex();
                 var ion = label.Ion;
                 Xic xic;
                 if (label.IsFragmentIon) xic = Lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
@@ -378,8 +389,10 @@ namespace LcmsSpectator.ViewModels
                                                                                             label.PrecursorIon.GetMostAbundantIsotopeMz());
                 else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
                 lxic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
+                _xicCacheLock.WaitOne();
                 _xicCache.Add(label.Label, lxic);
             }
+            _xicCacheLock.ReleaseMutex();
             return lxic;
         }
 
@@ -434,6 +447,7 @@ namespace LcmsSpectator.ViewModels
         private readonly Mutex _smoothedXicLock;
         private readonly List<LabeledXic> _smoothedXics;
         private readonly Dictionary<string, LabeledXic> _xicCache;
+        private readonly Mutex _xicCacheLock;
         private SelectablePlotModel _plot;
         private double _area;
     }

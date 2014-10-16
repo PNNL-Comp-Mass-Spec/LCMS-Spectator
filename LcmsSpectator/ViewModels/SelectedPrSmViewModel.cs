@@ -226,12 +226,12 @@ namespace LcmsSpectator.ViewModels
 
         public Task<List<LabeledIonViewModel>> GetLightFragmentIons()
         {
-            return Task.Run(() => GenerateFragmentLabels(PrSm.LightSequence, false));
+            return Task.Run(() => GenerateFragmentLabels(PrSm.LightSequence, false, false));
         }
 
         public Task<List<LabeledIonViewModel>> GetHeavyFragmentIons()
         {
-            return Task.Run(() => GenerateFragmentLabels(PrSm.HeavySequence, true));
+            return Task.Run(() => GenerateFragmentLabels(PrSm.HeavySequence, true, false));
         }
 
         public Task<List<LabeledIonViewModel>> GetLightPrecursorIons()
@@ -255,7 +255,7 @@ namespace LcmsSpectator.ViewModels
             FragmentLabels = await FragmentLabelUpdate;
         }
 
-        private List<LabeledIonViewModel> GenerateFragmentLabels(Sequence sequence, bool heavy)
+        private List<LabeledIonViewModel> GenerateFragmentLabels(Sequence sequence, bool heavy, bool useCache=true)
         {
             var fragmentLabels = new List<LabeledIonViewModel>();
             if (sequence.Count < 1) return fragmentLabels;
@@ -266,14 +266,14 @@ namespace LcmsSpectator.ViewModels
                 {
                     LabeledIonViewModel label;
                     var key = new Tuple<string, bool>(ionType.GetName(i), heavy);
-                    if (!_fragmentLabelCache.TryGetValue(key, out label))
+                    if (!(useCache && _fragmentLabelCache.TryGetValue(key, out label)))
                     {
                         var composition = ionType.IsPrefixIon
                             ? PrSm.Sequence.GetComposition(0, i)
                             : PrSm.Sequence.GetComposition(i, Sequence.Count);
                         var labelIndex = ionType.IsPrefixIon ? i : (Sequence.Count - i);
                         label = new LabeledIonViewModel(new LabeledIon(composition, labelIndex, ionType, true, IonUtils.GetPrecursorIon(sequence, PrSm.Charge)));
-                        _fragmentLabelCache.Add(key, label);
+                        if (useCache) _fragmentLabelCache.Add(key, label);
                     }
                     ionFragments.Add(label);
                 }
