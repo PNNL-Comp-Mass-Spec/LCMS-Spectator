@@ -19,6 +19,15 @@ namespace LcmsSpectator.PlotModels
             MouseDown += SelectablePlotModel_MouseDown;
             UniqueColor = OxyColors.Black;
             OrdinaryColor = OxyColors.LightGray;
+            _pointMarkers = _pointMarkers = new StemSeries(OrdinaryColor, 3)
+            {
+
+                LineStyle = LineStyle.Dash,
+                TrackerFormatString =
+                        "{0}" + Environment.NewLine +
+                        "{1}: {2}" + Environment.NewLine
+            };
+            GuiInvoker.Invoke(() => Series.Add(_pointMarkers));
         }
 
         /// <summary>
@@ -49,6 +58,17 @@ namespace LcmsSpectator.PlotModels
         {
             SetPointMarker(x, GetMarkerColor());
         }
+
+        /// <summary>
+        /// Get point marker position.
+        /// </summary>
+        public IDataPoint GetPointMarker()
+        {
+            IDataPoint point = null;
+            if (_pointMarkers != null && _pointMarkers.Points.Count > 0)
+                point = _pointMarkers.Points[0];
+            return point;
+        }
         
         /// <summary>
         /// Set point marker highlighted with a particular color.
@@ -59,17 +79,10 @@ namespace LcmsSpectator.PlotModels
         {
             if (color == null) color = OxyColors.Black;
             var y = YAxis.Maximum;
-            if (_pointMarkers != null) GuiInvoker.Invoke(() => Series.Remove(_pointMarkers));
+            GuiInvoker.Invoke(() => _pointMarkers.Points.Clear());
             if (x.Equals(0)) return;
-            _pointMarkers = new StemSeries(color, 3)
-            {
-                LineStyle = LineStyle.Dash,
-                TrackerFormatString = 
-                        "{0}" + Environment.NewLine +
-                        "{1}: {2}" + Environment.NewLine
-            };
+            GuiInvoker.Invoke(() => _pointMarkers.Color = color);
             GuiInvoker.Invoke(() => _pointMarkers.Points.Add(new DataPoint(x, y)));
-            GuiInvoker.Invoke(Series.Add, _pointMarkers);
             GuiInvoker.Invoke(InvalidatePlot, true);
         }
 
@@ -81,11 +94,11 @@ namespace LcmsSpectator.PlotModels
         public override void SetBounds(double minX, double maxX)
         {
             double xPoint = 0;
-            if (_pointMarkers != null && _pointMarkers.Points.Count != 0) // remove marker
+            if (_pointMarkers.Points.Count != 0) // remove marker
             {
                 var point = _pointMarkers.Points[0];
                 xPoint = point.X;
-                GuiInvoker.Invoke(() => Series.Remove(_pointMarkers));
+                GuiInvoker.Invoke(() => _pointMarkers.Points.Clear());
             }
             base.SetBounds(minX, maxX);
             SetPointMarker(xPoint, GetMarkerColor()); // add marker

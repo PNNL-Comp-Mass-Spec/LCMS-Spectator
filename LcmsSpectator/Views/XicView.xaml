@@ -43,7 +43,7 @@
                 </oxy:Plot.InputBindings>
             </oxy:Plot>
             <Slider Grid.Column="0" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="15" Minimum="1"
-                    Ticks="0, 3, 5, 7, 9, 11, 15" IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
+                    Ticks="0, 3, 5, 7, 9, 11, 13, 15" IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
                     ToolTip="Smoothing Window Points" />
         </Grid>
         <Viewbox Grid.Row="0" Grid.Column="1"  StretchDirection="Both" HorizontalAlignment="Stretch">
@@ -67,7 +67,7 @@
                 </oxy:Plot.InputBindings>
             </oxy:Plot>
             <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="15" Minimum="1"
-                    Ticks="0, 3, 5, 7, 9, 11, 15" IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
+                    Ticks="0, 3, 5, 7, 9, 11, 13, 15" IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
                     ToolTip="Smoothing Window Points"/>
         </Grid>
         <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="Bold" Text="{Binding FragmentAreaRatioLabel}" />
@@ -89,7 +89,7 @@
                 </oxy:Plot.ContextMenu>
             </oxy:Plot>
             <Slider Grid.Column="0" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="15" Minimum="1"
-                    Ticks="0, 3, 5, 7, 9, 11, 15" IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
+                    Ticks="0, 3, 5, 7, 9, 11, 13, 15" IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
                     ToolTip="Smoothing Window Points"/>
         </Grid>
         <Viewbox Grid.Row="3" Grid.Column="1" StretchDirection="Both" HorizontalAlignment="Stretch">
@@ -110,7 +110,7 @@
                 </oxy:Plot.ContextMenu>
             </oxy:Plot>
             <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="15" Minimum="1"
-                    Ticks="0, 3, 5, 7, 9, 11, 15" IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
+                    Ticks="0, 3, 5, 7, 9, 11, 13, 15" IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
                     ToolTip="Smoothing Window Points"/>
         </Grid>
         <Grid Grid.Row="5" Grid.Column="1">

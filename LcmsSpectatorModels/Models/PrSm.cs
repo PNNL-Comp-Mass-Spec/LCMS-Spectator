@@ -128,6 +128,28 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
+        public double LightPrecursorMz
+        {
+            get
+            {
+                if (LightSequence.Count == 0) return 0.0;
+                var composition = LightSequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
+                var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
+                return Math.Round(ion.GetMonoIsotopicMz(), 2);
+            }
+        }
+
+        public double HeavyPrecursorMz
+        {
+            get
+            {
+                if (HeavySequence.Count == 0) return 0.0;
+                var composition = HeavySequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
+                var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
+                return Math.Round(ion.GetMonoIsotopicMz(), 2);
+            }
+        }
+
         public int CompareTo(PrSm other)
         {
             var comp = UseGolfScoring ? other.Score.CompareTo(Score) : Score.CompareTo(other.Score);

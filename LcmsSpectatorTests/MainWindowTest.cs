@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.TaskServices;
 using LcmsSpectator.ViewModels;
-using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
 using LcmsSpectatorTests.DialogServices;
@@ -31,7 +31,7 @@ namespace LcmsSpectatorTests
         public void TestRawFileOpening()
         {
             // create empty main window view model
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService());
+            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService());
             var xicVm = mainVm.ReadRawFile(_rawFilePath);
 
             // Check to see if xicVm is valid
@@ -52,54 +52,8 @@ namespace LcmsSpectatorTests
             var numLines = file.Length - 1; // subtract one for TSV header
 
             // create MainWindowViewModel
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService());
+            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService());
             //mainVm.ReadIdFile();
-        }
-
-        /// <summary>
-        /// This test checks to see if IDs are being filtered by QValue.
-        /// The input should be a TSV file with IDs of QValue greater than the QValue threshold
-        /// set in the application settings.
-        /// </summary>
-        [Test]
-        public void TestQValueFilter()
-        {
-            // create main view model and pass it IDs
-            // MainWindowViewModel should automatically filter IDs by qvalue
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), _ids);
-            var qValueThresh = IcParameters.Instance.QValueThreshold;
-
-            var prsms = mainVm.PrSms;
-            // Check QValue filteration
-            foreach (var prsm in prsms)
-            {
-                Assert.True(prsm.QValue <= qValueThresh);
-            }
-        }
-
-        /// <summary>
-        /// This test checks to see if toggling ShowUnidentifiedScans correctly shows/hides
-        /// unidentified scans.
-        /// </summary>
-        [Test]
-        public void TestUnidentifiedScanToggle()
-        {
-            // create ID Tree of prsms without scan #s
-            var idTree = new IdentificationTree();
-            var prsm = new PrSm {Scan = 1, RawFileName = Path.GetFileNameWithoutExtension(_rawFilePath)};
-            idTree.Add(prsm);
-
-            // create MainWindowViewModel with unidentified scans showing
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), idTree) {ShowUnidentifiedScans = true};
-            
-            // Should be showing one prsm
-            Assert.True(mainVm.PrSms.Count == 1);
-
-            // toggle off unidentified scans
-            mainVm.ShowUnidentifiedScans = false;
-
-            // Should be showing 0 prsms
-            Assert.True(mainVm.PrSms.Count == 0);
         }
 
         private readonly string _rawFilePath;

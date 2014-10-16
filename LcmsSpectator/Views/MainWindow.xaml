@@ -44,19 +44,19 @@
                               HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Visibility="{Binding FileOpen, Converter={StaticResource BoolToVis}}">
                     <TextBlock TextAlignment="Center" TextWrapping="Wrap"
-                                   Text="{Binding Path=SelectedPrSm.ProteinNameDesc}"
+                                   Text="{Binding Path=SelectedPrSmViewModel.ProteinNameDesc}"
                                    FontSize="14" FontWeight="Bold"/>
-                    <TextBlock TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=SelectedPrSm.SequenceText}"
+                    <TextBlock TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=SelectedPrSmViewModel.SequenceText}"
                                    FontWeight="Bold"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="Charge: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.Charge}" FontWeight="Bold" Width="75" />
+                        <TextBlock Text="{Binding Path=SelectedPrSmViewModel.Charge}" FontWeight="Bold" Width="75" />
                         <TextBlock Text="Precursor M/z: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.PrecursorMz}" FontWeight="Bold" Width="75" />
+                        <TextBlock Text="{Binding Path=SelectedPrSmViewModel.PrecursorMz}" FontWeight="Bold" Width="75" />
                         <TextBlock Text="Score: " FontWeight="Bold" />
                         <TextBlock Text="{Binding Path=SelectedPrSm.Score, Converter={StaticResource ScoreFormatter}}" FontWeight="Bold" Width="75"/>
                         <TextBlock Text="QValue: " FontWeight="Bold" />
-                        <TextBlock Text="{Binding Path=SelectedPrSm.QValue}" FontWeight="Bold" Width="75"/>
+                        <TextBlock Text="{Binding Path=SelectedPrSmViewModel.QValue}" FontWeight="Bold" Width="75"/>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
@@ -115,23 +115,31 @@
                                             </xcad:LayoutRoot>
                                         </xcad:DockingManager>
                                         <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" VerticalAlignment="Stretch" HorizontalAlignment="Center" Width="3" ShowsPreview="True" />
-                                        <controls:MultiSelectDataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                                        <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                                                                        IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" Grid.Row="0"
-                                                                       ItemsSource="{Binding FragmentLabels}"
-                                                                       SelectedItemsSource="{Binding  SelectedFragmentLabels, Mode=TwoWay}">
+                                                                       ItemsSource="{Binding SelectedPrSmViewModel.FragmentLabels}">
+                                            <DataGrid.Resources>
+                                                <Style TargetType="DataGridRow">
+                                                    <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                </Style>
+                                            </DataGrid.Resources>
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding Label}"/>
+                                                <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding LabeledIon.Label}"/>
                                             </DataGrid.Columns>
-                                        </controls:MultiSelectDataGrid>
+                                        </DataGrid>
                                         <GridSplitter Grid.Row="1" Grid.Column="2" HorizontalAlignment="Stretch" ShowsPreview="True" Height="1" />
-                                        <controls:MultiSelectDataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                                                                       ItemsSource="{Binding PrecursorLabels}"
-                                                                       SelectedItemsSource="{Binding SelectedPrecursorLabels, Mode=TwoWay}"
+                                        <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
+                                                                       ItemsSource="{Binding SelectedPrSmViewModel.PrecursorLabels}"
                                                                        IsReadOnly="True" Grid.Column="2" RowHeaderWidth="0" Grid.Row="2">
+                                            <DataGrid.Resources>
+                                                <Style TargetType="DataGridRow">
+                                                    <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                </Style>
+                                            </DataGrid.Resources>
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Isotope" Width="*" Binding="{Binding Label}" />
+                                                <DataGridTextColumn Header="Isotope" Width="*" Binding="{Binding LabeledIon.Label}" />
                                             </DataGrid.Columns>
-                                        </controls:MultiSelectDataGrid>
+                                        </DataGrid>
                                     </Grid>
                                 </xcad:LayoutAnchorable>
                                 <xcad:LayoutAnchorable Title="Spectrum View" CanClose="False" CanHide="False">
@@ -149,7 +157,22 @@
                         <!-- ID Tree -->
                         <TabItem Header="Protein Tree">
                             <Grid>
-                                <controls:MvvmTreeView ItemsSource="{Binding ProteinIds}" SelectedItemTarget="{Binding TreeViewSelectedItem, Mode=TwoWay}">
+                                <controls:MvvmTreeView DataContext="{Binding ScanViewModel}" ItemsSource="{Binding FilteredProteins}" SelectedItemTarget="{Binding TreeViewSelectedItem, Mode=TwoWay}">
+                                    <controls:MvvmTreeView.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="_Filter by">
+                                                <MenuItem Header="_Sequence" IsCheckable="True" IsChecked="{Binding SequenceFilterChecked}" />
+                                                <MenuItem Header="_Protein" IsCheckable="True" IsChecked="{Binding ProteinFilterChecked}" />
+                                                <MenuItem Header="Precursor _M/Z" IsCheckable="True" IsChecked="{Binding PrecursorMzFilterChecked}" />
+                                                <MenuItem Header="_Charge" IsCheckable="True" IsChecked="{Binding ChargeFilterChecked}" />
+                                                <MenuItem Header="_Score" IsCheckable="True" IsChecked="{Binding ScoreFilterChecked}"/>
+                                                <MenuItem Header="_Q Value" IsCheckable="True" IsChecked="{Binding QValueFilterChecked}"/>
+                                                <MenuItem Header="_Raw File" IsCheckable="True" IsChecked="{Binding RawFileFilterChecked}"/>
+                                                <Separator />
+                                                <MenuItem Header="Clear Filters" Command="{Binding ClearFiltersCommand}" />
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </controls:MvvmTreeView.ContextMenu>
                                     <controls:MvvmTreeView.Resources>
                                         <HierarchicalDataTemplate DataType="{x:Type models:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
                                             <TextBlock Text="{Binding ProteinNameDesc}" />
@@ -190,22 +213,33 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="100*" />
-                                  <!--  <RowDefinition Height="20" /> -->
+                                    <!--  <RowDefinition Height="20" /> -->
                                 </Grid.RowDefinitions>
-                                <DataGrid AutoGenerateColumns="False" SelectionMode="Extended"
+                                <DataGrid AutoGenerateColumns="False" SelectionMode="Extended" DataContext="{Binding ScanViewModel}"
                                           IsReadOnly="True" RowHeaderWidth="0"
-                                          ItemsSource="{Binding PrSms}" SelectedItem="{Binding SelectedPrSm}"
+                                          ItemsSource="{Binding FilteredData}" SelectedItem="{Binding SelectedPrSm}"
                                           Grid.Row="0" Name="ScanView">
                                     <DataGrid.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="Show _Unidentified Scans" IsCheckable="True" IsChecked="{Binding ShowUnidentifiedScans}" />
+                                            <MenuItem Header="_Filter by">
+                                                <MenuItem Header="_Sequence" IsCheckable="True" IsChecked="{Binding SequenceFilterChecked}" />
+                                                <MenuItem Header="_Protein" IsCheckable="True" IsChecked="{Binding ProteinFilterChecked}" />
+                                                <MenuItem Header="Precursor _M/Z" IsCheckable="True" IsChecked="{Binding PrecursorMzFilterChecked}" />
+                                                <MenuItem Header="_Charge" IsCheckable="True" IsChecked="{Binding ChargeFilterChecked}" />
+                                                <MenuItem Header="_Score" IsCheckable="True" IsChecked="{Binding ScoreFilterChecked}"/>
+                                                <MenuItem Header="_Q Value" IsCheckable="True" IsChecked="{Binding QValueFilterChecked}"/>
+                                                <MenuItem Header="_Raw File" IsCheckable="True" IsChecked="{Binding RawFileFilterChecked}"/>
+                                                <MenuItem Header="Hide _Unidentified Scans" IsCheckable="True" IsChecked="{Binding HideUnidentifiedScans}" />
+                                                <Separator />
+                                                <MenuItem Header="Clear Filters" Command="{Binding ClearFiltersCommand}" />
+                                            </MenuItem>
                                         </ContextMenu>
                                     </DataGrid.ContextMenu>
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}"/>
                                         <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" />
                                         <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" />
-                                        <DataGridTextColumn Header="Precursor m/z" Width="5*" Binding="{Binding PrecursorMz}" />
+                                        <DataGridTextColumn Header="Precursor M/Z" Width="5*" Binding="{Binding PrecursorMz}" />
                                         <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
                                         <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" />
                                         <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue, Converter={StaticResource QValueToStringConverter}}" />

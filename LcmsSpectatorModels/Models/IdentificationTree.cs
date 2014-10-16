@@ -11,13 +11,15 @@ namespace LcmsSpectatorModels.Models
 
         public ToolType Tool { get; set; }
 
-        public double QValueFilter { get; private set; }
-
-        public IdentificationTree(ToolType tool=ToolType.Other, double qValueFilter=Double.PositiveInfinity)
+        public IdentificationTree(ToolType tool=ToolType.Other)
         {
             Tool = tool;
             Proteins = new Dictionary<string, ProteinId>();
-            QValueFilter = qValueFilter;
+        }
+
+        public IdentificationTree(IEnumerable<PrSm> data, ToolType tool = ToolType.Other): this(tool)
+        {
+            Add(data);
         }
 
         public IEnumerable<ProteinId> ProteinIds
@@ -158,37 +160,6 @@ namespace LcmsSpectatorModels.Models
                             where prsm.Sequence.Count > 0
                             select prsm).ToList();
             }
-        }
-
-        /// <summary>
-        /// Get an IdentificationTree filtered by IDs with QValue smaller than QValue
-        /// </summary>
-        /// <param name="qValue">QValue to filter by</param>
-        /// <returns>IDs to filter by</returns>
-        public IdentificationTree GetTreeFilteredByQValue(double qValue)
-        {
-            var idTree = new IdentificationTree(Tool, qValue);
-            var prsms = AllPrSms;
-            foreach (var prsm in prsms)
-            {
-                if (prsm.QValue <= qValue || prsm.Sequence.Count == 0) idTree.Add(prsm);
-            }
-            return idTree;
-        }
-
-        /// <summary>
-        /// Remove PrSms from IDTree that are associated with raw file
-        /// </summary>
-        /// <param name="rawFileName">Name of raw file</param>
-        public void RemovePrSmsFromRawFile(string rawFileName)
-        {
-            var newProteins = new Dictionary<string, ProteinId>();
-            foreach (var protein in Proteins)
-            {
-                protein.Value.RemovePrSmsFromRawFile(rawFileName);
-                if (protein.Value.Proteoforms.Count > 0) newProteins.Add(protein.Key, protein.Value);
-            }
-            Proteins = newProteins;
         }
     }
 }

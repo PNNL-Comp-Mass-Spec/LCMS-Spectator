@@ -4,12 +4,14 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
-using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
@@ -21,31 +23,31 @@ namespace LcmsSpectator.ViewModels
     {
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
         public ObservableCollection<Target> Targets { get; private set; } 
-        public string SequenceText { get; set; }
         public int SequencePosition { get; set; }
-        public int SelectedCharge { get; set; }
-        public DelegateCommand OpenTargetListCommand { get; private set; }
-        public DelegateCommand CreatePrSmCommand { get; private set; }
-        public DelegateCommand InsertModificationCommand { get; private set; }
-        public DelegateCommand InsertStaticModificationsCommand { get; private set; }
-        public DelegateCommand PasteCommand { get; private set; }
+        public RelayCommand OpenTargetListCommand { get; private set; }
+        public RelayCommand CreatePrSmCommand { get; private set; }
+        public RelayCommand InsertModificationCommand { get; private set; }
+        public RelayCommand InsertStaticModificationsCommand { get; private set; }
+        public RelayCommand PasteCommand { get; private set; }
         public ObservableCollection<Modification> Modifications { get; private set; }
         public Modification SelectedModification { get; set; }
-        public event EventHandler SequenceCreated;
         public CreateSequenceViewModel(ObservableCollection<XicViewModel> xicViewModels, IDialogService dialogService)
         {
             XicViewModels = xicViewModels;
             Targets = new ObservableCollection<Target>();
             _dialogService = dialogService;
             SequenceText = "";
-            OpenTargetListCommand = new DelegateCommand(OpenTargetList);
-            CreatePrSmCommand = new DelegateCommand(CreatePrSm, false);
-            InsertModificationCommand = new DelegateCommand(InsertModification);
-            InsertStaticModificationsCommand = new DelegateCommand(InsertStaticModifications);
-            PasteCommand = new DelegateCommand(Paste);
+            OpenTargetListCommand = new RelayCommand(OpenTargetList);
+            CreatePrSmCommand = new RelayCommand(CreatePrSm, () => (XicViewModels != null && XicViewModels.Count > 0));
+            InsertModificationCommand = new RelayCommand(InsertModification);
+            InsertStaticModificationsCommand = new RelayCommand(InsertStaticModifications);
+            PasteCommand = new RelayCommand(Paste);
             SelectedCharge = 2;
             SelectedScan = 0;
             if (XicViewModels.Count > 0) SelectedXicViewModel = XicViewModels[0];
+
+            Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
+            Messenger.Default.Register<PropertyChangedMessage<string>>(this, SelectedRawFileChanged);
 
             Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
         }
@@ -56,7 +58,27 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _selectedScan = value;
-                OnPropertyChanged("SelectedScan");
+                RaisePropertyChanged();
+            }
+        }
+
+        public int SelectedCharge
+        {
+            get { return _selectedChage; }
+            set
+            {
+                _selectedChage = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string SequenceText
+        {
+            get { return _sequenceText; }
+            set
+            {
+                _sequenceText = value;
+                RaisePropertyChanged();
             }
         }
 
@@ -67,7 +89,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_selectedXicViewModel == value) return;
                 _selectedXicViewModel = value;
-                OnPropertyChanged("SelectedXicViewModel");
+                RaisePropertyChanged();
             }
         }
 
@@ -82,10 +104,8 @@ namespace LcmsSpectator.ViewModels
                 if (_selectedTarget.Charge != 0)
                 {
                     SelectedCharge = _selectedTarget.Charge;
-                    OnPropertyChanged("SelectedCharge");
                 }
-                OnPropertyChanged("SequenceText");
-                OnPropertyChanged("SelectedTarget");
+                RaisePropertyChanged();
             }
         }
 
@@ -111,7 +131,6 @@ namespace LcmsSpectator.ViewModels
         {
             var modStr = String.Format("[{0}]", SelectedModification.Name);
             SequenceText = SequenceText.Insert(SequencePosition, modStr);
-            OnPropertyChanged("SequenceText");
         }
 
         private void CreatePrSm()
@@ -165,7 +184,7 @@ namespace LcmsSpectator.ViewModels
                 prsm.Scan = 0;
                 prsm.Lcms = null;
             }
-            if (SequenceCreated != null) SequenceCreated(this, new PrSmChangedEventArgs(prsm));
+            SelectedPrSmViewModel.Instance.PrSm = prsm;
         }
 
         private void InsertStaticModifications()
@@ -173,7 +192,6 @@ namespace LcmsSpectator.ViewModels
             if (SequenceText == "" || IcParameters.Instance.SearchModifications.Count == 0) return;
             if (SequenceText.Contains("+")) InsertStaticMsgfPlusModifications();
             else InsertStaticLcmsSpectatorModifications();
-            OnPropertyChanged("SequenceText");
         }
 
         private void InsertStaticMsgfPlusModifications()
@@ -257,9 +275,32 @@ namespace LcmsSpectator.ViewModels
             foreach (var target in targets) Targets.Add(target);
         }
 
+        private void SelectedRawFileChanged(PropertyChangedMessage<string> message)
+        {
+            if (message.PropertyName == "RawFileName" && message.Sender == SelectedPrSmViewModel.Instance)
+            {
+                var rawFileName = message.NewValue;
+                foreach (var xicVm in XicViewModels)
+                {
+                    if (xicVm.RawFileName == rawFileName) SelectedXicViewModel = xicVm;
+                }
+            }
+        }
+
+        private void SelectedScanChanged(PropertyChangedMessage<int> message)
+        {
+            if (message.PropertyName == "Scan" && message.Sender == SelectedPrSmViewModel.Instance)
+            {
+                var scan = message.NewValue;
+                SelectedScan = scan;
+            }
+        }
+
         private readonly IDialogService _dialogService;
         private XicViewModel _selectedXicViewModel;
         private Target _selectedTarget;
         private int _selectedScan;
+        private int _selectedChage;
+        private string _sequenceText;
     }
 }

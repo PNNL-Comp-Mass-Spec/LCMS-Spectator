@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Biology;
+using System.Reflection;
 using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
-using LcmsSpectatorModels.Config;
-using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
 using LcmsSpectatorModels.Utils;
 using NUnit.Framework;
@@ -63,6 +59,22 @@ namespace LcmsSpectatorTests
                     }
                 }
             }
+        }
+
+        [Test]
+        public void TestITraqMod()
+        {
+            var aminoAcidSet = new AminoAcidSet();
+            var p = aminoAcidSet.GetAminoAcid('P');
+            var a = aminoAcidSet.GetAminoAcid('A');
+            var q = aminoAcidSet.GetAminoAcid('Q');
+
+            var itraqMod = Modification.Itraq4Plex;
+            Console.WriteLine(itraqMod.GetMass());
+
+            var modp = new ModifiedAminoAcid(p, itraqMod);
+            var sequence = new Sequence(new List<AminoAcid> {modp, a, q});
+            Console.WriteLine(sequence.GetMass());
         }
     }
 }

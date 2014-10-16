@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
-using LcmsSpectator.Utils;
+using LcmsSpectator.TaskServices;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
@@ -24,18 +26,30 @@ namespace LcmsSpectator.ViewModels
 {
     public class SpectrumPlotViewModel: ViewModelBase
     {
-        public DelegateCommand SaveAsImageCommand { get; private set; }
-        public AutoAdjustedYPlotModel Plot { get; private set; }
-        public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, ColorDictionary colors, bool showUnexplainedPeaks=true)
+        public RelayCommand SaveAsImageCommand { get; private set; }
+
+        public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, double multiplier, bool showUnexplainedPeaks=true)
         {
-            SaveAsImageCommand = new DelegateCommand(SaveAsImage);
+            _taskService = taskService;
+            SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _dialogService = dialogService;
             _showUnexplainedPeaks = showUnexplainedPeaks;
             _showFilteredSpectrum = false;
             _showDeconvolutedSpectrum = false;
             _multiplier = multiplier;
-            _colors = colors;
             Title = "";
+            _ionCache = new Dictionary<string, Tuple<Series, Annotation>>();
+            SpectrumUpdate();
+        }
+
+        public AutoAdjustedYPlotModel Plot
+        {
+            get { return _plot; }
+            private set
+            {
+                _plot = value;
+                RaisePropertyChanged();
+            }
         }
 
         /// <summary>
@@ -47,8 +61,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _title = value;
-                if (Plot != null) Plot.Title = _title;
-                OnPropertyChanged("Title");
+                RaisePropertyChanged();
             }
         }
 
@@ -62,14 +75,8 @@ namespace LcmsSpectator.ViewModels
             {
                 if (_showUnexplainedPeaks == value) return;
                 _showUnexplainedPeaks = value;
-                if (_showUnexplainedPeaks == false && Plot.Series.Count > 0)
-                {
-                    GuiInvoker.Invoke(Plot.Series.RemoveAt, 0);
-                    GuiInvoker.Invoke(Plot.AdjustForZoom);
-                    GuiInvoker.Invoke(Plot.InvalidatePlot, true);
-                }
-                else GuiInvoker.Invoke(BuildSpectrumPlot);
-                OnPropertyChanged("ShowUnexplainedPeaks");
+                SpectrumUpdate();
+                RaisePropertyChanged();
             }
         }
 
@@ -82,8 +89,8 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showFilteredSpectrum = value;
-                Update();
-                OnPropertyChanged("ShowFilteredSpectrum");
+                SpectrumUpdate();
+                RaisePropertyChanged();
             }
         }
 
@@ -96,38 +103,8 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showDeconvolutedSpectrum = value;
-                Update();
-                OnPropertyChanged("ShowDeconvolutedSpectrum");
-            }
-        }
-
-        /// <summary>
-        /// Spectrum to display.
-        /// </summary>
-        public Spectrum Spectrum
-        {
-            get { return _spectrum; }
-            set
-            {
-                if (_spectrum == value) return;
-                _spectrum = value;
-                _filteredSpectrum = null; // reset filtered spectrum
-                _deconvolutedSpectrum = null;
-                _filtDeconSpectrum = null;
-                OnPropertyChanged("Spectrum");
-            }
-        }
-
-        /// <summary>
-        /// Ions to get peak highlights for
-        /// </summary>
-        public List<LabeledIon> Ions
-        {
-            get { return _ions;  }
-            set
-            {
-                _ions = value;
-                OnPropertyChanged("Ions");
+                SpectrumUpdate();
+                RaisePropertyChanged();
             }
         }
 
@@ -140,42 +117,57 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _xAxis = value;
-                if (Plot == null) return;
-                GuiInvoker.Invoke(Plot.Axes.Clear);
-                GuiInvoker.Invoke(Plot.Axes.Add, _xAxis);
-                Plot.GenerateYAxis("Intensity", "0e0");
-                Plot.InvalidatePlot(true);
-                OnPropertyChanged("XAxis");
+                RaisePropertyChanged();
             }
         }
 
         /// <summary>
         /// Update spectrum and ion highlights
         /// </summary>
-        public Task Update()
+        public void SpectrumUpdate(Spectrum spectrum=null)
         {
-            return Task.Factory.StartNew(BuildSpectrumPlot);
+            _taskService.Enqueue(() =>
+            {
+                if (spectrum != null)
+                {
+                    _spectrum = spectrum;
+                }
+                _filteredSpectrum = null; // reset filtered spectrum
+                _deconvolutedSpectrum = null;
+                _filtDeconSpectrum = null; 
+                _ionCache.Clear();
+                Plot = BuildSpectrumPlot();
+                IonUpdate();
+            });
+        }
+
+        public void IonUpdate(List<LabeledIonViewModel> ions = null)
+        {
+            _taskService.Enqueue(() =>
+            {
+                if (ions != null)
+                {
+                    _ions = ions;
+                }
+                SetPlotSeries();
+            });
         }
 
         /// <summary>
         /// Clear spectrum plot
         /// </summary>
-        public void ClearPlot()
+        public void Clear()
         {
-            Plot = new AutoAdjustedYPlotModel(new LinearAxis { Minimum = 0, Maximum = 100, IsAxisVisible = false }, _multiplier);
-            OnPropertyChanged("Plot");
+            _spectrum = null;
+            SpectrumUpdate();
         }
-
-        private void BuildSpectrumPlot()
+        
+        private AutoAdjustedYPlotModel BuildSpectrumPlot()
         {
-            if (Spectrum == null)
-            {
-                ClearPlot();
-                return;
-            }
+            if (_spectrum == null) return new AutoAdjustedYPlotModel(new LinearAxis(), 1.05);
             // Filtered/Deconvoluted Spectrum?
-            var spectrum = Spectrum;
-            var tolerance = (Spectrum is ProductSpectrum)
+            var spectrum = _spectrum;
+            var tolerance = (_spectrum is ProductSpectrum)
                                 ? IcParameters.Instance.ProductIonTolerancePpm
                                 : IcParameters.Instance.PrecursorTolerancePpm;
             if (ShowFilteredSpectrum && ShowDeconvolutedSpectrum)
@@ -183,7 +175,7 @@ namespace LcmsSpectator.ViewModels
                 if (_filtDeconSpectrum == null)
                 {
                     if (_filteredSpectrum == null)
-                        _filteredSpectrum = Spectrum.GetFilteredSpectrumByIntensityHistogram();
+                        _filteredSpectrum = _spectrum.GetFilteredSpectrumByIntensityHistogram();
                     _filtDeconSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(spectrum,
                                     Constants.MinCharge, Constants.MaxCharge, tolerance,
                                     IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
@@ -193,25 +185,19 @@ namespace LcmsSpectator.ViewModels
             else if (ShowFilteredSpectrum)
             {
                 if (_filteredSpectrum == null)
-                    _filteredSpectrum = Spectrum.GetFilteredSpectrumByIntensityHistogram();
+                    _filteredSpectrum = _spectrum.GetFilteredSpectrumByIntensityHistogram();
                 spectrum = _filteredSpectrum;
             }
             else if (ShowDeconvolutedSpectrum)
             {
                 if (_deconvolutedSpectrum == null)
-                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(spectrum,
-                                    Constants.MinCharge, Constants.MaxCharge, tolerance,
-                                    IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
+                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
+                        spectrum,
+                        Constants.MinCharge, Constants.MaxCharge, tolerance,
+                        IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
                 spectrum = _deconvolutedSpectrum;
             }
-            // Create XAxis if there is none
-            var xAxis = _xAxis ?? GenerateXAxis(spectrum);
-            var plot = new AutoAdjustedYPlotModel(xAxis, _multiplier)
-            {
-                Title = Title,
-                TitleFontSize = 14,
-                TitlePadding = 0
-            };
+            _currentSpectrum = spectrum;
             var spectrumSeries = new StemSeries(OxyColors.Black, 0.5)
             {
                 TrackerFormatString =
@@ -219,42 +205,60 @@ namespace LcmsSpectator.ViewModels
                     "{1}: {2:0.###}" + Environment.NewLine +
                     "{3}: {4:0.##E0}"
             };
-            foreach (var peak in spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
-            GuiInvoker.Invoke(plot.Series.Add, spectrumSeries);
+            if (ShowUnexplainedPeaks)
+            {
+                foreach (var peak in spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
+            }
+            // Create XAxis if there is none
+            var xAxis = _xAxis ?? (_xAxis = GenerateXAxis(spectrum));
+            var plot = new AutoAdjustedYPlotModel(xAxis, _multiplier)
+            {
+                Title = Title,
+                TitleFontSize = 14,
+                TitlePadding = 0
+            };
+            if (ShowUnexplainedPeaks) plot.Series.Add(spectrumSeries);
             plot.GenerateYAxis("Intensity", "0e0");
-            SetPlotSeries(plot, spectrum);
-            Plot = plot;
-            OnPropertyChanged("Plot");
+            return plot;
         }
 
-        private void SetPlotSeries(AutoAdjustedYPlotModel plot, Spectrum spectrum)
+        private void SetPlotSeries()
         {
-            if (plot == null || Ions == null) return;
-            // remove old ion series
-            while (plot.Series.Count > 1)
-            {
-                GuiInvoker.Invoke(plot.Series.RemoveAt, Plot.Series.Count-1);
-            }
-            GuiInvoker.Invoke(plot.Annotations.Clear);
+            if (Plot == null || _ions == null || _ions.Count == 0 || _currentSpectrum == null) return;
+            var plot = Plot;
+            Plot = new AutoAdjustedYPlotModel(new LinearAxis(), 1.05);
+            StemSeries spectrumSeries = null;
+            if (ShowUnexplainedPeaks && plot.Series.Count > 0) spectrumSeries = plot.Series[0] as StemSeries;
+            plot.Series.Clear();
+            plot.Annotations.Clear();
+            if (spectrumSeries != null) plot.Series.Add(spectrumSeries);
             // add new ion series
-            foreach (var labeledIon in Ions)
+            var seriesstore = _ions.ToDictionary<LabeledIonViewModel, string, Tuple<Series, Annotation>>(ionVm => ionVm.LabeledIon.Label, ion => null);
+            var colors = new ColorDictionary(Math.Min(Math.Max(SelectedPrSmViewModel.Instance.Charge - 1, 2), 15));
+            Parallel.ForEach(_ions, ionVm =>
             {
-                if (labeledIon.IonType.Charge == 0) continue;
-                var ionSeries = GetIonSeries(labeledIon, spectrum);
-                if (ionSeries == null) continue;
-                GuiInvoker.Invoke(plot.Series.Add, ionSeries.Item1);
-                GuiInvoker.Invoke(plot.Annotations.Add, ionSeries.Item2);
+                if (ionVm.LabeledIon.IonType.Charge == 0) return;
+                var ionSeries = _ionCache.ContainsKey(ionVm.LabeledIon.Label) ? _ionCache[ionVm.LabeledIon.Label] : GetIonSeries(ionVm.LabeledIon, _currentSpectrum, colors);
+                seriesstore[ionVm.LabeledIon.Label] = ionSeries;
+            });
+            foreach (var series in seriesstore.Where(series => series.Value != null))
+            {
+                plot.Series.Add(series.Value.Item1);
+                plot.Annotations.Add(series.Value.Item2);
+                if (!_ionCache.ContainsKey(series.Key)) _ionCache.Add(series.Key, series.Value);
+                else _ionCache[series.Key] = series.Value;
             }
             plot.InvalidatePlot(true);
+            Plot = plot;
         }
 
-        private Tuple<Series, Annotation> GetIonSeries(LabeledIon labeledIon, Spectrum spectrum)
+        private Tuple<Series, Annotation> GetIonSeries(LabeledIon labeledIon, Spectrum spectrum, ColorDictionary colors)
         {
             var labeledIonPeaks = IonUtils.GetIonPeaks(labeledIon, spectrum,
                                                        IcParameters.Instance.ProductIonTolerancePpm,
                                                        IcParameters.Instance.PrecursorTolerancePpm);
             // create plots
-            var color = _colors.GetColor(labeledIon);
+            var color = colors.GetColor(labeledIon);
             var ionSeries = new StemSeries(color, 1.5)
             {
                 TrackerFormatString =
@@ -313,11 +317,13 @@ namespace LcmsSpectator.ViewModels
 
         private void SaveAsImage()
         {
-            if (Plot == null) return;
             var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
-                if (fileName != "") PngExporter.Export(Plot, fileName, (int)Plot.Width, (int)Plot.Height);
+                if (fileName != "")
+                {
+                    PngExporter.Export(Plot, fileName, (int)Plot.Width, (int)Plot.Height);
+                }
             }
             catch (Exception e)
             {
@@ -325,20 +331,25 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private readonly ColorDictionary _colors;
+        private readonly IDialogService _dialogService;
+        private readonly ITaskService _taskService;
+
         private string _title;
         private LinearAxis _xAxis;
         private readonly double _multiplier;
 
         private bool _showFilteredSpectrum;
+        private Spectrum _currentSpectrum;
         private Spectrum _filteredSpectrum;
         private Spectrum _deconvolutedSpectrum;
         private Spectrum _filtDeconSpectrum;
         private Spectrum _spectrum;
 
-        private List<LabeledIon> _ions;
+        private List<LabeledIonViewModel> _ions;
         private bool _showUnexplainedPeaks;
-        private readonly IDialogService _dialogService;
+
+        private readonly Dictionary<string, Tuple<Series, Annotation>> _ionCache;
         private bool _showDeconvolutedSpectrum;
+        private AutoAdjustedYPlotModel _plot;
     }
 }
