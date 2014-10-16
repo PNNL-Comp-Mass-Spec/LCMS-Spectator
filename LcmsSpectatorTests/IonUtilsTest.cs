@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -64,14 +65,16 @@ namespace LcmsSpectatorTests
         public void TestITraqMod()
         {
             var aminoAcidSet = new AminoAcidSet();
-            var p = aminoAcidSet.GetAminoAcid('C');
-            Console.WriteLine(p.GetMass());
+            var p = aminoAcidSet.GetAminoAcid('P');
+            var a = aminoAcidSet.GetAminoAcid('A');
+            var q = aminoAcidSet.GetAminoAcid('Q');
 
-            var itraqMod = Modification.Carbamidomethylation;
+            var itraqMod = Modification.Itraq4Plex;
             Console.WriteLine(itraqMod.GetMass());
 
-            var modk = new ModifiedAminoAcid(p, itraqMod);
-            Console.WriteLine(modk.GetMass());
+            var modp = new ModifiedAminoAcid(p, itraqMod);
+            var sequence = new Sequence(new List<AminoAcid> {modp, a, q});
+            Console.WriteLine(sequence.GetMass());
         }
     }
 }

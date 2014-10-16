@@ -6,12 +6,13 @@ using InformedProteomics.Backend.Data.Sequence;
 
 namespace LcmsSpectatorModels.Readers.SequenceReaders
 {
-    class LcmsSpectatorSequenceReader: ISequenceReader
+    public class LcmsSpectatorSequenceReader: ISequenceReader
     {
         public Sequence Read(string sequence)
         {
             const string aminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
-            const string modRegex = @"\[[A-Z][a-z]*\]";
+            //const string modRegex = @"\[([A-Z]|[a-z])+\]";
+            const string modRegex = @"\[([A-Z]|[a-z]|[0-9])+\]";
 
             if (!Regex.IsMatch(sequence, "(" + aminoAcidRegex + "|" + modRegex + ")+")) return null;
 
