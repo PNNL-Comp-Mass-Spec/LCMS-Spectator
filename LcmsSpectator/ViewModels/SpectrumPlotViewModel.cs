@@ -116,8 +116,7 @@ namespace LcmsSpectator.ViewModels
             _taskService.Enqueue(() =>
             {
                 if (spectrum != null) _spectrum = spectrum;
-                if (xAxis != null) _xAxis = xAxis;
-                else _xAxis = null;
+                _xAxis = xAxis;
                 _filteredSpectrum = null; // reset filtered spectrum
                 _deconvolutedSpectrum = null;
                 _filtDeconSpectrum = null; 
