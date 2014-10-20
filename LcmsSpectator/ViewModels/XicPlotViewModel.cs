@@ -338,7 +338,7 @@ namespace LcmsSpectator.ViewModels
                 var series = new XicSeries
                 {
                     Label = lxic.Label,
-                    StrokeThickness = 3,
+                    StrokeThickness = 1.5,
                     Title = lxic.Label,
                     Color = color,
                     LineStyle = lineStyle,
