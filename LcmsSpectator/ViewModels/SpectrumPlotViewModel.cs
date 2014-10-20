@@ -39,7 +39,7 @@ namespace LcmsSpectator.ViewModels
             _multiplier = multiplier;
             Title = "";
             _ionCache = new Dictionary<string, Tuple<Series, Annotation>>();
-            SpectrumUpdate();
+            Clear();
         }
 
         public AutoAdjustedYPlotModel Plot
@@ -109,33 +109,18 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Plot's x axis
-        /// </summary>
-        public LinearAxis XAxis
-        {
-            get { return _xAxis; }
-            set
-            {
-                _xAxis = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
         /// Update spectrum and ion highlights
         /// </summary>
-        public void SpectrumUpdate(Spectrum spectrum=null)
+        public void SpectrumUpdate(Spectrum spectrum=null, LinearAxis xAxis=null)
         {
             _taskService.Enqueue(() =>
             {
-                if (spectrum != null)
-                {
-                    _spectrum = spectrum;
-                }
+                if (spectrum != null) _spectrum = spectrum;
+                if (xAxis != null) _xAxis = xAxis;
+                else _xAxis = null;
                 _filteredSpectrum = null; // reset filtered spectrum
                 _deconvolutedSpectrum = null;
                 _filtDeconSpectrum = null; 
-                _ionCache.Clear();
                 Plot = BuildSpectrumPlot();
                 IonUpdate();
             });
@@ -145,11 +130,13 @@ namespace LcmsSpectator.ViewModels
         {
             _taskService.Enqueue(() =>
             {
+                bool useCache = false;
                 if (ions != null)
                 {
                     _ions = ions;
+                    useCache = true;
                 }
-                SetPlotSeries();
+                SetPlotSeries(useCache);
             });
         }
 
@@ -158,8 +145,16 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void Clear()
         {
-            _spectrum = null;
-            SpectrumUpdate();
+            _taskService.Enqueue(() =>
+            {
+                _spectrum = null;
+                _xAxis = null;
+                _filteredSpectrum = null; // reset filtered spectrum
+                _deconvolutedSpectrum = null;
+                _filtDeconSpectrum = null;
+                Plot = BuildSpectrumPlot();
+                IonUpdate();
+            });
         }
         
         private AutoAdjustedYPlotModel BuildSpectrumPlot()
@@ -222,13 +217,14 @@ namespace LcmsSpectator.ViewModels
             return plot;
         }
 
-        private void SetPlotSeries()
+        private void SetPlotSeries(bool useCache=true)
         {
             if (Plot == null || _ions == null || _ions.Count == 0 || _currentSpectrum == null) return;
             var plot = Plot;
             Plot = new AutoAdjustedYPlotModel(new LinearAxis(), 1.05);
             StemSeries spectrumSeries = null;
             if (ShowUnexplainedPeaks && plot.Series.Count > 0) spectrumSeries = plot.Series[0] as StemSeries;
+            if (!useCache) _ionCache.Clear();
             plot.Series.Clear();
             plot.Annotations.Clear();
             if (spectrumSeries != null) plot.Series.Add(spectrumSeries);
@@ -238,17 +234,21 @@ namespace LcmsSpectator.ViewModels
             Parallel.ForEach(_ions, ionVm =>
             {
                 if (ionVm.LabeledIon.IonType.Charge == 0) return;
-                var ionSeries = _ionCache.ContainsKey(ionVm.LabeledIon.Label) ? _ionCache[ionVm.LabeledIon.Label] : GetIonSeries(ionVm.LabeledIon, _currentSpectrum, colors);
+                var ionSeries = (useCache && _ionCache.ContainsKey(ionVm.LabeledIon.Label)) ? _ionCache[ionVm.LabeledIon.Label] : GetIonSeries(ionVm.LabeledIon, _currentSpectrum, colors);
                 seriesstore[ionVm.LabeledIon.Label] = ionSeries;
             });
             foreach (var series in seriesstore.Where(series => series.Value != null))
             {
                 plot.Series.Add(series.Value.Item1);
                 plot.Annotations.Add(series.Value.Item2);
-                if (!_ionCache.ContainsKey(series.Key)) _ionCache.Add(series.Key, series.Value);
-                else _ionCache[series.Key] = series.Value;
+                if (useCache)
+                {
+                    if (!_ionCache.ContainsKey(series.Key)) _ionCache.Add(series.Key, series.Value);
+                    else _ionCache[series.Key] = series.Value;
+                }
             }
             plot.InvalidatePlot(true);
+            plot.AdjustForZoom();
             Plot = plot;
         }
 
@@ -306,8 +306,8 @@ namespace LcmsSpectator.ViewModels
             if (peaks.Length > 0) ms2MaxMz = peaks.Max().Mz * 1.1;
             var xAxis = new LinearAxis(AxisPosition.Bottom, "M/Z")
             {
-                Minimum = 0,
-                Maximum = ms2MaxMz,
+                //Minimum = 0,
+                //Maximum = ms2MaxMz,
                 AbsoluteMinimum = 0,
                 AbsoluteMaximum = ms2MaxMz
             };

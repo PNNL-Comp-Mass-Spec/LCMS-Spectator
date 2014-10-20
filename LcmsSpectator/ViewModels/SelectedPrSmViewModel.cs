@@ -68,9 +68,9 @@ namespace LcmsSpectator.ViewModels
                 PrecursorMz = Heavy ? _heavyPrecursorMz : _noLabelPrecursorMz;
                 _charge = value.Charge;
                 ProteinNameDesc = value.ProteinNameDesc;
+                Scan = value.Scan;
                 Sequence = value.Sequence;
                 SequenceText = value.SequenceText;
-                Scan = value.Scan;
                 Charge = value.Charge;
                 RaisePropertyChanged("PrSm", oldValue, PrSm, true);
             }
@@ -273,7 +273,7 @@ namespace LcmsSpectator.ViewModels
                             ? PrSm.Sequence.GetComposition(0, i)
                             : PrSm.Sequence.GetComposition(i, Sequence.Count);
                         var labelIndex = ionType.IsPrefixIon ? i : (Sequence.Count - i);
-                        label = new LabeledIonViewModel(new LabeledIon(composition, labelIndex, ionType, true, IonUtils.GetPrecursorIon(sequence, PrSm.Charge)));
+                        label = new LabeledIonViewModel(new LabeledIon(composition, labelIndex, ionType, true, IonUtils.GetPrecursorIon(sequence, Charge)));
                         if (useCache) _fragmentLabelCache.Add(key, label);
                     }
                     ionFragments.Add(label);

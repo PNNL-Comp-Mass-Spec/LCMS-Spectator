@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
+using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.TaskServices;
+using LcmsSpectatorModels.Models;
 using OxyPlot.Axes;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
 
@@ -69,8 +73,18 @@ namespace LcmsSpectator.ViewModels
             if (message.PropertyName != "FragmentLabels") return;
             var fragmentLabels = message.NewValue;
             var heavy = SelectedPrSmViewModel.Instance.Heavy;
-            if (!heavy) Ms2SpectrumViewModel.IonUpdate(fragmentLabels);
-            else Ms2SpectrumViewModel.IonUpdate(await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons());
+            var labels = (!heavy) ? fragmentLabels : await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+            // add precursor ion
+            if (labels.Count > 0)
+            {
+                var label1 = labels[0];
+                var precursorIon = label1.LabeledIon.PrecursorIon;
+                var charge = precursorIon.Charge;
+                var precursorIonType = new IonType("Precursor", Composition.H2O, charge, false);
+                var ion = new LabeledIon(precursorIon.Composition, 0, precursorIonType, false);
+                labels.Add(new LabeledIonViewModel(ion));
+            }
+            Ms2SpectrumViewModel.IonUpdate(labels);
         }
 
         private async void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
@@ -82,8 +96,8 @@ namespace LcmsSpectator.ViewModels
             else precursorLabels = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
             if (precursorLabels.Count < 2) return;
             var precursorLabel = precursorLabels[1];
+            NextMs1ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });   
             PreviousMs1ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });
-            NextMs1ViewModel.IonUpdate(new List<LabeledIonViewModel>{precursorLabel});
         }
 
         private void SelectedScanChanged(PropertyChangedMessage<int> message)
@@ -104,26 +118,21 @@ namespace LcmsSpectator.ViewModels
             var nextms1 = lcms.GetSpectrum(lcms.GetNextScanNum(scan, 1));
 
             // get ions
-            var precursors = SelectedPrSmViewModel.Instance.PrecursorLabels; /*await SelectedPrSmViewModel.Instance.PrecursorLabelUpdate; */
-            var precursorIon = precursors.Count > 2 ? new List<LabeledIonViewModel> { precursors[1] } : new List<LabeledIonViewModel>();
+            //var precursors = SelectedPrSmViewModel.Instance.PrecursorLabels; /*await SelectedPrSmViewModel.Instance.PrecursorLabelUpdate; */
+            //var precursorIon = precursors.Count > 2 ? new List<LabeledIonViewModel> { precursors[1] } : new List<LabeledIonViewModel>();
 
             // Ms2 spectrum plot
             var heavyStr = SelectedPrSmViewModel.Instance.Heavy ? ", Heavy" : "";
-            Ms2SpectrumViewModel.XAxis = null;
             Ms2SpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1}{2})", ms2.ScanNum, rawFileName, heavyStr);
             Ms2SpectrumViewModel.SpectrumUpdate(ms2);
             // Ms1 spectrum plots
             var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);    // shared x axis
             // previous Ms1
-            PreviousMs1ViewModel.XAxis = xAxis;
-            PreviousMs1ViewModel.SpectrumUpdate(prevms1);
+            PreviousMs1ViewModel.SpectrumUpdate(prevms1, xAxis);
             PreviousMs1ViewModel.Title = prevms1 == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", prevms1.ScanNum);
-            PreviousMs1ViewModel.IonUpdate(precursorIon);
             // next Ms1
-            NextMs1ViewModel.XAxis = xAxis;
-            NextMs1ViewModel.SpectrumUpdate(nextms1);
+            NextMs1ViewModel.SpectrumUpdate(nextms1, xAxis);
             NextMs1ViewModel.Title = nextms1 == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
-            NextMs1ViewModel.IonUpdate(precursorIon);
         }
 
         private async void SettingsChanged(SettingsChangedNotification notification)
@@ -156,13 +165,11 @@ namespace LcmsSpectator.ViewModels
             // Ms1 spectrum plots
             var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);    // shared x axis
             // previous Ms1
-            PreviousMs1ViewModel.XAxis = xAxis;
-            PreviousMs1ViewModel.SpectrumUpdate(prevms1);
+            PreviousMs1ViewModel.SpectrumUpdate(prevms1, xAxis);
             PreviousMs1ViewModel.IonUpdate(precursorIon);
             PreviousMs1ViewModel.Title = prevms1 == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", prevms1.ScanNum);
             // next Ms1
-            NextMs1ViewModel.XAxis = xAxis;
-            NextMs1ViewModel.SpectrumUpdate(nextms1);
+            NextMs1ViewModel.SpectrumUpdate(nextms1, xAxis);
             NextMs1ViewModel.IonUpdate(precursorIon);
             NextMs1ViewModel.Title = nextms1 == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
         }
