@@ -46,7 +46,7 @@ namespace LcmsSpectator.ViewModels
         public MainWindowViewModel(IMainDialogService dialogService, ITaskService taskService)
         {
             // register messenger events
-            Messenger.Default.Register<XicViewModel.XicCloseRequest>(this, XicCloseRequest);
+            Messenger.Default.Register<XicCloseRequest>(this, XicCloseRequest);
 
             _dialogService = dialogService;
             _taskService = taskService;
@@ -329,7 +329,7 @@ namespace LcmsSpectator.ViewModels
         /// Closes the raw file and cleans up IDs pointing to that raw file
         /// </summary>
         /// <param name="message">Message containing sender info</param>
-        private void XicCloseRequest(XicViewModel.XicCloseRequest message)
+        private void XicCloseRequest(XicCloseRequest message)
         {
             var xicVm = message.Sender as XicViewModel;
             if (xicVm != null)

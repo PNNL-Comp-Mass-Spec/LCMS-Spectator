@@ -8,12 +8,13 @@ using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.TaskServices;
+using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Models;
 using OxyPlot.Axes;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class XicViewModel: ViewModelBase
+    public class XicViewModel: ViewModelBase, IXicViewModel
     {
         public XicPlotViewModel FragmentPlotViewModel { get; set; }
         public XicPlotViewModel HeavyFragmentPlotViewModel { get; set; }
@@ -22,10 +23,6 @@ namespace LcmsSpectator.ViewModels
         public ILcMsRun Lcms { get; private set; }
         public RelayCommand CloseCommand { get; private set; }
         public RelayCommand OpenHeavyModificationsCommand { get; private set; }
-        public class XicCloseRequest: NotificationMessage
-        {
-            public XicCloseRequest(object sender, string notification = "XicClosing") : base(sender, notification) {}
-        }
         public XicViewModel(IMainDialogService dialogService, ITaskService taskService)
         {
             IsLoading = true;

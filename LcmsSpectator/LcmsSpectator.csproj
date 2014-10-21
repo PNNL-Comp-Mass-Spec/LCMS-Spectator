@@ -153,6 +153,8 @@
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
     <Compile Include="Utils\PrSmChangedEventArgs.cs" />
     <Compile Include="TaskServices\TaskService.cs" />
+    <Compile Include="Utils\XicCloseRequest.cs" />
+    <Compile Include="ViewModels\ChargeXicViewModel.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\DmsJobViewModel.cs" />
@@ -161,6 +163,7 @@
     <Compile Include="ViewModels\HeavyModificationsViewModel.cs" />
     <Compile Include="ViewModels\HeavyModificationsWindowViewModel.cs" />
     <Compile Include="ViewModels\IonTypeSelectorViewModel.cs" />
+    <Compile Include="ViewModels\IXicViewModel.cs" />
     <Compile Include="ViewModels\LabeledIonViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModificationViewModel.cs" />
