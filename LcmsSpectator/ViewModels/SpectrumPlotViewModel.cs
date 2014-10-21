@@ -158,7 +158,7 @@ namespace LcmsSpectator.ViewModels
         
         private AutoAdjustedYPlotModel BuildSpectrumPlot()
         {
-            if (_spectrum == null) return new AutoAdjustedYPlotModel(new LinearAxis(), 1.05);
+            if (_spectrum == null) return new AutoAdjustedYPlotModel(new LinearAxis(AxisPosition.Bottom), 1.05);
             // Filtered/Deconvoluted Spectrum?
             var spectrum = _spectrum;
             var tolerance = (_spectrum is ProductSpectrum)
@@ -220,7 +220,7 @@ namespace LcmsSpectator.ViewModels
         {
             if (Plot == null || _ions == null || _ions.Count == 0 || _currentSpectrum == null) return;
             var plot = Plot;
-            Plot = new AutoAdjustedYPlotModel(new LinearAxis(), 1.05);
+            Plot = new AutoAdjustedYPlotModel(new LinearAxis(AxisPosition.Bottom), 1.05);
             StemSeries spectrumSeries = null;
             if (ShowUnexplainedPeaks && plot.Series.Count > 0) spectrumSeries = plot.Series[0] as StemSeries;
             if (!useCache) _ionCache.Clear();
