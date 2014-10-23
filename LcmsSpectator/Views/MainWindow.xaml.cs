@@ -18,8 +18,6 @@ namespace LcmsSpectator.Views
         public MainWindow()
         {
             InitializeComponent();
-            //Loaded += (o, e) => { ScanView.ContextMenu.DataContext = DataContext;  };
-            //Loaded += Window_OnLoaded;
         }
 
         private void Window_OnLoaded(object sender, RoutedEventArgs e)
