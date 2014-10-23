@@ -34,6 +34,7 @@ namespace LcmsSpectator.ViewModels
         public ScanViewModel ScanViewModel { get; private set; }
         public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
         public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
+        public IonListViewModel IonListViewModel { get; private set; }
         public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
         public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
         public SelectedPrSmViewModel SelectedPrSmViewModel { get; private set; }
@@ -54,6 +55,7 @@ namespace LcmsSpectator.ViewModels
             Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
             ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService), new List<PrSm>());
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
+            IonListViewModel = new IonListViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
             XicViewModels = new ObservableCollection<XicViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
 

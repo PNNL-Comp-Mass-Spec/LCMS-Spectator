@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LayoutRoot xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <RootPanel Orientation="Horizontal">
+    <LayoutAnchorablePane Id="0a12a9f1-bcc2-4612-88f6-1ea9bee157ce" DockWidth="130" />
+    <LayoutPanel Orientation="Vertical">
+      <LayoutPanel Orientation="Horizontal">
+        <LayoutDocumentPane>
+          <LayoutDocument Title="XIC View" IsSelected="True" IsLastFocusedDocument="True" ContentId="XicView" CanClose="False" LastActivationTimeStamp="10/23/2014 10:38:49" />
+          <LayoutDocument Title="Spectrum View" ContentId="SpectrumView" CanClose="False" LastActivationTimeStamp="10/23/2014 10:38:47" />
+        </LayoutDocumentPane>
+      </LayoutPanel>
+      <LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="161" DockHeight="200" FloatingWidth="161" FloatingHeight="923" FloatingLeft="875" FloatingTop="1021">
+        <LayoutAnchorablePane DockHeight="200" FloatingWidth="161" FloatingHeight="923" FloatingLeft="875" FloatingTop="1021">
+          <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Protein Tree" IsSelected="True" ContentId="ProteinTree" FloatingLeft="875" FloatingTop="1021" FloatingWidth="161" FloatingHeight="923" IsMaximized="True" LastActivationTimeStamp="10/23/2014 10:38:45" />
+          <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Scan View" ContentId="ScanView" FloatingLeft="875" FloatingTop="1021" FloatingWidth="161" FloatingHeight="923" LastActivationTimeStamp="10/23/2014 10:38:44" />
+          <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="TargetView" ContentId="CreateSequence" FloatingLeft="875" FloatingTop="1021" FloatingWidth="161" FloatingHeight="923" LastActivationTimeStamp="10/23/2014 10:38:43" />
+        </LayoutAnchorablePane>
+      </LayoutAnchorablePaneGroup>
+    </LayoutPanel>
+  </RootPanel>
+  <TopSide />
+  <RightSide />
+  <LeftSide>
+    <LayoutAnchorGroup PreviousContainerId="0a12a9f1-bcc2-4612-88f6-1ea9bee157ce">
+      <LayoutAnchorable CanHide="False" AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Ion Types" ContentId="IonTypeSelector" CanClose="False" LastActivationTimeStamp="10/23/2014 10:38:40" />
+      <LayoutAnchorable CanHide="False" AutoHideWidth="123" AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Ion List" ContentId="IonList" CanClose="False" LastActivationTimeStamp="10/23/2014 10:38:41" />
+    </LayoutAnchorGroup>
+  </LeftSide>
+  <BottomSide />
+  <FloatingWindows />
+  <Hidden />
+</LayoutRoot>

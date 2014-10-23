@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.DialogServices;
@@ -19,6 +20,7 @@ using OxyPlot.Series;
 using OxyPlot.Wpf;
 using Annotation = OxyPlot.Annotations.Annotation;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
+using LineSeries = OxyPlot.Series.LineSeries;
 using Series = OxyPlot.Series.Series;
 using TextAnnotation = OxyPlot.Annotations.TextAnnotation;
 
@@ -30,6 +32,7 @@ namespace LcmsSpectator.ViewModels
 
         public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, double multiplier, bool showUnexplainedPeaks=true)
         {
+            Messenger.Default.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
             _taskService = taskService;
             SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _dialogService = dialogService;
@@ -246,6 +249,7 @@ namespace LcmsSpectator.ViewModels
                     else _ionCache[series.Key] = series.Value;
                 }
             }
+            plot.IsLegendVisible = false;
             plot.InvalidatePlot(true);
             plot.AdjustForZoom();
             Plot = plot;
@@ -260,6 +264,7 @@ namespace LcmsSpectator.ViewModels
             var color = colors.GetColor(labeledIon);
             var ionSeries = new StemSeries(color, 1.5)
             {
+                Title = labeledIon.Label,
                 TrackerFormatString =
                     "{0}" + Environment.NewLine +
                     "{1}: {2:0.###}" + Environment.NewLine +
@@ -290,6 +295,7 @@ namespace LcmsSpectator.ViewModels
                 TextColor = color,
                 FontWeight = FontWeights.Bold,
                 Layer = AnnotationLayer.AboveSeries,
+                FontSize = 12,
                 Background = OxyColors.White,
                 Padding = new OxyThickness(0.1),
                 Position = new DataPoint(maxPeak.Mz, maxPeak.Intensity),
@@ -312,6 +318,33 @@ namespace LcmsSpectator.ViewModels
             };
             xAxis.Zoom(0, ms2MaxMz);
             return xAxis;
+        }
+
+        private void LabeledIonSelectedChanged(PropertyChangedMessage<bool> message)
+        {
+            if (message.PropertyName == "Selected" && message.Sender is LabeledIonViewModel)
+            {
+                var labeledIonVm = message.Sender as LabeledIonViewModel;
+                var label = labeledIonVm.LabeledIon.Label;
+                foreach (var series in Plot.Series)
+                {
+                    var lineSeries = series as StemSeries;
+                    if (lineSeries != null && lineSeries.Title == label)
+                    {
+                        lineSeries.IsVisible = message.NewValue;
+                        Plot.AdjustForZoom();
+                    }
+                }
+                foreach (var annotation in Plot.Annotations)
+                {
+                    var textAnnotation = annotation as TextAnnotation;
+                    if (textAnnotation != null && textAnnotation.Text == label)
+                    {
+                        if (message.NewValue) textAnnotation.FontSize = 0;
+                        else textAnnotation.FontSize = 12;
+                    }
+                }
+            }
         }
 
         private void SaveAsImage()

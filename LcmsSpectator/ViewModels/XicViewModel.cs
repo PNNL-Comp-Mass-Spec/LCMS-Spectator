@@ -151,8 +151,8 @@ namespace LcmsSpectator.ViewModels
             {
                 if (ShowFragmentXic)
                 {
-                    FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
-                    HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                    //FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
+                    //HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
                     UpdateFragmentAreaRatioLabels();
                 }
             }
@@ -171,8 +171,8 @@ namespace LcmsSpectator.ViewModels
             _precursorLabels = message.NewValue;
             if (ShowHeavy)
             {
-                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
-                HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+                //PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
+                //HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
                 UpdatePrecursorAreaRatioLabels();
             }
             else
@@ -296,13 +296,13 @@ namespace LcmsSpectator.ViewModels
 
             if (ShowHeavy)
             {
-                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
-                HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+                //PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
+                //HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
                 UpdatePrecursorAreaRatioLabels();
                 if (ShowFragmentXic)
                 {
-                    FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
-                    HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                    //FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
+                    //HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
                     UpdateFragmentAreaRatioLabels();
                 }
             }
@@ -318,13 +318,13 @@ namespace LcmsSpectator.ViewModels
 
         private async void EnableHeavyXic()
         {
-            PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
-            HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+            //PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
+            //HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
             UpdatePrecursorAreaRatioLabels();
             if (ShowFragmentXic)
             {
-                FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
-                HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                //FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
+                //HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
                 UpdateFragmentAreaRatioLabels();
             }
         }
@@ -333,8 +333,8 @@ namespace LcmsSpectator.ViewModels
         {
             if (ShowHeavy)
             {
-                FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
-                HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                //FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
+                //HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
                 UpdateFragmentAreaRatioLabels();
             }
             else
