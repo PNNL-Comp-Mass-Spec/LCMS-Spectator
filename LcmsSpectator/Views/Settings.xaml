@@ -65,6 +65,8 @@
 
                     <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold">Spectrum Filter Slope</TextBlock>
                     <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterSlope}" Height="25" VerticalAlignment="Top" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope RIT</TextBlock>
+                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
                 </Grid>
             </TabItem>
             <TabItem Header="Modifications">

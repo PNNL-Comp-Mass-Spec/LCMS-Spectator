@@ -100,10 +100,18 @@ namespace LcmsSpectator.ViewModels
             if (!heavy) precursorLabels = message.NewValue;
             else precursorLabels = await ionListVm.GetHeavyPrecursorIons();
             if (precursorLabels.Count < 2) return;
-            var precursorLabel = precursorLabels[1];
+            LabeledIonViewModel precursorLabel = null;
+            foreach (var label in precursorLabels.Where(label => label.LabeledIon.Index == 0))
+            {
+                precursorLabel = label;
+                break;
+            }
             _precursorLabels = precursorLabels;
-            NextMs1ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });   
-            PreviousMs1ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });
+            if (precursorLabel != null)
+            {
+                NextMs1ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });
+                PreviousMs1ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });   
+            }
         }
 
         private void SelectedScanChanged(PropertyChangedMessage<int> message)

@@ -23,6 +23,7 @@ namespace LcmsSpectatorModels.Config
         public List<SearchModification> Modifications { get; set; }
         public int PointsToSmooth { get; set; }
         public double SpectrumFilterSlope { get; set; }
+        public double PrecursorRelativeIntensityThreshold { get; set; }
         public List<SearchModification> SearchModifications { get; set; }
         public List<Modification> LightModifications { get; set; } 
         public List<Modification> HeavyModifications { get; set; } 
@@ -79,6 +80,7 @@ namespace LcmsSpectatorModels.Config
             MaxDynamicModificationsPerSequence = 0;
             PointsToSmooth = 9;
             SpectrumFilterSlope = 0.33;
+            PrecursorRelativeIntensityThreshold = 0.1;
             SearchModifications = new List<SearchModification>
             {
                 new SearchModification(Modification.Carbamidomethylation, 'C', SequenceLocation.Everywhere, true)

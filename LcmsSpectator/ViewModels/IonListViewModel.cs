@@ -2,15 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
+using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.TaskServices;
+using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
+using Constants = LcmsSpectatorModels.Utils.Constants;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -32,6 +36,7 @@ namespace LcmsSpectator.ViewModels
             Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
             Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
             Messenger.Default.Register<PropertyChangedMessage<Sequence>>(this, SelectedSequenceChanged);
+            Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
 
             FragmentLabelUpdate = Task.Run(() => GenerateFragmentLabels(_currentSequence, false));
             PrecursorLabelUpdate = Task.Run(() => GeneratePrecursorLabels(_currentSequence));
@@ -105,12 +110,22 @@ namespace LcmsSpectator.ViewModels
         {
             var ions = new List<LabeledIonViewModel>();
             if (sequence.Count == 0) return ions;
-            for (int i = Constants.MinIsotopeIndex; i <= Constants.MaxIsotopeIndex; i++)
+            var precursorIonType = new IonType("Precursor", Composition.H2O, SelectedPrSmViewModel.Instance.Charge, false);
+            var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
+            var relativeIntensities = composition.GetIsotopomerEnvelope();
+            var mostAbundant = composition.GetMostAbundantIsotopeZeroBasedIndex();
+            var indices = new List<int>();
+            for (int i = 0; i < relativeIntensities.Length; i++)
             {
-                var precursorIonType = new IonType("Precursor", Composition.H2O, SelectedPrSmViewModel.Instance.Charge, false);
-                var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
-                var ion = new LabeledIon(composition, i, precursorIonType, false);
-                ions.Add(new LabeledIonViewModel(ion));
+                if (relativeIntensities[i] >= IcParameters.Instance.PrecursorRelativeIntensityThreshold)
+                    indices.Add(i - mostAbundant);
+            }
+            var min = indices.Min();
+            var max = indices.Max();
+            for (int i = min; i <= max; i++)
+            {
+                var ionLabel = new LabeledIon(composition, i, precursorIonType, false);
+                ions.Add(new LabeledIonViewModel(ionLabel));
             }
             return ions;
         }
@@ -153,6 +168,11 @@ namespace LcmsSpectator.ViewModels
         public Task<List<LabeledIonViewModel>> GetHeavyPrecursorIons()
         {
             return Task.Run(() => GeneratePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.HeavySequence));
+        }
+
+        private void SettingsChanged(SettingsChangedNotification notification)
+        {
+            UpdatePrecursorLabels();
         }
 
         private IMainDialogService _dialogService;
