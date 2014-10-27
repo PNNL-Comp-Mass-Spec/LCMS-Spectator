@@ -118,6 +118,11 @@ namespace LcmsSpectator.ViewModels
             if (ReadyToClose != null) ReadyToClose(this, null);
         }
 
+        private void LoadLayoutFile()
+        {
+            
+        }
+
         private void Cancel()
         {
             if (ReadyToClose != null) ReadyToClose(this, null);

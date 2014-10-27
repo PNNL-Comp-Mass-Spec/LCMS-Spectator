@@ -108,6 +108,23 @@
             <TabItem Header="Heavy Modifications">
                 <views:HeavyModificationsView DataContext="{Binding HeavyModificationsViewModel}" />
             </TabItem>
+            <TabItem Header="Layout">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="15*" />
+                        <ColumnDefinition Width="25*" />
+                        <ColumnDefinition Width="10*" />
+                        <ColumnDefinition Width="10*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold">Current Layout</TextBlock>
+                    <TextBox Grid.Row="0" Grid.Column="1" TextAlignment="Right" Text="{Binding ProductIonTolerance}" Height="25" VerticalAlignment="Top"  />
+                    <Button Grid.Row="0" Grid.Column="2" Height="25" VerticalAlignment="Top">Browse</Button>
+                    <Button Grid.Row="0" Grid.Column="3" Height="25" VerticalAlignment="Top">Restore Default</Button>
+                </Grid>
+            </TabItem>
         </TabControl>
 
         <Grid Grid.Row="2" Margin="280,0,0,0">
