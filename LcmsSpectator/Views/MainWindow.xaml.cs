@@ -74,7 +74,7 @@ namespace LcmsSpectator.Views
 
         private void DockingManager_OnUnloaded(object sender, RoutedEventArgs e)
         {
-            /*using (var fs = new StreamWriter("layout.xml"))
+            /*using (var fs = new StreamWriter("layout1.xml"))
             {
                 var xmlLayout = new XmlLayoutSerializer(AvDock);
                 xmlLayout.Serialize(fs);

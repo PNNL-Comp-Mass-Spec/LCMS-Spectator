@@ -7,33 +7,31 @@
              d:DesignHeight="450" d:DesignWidth="175">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="80*" />
-            <RowDefinition Height="1" />
-            <RowDefinition Height="20*" />
+            <RowDefinition Height="65*" />
+            <RowDefinition Height="35*" />
         </Grid.RowDefinitions>
         <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                                                                       IsReadOnly="True" RowHeaderWidth="0" Grid.Row="0"
-                                                                       ItemsSource="{Binding FragmentLabels}">
+                   IsReadOnly="True" RowHeaderWidth="0" Grid.Row="0"
+                   ItemsSource="{Binding FragmentLabels}">
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">
                     <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Fragment" Width="*" Binding="{Binding LabeledIon.Label}"/>
+                <DataGridTextColumn Header="Product Ions" Width="*" Binding="{Binding LabeledIon.Label}"/>
             </DataGrid.Columns>
         </DataGrid>
-        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ShowsPreview="True" Height="1" />
         <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
-                                                                       ItemsSource="{Binding PrecursorLabels}"
-                                                                       IsReadOnly="True" RowHeaderWidth="0" Grid.Row="2">
+                   ItemsSource="{Binding PrecursorLabels}"
+                   IsReadOnly="True" RowHeaderWidth="0" Grid.Row="1">
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">
                     <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Isotope" Width="*" Binding="{Binding LabeledIon.Label}" />
+                <DataGridTextColumn Header="Precursor" Width="*" Binding="{Binding LabeledIon.Label}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

@@ -10,6 +10,7 @@ using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.TaskServices;
+using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
@@ -33,6 +34,7 @@ namespace LcmsSpectator.ViewModels
         public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, double multiplier, bool showUnexplainedPeaks=true)
         {
             Messenger.Default.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
+            //Messenger.Default.Register<PropertyChangedMessage<double>>(this, PrecursorChanged);
             _taskService = taskService;
             SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _dialogService = dialogService;
@@ -40,6 +42,7 @@ namespace LcmsSpectator.ViewModels
             _showFilteredSpectrum = false;
             _showDeconvolutedSpectrum = false;
             _multiplier = multiplier;
+            _updateIons = false;
             Title = "";
             _ionCache = new Dictionary<string, Tuple<Series, Annotation>>();
             Clear();
@@ -125,6 +128,9 @@ namespace LcmsSpectator.ViewModels
                 _filtDeconSpectrum = null; 
                 Plot = BuildSpectrumPlot();
                 IonUpdate();
+                /*if (_updateIons) IonUpdate();
+                else if (_ions != null) _ions.Clear();
+                _updateIons = true;*/
             });
         }
 
@@ -222,16 +228,21 @@ namespace LcmsSpectator.ViewModels
         private void SetPlotSeries(bool useCache=true)
         {
             if (Plot == null || _ions == null || _ions.Count == 0 || _currentSpectrum == null) return;
-            var plot = Plot;
-            Plot = new AutoAdjustedYPlotModel(new LinearAxis(AxisPosition.Bottom), 1.05);
             StemSeries spectrumSeries = null;
-            if (ShowUnexplainedPeaks && plot.Series.Count > 0) spectrumSeries = plot.Series[0] as StemSeries;
+            if (ShowUnexplainedPeaks && Plot.Series.Count > 0) spectrumSeries = Plot.Series[0] as StemSeries;
             if (!useCache) _ionCache.Clear();
-            plot.Series.Clear();
-            plot.Annotations.Clear();
-            if (spectrumSeries != null) plot.Series.Add(spectrumSeries);
+            GuiInvoker.Invoke(() =>
+            {
+                Plot.Series.Clear();
+                Plot.Annotations.Clear();
+                if (spectrumSeries != null) Plot.Series.Add(spectrumSeries);
+            });
             // add new ion series
-            var seriesstore = _ions.ToDictionary<LabeledIonViewModel, string, Tuple<Series, Annotation>>(ionVm => ionVm.LabeledIon.Label, ion => null);
+            var seriesstore = new Dictionary<string, Tuple<Series, Annotation>>();
+            foreach (var ion in _ions)
+            {
+                if (!seriesstore.ContainsKey(ion.LabeledIon.Label)) seriesstore.Add(ion.LabeledIon.Label, null);
+            }
             var colors = new ColorDictionary(Math.Min(Math.Max(SelectedPrSmViewModel.Instance.Charge - 1, 2), 15));
             Parallel.ForEach(_ions, ionVm =>
             {
@@ -241,18 +252,21 @@ namespace LcmsSpectator.ViewModels
             });
             foreach (var series in seriesstore.Where(series => series.Value != null))
             {
-                plot.Series.Add(series.Value.Item1);
-                plot.Annotations.Add(series.Value.Item2);
+                KeyValuePair<string, Tuple<Series, Annotation>> series1 = series;
+                GuiInvoker.Invoke(() =>
+                {
+                    Plot.Series.Add(series1.Value.Item1);
+                    Plot.Annotations.Add(series1.Value.Item2); 
+                });
                 if (useCache)
                 {
                     if (!_ionCache.ContainsKey(series.Key)) _ionCache.Add(series.Key, series.Value);
                     else _ionCache[series.Key] = series.Value;
                 }
             }
-            plot.IsLegendVisible = false;
-            plot.InvalidatePlot(true);
-            plot.AdjustForZoom();
-            Plot = plot;
+            Plot.IsLegendVisible = false;
+            Plot.InvalidatePlot(true);
+            Plot.AdjustForZoom();
         }
 
         private Tuple<Series, Annotation> GetIonSeries(LabeledIon labeledIon, Spectrum spectrum, ColorDictionary colors)
@@ -347,6 +361,14 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private void PrecursorChanged(PropertyChangedMessage<double> message)
+        {
+            if (message.PropertyName == "PrecursorMz")
+            {
+                _taskService.Enqueue(() =>_updateIons = false);
+            }
+        }
+
         private void SaveAsImage()
         {
             var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
@@ -379,6 +401,8 @@ namespace LcmsSpectator.ViewModels
 
         private List<LabeledIonViewModel> _ions;
         private bool _showUnexplainedPeaks;
+
+        private bool _updateIons;
 
         private readonly Dictionary<string, Tuple<Series, Annotation>> _ionCache;
         private bool _showDeconvolutedSpectrum;

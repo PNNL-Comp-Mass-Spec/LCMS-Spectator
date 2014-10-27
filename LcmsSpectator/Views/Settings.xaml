@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:views="clr-namespace:LcmsSpectator.Views"
+             xmlns:utils="clr-namespace:LcmsSpectator.Utils"
              mc:Ignorable="d" Title="LcMsSpectator: Settings"
              Height="360" Width="650">
     <Window.Resources>
@@ -34,12 +35,13 @@
             <TabItem Header="Data">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="16*" />
-                        <RowDefinition Height="16*" />
-                        <RowDefinition Height="16*" />
-                        <RowDefinition Height="16*" />
-                        <RowDefinition Height="16*" />
-                        <RowDefinition Height="16*" />
+                        <RowDefinition Height="14*" />
+                        <RowDefinition Height="14*" />
+                        <RowDefinition Height="14*" />
+                        <RowDefinition Height="14*" />
+                        <RowDefinition Height="14*" />
+                        <RowDefinition Height="14*" />
+                        <RowDefinition Height="14*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="40*" />
@@ -67,6 +69,9 @@
                     <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterSlope}" Height="25" VerticalAlignment="Top" />
                     <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope RIT</TextBlock>
                     <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Precursor View Mode</TextBlock>
+                    <ComboBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Height="25" VerticalAlignment="Top" ItemsSource="{Binding PrecursorViewModes}"
+                              SelectedItem="{Binding PrecursorViewMode}"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Modifications">

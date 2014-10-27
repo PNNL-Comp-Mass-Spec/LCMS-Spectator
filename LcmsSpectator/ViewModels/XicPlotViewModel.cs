@@ -382,13 +382,14 @@ namespace LcmsSpectator.ViewModels
             else
             {
                 _xicCacheLock.ReleaseMutex();
+                var isotopeIndex = label.IsChargeState ? 0 : label.Index;
                 var ion = label.Ion;
                 Xic xic;
                 if (label.IsFragmentIon) xic = Lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
                                                                                             IcParameters.Instance.ProductIonTolerancePpm,
                                                                                             label.PrecursorIon.GetMostAbundantIsotopeMz());
-                else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
-                lxic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon);
+                else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(isotopeIndex), IcParameters.Instance.PrecursorTolerancePpm);
+                lxic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon, label.PrecursorIon, label.IsChargeState);
                 _xicCacheLock.WaitOne();
                 _xicCache.Add(label.Label, lxic);
             }

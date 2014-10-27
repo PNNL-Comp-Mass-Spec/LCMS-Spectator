@@ -14,7 +14,7 @@ using OxyPlot.Axes;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class XicViewModel: ViewModelBase, IXicViewModel
+    public class XicViewModel: ViewModelBase
     {
         public XicPlotViewModel FragmentPlotViewModel { get; set; }
         public XicPlotViewModel HeavyFragmentPlotViewModel { get; set; }
@@ -165,7 +165,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private async void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        private void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
         {
             if (message.PropertyName != "PrecursorLabels") return;
             _precursorLabels = message.NewValue;
@@ -316,7 +316,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private async void EnableHeavyXic()
+        private void EnableHeavyXic()
         {
             //PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
             //HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
@@ -329,7 +329,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private async void EnableFragmentXic()
+        private void EnableFragmentXic()
         {
             if (ShowHeavy)
             {

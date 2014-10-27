@@ -9,6 +9,11 @@ using InformedProteomics.Backend.MassSpecData;
 
 namespace LcmsSpectatorModels.Config
 {
+    public enum PrecursorViewMode
+    {
+        Isotopes,
+        Charges
+    }
     public class IcParameters
     {
         public LcMsRun Lcms { get; set; }
@@ -24,6 +29,7 @@ namespace LcmsSpectatorModels.Config
         public int PointsToSmooth { get; set; }
         public double SpectrumFilterSlope { get; set; }
         public double PrecursorRelativeIntensityThreshold { get; set; }
+        public PrecursorViewMode PrecursorViewMode { get; set; }
         public List<SearchModification> SearchModifications { get; set; }
         public List<Modification> LightModifications { get; set; } 
         public List<Modification> HeavyModifications { get; set; } 
@@ -81,6 +87,7 @@ namespace LcmsSpectatorModels.Config
             PointsToSmooth = 9;
             SpectrumFilterSlope = 0.33;
             PrecursorRelativeIntensityThreshold = 0.1;
+            PrecursorViewMode = PrecursorViewMode.Isotopes;
             SearchModifications = new List<SearchModification>
             {
                 new SearchModification(Modification.Carbamidomethylation, 'C', SequenceLocation.Everywhere, true)

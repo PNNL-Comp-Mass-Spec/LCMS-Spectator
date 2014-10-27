@@ -27,6 +27,8 @@ namespace LcmsSpectator.ViewModels
         {
             _dialogService = dialogService;
             _taskService = taskService;
+            _fragmentTaskService = TaskServiceFactory.GetTaskServiceLike(_taskService);
+            _precursorTaskService = TaskServiceFactory.GetTaskServiceLike(_taskService);
 
             _fragmentLabelCache = new Dictionary<Tuple<string, bool>, LabeledIonViewModel>();
             _precursorLabelCache = new Dictionary<Tuple<string, bool>, LabeledIonViewModel>();
@@ -39,7 +41,12 @@ namespace LcmsSpectator.ViewModels
             Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
 
             FragmentLabelUpdate = Task.Run(() => GenerateFragmentLabels(_currentSequence, false));
-            PrecursorLabelUpdate = Task.Run(() => GeneratePrecursorLabels(_currentSequence));
+            PrecursorLabelUpdate = Task.Run(() => GenerateIsotopePrecursorLabels(_currentSequence));
+        }
+
+        public string PrecursorIonType
+        {
+            get { return "Precursor Isotopes";  }
         }
 
         public List<LabeledIonViewModel> FragmentLabels
@@ -66,9 +73,10 @@ namespace LcmsSpectator.ViewModels
 
         private async void UpdateFragmentLabels()
         {
-            if (FragmentLabelUpdate != null && !FragmentLabelUpdate.IsCompleted) await FragmentLabelUpdate;
+            _precursorTaskService.Enqueue(() => FragmentLabels = GenerateFragmentLabels(SelectedPrSmViewModel.Instance.Sequence, false));
+            /*if (FragmentLabelUpdate != null && !FragmentLabelUpdate.IsCompleted) await FragmentLabelUpdate;
             FragmentLabelUpdate = Task.Run(() => GenerateFragmentLabels(SelectedPrSmViewModel.Instance.Sequence, false));
-            FragmentLabels = await FragmentLabelUpdate;
+            FragmentLabels = await FragmentLabelUpdate; */
         }
 
         private List<LabeledIonViewModel> GenerateFragmentLabels(Sequence sequence, bool heavy, bool useCache = true)
@@ -99,33 +107,50 @@ namespace LcmsSpectator.ViewModels
             return fragmentLabels;
         }
 
-        private async void UpdatePrecursorLabels()
+        private void UpdatePrecursorLabels()
         {
-            if (PrecursorLabelUpdate != null && !PrecursorLabelUpdate.IsCompleted) await PrecursorLabelUpdate;
-            PrecursorLabelUpdate = Task.Run(() => GeneratePrecursorLabels(SelectedPrSmViewModel.Instance.Sequence));
-            PrecursorLabels = await PrecursorLabelUpdate;
+            _precursorTaskService.Enqueue(() =>
+            {
+                PrecursorLabels = (IcParameters.Instance.PrecursorViewMode == PrecursorViewMode.Charges)
+                    ? GenerateChargePrecursorLabels(SelectedPrSmViewModel.Instance.Sequence)
+                    : GenerateIsotopePrecursorLabels(SelectedPrSmViewModel.Instance.Sequence);
+            });
+            /*if (PrecursorLabelUpdate != null && !PrecursorLabelUpdate.IsCompleted) await PrecursorLabelUpdate;
+            PrecursorLabelUpdate = Task.Run(() => GenerateChargePrecursorLabels(SelectedPrSmViewModel.Instance.Sequence));
+            PrecursorLabels = await PrecursorLabelUpdate; */
         }
 
-        private List<LabeledIonViewModel> GeneratePrecursorLabels(Sequence sequence)
+        private List<LabeledIonViewModel> GenerateIsotopePrecursorLabels(Sequence sequence)
         {
             var ions = new List<LabeledIonViewModel>();
             if (sequence.Count == 0) return ions;
             var precursorIonType = new IonType("Precursor", Composition.H2O, SelectedPrSmViewModel.Instance.Charge, false);
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             var relativeIntensities = composition.GetIsotopomerEnvelope();
-            var mostAbundant = composition.GetMostAbundantIsotopeZeroBasedIndex();
-            var indices = new List<int>();
+            var indices = new List<int> { -1 };
             for (int i = 0; i < relativeIntensities.Length; i++)
             {
-                if (relativeIntensities[i] >= IcParameters.Instance.PrecursorRelativeIntensityThreshold)
-                    indices.Add(i - mostAbundant);
+                if (relativeIntensities[i] >= IcParameters.Instance.PrecursorRelativeIntensityThreshold || i == 0)
+                    indices.Add(i);
             }
-            var min = indices.Min();
-            var max = indices.Max();
-            for (int i = min; i <= max; i++)
+            ions.AddRange(indices.Select(index => new LabeledIon(composition, index, precursorIonType, false)).Select(ionLabel => new LabeledIonViewModel(ionLabel)));
+            return ions;
+        }
+
+        private List<LabeledIonViewModel> GenerateChargePrecursorLabels(Sequence sequence)
+        {
+            var ions = new List<LabeledIonViewModel>();
+
+            if (sequence.Count == 0) return ions;
+            var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
+            var minCharge = Math.Max(1, SelectedPrSmViewModel.Instance.Charge - 3);
+            var maxCharge = SelectedPrSmViewModel.Instance.Charge + 3;
+
+            for (int i = minCharge; i <= maxCharge; i++)
             {
-                var ionLabel = new LabeledIon(composition, i, precursorIonType, false);
-                ions.Add(new LabeledIonViewModel(ionLabel));
+                var precursorIonType = new IonType("Precursor", Composition.H2O, i, false);
+                var labeledIon = new LabeledIon(composition, i-minCharge, precursorIonType, false, null, true);
+                ions.Add(new LabeledIonViewModel(labeledIon));
             }
             return ions;
         }
@@ -162,12 +187,12 @@ namespace LcmsSpectator.ViewModels
 
         public Task<List<LabeledIonViewModel>> GetLightPrecursorIons()
         {
-            return Task.Run(() => GeneratePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.LightSequence));
+            return Task.Run(() => GenerateIsotopePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.LightSequence));
         }
 
         public Task<List<LabeledIonViewModel>> GetHeavyPrecursorIons()
         {
-            return Task.Run(() => GeneratePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.HeavySequence));
+            return Task.Run(() => GenerateIsotopePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.HeavySequence));
         }
 
         private void SettingsChanged(SettingsChangedNotification notification)
@@ -177,6 +202,8 @@ namespace LcmsSpectator.ViewModels
 
         private IMainDialogService _dialogService;
         private ITaskService _taskService;
+        private ITaskService _precursorTaskService;
+        private ITaskService _fragmentTaskService;
 
         private int _currentCharge;
         private Sequence _currentSequence;

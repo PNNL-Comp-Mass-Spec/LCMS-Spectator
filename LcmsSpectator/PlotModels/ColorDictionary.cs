@@ -71,18 +71,19 @@ namespace LcmsSpectator.PlotModels
 
             _precursorColors = new Dictionary<int, OxyColor>
             {
-                {-4, OxyColors.AliceBlue},
-                {-3, OxyColors.LightBlue},
-                {-2, OxyColors.Blue},
-                {-1, OxyColors.Navy},
+                {-1, OxyColors.DarkGray},
                 {0, OxyColors.Purple},
-                {1, OxyColors.LightGreen},
-                {2, OxyColors.Green},
-                {3, OxyColors.Yellow},
-                {4, OxyColors.Orange},
-                {5, OxyColors.OrangeRed},
-                {6, OxyColors.Red},
-                {7, OxyColors.DarkRed}
+                {1, OxyColors.Red},
+                {2, OxyColors.Blue},
+                {3, OxyColors.Green},
+                {4, OxyColors.Yellow},
+                {5, OxyColors.Brown},
+                {6, OxyColors.Orange},
+                {7, OxyColors.Magenta},
+                {8, OxyColors.Turquoise},
+                {9, OxyColors.Olive},
+                {10, OxyColors.Beige},
+                {11, OxyColors.Lime},
             };
         }
 

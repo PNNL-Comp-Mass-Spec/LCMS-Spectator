@@ -23,7 +23,9 @@ namespace LcmsSpectator.ViewModels
         public int PointsToSmooth { get; set; }
         public double SpectrumFilterSlope { get; set; }
         public double PrecursorRelativeIntensityThreshold { get; set; }
+        public PrecursorViewMode PrecursorViewMode { get; set; }
 
+        public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; } 
         public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
         public RelayCommand AddModificationCommand { get; set; }
 
@@ -50,6 +52,13 @@ namespace LcmsSpectator.ViewModels
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
             SpectrumFilterSlope = IcParameters.Instance.SpectrumFilterSlope;
             PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
+            PrecursorViewMode = IcParameters.Instance.PrecursorViewMode;
+
+            PrecursorViewModes = new ObservableCollection<PrecursorViewMode>
+            {
+                PrecursorViewMode.Isotopes,
+                PrecursorViewMode.Charges
+            };
 
             Modifications = new ObservableCollection<ModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
@@ -91,6 +100,7 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
             IcParameters.Instance.SpectrumFilterSlope = SpectrumFilterSlope;
             IcParameters.Instance.PrecursorRelativeIntensityThreshold = PrecursorRelativeIntensityThreshold;
+            IcParameters.Instance.PrecursorViewMode = PrecursorViewMode;
 
             var modificationList = new List<SearchModification>();
             foreach (var searchModificationVm in Modifications)
