@@ -114,7 +114,7 @@
                                     <xcad:LayoutAnchorable Title="Scan View">
                                         <Grid x:Name="ScanView">
                                             <DataGrid AutoGenerateColumns="False" SelectionMode="Extended" DataContext="{Binding ScanViewModel}"
-                                              IsReadOnly="False" RowHeaderWidth="0"
+                                              IsReadOnly="True" RowHeaderWidth="0"
                                               ItemsSource="{Binding FilteredData}" SelectedItem="{Binding SelectedPrSm}"
                                               Grid.Row="0">
                                                 <DataGrid.ContextMenu>
