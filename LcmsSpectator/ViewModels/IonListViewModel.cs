@@ -140,11 +140,11 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledIonViewModel> GenerateChargePrecursorLabels(Sequence sequence)
         {
             var ions = new List<LabeledIonViewModel>();
-
+            var numChargeStates = IonUtils.GetNumNeighboringChargeStates(SelectedPrSmViewModel.Instance.Charge);
             if (sequence.Count == 0) return ions;
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
-            var minCharge = Math.Max(1, SelectedPrSmViewModel.Instance.Charge - 3);
-            var maxCharge = SelectedPrSmViewModel.Instance.Charge + 3;
+            var minCharge = Math.Max(1, SelectedPrSmViewModel.Instance.Charge - numChargeStates);
+            var maxCharge = SelectedPrSmViewModel.Instance.Charge + numChargeStates;
 
             for (int i = minCharge; i <= maxCharge; i++)
             {
