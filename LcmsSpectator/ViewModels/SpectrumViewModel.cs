@@ -68,14 +68,15 @@ namespace LcmsSpectator.ViewModels
             return xAxis;
         }
 
-        private async void SelectedFragmentLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        private void SelectedFragmentLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
         {
             if (message.PropertyName != "FragmentLabels") return;
             var ionListVm = message.Sender as IonListViewModel;
             if (ionListVm == null) return;
             var fragmentLabels = message.NewValue;
             var heavy = SelectedPrSmViewModel.Instance.Heavy;
-            var labels = (!heavy) ? fragmentLabels : await ionListVm.GetHeavyFragmentIons();
+            //var labels = (!heavy) ? fragmentLabels : await ionListVm.GetHeavyFragmentIons();
+            var labels = fragmentLabels;
             // add precursor ion
             /*if (labels.Count > 0)
             {
@@ -96,9 +97,9 @@ namespace LcmsSpectator.ViewModels
             var ionListVm = message.Sender as IonListViewModel;
             if (ionListVm == null) return;
             var heavy = SelectedPrSmViewModel.Instance.Heavy;
-            List<LabeledIonViewModel> precursorLabels;
-            if (!heavy) precursorLabels = message.NewValue;
-            else precursorLabels = await ionListVm.GetHeavyPrecursorIons();
+            List<LabeledIonViewModel> precursorLabels = message.NewValue;
+            //if (!heavy) precursorLabels = message.NewValue;
+            //else precursorLabels = await ionListVm.GetHeavyPrecursorIons();
             if (precursorLabels.Count < 2) return;
             LabeledIonViewModel precursorLabel = null;
             foreach (var label in precursorLabels.Where(label => label.LabeledIon.Index == 0))

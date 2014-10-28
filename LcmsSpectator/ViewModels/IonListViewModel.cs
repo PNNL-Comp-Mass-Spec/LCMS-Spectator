@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Odbc;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
-using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -14,7 +13,6 @@ using LcmsSpectator.TaskServices;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
-using Constants = LcmsSpectatorModels.Utils.Constants;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -26,15 +24,18 @@ namespace LcmsSpectator.ViewModels
         public IonListViewModel(IMainDialogService dialogService, ITaskService taskService)
         {
             _dialogService = dialogService;
-            _taskService = taskService;
-            _fragmentTaskService = TaskServiceFactory.GetTaskServiceLike(_taskService);
-            _precursorTaskService = TaskServiceFactory.GetTaskServiceLike(_taskService);
+            ITaskService taskService1 = taskService;
+            _fragmentTaskService = TaskServiceFactory.GetTaskServiceLike(taskService1);
+            _precursorTaskService = TaskServiceFactory.GetTaskServiceLike(taskService1);
 
             _fragmentLabelCache = new Dictionary<Tuple<string, bool>, LabeledIonViewModel>();
             _precursorLabelCache = new Dictionary<Tuple<string, bool>, LabeledIonViewModel>();
 
+            _showHeavyCount = 0;
+
             _currentSequence = new Sequence(new List<AminoAcid>());
 
+            Messenger.Default.Register<PropertyChangedMessage<bool>>(this, ShowHeavyChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
             Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
             Messenger.Default.Register<PropertyChangedMessage<Sequence>>(this, SelectedSequenceChanged);
@@ -44,11 +45,7 @@ namespace LcmsSpectator.ViewModels
             PrecursorLabelUpdate = Task.Run(() => GenerateIsotopePrecursorLabels(_currentSequence));
         }
 
-        public string PrecursorIonType
-        {
-            get { return "Precursor Isotopes";  }
-        }
-
+        #region Ion label properties
         public List<LabeledIonViewModel> FragmentLabels
         {
             get { return _fragmentLabels; }
@@ -57,6 +54,28 @@ namespace LcmsSpectator.ViewModels
                 var oldValue = _fragmentLabels;
                 _fragmentLabels = value;
                 RaisePropertyChanged("FragmentLabels", oldValue, _fragmentLabels, true);
+            }
+        }
+
+        public List<LabeledIonViewModel> LightFragmentLabels
+        {
+            get { return _lightFragmentLabels; }
+            set
+            {
+                var oldValue = _lightFragmentLabels;
+                _lightFragmentLabels = value;
+                RaisePropertyChanged("LightFragmentLabels", oldValue, _lightFragmentLabels, true);
+            }
+        }
+
+        public List<LabeledIonViewModel> HeavyFragmentLabels
+        {
+            get { return _heavyFragmentLabels; }
+            set
+            {
+                var oldValue = _heavyFragmentLabels;
+                _heavyFragmentLabels = value;
+                RaisePropertyChanged("HeavyFragmentLabels", oldValue, _heavyFragmentLabels, true);
             }
         }
 
@@ -71,12 +90,42 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private async void UpdateFragmentLabels()
+        public List<LabeledIonViewModel> LightPrecursorLabels
         {
-            _precursorTaskService.Enqueue(() => FragmentLabels = GenerateFragmentLabels(SelectedPrSmViewModel.Instance.Sequence, false));
-            /*if (FragmentLabelUpdate != null && !FragmentLabelUpdate.IsCompleted) await FragmentLabelUpdate;
-            FragmentLabelUpdate = Task.Run(() => GenerateFragmentLabels(SelectedPrSmViewModel.Instance.Sequence, false));
-            FragmentLabels = await FragmentLabelUpdate; */
+            get { return _lightPrecursorLabels; }
+            set
+            {
+                var oldValue = _lightPrecursorLabels;
+                _lightPrecursorLabels = value;
+                RaisePropertyChanged("LightPrecursorLabels", oldValue, _lightPrecursorLabels, true);
+            }
+        }
+
+        public List<LabeledIonViewModel> HeavyPrecursorLabels
+        {
+            get { return _heavyPrecursorLabels; }
+            set
+            {
+                var oldValue = _heavyPrecursorLabels;
+                _heavyPrecursorLabels = value;
+                RaisePropertyChanged("HeavyPrecursorLabels", oldValue, _heavyPrecursorLabels, true);
+            }
+        }
+        #endregion
+
+        private void UpdateFragmentLabels()
+        {
+            _fragmentTaskService.Enqueue(() => FragmentLabels = GenerateFragmentLabels(SelectedPrSmViewModel.Instance.Sequence, false));
+        }
+
+        private void UpdateLightFragmentLabels()
+        {
+            _fragmentTaskService.Enqueue(() => LightFragmentLabels = GenerateFragmentLabels(SelectedPrSmViewModel.Instance.PrSm.LightSequence, true, false));
+        }
+
+        private void UpdateHeavyFragmentLabels()
+        {
+            _fragmentTaskService.Enqueue(() => HeavyFragmentLabels = GenerateFragmentLabels(SelectedPrSmViewModel.Instance.PrSm.HeavySequence, true, false));
         }
 
         private List<LabeledIonViewModel> GenerateFragmentLabels(Sequence sequence, bool heavy, bool useCache = true)
@@ -115,9 +164,26 @@ namespace LcmsSpectator.ViewModels
                     ? GenerateChargePrecursorLabels(SelectedPrSmViewModel.Instance.Sequence)
                     : GenerateIsotopePrecursorLabels(SelectedPrSmViewModel.Instance.Sequence);
             });
-            /*if (PrecursorLabelUpdate != null && !PrecursorLabelUpdate.IsCompleted) await PrecursorLabelUpdate;
-            PrecursorLabelUpdate = Task.Run(() => GenerateChargePrecursorLabels(SelectedPrSmViewModel.Instance.Sequence));
-            PrecursorLabels = await PrecursorLabelUpdate; */
+        }
+
+        private void UpdateLightPrecursorLabels()
+        {
+            _precursorTaskService.Enqueue(() =>
+            {
+                LightPrecursorLabels = (IcParameters.Instance.PrecursorViewMode == PrecursorViewMode.Charges)
+                    ? GenerateChargePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.LightSequence)
+                    : GenerateIsotopePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.LightSequence);
+            });
+        }
+
+        private void UpdateHeavyPrecursorLabels()
+        {
+            _precursorTaskService.Enqueue(() =>
+            {
+                HeavyPrecursorLabels = (IcParameters.Instance.PrecursorViewMode == PrecursorViewMode.Charges)
+                    ? GenerateChargePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.HeavySequence)
+                    : GenerateIsotopePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.HeavySequence);
+            });
         }
 
         private List<LabeledIonViewModel> GenerateIsotopePrecursorLabels(Sequence sequence)
@@ -159,6 +225,11 @@ namespace LcmsSpectator.ViewModels
         {
             _ionTypes = message.NewValue;
             UpdateFragmentLabels();
+            if (_showHeavyCount > 0)
+            {
+                UpdateLightFragmentLabels();
+                UpdateHeavyFragmentLabels();
+            }
         }
 
         private void SelectedChargeChanged(PropertyChangedMessage<int> message)
@@ -173,45 +244,63 @@ namespace LcmsSpectator.ViewModels
             _fragmentLabelCache.Clear();
             _precursorLabelCache.Clear();
             UpdatePrecursorLabels();
+            if (_showHeavyCount > 0)
+            {
+                UpdateLightPrecursorLabels();
+                UpdateHeavyPrecursorLabels();
+            }
         }
 
-        public Task<List<LabeledIonViewModel>> GetLightFragmentIons()
+        private void ShowHeavyChanged(PropertyChangedMessage<bool> message)
         {
-            return Task.Run(() => GenerateFragmentLabels(SelectedPrSmViewModel.Instance.PrSm.LightSequence, false, false));
-        }
-
-        public Task<List<LabeledIonViewModel>> GetHeavyFragmentIons()
-        {
-            return Task.Run(() => GenerateFragmentLabels(SelectedPrSmViewModel.Instance.PrSm.HeavySequence, true, false));
-        }
-
-        public Task<List<LabeledIonViewModel>> GetLightPrecursorIons()
-        {
-            return Task.Run(() => GenerateIsotopePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.LightSequence));
-        }
-
-        public Task<List<LabeledIonViewModel>> GetHeavyPrecursorIons()
-        {
-            return Task.Run(() => GenerateIsotopePrecursorLabels(SelectedPrSmViewModel.Instance.PrSm.HeavySequence));
+            if (message.PropertyName != "ShowHeavy") return;
+            if (message.NewValue)
+            {
+                if (_showHeavyCount == 0)
+                {
+                    UpdateLightFragmentLabels();
+                    UpdateHeavyFragmentLabels();
+                    UpdateLightPrecursorLabels();
+                    UpdateHeavyPrecursorLabels();
+                }
+                _showHeavyCount++;
+            }
+            else if (_showHeavyCount > 0)
+            {
+                _showHeavyCount--;
+            }
         }
 
         private void SettingsChanged(SettingsChangedNotification notification)
         {
+            UpdateFragmentLabels();
             UpdatePrecursorLabels();
+            if (_showHeavyCount > 0)
+            {
+                UpdateLightFragmentLabels();
+                UpdateHeavyFragmentLabels();
+                UpdateLightPrecursorLabels();
+                UpdateHeavyPrecursorLabels();
+            }
         }
 
         private IMainDialogService _dialogService;
-        private ITaskService _taskService;
-        private ITaskService _precursorTaskService;
+        private readonly ITaskService _precursorTaskService;
         private ITaskService _fragmentTaskService;
 
         private int _currentCharge;
         private Sequence _currentSequence;
+
+        private int _showHeavyCount;
 
         private List<IonType> _ionTypes;
         private readonly Dictionary<Tuple<string, bool>, LabeledIonViewModel> _fragmentLabelCache;
         private readonly Dictionary<Tuple<string, bool>, LabeledIonViewModel> _precursorLabelCache;
         private List<LabeledIonViewModel> _fragmentLabels;
         private List<LabeledIonViewModel> _precursorLabels;
+        private List<LabeledIonViewModel> _lightFragmentLabels;
+        private List<LabeledIonViewModel> _heavyFragmentLabels;
+        private List<LabeledIonViewModel> _lightPrecursorLabels;
+        private List<LabeledIonViewModel> _heavyPrecursorLabels;
     }
 }
