@@ -5,15 +5,15 @@
       <LayoutAnchorablePane Id="0a12a9f1-bcc2-4612-88f6-1ea9bee157ce" DockWidth="130" />
       <LayoutPanel Orientation="Horizontal">
         <LayoutDocumentPane>
-          <LayoutDocument Title="XIC View" IsSelected="True" IsLastFocusedDocument="True" ContentId="XicView" CanClose="False" LastActivationTimeStamp="10/23/2014 12:36:27" />
+          <LayoutDocument Title="XIC View" IsSelected="True" IsLastFocusedDocument="True" ContentId="XicView" CanClose="False" LastActivationTimeStamp="10/28/2014 09:38:54" />
           <LayoutDocument Title="Spectrum View" ContentId="SpectrumView" CanClose="False" LastActivationTimeStamp="10/23/2014 12:36:25" />
         </LayoutDocumentPane>
       </LayoutPanel>
     </LayoutPanel>
     <LayoutAnchorablePaneGroup Orientation="Horizontal" DockHeight="200" FloatingWidth="161" FloatingHeight="923" FloatingLeft="876" FloatingTop="1018">
       <LayoutAnchorablePane DockHeight="200" FloatingWidth="161" FloatingHeight="923" FloatingLeft="876" FloatingTop="1018">
-        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Protein Tree" IsSelected="True" ContentId="ProteinTree" FloatingLeft="876" FloatingTop="1018" FloatingWidth="161" FloatingHeight="923" IsMaximized="True" LastActivationTimeStamp="10/23/2014 12:36:30" />
-        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Scan View" ContentId="ScanView" FloatingLeft="876" FloatingTop="1018" FloatingWidth="161" FloatingHeight="923" LastActivationTimeStamp="10/23/2014 12:36:28" />
+        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Scan View" IsSelected="True" ContentId="ScanView" FloatingLeft="876" FloatingTop="1018" FloatingWidth="161" FloatingHeight="923" LastActivationTimeStamp="10/28/2014 09:38:57" />
+        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Protein Tree" ContentId="ProteinTree" FloatingLeft="876" FloatingTop="1018" FloatingWidth="161" FloatingHeight="923" IsMaximized="True" LastActivationTimeStamp="10/23/2014 12:36:30" />
         <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="TargetView" ContentId="CreateSequence" FloatingLeft="876" FloatingTop="1018" FloatingWidth="161" FloatingHeight="923" LastActivationTimeStamp="10/23/2014 12:36:29" />
       </LayoutAnchorablePane>
     </LayoutAnchorablePaneGroup>

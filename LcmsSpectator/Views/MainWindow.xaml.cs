@@ -78,7 +78,7 @@ namespace LcmsSpectator.Views
             {
                 var xmlLayout = new XmlLayoutSerializer(AvDock);
                 xmlLayout.Serialize(fs);
-            }*/
+            } */
         }
     }
 }
