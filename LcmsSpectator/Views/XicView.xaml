@@ -89,6 +89,9 @@
                         <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
                 </oxy:Plot.ContextMenu>
+                <oxy:Plot.InputBindings>
+                    <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
+                </oxy:Plot.InputBindings>
             </oxy:Plot>
             <Slider Grid.Column="0" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
@@ -111,6 +114,9 @@
                         <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
                 </oxy:Plot.ContextMenu>
+                <oxy:Plot.InputBindings>
+                    <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
+                </oxy:Plot.InputBindings>
             </oxy:Plot>
             <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
