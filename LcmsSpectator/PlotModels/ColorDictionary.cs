@@ -79,7 +79,7 @@ namespace LcmsSpectator.PlotModels
                 {4, OxyColors.Yellow},
                 {5, OxyColors.Brown},
                 {6, OxyColors.Orange},
-                {7, OxyColors.Magenta},
+                {7, OxyColors.PaleGreen},
                 {8, OxyColors.Turquoise},
                 {9, OxyColors.Olive},
                 {10, OxyColors.Beige},

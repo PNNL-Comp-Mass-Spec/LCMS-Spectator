@@ -115,8 +115,8 @@
                 <ColumnDefinition Width="10" /> <!-- Spacer -->
                 <ColumnDefinition Width="50*" />
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Command="{Binding SaveCommand}">Save</Button>
-            <Button Grid.Column="2" Command="{Binding CancelCommand}">Cancel</Button>
+            <Button Grid.Column="0" Command="{Binding CancelCommand}">Cancel</Button>
+            <Button Grid.Column="2" Command="{Binding SaveCommand}">Save</Button>
         </Grid>
     </Grid>
 </Window>

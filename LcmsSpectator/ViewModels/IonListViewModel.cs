@@ -206,16 +206,20 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledIonViewModel> GenerateChargePrecursorLabels(Sequence sequence)
         {
             var ions = new List<LabeledIonViewModel>();
-            var numChargeStates = IonUtils.GetNumNeighboringChargeStates(SelectedPrSmViewModel.Instance.Charge);
+            var charge = SelectedPrSmViewModel.Instance.Charge;
+            var numChargeStates = IonUtils.GetNumNeighboringChargeStates(charge);
             if (sequence.Count == 0) return ions;
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
-            var minCharge = Math.Max(1, SelectedPrSmViewModel.Instance.Charge - numChargeStates);
-            var maxCharge = SelectedPrSmViewModel.Instance.Charge + numChargeStates;
+            var minCharge = Math.Max(1, charge - numChargeStates);
+            var maxCharge = charge + numChargeStates;
 
             for (int i = minCharge; i <= maxCharge; i++)
             {
+                var index = i - minCharge;
+                if (index == 0) index = charge - minCharge;
+                if (i == charge) index = 0;         // guarantee that actual charge is index 0
                 var precursorIonType = new IonType("Precursor", Composition.H2O, i, false);
-                var labeledIon = new LabeledIon(composition, i-minCharge, precursorIonType, false, null, true);
+                var labeledIon = new LabeledIon(composition, index, precursorIonType, false, null, true);
                 ions.Add(new LabeledIonViewModel(labeledIon));
             }
             return ions;
@@ -286,7 +290,7 @@ namespace LcmsSpectator.ViewModels
 
         private IMainDialogService _dialogService;
         private readonly ITaskService _precursorTaskService;
-        private ITaskService _fragmentTaskService;
+        private readonly ITaskService _fragmentTaskService;
 
         private int _currentCharge;
         private Sequence _currentSequence;

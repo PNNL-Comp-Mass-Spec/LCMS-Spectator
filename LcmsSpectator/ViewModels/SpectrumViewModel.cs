@@ -28,7 +28,7 @@ namespace LcmsSpectator.ViewModels
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedPrecursorLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
-            Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
+            //Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
         }
 
         public void ClearPlots()
@@ -91,7 +91,7 @@ namespace LcmsSpectator.ViewModels
             Ms2SpectrumViewModel.IonUpdate(labels);
         }
 
-        private async void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        private void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
         {
             if (message.PropertyName != "PrecursorLabels") return;
             var ionListVm = message.Sender as IonListViewModel;
@@ -100,7 +100,7 @@ namespace LcmsSpectator.ViewModels
             List<LabeledIonViewModel> precursorLabels = message.NewValue;
             //if (!heavy) precursorLabels = message.NewValue;
             //else precursorLabels = await ionListVm.GetHeavyPrecursorIons();
-            if (precursorLabels.Count < 2) return;
+            if (precursorLabels.Count < 1) return;
             LabeledIonViewModel precursorLabel = null;
             foreach (var label in precursorLabels.Where(label => label.LabeledIon.Index == 0))
             {

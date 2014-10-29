@@ -126,7 +126,9 @@ namespace LcmsSpectator.ViewModels
 
         private void SettingsChanged(SettingsChangedNotification notification)
         {
-            UpdatePlots();
+            //if (notification.Notification != "HeavyModificationsSettingsChanged") return;
+            //UpdatePlots();
+            ClearCache();
         }
 
         private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
@@ -332,19 +334,19 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Update and regenerate all plots
         /// </summary>
-        public async void UpdatePlots()
+        public void UpdatePlots()
         {
             ClearCache();
 
             if (ShowHeavy)
             {
-                //PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
-                //HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+                PrecursorPlotViewModel.Ions = _lightPrecursorLabels;
+                HeavyPrecursorPlotViewModel.Ions = _heavyPrecursorLabels;
                 UpdatePrecursorAreaRatioLabels();
                 if (ShowFragmentXic)
                 {
-                    //FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
-                    //HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                    FragmentPlotViewModel.Ions = _lightFragmentLabels;
+                    HeavyFragmentPlotViewModel.Ions = _heavyFragmentLabels;
                     UpdateFragmentAreaRatioLabels();
                 }
             }
