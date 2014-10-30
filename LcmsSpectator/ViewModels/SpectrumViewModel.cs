@@ -5,6 +5,7 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.TaskServices;
 using LcmsSpectatorModels.Models;
@@ -151,10 +152,23 @@ namespace LcmsSpectator.ViewModels
                 secondary1Title = "Ms1 Spectrum";
                 secondary2Title = "Next Ms1 Spectrum";
                 secondary1 = primary;
-                var nextms2Scan = lcms.GetNextScanNum(scan, 2);
-                var nextms1Scan = lcms.GetNextScanNum(scan, 1);
-                primary = lcms.GetSpectrum(nextms2Scan);
-                secondary2 = lcms.GetSpectrum(nextms1Scan);
+                primary = FindNearestMs2Spectrum(scan, lcms);
+                if (primary.ScanNum < scan)
+                {
+                    primaryTitle = "Previous Ms2 Spectrum";
+                    secondary1Title = "Previous Ms1 Spectrum";
+                    secondary2Title = "Ms1 Spectrum";
+                    secondary1 = lcms.GetSpectrum(lcms.GetPrevScanNum(primary.ScanNum, 1));
+                    secondary2 = lcms.GetSpectrum(scan);
+                }
+                else
+                {
+                    primaryTitle = "Next Ms2 Spectrum";
+                    secondary1Title = "Ms1 Spectrum";
+                    secondary2Title = "Next Ms1 Spectrum";
+                    secondary1 = lcms.GetSpectrum(scan);
+                    secondary2 = lcms.GetSpectrum(lcms.GetNextScanNum(primary.ScanNum, 1));
+                }
             }
 
             // Ms2 spectrum plot
@@ -205,6 +219,63 @@ namespace LcmsSpectator.ViewModels
             Secondary2ViewModel.SpectrumUpdate(nextms1, xAxis);
             Secondary2ViewModel.IonUpdate(precursorIon);
             Secondary2ViewModel.Title = nextms1 == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
+        }
+
+        private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, ILcMsRun lcms)
+        {
+            var precursormz = SelectedPrSmViewModel.Instance.PrecursorMz;
+            
+            int highScan = ms1Scan;
+            ProductSpectrum highSpec = null;
+            bool found = false;
+            double highDist = 0.0;
+            while (!found)
+            {
+                highScan = lcms.GetNextScanNum(highScan, 2);
+                if (highScan == lcms.MaxLcScan + 1)
+                {
+                    highDist = Double.PositiveInfinity;
+                    break;
+                }
+                var spectrum = lcms.GetSpectrum(highScan);
+                var prodSpectrum = spectrum as ProductSpectrum;
+                if (prodSpectrum == null) continue;
+                if (prodSpectrum.IsolationWindow.Contains(precursormz))
+                {
+                    highSpec = prodSpectrum;
+                    found = true;
+                }
+                highDist++;
+            }
+
+            ProductSpectrum lowSpec = null;
+            int lowScan = ms1Scan;
+            found = false;
+            double lowDist = 0.0;
+            while (!found)
+            {
+                lowScan = lcms.GetPrevScanNum(lowScan, 2);
+                if (lowScan == lcms.MinLcScan - 1)
+                {
+                    lowDist = Double.PositiveInfinity;
+                    break;
+                }
+                var spectrum = lcms.GetSpectrum(lowScan);
+                var prodSpectrum = spectrum as ProductSpectrum;
+                if (prodSpectrum == null) continue;
+                if (prodSpectrum.IsolationWindow.Contains(precursormz))
+                {
+                    lowSpec = prodSpectrum;
+                    found = true;
+                }
+                lowDist++;
+            }
+
+            ProductSpectrum nextMs2;
+            if (highDist <= lowDist && highSpec != null) nextMs2 = highSpec;
+            else nextMs2 = lowSpec;
+
+            return nextMs2;
         }
 
         private List<LabeledIonViewModel> _fragmentLabels;
