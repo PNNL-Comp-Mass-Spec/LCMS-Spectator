@@ -24,7 +24,7 @@ namespace LcmsSpectatorModels.Readers
 		}
 
 
-		public IdentificationTree Read()
+        public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
 		{
 			IdentificationTree tree = new IdentificationTree();
 

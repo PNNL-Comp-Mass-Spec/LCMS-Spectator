@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
+using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
@@ -195,20 +196,50 @@ namespace LcmsSpectator.ViewModels
         public void ReadIdFile(string idFileName, string rawFileName, XicViewModel xicVm)
         {
             IsLoading = true;
-            IdentificationTree ids;
-			try
-			{
-                var reader = IdFileReaderFactory.CreateReader(idFileName);
-                ids = reader.Read();
-                ids.SetLcmsRun(xicVm.Lcms, xicVm.RawFileName);
-            }
-			catch (IOException e)
-			{
-				_dialogService.ExceptionAlert(e);
-				FileOpen = false;
-				IsLoading = false;
-				return;
-			}
+            IdentificationTree ids = new IdentificationTree();
+            bool attemptToReadFile = true;
+            var modIgnoreList = new List<string>();
+            do
+            {
+                try
+                {
+                    var reader = IdFileReaderFactory.CreateReader(idFileName);
+                    ids = reader.Read(modIgnoreList);
+                    ids.SetLcmsRun(xicVm.Lcms, xicVm.RawFileName);
+                    attemptToReadFile = false;
+                }
+                catch (IOException e)
+                {
+                    _dialogService.ExceptionAlert(e);
+                    FileOpen = false;
+                    IsLoading = false;
+                    return;
+                }
+                catch (InvalidModificationException e)
+                {
+                    var result =
+                        _dialogService.ConfirmationBox(
+                            String.Format("{0}\nWould you like to add this modification?\nIf not, all sequences containing this modification will be ignored.", e.Message),
+                            "Unknown Modification");
+                    if (result)
+                    {
+                        var customModVm = new CustomModificationViewModel(e.ModificationName, true);
+                        GuiInvoker.Invoke(() => _dialogService.OpenCustomModification(customModVm));
+                        if (customModVm.Status)
+                        {
+                            Modification.RegisterAndGetModification(customModVm.ModificationName, customModVm.Composition);   
+                        }
+                        else
+                        {
+                            modIgnoreList.Add(e.ModificationName);
+                        }
+                    }
+                    else
+                    {
+                        modIgnoreList.Add(e.ModificationName);
+                    }
+                }
+            } while (attemptToReadFile);
             var data = ScanViewModel.Data;
             data.AddRange(ids.AllPrSms);
             ScanViewModel.Data = data;

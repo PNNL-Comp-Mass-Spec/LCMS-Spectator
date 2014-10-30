@@ -87,8 +87,10 @@
                         <ColumnDefinition Width="25*" />
                         <ColumnDefinition Width="25*" />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Row="0" Grid.Column="4" 
-                            Width="25" HorizontalAlignment="Right" FontSize="14" FontWeight="Bold" Command="{Binding AddModificationCommand}">+</Button>
+                    <Button Grid.Row="0" Grid.Column="0" 
+                            Width="25" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold" Command="{Binding AddModificationCommand}">+</Button>
+                    <!--<Button Grid.Row="0" Grid.Column="4" Command="{Binding CreateNewModificationCommand}"
+                            HorizontalAlignment="Right">Create New Modification</Button> -->
                     <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Modification</TextBlock>
                     <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Amino Acid</TextBlock>
                     <TextBlock Grid.Row="1" Grid.Column="3" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Location</TextBlock>

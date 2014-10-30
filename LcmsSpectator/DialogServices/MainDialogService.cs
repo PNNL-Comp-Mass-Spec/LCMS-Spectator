@@ -40,6 +40,14 @@ namespace LcmsSpectator.DialogServices
             return heavyModificationsWindowVm.Status;
         }
 
+        public bool OpenCustomModification(CustomModificationViewModel customModificationViewModel)
+        {
+            var customModificationDialog = new CustomModificationView { DataContext = customModificationViewModel };
+            customModificationViewModel.ReadyToClose += (o, e) => customModificationDialog.Close();
+            customModificationDialog.ShowDialog();
+            return customModificationViewModel.Status;
+        }
+
         public bool FilterBox(FilterViewModel filterViewModel)
         {
             var filterDialog = new FilterView

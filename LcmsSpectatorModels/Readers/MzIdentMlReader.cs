@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers.SequenceReaders;
@@ -19,7 +20,7 @@ namespace LcmsSpectatorModels.Readers
             _mzIdentMlReader = new MTDBFramework.IO.MzIdentMlReader(options);
         }
 
-        public IdentificationTree Read()
+        public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
         {
             var dataSet = _mzIdentMlReader.Read(_fileName);
             var idTree = new IdentificationTree(ToolType.MsgfPlus);

@@ -27,7 +27,8 @@ namespace LcmsSpectator.ViewModels
 
         public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; } 
         public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
-        public RelayCommand AddModificationCommand { get; set; }
+        public RelayCommand AddModificationCommand { get; private set; }
+        public RelayCommand CreateNewModificationCommand { get; private set; }
 
         public RelayCommand SaveCommand { get; private set; }
         public RelayCommand CancelCommand { get; private set; }
@@ -38,7 +39,7 @@ namespace LcmsSpectator.ViewModels
 
         public bool Status { get; private set; }
 
-        public SettingsViewModel(IDialogService dialogService)
+        public SettingsViewModel(IMainDialogService dialogService)
         {
             _dialogService = dialogService;
             ToleranceUnits = new List<ToleranceUnit> {ToleranceUnit.Ppm, ToleranceUnit.Th};
@@ -68,6 +69,7 @@ namespace LcmsSpectator.ViewModels
                 Modifications.Add(modificationVm);
             }
             AddModificationCommand = new RelayCommand(AddModification);
+            CreateNewModificationCommand = new RelayCommand(CreateNewModification);
 
             HeavyModificationsViewModel = new HeavyModificationsViewModel();
 
@@ -82,6 +84,15 @@ namespace LcmsSpectator.ViewModels
             var modVm = new ModificationViewModel();
             modVm.RequestModificationRemoval += RemoveModification;
             Modifications.Add(modVm);
+        }
+
+        private void CreateNewModification()
+        {
+            var customModVm = new CustomModificationViewModel("", false);
+            if (_dialogService.OpenCustomModification(customModVm))
+            {
+                var mod = Modification.RegisterAndGetModification(customModVm.ModificationName, customModVm.Composition);
+            }
         }
 
         private void Save()
@@ -129,6 +140,6 @@ namespace LcmsSpectator.ViewModels
             if (modVm != null) Modifications.Remove(modVm);
         }
 
-        private readonly IDialogService _dialogService;
+        private readonly IMainDialogService _dialogService;
     }
 }

@@ -15,7 +15,7 @@ namespace LcmsSpectatorModels.Readers
             _filePath = tsvFile;
         }
 
-        public IdentificationTree Read()
+        public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
         {
             var ext = Path.GetFileNameWithoutExtension(_filePath);
             return (ext == ".gz") ? ReadFromMzId() : ReadFromTsvFile();

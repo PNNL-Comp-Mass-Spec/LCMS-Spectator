@@ -154,6 +154,7 @@
     <Compile Include="TaskServices\TaskService.cs" />
     <Compile Include="Utils\XicCloseRequest.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
+    <Compile Include="ViewModels\CustomModificationViewModel.cs" />
     <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\DmsJobViewModel.cs" />
     <Compile Include="ViewModels\DmsLookupViewModel.cs" />
@@ -180,6 +181,9 @@
     </Compile>
     <Compile Include="Views\CreateSequenceView.xaml.cs">
       <DependentUpon>CreateSequenceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CustomModificationView.xaml.cs">
+      <DependentUpon>CustomModificationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DmsLookupView.xaml.cs">
       <DependentUpon>DmsLookupView.xaml</DependentUpon>
@@ -260,6 +264,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Views\CreateSequenceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CustomModificationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

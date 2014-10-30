@@ -8,6 +8,7 @@ namespace LcmsSpectator.DialogServices
         Tuple<string, string> OpenDmsLookup(DmsLookupViewModel dmsLookupViewModel);
         bool OpenSettings(SettingsViewModel settingsViewModel);
         bool OpenHeavyModifications(HeavyModificationsWindowViewModel heavyModificationsWindowVm);
+        bool OpenCustomModification(CustomModificationViewModel customModificationViewModel);
         bool FilterBox(FilterViewModel filterViewModel);
         void OpenAboutBox();
     }
