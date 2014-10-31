@@ -194,9 +194,9 @@ namespace LcmsSpectator.ViewModels
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             var relativeIntensities = composition.GetIsotopomerEnvelope();
             var indices = new List<int> { -1 };
-            for (int i = 0; i < relativeIntensities.Length; i++)
+            for (int i = 0; i < relativeIntensities.Envolope.Length; i++)
             {
-                if (relativeIntensities[i] >= IcParameters.Instance.PrecursorRelativeIntensityThreshold || i == 0)
+                if (relativeIntensities.Envolope[i] >= IcParameters.Instance.PrecursorRelativeIntensityThreshold || i == 0)
                     indices.Add(i);
             }
             ions.AddRange(indices.Select(index => new LabeledIon(composition, index, precursorIonType, false)).Select(ionLabel => new LabeledIonViewModel(ionLabel)));

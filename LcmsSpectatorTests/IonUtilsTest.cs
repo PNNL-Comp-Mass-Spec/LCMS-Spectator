@@ -70,11 +70,11 @@ namespace LcmsSpectatorTests
             var q = aminoAcidSet.GetAminoAcid('Q');
 
             var itraqMod = Modification.Itraq4Plex;
-            Console.WriteLine(itraqMod.GetMass());
+            Console.WriteLine(itraqMod.Mass);
 
             var modp = new ModifiedAminoAcid(p, itraqMod);
             var sequence = new Sequence(new List<AminoAcid> {modp, a, q});
-            Console.WriteLine(sequence.GetMass());
+            Console.WriteLine(sequence.Mass);
         }
     }
 }

@@ -42,16 +42,6 @@ namespace LcmsSpectatorModels.Config
             get { return _instance ?? (_instance = new IcParameters()); }
         }
 
-        public string RawFile
-        {
-            get { return _rawFile; }
-            set
-            {
-                _rawFile = value;
-                ReadRawFile();
-            }
-        }
-
         public string ParamFile
         {
             get { return _paramFile; }
@@ -97,11 +87,6 @@ namespace LcmsSpectatorModels.Config
             IonTypeFactory = new IonTypeFactory(15);
         }
 
-        private void ReadRawFile()
-        {
-            Lcms = LcMsRun.GetLcMsRun(_rawFile, MassSpecDataType.XCaliburRun, 0, 0);
-        }
-
         private void ReadParamFile()
         {
             var file = File.ReadLines(_paramFile);
@@ -113,7 +98,7 @@ namespace LcmsSpectatorModels.Config
                 switch (parts[0])
                 {
                     case "SpecFile":
-                        if (Lcms == null)   Lcms = LcMsRun.GetLcMsRun(parts[1], MassSpecDataType.XCaliburRun, 0, 0);
+                        //if (Lcms == null)   Lcms = LcMsRun.GetLcMsRun(parts[1], MassSpecDataType.XCaliburRun, 0, 0);
                         break;
                     case "DatabaseFile":
                         DatabaseFile = parts[1];
