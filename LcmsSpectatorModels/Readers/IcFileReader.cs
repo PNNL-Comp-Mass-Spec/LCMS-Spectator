@@ -117,7 +117,7 @@ namespace LcmsSpectatorModels.Readers
                 parsedMods.Add(new Tuple<int, Modification>(modPos, modification));
                 if (modification == null)
                 {
-                    throw new InvalidModificationException(String.Format("Could not find modification {0}", modName), modName);
+                    throw new InvalidModificationNameException(String.Format("Could not find modification {0}", modName), modName);
                 }
             }
             return parsedMods;
@@ -126,10 +126,10 @@ namespace LcmsSpectatorModels.Readers
         private readonly string _tsvFile;
     }
 
-    public class InvalidModificationException : Exception
+    public class InvalidModificationNameException : Exception
     {
         public string ModificationName { get; private set; }
-        public InvalidModificationException(string message, string modificationName): base(message)
+        public InvalidModificationNameException(string message, string modificationName): base(message)
         {
             ModificationName = modificationName;
         }

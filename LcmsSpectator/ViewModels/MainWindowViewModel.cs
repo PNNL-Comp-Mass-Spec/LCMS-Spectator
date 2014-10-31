@@ -215,7 +215,7 @@ namespace LcmsSpectator.ViewModels
                     IsLoading = false;
                     return;
                 }
-                catch (InvalidModificationException e)
+                catch (InvalidModificationNameException e)
                 {
                     var result =
                         _dialogService.ConfirmationBox(

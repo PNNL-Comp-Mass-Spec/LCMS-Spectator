@@ -45,18 +45,27 @@ namespace LcmsSpectatorModels.Readers.SequenceReaders
                 }
                 else
                 {
+                    double dblMass = 0.0;
                     string mass;
                     try
                     {
-                        var dblMass = Math.Round(Convert.ToDouble(element), 3);
+                        dblMass = Math.Round(Convert.ToDouble(element), 3);
                         mass = dblMass.ToString(CultureInfo.InvariantCulture);
+                    }
+                    catch (FormatException)
+                    {
+                        throw new InvalidModificationNameException(String.Format("Could not find modification {0}", element), element);
                     }
                     catch (Exception)
                     {
-                        throw new Exception("Unrecognized modificaion mass: " + element);
+                        throw new InvalidModificationNameException(String.Format("Could not find modification {0}", element), element);
                     }
                     var modList = Modification.GetFromMass(mass);
-                    if (modList == null || modList.Count == 1) throw new Exception("Unrecognized modificaion mass: " + element);
+                    if (modList == null || modList.Count == 1)
+                    {
+                        var regMod = Modification.RegisterAndGetModification(element, dblMass);
+                        modList = new List<Modification> {regMod};
+                    }
                     var mod = modList[0];
                     mods.Add(mod);
                     //                    Console.WriteLine("{0} {1} {2}", mod.Name, mod.Composition, mod.Composition.AveragineMass);
