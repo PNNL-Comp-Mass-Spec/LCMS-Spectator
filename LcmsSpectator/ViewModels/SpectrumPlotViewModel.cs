@@ -286,7 +286,7 @@ namespace LcmsSpectator.ViewModels
                     "Error: {Error:G4}ppm" + Environment.NewLine +
                     "Correlation: {Correlation:0.###}"
             };
-            if (labeledIonPeaks.IsFragmentIon &&
+            if (labeledIonPeaks.IsFragmentIon && !ShowDeconvolutedSpectrum &&
                 labeledIonPeaks.CorrelationScore < IcParameters.Instance.IonCorrelationThreshold) return null;
             var obsPeaks = labeledIonPeaks.Peaks;
             if (obsPeaks == null || obsPeaks.Length < 1) return null;

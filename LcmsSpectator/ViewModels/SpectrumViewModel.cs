@@ -148,10 +148,6 @@ namespace LcmsSpectator.ViewModels
             }
             else
             {
-                primaryTitle = "Next Ms2 Spectrum";
-                secondary1Title = "Ms1 Spectrum";
-                secondary2Title = "Next Ms1 Spectrum";
-                secondary1 = primary;
                 primary = FindNearestMs2Spectrum(scan, lcms);
                 if (primary.ScanNum < scan)
                 {
