@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -56,9 +57,9 @@ namespace LcmsSpectator.ViewModels
             _ions = new List<LabeledIonViewModel>();
             _smoothedXics = new List<LabeledXic>();
             _xAxis.AxisChanged += AxisChanged_UpdatePlotTitle;
-            _xicCache = new Dictionary<string, LabeledXic>();
+            _xicCache = new ConcurrentDictionary<string, LabeledXic>();
             _smoothedXicLock = new Mutex();
-            _xicCacheLock = new Mutex();
+            //_xicCacheLock = new Mutex();
             Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
             Messenger.Default.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
             UpdatePlot();
@@ -377,11 +378,11 @@ namespace LcmsSpectator.ViewModels
         private LabeledXic GetXic(LabeledIon label)
         {
             LabeledXic lxic;
-            _xicCacheLock.WaitOne();
+            //_xicCacheLock.WaitOne();
             if (_xicCache.ContainsKey(label.Label)) lxic = _xicCache[label.Label];
             else
             {
-                _xicCacheLock.ReleaseMutex();
+                //_xicCacheLock.ReleaseMutex();
                 var isotopeIndex = label.IsChargeState ? 0 : label.Index;
                 var ion = label.Ion;
                 Xic xic;
@@ -390,10 +391,10 @@ namespace LcmsSpectator.ViewModels
                                                                                             label.PrecursorIon.GetMostAbundantIsotopeMz());
                 else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(isotopeIndex), IcParameters.Instance.PrecursorTolerancePpm);
                 lxic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon, label.PrecursorIon, label.IsChargeState);
-                _xicCacheLock.WaitOne();
-                _xicCache.Add(label.Label, lxic);
+                //_xicCacheLock.WaitOne();
+                _xicCache.AddOrUpdate(label.Label, lxic, (key, oldValue) => lxic);
             }
-            _xicCacheLock.ReleaseMutex();
+            //_xicCacheLock.ReleaseMutex();
             return lxic;
         }
 
@@ -447,8 +448,8 @@ namespace LcmsSpectator.ViewModels
 
         private readonly Mutex _smoothedXicLock;
         private readonly List<LabeledXic> _smoothedXics;
-        private readonly Dictionary<string, LabeledXic> _xicCache;
-        private readonly Mutex _xicCacheLock;
+        private readonly ConcurrentDictionary<string, LabeledXic> _xicCache;
+        //private readonly Mutex _xicCacheLock;
         private SelectablePlotModel _plot;
         private double _area;
     }
