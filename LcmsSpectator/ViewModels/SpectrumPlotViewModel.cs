@@ -246,7 +246,7 @@ namespace LcmsSpectator.ViewModels
             var colors = new ColorDictionary(Math.Min(Math.Max(SelectedPrSmViewModel.Instance.Charge - 1, 2), 15));
             Parallel.ForEach(_ions, ionVm =>
             {
-                if (ionVm.LabeledIon.IonType.Charge == 0) return;
+                if (ionVm.LabeledIon.IonType.Charge == 0 || (ShowDeconvolutedSpectrum && ionVm.LabeledIon.IonType.Charge > 1)) return;
                 var ionSeries = (useCache && _ionCache.ContainsKey(ionVm.LabeledIon.Label)) ? _ionCache[ionVm.LabeledIon.Label] : GetIonSeries(ionVm.LabeledIon, _currentSpectrum, colors);
                 seriesstore[ionVm.LabeledIon.Label] = ionSeries;
             });
