@@ -54,11 +54,11 @@ namespace LcmsSpectatorModels.Readers.SequenceReaders
                     }
                     catch (FormatException)
                     {
-                        throw new InvalidModificationNameException(String.Format("Could not find modification {0}", element), element);
+                        throw new InvalidModificationNameException(String.Format("Found an unrecognized modification {0}", element), element);
                     }
                     catch (Exception)
                     {
-                        throw new InvalidModificationNameException(String.Format("Could not find modification {0}", element), element);
+                        throw new InvalidModificationNameException(String.Format("Found an unrecognized modification {0}", element), element);
                     }
                     var modList = Modification.GetFromMass(mass);
                     if (modList == null || modList.Count == 1)
