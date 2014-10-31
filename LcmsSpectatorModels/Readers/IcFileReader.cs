@@ -117,7 +117,7 @@ namespace LcmsSpectatorModels.Readers
                 parsedMods.Add(new Tuple<int, Modification>(modPos, modification));
                 if (modification == null)
                 {
-                    throw new InvalidModificationNameException(String.Format("Found an unrecongnized modification: {0}", modName), modName);
+                    throw new InvalidModificationNameException(String.Format("Found an unrecognized modification: {0}", modName), modName);
                 }
             }
             return parsedMods;
