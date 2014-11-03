@@ -227,7 +227,7 @@ namespace LcmsSpectator.ViewModels
 
         private void SetPlotSeries(bool useCache=true)
         {
-            if (Plot == null || _ions == null || _ions.Count == 0 || _currentSpectrum == null) return;
+            if (Plot == null || _currentSpectrum == null) return;
             StemSeries spectrumSeries = null;
             if (ShowUnexplainedPeaks && Plot.Series.Count > 0) spectrumSeries = Plot.Series[0] as StemSeries;
             if (!useCache) _ionCache.Clear();
@@ -237,6 +237,13 @@ namespace LcmsSpectator.ViewModels
                 Plot.Annotations.Clear();
                 if (spectrumSeries != null) Plot.Series.Add(spectrumSeries);
             });
+            if (_ions == null || _ions.Count == 0)
+            {
+                Plot.IsLegendVisible = false;
+                Plot.InvalidatePlot(true);
+                Plot.AdjustForZoom();
+                return;   
+            }
             // add new ion series
             var seriesstore = new Dictionary<string, Tuple<Series, Annotation>>();
             foreach (var ion in _ions)
