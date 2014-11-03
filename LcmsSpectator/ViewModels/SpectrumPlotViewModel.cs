@@ -4,11 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.TaskServices;
+using LcmsSpectator.Utils;
 using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Utils;
@@ -19,6 +21,7 @@ using OxyPlot.Series;
 using OxyPlot.Wpf;
 using Annotation = OxyPlot.Annotations.Annotation;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
+using LineSeries = OxyPlot.Series.LineSeries;
 using Series = OxyPlot.Series.Series;
 using TextAnnotation = OxyPlot.Annotations.TextAnnotation;
 
@@ -30,6 +33,8 @@ namespace LcmsSpectator.ViewModels
 
         public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, double multiplier, bool showUnexplainedPeaks=true)
         {
+            Messenger.Default.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
+            //Messenger.Default.Register<PropertyChangedMessage<double>>(this, PrecursorChanged);
             _taskService = taskService;
             SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _dialogService = dialogService;
@@ -37,6 +42,7 @@ namespace LcmsSpectator.ViewModels
             _showFilteredSpectrum = false;
             _showDeconvolutedSpectrum = false;
             _multiplier = multiplier;
+            _updateIons = false;
             Title = "";
             _ionCache = new Dictionary<string, Tuple<Series, Annotation>>();
             Clear();
@@ -122,6 +128,9 @@ namespace LcmsSpectator.ViewModels
                 _filtDeconSpectrum = null; 
                 Plot = BuildSpectrumPlot();
                 IonUpdate();
+                /*if (_updateIons) IonUpdate();
+                else if (_ions != null) _ions.Clear();
+                _updateIons = true;*/
             });
         }
 
@@ -218,37 +227,53 @@ namespace LcmsSpectator.ViewModels
 
         private void SetPlotSeries(bool useCache=true)
         {
-            if (Plot == null || _ions == null || _ions.Count == 0 || _currentSpectrum == null) return;
-            var plot = Plot;
-            Plot = new AutoAdjustedYPlotModel(new LinearAxis(AxisPosition.Bottom), 1.05);
+            if (Plot == null || _currentSpectrum == null) return;
             StemSeries spectrumSeries = null;
-            if (ShowUnexplainedPeaks && plot.Series.Count > 0) spectrumSeries = plot.Series[0] as StemSeries;
+            if (ShowUnexplainedPeaks && Plot.Series.Count > 0) spectrumSeries = Plot.Series[0] as StemSeries;
             if (!useCache) _ionCache.Clear();
-            plot.Series.Clear();
-            plot.Annotations.Clear();
-            if (spectrumSeries != null) plot.Series.Add(spectrumSeries);
+            GuiInvoker.Invoke(() =>
+            {
+                Plot.Series.Clear();
+                Plot.Annotations.Clear();
+                if (spectrumSeries != null) Plot.Series.Add(spectrumSeries);
+            });
+            if (_ions == null || _ions.Count == 0)
+            {
+                Plot.IsLegendVisible = false;
+                Plot.InvalidatePlot(true);
+                Plot.AdjustForZoom();
+                return;   
+            }
             // add new ion series
-            var seriesstore = _ions.ToDictionary<LabeledIonViewModel, string, Tuple<Series, Annotation>>(ionVm => ionVm.LabeledIon.Label, ion => null);
+            var seriesstore = new Dictionary<string, Tuple<Series, Annotation>>();
+            foreach (var ion in _ions)
+            {
+                if (!seriesstore.ContainsKey(ion.LabeledIon.Label)) seriesstore.Add(ion.LabeledIon.Label, null);
+            }
             var colors = new ColorDictionary(Math.Min(Math.Max(SelectedPrSmViewModel.Instance.Charge - 1, 2), 15));
             Parallel.ForEach(_ions, ionVm =>
             {
-                if (ionVm.LabeledIon.IonType.Charge == 0) return;
+                if (ionVm.LabeledIon.IonType.Charge == 0 || (ShowDeconvolutedSpectrum && ionVm.LabeledIon.IonType.Charge > 1)) return;
                 var ionSeries = (useCache && _ionCache.ContainsKey(ionVm.LabeledIon.Label)) ? _ionCache[ionVm.LabeledIon.Label] : GetIonSeries(ionVm.LabeledIon, _currentSpectrum, colors);
                 seriesstore[ionVm.LabeledIon.Label] = ionSeries;
             });
             foreach (var series in seriesstore.Where(series => series.Value != null))
             {
-                plot.Series.Add(series.Value.Item1);
-                plot.Annotations.Add(series.Value.Item2);
+                KeyValuePair<string, Tuple<Series, Annotation>> series1 = series;
+                GuiInvoker.Invoke(() =>
+                {
+                    Plot.Series.Add(series1.Value.Item1);
+                    Plot.Annotations.Add(series1.Value.Item2); 
+                });
                 if (useCache)
                 {
                     if (!_ionCache.ContainsKey(series.Key)) _ionCache.Add(series.Key, series.Value);
                     else _ionCache[series.Key] = series.Value;
                 }
             }
-            plot.InvalidatePlot(true);
-            plot.AdjustForZoom();
-            Plot = plot;
+            Plot.IsLegendVisible = false;
+            Plot.InvalidatePlot(true);
+            Plot.AdjustForZoom();
         }
 
         private Tuple<Series, Annotation> GetIonSeries(LabeledIon labeledIon, Spectrum spectrum, ColorDictionary colors)
@@ -260,6 +285,7 @@ namespace LcmsSpectator.ViewModels
             var color = colors.GetColor(labeledIon);
             var ionSeries = new StemSeries(color, 1.5)
             {
+                Title = labeledIon.Label,
                 TrackerFormatString =
                     "{0}" + Environment.NewLine +
                     "{1}: {2:0.###}" + Environment.NewLine +
@@ -267,7 +293,7 @@ namespace LcmsSpectator.ViewModels
                     "Error: {Error:G4}ppm" + Environment.NewLine +
                     "Correlation: {Correlation:0.###}"
             };
-            if (labeledIonPeaks.IsFragmentIon &&
+            if (labeledIonPeaks.IsFragmentIon && !ShowDeconvolutedSpectrum &&
                 labeledIonPeaks.CorrelationScore < IcParameters.Instance.IonCorrelationThreshold) return null;
             var obsPeaks = labeledIonPeaks.Peaks;
             if (obsPeaks == null || obsPeaks.Length < 1) return null;
@@ -290,6 +316,7 @@ namespace LcmsSpectator.ViewModels
                 TextColor = color,
                 FontWeight = FontWeights.Bold,
                 Layer = AnnotationLayer.AboveSeries,
+                FontSize = 12,
                 Background = OxyColors.White,
                 Padding = new OxyThickness(0.1),
                 Position = new DataPoint(maxPeak.Mz, maxPeak.Intensity),
@@ -312,6 +339,41 @@ namespace LcmsSpectator.ViewModels
             };
             xAxis.Zoom(0, ms2MaxMz);
             return xAxis;
+        }
+
+        private void LabeledIonSelectedChanged(PropertyChangedMessage<bool> message)
+        {
+            if (message.PropertyName == "Selected" && message.Sender is LabeledIonViewModel)
+            {
+                var labeledIonVm = message.Sender as LabeledIonViewModel;
+                var label = labeledIonVm.LabeledIon.Label;
+                foreach (var series in Plot.Series)
+                {
+                    var lineSeries = series as StemSeries;
+                    if (lineSeries != null && lineSeries.Title == label)
+                    {
+                        lineSeries.IsVisible = message.NewValue;
+                        Plot.AdjustForZoom();
+                    }
+                }
+                foreach (var annotation in Plot.Annotations)
+                {
+                    var textAnnotation = annotation as TextAnnotation;
+                    if (textAnnotation != null && textAnnotation.Text == label)
+                    {
+                        if (message.NewValue) textAnnotation.FontSize = 0;
+                        else textAnnotation.FontSize = 12;
+                    }
+                }
+            }
+        }
+
+        private void PrecursorChanged(PropertyChangedMessage<double> message)
+        {
+            if (message.PropertyName == "PrecursorMz")
+            {
+                _taskService.Enqueue(() =>_updateIons = false);
+            }
         }
 
         private void SaveAsImage()
@@ -346,6 +408,8 @@ namespace LcmsSpectator.ViewModels
 
         private List<LabeledIonViewModel> _ions;
         private bool _showUnexplainedPeaks;
+
+        private bool _updateIons;
 
         private readonly Dictionary<string, Tuple<Series, Annotation>> _ionCache;
         private bool _showDeconvolutedSpectrum;

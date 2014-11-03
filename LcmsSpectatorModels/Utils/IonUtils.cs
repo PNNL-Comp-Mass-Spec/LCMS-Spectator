@@ -36,6 +36,17 @@ namespace LcmsSpectatorModels.Utils
             return ionTypeFactory.GetIonType(name);
         }
 
+        public static int GetNumNeighboringChargeStates(int charge)
+        {
+            int chargeStates = 1;
+            if (charge >= 2 && charge <= 4) chargeStates = 1;
+            else if (charge >= 5 && charge <= 10) chargeStates = 2;
+            else if (charge >= 11 && charge <= 20) chargeStates = 3;
+            else if (charge >= 21 && charge <= 30) chargeStates = 4;
+            else if (charge >= 31) chargeStates = 5;
+            return chargeStates;
+        }
+
         public static List<IonType> GetIonTypes(IonTypeFactory ionTypeFactory,
                                                 IList<BaseIonType> baseIonTypes, IList<NeutralLoss> neutralLosses,
                                                 int minCharge, int maxCharge)

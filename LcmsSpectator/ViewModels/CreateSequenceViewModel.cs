@@ -212,7 +212,7 @@ namespace LcmsSpectator.ViewModels
                         searchModification.Location == SequenceLocation.Everywhere &&
                         searchModification.TargetResidue == residue)
                     {
-                        var modStr = String.Format("+{0}", Math.Round(searchModification.Modification.GetMass(), 3));
+                        var modStr = String.Format("+{0}", Math.Round(searchModification.Modification.Mass, 3));
                         if (!matchStr.Contains(modStr)) matchStr += modStr;
                     }
                 }

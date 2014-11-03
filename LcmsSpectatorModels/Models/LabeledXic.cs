@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Spectrometry;
 
@@ -10,8 +11,8 @@ namespace LcmsSpectatorModels.Models
     { 
         public List<XicPoint> Xic { get; private set; }
 
-        public LabeledXic(Composition composition, int index, List<XicPoint> xic, IonType ionType,  bool isFragmentIon=true): 
-               base(composition, index, ionType, isFragmentIon)
+        public LabeledXic(Composition composition, int index, List<XicPoint> xic, IonType ionType,  bool isFragmentIon=true, Ion precursorIon=null, bool isChargeState=false): 
+               base(composition, index, ionType, isFragmentIon, precursorIon, isChargeState)
         {
             Xic = xic;
         }
@@ -29,9 +30,16 @@ namespace LcmsSpectatorModels.Models
                 }
                 else
                 {
-                    if (Index < 0) annotation = String.Format("Precursor [M{0}] ({1}+)", Index, IonType.Charge);
-                    else if (Index == 0) annotation = String.Format("Precursor ({0}+)", IonType.Charge);
-                    else if (Index > 0) annotation = String.Format("Precursor [M+{0}] ({1}+)", Index, IonType.Charge);
+                    if (IsChargeState)
+                    {
+                        annotation = String.Format("Precursor ({0}+)", IonType.Charge);
+                    }
+                    else
+                    {
+                        if (Index < 0) annotation = String.Format("Precursor [M{0}] ({1}+)", Index, IonType.Charge);
+                        else if (Index == 0) annotation = String.Format("Precursor ({0}+)", IonType.Charge);
+                        else if (Index > 0) annotation = String.Format("Precursor [M+{0}] ({1}+)", Index, IonType.Charge);
+                    }
                 }
                 return annotation;
             }

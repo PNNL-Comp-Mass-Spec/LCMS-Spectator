@@ -9,6 +9,11 @@ using InformedProteomics.Backend.MassSpecData;
 
 namespace LcmsSpectatorModels.Config
 {
+    public enum PrecursorViewMode
+    {
+        Isotopes,
+        Charges
+    }
     public class IcParameters
     {
         public LcMsRun Lcms { get; set; }
@@ -23,6 +28,8 @@ namespace LcmsSpectatorModels.Config
         public List<SearchModification> Modifications { get; set; }
         public int PointsToSmooth { get; set; }
         public double SpectrumFilterSlope { get; set; }
+        public double PrecursorRelativeIntensityThreshold { get; set; }
+        public PrecursorViewMode PrecursorViewMode { get; set; }
         public List<SearchModification> SearchModifications { get; set; }
         public List<Modification> LightModifications { get; set; } 
         public List<Modification> HeavyModifications { get; set; } 
@@ -33,16 +40,6 @@ namespace LcmsSpectatorModels.Config
         public static IcParameters Instance
         {
             get { return _instance ?? (_instance = new IcParameters()); }
-        }
-
-        public string RawFile
-        {
-            get { return _rawFile; }
-            set
-            {
-                _rawFile = value;
-                ReadRawFile();
-            }
         }
 
         public string ParamFile
@@ -79,6 +76,8 @@ namespace LcmsSpectatorModels.Config
             MaxDynamicModificationsPerSequence = 0;
             PointsToSmooth = 9;
             SpectrumFilterSlope = 0.33;
+            PrecursorRelativeIntensityThreshold = 0.1;
+            PrecursorViewMode = PrecursorViewMode.Isotopes;
             SearchModifications = new List<SearchModification>
             {
                 new SearchModification(Modification.Carbamidomethylation, 'C', SequenceLocation.Everywhere, true)
@@ -86,11 +85,6 @@ namespace LcmsSpectatorModels.Config
             LightModifications = new List<Modification>();
             HeavyModifications = new List<Modification> { Modification.LysToHeavyLys, Modification.ArgToHeavyArg };
             IonTypeFactory = new IonTypeFactory(15);
-        }
-
-        private void ReadRawFile()
-        {
-            Lcms = LcMsRun.GetLcMsRun(_rawFile, MassSpecDataType.XCaliburRun, 0, 0);
         }
 
         private void ReadParamFile()
@@ -104,7 +98,7 @@ namespace LcmsSpectatorModels.Config
                 switch (parts[0])
                 {
                     case "SpecFile":
-                        if (Lcms == null)   Lcms = LcMsRun.GetLcMsRun(parts[1], MassSpecDataType.XCaliburRun, 0, 0);
+                        //if (Lcms == null)   Lcms = LcMsRun.GetLcMsRun(parts[1], MassSpecDataType.XCaliburRun, 0, 0);
                         break;
                     case "DatabaseFile":
                         DatabaseFile = parts[1];

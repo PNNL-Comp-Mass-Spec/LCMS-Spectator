@@ -12,14 +12,16 @@ namespace LcmsSpectatorModels.Models
         public int Index { get; private set; }
         public IonType IonType { get; private set; }
         public bool IsFragmentIon { get; private set; }
+        public bool IsChargeState { get; private set; }
 
-        public LabeledIon(Composition composition, int index, IonType ionType,  bool isFragmentIon, Ion precursorIon=null)
+        public LabeledIon(Composition composition, int index, IonType ionType,  bool isFragmentIon, Ion precursorIon=null, bool isChargeState=false)
         {
             Composition = composition;
             PrecursorIon = precursorIon;
             Index = index;
             IonType = ionType;
             IsFragmentIon = isFragmentIon;
+            IsChargeState = isChargeState;
         }
 
         public Ion Ion
@@ -40,9 +42,16 @@ namespace LcmsSpectatorModels.Models
                 }
                 else
                 {
-                    if (Index < 0) annotation = String.Format("Precursor [M{0}] ({1}+)", Index, IonType.Charge);
-                    else if (Index == 0) annotation = String.Format("Precursor ({0}+)", IonType.Charge);
-                    else if (Index > 0) annotation = String.Format("Precursor [M+{0}] ({1}+)", Index, IonType.Charge);
+                    if (IsChargeState)
+                    {
+                        annotation = String.Format("Precursor ({0}+)", IonType.Charge);
+                    }
+                    else
+                    {
+                        if (Index < 0) annotation = String.Format("Precursor [M{0}] ({1}+)", Index, IonType.Charge);
+                        else if (Index == 0) annotation = String.Format("Precursor ({0}+)", IonType.Charge);
+                        else if (Index > 0) annotation = String.Format("Precursor [M+{0}] ({1}+)", Index, IonType.Charge);   
+                    }
                 }
                 return annotation;
             }

@@ -22,9 +22,13 @@ namespace LcmsSpectator.ViewModels
         public double IonCorrelationThreshold { get; set; }
         public int PointsToSmooth { get; set; }
         public double SpectrumFilterSlope { get; set; }
+        public double PrecursorRelativeIntensityThreshold { get; set; }
+        public PrecursorViewMode PrecursorViewMode { get; set; }
 
+        public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; } 
         public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
-        public RelayCommand AddModificationCommand { get; set; }
+        public RelayCommand AddModificationCommand { get; private set; }
+        public RelayCommand CreateNewModificationCommand { get; private set; }
 
         public RelayCommand SaveCommand { get; private set; }
         public RelayCommand CancelCommand { get; private set; }
@@ -35,7 +39,7 @@ namespace LcmsSpectator.ViewModels
 
         public bool Status { get; private set; }
 
-        public SettingsViewModel(IDialogService dialogService)
+        public SettingsViewModel(IMainDialogService dialogService)
         {
             _dialogService = dialogService;
             ToleranceUnits = new List<ToleranceUnit> {ToleranceUnit.Ppm, ToleranceUnit.Th};
@@ -48,6 +52,14 @@ namespace LcmsSpectator.ViewModels
             ModificationsPerSequence = IcParameters.Instance.MaxDynamicModificationsPerSequence;
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
             SpectrumFilterSlope = IcParameters.Instance.SpectrumFilterSlope;
+            PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
+            PrecursorViewMode = IcParameters.Instance.PrecursorViewMode;
+
+            PrecursorViewModes = new ObservableCollection<PrecursorViewMode>
+            {
+                PrecursorViewMode.Isotopes,
+                PrecursorViewMode.Charges
+            };
 
             Modifications = new ObservableCollection<ModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
@@ -57,6 +69,7 @@ namespace LcmsSpectator.ViewModels
                 Modifications.Add(modificationVm);
             }
             AddModificationCommand = new RelayCommand(AddModification);
+            CreateNewModificationCommand = new RelayCommand(CreateNewModification);
 
             HeavyModificationsViewModel = new HeavyModificationsViewModel();
 
@@ -71,6 +84,15 @@ namespace LcmsSpectator.ViewModels
             var modVm = new ModificationViewModel();
             modVm.RequestModificationRemoval += RemoveModification;
             Modifications.Add(modVm);
+        }
+
+        private void CreateNewModification()
+        {
+            var customModVm = new CustomModificationViewModel("", false);
+            if (_dialogService.OpenCustomModification(customModVm))
+            {
+                var mod = Modification.RegisterAndGetModification(customModVm.ModificationName, customModVm.Composition);
+            }
         }
 
         private void Save()
@@ -88,6 +110,8 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.IonCorrelationThreshold = IonCorrelationThreshold;
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
             IcParameters.Instance.SpectrumFilterSlope = SpectrumFilterSlope;
+            IcParameters.Instance.PrecursorRelativeIntensityThreshold = PrecursorRelativeIntensityThreshold;
+            IcParameters.Instance.PrecursorViewMode = PrecursorViewMode;
 
             var modificationList = new List<SearchModification>();
             foreach (var searchModificationVm in Modifications)
@@ -116,6 +140,6 @@ namespace LcmsSpectator.ViewModels
             if (modVm != null) Modifications.Remove(modVm);
         }
 
-        private readonly IDialogService _dialogService;
+        private readonly IMainDialogService _dialogService;
     }
 }

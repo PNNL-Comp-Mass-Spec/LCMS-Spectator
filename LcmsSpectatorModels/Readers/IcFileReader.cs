@@ -14,7 +14,7 @@ namespace LcmsSpectatorModels.Readers
             _tsvFile = tsvFile;
         }
 
-        public IdentificationTree Read()
+        public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
         {
             var idTree = new IdentificationTree(ToolType.MsPathFinder);
             var file = new StreamReader(File.Open(_tsvFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -34,15 +34,15 @@ namespace LcmsSpectatorModels.Readers
                     }
                     continue;
                 }
-                var idData = CreatePrSms(line, headers);
-                idTree.Add(idData);
+                var idData = CreatePrSms(line, headers, modIgnoreList);
+                if (idData != null) idTree.Add(idData);
             }
             file.Close();
 
             return idTree;
         }
 
-        private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers)
+        private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers, IEnumerable<string> modIgnoreList=null)
         {
             var parts = line.Split('\t');
             var scoreLabel = "IcScore";
@@ -51,6 +51,15 @@ namespace LcmsSpectatorModels.Readers
 
             var proteinNames = parts[headers["ProteinName"]].Split(';');
             var prsms = new List<PrSm>{Capacity = proteinNames.Length};
+
+            if (modIgnoreList != null)
+            {
+                foreach (var mod in modIgnoreList)
+                {
+                    var searchMod = String.Format("{0} ", mod);
+                    if (parts[headers["Modifications"]].Contains(searchMod)) return null;
+                }
+            }
 
             foreach (var protein in proteinNames)
             {
@@ -101,15 +110,29 @@ namespace LcmsSpectatorModels.Readers
             if (mods.Length < 1 || mods[0] == "") return parsedMods;
             foreach (var modParts in mods.Select(mod => mod.Split(' ')))
             {
-                if (modParts.Length < 0) throw new FormatException("Invalid modification.");
+                if (modParts.Length < 0) throw new FormatException("Unknown Modification");
                 var modName = modParts[0];
                 var modPos = Convert.ToInt32(modParts[1]);
-                parsedMods.Add(new Tuple<int, Modification>(modPos, Modification.Get(modName)));
+                var modification = Modification.Get(modName);
+                parsedMods.Add(new Tuple<int, Modification>(modPos, modification));
+                if (modification == null)
+                {
+                    throw new InvalidModificationNameException(String.Format("Found an unrecognized modification: {0}", modName), modName);
+                }
             }
             return parsedMods;
         }
 
         private readonly string _tsvFile;
+    }
+
+    public class InvalidModificationNameException : Exception
+    {
+        public string ModificationName { get; private set; }
+        public InvalidModificationNameException(string message, string modificationName): base(message)
+        {
+            ModificationName = modificationName;
+        }
     }
 
     internal class CompareModByHighestPosition : IComparer<Tuple<int, Modification>>

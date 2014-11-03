@@ -136,5 +136,11 @@ namespace LcmsSpectatorTests.DialogServices
 
         // private members
         private readonly string _filePath;
+
+
+        public bool OpenCustomModification(CustomModificationViewModel customModificationViewModel)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

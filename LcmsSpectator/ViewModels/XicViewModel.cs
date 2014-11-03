@@ -14,7 +14,7 @@ using OxyPlot.Axes;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class XicViewModel: ViewModelBase, IXicViewModel
+    public class XicViewModel: ViewModelBase
     {
         public XicPlotViewModel FragmentPlotViewModel { get; set; }
         public XicPlotViewModel HeavyFragmentPlotViewModel { get; set; }
@@ -49,11 +49,19 @@ namespace LcmsSpectator.ViewModels
             OpenHeavyModificationsCommand = new RelayCommand(OpenHeavyModifications);
 
             _fragmentLabels = new List<LabeledIonViewModel>();
+            _lightFragmentLabels = new List<LabeledIonViewModel>();
+            _heavyFragmentLabels = new List<LabeledIonViewModel>();
             _precursorLabels = new List<LabeledIonViewModel>();
+            _lightPrecursorLabels = new List<LabeledIonViewModel>();
+            _heavyPrecursorLabels = new List<LabeledIonViewModel>();
 
             Messenger.Default.Register<ClearAllNotification>(this, ClearAllNotificationHandler);
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedPrecursorLabelsChanged);
+            Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, LightPrecursorLabelsChanged);
+            Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, HeavyPrecursorLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);
+            Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, LightFragmentLabelsChanged);
+            Messenger.Default.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, HeavyFragmentLabelsChanged);
             Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
             Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
         }
@@ -118,7 +126,9 @@ namespace LcmsSpectator.ViewModels
 
         private void SettingsChanged(SettingsChangedNotification notification)
         {
-            UpdatePlots();
+            //if (notification.Notification != "HeavyModificationsSettingsChanged") return;
+            //UpdatePlots();
+            ClearCache();
         }
 
         private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
@@ -143,36 +153,46 @@ namespace LcmsSpectator.ViewModels
             XicXAxis.Zoom(minRt, maxRt);
         }
 
-        private async void SelectedFragmentLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        private void SelectedFragmentLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
         {
             if (message.PropertyName != "FragmentLabels") return;
             _fragmentLabels = message.NewValue;
-            if (ShowHeavy)
+            if (!ShowHeavy && ShowFragmentXic)
             {
-                if (ShowFragmentXic)
-                {
-                    FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
-                    HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
-                    UpdateFragmentAreaRatioLabels();
-                }
-            }
-            else
-            {
-                if (ShowFragmentXic)
-                {
-                    FragmentPlotViewModel.Ions = _fragmentLabels;
-                }
+                FragmentPlotViewModel.Ions = _fragmentLabels;
             }
         }
 
-        private async void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        private void LightFragmentLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        {
+            if (message.PropertyName != "LightFragmentLabels") return;
+            _lightFragmentLabels = message.NewValue;
+            if (ShowHeavy && ShowFragmentXic)
+            {
+                FragmentPlotViewModel.Ions = _lightFragmentLabels;
+                UpdateFragmentAreaRatioLabels();
+            }
+        }
+
+        private void HeavyFragmentLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        {
+            if (message.PropertyName != "HeavyFragmentLabels") return;
+            _heavyFragmentLabels = message.NewValue;
+            if (ShowHeavy && ShowFragmentXic)
+            {
+                HeavyFragmentPlotViewModel.Ions = _heavyFragmentLabels;
+                UpdateFragmentAreaRatioLabels();
+            }
+        }
+
+        private void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
         {
             if (message.PropertyName != "PrecursorLabels") return;
             _precursorLabels = message.NewValue;
             if (ShowHeavy)
             {
-                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
-                HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+                //PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
+                //HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
                 UpdatePrecursorAreaRatioLabels();
             }
             else
@@ -180,6 +200,29 @@ namespace LcmsSpectator.ViewModels
                 PrecursorPlotViewModel.Ions = _precursorLabels;
             }
         }
+
+        private void LightPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        {
+            if (message.PropertyName != "LightPrecursorLabels") return;
+            _lightPrecursorLabels = message.NewValue;
+            if (ShowHeavy)
+            {
+                PrecursorPlotViewModel.Ions = _lightPrecursorLabels;
+                UpdatePrecursorAreaRatioLabels();   
+            }
+        }
+
+        private void HeavyPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        {
+            if (message.PropertyName != "HeavyPrecursorLabels") return;
+            _heavyPrecursorLabels = message.NewValue;
+            if (ShowHeavy)
+            {
+                HeavyPrecursorPlotViewModel.Ions = _heavyPrecursorLabels;
+                UpdatePrecursorAreaRatioLabels();   
+            }
+        }
+
 
         private void ClearAllNotificationHandler(ClearAllNotification notification)
         {
@@ -240,6 +283,7 @@ namespace LcmsSpectator.ViewModels
             get { return _showHeavy; }
             set
             {
+                var oldValue = _showHeavy;
                 _showHeavy = value;
                 if (_showHeavy)
                 {
@@ -255,7 +299,7 @@ namespace LcmsSpectator.ViewModels
                         HeavyFragmentPlotViewModel.Ions = new List<LabeledIonViewModel>();   
                     }
                 }
-                RaisePropertyChanged();
+                RaisePropertyChanged("ShowHeavy", oldValue, _showHeavy, true);
             }
         }
 
@@ -290,19 +334,19 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Update and regenerate all plots
         /// </summary>
-        public async void UpdatePlots()
+        public void UpdatePlots()
         {
             ClearCache();
 
             if (ShowHeavy)
             {
-                PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
-                HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+                PrecursorPlotViewModel.Ions = _lightPrecursorLabels;
+                HeavyPrecursorPlotViewModel.Ions = _heavyPrecursorLabels;
                 UpdatePrecursorAreaRatioLabels();
                 if (ShowFragmentXic)
                 {
-                    FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
-                    HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                    FragmentPlotViewModel.Ions = _lightFragmentLabels;
+                    HeavyFragmentPlotViewModel.Ions = _heavyFragmentLabels;
                     UpdateFragmentAreaRatioLabels();
                 }
             }
@@ -316,25 +360,25 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private async void EnableHeavyXic()
+        private void EnableHeavyXic()
         {
-            PrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightPrecursorIons();
-            HeavyPrecursorPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyPrecursorIons();
+            PrecursorPlotViewModel.Ions = _lightPrecursorLabels;
+            HeavyPrecursorPlotViewModel.Ions = _heavyPrecursorLabels;
             UpdatePrecursorAreaRatioLabels();
             if (ShowFragmentXic)
             {
-                FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
-                HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                FragmentPlotViewModel.Ions = _lightFragmentLabels;
+                HeavyFragmentPlotViewModel.Ions = _heavyFragmentLabels;
                 UpdateFragmentAreaRatioLabels();
             }
         }
 
-        private async void EnableFragmentXic()
+        private void EnableFragmentXic()
         {
             if (ShowHeavy)
             {
-                FragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetLightFragmentIons();
-                HeavyFragmentPlotViewModel.Ions = await SelectedPrSmViewModel.Instance.GetHeavyFragmentIons();
+                FragmentPlotViewModel.Ions = _lightFragmentLabels;
+                HeavyFragmentPlotViewModel.Ions = _heavyFragmentLabels;
                 UpdateFragmentAreaRatioLabels();
             }
             else
@@ -425,6 +469,7 @@ namespace LcmsSpectator.ViewModels
         private readonly LinearAxis _xicXAxis;
 
         private List<LabeledIonViewModel> _fragmentLabels;
+        private List<LabeledIonViewModel> _lightFragmentLabels;
         private List<LabeledIonViewModel> _precursorLabels; 
 
         private bool _showScanMarkers;
@@ -435,5 +480,8 @@ namespace LcmsSpectator.ViewModels
         private bool _isLoading;
         private string _fragmentAreaRatioLabel;
         private string _precursorAreaRatioLabel;
+        private List<LabeledIonViewModel> _heavyFragmentLabels;
+        private List<LabeledIonViewModel> _lightPrecursorLabels;
+        private List<LabeledIonViewModel> _heavyPrecursorLabels;
     }
 }

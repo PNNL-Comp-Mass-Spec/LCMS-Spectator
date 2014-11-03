@@ -21,7 +21,13 @@ namespace LcmsSpectator.PlotModels
                 var index = Math.Min(label.IonType.Charge - 1, _fragmentColors[label.IonType.BaseIonType].Count - 1);
                 color = _fragmentColors[label.IonType.BaseIonType][index];
             }
-            else color = _precursorColors[label.Index];
+            else
+            {
+                if (_precursorColors.ContainsKey(label.Index))
+                    color = _precursorColors[label.Index];
+                else
+                    color = label.Index > 0 ? OxyColors.DarkRed : OxyColors.AliceBlue;
+            }
 
             return color;
         }
@@ -65,10 +71,19 @@ namespace LcmsSpectator.PlotModels
 
             _precursorColors = new Dictionary<int, OxyColor>
             {
-                {-1, OxyColors.Blue},
+                {-1, OxyColors.DarkGray},
                 {0, OxyColors.Purple},
-                {1, OxyColors.Green},
-                {2, OxyColors.Red}
+                {1, OxyColors.Red},
+                {2, OxyColors.Blue},
+                {3, OxyColors.Green},
+                {4, OxyColors.Yellow},
+                {5, OxyColors.Brown},
+                {6, OxyColors.Orange},
+                {7, OxyColors.PaleGreen},
+                {8, OxyColors.Turquoise},
+                {9, OxyColors.Olive},
+                {10, OxyColors.Beige},
+                {11, OxyColors.Lime},
             };
         }
 

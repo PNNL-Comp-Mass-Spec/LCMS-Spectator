@@ -22,7 +22,7 @@ namespace LcmsSpectator.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace LcmsSpectator.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LcmsSpectator.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace LcmsSpectator.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,10 +63,26 @@ namespace LcmsSpectator.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon iconSmall {
+        public static System.Drawing.Icon iconSmall {
             get {
                 object obj = ResourceManager.GetObject("iconSmall", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;LayoutRoot xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&gt;
+        ///  &lt;RootPanel Orientation=&quot;Horizontal&quot;&gt;
+        ///    &lt;LayoutAnchorablePane Id=&quot;0a12a9f1-bcc2-4612-88f6-1ea9bee157ce&quot; DockWidth=&quot;130&quot; /&gt;
+        ///    &lt;LayoutPanel Orientation=&quot;Vertical&quot;&gt;
+        ///      &lt;LayoutPanel Orientation=&quot;Horizontal&quot;&gt;
+        ///        &lt;LayoutDocumentPane&gt;
+        ///          &lt;LayoutDocument Title=&quot;XIC View&quot; IsSelected=&quot;True&quot; IsLastFocusedDocument=&quot;True&quot; ContentId=&quot;XicView&quot; Can [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string layout {
+            get {
+                return ResourceManager.GetString("layout", resourceCulture);
             }
         }
     }

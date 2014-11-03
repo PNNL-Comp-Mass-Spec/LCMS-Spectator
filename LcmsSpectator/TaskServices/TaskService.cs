@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using LcmsSpectator.Utils;
 
 namespace LcmsSpectator.TaskServices
 {
@@ -16,31 +15,32 @@ namespace LcmsSpectator.TaskServices
 
         public void Enqueue(Action action, bool parallel=false)
         {
-            _queueLock.WaitOne();
-            _taskQueue.Enqueue(new QTask{ Action = action, IsParallel = parallel});
-            _queueLock.ReleaseMutex();
+            lock (_queueLock)
+            {
+                _taskQueue.Enqueue(new QTask { Action = action, IsParallel = parallel });   
+            }
             RunTasks();
         }
 
         private void RunTasks()
         {
-            _queueLock.WaitOne();
-            if (_runningTasksCount != 0)
+            lock (_queueLock)
             {
-                _queueLock.ReleaseMutex();
-                return;
+                if (_runningTasksCount != 0)
+                {
+                    return;
+                }
+                while (_taskQueue.Count > 0 && _taskQueue.Peek().IsParallel)
+                {
+                    var task = _taskQueue.Dequeue();
+                    QueueWorkItem(task);
+                }
+                if (_taskQueue.Count > 0 && _runningTasksCount == 0)
+                {
+                    var action = _taskQueue.Dequeue();
+                    QueueWorkItem(action);
+                }   
             }
-            while (_taskQueue.Count > 0 && _taskQueue.Peek().IsParallel)
-            {
-                var task = _taskQueue.Dequeue();
-                QueueWorkItem(task);
-            }
-            if (_taskQueue.Count > 0 && _runningTasksCount == 0)
-            {
-                var action = _taskQueue.Dequeue();
-                QueueWorkItem(action);
-            }
-            _queueLock.ReleaseMutex();
         }
 
         private void QueueWorkItem(QTask task)
@@ -57,15 +57,16 @@ namespace LcmsSpectator.TaskServices
 
         private void OnTaskCompleted()
         {
-            _queueLock.WaitOne();
-            _runningTasksCount--;
-            if (_runningTasksCount == 0) RunTasks();
-            _queueLock.ReleaseMutex();
+            lock (_queueLock)
+            {
+                _runningTasksCount--;
+                if (_runningTasksCount == 0) RunTasks();   
+            }
         }
 
         private int _runningTasksCount;
         private readonly Queue<QTask> _taskQueue; 
-        private readonly Mutex _queueLock;
+        private readonly Object _queueLock;
 
         private class QTask
         {

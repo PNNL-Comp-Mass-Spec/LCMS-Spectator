@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Remoting.Messaging;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectatorModels.Models;
+using LcmsSpectatorModels.Readers.SequenceReaders;
 
 namespace LcmsSpectatorModels.Readers
 {
@@ -15,10 +17,9 @@ namespace LcmsSpectatorModels.Readers
             _filePath = tsvFile;
         }
 
-        public IdentificationTree Read()
+        public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
         {
-            var ext = Path.GetFileNameWithoutExtension(_filePath);
-            return (ext == ".gz") ? ReadFromMzId() : ReadFromTsvFile();
+            return ReadFromTsvFile();
         }
 
         private IdentificationTree ReadFromTsvFile()
@@ -47,7 +48,7 @@ namespace LcmsSpectatorModels.Readers
             return idTree;
         }
 
-        private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers)
+        private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers, IEnumerable<string> modIgnoreList = null)
         {
             var parts = line.Split('\t');
             var score = Convert.ToDouble(parts[headers["SpecEValue"]]);
@@ -55,14 +56,26 @@ namespace LcmsSpectatorModels.Readers
             var proteinNames = parts[headers["Protein"]].Split(';');
             var prsms = new List<PrSm> { Capacity = proteinNames.Length };
 
+            var sequenceText = parts[headers["Peptide"]];
+
+            if (modIgnoreList != null)
+            {
+                foreach (var mod in modIgnoreList)
+                {
+                    if (sequenceText.Contains(mod)) return null;
+                }
+            }
+
+            var sequenceReader = new SequenceReader();
+
             foreach (var protein in proteinNames)
             {
                 var prsm = new PrSm
                 {
                     Heavy = false,
                     Scan = Convert.ToInt32(parts[headers["ScanNum"]]),
-                    Sequence = Sequence.GetSequenceFromMsGfPlusPeptideStr(parts[headers["Peptide"]]),
-                    SequenceText = parts[headers["Peptide"]],
+                    Sequence = sequenceReader.Read(sequenceText),
+                    SequenceText = sequenceText,
                     ProteinName = protein,
                     ProteinDesc = "",
                     Charge = Convert.ToInt32(parts[headers["Charge"]]),
@@ -74,22 +87,6 @@ namespace LcmsSpectatorModels.Readers
             }
             return prsms;
         }
-
-        private IdentificationTree ReadFromMzId()
-        {
-            throw new NotImplementedException();
-        /*     var oReader = new PHRPReader.clsPHRPReader(_filePath) {SkipDuplicatePSMs = true};
-               var idTree = new IdentificationTree();
-                while (oReader.MoveNext())
-                {
-                    var prsm = new PrSm
-                    {
-                        Scan = oReader.CurrentPSM.ScanNumber,
-                        Charge = oReader.CurrentPSM.Charge,
-                    };
-                    idTree.Add(prsm);
-                } */
-        } 
 
         private readonly string _filePath;
     }
