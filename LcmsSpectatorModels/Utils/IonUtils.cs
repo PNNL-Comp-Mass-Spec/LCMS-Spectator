@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using InformedProteomics.Backend.Data.Biology;
@@ -8,6 +9,7 @@ using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectatorModels.Models;
 using MultiDimensionalPeakFinding;
+using NHibernate.Transaction;
 
 namespace LcmsSpectatorModels.Utils
 {
@@ -131,6 +133,15 @@ namespace LcmsSpectatorModels.Utils
                 if (labeledIon.CorrelationScore >= corrThreshold) labeledIonPeaks.Add(labeledIon);
             }
             return labeledIonPeaks;
+        }
+
+        public static LabeledIon GetDeconvolutedLabeledIon(LabeledIon labeledIon, IonTypeFactory ionTypeFactory)
+        {
+            var deconIonTypeName = labeledIon.IonType.Name.Insert(1, "'");
+            var ionType = ionTypeFactory.GetIonType(deconIonTypeName);
+            var deconLabeledIon = new LabeledIon(labeledIon.Composition, labeledIon.Index, ionType,
+                labeledIon.IsFragmentIon, labeledIon.PrecursorIon, labeledIon.IsChargeState);
+            return deconLabeledIon;
         }
 
         /// <summary>

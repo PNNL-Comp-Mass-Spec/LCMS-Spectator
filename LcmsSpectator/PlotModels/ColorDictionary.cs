@@ -18,8 +18,8 @@ namespace LcmsSpectator.PlotModels
             OxyColor color;
             if (label.IsFragmentIon)
             {
-                var index = Math.Min(label.IonType.Charge - 1, _fragmentColors[label.IonType.BaseIonType].Count - 1);
-                color = _fragmentColors[label.IonType.BaseIonType][index];
+                var index = Math.Min(label.IonType.Charge - 1, _fragmentColors[label.IonType.BaseIonType.Symbol].Count - 1);
+                color = _fragmentColors[label.IonType.BaseIonType.Symbol][index];
             }
             else
             {
@@ -37,37 +37,43 @@ namespace LcmsSpectator.PlotModels
             const byte colorMin = 150;
             const byte colorMax = 255;
 
-            _fragmentColors = new Dictionary<BaseIonType, IList<OxyColor>>();
+            _fragmentColors = new Dictionary<string, IList<OxyColor>>();
 
             var aStart = OxyColor.FromRgb(0, colorMin, 0);
             var aEnd = OxyColor.FromRgb(0, colorMax, 0);
             var aColors = OxyPalette.Interpolate(length, new[] { aEnd, aStart });
-            _fragmentColors.Add(BaseIonType.A, aColors.Colors);
+            _fragmentColors.Add(BaseIonType.A.Symbol, aColors.Colors);
+            _fragmentColors.Add(BaseIonType.A.GetDeconvolutedIon().Symbol, aColors.Colors);
 
             var bStart = OxyColor.FromRgb(0, 0, colorMin);
             var bEnd = OxyColor.FromRgb(0, 0, colorMax);
             var bColors = OxyPalette.Interpolate(length, new[] { bEnd, bStart });
-            _fragmentColors.Add(BaseIonType.B, bColors.Colors);
+            _fragmentColors.Add(BaseIonType.B.Symbol, bColors.Colors);
+            _fragmentColors.Add(BaseIonType.B.GetDeconvolutedIon().Symbol, bColors.Colors);
 
             var cStart = OxyColor.FromRgb(0, colorMin, colorMin);
             var cEnd = OxyColor.FromRgb(0, colorMax, colorMax);
             var cColors = OxyPalette.Interpolate(length, new[] { cEnd, cStart });
-            _fragmentColors.Add(BaseIonType.C, cColors.Colors);
+            _fragmentColors.Add(BaseIonType.C.Symbol, cColors.Colors);
+            _fragmentColors.Add(BaseIonType.C.GetDeconvolutedIon().Symbol, cColors.Colors);
 
             var xStart = OxyColor.FromRgb(colorMin, colorMin, 0);
             var xEnd = OxyColor.FromRgb(colorMax, colorMax, 0);
             var xColors = OxyPalette.Interpolate(length, new[] { xEnd, xStart });
-            _fragmentColors.Add(BaseIonType.X, xColors.Colors);
+            _fragmentColors.Add(BaseIonType.X.Symbol, xColors.Colors);
+            _fragmentColors.Add(BaseIonType.X.GetDeconvolutedIon().Symbol, xColors.Colors);
 
             var yStart = OxyColor.FromRgb(colorMin, 0, 0);
             var yEnd = OxyColor.FromRgb(colorMax, 0, 0);
             var yColors = OxyPalette.Interpolate(length, new[] { yEnd, yStart });
-            _fragmentColors.Add(BaseIonType.Y, yColors.Colors);
+            _fragmentColors.Add(BaseIonType.Y.Symbol, yColors.Colors);
+            _fragmentColors.Add(BaseIonType.Y.GetDeconvolutedIon().Symbol, yColors.Colors);
 
             var zStart = OxyColor.FromRgb(colorMin, 0, colorMin);
             var zEnd = OxyColor.FromRgb(colorMax, 0, colorMax);
             var zColors = OxyPalette.Interpolate(length, new[] { zEnd, zStart });
-            _fragmentColors.Add(BaseIonType.Z, zColors.Colors);
+            _fragmentColors.Add(BaseIonType.Z.Symbol, zColors.Colors);
+            _fragmentColors.Add(BaseIonType.Z.GetDeconvolutedIon().Symbol, zColors.Colors);
 
             _precursorColors = new Dictionary<int, OxyColor>
             {
@@ -87,7 +93,7 @@ namespace LcmsSpectator.PlotModels
             };
         }
 
-        private Dictionary<BaseIonType, IList<OxyColor>> _fragmentColors;
+        private Dictionary<string, IList<OxyColor>> _fragmentColors;
         private Dictionary<int, OxyColor> _precursorColors;
     }
 }
