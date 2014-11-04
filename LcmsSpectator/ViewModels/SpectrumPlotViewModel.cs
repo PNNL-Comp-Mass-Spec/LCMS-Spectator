@@ -417,7 +417,7 @@ namespace LcmsSpectator.ViewModels
 
         private List<LabeledIonViewModel> _ions;
         private bool _showUnexplainedPeaks;
-        private bool _updateXAxis;
+        private readonly bool _updateXAxis;
 
         //private bool _updateIons;
 
