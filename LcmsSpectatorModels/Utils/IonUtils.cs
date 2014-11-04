@@ -107,8 +107,13 @@ namespace LcmsSpectatorModels.Utils
             return source.Where(target.Contains).ToList();
         }
 
-        public static LabeledIonPeaks GetIonPeaks(LabeledIon ion, Spectrum spectrum, Tolerance productIonTolerance, Tolerance precursorIonTolerance)
+        public static LabeledIonPeaks GetIonPeaks(LabeledIon ion, Spectrum spectrum, Tolerance productIonTolerance, Tolerance precursorIonTolerance, bool decharged)
         {
+            if (decharged && !ion.IsFragmentIon) ion = new LabeledIon(ion.Composition, ion.Index, 
+                                                                     new IonType(ion.IonType.Name,
+                                                                                 ion.IonType.OffsetComposition, 1, 
+                                                                                 ion.IonType.IsPrefixIon), 
+                                                                     false, ion.PrecursorIon, ion.IsChargeState);
             var tolerance = ion.IsFragmentIon ? productIonTolerance : precursorIonTolerance;
             var ionCorrelation = spectrum.GetCorrScore(ion.Ion, tolerance);
             var isotopePeaks = spectrum.GetAllIsotopePeaks(ion.Ion, tolerance, 0.1);
@@ -117,12 +122,12 @@ namespace LcmsSpectatorModels.Utils
 
         public static List<LabeledIonPeaks> GetIonPeaks(List<LabeledIon> ions, Spectrum spectrum,
                                                         Tolerance productIonTolerance, Tolerance precursorIonTolerance,
-                                                        double corrThreshold)
+                                                        double corrThreshold, bool decharged)
         {
             var labeledIonPeaks = new List<LabeledIonPeaks>();
             foreach (var ion in ions)
             {
-                var labeledIon = GetIonPeaks(ion, spectrum, productIonTolerance, precursorIonTolerance);
+                var labeledIon = GetIonPeaks(ion, spectrum, productIonTolerance, precursorIonTolerance, decharged);
                 if (labeledIon.CorrelationScore >= corrThreshold) labeledIonPeaks.Add(labeledIon);
             }
             return labeledIonPeaks;

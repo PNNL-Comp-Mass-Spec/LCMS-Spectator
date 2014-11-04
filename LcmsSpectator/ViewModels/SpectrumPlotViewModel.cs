@@ -95,7 +95,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showFilteredSpectrum = value;
-                SpectrumUpdate();
+                SpectrumUpdate(_spectrum, _xAxis);
                 RaisePropertyChanged();
             }
         }
@@ -109,7 +109,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showDeconvolutedSpectrum = value;
-                SpectrumUpdate();
+                SpectrumUpdate(_spectrum, _xAxis);
                 RaisePropertyChanged();
             }
         }
@@ -280,7 +280,7 @@ namespace LcmsSpectator.ViewModels
         {
             var labeledIonPeaks = IonUtils.GetIonPeaks(labeledIon, spectrum,
                                                        IcParameters.Instance.ProductIonTolerancePpm,
-                                                       IcParameters.Instance.PrecursorTolerancePpm);
+                                                       IcParameters.Instance.PrecursorTolerancePpm, ShowDeconvolutedSpectrum);
             // create plots
             var color = colors.GetColor(labeledIon);
             var ionSeries = new StemSeries(color, 1.5)
