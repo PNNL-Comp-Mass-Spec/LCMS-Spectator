@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.TaskServices;
 using LcmsSpectator.ViewModels;
@@ -11,6 +13,7 @@ using LcmsSpectatorModels.Readers;
 using LcmsSpectatorModels.Utils;
 using LcmsSpectatorTests.DialogServices;
 using NUnit.Framework;
+using OxyPlot.Annotations;
 using OxyPlot.Series;
 
 namespace LcmsSpectatorTests
@@ -31,7 +34,7 @@ namespace LcmsSpectatorTests
             // init SpectrumPlotViewModel
             SelectedPrSmViewModel.Instance.Charge = 2;
             var dialogService = new TestableMainDialogService();
-            var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, new MockTaskService(), 1.05);
+            var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, new MockTaskService(), 1.05, false);
 
             // init test data
             var id = ids.GetHighestScoringPrSm();
@@ -61,7 +64,7 @@ namespace LcmsSpectatorTests
             // init SpectrumPlotViewModel
             SelectedPrSmViewModel.Instance.Charge = 2;
             var dialogService = new TestableMainDialogService();
-            var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, new MockTaskService(),  1.05);
+            var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, new MockTaskService(),  1.05, false);
 
             // init test data
             var id = ids.GetHighestScoringPrSm();
@@ -78,7 +81,7 @@ namespace LcmsSpectatorTests
             foreach (var label in ions) ionVms.Add(new LabeledIonViewModel(label));
             var expectedIons = IonUtils.GetIonPeaks(ions, id.Ms2Spectrum, IcParameters.Instance.ProductIonTolerancePpm,
                                                     IcParameters.Instance.PrecursorTolerancePpm,
-                                                    IcParameters.Instance.IonCorrelationThreshold);
+                                                    IcParameters.Instance.IonCorrelationThreshold, false);
             spectrumPlotViewModel.SpectrumUpdate(id.Ms2Spectrum);
             spectrumPlotViewModel.IonUpdate(ionVms);
 
@@ -93,7 +96,7 @@ namespace LcmsSpectatorTests
             foreach (var label in ions) ionVms.Add(new LabeledIonViewModel(label));
             expectedIons = IonUtils.GetIonPeaks(ions, id.Ms2Spectrum, IcParameters.Instance.ProductIonTolerancePpm,
                                         IcParameters.Instance.PrecursorTolerancePpm,
-                                        IcParameters.Instance.IonCorrelationThreshold);
+                                        IcParameters.Instance.IonCorrelationThreshold, false);
             spectrumPlotViewModel.SpectrumUpdate(id.Ms2Spectrum);
             spectrumPlotViewModel.IonUpdate(ionVms);
             //spectrumPlotViewModel.UpdateSpectrum();
@@ -114,7 +117,7 @@ namespace LcmsSpectatorTests
 
             const int maxCharge = 15;
             SelectedPrSmViewModel.Instance.Charge = maxCharge;
-            var specPlotVm = new SpectrumPlotViewModel(new TestableMainDialogService(), new MockTaskService(), 1.05);
+            var specPlotVm = new SpectrumPlotViewModel(new TestableMainDialogService(), new MockTaskService(), 1.05, false);
 
             foreach (var scan in scans)
             {
@@ -148,6 +151,39 @@ namespace LcmsSpectatorTests
             }
         }
 
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        public void TestShowDeconvolutedIons(string rawFile, string tsvFile)
+        {
+            var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
+            var scans = lcms.GetScanNumbers(2);
+            var idFileReader = IdFileReaderFactory.CreateReader(tsvFile);
+            var ids = idFileReader.Read().AllPrSms;
+
+            const int maxCharge = 15;
+            SelectedPrSmViewModel.Instance.Charge = maxCharge;
+            var specPlotVm = new SpectrumPlotViewModel(new TestableMainDialogService(), new MockTaskService(), 1.05, false);
+            specPlotVm.ShowDeconvolutedSpectrum = true;
+
+            var ionTypeFactory = new IonTypeFactory(maxCharge);
+            var ionTypes = ionTypeFactory.GetAllKnownIonTypes();
+
+            foreach (var prsm in ids)
+            {
+                specPlotVm.SpectrumUpdate(prsm.Ms2Spectrum);
+                var ions = IonUtils.GetFragmentIonLabels(prsm.Sequence, prsm.Charge, ionTypes.ToList());
+                var ionVms = new List<LabeledIonViewModel>();
+                foreach (var label in ions) ionVms.Add(new LabeledIonViewModel(label));
+                specPlotVm.IonUpdate(ionVms);
+                foreach (var annotation in specPlotVm.Plot.Annotations)
+                {
+                    var textAnnotation = annotation as TextAnnotation;
+                    Assert.True(textAnnotation.Text.Contains("'"));
+                    Assert.True(textAnnotation.Text.Contains("1+"));
+                }
+            }
+        }
+
         /// <summary>
         /// This test checks to see if the spectrum plot is showing a valid ppm error for the ion highlights
         /// </summary>
@@ -173,7 +209,7 @@ namespace LcmsSpectatorTests
             // init SpectrumPlotViewModel
             SelectedPrSmViewModel.Instance.Charge = 2;
             var dialogService = new TestableMainDialogService();
-            var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, new MockTaskService(), 1.05);
+            var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, new MockTaskService(), 1.05, false);
 
             // init ionTypes
             const int maxCharge = 15;
