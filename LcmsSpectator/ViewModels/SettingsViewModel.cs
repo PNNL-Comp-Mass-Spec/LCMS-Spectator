@@ -21,7 +21,7 @@ namespace LcmsSpectator.ViewModels
         public int ModificationsPerSequence { get; set; }
         public double IonCorrelationThreshold { get; set; }
         public int PointsToSmooth { get; set; }
-        public double SpectrumFilterSlope { get; set; }
+        public double SpectrumFilterWindowSize { get; set; }
         public double PrecursorRelativeIntensityThreshold { get; set; }
         public PrecursorViewMode PrecursorViewMode { get; set; }
 
@@ -51,7 +51,7 @@ namespace LcmsSpectator.ViewModels
             IonCorrelationThreshold = IcParameters.Instance.IonCorrelationThreshold;
             ModificationsPerSequence = IcParameters.Instance.MaxDynamicModificationsPerSequence;
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
-            SpectrumFilterSlope = IcParameters.Instance.SpectrumFilterSlope;
+            SpectrumFilterWindowSize = IcParameters.Instance.SpectrumFilterWindowSize;
             PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
             PrecursorViewMode = IcParameters.Instance.PrecursorViewMode;
 
@@ -109,7 +109,7 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.MaxDynamicModificationsPerSequence = ModificationsPerSequence;
             IcParameters.Instance.IonCorrelationThreshold = IonCorrelationThreshold;
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
-            IcParameters.Instance.SpectrumFilterSlope = SpectrumFilterSlope;
+            IcParameters.Instance.SpectrumFilterWindowSize = SpectrumFilterWindowSize;
             IcParameters.Instance.PrecursorRelativeIntensityThreshold = PrecursorRelativeIntensityThreshold;
             IcParameters.Instance.PrecursorViewMode = PrecursorViewMode;
 

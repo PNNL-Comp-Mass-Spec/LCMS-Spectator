@@ -27,7 +27,7 @@ namespace LcmsSpectatorModels.Config
         public double IonCorrelationThreshold { get; set; }
         public List<SearchModification> Modifications { get; set; }
         public int PointsToSmooth { get; set; }
-        public double SpectrumFilterSlope { get; set; }
+        public double SpectrumFilterWindowSize { get; set; }
         public double PrecursorRelativeIntensityThreshold { get; set; }
         public PrecursorViewMode PrecursorViewMode { get; set; }
         public List<SearchModification> SearchModifications { get; set; }
@@ -75,7 +75,7 @@ namespace LcmsSpectatorModels.Config
             IonCorrelationThreshold = 0.7;
             MaxDynamicModificationsPerSequence = 0;
             PointsToSmooth = 9;
-            SpectrumFilterSlope = 0.33;
+            SpectrumFilterWindowSize = 2.5;
             PrecursorRelativeIntensityThreshold = 0.1;
             PrecursorViewMode = PrecursorViewMode.Isotopes;
             SearchModifications = new List<SearchModification>

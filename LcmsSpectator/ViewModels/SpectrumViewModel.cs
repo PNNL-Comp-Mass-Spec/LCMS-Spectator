@@ -19,8 +19,6 @@ namespace LcmsSpectator.ViewModels
         public SpectrumPlotViewModel Secondary2ViewModel { get; private set; }
         public SpectrumViewModel(IDialogService dialogService, ITaskService taskService)
         {
-            _fragmentLabels = new List<LabeledIonViewModel>();
-            _precursorLabels = new List<LabeledIonViewModel>();
             PrimarySpectrumViewModel = new SpectrumPlotViewModel(dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), 1.05, false);
             Secondary1ViewModel = new SpectrumPlotViewModel(dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), 1.1, true);
             Secondary2ViewModel = new SpectrumPlotViewModel(dialogService, taskService, 1.1, true);
@@ -86,7 +84,6 @@ namespace LcmsSpectator.ViewModels
                 var ion = new LabeledIon(precursorIon.Composition, 0, precursorIonType, false);
                 labels.Add(new LabeledIonViewModel(ion));
             } */
-            _fragmentLabels = labels;
             PrimarySpectrumViewModel.IonUpdate(labels);
         }
 
@@ -106,7 +103,6 @@ namespace LcmsSpectator.ViewModels
                 precursorLabel = label;
                 break;
             }
-            _precursorLabels = precursorLabels;
             if (precursorLabel != null)
             {
                 Secondary2ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });
@@ -179,41 +175,12 @@ namespace LcmsSpectator.ViewModels
             Secondary2ViewModel.Title = secondary2 == null ? "" : String.Format("{0} (Scan: {1})", secondary2Title, secondary2.ScanNum);
         }
 
-        private void SettingsChanged(SettingsChangedNotification notification)
+        /*private void SettingsChanged(SettingsChangedNotification notification)
         {
-            var prsm = SelectedPrSmViewModel.Instance.PrSm;
-            var scan = prsm.Scan;
-            if (scan == 0)
-            {
-                PrimarySpectrumViewModel.Clear();
-                Secondary2ViewModel.Clear();
-                Secondary1ViewModel.Clear();
-                return;
-            }
-            var lcms = SelectedPrSmViewModel.Instance.Lcms;
-            var rawFileName = SelectedPrSmViewModel.Instance.RawFileName;
-            var ms2 = lcms.GetSpectrum(scan);
-            var prevms1 = lcms.GetSpectrum(lcms.GetPrevScanNum(scan, 1));
-            var nextms1 = lcms.GetSpectrum(lcms.GetNextScanNum(scan, 1));
-
-            var precursorIon = _precursorLabels.Count > 2 ? new List<LabeledIonViewModel> { _precursorLabels[1] } : new List<LabeledIonViewModel>();
-
-            // Ms2 spectrum plot
-            var heavyStr = SelectedPrSmViewModel.Instance.Heavy ? ", Heavy" : "";
-            PrimarySpectrumViewModel.Title = (ms2 == null) ? "" : String.Format("Ms2 Spectrum (Scan: {0}, Raw: {1}{2})", ms2.ScanNum, rawFileName, heavyStr);
-            PrimarySpectrumViewModel.SpectrumUpdate(ms2);
-            PrimarySpectrumViewModel.IonUpdate(_fragmentLabels);
-            // Ms1 spectrum plots
-            var xAxis = GenerateMs1XAxis(ms2, prevms1, nextms1);    // shared x axis
-            // previous Ms1
-            Secondary1ViewModel.SpectrumUpdate(prevms1, xAxis);
-            Secondary1ViewModel.IonUpdate(precursorIon);
-            Secondary1ViewModel.Title = prevms1 == null ? "" : String.Format("Previous Ms1 Spectrum (Scan: {0})", prevms1.ScanNum);
-            // next Ms1
-            Secondary2ViewModel.SpectrumUpdate(nextms1, xAxis);
-            Secondary2ViewModel.IonUpdate(precursorIon);
-            Secondary2ViewModel.Title = nextms1 == null ? "" : String.Format("Next Ms1 Spectrum (Scan: {0})", nextms1.ScanNum);
-        }
+            PrimarySpectrumViewModel.SpectrumUpdate();
+            Secondary1ViewModel.SpectrumUpdate();
+            Secondary2ViewModel.SpectrumUpdate();
+        } */
 
         private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, ILcMsRun lcms)
         {
@@ -271,8 +238,5 @@ namespace LcmsSpectator.ViewModels
 
             return nextMs2;
         }
-
-        private List<LabeledIonViewModel> _fragmentLabels;
-        private List<LabeledIonViewModel> _precursorLabels;
     }
 }

@@ -32,6 +32,7 @@ namespace LcmsSpectator.ViewModels
 
         public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, double multiplier, bool updateXAxis)
         {
+            Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
             Messenger.Default.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
             //Messenger.Default.Register<PropertyChangedMessage<double>>(this, PrecursorChanged);
             _taskService = taskService;
@@ -180,7 +181,7 @@ namespace LcmsSpectator.ViewModels
                 if (_filtDeconSpectrum == null)
                 {
                     if (_filteredSpectrum == null)
-                        _filteredSpectrum = _spectrum.GetFilteredSpectrumByIntensityHistogram();
+                        _filteredSpectrum = _spectrum.GetFilteredSpectrumByIntensityHistogram(IcParameters.Instance.SpectrumFilterWindowSize);
                     _filtDeconSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(spectrum,
                                     Constants.MinCharge, Constants.MaxCharge, tolerance,
                                     IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
@@ -190,7 +191,7 @@ namespace LcmsSpectator.ViewModels
             else if (ShowFilteredSpectrum)
             {
                 if (_filteredSpectrum == null)
-                    _filteredSpectrum = _spectrum.GetFilteredSpectrumByIntensityHistogram();
+                    _filteredSpectrum = _spectrum.GetFilteredSpectrumByIntensityHistogram(IcParameters.Instance.SpectrumFilterWindowSize);
                 spectrum = _filteredSpectrum;
             }
             else if (ShowDeconvolutedSpectrum)
@@ -375,6 +376,12 @@ namespace LcmsSpectator.ViewModels
                     }
                 }
             }
+        }
+
+        private void SettingsChanged(SettingsChangedNotification notification)
+        {
+            if (_updateXAxis) SpectrumUpdate(_spectrum, _xAxis);
+            else SpectrumUpdate();
         }
 
         /*private void PrecursorChanged(PropertyChangedMessage<double> message)
