@@ -23,6 +23,7 @@ namespace LcmsSpectator.ViewModels
             {
                 { "Sequence", "" },
                 { "Protein", ""},
+                { "Mass", ""},
                 { "PrecursorMz", ""},
                 { "Charge", ""},
                 { "Score", ""},
@@ -47,6 +48,7 @@ namespace LcmsSpectator.ViewModels
         {
             _sequenceFilterChecked = false; RaisePropertyChanged("SequenceFilterChecked");
             _proteinFilterChecked = false; RaisePropertyChanged("ProteinFilterChecked");
+            _precursorMzFilterChecked = false; RaisePropertyChanged("MassFilterChecked");
             _precursorMzFilterChecked = false; RaisePropertyChanged("PrecursorMzFilterChecked");
             _chargeFilterChecked = false; RaisePropertyChanged("ChargeFilterChecked");
             _scoreFilterChecked = false; RaisePropertyChanged("ScoreFilterChecked");
@@ -201,6 +203,39 @@ namespace LcmsSpectator.ViewModels
                 else
                 {
                     if (_filters.ContainsKey("Protein")) _filters.Remove("Protein");
+                    _taskService.Enqueue(FilterData);
+                }
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool MassFilterChecked
+        {
+            get { return _massFilterChecked; }
+            set
+            {
+                _massFilterChecked = value;
+                if (_massFilterChecked)
+                {
+                    string defaultValue;
+                    _previousFilters.TryGetValue("Mass", out defaultValue);
+                    FilterViewModel.Validate validator = o =>
+                    {
+                        double conv;
+                        var str = o as string;
+                        return Double.TryParse(str, out conv);
+                    };
+                    var filterBoxVm = new FilterViewModel("Filter by Mass", "Enter minimum Mass to display:", defaultValue, new List<string>(), validator, _dialogService);
+                    if (_dialogService.FilterBox(filterBoxVm))
+                    {
+                        AddFilter("Mass", filterBoxVm.SelectedValue);
+                        _previousFilters["Mass"] = filterBoxVm.SelectedValue;
+                    }
+                    else _precursorMzFilterChecked = false;
+                }
+                else
+                {
+                    if (_filters.ContainsKey("Mass")) _filters.Remove("Mass");
                     _taskService.Enqueue(FilterData);
                 }
                 RaisePropertyChanged();
@@ -383,6 +418,9 @@ namespace LcmsSpectator.ViewModels
                     case "Protein":
                         filtered = filtered.Where(datum => datum.ProteinName.StartsWith(filter.Value)).ToList();
                         break;
+                    case "Mass":
+                        filtered = filtered.Where(datum => datum.Mass >= Convert.ToDouble(filter.Value)).ToList();
+                        break;
                     case "PrecursorMz":
                         filtered = filtered.Where(datum => datum.PrecursorMz >= Convert.ToDouble(filter.Value)).ToList();
                         break;
@@ -418,6 +456,7 @@ namespace LcmsSpectator.ViewModels
         private PrSm _selectedPrSm;
         private List<PrSm> _filteredData;
         private List<ProteinId> _filteredProteins;
+        private bool _massFilterChecked;
         private bool _precursorMzFilterChecked;
         private bool _chargeFilterChecked;
         private bool _scoreFilterChecked;

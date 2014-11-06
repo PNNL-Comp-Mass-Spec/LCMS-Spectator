@@ -117,6 +117,15 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
+        public double Mass
+        {
+            get
+            {
+                var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
+                return Math.Round(composition.Mass, 2);
+            }
+        }
+
         public double PrecursorMz
         {
             get
@@ -124,7 +133,7 @@ namespace LcmsSpectatorModels.Models
                 if (Sequence.Count == 0) return 0.0;
                 var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
                 var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
-                return Math.Round(ion.GetMonoIsotopicMz(), 2);
+                return Math.Round(ion.GetMostAbundantIsotopeMz(), 2);
             }
         }
 
