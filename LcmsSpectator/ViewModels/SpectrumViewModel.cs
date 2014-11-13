@@ -143,6 +143,13 @@ namespace LcmsSpectator.ViewModels
             else
             {
                 primary = FindNearestMs2Spectrum(scan, lcms);
+                if (primary == null)
+                {
+                    PrimarySpectrumViewModel.Clear();
+                    Secondary1ViewModel.Clear();
+                    Secondary2ViewModel.Clear();
+                    return;
+                }
                 if (primary.ScanNum < scan)
                 {
                     primaryTitle = "Previous Ms2 Spectrum";
@@ -185,7 +192,7 @@ namespace LcmsSpectator.ViewModels
         private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, ILcMsRun lcms)
         {
             var precursormz = SelectedPrSmViewModel.Instance.PrecursorMz;
-            
+
             int highScan = ms1Scan;
             ProductSpectrum highSpec = null;
             bool found = false;
