@@ -85,8 +85,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Feature.cs" />
     <Compile Include="Models\ToolType.cs" />
     <Compile Include="Readers\DmsLookupUtility.cs" />
+    <Compile Include="Readers\FeatureReader.cs" />
     <Compile Include="Readers\IcFileReader.cs" />
     <Compile Include="Readers\IcFileWriter.cs" />
     <Compile Include="Config\IcParameters.cs" />
