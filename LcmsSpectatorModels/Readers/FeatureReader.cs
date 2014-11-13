@@ -40,19 +40,32 @@ namespace LcmsSpectatorModels.Readers
         private static Feature ReadFeature(string line, char delimeter, Dictionary<string, int> headers)
         {
             var parts = line.Split(delimeter);
-            var feature = new Feature
+            var mass = Convert.ToDouble(parts[headers["monoisotopic_mw"]]);
+            var abundance = Convert.ToDouble(parts[headers["abundance"]]);
+            var score = Convert.ToDouble(parts[headers["score"]]);
+            var isotopes = ReadIsotopicEnvelope(parts[headers["isotopic_envelope"]]);
+
+            var minPoint = new FeaturePoint
             {
-                Mass = Convert.ToDouble(parts[headers["monoisotopic_mw"]]),
-                MinScan = Convert.ToInt32(parts[headers["min_scan_num"]]),
-                MaxScan = Convert.ToInt32(parts[headers["max_scan_num"]]),
+                Mass = mass,
+                Scan = Convert.ToInt32(parts[headers["min_scan_num"]]),
                 //Mz = Convert.ToDouble(parts[headers["mz"]]),
-                MinCharge = Convert.ToInt32(parts[headers["min_charge"]]),
-                MaxCharge = Convert.ToInt32(parts[headers["max_charge"]]),
-                Abundance = Convert.ToDouble(parts[headers["abundance"]]),
+                Charge = Convert.ToInt32(parts[headers["min_charge"]]),
+                Abundance = abundance,
                 Score = Convert.ToDouble(parts[headers["score"]]),
-                Isotopes = ReadIsotopicEnvelope(parts[headers["isotopic_envelope"]]),
+                Isotopes = isotopes,
             };
-            return feature;
+            var maxPoint = new FeaturePoint
+            {
+                Mass = mass,
+                Scan = Convert.ToInt32(parts[headers["max_scan_num"]]),
+                //Mz = Convert.ToDouble(parts[headers["mz"]]),
+                Charge = Convert.ToInt32(parts[headers["max_charge"]]),
+                Abundance = abundance,
+                Score = score,
+                Isotopes = isotopes
+            };
+            return new Feature {MinPoint = minPoint, MaxPoint = maxPoint};
         }
 
         private static Isotope[] ReadIsotopicEnvelope(string env)
