@@ -9,7 +9,6 @@ using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectatorModels.Models;
 using MultiDimensionalPeakFinding;
-using NHibernate.Transaction;
 
 namespace LcmsSpectatorModels.Utils
 {
