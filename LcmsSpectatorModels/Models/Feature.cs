@@ -10,6 +10,12 @@ namespace LcmsSpectatorModels.Models
     {
         public FeaturePoint MinPoint { get; set; }
         public FeaturePoint MaxPoint { get; set; }
+        public List<int> AssociatedMs2 { get; private set; }
+
+        public Feature(int minPoint=0, int maxPoint=0)
+        {
+            AssociatedMs2 = new List<int>();
+        }
     }
 
     public class FeaturePoint

@@ -44,7 +44,7 @@ namespace LcmsSpectatorModels.Readers
             var parts = line.Split(delimeter);
             var mass = Convert.ToDouble(parts[headers["monoisotopic_mw"]]);
             var abundance = Convert.ToDouble(parts[headers["abundance"]]);
-            var score = Convert.ToDouble(parts[headers["score"]]);
+            var score = Convert.ToDouble(parts[headers["summed_envelope_corr"]]);
             var isotopes = ReadIsotopicEnvelope(parts[headers["isotopic_envelope"]]);
             var minCharge = Convert.ToInt32(parts[headers["min_charge"]]);
             var maxCharge = Convert.ToInt32(parts[headers["max_charge"]]);
@@ -56,7 +56,7 @@ namespace LcmsSpectatorModels.Readers
                 Mz = (mass + (minCharge * Constants.Proton)) / minCharge,
                 Charge = minCharge,
                 Abundance = abundance,
-                Score = Convert.ToDouble(parts[headers["score"]]),
+                Score = score,
                 Isotopes = isotopes,
             };
             var maxPoint = new FeaturePoint
