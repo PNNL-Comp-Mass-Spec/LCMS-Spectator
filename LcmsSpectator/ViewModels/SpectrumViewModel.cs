@@ -54,8 +54,10 @@ namespace LcmsSpectator.ViewModels
             var diff = ms1Max - ms1Min;
             var ms1MinMz = ms2Prod.IsolationWindow.MinMz - 0.25*diff;
             var ms1MaxMz = ms2Prod.IsolationWindow.MaxMz + 0.25*diff;
-            var xAxis = new LinearAxis(AxisPosition.Bottom, "M/Z")
+            var xAxis = new LinearAxis
             {
+                Position = AxisPosition.Bottom,
+                Title = "M/Z",
                 Minimum = ms1MinMz,
                 Maximum = ms1MaxMz,
                 AbsoluteMinimum = 0,
@@ -71,7 +73,6 @@ namespace LcmsSpectator.ViewModels
             var ionListVm = message.Sender as IonListViewModel;
             if (ionListVm == null) return;
             var fragmentLabels = message.NewValue;
-            var heavy = SelectedPrSmViewModel.Instance.Heavy;
             //var labels = (!heavy) ? fragmentLabels : await ionListVm.GetHeavyFragmentIons();
             var labels = fragmentLabels;
             // add precursor ion
@@ -92,17 +93,11 @@ namespace LcmsSpectator.ViewModels
             if (message.PropertyName != "PrecursorLabels") return;
             var ionListVm = message.Sender as IonListViewModel;
             if (ionListVm == null) return;
-            var heavy = SelectedPrSmViewModel.Instance.Heavy;
             List<LabeledIonViewModel> precursorLabels = message.NewValue;
             //if (!heavy) precursorLabels = message.NewValue;
             //else precursorLabels = await ionListVm.GetHeavyPrecursorIons();
             if (precursorLabels.Count < 1) return;
-            LabeledIonViewModel precursorLabel = null;
-            foreach (var label in precursorLabels.Where(label => label.LabeledIon.Index == 0))
-            {
-                precursorLabel = label;
-                break;
-            }
+            LabeledIonViewModel precursorLabel = precursorLabels.FirstOrDefault(label => label.LabeledIon.Index == 0);
             if (precursorLabel != null)
             {
                 Secondary2ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });
@@ -125,9 +120,9 @@ namespace LcmsSpectator.ViewModels
             var rawFileName = SelectedPrSmViewModel.Instance.RawFileName;
             var primary = lcms.GetSpectrum(scan);
 
-            var primaryTitle = "";
-            var secondary1Title = "";
-            var secondary2Title = "";
+            string primaryTitle;
+            string secondary1Title;
+            string secondary2Title;
 
             Spectrum secondary1;
             Spectrum secondary2;
@@ -170,16 +165,34 @@ namespace LcmsSpectator.ViewModels
 
             // Ms2 spectrum plot
             var heavyStr = SelectedPrSmViewModel.Instance.Heavy ? ", Heavy" : "";
-            PrimarySpectrumViewModel.Title = (primary == null) ? "" : String.Format("{0} (Scan: {1}, Raw: {2}{3})", primaryTitle, primary.ScanNum, rawFileName, heavyStr);
+            PrimarySpectrumViewModel.Title = String.Format("{0} (Scan: {1}, Raw: {2}{3})", primaryTitle, primary.ScanNum, rawFileName, heavyStr);
             PrimarySpectrumViewModel.SpectrumUpdate(primary);
             // Ms1 spectrum plots
-            var xAxis = GenerateMs1XAxis(primary, secondary1, secondary2);    // shared x axis
             // previous Ms1
-            Secondary1ViewModel.SpectrumUpdate(secondary1, xAxis);
+            var xAxis1 = GenerateMs1XAxis(primary, secondary1, secondary2);
+            Secondary1ViewModel.SpectrumUpdate(secondary1, xAxis1);
             Secondary1ViewModel.Title = secondary1 == null ? "" : String.Format("{0} (Scan: {1})", secondary1Title, secondary1.ScanNum);
             // next Ms1
-            Secondary2ViewModel.SpectrumUpdate(secondary2, xAxis);
+            var xAxis2 = GenerateMs1XAxis(primary, secondary1, secondary2);
+            Secondary2ViewModel.SpectrumUpdate(secondary2, xAxis2);
             Secondary2ViewModel.Title = secondary2 == null ? "" : String.Format("{0} (Scan: {1})", secondary2Title, secondary2.ScanNum);
+
+            bool isInternalChange = false;
+            xAxis1.AxisChanged += (o, e) =>
+            {
+                if (isInternalChange) return;
+                isInternalChange = true;
+                xAxis2.Zoom(xAxis1.ActualMinimum, xAxis1.ActualMaximum);
+                isInternalChange = false;
+            };
+
+            xAxis2.AxisChanged += (o, e) =>
+            {
+                if (isInternalChange) return;
+                isInternalChange = true;
+                xAxis1.Zoom(xAxis2.ActualMinimum, xAxis2.ActualMaximum);
+                isInternalChange = false;
+            };
         }
 
         /*private void SettingsChanged(SettingsChangedNotification notification)

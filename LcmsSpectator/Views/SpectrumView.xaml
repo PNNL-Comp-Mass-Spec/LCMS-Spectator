@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:oxy="http://oxyplot.codeplex.com"
+             xmlns:wpf="http://oxyplot.org/wpf"
              mc:Ignorable="d" Background="White"
              d:DesignHeight="300" d:DesignWidth="800">
     <Grid>
@@ -15,35 +15,35 @@
             <ColumnDefinition Width="75*" />
             <ColumnDefinition Width="25*" />
         </Grid.ColumnDefinitions>
-        <oxy:Plot Name="Ms2Spectrum" DataContext="{Binding PrimarySpectrumViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
-            <oxy:Plot.ContextMenu>
+        <wpf:Plot Name="Ms2Spectrum" DataContext="{Binding PrimarySpectrumViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
+            <wpf:Plot.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                     <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                 </ContextMenu>
-            </oxy:Plot.ContextMenu>
-        </oxy:Plot>
-        <oxy:Plot Name="PreviousMs1" DataContext="{Binding Secondary1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="1">
-            <oxy:Plot.ContextMenu>
+            </wpf:Plot.ContextMenu>
+        </wpf:Plot>
+        <wpf:Plot Name="PreviousMs1" DataContext="{Binding Secondary1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="1">
+            <wpf:Plot.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                     <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                 </ContextMenu>
-            </oxy:Plot.ContextMenu>
-        </oxy:Plot>
-        <oxy:Plot Name="NextMs1" DataContext="{Binding Secondary2ViewModel}" Model="{Binding Path=Plot}" Grid.Row="1" Grid.Column="1">
-            <oxy:Plot.ContextMenu>
+            </wpf:Plot.ContextMenu>
+        </wpf:Plot>
+        <wpf:Plot Name="NextMs1" DataContext="{Binding Secondary2ViewModel}" Model="{Binding Path=Plot}" Grid.Row="1" Grid.Column="1">
+            <wpf:Plot.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                     <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                 </ContextMenu>
-            </oxy:Plot.ContextMenu>
-        </oxy:Plot>
+            </wpf:Plot.ContextMenu>
+        </wpf:Plot>
     </Grid>
 </UserControl>

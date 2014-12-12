@@ -260,7 +260,9 @@ namespace LcmsSpectator.ViewModels
         {
             _taskService.Enqueue(() =>
             { 
+                Plot.ClearAxes();
                 Plot = GeneratePlot();
+                Plot.InvalidatePlot(true);
                 if (XicPlotChanged != null) XicPlotChanged(this, EventArgs.Empty);
             });
         }
@@ -287,9 +289,10 @@ namespace LcmsSpectator.ViewModels
                 if (xicSeries == null || !xicSeries.IsVisible) continue;
                 foreach (var point in xicSeries.Points)
                 {
-                    var xicPoint = point as XicDataPoint;
-                    if (xicPoint == null) continue;
-                    if (xicPoint.Index >= 0 && xicPoint.X >= min && xicPoint.X <= max) area += xicPoint.Y;
+                    //var xicPoint = point as XicDataPoint;
+                    //if (xicPoint == null) continue;
+                    //if (xicPoint.Index >= 0 && point.X >= min && point.X <= max) area += point.Y;
+                    if (point.X >= min && point.X <= max) area += point.Y;
                 }
             }
             return area;
@@ -312,13 +315,14 @@ namespace LcmsSpectator.ViewModels
         private SelectablePlotModel GeneratePlot()
         {
             // add XICs
+            Plot.Axes.Clear();
             var plot = new SelectablePlotModel(_xAxis, 1.05)
             {
                 TitleFontSize = 14,
                 TitlePadding = 0,
             };
             if (Ions == null || Ions.Count == 0) return plot;
-            var seriesstore = Ions.ToDictionary<LabeledIonViewModel, string, LineSeries>(ion => ion.LabeledIon.Label, ion => null);
+            var seriesstore = Ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, List<XicDataPoint>>>(ion => ion.LabeledIon.Label, ion => null);
             var smoother = (PointsToSmooth == 0 || PointsToSmooth == 1) ?
                 null : new SavitzkyGolaySmoother(PointsToSmooth, 2);
             var colors = new ColorDictionary(Math.Min(Math.Max(SelectedPrSmViewModel.Instance.Charge - 1, 2), 15));
@@ -335,10 +339,19 @@ namespace LcmsSpectator.ViewModels
                 var color = colors.GetColor(lxic);
                 var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
                 var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
-                // create line series for xic
-                var series = new XicSeries
+                var xicPoints = new List<XicDataPoint>();
+                for (int i = 0; i < xic.Count; i++)
                 {
-                    Label = lxic.Label,
+                    // remove plateau points (line will connect them anyway)
+                    if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) &&
+                        xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
+                    xicPoints.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum, xic[i].Intensity, ion.LabeledIon.Index));
+                }
+                // create line series for xic
+                var series = new LineSeries
+                {
+                    ItemsSource = xicPoints,
+                    Mapping = (x) => new DataPoint(((XicDataPoint)x).X, ((XicDataPoint)x).Y),
                     StrokeThickness = 1.5,
                     Title = lxic.Label,
                     Color = color,
@@ -354,19 +367,13 @@ namespace LcmsSpectator.ViewModels
                         "Scan #: {ScanNum}" + Environment.NewLine +
                         "{3}: {4:0.##E0}"
                 };
-                // Add XIC points
-                for (int i = 0; i < xic.Count; i++)
-                {
-                    // remove plateau points (line will connect them anyway)
-                    if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) &&
-                        xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
-                    if (xic[i] != null)
-                        series.Points.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum,
-                            xic[i].Intensity, ion.LabeledIon.Index));
-                }
-                seriesstore[ion.LabeledIon.Label] = series;
+                seriesstore[ion.LabeledIon.Label] = new Tuple<LineSeries, List<XicDataPoint>>(series, xicPoints);
             });
-            foreach (var ion in seriesstore) plot.Series.Insert(0, ion.Value);
+            foreach (var ion in seriesstore)
+            {
+                plot.Series.Insert(0, ion.Value.Item1);
+                plot.AddSeries(ion.Value.Item2);
+            }
             plot.GenerateYAxis("Intensity", "0e0");
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
@@ -427,7 +434,7 @@ namespace LcmsSpectator.ViewModels
             var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
-                if (fileName != "") PngExporter.Export(Plot, fileName, (int)Plot.Width, (int)Plot.Height);
+                if (fileName != "") PngExporter.Export(Plot, fileName, (int)Plot.Width, (int)Plot.Height, OxyColors.White);
             }
             catch (Exception e)
             {

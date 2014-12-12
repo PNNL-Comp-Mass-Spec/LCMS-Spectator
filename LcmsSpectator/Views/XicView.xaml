@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:oxy="http://oxyplot.codeplex.com"
+             xmlns:wpf="http://oxyplot.org/wpf"
              mc:Ignorable="d" Background="White"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
@@ -30,18 +31,18 @@
                 <ColumnDefinition Width="30" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <oxy:Plot Grid.Column="1" Name="FragmentIonXic" Model="{Binding Path=Plot}">
-                <oxy:Plot.ContextMenu>
+            <wpf:Plot Grid.Column="1" Name="FragmentIonXic" Model="{Binding Path=Plot, UpdateSourceTrigger=PropertyChanged}">
+                <wpf:Plot.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
                         <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
-                </oxy:Plot.ContextMenu>
-                <oxy:Plot.InputBindings>
+                </wpf:Plot.ContextMenu>
+                <wpf:Plot.InputBindings>
                     <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
-                </oxy:Plot.InputBindings>
-            </oxy:Plot>
+                </wpf:Plot.InputBindings>
+            </wpf:Plot>
             <Slider Grid.Column="0" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
                     IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
@@ -55,18 +56,18 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="30" />
             </Grid.ColumnDefinitions>
-            <oxy:Plot Grid.Column="0" Name="HeavyFragmentIonXic" Model="{Binding Path=Plot}">
-                <oxy:Plot.ContextMenu>
+            <wpf:Plot Grid.Column="0" Name="HeavyFragmentIonXic" Model="{Binding Path=Plot, UpdateSourceTrigger=PropertyChanged}">
+                <wpf:Plot.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
                         <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
-                </oxy:Plot.ContextMenu>
-                <oxy:Plot.InputBindings>
+                </wpf:Plot.ContextMenu>
+                <wpf:Plot.InputBindings>
                     <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
-                </oxy:Plot.InputBindings>
-            </oxy:Plot>
+                </wpf:Plot.InputBindings>
+            </wpf:Plot>
             <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
                     IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
@@ -81,18 +82,18 @@
                 <ColumnDefinition Width="30" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <oxy:Plot Name="PrecursorIonXic" Grid.Column="1" Model="{Binding Path=Plot}">
-                <oxy:Plot.ContextMenu>
+            <wpf:Plot Name="PrecursorIonXic" Grid.Column="1" Model="{Binding Path=Plot, UpdateSourceTrigger=PropertyChanged}">
+                <wpf:Plot.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
                         <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
-                </oxy:Plot.ContextMenu>
-                <oxy:Plot.InputBindings>
+                </wpf:Plot.ContextMenu>
+                <wpf:Plot.InputBindings>
                     <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
-                </oxy:Plot.InputBindings>
-            </oxy:Plot>
+                </wpf:Plot.InputBindings>
+            </wpf:Plot>
             <Slider Grid.Column="0" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
                     IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
@@ -106,18 +107,18 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="30" />
             </Grid.ColumnDefinitions>
-            <oxy:Plot Name="HeavyPrecursorIonXic" Grid.Column="0" Model="{Binding Path=Plot}">
-                <oxy:Plot.ContextMenu>
+            <wpf:Plot Name="HeavyPrecursorIonXic" Grid.Column="0" Model="{Binding Path=Plot, UpdateSourceTrigger=PropertyChanged}">
+                <wpf:Plot.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
                         <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
-                </oxy:Plot.ContextMenu>
-                <oxy:Plot.InputBindings>
+                </wpf:Plot.ContextMenu>
+                <wpf:Plot.InputBindings>
                     <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
-                </oxy:Plot.InputBindings>
-            </oxy:Plot>
+                </wpf:Plot.InputBindings>
+            </wpf:Plot>
             <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
                     IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"

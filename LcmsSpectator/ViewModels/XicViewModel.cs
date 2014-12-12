@@ -28,14 +28,26 @@ namespace LcmsSpectator.ViewModels
             IsLoading = true;
             _dialogService = dialogService;
             _taskService = taskService;
-            _xicXAxis = new LinearAxis(AxisPosition.Bottom, "Retention Time");
-            FragmentPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Fragment XIC", XicXAxis, false, false);
+            _xicXAxis = new LinearAxis
+            {
+                Position = AxisPosition.Bottom,
+                Title = "Retention Time"
+            };
+            _fragmentXAxis = new LinearAxis {Position = AxisPosition.Bottom, Title = "Retention Time"};
+            _fragmentXAxis.AxisChanged += XAxisChanged;
+            FragmentPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Fragment XIC", _fragmentXAxis, false, false);
             FragmentPlotViewModel.XicPlotChanged += (o, e) => UpdateFragmentAreaRatioLabels();
-            HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Heavy Fragment XIC", XicXAxis, true, false);
+            _heavyFragmentXAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time" };
+            _heavyFragmentXAxis.AxisChanged += XAxisChanged;
+            HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Heavy Fragment XIC", _heavyFragmentXAxis, true, false);
             HeavyFragmentPlotViewModel.XicPlotChanged += (o, e) => UpdateFragmentAreaRatioLabels();
-            PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Precursor XIC", XicXAxis, false);
+            _precursorXAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time" };
+            _precursorXAxis.AxisChanged += XAxisChanged;
+            PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Precursor XIC", _precursorXAxis, false);
             PrecursorPlotViewModel.XicPlotChanged += (o, e) => UpdatePrecursorAreaRatioLabels();
-            HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Heavy Precursor XIC", XicXAxis, true);
+            _heavyPrecursorXAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time" };
+            _heavyPrecursorXAxis.AxisChanged += XAxisChanged;
+            HeavyPrecursorPlotViewModel = new XicPlotViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), "Heavy Precursor XIC", _heavyPrecursorXAxis, true);
             HeavyPrecursorPlotViewModel.XicPlotChanged += (o, e) => UpdatePrecursorAreaRatioLabels();
             _showScanMarkers = false;
             _showHeavy = false;
@@ -449,8 +461,23 @@ namespace LcmsSpectator.ViewModels
         /// <param name="e"></param>
         private void XAxisChanged(object sender, AxisChangedEventArgs e)
         {
-            UpdateFragmentAreaRatioLabels();
-            UpdatePrecursorAreaRatioLabels();
+            if (!_axisInternalChange)
+            {
+                _axisInternalChange = true;
+                var axis = sender as LinearAxis;
+                if (axis == null) return;
+                if (sender != _fragmentXAxis)
+                    _fragmentXAxis.Zoom(axis.ActualMinimum, axis.ActualMaximum);
+                if (sender != _heavyFragmentXAxis)
+                    _heavyFragmentXAxis.Zoom(axis.ActualMinimum, axis.ActualMaximum);
+                if (sender != _precursorXAxis)
+                    _precursorXAxis.Zoom(axis.ActualMinimum, axis.ActualMaximum);
+                if (sender != _heavyPrecursorXAxis)
+                    _heavyPrecursorXAxis.Zoom(axis.ActualMinimum, axis.ActualMaximum);
+                UpdateFragmentAreaRatioLabels();
+                UpdatePrecursorAreaRatioLabels();
+                _axisInternalChange = false;
+            }
         }
 
         private void OpenHeavyModifications()
@@ -483,5 +510,11 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledIonViewModel> _heavyFragmentLabels;
         private List<LabeledIonViewModel> _lightPrecursorLabels;
         private List<LabeledIonViewModel> _heavyPrecursorLabels;
+
+        private bool _axisInternalChange;
+        private readonly LinearAxis _fragmentXAxis;
+        private readonly LinearAxis _heavyFragmentXAxis;
+        private readonly LinearAxis _precursorXAxis;
+        private readonly LinearAxis _heavyPrecursorXAxis;
     }
 }

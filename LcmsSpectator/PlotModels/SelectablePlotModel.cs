@@ -62,9 +62,9 @@ namespace LcmsSpectator.PlotModels
         /// <summary>
         /// Get point marker position.
         /// </summary>
-        public IDataPoint GetPointMarker()
+        public DataPoint GetPointMarker()
         {
-            IDataPoint point = null;
+            DataPoint point = new DataPoint();
             if (_pointMarkers != null && _pointMarkers.Points.Count > 0)
                 point = _pointMarkers.Points[0];
             return point;
@@ -77,7 +77,7 @@ namespace LcmsSpectator.PlotModels
         /// <param name="color">color of marker</param>
         public void SetPointMarker(double x, OxyColor color)
         {
-            if (color == null) color = OxyColors.Black;
+            //if (color == null) color = OxyColors.Black;
             var y = YAxis.Maximum;
             GuiInvoker.Invoke(() => _pointMarkers.Points.Clear());
             if (x.Equals(0)) return;
@@ -111,7 +111,7 @@ namespace LcmsSpectator.PlotModels
         /// <param name="args"></param>
         void SelectablePlotModel_MouseDown(object sender, OxyMouseEventArgs args)
         {
-            switch (args.ChangedButton)
+            /*switch (args.ChangedButton)
             {
                 case OxyMouseButton.Left:
                     var series = GetSeriesFromPoint(args.Position, 10);
@@ -121,6 +121,14 @@ namespace LcmsSpectator.PlotModels
                         if (result != null && result.DataPoint != null) SelectedDataPoint = result.DataPoint;
                     }
                     break;
+            }*/
+
+            var series = GetSeriesFromPoint(args.Position, 10);
+            if (series != null)
+            {
+                var result = series.GetNearestPoint(args.Position, false);
+                if (result == null) return;
+                SelectedDataPoint = (IDataPoint)result.Item;
             }
         }
 
@@ -129,6 +137,6 @@ namespace LcmsSpectator.PlotModels
             return UniqueHighlight ? UniqueColor : OrdinaryColor;
         }
 
-        private LineSeries _pointMarkers;
+        private readonly LineSeries _pointMarkers;
     }
 }
