@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
-using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.DialogServices;
@@ -34,11 +33,12 @@ namespace LcmsSpectator.ViewModels
         // Child view models
         public ScanViewModel ScanViewModel { get; private set; }
         public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
-        public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
-        public IonListViewModel IonListViewModel { get; private set; }
-        public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
-        public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
-        public SelectedPrSmViewModel SelectedPrSmViewModel { get; private set; }
+        //public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
+        //public IonListViewModel IonListViewModel { get; private set; }
+        //public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
+        //public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
+        public ObservableCollection<DataSetViewModel> DataSets { get; private set; } 
+        //public SelectedPrSmViewModel SelectedPrSmViewModel { get; private set; }
 
         /// <summary>
         /// Constructor for creating a new, empty MainWindowViewModel
@@ -48,17 +48,17 @@ namespace LcmsSpectator.ViewModels
         public MainWindowViewModel(IMainDialogService dialogService, ITaskService taskService)
         {
             // register messenger events
-            Messenger.Default.Register<XicCloseRequest>(this, XicCloseRequest);
+            Messenger.Default.Register<DataSetCloseRequest>(this, DataSetCloseRequest);
 
             _dialogService = dialogService;
             _taskService = taskService;
-            SelectedPrSmViewModel = SelectedPrSmViewModel.Instance;
-            Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
-            ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService), new List<PrSm>());
-            IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
-            IonListViewModel = new IonListViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
-            XicViewModels = new ObservableCollection<XicViewModel>();
-            CreateSequenceViewModel = new CreateSequenceViewModel(XicViewModels, _dialogService);
+            //SelectedPrSmViewModel = SelectedPrSmViewModel.Instance;
+            //Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
+            ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService), new List<PrSm>(), Messenger.Default);
+            //IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
+            //IonListViewModel = new IonListViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
+            DataSets = new ObservableCollection<DataSetViewModel>();
+            CreateSequenceViewModel = new CreateSequenceViewModel(DataSets, _dialogService);
 
             OpenRawFileCommand = new RelayCommand(OpenRawFile);
             OpenTsvFileCommand = new RelayCommand(OpenIdFile);
@@ -131,7 +131,7 @@ namespace LcmsSpectator.ViewModels
                 _taskService.Enqueue(() =>
                 {
                     ReadRawFile(name);
-                    if (XicViewModels.Count > 0) ScanViewModel.HideUnidentifiedScans = false;
+                    if (DataSets.Count > 0) ScanViewModel.HideUnidentifiedScans = false;
                 }, true);
             }
         }
@@ -149,16 +149,16 @@ namespace LcmsSpectator.ViewModels
             var ext = Path.GetExtension(tsvFileName);
             string path = ext != null ? tsvFileName.Remove(tsvFileName.IndexOf(ext, StringComparison.Ordinal)) : tsvFileName;
             string rawFileName = "";
-            XicViewModel xicVm = null;
-            foreach (var xic in XicViewModels)      // Raw file already open?
+            DataSetViewModel dsVm = null;
+            foreach (var ds in DataSets)      // Raw file already open?
             {
-                if (xic.RawFileName == fileName)
+                if (ds.RawFileName == fileName)
                 {   // xicVm with correct raw file name was found. Raw file is already open
-                    xicVm = xic;
-                    rawFileName = xicVm.RawFileName;
+                    dsVm = ds;
+                    rawFileName = dsVm.RawFileName;
                 }
             }
-            if (xicVm == null)  // Raw file not already open
+            if (dsVm == null)  // Raw file not already open
             {
                 var directoryName = Path.GetDirectoryName(tsvFileName);
                 if (directoryName != null)
@@ -179,8 +179,8 @@ namespace LcmsSpectator.ViewModels
                 _taskService.Enqueue(() =>
                 {
                     // Name of raw file was found
-                    if (xicVm == null) xicVm = ReadRawFile(rawFileName); // raw file isn't open yet
-                    ReadIdFile(tsvFileName, rawFileName, xicVm); // finally read the TSV file
+                    if (dsVm == null) dsVm = ReadRawFile(rawFileName); // raw file isn't open yet
+                    ReadIdFile(tsvFileName, rawFileName, dsVm); // finally read the TSV file
                 }, true);
             }
             else _dialogService.MessageBox("Cannot open ID file.");
@@ -192,11 +192,11 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         /// <param name="idFileName">Name of id file.</param>
         /// <param name="rawFileName">Name of raw file to associate with id file.</param>
-        /// <param name="xicVm">Xic View model to associate with id file.</param>
-        public void ReadIdFile(string idFileName, string rawFileName, XicViewModel xicVm)
+        /// <param name="dsVm">Data Set View model to associate with id file.</param>
+        public void ReadIdFile(string idFileName, string rawFileName, DataSetViewModel dsVm)
         {
             IsLoading = true;
-            IdentificationTree ids = new IdentificationTree();
+            var ids = new IdentificationTree();
             bool attemptToReadFile = true;
             var modIgnoreList = new List<string>();
             do
@@ -205,7 +205,7 @@ namespace LcmsSpectator.ViewModels
                 {
                     var reader = IdFileReaderFactory.CreateReader(idFileName);
                     ids = reader.Read(modIgnoreList);
-                    ids.SetLcmsRun(xicVm.Lcms, xicVm.RawFileName);
+                    ids.SetLcmsRun(dsVm.Lcms, dsVm.RawFileName);
                     attemptToReadFile = false;
                 }
                 catch (IOException e)
@@ -241,6 +241,7 @@ namespace LcmsSpectator.ViewModels
                 }
             } while (attemptToReadFile);
             var data = ScanViewModel.Data;
+            dsVm.ScanViewModel.Data = ids.AllPrSms;
             data.AddRange(ids.AllPrSms);
             ScanViewModel.Data = data;
             ScanViewModel.HideUnidentifiedScans = true;
@@ -253,12 +254,12 @@ namespace LcmsSpectator.ViewModels
         /// Open raw file
         /// </summary>
         /// <param name="rawFilePath">Path to raw file to open</param>
-        public XicViewModel ReadRawFile(string rawFilePath)
+        public DataSetViewModel ReadRawFile(string rawFilePath)
         {
-            var xicVm = new XicViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService)); // create xic view model
-            GuiInvoker.Invoke(() => XicViewModels.Add(xicVm)); // add xic view model to gui
-            xicVm.RawFilePath = rawFilePath;
-            var lcms = xicVm.Lcms;
+            var dsVm = new DataSetViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService)); // create xic view model
+            GuiInvoker.Invoke(() => DataSets.Add(dsVm)); // add xic view model to gui
+            dsVm.RawFilePath = rawFilePath;
+            var lcms = dsVm.Lcms;
             var scans = lcms.GetScanNumbers(2);
             var prsmScans = new List<PrSm>();
             foreach (var scan in scans)
@@ -266,7 +267,7 @@ namespace LcmsSpectator.ViewModels
                 var prsm = new PrSm
                 {
                     Scan = scan,
-                    RawFileName = xicVm.RawFileName,
+                    RawFileName = dsVm.RawFileName,
                     Lcms = lcms,
                     QValue = 1.0,
                     Score = Double.NaN,
@@ -284,9 +285,9 @@ namespace LcmsSpectator.ViewModels
             ScanViewModel.Data.AddRange(prsmScans);
             ScanViewModel.Data = ScanViewModel.Data;
             _idTreeMutex.ReleaseMutex();
-            GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0]; });
+            GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedDataSetViewModel = DataSets[0]; });
             FileOpen = true;
-            return xicVm;
+            return dsVm;
         }
 
         /// <summary>
@@ -362,17 +363,17 @@ namespace LcmsSpectator.ViewModels
         /// Closes the raw file and cleans up IDs pointing to that raw file
         /// </summary>
         /// <param name="message">Message containing sender info</param>
-        private void XicCloseRequest(XicCloseRequest message)
+        private void DataSetCloseRequest(DataSetCloseRequest message)
         {
-            var xicVm = message.Sender as XicViewModel;
-            if (xicVm != null)
+            var dsVm = message.Sender as DataSetViewModel;
+            if (dsVm != null)
             {
-                var rawFileName = xicVm.RawFileName;
+                var rawFileName = dsVm.RawFileName;
                 ScanViewModel.RemovePrSmsFromRawFile(rawFileName);
-                XicViewModels.Remove(xicVm);
+                DataSets.Remove(dsVm);
                 if (SelectedPrSmViewModel.Instance.RawFileName == rawFileName)
                 {
-                    if (XicViewModels.Count > 0) CreateSequenceViewModel.SelectedXicViewModel = XicViewModels[0];
+                    if (DataSets.Count > 0) CreateSequenceViewModel.SelectedDataSetViewModel = DataSets[0];
                     //if (ScanViewModel.Data.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
                     else
                     {

@@ -35,7 +35,7 @@ namespace LcmsSpectatorModels.Models
         public void Add(PrSm data)
         {
             RemoveUnidentifiedScan(data);
-            if (!Proteins.ContainsKey(data.ProteinName)) Proteins.Add(data.ProteinName, new ProteinId(data.Sequence, data.SequenceText, data.ProteinNameDesc));
+            if (!Proteins.ContainsKey(data.ProteinName)) Proteins.Add(data.ProteinName, new ProteinId(data.Sequence, data.SequenceText, data.ProteinName));
             var protein = Proteins[data.ProteinName];
             protein.Add(data);
         }

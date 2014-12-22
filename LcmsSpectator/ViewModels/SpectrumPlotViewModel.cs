@@ -30,10 +30,12 @@ namespace LcmsSpectator.ViewModels
     {
         public RelayCommand SaveAsImageCommand { get; private set; }
 
-        public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, double multiplier, bool updateXAxis)
+        public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, IMessenger messenger,  double multiplier, bool updateXAxis)
         {
-            Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
-            Messenger.Default.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
+            MessengerInstance = messenger;
+            MessengerInstance.Register<SettingsChangedNotification>(this, SettingsChanged);
+            MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
+            MessengerInstance.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
             //Messenger.Default.Register<PropertyChangedMessage<double>>(this, PrecursorChanged);
             _taskService = taskService;
             SaveAsImageCommand = new RelayCommand(SaveAsImage);
@@ -166,6 +168,14 @@ namespace LcmsSpectator.ViewModels
                 Plot = BuildSpectrumPlot();
                 IonUpdate();
             });
+        }
+
+        private void SelectedChargeChanged(PropertyChangedMessage<int> message)
+        {
+            if (message.PropertyName == "Charge")
+            {
+                _selectedCharge = message.NewValue;
+            }
         }
         
         private AutoAdjustedYPlotModel BuildSpectrumPlot()
@@ -508,5 +518,6 @@ namespace LcmsSpectator.ViewModels
         private readonly Dictionary<string, IEnumerable<PeakDataPoint>> _ionCache;
         private bool _showDeconvolutedSpectrum;
         private AutoAdjustedYPlotModel _plot;
+        private int _selectedCharge;
     }
 }

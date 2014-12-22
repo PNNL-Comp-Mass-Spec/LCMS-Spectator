@@ -44,59 +44,6 @@ namespace LcmsSpectatorModels.Models
             get { return String.Format("{0} ({1})", Scan, RawFileName); }
         }
 
-        public Sequence HeavySequence
-        {
-            get
-            {
-                var mods = IcParameters.Instance.HeavyModifications;
-                if (Sequence.Count == 0) return Sequence;
-                var lastAa = Sequence[Sequence.Count - 1];
-
-                foreach (var mod in mods)
-                {
-                    if (mod.Equals(Modification.ArgToHeavyArg) && lastAa.Residue == 'R')
-                    {
-                        lastAa = new ModifiedAminoAcid(lastAa, mod);
-                    }
-                    else if (mod.Equals(Modification.LysToHeavyLys) && lastAa.Residue == 'K')
-                    {
-                        lastAa = new ModifiedAminoAcid(lastAa, mod);
-                    }
-                }
-
-                var tempSequence = Sequence.ToList();
-                tempSequence[tempSequence.Count - 1] = lastAa;
-                var heavySequence = new Sequence(tempSequence);
-                return heavySequence;
-            }
-        }
-
-        public Sequence LightSequence
-        {
-            get
-            {
-                var mods = IcParameters.Instance.LightModifications;
-                if (Sequence.Count == 0) return Sequence;
-                var lastAa = Sequence[Sequence.Count - 1];
-
-                foreach (var mod in mods)
-                {
-                    if (mod.Equals(Modification.ArgToHeavyArg) && lastAa.Residue == 'R')
-                    {
-                        lastAa = new ModifiedAminoAcid(lastAa, mod);
-                    }
-                    else if (mod.Equals(Modification.LysToHeavyLys) && lastAa.Residue == 'K')
-                    {
-                        lastAa = new ModifiedAminoAcid(lastAa, mod);
-                    }
-                }
-
-                var tempSequence = Sequence.ToList();
-                tempSequence[tempSequence.Count - 1] = lastAa;
-                return new Sequence(tempSequence);
-            }
-        }
-
         public Spectrum PreviousMs1 
         {
             get
@@ -134,28 +81,6 @@ namespace LcmsSpectatorModels.Models
                 var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
                 var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
                 return Math.Round(ion.GetMostAbundantIsotopeMz(), 2);
-            }
-        }
-
-        public double LightPrecursorMz
-        {
-            get
-            {
-                if (LightSequence.Count == 0) return 0.0;
-                var composition = LightSequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
-                var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
-                return Math.Round(ion.GetMonoIsotopicMz(), 2);
-            }
-        }
-
-        public double HeavyPrecursorMz
-        {
-            get
-            {
-                if (HeavySequence.Count == 0) return 0.0;
-                var composition = HeavySequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
-                var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
-                return Math.Round(ion.GetMonoIsotopicMz(), 2);
             }
         }
 

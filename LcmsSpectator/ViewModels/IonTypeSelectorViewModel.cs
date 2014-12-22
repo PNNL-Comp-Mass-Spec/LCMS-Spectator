@@ -17,8 +17,9 @@ namespace LcmsSpectator.ViewModels
         public List<BaseIonType> BaseIonTypes { get; private set; }
         public List<NeutralLoss> NeutralLosses { get; private set; }
         public RelayCommand SetIonChargesCommand { get; private set; }
-        public IonTypeSelectorViewModel(IDialogService dialogService)
+        public IonTypeSelectorViewModel(IDialogService dialogService, Messenger messenger)
         {
+            MessengerInstance = messenger;
             _dialogService = dialogService;
             SetIonChargesCommand = new RelayCommand(SetIonCharges);
 
@@ -37,7 +38,7 @@ namespace LcmsSpectator.ViewModels
             NeutralLosses = NeutralLoss.CommonNeutralLosses.ToList();
             SelectedNeutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
 
-            Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
+            MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
 
             UpdateIonTypes();
 

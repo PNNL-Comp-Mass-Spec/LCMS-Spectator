@@ -10,13 +10,13 @@ namespace LcmsSpectatorModels.Models
     {
         public string SequenceText { get; private set; }
         public Sequence Sequence { get; private set; }
-        public string ProteinNameDesc { get; private set; }
+        public string ProteinName { get; private set; }
         public Dictionary<string, ProteoformId> Proteoforms { get; private set; }
-        public ProteinId(Sequence sequence, string sequenceText, string proteinNameDesc)
+        public ProteinId(Sequence sequence, string sequenceText, string proteinName)
         {
             SequenceText = sequenceText;
             Sequence = sequence;
-            ProteinNameDesc = proteinNameDesc;
+            ProteinName = proteinName;
             Proteoforms = new Dictionary<string, ProteoformId>();
         }
 
@@ -75,7 +75,7 @@ namespace LcmsSpectatorModels.Models
     {
         public int Compare(ProteinId x, ProteinId y)
         {
-            return (String.Compare(x.ProteinNameDesc, y.ProteinNameDesc, StringComparison.Ordinal));
+            return (String.Compare(x.ProteinName, y.ProteinName, StringComparison.Ordinal));
         }
     }
 }

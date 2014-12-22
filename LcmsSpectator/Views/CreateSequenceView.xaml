@@ -9,7 +9,7 @@
              d:DesignHeight="300" d:DesignWidth="1200">
     <UserControl.Resources>
         <utils:ChargeToStringConverter x:Key="ChargeFormatter" />
-        <DataTemplate DataType="{x:Type viewModels:XicViewModel}" x:Key="XicDataTemplate">
+        <DataTemplate DataType="{x:Type viewModels:DataSetViewModel}" x:Key="XicDataTemplate">
             <TextBlock Text="{Binding RawFileName}" />
         </DataTemplate>
     </UserControl.Resources>
@@ -31,7 +31,7 @@
                 <ColumnDefinition Width="80" />
                 <ColumnDefinition Width="30*" />
                 <ColumnDefinition Width="15" />
-                <ColumnDefinition Width="15*" />
+                <!--<ColumnDefinition Width="15*" /> -->
             </Grid.ColumnDefinitions>
             <TextBlock Text="Sequence" FontWeight="Bold" Grid.Row="0" Grid.Column="0" />
             <TextBox Text="{Binding SequenceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" Name="Sequence"
@@ -63,7 +63,7 @@
                       Height="25" VerticalAlignment="Top"/>
             <Button Command="{Binding CreatePrSmCommand}" Grid.Row="4" Grid.Column="1" Height="25" VerticalAlignment="Top">View Target</Button>
         </Grid>
-        <GridSplitter Grid.Column="1" VerticalAlignment="Stretch" ShowsPreview="True" Width="3" HorizontalAlignment="Center" />
+        <!--<GridSplitter Grid.Column="1" VerticalAlignment="Stretch" ShowsPreview="True" Width="3" HorizontalAlignment="Center" />
         <DataGrid AutoGenerateColumns="False" SelectionMode="Extended" Grid.Column="2"
                   IsReadOnly="True" RowHeaderWidth="0"
                   ItemsSource="{Binding Targets}" SelectedItem="{Binding SelectedTarget}">
@@ -80,6 +80,6 @@
                 <DataGridTextColumn Header="Target Sequence" Width="90*" Binding="{Binding SequenceText}" />
                 <DataGridTextColumn Header="Charge" Width="10*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
             </DataGrid.Columns>
-        </DataGrid>
+        </DataGrid> -->
     </Grid>
 </UserControl>

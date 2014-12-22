@@ -9,16 +9,15 @@ using LcmsSpectatorModels.Utils;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class SelectedPrSmViewModel : ViewModelBase
+    public class PrSmViewModel: ViewModelBase
     {
-        private SelectedPrSmViewModel()
-        {
-            Sequence = new Sequence(new List<AminoAcid>());
-        }
 
-        public static SelectedPrSmViewModel Instance
+        public PrSmViewModel(IMessenger messenger)
         {
-            get { return _instance ?? (_instance = new SelectedPrSmViewModel()); }
+            MessengerInstance = messenger;
+            Sequence = new Sequence(new List<AminoAcid>());
+            MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
+            Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
         }
 
         #region PrSm Properties
@@ -43,7 +42,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 if (value == null) value = new PrSm();
-                Messenger.Default.Send(new ClearAllNotification(this));
+                MessengerInstance.Send(new ClearAllNotification(this));
                 var oldValue = PrSm;
                 Lcms = value.Lcms;
                 RawFileName = value.RawFileName;
@@ -117,6 +116,28 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public Sequence LightSequence
+        {
+            get { return _lightSequence; }
+            set
+            {
+                var oldValue = _lightSequence;
+                _lightSequence = value;
+                RaisePropertyChanged("LightSequence", oldValue, _lightSequence, true);
+            }
+        }
+
+        public Sequence HeavySequence
+        {
+            get { return _heavySequence; }
+            set
+            {
+                var oldValue = _heavySequence;
+                _heavySequence = value;
+                RaisePropertyChanged("HeavySequence", oldValue, _heavySequence, true);
+            }
+        }
+
         public string SequenceText
         {
             get { return _sequenceText; }
@@ -184,14 +205,6 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-    #endregion
-
-        public void Clear()
-        {
-        }
-
-        private static SelectedPrSmViewModel _instance;
-
         private Sequence _sequence;
         private string _sequenceText;
         private int _charge;
@@ -205,12 +218,31 @@ namespace LcmsSpectator.ViewModels
         private double _noLabelPrecursorMz;
         private double _heavyPrecursorMz;
         private string _proteinNameDesc;
+        private Sequence _lightSequence;
+        private Sequence _heavySequence;
+
+        #endregion
+
+        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
+        {
+            if (message.PropertyName == "SelectedPrSm")
+            {
+                PrSm = message.NewValue;
+            }
+        }
+
+        private void SettingsChanged(SettingsChangedNotification message)
+        {
+            LightSequence = IonUtils.GetHeavySequence(Sequence, IcParameters.Instance.LightModifications);
+            HeavySequence = IonUtils.GetHeavySequence(Sequence, IcParameters.Instance.HeavyModifications);
+        }
     }
 
-    /*public class ClearAllNotification : NotificationMessage
+    public class ClearAllNotification : NotificationMessage
     {
-        public ClearAllNotification(object sender, string notification="ClearAll") : base(sender, notification)
+        public ClearAllNotification(object sender, string notification = "ClearAll")
+            : base(sender, notification)
         {
         }
-    }*/
+    }
 }

@@ -1,0 +1,117 @@
+﻿<UserControl x:Class="LcmsSpectator.Views.DataSetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:views="clr-namespace:LcmsSpectator.Views"
+             xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
+             xmlns:controls="clr-namespace:LcmsSpectator.Controls"
+             xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
+             xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <utils:ChargeToStringConverter x:Key="ChargeFormatter" />
+        <utils:ScoreToStringConverter x:Key="ScoreFormatter" />
+        <utils:QValueToStringConverter x:Key="QValueFormatter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="7*" />
+            <RowDefinition Height="3" />
+            <RowDefinition Height="93*" />
+        </Grid.RowDefinitions>
+        <views:PrSmView DataContext="{Binding SelectedPrSm}" Grid.Row="0" />
+        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ShowsPreview="True" />
+        <!--<xcad:DockingManager Grid.Row="2" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Name="AvDock"> -->
+        <xcad:DockingManager Grid.Row="2" Name="AvDock">
+                <xcad:LayoutRoot>
+                <xcad:LayoutRoot.LeftSide>
+                    <xcad:LayoutAnchorSide>
+                        <xcad:LayoutAnchorGroup>
+                            <xcad:LayoutAnchorable Title="Ion Types" CanClose="False" CanHide="False">
+                                <views:IonTypeSelector DataContext="{Binding IonTypeSelectorViewModel}" x:Name="IonTypeSelector"/>
+                            </xcad:LayoutAnchorable>
+                            <xcad:LayoutAnchorable Title="Ion List" CanClose="False" CanHide="False">
+                                <views:IonListView DataContext="{Binding IonListViewModel}" x:Name="IonList" />
+                            </xcad:LayoutAnchorable>
+                        </xcad:LayoutAnchorGroup>
+                    </xcad:LayoutAnchorSide>
+                </xcad:LayoutRoot.LeftSide>
+                <xcad:LayoutPanel>
+                    <xcad:LayoutDocumentPane DockWidth="*">
+                        <xcad:LayoutDocument Title="XIC View" CanClose="False">
+                            <views:XicView DataContext="{Binding XicViewModel}" x:Name="XicView" />
+                        </xcad:LayoutDocument>
+                        <xcad:LayoutDocument Title="Spectrum View" CanClose="False">
+                            <views:SpectrumView DataContext="{Binding SpectrumViewModel}" x:Name="SpectrumView" />
+                        </xcad:LayoutDocument>
+                        <xcad:LayoutDocument Title="Feature Map" CanClose="False">
+                        </xcad:LayoutDocument>
+                    </xcad:LayoutDocumentPane>
+                    <xcad:LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="*" DockHeight="200">
+                        <xcad:LayoutAnchorablePane IsMaximized="True">
+                            <xcad:LayoutAnchorable Title="Scan View">
+                                <Grid x:Name="ScanView">
+                                    <DataGrid AutoGenerateColumns="False" SelectionMode="Extended" DataContext="{Binding ScanViewModel}"
+                                              IsReadOnly="True" RowHeaderWidth="0"
+                                              ItemsSource="{Binding FilteredData}" SelectedItem="{Binding SelectedPrSm}"
+                                              Grid.Row="0">
+                                        <DataGrid.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header="_Filter by">
+                                                    <MenuItem Header="_Sequence" IsCheckable="True" IsChecked="{Binding SequenceFilterChecked}" />
+                                                    <MenuItem Header="_Protein" IsCheckable="True" IsChecked="{Binding ProteinFilterChecked}" />
+                                                    <MenuItem Header="Mass" IsCheckable="True" IsChecked="{Binding MassFilterChecked}" />
+                                                    <MenuItem Header="Precursor M/_Z" IsCheckable="True" IsChecked="{Binding PrecursorMzFilterChecked}" />
+                                                    <MenuItem Header="_Charge" IsCheckable="True" IsChecked="{Binding ChargeFilterChecked}" />
+                                                    <MenuItem Header="_Score" IsCheckable="True" IsChecked="{Binding ScoreFilterChecked}"/>
+                                                    <MenuItem Header="_Q Value" IsCheckable="True" IsChecked="{Binding QValueFilterChecked}"/>
+                                                    <MenuItem Header="Hide _Unidentified Scans" IsCheckable="True" IsChecked="{Binding HideUnidentifiedScans}" />
+                                                    <Separator />
+                                                    <MenuItem Header="Clear Filters" Command="{Binding ClearFiltersCommand}" />
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </DataGrid.ContextMenu>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Mass" Width="5*" Binding="{Binding Mass}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Precursor M/Z" Width="5*" Binding="{Binding PrecursorMz}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue, Converter={StaticResource QValueFormatter}}" IsReadOnly="False" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+                            </xcad:LayoutAnchorable>
+     
+                            <!--<xcad:LayoutAnchorable Title="TargetView">
+                                <views:CreateSequenceView DataContext="{Binding CreateSequenceViewModel}" x:Name="CreateSequence"/>
+                            </xcad:LayoutAnchorable> -->
+                        </xcad:LayoutAnchorablePane>
+                    </xcad:LayoutAnchorablePaneGroup>
+                </xcad:LayoutPanel>
+            </xcad:LayoutRoot>
+        </xcad:DockingManager>
+        <!--<Border BorderBrush="Black" BorderThickness="1" Background="#80000000" Grid.Row="0" Grid.Column="0" Grid.RowSpan="6" Grid.ColumnSpan="2"
+                Name="LoadingScreen" VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*"/>
+                    <RowDefinition Height="50*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Margin="0"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Bottom"
+                           Grid.Row="0"
+                           TextAlignment="Center"
+                           FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
+                    Loading<LineBreak />Please Wait...
+                </TextBlock>
+            </Grid>
+        </Border> -->
+    </Grid>
+</UserControl>

@@ -21,36 +21,42 @@ namespace LcmsSpectator.ViewModels
 {
     public class CreateSequenceViewModel: ViewModelBase
     {
-        public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
+        public ObservableCollection<DataSetViewModel> DataSetViewModels { get; private set; }
         public ObservableCollection<Target> Targets { get; private set; } 
-        public int SequencePosition { get; set; }
+        public ObservableCollection<Modification> Modifications { get; private set; }
+        public Modification SelectedModification { get; set; }
+
+        #region Commands
         public RelayCommand OpenTargetListCommand { get; private set; }
         public RelayCommand CreatePrSmCommand { get; private set; }
         public RelayCommand InsertModificationCommand { get; private set; }
         public RelayCommand InsertStaticModificationsCommand { get; private set; }
         public RelayCommand PasteCommand { get; private set; }
-        public ObservableCollection<Modification> Modifications { get; private set; }
-        public Modification SelectedModification { get; set; }
-        public CreateSequenceViewModel(ObservableCollection<XicViewModel> xicViewModels, IDialogService dialogService)
+        #endregion
+
+        public CreateSequenceViewModel(ObservableCollection<DataSetViewModel> dataSetViewModels, IDialogService dialogService)
         {
-            XicViewModels = xicViewModels;
+            DataSetViewModels = dataSetViewModels;
             Targets = new ObservableCollection<Target>();
             _dialogService = dialogService;
             SequenceText = "";
             OpenTargetListCommand = new RelayCommand(OpenTargetList);
-            CreatePrSmCommand = new RelayCommand(CreatePrSm, () => (XicViewModels != null && XicViewModels.Count > 0));
+            CreatePrSmCommand = new RelayCommand(CreatePrSm, () => (DataSetViewModels != null && DataSetViewModels.Count > 0));
             InsertModificationCommand = new RelayCommand(InsertModification);
             InsertStaticModificationsCommand = new RelayCommand(InsertStaticModifications);
             PasteCommand = new RelayCommand(Paste);
             SelectedCharge = 2;
             SelectedScan = 0;
-            if (XicViewModels.Count > 0) SelectedXicViewModel = XicViewModels[0];
+            if (DataSetViewModels.Count > 0) SelectedDataSetViewModel = DataSetViewModels[0];
 
             Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
             Messenger.Default.Register<PropertyChangedMessage<string>>(this, SelectedRawFileChanged);
 
             Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
         }
+
+        #region Public Properties
+        public int SequencePosition { get; set; }
 
         public int SelectedScan
         {
@@ -82,7 +88,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        public XicViewModel SelectedXicViewModel
+        public DataSetViewModel SelectedDataSetViewModel
         {
             get { return _selectedXicViewModel; }
             set
@@ -108,7 +114,9 @@ namespace LcmsSpectator.ViewModels
                 RaisePropertyChanged();
             }
         }
+        #endregion
 
+        #region Public Methods
         public void OpenTargetList()
         {
             var targetFileName = _dialogService.OpenFile(".txt", @"Target Files (*.txt)|*.txt");
@@ -126,7 +134,9 @@ namespace LcmsSpectator.ViewModels
             }
             foreach (var target in targets) Targets.Add(target);
         }
+        #endregion
 
+        #region Private methods
         private void InsertModification()
         {
             var modStr = String.Format("[{0}]", SelectedModification.Name);
@@ -159,11 +169,11 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
             string rawFileName = "";
-            if (SelectedXicViewModel == null || SelectedXicViewModel.Lcms == null) SelectedScan = 0;
+            if (SelectedDataSetViewModel == null || SelectedDataSetViewModel.Lcms == null) SelectedScan = 0;
             else
             {
-                rawFileName = SelectedXicViewModel.RawFileName;
-                lcms = SelectedXicViewModel.Lcms;
+                rawFileName = SelectedDataSetViewModel.RawFileName;
+                lcms = SelectedDataSetViewModel.Lcms;
             }
             var prsm = new PrSm
             {
@@ -280,9 +290,9 @@ namespace LcmsSpectator.ViewModels
             if (message.PropertyName == "RawFileName" && message.Sender == SelectedPrSmViewModel.Instance)
             {
                 var rawFileName = message.NewValue;
-                foreach (var xicVm in XicViewModels)
+                foreach (var xicVm in DataSetViewModels)
                 {
-                    if (xicVm.RawFileName == rawFileName) SelectedXicViewModel = xicVm;
+                    if (xicVm.RawFileName == rawFileName) SelectedDataSetViewModel = xicVm;
                 }
             }
         }
@@ -295,12 +305,15 @@ namespace LcmsSpectator.ViewModels
                 SelectedScan = scan;
             }
         }
+        #endregion
 
+        #region Private Members
         private readonly IDialogService _dialogService;
-        private XicViewModel _selectedXicViewModel;
+        private DataSetViewModel _selectedXicViewModel;
         private Target _selectedTarget;
         private int _selectedScan;
         private int _selectedChage;
         private string _sequenceText;
+        #endregion
     }
 }

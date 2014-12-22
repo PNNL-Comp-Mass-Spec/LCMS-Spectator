@@ -7,8 +7,8 @@ using GalaSoft.MvvmLight.Messaging;
 
 namespace LcmsSpectator.Utils
 {
-    public class XicCloseRequest : NotificationMessage
+    public class DataSetCloseRequest : NotificationMessage
     {
-        public XicCloseRequest(object sender, string notification = "XicClosing") : base(sender, notification) { }
+        public DataSetCloseRequest(object sender, string notification = "DataSetClosing") : base(sender, notification) { }
     }
 }

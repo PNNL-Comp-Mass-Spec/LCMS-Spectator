@@ -161,6 +161,7 @@
     <Compile Include="Utils\XicCloseRequest.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\CustomModificationViewModel.cs" />
+    <Compile Include="ViewModels\DataSetViewModel.cs" />
     <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\DmsJobViewModel.cs" />
     <Compile Include="ViewModels\DmsLookupViewModel.cs" />
@@ -172,6 +173,7 @@
     <Compile Include="ViewModels\LabeledIonViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModificationViewModel.cs" />
+    <Compile Include="ViewModels\PrSmViewModel.cs" />
     <Compile Include="ViewModels\ScanViewModel.cs" />
     <Compile Include="ViewModels\SelectedPrSmViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
@@ -190,6 +192,9 @@
     </Compile>
     <Compile Include="Views\CustomModificationView.xaml.cs">
       <DependentUpon>CustomModificationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DataSetView.xaml.cs">
+      <DependentUpon>DataSetView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DmsLookupView.xaml.cs">
       <DependentUpon>DmsLookupView.xaml</DependentUpon>
@@ -212,6 +217,9 @@
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\PrSmView.xaml.cs">
+      <DependentUpon>PrSmView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
@@ -277,6 +285,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\DataSetView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\DmsLookupView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -302,6 +314,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PrSmView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

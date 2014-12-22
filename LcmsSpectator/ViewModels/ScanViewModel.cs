@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.TaskServices;
 using LcmsSpectatorModels.Models;
@@ -13,8 +14,9 @@ namespace LcmsSpectator.ViewModels
     public class ScanViewModel: ViewModelBase
     {
         public RelayCommand ClearFiltersCommand { get; private set; }
-        public ScanViewModel(IMainDialogService dialogService, ITaskService taskService, List<PrSm> data)
+        public ScanViewModel(IMainDialogService dialogService, ITaskService taskService, List<PrSm> data, IMessenger messenger)
         {
+            MessengerInstance = messenger;
             ClearFiltersCommand = new RelayCommand(ClearFilters);
             _taskService = taskService;
             _dialogService = dialogService;
@@ -135,8 +137,10 @@ namespace LcmsSpectator.ViewModels
             get { return _selectedPrSm; }
             set
             {
+                var oldValue = _selectedPrSm;
                 _selectedPrSm = value;
-                SelectedPrSmViewModel.Instance.PrSm = _selectedPrSm;
+                RaisePropertyChanged("SelectedPrSm", oldValue, _selectedPrSm, true);
+                //SelectedPrSmViewModel.Instance.PrSm = _selectedPrSm;
             }
         }
 

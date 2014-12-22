@@ -6,6 +6,7 @@ using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using MultiDimensionalPeakFinding;
 
@@ -199,6 +200,36 @@ namespace LcmsSpectatorModels.Utils
                 smoothedXic.Add(new XicPoint(xic[i].ScanNum, xic[i].Mz, smoothedPoints[i]));
             }
             return smoothedXic;
+        }
+
+        public static Sequence GetHeavySequence(Sequence sequence, List<Modification> mods)
+        {
+            if (sequence.Count == 0) return sequence;
+            var lastAa = sequence[sequence.Count - 1];
+
+            foreach (var mod in mods)
+            {
+                if (mod.Equals(Modification.ArgToHeavyArg) && lastAa.Residue == 'R')
+                {
+                    lastAa = new ModifiedAminoAcid(lastAa, mod);
+                }
+                else if (mod.Equals(Modification.LysToHeavyLys) && lastAa.Residue == 'K')
+                {
+                    lastAa = new ModifiedAminoAcid(lastAa, mod);
+                }
+            }
+
+            var tempSequence = sequence.ToList();
+            tempSequence[tempSequence.Count - 1] = lastAa;
+            return new Sequence(tempSequence);   
+        }
+
+        public static double GetPrecursorMz(Sequence sequence, int charge)
+        {
+            if (sequence.Count == 0) return 0.0;
+            var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
+            var ion = new Ion(composition + Composition.H2O, charge);
+            return Math.Round(ion.GetMostAbundantIsotopeMz(), 2);
         }
     }
 }
