@@ -17,6 +17,8 @@ namespace LcmsSpectator.ViewModels
             MessengerInstance = messenger;
             Sequence = new Sequence(new List<AminoAcid>());
             MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
+            MessengerInstance.Register<XicPlotViewModel.SelectedScanChangedMessage>(this, SelectedScanChanged);
+            Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
             Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
         }
 
@@ -229,6 +231,11 @@ namespace LcmsSpectator.ViewModels
             {
                 PrSm = message.NewValue;
             }
+        }
+
+        private void SelectedScanChanged(XicPlotViewModel.SelectedScanChangedMessage message)
+        {
+            Scan = message.Scan;
         }
 
         private void SettingsChanged(SettingsChangedNotification message)

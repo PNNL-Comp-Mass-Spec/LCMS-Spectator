@@ -165,6 +165,7 @@
     <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\DmsJobViewModel.cs" />
     <Compile Include="ViewModels\DmsLookupViewModel.cs" />
+    <Compile Include="ViewModels\FeatureViewerViewModel.cs" />
     <Compile Include="ViewModels\FilterViewModel.cs" />
     <Compile Include="ViewModels\HeavyModificationsViewModel.cs" />
     <Compile Include="ViewModels\HeavyModificationsWindowViewModel.cs" />
@@ -173,6 +174,7 @@
     <Compile Include="ViewModels\LabeledIonViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModificationViewModel.cs" />
+    <Compile Include="ViewModels\OpenDataWindowViewModel.cs" />
     <Compile Include="ViewModels\PrSmViewModel.cs" />
     <Compile Include="ViewModels\ScanViewModel.cs" />
     <Compile Include="ViewModels\SelectedPrSmViewModel.cs" />
@@ -199,6 +201,9 @@
     <Compile Include="Views\DmsLookupView.xaml.cs">
       <DependentUpon>DmsLookupView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\FeatureViewerView.xaml.cs">
+      <DependentUpon>FeatureViewerView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\FilterView.xaml.cs">
       <DependentUpon>FilterView.xaml</DependentUpon>
     </Compile>
@@ -217,6 +222,9 @@
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\OpenDataWindow.xaml.cs">
+      <DependentUpon>OpenDataWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PrSmView.xaml.cs">
       <DependentUpon>PrSmView.xaml</DependentUpon>
@@ -293,6 +301,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\FeatureViewerView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\FilterView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -316,6 +328,10 @@
     <Page Include="Views\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\OpenDataWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\PrSmView.xaml">
       <SubType>Designer</SubType>
@@ -364,6 +380,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="layout.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="layoutdoc.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

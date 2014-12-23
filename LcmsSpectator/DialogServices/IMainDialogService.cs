@@ -9,6 +9,7 @@ namespace LcmsSpectator.DialogServices
         bool OpenSettings(SettingsViewModel settingsViewModel);
         bool OpenHeavyModifications(HeavyModificationsWindowViewModel heavyModificationsWindowVm);
         bool OpenCustomModification(CustomModificationViewModel customModificationViewModel);
+        bool OpenDataWindow(OpenDataWindowViewModel openDataWindowViewModel);
         bool FilterBox(FilterViewModel filterViewModel);
         void OpenAboutBox();
     }

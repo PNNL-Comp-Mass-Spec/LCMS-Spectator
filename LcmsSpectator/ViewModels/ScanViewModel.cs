@@ -89,8 +89,9 @@ namespace LcmsSpectator.ViewModels
             get { return _filteredData; }
             private set
             {
+                var oldData = _filteredData;
                 _filteredData = value;
-                RaisePropertyChanged();
+                RaisePropertyChanged("FilteredData", oldData, _filteredData, true);
             }
         }
 

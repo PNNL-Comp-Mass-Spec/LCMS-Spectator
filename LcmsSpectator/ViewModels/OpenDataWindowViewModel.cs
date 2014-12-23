@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FeatureMap.DialogServices;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using LcmsSpectator.DialogServices;
 
-namespace FeatureMap.ViewModels
+namespace LcmsSpectator.ViewModels
 {
     public class OpenDataWindowViewModel: ViewModelBase
     {

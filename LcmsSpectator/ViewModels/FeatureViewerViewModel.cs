@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using FeatureMap.Plots;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -9,28 +8,27 @@ using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.PlotModels;
 using LcmsSpectator.TaskServices;
 using LcmsSpectatorModels.Models;
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using LinearAxis = OxyPlot.Axes.LinearAxis;
-using LinearColorAxis = OxyPlot.Axes.LinearColorAxis;
-using LineSeries = OxyPlot.Series.LineSeries;
-using ScatterSeries = OxyPlot.Series.ScatterSeries;
 
-namespace FeatureMap.ViewModels
+namespace LcmsSpectator.ViewModels
 {
     public class FeatureViewerViewModel: ViewModelBase
     {
         public RelayCommand SetScanChangedCommand { get; private set; }
         public RelayCommand FeatureSelectedCommand { get; private set; }
-        public FeatureViewerViewModel(ITaskService taskService)
+        public FeatureViewerViewModel(ITaskService taskService, IMessenger messenger)
         {
+            MessengerInstance = messenger;
             _taskService = taskService;
-            Messenger.Default.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
-            Messenger.Default.Register<PropertyChangedMessage<List<PrSm>>>(this, FilteredIdsChanged);
+            MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
+            MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
+            MessengerInstance.Register<PropertyChangedMessage<List<PrSm>>>(this, FilteredIdsChanged);
             SetScanChangedCommand = new RelayCommand(SetScanChanged);
             FeatureSelectedCommand = new RelayCommand(FeatureSelected);
             FeatureMap = new PlotModel {Title = "Feature Map"};
@@ -273,6 +271,17 @@ namespace FeatureMap.ViewModels
             }
         }
 
+        public PrSm SelectedPrSm
+        {
+            get { return _selectedPrSm; }
+            set
+            {
+                var oldValue = _selectedPrSm;
+                _selectedPrSm = value;
+                RaisePropertyChanged("SelectedPrSm", oldValue, _selectedPrSm, true);
+            }
+        }
+
         private void BuildPlot(double scoreThreshold, double abundanceThreshold, int pointsDisplayed, bool showFoundMs2, bool showNotFoundMs2)
         {
             var filteredFeatures = FilterData(_features, scoreThreshold, abundanceThreshold, pointsDisplayed);
@@ -333,6 +342,7 @@ namespace FeatureMap.ViewModels
             {
                 var feature1 = feature;
                 var size = Math.Min(feature.MinPoint.Abundance / (2*medianAbundance), 7.0);
+                var ms2SeriesCollection = new List<ScatterSeries>();
                 if (showFoundMs2)
                 {
                     var ms2Series = new ScatterSeries
@@ -349,9 +359,9 @@ namespace FeatureMap.ViewModels
                     {
                         //if (!TryInsert(scanHash, scan, feature1.MinPoint.Mass)) continue;
                         var colorScore = _ids.ContainsKey(scan) ? 3975 : 2925;
-                        ms2Series.Points.Add(new ScatterPoint(_lcms.GetElutionTime(scan), feature1.MinPoint.Mass, Math.Max(size * 0.8, 3.0), colorScore));
+                        ms2Series.Points.Add(new ScatterPoint(_lcms.GetElutionTime(scan), feature1.MinPoint.Mass+0.001, Math.Max(size * 0.8, 3.0), colorScore));
                     }
-                    FeatureMap.Series.Add(ms2Series);
+                    ms2SeriesCollection.Add(ms2Series);
                 }
                 var colorIndex = 1 + (int)((feature1.MinPoint.Score - minScore) / (1.0 - minScore) * colors.Count);
                 if (colorIndex < 1) colorIndex = 1;
@@ -375,6 +385,7 @@ namespace FeatureMap.ViewModels
                         "Score: {Score:0.###}"
                 };
                 FeatureMap.Series.Add(ls);
+                foreach (var series in ms2SeriesCollection) FeatureMap.Series.Add(series);
             }
             if (showNotFoundMs2)
             {
@@ -393,6 +404,11 @@ namespace FeatureMap.ViewModels
                 };
                 FeatureMap.Series.Add(ids);
             }
+            if (SelectedPrSm != null)
+            {
+                SetHighlight(SelectedPrSm);
+            }
+
             FeatureMap.IsLegendVisible = false;
             FeatureMap.InvalidatePlot(true);
         }
@@ -403,12 +419,39 @@ namespace FeatureMap.ViewModels
 
         private void FeatureSelected()
         {
-            BuildIsotopePlots();
+            if (_selectedFeaturePoint != null)
+                BuildIsotopePlots();
+            else if (_selectedPrSmPoint != null)
+            {
+                SelectedPrSm = _selectedPrSmPoint;
+            }
         }
 
         private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
         {
             var prsm = message.NewValue;
+            if (prsm == null) return;
+            SetHighlight(prsm);
+            _selectedPrSm = prsm;
+            RaisePropertyChanged("SelectedPrSm");
+            FeatureMap.InvalidatePlot(true);
+        }
+
+        private void SelectedScanChanged(PropertyChangedMessage<int> message)
+        {
+            if (message.PropertyName == "Scan" && message.Sender is PrSmViewModel && SelectedPrSm != null)
+            {
+                SelectedPrSm.Scan = message.NewValue;
+                if (FeatureMap != null)
+                {
+                    SetHighlight(SelectedPrSm);
+                    FeatureMap.InvalidatePlot(true);
+                }
+            }
+        }
+
+        private void SetHighlight(PrSm prsm)
+        {
             prsm.Lcms = _lcms;
             var rt = prsm.RetentionTime;
             var mass = prsm.Mass;
@@ -423,16 +466,15 @@ namespace FeatureMap.ViewModels
                     Fill = OxyColor.FromArgb(100, 255, 255, 0),
                     Stroke = OxyColors.Green,
                     //Fill = OxyColors.Transparent,
-                    
+
                 };
-                FeatureMap.Annotations.Add(_circleHighlight);   
+                FeatureMap.Annotations.Add(_circleHighlight);
             }
             else
             {
                 _circleHighlight.X = rt;
                 _circleHighlight.Y = mass;
             }
-            FeatureMap.InvalidatePlot(true);
         }
 
         private void BuildIsotopePlots()
@@ -515,6 +557,8 @@ namespace FeatureMap.ViewModels
         private void FeatureMap_MouseDown(object sender, OxyMouseEventArgs args)
         {
             var series = FeatureMap.GetSeriesFromPoint(args.Position, 10);
+            _selectedFeaturePoint = null;
+            _selectedPrSmPoint = null;
             if (series is LineSeries)
             {
                 var result = series.GetNearestPoint(args.Position, false);
@@ -523,7 +567,9 @@ namespace FeatureMap.ViewModels
             }
             else if (series is ScatterSeries)
             {
-                
+                var result = series.GetNearestPoint(args.Position, false);
+                if (result == null) return;
+                _selectedPrSmPoint = result.Item as PrSm;
             }
         }
 
@@ -592,9 +638,11 @@ namespace FeatureMap.ViewModels
         private double _isotopicEnvelopeCorrelation;
        
         private FeaturePoint _selectedFeaturePoint;
+        private PrSm _selectedPrSmPoint;
         private bool _isLoading;
         private readonly LinearAxis _ipxAxis;
         private bool _showFoundMs2;
         private bool _showNotFoundMs2;
+        private PrSm _selectedPrSm;
     }
 }

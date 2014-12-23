@@ -190,6 +190,7 @@ namespace LcmsSpectator.ViewModels
                 //SelectedPrSmViewModel.Instance.RawFileName = RawFileName;
                 //SelectedPrSmViewModel.Instance.Heavy = Heavy;
                 //SelectedPrSmViewModel.Instance.Scan = dataPoint.ScanNum;
+                MessengerInstance.Send(new SelectedScanChangedMessage(this, dataPoint.ScanNum));
             });
         }
 
@@ -283,21 +284,18 @@ namespace LcmsSpectator.ViewModels
 
         public double GetCurrentArea(SelectablePlotModel plot=null)
         {
-            if (plot == null) plot = Plot;
+            //if (plot == null) plot = Plot;
             var min = _xAxis.ActualMinimum;
             var max = _xAxis.ActualMaximum;
             var area = 0.0;
-            foreach (var series in plot.Series)
+            foreach (var xic in _smoothedXics)
             {
-                var xicSeries = series as XicSeries;
-                if (xicSeries == null || !xicSeries.IsVisible) continue;
-                foreach (var point in xicSeries.Points)
-                {
-                    //var xicPoint = point as XicDataPoint;
-                    //if (xicPoint == null) continue;
-                    //if (xicPoint.Index >= 0 && point.X >= min && point.X <= max) area += point.Y;
-                    if (point.X >= min && point.X <= max) area += point.Y;
-                }
+                var xicPoints = xic.Xic;
+                if (xic.Index < 0) continue;
+                area += (from xicPoint in xicPoints 
+                         let rt = Lcms.GetElutionTime(xicPoint.ScanNum) 
+                         where rt >= min && rt <= max 
+                         select xicPoint.Intensity).Sum();
             }
             return area;
         }
@@ -363,7 +361,7 @@ namespace LcmsSpectator.ViewModels
                 var series = new LineSeries
                 {
                     ItemsSource = xicPoints,
-                    Mapping = (x) => new DataPoint(((XicDataPoint)x).X, ((XicDataPoint)x).Y),
+                    Mapping = x => new DataPoint(((XicDataPoint)x).X, ((XicDataPoint)x).Y),
                     StrokeThickness = 1.5,
                     Title = lxic.Label,
                     Color = color,

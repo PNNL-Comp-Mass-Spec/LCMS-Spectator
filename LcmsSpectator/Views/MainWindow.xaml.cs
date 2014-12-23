@@ -2,11 +2,8 @@
 using System.IO;
 using System.Windows;
 using LcmsSpectator.DialogServices;
-using LcmsSpectator.ViewModels;
-using LcmsSpectatorModels.Models;
 using Microsoft.Win32;
 using Xceed.Wpf.AvalonDock.Layout.Serialization;
-using TreeView = System.Windows.Controls.TreeView;
 
 namespace LcmsSpectator.Views
 {
@@ -78,7 +75,40 @@ namespace LcmsSpectator.Views
             {
                 var xmlLayout = new XmlLayoutSerializer(AvDock);
                 xmlLayout.Serialize(fs);
-            } */
+            }*/
         }
+
+        //private void LoadLayout_MenuItem_OnClick(object sender, RoutedEventArgs e)
+        //{
+        //    var dialogService = new DialogService();
+        //    var fileName = dialogService.OpenFile(".xml", @"XML Layout Files (*.xml)|*.xml");
+        //    if (!String.IsNullOrEmpty(fileName))
+        //    {
+        //        try
+        //        {
+        //            LoadLayout(fileName);
+        //        }
+        //        catch (Exception)
+        //        {
+        //            MessageBox.Show("Could not load layout.");
+        //            throw;
+        //        }
+        //    }
+        //}
+
+        //private void SaveLayout_MenuItem_OnClick(object sender, RoutedEventArgs e)
+        //{
+        //    var dialogService = new DialogService();
+        //    var fileName = dialogService.SaveFile(".xml", @"XML Layout Files (*.xml)|*.xml");
+        //    if (!String.IsNullOrEmpty(fileName))
+        //    {
+        //        using (var fs = new StreamWriter(fileName))
+        //        {
+        //            var xmlLayout = new XmlLayoutSerializer(AvDock);
+        //            xmlLayout.Serialize(fs);
+        //        }
+
+        //    }
+        //}
     }
 }

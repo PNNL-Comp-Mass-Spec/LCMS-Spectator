@@ -25,7 +25,7 @@
         <views:PrSmView DataContext="{Binding SelectedPrSm}" Grid.Row="0" />
         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ShowsPreview="True" />
         <!--<xcad:DockingManager Grid.Row="2" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Name="AvDock"> -->
-        <xcad:DockingManager Grid.Row="2" Name="AvDock">
+        <xcad:DockingManager Grid.Row="2" Name="AvDock" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
                 <xcad:LayoutRoot>
                 <xcad:LayoutRoot.LeftSide>
                     <xcad:LayoutAnchorSide>
@@ -48,6 +48,28 @@
                             <views:SpectrumView DataContext="{Binding SpectrumViewModel}" x:Name="SpectrumView" />
                         </xcad:LayoutDocument>
                         <xcad:LayoutDocument Title="Feature Map" CanClose="False">
+                            <Grid x:Name="FeatureMap">
+                                <views:FeatureViewerView DataContext="{Binding FeatureMapViewModel}"/>
+                                <Border BorderBrush="Black" BorderThickness="1" Background="#F0000000" Grid.RowSpan="6" Grid.ColumnSpan="2"
+                                 VerticalAlignment="Stretch" Visibility="{Binding ShowFeatureMapSplash, Converter={StaticResource BoolToVis}}">
+                                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="50*"/>
+                                            <RowDefinition Height="30" />
+                                            <RowDefinition Height="50*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Margin="0"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Bottom"
+                                           Grid.Row="0"
+                                           TextAlignment="Center"
+                                           FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
+                    Load Features
+                                        </TextBlock>
+                                        <Button Grid.Row="2" Command="{Binding OpenFeatureFileCommand}">Open Data</Button>
+                                    </Grid>
+                                </Border>
+                            </Grid>
                         </xcad:LayoutDocument>
                     </xcad:LayoutDocumentPane>
                     <xcad:LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="*" DockHeight="200">

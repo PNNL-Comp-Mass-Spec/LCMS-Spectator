@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Controls;
 
-namespace FeatureMap.Views
+namespace LcmsSpectator.Views
 {
     /// <summary>
     /// Interaction logic for FeatureViewerView.xaml

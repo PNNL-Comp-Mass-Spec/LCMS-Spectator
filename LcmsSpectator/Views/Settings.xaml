@@ -68,9 +68,9 @@
                     <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterWindowSize}" Height="25" VerticalAlignment="Top" />
                     <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope Relative Intensity Threshold</TextBlock>
                     <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
-                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Precursor View Mode</TextBlock>
+                    <!--<TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Precursor View Mode</TextBlock>
                     <ComboBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Height="25" VerticalAlignment="Top" ItemsSource="{Binding PrecursorViewModes}"
-                              SelectedItem="{Binding PrecursorViewMode}"/>
+                              SelectedItem="{Binding PrecursorViewMode}"/> -->
                 </Grid>
             </TabItem>
             <TabItem Header="Modifications">

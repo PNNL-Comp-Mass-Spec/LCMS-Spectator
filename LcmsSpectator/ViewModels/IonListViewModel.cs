@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Odbc;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
@@ -21,6 +21,8 @@ namespace LcmsSpectator.ViewModels
         public Task<List<LabeledIonViewModel>> FragmentLabelUpdate { get; private set; }
         public Task<List<LabeledIonViewModel>> PrecursorLabelUpdate { get; private set; }
 
+        public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; }
+        
         public IonListViewModel(IMainDialogService dialogService, ITaskService taskService, Messenger messenger)
         {
             MessengerInstance = messenger;
@@ -36,6 +38,13 @@ namespace LcmsSpectator.ViewModels
 
             _currentSequence = new Sequence(new List<AminoAcid>());
 
+            PrecursorViewModes = new ObservableCollection<PrecursorViewMode>
+            {
+                PrecursorViewMode.Isotopes,
+                PrecursorViewMode.Charges
+            };
+            _precursorViewMode = PrecursorViewMode.Isotopes;
+
             MessengerInstance.Register<PropertyChangedMessage<bool>>(this, ShowHeavyChanged);
             MessengerInstance.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
             MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
@@ -47,6 +56,26 @@ namespace LcmsSpectator.ViewModels
         }
 
         #region Ion label properties
+
+        public PrecursorViewMode PrecursorViewMode
+        {
+            get { return _precursorViewMode; }
+            set
+            {
+                _precursorViewMode = value;
+                UpdateFragmentLabels();
+                UpdatePrecursorLabels();
+                if (_showHeavyCount > 0)
+                {
+                    UpdateLightFragmentLabels();
+                    UpdateHeavyFragmentLabels();
+                    UpdateLightPrecursorLabels();
+                    UpdateHeavyPrecursorLabels();
+                }
+                RaisePropertyChanged();
+            }
+        }
+
         public List<LabeledIonViewModel> FragmentLabels
         {
             get { return _fragmentLabels; }
@@ -162,7 +191,7 @@ namespace LcmsSpectator.ViewModels
         {
             _precursorTaskService.Enqueue(() =>
             {
-                PrecursorLabels = (IcParameters.Instance.PrecursorViewMode == PrecursorViewMode.Charges)
+                PrecursorLabels = (_precursorViewMode == PrecursorViewMode.Charges)
                     ? GenerateChargePrecursorLabels(_currentSequence)
                     : GenerateIsotopePrecursorLabels(_currentSequence);
             });
@@ -173,7 +202,7 @@ namespace LcmsSpectator.ViewModels
             _precursorTaskService.Enqueue(() =>
             {
                 var lightSequence = IonUtils.GetHeavySequence(_currentSequence, IcParameters.Instance.LightModifications);
-                LightPrecursorLabels = (IcParameters.Instance.PrecursorViewMode == PrecursorViewMode.Charges)
+                LightPrecursorLabels = (_precursorViewMode == PrecursorViewMode.Charges)
                     ? GenerateChargePrecursorLabels(lightSequence)
                     : GenerateIsotopePrecursorLabels(lightSequence);
             });
@@ -184,7 +213,7 @@ namespace LcmsSpectator.ViewModels
             _precursorTaskService.Enqueue(() =>
             {
                 var heavySequence = IonUtils.GetHeavySequence(_currentSequence, IcParameters.Instance.LightModifications);
-                HeavyPrecursorLabels = (IcParameters.Instance.PrecursorViewMode == PrecursorViewMode.Charges)
+                HeavyPrecursorLabels = (_precursorViewMode == PrecursorViewMode.Charges)
                     ? GenerateChargePrecursorLabels(heavySequence)
                     : GenerateIsotopePrecursorLabels(heavySequence);
             });
@@ -311,5 +340,6 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledIonViewModel> _heavyFragmentLabels;
         private List<LabeledIonViewModel> _lightPrecursorLabels;
         private List<LabeledIonViewModel> _heavyPrecursorLabels;
+        private PrecursorViewMode _precursorViewMode;
     }
 }

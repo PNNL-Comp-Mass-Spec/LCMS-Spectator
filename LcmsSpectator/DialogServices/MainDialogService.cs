@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Documents;
+using FeatureMap.Views;
 using LcmsSpectator.ViewModels;
 using LcmsSpectator.Views;
 
@@ -46,6 +47,14 @@ namespace LcmsSpectator.DialogServices
             customModificationViewModel.ReadyToClose += (o, e) => customModificationDialog.Close();
             customModificationDialog.ShowDialog();
             return customModificationViewModel.Status;
+        }
+
+        public bool OpenDataWindow(OpenDataWindowViewModel openDataWindowViewModel)
+        {
+            var openDataDialog = new OpenDataWindow { DataContext = openDataWindowViewModel };
+            openDataWindowViewModel.ReadyToClose += (o, e) => openDataDialog.Close();
+            openDataDialog.ShowDialog();
+            return openDataWindowViewModel.Status;
         }
 
         public bool FilterBox(FilterViewModel filterViewModel)

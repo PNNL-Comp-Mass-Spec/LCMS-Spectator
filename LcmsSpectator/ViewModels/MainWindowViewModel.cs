@@ -33,12 +33,7 @@ namespace LcmsSpectator.ViewModels
         // Child view models
         public ScanViewModel ScanViewModel { get; private set; }
         public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
-        //public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
-        //public IonListViewModel IonListViewModel { get; private set; }
-        //public SpectrumViewModel Ms2SpectrumViewModel { get; private set; }
-        //public ObservableCollection<XicViewModel> XicViewModels { get; private set; }
         public ObservableCollection<DataSetViewModel> DataSets { get; private set; } 
-        //public SelectedPrSmViewModel SelectedPrSmViewModel { get; private set; }
 
         /// <summary>
         /// Constructor for creating a new, empty MainWindowViewModel
@@ -52,11 +47,7 @@ namespace LcmsSpectator.ViewModels
 
             _dialogService = dialogService;
             _taskService = taskService;
-            //SelectedPrSmViewModel = SelectedPrSmViewModel.Instance;
-            //Ms2SpectrumViewModel = new SpectrumViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
             ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService), new List<PrSm>(), Messenger.Default);
-            //IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
-            //IonListViewModel = new IonListViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService));
             DataSets = new ObservableCollection<DataSetViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(DataSets, _dialogService);
 

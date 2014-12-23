@@ -36,7 +36,7 @@
         <!-- End Menu -->
         <Grid HorizontalAlignment="Stretch" Margin="0,22,0,0">
 <!--                <xcad:DockingManager Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Name="AvDock"> -->
-            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}">
+            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
                 <xcad:DockingManager.LayoutItemContainerStyle>
                     <Style TargetType="{x:Type xcad:LayoutItem}">
                         <Setter Property="Title" Value="{Binding Model.RawFileName}" />
