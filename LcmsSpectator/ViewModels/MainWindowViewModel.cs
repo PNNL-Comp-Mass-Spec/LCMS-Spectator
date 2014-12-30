@@ -50,7 +50,7 @@ namespace LcmsSpectator.ViewModels
             _taskService = taskService;
             ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService), new List<PrSm>(), Messenger.Default);
             DataSets = new ObservableCollection<DataSetViewModel>();
-            CreateSequenceViewModel = new CreateSequenceViewModel(DataSets, _dialogService);
+            CreateSequenceViewModel = new CreateSequenceViewModel(DataSets, _dialogService, Messenger.Default);
 
             OpenDataSetCommand = new RelayCommand(OpenDataSet);
             OpenRawFileCommand = new RelayCommand(OpenRawFile);
