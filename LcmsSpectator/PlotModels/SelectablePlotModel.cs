@@ -1,5 +1,4 @@
 ﻿using System;
-using LcmsSpectator.Utils;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -28,7 +27,7 @@ namespace LcmsSpectator.PlotModels
                         "{0}" + Environment.NewLine +
                         "{1}: {2}" + Environment.NewLine
             };
-            GuiInvoker.Invoke(() => Series.Add(_pointMarkers));
+            Series.Add(_pointMarkers);
         }
 
         /// <summary>
