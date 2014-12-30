@@ -71,11 +71,11 @@ namespace LcmsSpectator.Views
 
         private void DockingManager_OnUnloaded(object sender, RoutedEventArgs e)
         {
-            /*using (var fs = new StreamWriter("layout1.xml"))
-            {
-                var xmlLayout = new XmlLayoutSerializer(AvDock);
-                xmlLayout.Serialize(fs);
-            }*/
+            //using (var fs = new StreamWriter("layout1.xml"))
+            //{
+            //    var xmlLayout = new XmlLayoutSerializer(AvDock);
+            //    xmlLayout.Serialize(fs);
+            //}
         }
 
         //private void LoadLayout_MenuItem_OnClick(object sender, RoutedEventArgs e)

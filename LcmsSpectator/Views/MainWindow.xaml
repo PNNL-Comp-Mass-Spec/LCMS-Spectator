@@ -102,9 +102,9 @@
                                             </Border>
                                         </Grid>
                                     </xcad:LayoutAnchorable>
-                                    <xcad:LayoutAnchorable Title="TargetView">
+                                    <!--<xcad:LayoutAnchorable Title="TargetView">
                                         <views1:CreateSequenceView DataContext="{Binding CreateSequenceViewModel}" x:Name="CreateSequence"/>
-                                    </xcad:LayoutAnchorable>
+                                    </xcad:LayoutAnchorable> -->
                                 </xcad:LayoutAnchorablePane>
                             </xcad:LayoutAnchorablePaneGroup>
                     </xcad:LayoutPanel>
