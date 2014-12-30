@@ -273,6 +273,12 @@ namespace LcmsSpectator.ViewModels
         {
             if (message.PropertyName != "Charge") return;
             _currentCharge = message.NewValue;
+            UpdatePrecursorLabels();
+            if (_showHeavyCount > 0)
+            {
+                UpdateLightPrecursorLabels();
+                UpdateHeavyPrecursorLabels();
+            }
         }
 
         private void SelectedSequenceChanged(PropertyChangedMessage<Sequence> message)
@@ -281,12 +287,6 @@ namespace LcmsSpectator.ViewModels
             _currentSequence = message.NewValue;
             _fragmentLabelCache.Clear();
             _precursorLabelCache.Clear();
-            UpdatePrecursorLabels();
-            if (_showHeavyCount > 0)
-            {
-                UpdateLightPrecursorLabels();
-                UpdateHeavyPrecursorLabels();
-            }
         }
 
         private void ShowHeavyChanged(PropertyChangedMessage<bool> message)

@@ -43,9 +43,7 @@ namespace LcmsSpectator.ViewModels
             }
             set
             {
-                PrSm newPrSm;
-                if (value == null) newPrSm = new PrSm();
-                else newPrSm = value;
+                PrSm newPrSm = value ?? new PrSm();
                 MessengerInstance.Send(new ClearAllNotification(this));
                 var oldValue = PrSm;
                 Lcms = newPrSm.Lcms;
@@ -55,7 +53,6 @@ namespace LcmsSpectator.ViewModels
                 _noLabelPrecursorMz = newPrSm.PrecursorMz;
                 _heavyPrecursorMz = IonUtils.GetPrecursorMz(IonUtils.GetHeavySequence(newPrSm.Sequence, IcParameters.Instance.HeavyModifications), newPrSm.Charge);
                 PrecursorMz = Heavy ? _heavyPrecursorMz : _noLabelPrecursorMz;
-                _charge = newPrSm.Charge;
                 ProteinNameDesc = newPrSm.ProteinNameDesc;
                 Scan = newPrSm.Scan;
                 RaisePropertyChanged("PrSm", oldValue, newPrSm, true);

@@ -161,7 +161,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _firstActualIds = false;
                 _qValueFilterChecked = true; RaisePropertyChanged("QValueFilterChecked");
-                _filters.Add("QValue", "0.01");
+                if (!_filters.ContainsKey("QValue")) _filters.Add("QValue", "0.01");
 
                 var highestScoringPrsm = _data[0];
                 foreach (var prsm in _data)
