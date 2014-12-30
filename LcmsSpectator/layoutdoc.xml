@@ -2,28 +2,26 @@
 <LayoutRoot xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <RootPanel Orientation="Vertical">
     <LayoutPanel Orientation="Horizontal">
-      <LayoutPanel Orientation="Horizontal">
+      <LayoutPanel Orientation="Horizontal" DockWidth="1.00740740740741*">
         <LayoutDocumentPane>
-          <LayoutDocument Title="XIC View" IsSelected="True" IsLastFocusedDocument="True" ContentId="XicView" CanClose="False" LastActivationTimeStamp="12/23/2014 11:27:47" />
-          <LayoutDocument Title="Spectrum View" ContentId="SpectrumView" CanClose="False" LastActivationTimeStamp="12/23/2014 11:27:46" />
-          <LayoutDocument Title="Feature Map" ContentId="FeatureMap" CanClose="False" LastActivationTimeStamp="12/23/2014 11:27:44" />
+          <LayoutDocument Title="XIC View" IsSelected="True" IsLastFocusedDocument="True" ContentId="XicView" CanClose="False" LastActivationTimeStamp="12/30/2014 14:50:06" />
+          <LayoutDocument Title="Spectrum View" ContentId="SpectrumView" CanClose="False" LastActivationTimeStamp="12/30/2014 14:50:03" />
+          <LayoutDocument Title="Feature Map" ContentId="FeatureMap" CanClose="False" LastActivationTimeStamp="12/30/2014 14:50:04" />
         </LayoutDocumentPane>
       </LayoutPanel>
-      <LayoutAnchorablePane Id="5003c8f7-c862-4d02-ac86-d9439ca54bc6" DockWidth="162" FloatingWidth="824" FloatingHeight="894" FloatingLeft="1491" FloatingTop="585" />
+      <LayoutAnchorablePane Id="5003c8f7-c862-4d02-ac86-d9439ca54bc6" DockWidth="151" FloatingWidth="824" FloatingHeight="894" FloatingLeft="1491" FloatingTop="585">
+        <LayoutAnchorable CanHide="False" AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Ion Types" IsSelected="True" ContentId="IonTypeSelector" FloatingLeft="1491" FloatingTop="585" FloatingWidth="824" FloatingHeight="894" CanClose="False" LastActivationTimeStamp="12/30/2014 14:49:55" />
+        <LayoutAnchorable CanHide="False" AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Ion List" ContentId="IonList" FloatingLeft="1491" FloatingTop="585" FloatingWidth="824" FloatingHeight="894" CanClose="False" LastActivationTimeStamp="12/30/2014 14:49:49" />
+      </LayoutAnchorablePane>
     </LayoutPanel>
     <LayoutAnchorablePaneGroup Orientation="Horizontal" DockHeight="200" FloatingWidth="248" FloatingHeight="894" FloatingLeft="959" FloatingTop="1017">
       <LayoutAnchorablePane DockHeight="200" FloatingWidth="248" FloatingHeight="894" FloatingLeft="959" FloatingTop="1017">
-        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Scan View" IsSelected="True" ContentId="ScanView" FloatingLeft="959" FloatingTop="1017" FloatingWidth="248" FloatingHeight="894" LastActivationTimeStamp="12/23/2014 11:27:31" />
+        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Scan View" IsSelected="True" ContentId="ScanView" FloatingLeft="959" FloatingTop="1017" FloatingWidth="248" FloatingHeight="894" LastActivationTimeStamp="12/30/2014 14:49:59" />
       </LayoutAnchorablePane>
     </LayoutAnchorablePaneGroup>
   </RootPanel>
   <TopSide />
-  <RightSide>
-    <LayoutAnchorGroup PreviousContainerId="5003c8f7-c862-4d02-ac86-d9439ca54bc6">
-      <LayoutAnchorable CanHide="False" AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Ion Types" ContentId="IonTypeSelector" FloatingLeft="1491" FloatingTop="585" FloatingWidth="824" FloatingHeight="894" CanClose="False" LastActivationTimeStamp="12/23/2014 11:27:40" />
-      <LayoutAnchorable CanHide="False" AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Ion List" ContentId="IonList" FloatingLeft="1491" FloatingTop="585" FloatingWidth="824" FloatingHeight="894" CanClose="False" LastActivationTimeStamp="12/23/2014 11:27:42" />
-    </LayoutAnchorGroup>
-  </RightSide>
+  <RightSide />
   <LeftSide />
   <BottomSide />
   <FloatingWindows />
