@@ -84,7 +84,7 @@ namespace LcmsSpectatorModels.Config
             };
             LightModifications = new List<Modification>();
             HeavyModifications = new List<Modification> { Modification.LysToHeavyLys, Modification.ArgToHeavyArg };
-            IonTypeFactory = new IonTypeFactory(15);
+            IonTypeFactory = new IonTypeFactory(100);
         }
 
         private void ReadParamFile()
