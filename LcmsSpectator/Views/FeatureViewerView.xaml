@@ -4,10 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:wpf="http://oxyplot.org/wpf"
+             xmlns:utils="clr-namespace:LcmsSpectator.Utils"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="1100">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <utils:ScoreToStringConverter x:Key="ScoreFormatter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -77,7 +79,7 @@
             </Grid> -->
             <StackPanel Orientation="Horizontal" Grid.Row="2">
                 <TextBlock Width="110">Correlation:</TextBlock>
-                <TextBlock Width="70" FontWeight="Bold" Text="{Binding IsotopicEnvelopeCorrelation}" />
+                <TextBlock Width="70" FontWeight="Bold" Text="{Binding IsotopicEnvelopeCorrelation, Converter={StaticResource ScoreFormatter}}" />
             </StackPanel>
         </Grid>
         <GroupBox Grid.Row="1" Grid.Column="1">
@@ -102,9 +104,9 @@
                 </StackPanel>
                 <StackPanel Grid.Row="1" Orientation="Horizontal">
                     <TextBlock Width="110">Abundance Range:</TextBlock>
-                    <TextBlock Width="70" FontWeight="Bold" Text="{Binding MinimumAbundance}" />
+                    <TextBlock Width="70" FontWeight="Bold" Text="{Binding MinimumAbundance, Converter={StaticResource ScoreFormatter}}" />
                     <TextBlock Width="10" FontWeight="Bold" Text="-" />
-                    <TextBlock Width="70" FontWeight="Bold" Text="{Binding MaximumAbundance}" />
+                    <TextBlock Width="70" FontWeight="Bold" Text="{Binding MaximumAbundance, Converter={StaticResource ScoreFormatter}}" />
                 </StackPanel>
                 <StackPanel Grid.Row="2" Orientation="Horizontal">
                     <TextBlock Width="150"># Features Displayed</TextBlock>
