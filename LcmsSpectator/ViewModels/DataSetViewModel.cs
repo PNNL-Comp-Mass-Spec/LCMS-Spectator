@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using GalaSoft.MvvmLight;
@@ -24,6 +25,7 @@ namespace LcmsSpectator.ViewModels
         public ScanViewModel ScanViewModel { get; private set; }
         public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
         public IonListViewModel IonListViewModel { get; private set; }
+        public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
         #endregion
 
         #region Commands
@@ -44,6 +46,7 @@ namespace LcmsSpectator.ViewModels
             ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService1), new List<PrSm>(), messenger);
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService, messenger);
             IonListViewModel = new IonListViewModel(_dialogService, taskService1, messenger);
+            CreateSequenceViewModel = new CreateSequenceViewModel(new ObservableCollection<DataSetViewModel>(), _dialogService, messenger);
 
             _showFeatureMapSplash = true;
 
@@ -89,9 +92,9 @@ namespace LcmsSpectator.ViewModels
                 // load raw file
                 var massSpecDataType = (extension == ".mzml") ? MassSpecDataType.MzMLFile : MassSpecDataType.XCaliburRun;
                 Lcms = PbfLcMsRun.GetLcMsRun(_rawFilePath, massSpecDataType, 0, 0);
-                var scans = Lcms.GetScanNumbers(1).ToList();
-                scans.AddRange(Lcms.GetScanNumbers(2));
-                scans.Sort();
+                var scans = Lcms.GetScanNumbers(2);
+                //scans.AddRange(Lcms.GetScanNumbers(2));
+                //scans.Sort();
                 var prsmScans = scans.Select(scan => new PrSm
                 {
                     Scan = scan, RawFileName = RawFileName, Lcms = Lcms, QValue = 1.0, Score = Double.NaN,
