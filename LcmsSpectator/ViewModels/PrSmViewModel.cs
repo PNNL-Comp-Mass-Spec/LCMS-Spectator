@@ -43,23 +43,25 @@ namespace LcmsSpectator.ViewModels
             }
             set
             {
-                if (value == null) value = new PrSm();
+                PrSm newPrSm;
+                if (value == null) newPrSm = new PrSm();
+                else newPrSm = value;
                 MessengerInstance.Send(new ClearAllNotification(this));
                 var oldValue = PrSm;
-                Lcms = value.Lcms;
-                RawFileName = value.RawFileName;
-                Heavy = value.Heavy;
-                Score = value.Score;
-                _noLabelPrecursorMz = value.PrecursorMz;
-                _heavyPrecursorMz = IonUtils.GetPrecursorMz(IonUtils.GetHeavySequence(value.Sequence, IcParameters.Instance.HeavyModifications), value.Charge);
+                Lcms = newPrSm.Lcms;
+                RawFileName = newPrSm.RawFileName;
+                Heavy = newPrSm.Heavy;
+                Score = newPrSm.Score;
+                _noLabelPrecursorMz = newPrSm.PrecursorMz;
+                _heavyPrecursorMz = IonUtils.GetPrecursorMz(IonUtils.GetHeavySequence(newPrSm.Sequence, IcParameters.Instance.HeavyModifications), newPrSm.Charge);
                 PrecursorMz = Heavy ? _heavyPrecursorMz : _noLabelPrecursorMz;
-                _charge = value.Charge;
-                ProteinNameDesc = value.ProteinNameDesc;
-                Scan = value.Scan;
-                Sequence = value.Sequence;
-                SequenceText = value.SequenceText;
-                Charge = value.Charge;
-                RaisePropertyChanged("PrSm", oldValue, PrSm, true);
+                _charge = newPrSm.Charge;
+                ProteinNameDesc = newPrSm.ProteinNameDesc;
+                Scan = newPrSm.Scan;
+                RaisePropertyChanged("PrSm", oldValue, newPrSm, true);
+                Sequence = newPrSm.Sequence;
+                SequenceText = newPrSm.SequenceText;
+                Charge = newPrSm.Charge;
             }
         }
 

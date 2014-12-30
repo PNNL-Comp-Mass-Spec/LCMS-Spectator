@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -56,12 +55,9 @@ namespace LcmsSpectator.ViewModels
             _pointsToSmooth = IcParameters.Instance.PointsToSmooth;
             Plot = new SelectablePlotModel(xAxis, 1.05);
             _ions = new List<LabeledIonViewModel>();
-            _smoothedXics = new List<LabeledXic>();
             _xAxis.AxisChanged += AxisChanged_UpdatePlotTitle;
+            _smoothedXics = new ConcurrentDictionary<string, LabeledXic>();
             _xicCache = new ConcurrentDictionary<string, LabeledXic>();
-            _smoothedXicLock = new Mutex();
-            _selectedCharge = 2;
-            //_xicCacheLock = new Mutex();
             MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
             MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
             MessengerInstance.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
@@ -186,10 +182,6 @@ namespace LcmsSpectator.ViewModels
                 var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
                 if (dataPoint == null) return;
                 SelectedRt = Plot.SelectedDataPoint.X;
-                //SelectedPrSmViewModel.Instance.Lcms = Lcms;
-                //SelectedPrSmViewModel.Instance.RawFileName = RawFileName;
-                //SelectedPrSmViewModel.Instance.Heavy = Heavy;
-                //SelectedPrSmViewModel.Instance.Scan = dataPoint.ScanNum;
                 MessengerInstance.Send(new SelectedScanChangedMessage(this, dataPoint.ScanNum));
             });
         }
@@ -257,7 +249,7 @@ namespace LcmsSpectator.ViewModels
             _taskService.Enqueue(() =>
             {
                 _xicCache.Clear();
-                _smoothedXics.Clear(); 
+                _smoothedXics.Clear();
             });
         }
 
@@ -282,19 +274,19 @@ namespace LcmsSpectator.ViewModels
             return Task.Run(() => GetCurrentArea());
         } 
 
-        public double GetCurrentArea(SelectablePlotModel plot=null)
+        public double GetCurrentArea()
         {
-            //if (plot == null) plot = Plot;
             var min = _xAxis.ActualMinimum;
             var max = _xAxis.ActualMaximum;
             var area = 0.0;
-            foreach (var xic in _smoothedXics)
+            var xics = _smoothedXics.Values;
+            foreach (var xic in xics)
             {
                 var xicPoints = xic.Xic;
                 if (xic.Index < 0) continue;
-                area += (from xicPoint in xicPoints 
-                         let rt = Lcms.GetElutionTime(xicPoint.ScanNum) 
-                         where rt >= min && rt <= max 
+                area += (from xicPoint in xicPoints
+                         let rt = Lcms.GetElutionTime(xicPoint.ScanNum)
+                         where rt >= min && rt <= max
                          select xicPoint.Intensity).Sum();
             }
             return area;
@@ -342,18 +334,18 @@ namespace LcmsSpectator.ViewModels
                 var xic = lxic.Xic;
                 if (xic == null) return;
                 // smooth
-                if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic).ToList();
-                _smoothedXicLock.WaitOne();
-                _smoothedXics.Add(new LabeledXic(ion.LabeledIon.Composition, ion.LabeledIon.Index, xic, ion.LabeledIon.IonType, ion.LabeledIon.IsFragmentIon));
-                _smoothedXicLock.ReleaseMutex();
+                if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic);
+                var labeledXic = new LabeledXic(ion.LabeledIon.Composition, ion.LabeledIon.Index, xic,
+                                                ion.LabeledIon.IonType, ion.LabeledIon.IsFragmentIon);
+                _smoothedXics.AddOrUpdate(ion.LabeledIon.Label, labeledXic, (key, oldValue) => labeledXic);   
                 var color = colors.GetColor(lxic);
                 var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
                 var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
                 var xicPoints = new List<XicDataPoint>();
-                for (int i = 0; i < xic.Count; i++)
+                for (int i = 0; i < xic.Length; i++)
                 {
                     // remove plateau points (line will connect them anyway)
-                    if (i > 1 && i < xic.Count - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) &&
+                    if (i > 1 && i < xic.Length - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) &&
                         xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
                     xicPoints.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum, xic[i].Intensity, ion.LabeledIon.Index));
                 }
@@ -381,6 +373,7 @@ namespace LcmsSpectator.ViewModels
             });
             foreach (var ion in seriesstore)
             {
+                if (ion.Value == null) continue;
                 plot.Series.Insert(0, ion.Value.Item1);
                 plot.AddSeries(ion.Value.Item2);
             }
@@ -388,18 +381,16 @@ namespace LcmsSpectator.ViewModels
             plot.IsLegendVisible = _showLegend;
             plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
             plot.SetPointMarker(SelectedRt);
-            Area = GetCurrentArea(plot);
+            Area = GetCurrentArea();
             return plot;
         }
 
         private LabeledXic GetXic(LabeledIon label)
         {
             LabeledXic lxic;
-            //_xicCacheLock.WaitOne();
             if (_xicCache.ContainsKey(label.Label)) lxic = _xicCache[label.Label];
             else
             {
-                //_xicCacheLock.ReleaseMutex();
                 var ion = label.Ion;
                 Xic xic;
                 if (label.IsFragmentIon) xic = Lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
@@ -408,11 +399,9 @@ namespace LcmsSpectator.ViewModels
                 else if (label.IsChargeState) xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(), 
                                                                                                      IcParameters.Instance.PrecursorTolerancePpm);
                 else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
-                lxic = new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon, label.PrecursorIon, label.IsChargeState);
-                //_xicCacheLock.WaitOne();
+                lxic = new LabeledXic(label.Composition, label.Index, xic.ToArray(), label.IonType, label.IsFragmentIon, label.PrecursorIon, label.IsChargeState);
                 _xicCache.AddOrUpdate(label.Label, lxic, (key, oldValue) => lxic);
             }
-            //_xicCacheLock.ReleaseMutex();
             return lxic;
         }
 
@@ -464,10 +453,8 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledIonViewModel> _ions;
         private int _pointsToSmooth;
 
-        private readonly Mutex _smoothedXicLock;
-        private readonly List<LabeledXic> _smoothedXics;
+        private readonly ConcurrentDictionary<string, LabeledXic> _smoothedXics;
         private readonly ConcurrentDictionary<string, LabeledXic> _xicCache;
-        //private readonly Mutex _xicCacheLock;
         private SelectablePlotModel _plot;
         private double _area;
         private int _selectedCharge;

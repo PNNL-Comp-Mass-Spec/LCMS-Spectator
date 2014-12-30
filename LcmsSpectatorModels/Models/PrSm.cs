@@ -5,7 +5,6 @@ using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
-using LcmsSpectatorModels.Config;
 
 namespace LcmsSpectatorModels.Models
 {

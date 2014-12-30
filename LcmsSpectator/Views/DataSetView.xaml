@@ -5,8 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:views="clr-namespace:LcmsSpectator.Views"
              xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
-             xmlns:controls="clr-namespace:LcmsSpectator.Controls"
-             xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
              xmlns:utils="clr-namespace:LcmsSpectator.Utils"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
@@ -64,9 +62,10 @@
                                            Grid.Row="0"
                                            TextAlignment="Center"
                                            FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
-                    Load Features
+                                           Feature Map
                                         </TextBlock>
-                                        <Button Grid.Row="2" Command="{Binding OpenFeatureFileCommand}">Open Data</Button>
+                                        <Button Grid.Row="2" Command="{Binding OpenFeatureFileCommand}"
+                                                Background="#7EFFFFFF" FontWeight="Bold">Open Feature File</Button>
                                     </Grid>
                                 </Border>
                             </Grid>
@@ -98,6 +97,7 @@
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Retention Time" Width="5*" Binding="{Binding RetentionTime}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Mass" Width="5*" Binding="{Binding Mass}" IsReadOnly="True" />
@@ -118,7 +118,7 @@
                 </xcad:LayoutPanel>
             </xcad:LayoutRoot>
         </xcad:DockingManager>
-        <!--<Border BorderBrush="Black" BorderThickness="1" Background="#80000000" Grid.Row="0" Grid.Column="0" Grid.RowSpan="6" Grid.ColumnSpan="2"
+        <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" Grid.Row="0" Grid.Column="0" Grid.RowSpan="6" Grid.ColumnSpan="2"
                 Name="LoadingScreen" VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
             <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
                 <Grid.RowDefinitions>
@@ -134,6 +134,6 @@
                     Loading<LineBreak />Please Wait...
                 </TextBlock>
             </Grid>
-        </Border> -->
+        </Border>
     </Grid>
 </UserControl>

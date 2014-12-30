@@ -81,13 +81,24 @@ namespace LcmsSpectator.ViewModels
             get { return _rawFilePath; }
             set
             {
+                IsLoading = true;
                 _rawFilePath = value;
                 RawFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(RawFilePath));
-                IsLoading = true;
+                var extension = Path.GetExtension(value);
+                if (extension != null) extension = extension.ToLower();
                 // load raw file
-                Lcms = PbfLcMsRun.GetLcMsRun(_rawFilePath, MassSpecDataType.XCaliburRun, 0, 0);
+                var massSpecDataType = (extension == ".mzml") ? MassSpecDataType.MzMLFile : MassSpecDataType.XCaliburRun;
+                Lcms = PbfLcMsRun.GetLcMsRun(_rawFilePath, massSpecDataType, 0, 0);
+                var scans = Lcms.GetScanNumbers(1).ToList();
+                scans.AddRange(Lcms.GetScanNumbers(2));
+                scans.Sort();
+                var prsmScans = scans.Select(scan => new PrSm
+                {
+                    Scan = scan, RawFileName = RawFileName, Lcms = Lcms, QValue = 1.0, Score = Double.NaN,
+                });
                 XicViewModel.Lcms = Lcms;
                 SpectrumViewModel.Lcms = Lcms;
+                ScanViewModel.AddIds(prsmScans);
                 // set bounds for shared x axis
                 //var maxRt = Math.Max(Lcms.GetElutionTime(Lcms.MaxLcScan), 1.0);
                 IsLoading = false;
@@ -122,16 +133,29 @@ namespace LcmsSpectator.ViewModels
         }
         #endregion
 
+        public void AddIds(IdentificationTree ids)
+        {
+            ScanViewModel.AddIds(ids.AllPrSms);
+        }
+
+        public void OpenFeatureFile(string filePath)
+        {
+            ShowFeatureMapSplash = false;
+            //ShowLoadingScreen = true;
+            var features = FeatureReader.Read(filePath);
+            FeatureMapViewModel.SetData((LcMsRun)Lcms, features.ToList(), ScanViewModel.FilteredData);
+            //ShowLoadingScreen = false;
+        }
+
         public void OpenFeatureFile()
         {
-            var openDataVm = new OpenDataWindowViewModel(new DialogService());
-            if (_dialogService.OpenDataWindow(openDataVm))
+            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv";
+            var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
+            if (!String.IsNullOrEmpty(tsvFileName))
             {
                 ShowFeatureMapSplash = false;
-                //ShowLoadingScreen = true;
-                var features = FeatureReader.Read(openDataVm.FeatureFilePath);
+                var features = FeatureReader.Read(tsvFileName);
                 FeatureMapViewModel.SetData((LcMsRun)Lcms, features.ToList(), ScanViewModel.FilteredData);
-                //ShowLoadingScreen = false;
             }
         }
 

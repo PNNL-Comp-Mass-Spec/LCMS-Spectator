@@ -57,6 +57,14 @@ namespace LcmsSpectator.DialogServices
             return openDataWindowViewModel.Status;
         }
 
+        public bool OpenSelectDataWindow(SelectDataSetViewModel selectDataViewModel)
+        {
+            var selectDataDialog = new SelectDataSetView { DataContext = selectDataViewModel };
+            selectDataViewModel.ReadyToClose += (o, e) => selectDataDialog.Close();
+            selectDataDialog.ShowDialog();
+            return selectDataViewModel.Status;
+        }
+
         public bool FilterBox(FilterViewModel filterViewModel)
         {
             var filterDialog = new FilterView

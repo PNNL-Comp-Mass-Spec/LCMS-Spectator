@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -10,7 +11,7 @@ namespace LcmsSpectator.PlotModels
     {
         public AutoAdjustedYPlotModel(Axis xAxis, double multiplier)
         {
-            DataPoints = new List<IDataPoint>();
+            DataPoints = new ConcurrentBag<IDataPoint>();
             Multiplier = multiplier;
             Axes.Add(xAxis);
             XAxis = xAxis;
@@ -74,12 +75,12 @@ namespace LcmsSpectator.PlotModels
         /// <param name="dataPoints">Points to add to plot</param>
         public virtual void AddSeries(IEnumerable<IDataPoint> dataPoints) 
         {
-            DataPoints.AddRange(dataPoints);
+            foreach (var point in dataPoints) DataPoints.Add(point);
         }
 
         public virtual void ClearSeries()
         {
-            DataPoints.Clear();
+            DataPoints = new ConcurrentBag<IDataPoint>();
             Series.Clear();
         }
 
@@ -99,9 +100,10 @@ namespace LcmsSpectator.PlotModels
         protected double GetMaxYInRange(double minX, double maxX)
         {
             double[] maxY = { 0.0 };
-            if (DataPoints.Count > 0)
+            var dataPoints = DataPoints.ToArray();
+            if (dataPoints.Length > 0)
             {
-                foreach (var point in DataPoints.Where(point => point.Y >= maxY[0] &&
+                foreach (var point in dataPoints.Where(point => point.Y >= maxY[0] &&
                                                         point.X >= minX && point.X <= maxX))
                 {
                     maxY[0] = point.Y;
@@ -109,7 +111,7 @@ namespace LcmsSpectator.PlotModels
             }
             else
             {
-                foreach (var series in base.Series)
+                foreach (var series in Series)
                 {
                     var lSeries = series as DataPointSeries;
                     if (lSeries == null || lSeries.IsVisible == false) continue;
@@ -123,7 +125,7 @@ namespace LcmsSpectator.PlotModels
         }
         protected Axis YAxis;
         protected Axis XAxis;
-        protected List<IDataPoint> DataPoints;
+        protected ConcurrentBag<IDataPoint> DataPoints;
         protected double Multiplier;
 
         /// <summary>

@@ -21,7 +21,10 @@
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
-                    <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                    <MenuItem Header="Save As _Image">
+                        <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
+                        <MenuItem Header="Save as _Svg" Command="{Binding SaveAsImageCommand}" CommandParameter="svg" />
+                    </MenuItem>
                 </ContextMenu>
             </wpf:Plot.ContextMenu>
         </wpf:Plot>
@@ -31,7 +34,10 @@
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
-                    <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                    <MenuItem Header="Save As _Image">
+                        <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
+                        <MenuItem Header="Save as _Svg" Command="{Binding SaveAsImageCommand}" CommandParameter="svg" />
+                    </MenuItem>
                 </ContextMenu>
             </wpf:Plot.ContextMenu>
         </wpf:Plot>
@@ -41,7 +47,10 @@
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                     <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
-                    <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                    <MenuItem Header="Save As _Image">
+                        <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
+                        <MenuItem Header="Save as _Svg" Command="{Binding SaveAsImageCommand}" CommandParameter="svg" />
+                    </MenuItem>
                 </ContextMenu>
             </wpf:Plot.ContextMenu>
         </wpf:Plot>

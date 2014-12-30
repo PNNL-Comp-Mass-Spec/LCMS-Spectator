@@ -49,7 +49,10 @@ namespace LcmsSpectator.ViewModels
         public void SetData(LcMsRun lcms, IEnumerable<Feature> features, IEnumerable<PrSm> ids, bool updatePlot=true)
         {
             _ids = new Dictionary<int, PrSm>();
-            foreach (var id in ids) _ids.Add(id.Scan, id);
+            foreach (var id in ids)
+            {
+                if (id.Sequence.Count > 0) _ids.Add(id.Scan, id);
+            }
             _lcms = lcms;
             _features = features.ToList();
             var scanHash = new Dictionary<int, List<double>>();
@@ -90,7 +93,7 @@ namespace LcmsSpectator.ViewModels
         public void UpdateIds(IEnumerable<PrSm> ids)
         {
             _ids = new Dictionary<int, PrSm>();
-            foreach (var id in ids) _ids.Add(id.Scan, id);
+            foreach (var id in ids) if (id.Sequence.Count > 0)  _ids.Add(id.Scan, id);
             if (_features == null) return;
             _notFoundMs2 = new List<PrSm>();
             var scanHash = new Dictionary<int, List<double>>();
@@ -338,6 +341,8 @@ namespace LcmsSpectator.ViewModels
             FeatureMap.Axes.Add(_yAxis);
             var colors = colorAxis.Palette.Colors;
             //var colors = OxyPalette.Interpolate(numColors, new[] {minColor, maxColor}).Colors;
+            var idColorScore = 3975;
+            var unidColorScore = 2925;
             foreach (var feature in filteredFeatures)
             {
                 var feature1 = feature;
@@ -345,7 +350,8 @@ namespace LcmsSpectator.ViewModels
                 var ms2SeriesCollection = new List<ScatterSeries>();
                 if (showFoundMs2)
                 {
-                    var ms2Series = new ScatterSeries
+                    var prsms = new List<PrSm>();
+                    var unidentifiedms2Series = new ScatterSeries
                     {
                         Title = "Ms2 Scan",
                         MarkerType = MarkerType.Cross,
@@ -357,11 +363,26 @@ namespace LcmsSpectator.ViewModels
                     };
                     foreach (var scan in feature.AssociatedMs2)
                     {
-                        //if (!TryInsert(scanHash, scan, feature1.MinPoint.Mass)) continue;
-                        var colorScore = _ids.ContainsKey(scan) ? 3975 : 2925;
-                        ms2Series.Points.Add(new ScatterPoint(_lcms.GetElutionTime(scan), feature1.MinPoint.Mass+0.001, Math.Max(size * 0.8, 3.0), colorScore));
+                        if (!_ids.ContainsKey(scan))
+                            unidentifiedms2Series.Points.Add(new ScatterPoint(_lcms.GetElutionTime(scan), 
+                                                                              feature1.MinPoint.Mass, Math.Max(size * 0.8, 3.0),
+                                                                              unidColorScore));
+                        else prsms.Add(_ids[scan]);
                     }
-                    ms2SeriesCollection.Add(ms2Series);
+                    var identifiedms2Series = new ScatterSeries
+                    {
+                        ItemsSource = prsms,
+                        Mapping = p => new ScatterPoint(((PrSm)p).RetentionTime, feature1.MinPoint.Mass, Math.Max(size*0.8, 3.0), idColorScore), 
+                        Title = "Ms2 Scan",
+                        MarkerType = MarkerType.Cross,
+                        ColorAxisKey = ms2ColorAxis.Key,
+                        TrackerFormatString =
+                            "{0}" + Environment.NewLine +
+                            "{1}: {2:0.###}" + Environment.NewLine +
+                            "{2}: {4:0.##E0}"
+                    };
+                    ms2SeriesCollection.Add(identifiedms2Series);
+                    ms2SeriesCollection.Add(unidentifiedms2Series);
                 }
                 var colorIndex = 1 + (int)((feature1.MinPoint.Score - minScore) / (1.0 - minScore) * colors.Count);
                 if (colorIndex < 1) colorIndex = 1;
@@ -429,22 +450,25 @@ namespace LcmsSpectator.ViewModels
 
         private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
         {
+            if (message.PropertyName != "PrSm" || !(message.Sender is PrSmViewModel)) return;
             var prsm = message.NewValue;
             if (prsm == null) return;
-            SetHighlight(prsm);
             _selectedPrSm = prsm;
+            _taskService.Enqueue(() =>
+            {
+                SetHighlight(prsm);
+                FeatureMap.InvalidatePlot(true);
+            });
             RaisePropertyChanged("SelectedPrSm");
-            FeatureMap.InvalidatePlot(true);
         }
 
         private void SelectedScanChanged(PropertyChangedMessage<int> message)
         {
             if (message.PropertyName == "Scan" && message.Sender is PrSmViewModel && SelectedPrSm != null)
             {
-                SelectedPrSm.Scan = message.NewValue;
                 if (FeatureMap != null)
                 {
-                    SetHighlight(SelectedPrSm);
+                    SetHighlight(new PrSm(){Scan = message.NewValue, Sequence = _selectedPrSm.Sequence, Lcms = _selectedPrSm.Lcms});
                     FeatureMap.InvalidatePlot(true);
                 }
             }
@@ -556,9 +580,9 @@ namespace LcmsSpectator.ViewModels
         /// <param name="args"></param>
         private void FeatureMap_MouseDown(object sender, OxyMouseEventArgs args)
         {
-            var series = FeatureMap.GetSeriesFromPoint(args.Position, 10);
             _selectedFeaturePoint = null;
             _selectedPrSmPoint = null;
+            var series = FeatureMap.GetSeriesFromPoint(args.Position, 2);
             if (series is LineSeries)
             {
                 var result = series.GetNearestPoint(args.Position, false);
@@ -589,7 +613,27 @@ namespace LcmsSpectator.ViewModels
             UpdateIds(message.NewValue);
         }
 
-        private bool TryInsert(Dictionary<int, List<double>> points, int scan, double mass)
+        private bool ContainsPoint(Dictionary<int, List<double>> points, int scan, double mass,
+            double massTolerance = 0.01)
+        {
+            bool success = false;
+            List<double> masses;
+            if (points.TryGetValue(scan, out masses))
+            {
+                var index = masses.BinarySearch(mass);
+                if (index < 0) index *= -1;
+                var lowIndex = Math.Min(Math.Max(0, index - 1), masses.Count - 1);
+                var hiIndex = Math.Min(index + 1, masses.Count - 1);
+                if ((Math.Abs(mass - masses[hiIndex]) <= massTolerance &&
+                     Math.Abs(mass - masses[lowIndex]) <= massTolerance))
+                {
+                    success = true;
+                }
+            }
+            return success;
+        }
+
+        private bool TryInsert(Dictionary<int, List<double>> points, int scan, double mass, double massTolerance=0.001)
         {
             bool success = false;
             List<double> masses;
@@ -604,8 +648,8 @@ namespace LcmsSpectator.ViewModels
                 if (index < 0) index *= -1;
                 var lowIndex = Math.Min(Math.Max(0, index-1), masses.Count-1);
                 var hiIndex = Math.Min(index + 1, masses.Count - 1);
-                if ((Math.Abs(mass - masses[hiIndex]) <= 0.001 &&
-                     Math.Abs(mass - masses[lowIndex]) <= 0.001))
+                if ((Math.Abs(mass - masses[hiIndex]) <= massTolerance &&
+                     Math.Abs(mass - masses[lowIndex]) <= massTolerance))
                 {
                     masses.Insert(hiIndex, mass);
                     success = true;

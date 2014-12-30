@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -49,14 +48,25 @@ namespace LcmsSpectator.ViewModels
             SelectedScan = 0;
             if (DataSetViewModels.Count > 0) SelectedDataSetViewModel = DataSetViewModels[0];
 
-            Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
-            Messenger.Default.Register<PropertyChangedMessage<string>>(this, SelectedRawFileChanged);
+            //Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
+            //Messenger.Default.Register<PropertyChangedMessage<string>>(this, SelectedRawFileChanged);
 
             Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
         }
 
         #region Public Properties
         public int SequencePosition { get; set; }
+
+        public PrSm SelectedPrSm
+        {
+            get { return _selectedPrSm; }
+            set
+            {
+                var oldSelectedPrSm = _selectedPrSm;
+                _selectedPrSm = value;
+                RaisePropertyChanged("SelectedPrSm", oldSelectedPrSm, _selectedPrSm, true);
+            }
+        }
 
         public int SelectedScan
         {
@@ -194,7 +204,7 @@ namespace LcmsSpectator.ViewModels
                 prsm.Scan = 0;
                 prsm.Lcms = null;
             }
-            SelectedPrSmViewModel.Instance.PrSm = prsm;
+            SelectedPrSm = prsm;
         }
 
         private void InsertStaticModifications()
@@ -285,26 +295,26 @@ namespace LcmsSpectator.ViewModels
             foreach (var target in targets) Targets.Add(target);
         }
 
-        private void SelectedRawFileChanged(PropertyChangedMessage<string> message)
-        {
-            if (message.PropertyName == "RawFileName" && message.Sender == SelectedPrSmViewModel.Instance)
-            {
-                var rawFileName = message.NewValue;
-                foreach (var xicVm in DataSetViewModels)
-                {
-                    if (xicVm.RawFileName == rawFileName) SelectedDataSetViewModel = xicVm;
-                }
-            }
-        }
+        //private void SelectedRawFileChanged(PropertyChangedMessage<string> message)
+        //{
+        //    if (message.PropertyName == "RawFileName" && message.Sender == SelectedPrSmViewModel.Instance)
+        //    {
+        //        var rawFileName = message.NewValue;
+        //        foreach (var xicVm in DataSetViewModels)
+        //        {
+        //            if (xicVm.RawFileName == rawFileName) SelectedDataSetViewModel = xicVm;
+        //        }
+        //    }
+        //}
 
-        private void SelectedScanChanged(PropertyChangedMessage<int> message)
-        {
-            if (message.PropertyName == "Scan" && message.Sender == SelectedPrSmViewModel.Instance)
-            {
-                var scan = message.NewValue;
-                SelectedScan = scan;
-            }
-        }
+        //private void SelectedScanChanged(PropertyChangedMessage<int> message)
+        //{
+        //    if (message.PropertyName == "Scan" && message.Sender == SelectedPrSmViewModel.Instance)
+        //    {
+        //        var scan = message.NewValue;
+        //        SelectedScan = scan;
+        //    }
+        //}
         #endregion
 
         #region Private Members
@@ -314,6 +324,7 @@ namespace LcmsSpectator.ViewModels
         private int _selectedScan;
         private int _selectedChage;
         private string _sequenceText;
+        private PrSm _selectedPrSm;
         #endregion
     }
 }

@@ -19,9 +19,10 @@ namespace LcmsSpectator.PlotModels
             MouseDown += SelectablePlotModel_MouseDown;
             UniqueColor = OxyColors.Black;
             OrdinaryColor = OxyColors.LightGray;
-            _pointMarkers = _pointMarkers = new StemSeries(OrdinaryColor, 3)
+            _pointMarkers = _pointMarkers = new StemSeries
             {
-
+                Color = OrdinaryColor,
+                StrokeThickness = 3,
                 LineStyle = LineStyle.Dash,
                 TrackerFormatString =
                         "{0}" + Environment.NewLine +
@@ -64,7 +65,7 @@ namespace LcmsSpectator.PlotModels
         /// </summary>
         public DataPoint GetPointMarker()
         {
-            DataPoint point = new DataPoint();
+            var point = new DataPoint();
             if (_pointMarkers != null && _pointMarkers.Points.Count > 0)
                 point = _pointMarkers.Points[0];
             return point;
@@ -79,11 +80,11 @@ namespace LcmsSpectator.PlotModels
         {
             //if (color == null) color = OxyColors.Black;
             var y = YAxis.Maximum;
-            GuiInvoker.Invoke(() => _pointMarkers.Points.Clear());
+            _pointMarkers.Points.Clear();
             if (x.Equals(0)) return;
-            GuiInvoker.Invoke(() => _pointMarkers.Color = color);
-            GuiInvoker.Invoke(() => _pointMarkers.Points.Add(new DataPoint(x, y)));
-            GuiInvoker.Invoke(InvalidatePlot, true);
+            _pointMarkers.Color = color;
+            _pointMarkers.Points.Add(new DataPoint(x, y));
+            InvalidatePlot(true);
         }
 
         /// <summary>
@@ -98,7 +99,7 @@ namespace LcmsSpectator.PlotModels
             {
                 var point = _pointMarkers.Points[0];
                 xPoint = point.X;
-                GuiInvoker.Invoke(() => _pointMarkers.Points.Clear());
+                _pointMarkers.Points.Clear();
             }
             base.SetBounds(minX, maxX);
             SetPointMarker(xPoint, GetMarkerColor()); // add marker
@@ -111,24 +112,12 @@ namespace LcmsSpectator.PlotModels
         /// <param name="args"></param>
         void SelectablePlotModel_MouseDown(object sender, OxyMouseEventArgs args)
         {
-            /*switch (args.ChangedButton)
-            {
-                case OxyMouseButton.Left:
-                    var series = GetSeriesFromPoint(args.Position, 10);
-                    if (series != null)
-                    {
-                        var result = series.GetNearestPoint(args.Position, false);
-                        if (result != null && result.DataPoint != null) SelectedDataPoint = result.DataPoint;
-                    }
-                    break;
-            }*/
-
             var series = GetSeriesFromPoint(args.Position, 10);
             if (series != null)
             {
                 var result = series.GetNearestPoint(args.Position, false);
                 if (result == null) return;
-                SelectedDataPoint = (IDataPoint)result.Item;
+                SelectedDataPoint = result.Item as IDataPoint;
             }
         }
 

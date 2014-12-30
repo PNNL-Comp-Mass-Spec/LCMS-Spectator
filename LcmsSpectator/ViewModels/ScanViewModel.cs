@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Windows;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
@@ -20,20 +21,21 @@ namespace LcmsSpectator.ViewModels
             ClearFiltersCommand = new RelayCommand(ClearFilters);
             _taskService = taskService;
             _dialogService = dialogService;
-            _filters = new Dictionary<string, string> { { "QValue", "0.01" } };
+            _filters = new Dictionary<string, string>();
             _previousFilters = new Dictionary<string, string>
             {
-                { "Sequence", "" },
-                { "Protein", ""},
-                { "Mass", ""},
-                { "PrecursorMz", ""},
-                { "Charge", ""},
-                { "Score", ""},
-                { "QValue", "0.01" },
-                { "RawFile", "" }
+                {"Sequence", ""},
+                {"Protein", ""},
+                {"Mass", ""},
+                {"PrecursorMz", ""},
+                {"Charge", ""},
+                {"Score", ""},
+                {"QValue", "0.01"},
+                {"RawFile", ""}
             };
-            _qValueFilterChecked = true;
-            Data = data;
+            _actualIds = false;
+            _firstActualIds = false;
+            _data = data;
             FilteredData = data;
             _taskService.Enqueue(FilterData);
         }
@@ -67,21 +69,17 @@ namespace LcmsSpectator.ViewModels
         /// <param name="rawFileName">Name of raw file</param>
         public void RemovePrSmsFromRawFile(string rawFileName)
         {
-            var newData = Data.Where(prsm => prsm.RawFileName != rawFileName).ToList();
+            var newData = _data.Where(prsm => prsm.RawFileName != rawFileName).ToList();
             var max = (newData.Count > 0) ? newData[0] : null;
             foreach (var item in newData) if (item.CompareTo(max) > 0) max = item;
             SelectedPrSm = max;
-            Data = newData;
+            _data = newData;
+            _taskService.Enqueue(FilterData);
         }
 
         public List<PrSm> Data
         {
-            get { return _data; }
-            set
-            {
-                _data = value;
-                _taskService.Enqueue(FilterData);
-            }
+            get { return new List<PrSm>(_data); }
         }
 
         public List<PrSm> FilteredData
@@ -98,7 +96,7 @@ namespace LcmsSpectator.ViewModels
         public List<ProteinId> FilteredProteins
         {
             get { return _filteredProteins; }
-            set
+            private set
             {
                 _filteredProteins = value;
                 RaisePropertyChanged();
@@ -141,8 +139,45 @@ namespace LcmsSpectator.ViewModels
                 var oldValue = _selectedPrSm;
                 _selectedPrSm = value;
                 RaisePropertyChanged("SelectedPrSm", oldValue, _selectedPrSm, true);
-                //SelectedPrSmViewModel.Instance.PrSm = _selectedPrSm;
             }
+        }
+
+        public void AddIds(IEnumerable<PrSm> ids)
+        {
+            var scanMap = _data.ToDictionary(prsm => prsm.Scan);
+            foreach (var prsm in ids)
+            {
+                if (scanMap.ContainsKey(prsm.Scan))
+                {
+                    scanMap[prsm.Scan] = prsm;
+                }
+                else scanMap.Add(prsm.Scan, prsm); 
+            }
+            _data = scanMap.Values.ToList();
+            UpdateActualIds();
+            // QValue filter should be set to 0.01 by default for Ids.
+            // Should show highest scoring id first time ids are added
+            if (_actualIds && !_firstActualIds && _data.Count > 0)
+            {
+                _firstActualIds = false;
+                _qValueFilterChecked = true; RaisePropertyChanged("QValueFilterChecked");
+                _filters.Add("QValue", "0.01");
+
+                var highestScoringPrsm = _data[0];
+                foreach (var prsm in _data)
+                {
+                    if (prsm.CompareTo(highestScoringPrsm) >= 0) highestScoringPrsm = prsm;
+                }
+                SelectedPrSm = highestScoringPrsm;
+            }
+            _taskService.Enqueue(FilterData);
+        }
+
+        public void ClearIds()
+        {
+            _data = new List<PrSm>();
+            UpdateActualIds();
+            _taskService.Enqueue(FilterData);
         }
 
         #region FilterProperties
@@ -160,11 +195,11 @@ namespace LcmsSpectator.ViewModels
 
         public bool SequenceFilterChecked
         {
-            get { return _sequenceFilterChecked; }
+            get { return _sequenceFilterChecked && _actualIds; }
             set
             {
                 _sequenceFilterChecked = value;
-                if (_sequenceFilterChecked)
+                if (_sequenceFilterChecked && _actualIds)
                 {
                     string defaultValue;
                     _previousFilters.TryGetValue("Sequence", out defaultValue);
@@ -188,11 +223,11 @@ namespace LcmsSpectator.ViewModels
 
         public bool ProteinFilterChecked
         {
-            get { return _proteinFilterChecked; }
+            get { return _proteinFilterChecked && _actualIds; }
             set
             {
                 _proteinFilterChecked = value;
-                if (_proteinFilterChecked)
+                if (_proteinFilterChecked && _actualIds)
                 {
                     string defaultValue;
                     _previousFilters.TryGetValue("Protein", out defaultValue);
@@ -216,11 +251,11 @@ namespace LcmsSpectator.ViewModels
 
         public bool MassFilterChecked
         {
-            get { return _massFilterChecked; }
+            get { return _massFilterChecked && _actualIds; }
             set
             {
                 _massFilterChecked = value;
-                if (_massFilterChecked)
+                if (_massFilterChecked && _actualIds)
                 {
                     string defaultValue;
                     _previousFilters.TryGetValue("Mass", out defaultValue);
@@ -249,11 +284,11 @@ namespace LcmsSpectator.ViewModels
 
         public bool PrecursorMzFilterChecked
         {
-            get { return _precursorMzFilterChecked; }
+            get { return _precursorMzFilterChecked && _actualIds; }
             set
             {
                 _precursorMzFilterChecked = value;
-                if (_precursorMzFilterChecked)
+                if (_precursorMzFilterChecked && _actualIds)
                 {
                     string defaultValue;
                     _previousFilters.TryGetValue("PrecursorMz", out defaultValue);
@@ -282,11 +317,11 @@ namespace LcmsSpectator.ViewModels
 
         public bool ChargeFilterChecked
         {
-            get { return _chargeFilterChecked; }
+            get { return _chargeFilterChecked && _actualIds; }
             set
             {
                 _chargeFilterChecked = value;
-                if (_chargeFilterChecked)
+                if (_chargeFilterChecked && _actualIds)
                 {
                     string defaultValue;
                     _previousFilters.TryGetValue("Charge", out defaultValue);
@@ -317,11 +352,11 @@ namespace LcmsSpectator.ViewModels
 
         public bool ScoreFilterChecked
         {
-            get { return _scoreFilterChecked; }
+            get { return _scoreFilterChecked && _actualIds; }
             set
             {
                 _scoreFilterChecked = value;
-                if (_scoreFilterChecked)
+                if (_scoreFilterChecked && _actualIds)
                 {
                     string defaultValue;
                     _previousFilters.TryGetValue("Score", out defaultValue);
@@ -350,11 +385,11 @@ namespace LcmsSpectator.ViewModels
 
         public bool QValueFilterChecked
         {
-            get { return _qValueFilterChecked; }
+            get { return _qValueFilterChecked && _actualIds; }
             set
             {
                 _qValueFilterChecked = value;
-                if (_qValueFilterChecked)
+                if (_qValueFilterChecked && _actualIds)
                 {
                     string defaultValue;
                     _previousFilters.TryGetValue("QValue", out defaultValue);
@@ -412,7 +447,7 @@ namespace LcmsSpectator.ViewModels
 
         private void FilterData()
         {
-            var filtered = Data;
+            var filtered = _data;
             foreach (var filter in _filters)
             {
                 switch (filter.Key)
@@ -451,6 +486,11 @@ namespace LcmsSpectator.ViewModels
             FilteredProteins = filteredIds.ProteinIds.ToList();
         }
 
+        private void UpdateActualIds()
+        {
+            _actualIds = _data.Any(id => id.Sequence.Count > 0);
+        }
+
         private readonly IMainDialogService _dialogService;
         private readonly ITaskService _taskService;
         private readonly Dictionary<string, string> _filters;
@@ -468,6 +508,8 @@ namespace LcmsSpectator.ViewModels
         private bool _qValueFilterChecked;
         private bool _rawFileFilterChecked;
         private bool _hideUnidentifiedScans;
+        private bool _actualIds;
+        private bool _firstActualIds;
         private object _treeViewSelectedItem;
     }
 }

@@ -177,7 +177,7 @@
     <Compile Include="ViewModels\OpenDataWindowViewModel.cs" />
     <Compile Include="ViewModels\PrSmViewModel.cs" />
     <Compile Include="ViewModels\ScanViewModel.cs" />
-    <Compile Include="ViewModels\SelectedPrSmViewModel.cs" />
+    <Compile Include="ViewModels\SelectDataSetViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\SpectrumPlotViewModel.cs" />
     <Compile Include="ViewModels\SpectrumViewModel.cs" />
@@ -228,6 +228,9 @@
     </Compile>
     <Compile Include="Views\PrSmView.xaml.cs">
       <DependentUpon>PrSmView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SelectDataSetView.xaml.cs">
+      <DependentUpon>SelectDataSetView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
@@ -334,6 +337,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\PrSmView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SelectDataSetView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

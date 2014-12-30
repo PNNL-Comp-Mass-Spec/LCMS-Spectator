@@ -44,8 +44,8 @@ namespace LcmsSpectator.ViewModels
 
             _minSelectedCharge = 1;
             _minSelectedCharge = 2;
-            MinCharge = 1;
-            AbsoluteMaxCharge = 2;
+            MinCharge = 2;
+            AbsoluteMaxCharge = 50;
         }
 
         /// <summary>
@@ -147,9 +147,9 @@ namespace LcmsSpectator.ViewModels
 
         private void SelectedChargeChanged(PropertyChangedMessage<int> message)
         {
-            var charge = message.NewValue;
             if (message.PropertyName == "Charge")
             {
+                var charge = message.NewValue;
                 MinCharge = 1;
                 var maxCharge = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
                 MaxCharge = maxCharge;

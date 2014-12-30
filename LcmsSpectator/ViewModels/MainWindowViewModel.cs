@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -24,8 +23,10 @@ namespace LcmsSpectator.ViewModels
         public List<IonType> IonTypes { get; set; }
 
         // Commands
+        public RelayCommand OpenDataSetCommand { get; private set; }
         public RelayCommand OpenRawFileCommand { get; private set; }
         public RelayCommand OpenTsvFileCommand { get; private set; }
+        public RelayCommand OpenFeatureFileCommand { get; private set; }
         public RelayCommand OpenFromDmsCommand { get; private set; }
         public RelayCommand OpenSettingsCommand { get; private set; }
         public RelayCommand OpenAboutBoxCommand { get; private set; }
@@ -51,16 +52,17 @@ namespace LcmsSpectator.ViewModels
             DataSets = new ObservableCollection<DataSetViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(DataSets, _dialogService);
 
+            OpenDataSetCommand = new RelayCommand(OpenDataSet);
             OpenRawFileCommand = new RelayCommand(OpenRawFile);
             OpenTsvFileCommand = new RelayCommand(OpenIdFile);
+            OpenFeatureFileCommand = new RelayCommand(OpenFeatureFile);
             OpenFromDmsCommand = new RelayCommand(() => OpenFromDms(), () => ShowOpenFromDms);
             OpenSettingsCommand = new RelayCommand(OpenSettings);
             OpenAboutBoxCommand = new RelayCommand(OpenAboutBox);
 
+            ShowSplash = true;
             IsLoading = false;
             FileOpen = false;
-
-            _idTreeMutex = new Mutex();
         }
 
         /// <summary>
@@ -71,7 +73,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="idTree">Existing IDs</param>
         public MainWindowViewModel(IMainDialogService dialogService, ITaskService taskService, IdentificationTree idTree) : this(dialogService, taskService)
         {
-            ScanViewModel.Data = idTree.AllPrSms;
+            ScanViewModel.AddIds(idTree.AllPrSms);
         }
 
         /// <summary>
@@ -81,6 +83,19 @@ namespace LcmsSpectator.ViewModels
         public bool ShowOpenFromDms
         {
             get { return System.Net.Dns.GetHostEntry("").HostName.Contains("pnl.gov"); }
+        }
+
+        /// <summary>
+        /// Toggles whether or not splash screen is shown.
+        /// </summary>
+        public bool ShowSplash
+        {
+            get { return _showSplash; }
+            set
+            {
+                _showSplash = value;
+                RaisePropertyChanged();
+            }
         }
 
         /// <summary>
@@ -110,12 +125,36 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Open raw file and/or id file, feature file
+        /// </summary>
+        public void OpenDataSet()
+        {
+            var openDataVm = new OpenDataWindowViewModel(_dialogService);
+            if (_dialogService.OpenDataWindow(openDataVm))
+            {
+                ShowSplash = false;
+                _taskService.Enqueue(() =>
+                {
+                    var dsVm = ReadRawFile(openDataVm.RawFilePath);
+                    if (dsVm != null)
+                    {
+                        if (!String.IsNullOrEmpty(openDataVm.IdFilePath))
+                            ReadIdFile(openDataVm.IdFilePath, dsVm.RawFilePath, dsVm);
+                        if (!String.IsNullOrEmpty(openDataVm.FeatureFilePath))
+                            dsVm.OpenFeatureFile(openDataVm.FeatureFilePath);
+                    }
+                });
+            }
+        }
+
+        /// <summary>
         /// Prompt user for raw files and call ReadRawFile() to open file.
         /// </summary>
         public void OpenRawFile()
         {
-            var rawFileNames = _dialogService.MultiSelectOpenFile(".raw", @"Raw Files (*.raw)|*.raw");
+            var rawFileNames = _dialogService.MultiSelectOpenFile(".raw", @"Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl)|*.mzMl");
             if (rawFileNames == null) return;
+            ShowSplash = false;
             foreach (var rawFileName in rawFileNames)
             {
                 var name = rawFileName;
@@ -159,14 +198,28 @@ namespace LcmsSpectator.ViewModels
                         if (file == path + ".raw") rawFileName = path + ".raw";
                     if (rawFileName == "")  // Raw file was not in the same directory.
                     {   // prompt user for raw file path
-                        _dialogService.MessageBox("Please select raw file.");
-                        rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");
+                        /*_dialogService.MessageBox("Please select raw file.");
+                        rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");*/
+                        var selectDataVm = new SelectDataSetViewModel(_dialogService, DataSets);
+                        if (_dialogService.OpenSelectDataWindow(selectDataVm))
+                        {
                             // manually find raw file
+                            if (!String.IsNullOrEmpty(selectDataVm.RawFilePath))
+                            {
+                                rawFileName = selectDataVm.RawFilePath;
+                            }
+                            else
+                            {
+                                rawFileName = selectDataVm.SelectedDataSet.RawFileName;
+                                dsVm = selectDataVm.SelectedDataSet;
+                            }
+                        }
                     }
                 }
             }
             if (!String.IsNullOrEmpty(rawFileName))
             {
+                ShowSplash = false;
                 _taskService.Enqueue(() =>
                 {
                     // Name of raw file was found
@@ -177,6 +230,69 @@ namespace LcmsSpectator.ViewModels
             else _dialogService.MessageBox("Cannot open ID file.");
         }
 
+        /// <summary>
+        /// Open feature file. Checks to ensure that there is a raw file open
+        /// corresponding to this ID file.
+        /// </summary>
+        public void OpenFeatureFile()
+        {
+            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv";
+            var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
+            if (tsvFileName == "") return;
+            var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
+            var ext = Path.GetExtension(tsvFileName);
+            string path = ext != null ? tsvFileName.Remove(tsvFileName.IndexOf(ext, StringComparison.Ordinal)) : tsvFileName;
+            string rawFileName = "";
+            DataSetViewModel dsVm = null;
+            foreach (var ds in DataSets)      // Raw file already open?
+            {
+                if (ds.RawFileName == fileName)
+                {   // xicVm with correct raw file name was found. Raw file is already open
+                    dsVm = ds;
+                    rawFileName = dsVm.RawFileName;
+                }
+            }
+            if (dsVm == null)  // Raw file not already open
+            {
+                var directoryName = Path.GetDirectoryName(tsvFileName);
+                if (directoryName != null)
+                {
+                    var directory = Directory.GetFiles(directoryName);
+                    foreach (var file in directory) // Raw file in same directory as tsv file?
+                        if (file == path + ".raw") rawFileName = path + ".raw";
+                    if (rawFileName == "")  // Raw file was not in the same directory.
+                    {   // prompt user for raw file path
+                        /*_dialogService.MessageBox("Please select raw file.");
+                        rawFileName = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw");*/
+                        var selectDataVm = new SelectDataSetViewModel(_dialogService, DataSets);
+                        if (_dialogService.OpenSelectDataWindow(selectDataVm))
+                        {
+                            // manually find raw file
+                            if (!String.IsNullOrEmpty(selectDataVm.RawFilePath))
+                            {
+                                rawFileName = selectDataVm.RawFilePath;
+                            }
+                            else
+                            {
+                                rawFileName = selectDataVm.SelectedDataSet.RawFileName;
+                                dsVm = selectDataVm.SelectedDataSet;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!String.IsNullOrEmpty(rawFileName))
+            {
+                ShowSplash = false;
+                _taskService.Enqueue(() =>
+                {
+                    // Name of raw file was found
+                    if (dsVm == null) dsVm = ReadRawFile(rawFileName); // raw file isn't open yet
+                    if (dsVm != null) dsVm.OpenFeatureFile(tsvFileName);
+                }, true);
+            }
+            else _dialogService.MessageBox("Cannot open ID file.");
+        }
 
         /// <summary>
         /// Attempt to open Ids from identification file and associate raw file with them.
@@ -232,11 +348,10 @@ namespace LcmsSpectator.ViewModels
                 }
             } while (attemptToReadFile);
             var data = ScanViewModel.Data;
-            dsVm.ScanViewModel.Data = ids.AllPrSms;
+            dsVm.AddIds(ids);
             data.AddRange(ids.AllPrSms);
-            ScanViewModel.Data = data;
+            ScanViewModel.AddIds(data);
             ScanViewModel.HideUnidentifiedScans = true;
-            if (ids.Proteins.Count > 0) SelectedPrSmViewModel.Instance.PrSm = ids.GetHighestScoringPrSm();
             FileOpen = true;
             IsLoading = false;
         }
@@ -247,35 +362,9 @@ namespace LcmsSpectator.ViewModels
         /// <param name="rawFilePath">Path to raw file to open</param>
         public DataSetViewModel ReadRawFile(string rawFilePath)
         {
-            var dsVm = new DataSetViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService)); // create xic view model
-            GuiInvoker.Invoke(() => DataSets.Add(dsVm)); // add xic view model to gui
+            var dsVm = new DataSetViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService)); // create data set view model
+            GuiInvoker.Invoke(() => DataSets.Add(dsVm)); // add data set view model. Can only add to ObservableCollection in thread that created it (gui thread)
             dsVm.RawFilePath = rawFilePath;
-            var lcms = dsVm.Lcms;
-            var scans = lcms.GetScanNumbers(2);
-            var prsmScans = new List<PrSm>();
-            foreach (var scan in scans)
-            {
-                var prsm = new PrSm
-                {
-                    Scan = scan,
-                    RawFileName = dsVm.RawFileName,
-                    Lcms = lcms,
-                    QValue = 1.0,
-                    Score = Double.NaN,
-                    Sequence = new Sequence(new List<AminoAcid>()),
-                    SequenceText = "",
-                    ProteinName = "",
-                    ProteinDesc = "",
-                    Charge = 0
-                };
-                _idTreeMutex.WaitOne();
-                prsmScans.Add(prsm);
-                _idTreeMutex.ReleaseMutex();
-            }
-            _idTreeMutex.WaitOne();
-            ScanViewModel.Data.AddRange(prsmScans);
-            ScanViewModel.Data = ScanViewModel.Data;
-            _idTreeMutex.ReleaseMutex();
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedDataSetViewModel = DataSets[0]; });
             FileOpen = true;
             return dsVm;
@@ -315,6 +404,7 @@ namespace LcmsSpectator.ViewModels
                 IsLoading = false;
                 return null;
             }
+            ShowSplash = false;
             foreach (var rawFilePath in rawFileNames)
             {
                 var raw = rawFilePath;
@@ -362,24 +452,15 @@ namespace LcmsSpectator.ViewModels
                 var rawFileName = dsVm.RawFileName;
                 ScanViewModel.RemovePrSmsFromRawFile(rawFileName);
                 DataSets.Remove(dsVm);
-                if (SelectedPrSmViewModel.Instance.RawFileName == rawFileName)
-                {
-                    if (DataSets.Count > 0) CreateSequenceViewModel.SelectedDataSetViewModel = DataSets[0];
-                    //if (ScanViewModel.Data.Count > 0) SelectedPrSmViewModel.Instance.PrSm = Ids.GetHighestScoringPrSm();
-                    else
-                    {
-                        SelectedPrSmViewModel.Instance.Clear();
-                    }
-                }
             }
         }
 
         private readonly IMainDialogService _dialogService;
         private readonly ITaskService _taskService;
-        private readonly Mutex _idTreeMutex;
 
         private bool _isLoading;
         private bool _fileOpen;
+        private bool _showSplash;
     }
 
     public class SettingsChangedNotification : NotificationMessage

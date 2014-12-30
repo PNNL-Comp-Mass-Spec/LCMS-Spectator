@@ -22,6 +22,7 @@ namespace LcmsSpectator.ViewModels
             BrowseFeatureFilesCommand = new RelayCommand(BrowseFeatureFiles);
             BrowseIdFilesCommand = new RelayCommand(BrowseIdFiles);
             Status = false;
+            OpenEnabled = false;
             OkCommand = new RelayCommand(Ok);
             CancelCommand = new RelayCommand(Cancel);
         }
@@ -32,6 +33,14 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _rawFilePath = value;
+                if (!String.IsNullOrEmpty(_rawFilePath))
+                {
+                    OpenEnabled = true;
+                }
+                else
+                {
+                    OpenEnabled = false;
+                }
                 RaisePropertyChanged();
             }
         }
@@ -52,6 +61,16 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _idFilePath = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool OpenEnabled
+        {
+            get { return _openEnabled; }
+            set
+            {
+                _openEnabled = value;
                 RaisePropertyChanged();
             }
         }
@@ -92,5 +111,6 @@ namespace LcmsSpectator.ViewModels
         private string _rawFilePath;
         private string _featureFilePath;
         private string _idFilePath;
+        private bool _openEnabled;
     }
 }

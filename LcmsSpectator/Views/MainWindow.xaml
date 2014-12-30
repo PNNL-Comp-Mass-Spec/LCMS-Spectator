@@ -20,8 +20,10 @@
         <!-- Menu -->
         <Menu VerticalAlignment="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="Open _Raw File" Command="{Binding OpenRawFileCommand}" />
+                <MenuItem Header="Open _Data Set" Command="{Binding OpenDataSetCommand}" />
+                <MenuItem Header="Open _Raw/MzML File(s)" Command="{Binding OpenRawFileCommand}" />
                 <MenuItem Header="Open _Id File" Command="{Binding OpenTsvFileCommand}" />
+                <MenuItem Header="Open _Feature File" Command="{Binding OpenFeatureFileCommand}" />
                 <MenuItem Header="Open _Target List" DataContext="{Binding CreateSequenceViewModel}" Command="{Binding OpenTargetListCommand}" />
                 <MenuItem Header="Search _DMS" Command="{Binding OpenFromDmsCommand}"
                           Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}" />
@@ -108,6 +110,40 @@
                     </xcad:LayoutPanel>
                 </xcad:LayoutRoot>
             </xcad:DockingManager>
+            <Border BorderBrush="Black" BorderThickness="1" Background="#F0000000" Grid.RowSpan="6" Grid.ColumnSpan="2"
+                                 VerticalAlignment="Stretch" Visibility="{Binding ShowSplash, Converter={StaticResource BoolToVis}}">
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50*"/>
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="50*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Margin="0"
+                                           TextWrapping="Wrap"
+                                           VerticalAlignment="Bottom"
+                                           Grid.Row="0"
+                                           TextAlignment="Center"
+                                           FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
+                                           Welcome to LcMSSpectator!
+                    </TextBlock>
+                    <Button Grid.Row="2" Command="{Binding OpenDataSetCommand}" 
+                            Background="#7EFFFFFF" FontWeight="Bold">Open Data Set</Button>
+
+                    <Button Grid.Row="4" Command="{Binding OpenRawFileCommand}"
+                            Background="#7EFFFFFF" FontWeight="Bold">Open _Raw/MzML File(s)</Button>
+                    <Button Grid.Row="6" Command="{Binding OpenTsvFileCommand}"
+                            Background="#7EFFFFFF" FontWeight="Bold">Open _Id File</Button>
+                    <Button Grid.Row="8" Command="{Binding OpenFeatureFileCommand}"
+                            Background="#7EFFFFFF" BorderThickness="0" FontWeight="Bold">Open Feature File</Button>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </Window>

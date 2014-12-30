@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
@@ -9,9 +8,9 @@ namespace LcmsSpectatorModels.Models
 {
     public class LabeledXic: LabeledIon
     { 
-        public List<XicPoint> Xic { get; private set; }
+        public XicPoint[] Xic { get; private set; }
 
-        public LabeledXic(Composition composition, int index, List<XicPoint> xic, IonType ionType,  bool isFragmentIon=true, Ion precursorIon=null, bool isChargeState=false): 
+        public LabeledXic(Composition composition, int index, XicPoint[] xic, IonType ionType,  bool isFragmentIon=true, Ion precursorIon=null, bool isChargeState=false): 
                base(composition, index, ionType, isFragmentIon, precursorIon, isChargeState)
         {
             Xic = xic;

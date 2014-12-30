@@ -49,7 +49,7 @@ namespace LcmsSpectator.ViewModels
             MessengerInstance.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
             MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
             MessengerInstance.Register<PropertyChangedMessage<Sequence>>(this, SelectedSequenceChanged);
-            MessengerInstance.Register<SettingsChangedNotification>(this, SettingsChanged);
+            Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
 
             FragmentLabelUpdate = Task.Run(() => GenerateFragmentLabels(_currentSequence, false));
             PrecursorLabelUpdate = Task.Run(() => GenerateIsotopePrecursorLabels(_currentSequence));
@@ -223,7 +223,7 @@ namespace LcmsSpectator.ViewModels
         {
             var ions = new List<LabeledIonViewModel>();
             if (sequence.Count == 0) return ions;
-            var precursorIonType = new IonType("Precursor", Composition.H2O, SelectedPrSmViewModel.Instance.Charge, false);
+            var precursorIonType = new IonType("Precursor", Composition.H2O, _currentCharge, false);
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             var relativeIntensities = composition.GetIsotopomerEnvelope();
             var indices = new List<int> { -1 };
@@ -239,7 +239,7 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledIonViewModel> GenerateChargePrecursorLabels(Sequence sequence)
         {
             var ions = new List<LabeledIonViewModel>();
-            var charge = SelectedPrSmViewModel.Instance.Charge;
+            var charge = _currentCharge;
             var numChargeStates = IonUtils.GetNumNeighboringChargeStates(charge);
             if (sequence.Count == 0) return ions;
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
