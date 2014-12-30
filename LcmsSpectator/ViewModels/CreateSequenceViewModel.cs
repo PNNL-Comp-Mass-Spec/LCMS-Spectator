@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -33,14 +34,16 @@ namespace LcmsSpectator.ViewModels
         public RelayCommand PasteCommand { get; private set; }
         #endregion
 
-        public CreateSequenceViewModel(ObservableCollection<DataSetViewModel> dataSetViewModels, IDialogService dialogService)
+        public CreateSequenceViewModel(ObservableCollection<DataSetViewModel> dataSetViewModels, IDialogService dialogService, IMessenger messenger)
         {
+            MessengerInstance = messenger;
             DataSetViewModels = dataSetViewModels;
             Targets = new ObservableCollection<Target>();
             _dialogService = dialogService;
             SequenceText = "";
             OpenTargetListCommand = new RelayCommand(OpenTargetList);
-            CreatePrSmCommand = new RelayCommand(CreatePrSm, () => (DataSetViewModels != null && DataSetViewModels.Count > 0));
+            //CreatePrSmCommand = new RelayCommand(CreatePrSm, () => (DataSetViewModels != null && DataSetViewModels.Count > 0));
+            CreatePrSmCommand = new RelayCommand(CreatePrSm);
             InsertModificationCommand = new RelayCommand(InsertModification);
             InsertStaticModificationsCommand = new RelayCommand(InsertStaticModifications);
             PasteCommand = new RelayCommand(Paste);
@@ -48,7 +51,8 @@ namespace LcmsSpectator.ViewModels
             SelectedScan = 0;
             if (DataSetViewModels.Count > 0) SelectedDataSetViewModel = DataSetViewModels[0];
 
-            //Messenger.Default.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
+            MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
+            MessengerInstance.Register<XicPlotViewModel.SelectedScanChangedMessage>(this, SelectedScanChanged);
             //Messenger.Default.Register<PropertyChangedMessage<string>>(this, SelectedRawFileChanged);
 
             Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
@@ -143,6 +147,24 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
             foreach (var target in targets) Targets.Add(target);
+        }
+        #endregion
+
+        #region Event Handlers
+        private void SelectedScanChanged(XicPlotViewModel.SelectedScanChangedMessage message)
+        {
+            SelectedScan = message.Scan;
+        }
+
+        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
+        {
+            if (message.PropertyName == "PrSm" && message.Sender is PrSmViewModel)
+            {
+                var prsm = message.NewValue;
+                SelectedScan = prsm.Scan;
+                SequenceText = prsm.SequenceText;
+                SelectedCharge = prsm.Charge;
+            }
         }
         #endregion
 
