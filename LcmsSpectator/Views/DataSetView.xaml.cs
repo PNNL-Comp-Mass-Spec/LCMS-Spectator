@@ -2,6 +2,8 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using InformedProteomics.Backend.Data.Sequence;
 using Microsoft.Win32;
 using Xceed.Wpf.AvalonDock.Layout.Serialization;
 
@@ -71,11 +73,38 @@ namespace LcmsSpectator.Views
 
         private void DockingManager_OnUnloaded(object sender, RoutedEventArgs e)
         {
-            /*using (var fs = new StreamWriter("layoutdoc1.xml"))
+            //using (var fs = new StreamWriter("layoutdoc1.xml"))
+            //{
+            //    var xmlLayout = new XmlLayoutSerializer(AvDock);
+            //    xmlLayout.Serialize(fs);
+            //}
+        }
+
+        private void InsertModButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            InsertModification();
+        }
+
+        private void InsertModification()
+        {
+            var selectedMod = ModificationList.SelectedItem as Modification;
+            if (selectedMod == null)
             {
-                var xmlLayout = new XmlLayoutSerializer(AvDock);
-                xmlLayout.Serialize(fs);
-            }*/
+                MessageBox.Show("Invalid modification.");
+                return;
+            }
+            var position = Sequence.CaretIndex;
+            var modStr = String.Format("[{0}]", selectedMod.Name);
+            Sequence.Text = Sequence.Text.Insert(position, modStr);
+        }
+
+        private void ModificationList_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            var key = e.Key;
+            if (key == Key.Enter)
+            {
+                InsertModification();
+            }
         }
     }
 }
