@@ -306,8 +306,10 @@ namespace LcmsSpectator.ViewModels
                                            IcParameters.Instance.ProductIonTolerancePpm,
                                            IcParameters.Instance.PrecursorTolerancePpm, ShowDeconvolutedSpectrum);
             var obsPeaks = labeledIonPeaks.Peaks;
-            if (obsPeaks == null || obsPeaks.Length < 1) return null;
-            Peak maxPeak = null;
+            if (labeledIonPeaks.CorrelationScore < IcParameters.Instance.IonCorrelationThreshold || 
+                obsPeaks == null || 
+                obsPeaks.Length < 1) 
+                    return null;
             var errors = IonUtils.GetIsotopePpmError(obsPeaks, labeledIonPeaks.Ion, 0.1);
             var peakDataPoints = new List<PeakDataPoint> {Capacity = errors.Length};
             for (int i = 0; i < errors.Length; i++)
@@ -315,8 +317,6 @@ namespace LcmsSpectator.ViewModels
                 if (errors[i] != null)
                 {
                     peakDataPoints.Add(new PeakDataPoint(obsPeaks[i].Mz, obsPeaks[i].Intensity, errors[i].Value, labeledIonPeaks.CorrelationScore));
-                    // Find most intense peak
-                    if (maxPeak == null || obsPeaks[i].Intensity >= maxPeak.Intensity) maxPeak = obsPeaks[i];
                 }
             }
             return peakDataPoints;
