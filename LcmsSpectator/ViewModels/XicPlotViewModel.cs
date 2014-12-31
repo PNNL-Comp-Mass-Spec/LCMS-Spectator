@@ -26,20 +26,16 @@ namespace LcmsSpectator.ViewModels
 {
     public class XicPlotViewModel: ViewModelBase
     {
-        public string RawFileName { get; set; }
-        public ILcMsRun Lcms { get; set; }
-        public RelayCommand SetScanChangedCommand { get; private set; }
-        public RelayCommand SaveAsImageCommand { get; private set; }
-        public bool Heavy { get; private set; }
-        public event EventHandler XicPlotChanged;
-        public class SelectedScanChangedMessage : NotificationMessage
-        {
-            public int Scan { get; private set; }
-            public SelectedScanChangedMessage(object sender, int scan, string notification="SelectedScanChanged") : base(sender, notification)
-            {
-                Scan = scan;
-            }
-        }
+        /// <summary>
+        /// Xic Plot View Model constructor
+        /// </summary>
+        /// <param name="dialogService">Dialog service</param>
+        /// <param name="taskService">Task scheduler</param>
+        /// <param name="messenger">Messenger instance to raise property changes/events to</param>
+        /// <param name="title">Title of XIC plot</param>
+        /// <param name="xAxis">XAxis for XIC plo.</param>
+        /// <param name="heavy">Does this XIC represent a heavy peptide?</param>
+        /// <param name="showLegend">Should a legend be shown on the plot?</param>
         public XicPlotViewModel(IDialogService dialogService, ITaskService taskService, Messenger messenger, string title, LinearAxis xAxis, bool heavy, bool showLegend=true)
         {
             MessengerInstance = messenger;
@@ -64,6 +60,41 @@ namespace LcmsSpectator.ViewModels
             UpdatePlot();
         }
 
+        #region Public Properties
+
+        /// <summary>
+        /// Name of data sets (without file extension or folder path)
+        /// </summary>
+        public string RawFileName { get; set; }
+
+        /// <summary>
+        /// LcMsRun data set
+        /// </summary>
+        public ILcMsRun Lcms { get; set; }
+
+        /// <summary>
+        /// Command triggered when new scan is selected (double clicked) on XIC.
+        /// </summary>
+        public RelayCommand SetScanChangedCommand { get; private set; }
+
+        /// <summary>
+        /// Command for exporting xic plot as an image.
+        /// </summary>
+        public RelayCommand SaveAsImageCommand { get; private set; }
+
+        /// <summary>
+        /// Whether or not this xic plot represents a heavy peptide/protein.
+        /// </summary>
+        public bool Heavy { get; private set; }
+
+        /// <summary>
+        /// Event that is triggered when the XIC plot is updated.
+        /// </summary>
+        public event EventHandler XicPlotChanged;
+
+        /// <summary>
+        /// Plot model for XIC
+        /// </summary>
         public SelectablePlotModel Plot
         {
             get { return _plot; }
@@ -148,6 +179,9 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Area under curve of XIC
+        /// </summary>
         public double Area
         {
             get { return _area; }
@@ -171,7 +205,9 @@ namespace LcmsSpectator.ViewModels
                 RaisePropertyChanged();
             }
         }
+#endregion
 
+        #region Public Methods
         /// <summary>
         /// Highlight Rt and call SelectedScanChanged to inform XicViewModel
         /// </summary>
@@ -186,64 +222,18 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
+        /// <summary>
+        /// Highlight (place marker at) retention time.
+        /// </summary>
+        /// <param name="rt">Retention time to put marker at.</param>
         public void HighlightRt(double rt)
         {
             _taskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));
         }
 
-        private void SelectedScanChanged(PropertyChangedMessage<int> message)
-        {
-            if (message.PropertyName == "Scan" && message.Sender is PrSmViewModel)
-            {
-                var rt = Lcms.GetElutionTime(message.NewValue);
-                _selectedRt = rt;
-                /*if (SelectedPrSmViewModel.Instance.Heavy == Heavy)
-                {
-                    _taskService.Enqueue(() => Plot.SetUniquePointMarker(rt));
-                }
-                else _taskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));*/
-                _taskService.Enqueue(() => Plot.SetUniquePointMarker(rt));
-            }
-        }
-
-        private void ToggleScanMarkers(bool value)
-        {
-            _taskService.Enqueue(() =>
-            {
-                var markerType = (value) ? MarkerType.Circle : MarkerType.None;
-                foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
-                {
-                    if (series is XicSeries)
-                    {
-                        var lineSeries = series as XicSeries;
-                        lineSeries.MarkerType = markerType;
-                    }
-                }
-                Plot.InvalidatePlot(false); 
-            });
-        }
-
-        private void ToggleLegend(bool value)
-        {
-            _taskService.Enqueue(() =>
-            {
-                Plot.IsLegendVisible = value;
-                Plot.InvalidatePlot(false); 
-            });
-        }
-
         /// <summary>
-        /// Update plot title when XAxis axis changed to reflect updated area of the currently
-        /// visible portion of the plot.
+        /// Clear XIC cache
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AxisChanged_UpdatePlotTitle(object sender, AxisChangedEventArgs e)
-        {
-            if (Plot == null || Plot.Series.Count == 0) return;
-            UpdateArea();
-        }
-
         public void ClearCache()
         {
             _taskService.Enqueue(() =>
@@ -253,6 +243,9 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
+        /// <summary>
+        /// Start update of XIC plot.
+        /// </summary>
         public void UpdatePlot()
         {
             _taskService.Enqueue(() =>
@@ -264,16 +257,27 @@ namespace LcmsSpectator.ViewModels
             });
         }
 
+        /// <summary>
+        /// Start update of plot title with current area.
+        /// </summary>
         public void UpdateArea()
         {
             _taskService.Enqueue(() => { Area = GetCurrentArea();  });
         }
 
+        /// <summary>
+        /// Get an awaitable task for XIC area.
+        /// </summary>
+        /// <returns></returns>
         public Task<double> GetAreaTask()
         {
             return Task.Run(() => GetCurrentArea());
         } 
 
+        /// <summary>
+        /// Get current area under curve of XIC plot
+        /// </summary>
+        /// <returns></returns>
         public double GetCurrentArea()
         {
             var min = _xAxis.ActualMinimum;
@@ -291,6 +295,107 @@ namespace LcmsSpectator.ViewModels
             }
             return area;
         }
+#endregion
+
+        #region Event Handlers
+        private void SelectedScanChanged(PropertyChangedMessage<int> message)
+        {
+            if (message.PropertyName == "Scan" && message.Sender is PrSmViewModel)
+            {
+                var rt = Lcms.GetElutionTime(message.NewValue);
+                _selectedRt = rt;
+                /*if (SelectedPrSmViewModel.Instance.Heavy == Heavy)
+                {
+                    _taskService.Enqueue(() => Plot.SetUniquePointMarker(rt));
+                }
+                else _taskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));*/
+                _taskService.Enqueue(() => Plot.SetUniquePointMarker(rt));
+            }
+        }
+
+        /// <summary>
+        /// Captures when the data set's selected charge has changed.
+        /// </summary>
+        /// <param name="message">Event message containing new charge.</param>
+        private void SelectedChargeChanged(PropertyChangedMessage<int> message)
+        {
+            if (message.PropertyName == "Charge")
+            {
+                _selectedCharge = message.NewValue;
+            }
+        }
+
+        /// <summary>
+        /// Update plot title when XAxis axis changed to reflect updated area of the currently
+        /// visible portion of the plot.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AxisChanged_UpdatePlotTitle(object sender, AxisChangedEventArgs e)
+        {
+            if (Plot == null || Plot.Series.Count == 0) return;
+            UpdateArea();
+        }
+
+        /// <summary>
+        /// Ion label has been selected/unselected
+        /// </summary>
+        /// <param name="message">Event message containing whether or not sender is selected.</param>
+        private void LabeledIonSelectedChanged(PropertyChangedMessage<bool> message)
+        {
+            if (message.PropertyName == "Selected" && message.Sender is LabeledIonViewModel)
+            {
+                var labeledIonVm = message.Sender as LabeledIonViewModel;
+                var label = labeledIonVm.LabeledIon.Label;
+                foreach (var series in Plot.Series)
+                {
+                    var lineSeries = series as LineSeries;
+                    if (lineSeries != null && lineSeries.Title == label)
+                    {
+                        lineSeries.IsVisible = message.NewValue;
+                        Plot.AdjustForZoom();
+                        _taskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea()); });
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region Private Methods
+        /// <summary>
+        /// Begin toggling scan markers on xic plot on/off.
+        /// The scan markers are the markers at each point in each series.
+        /// </summary>
+        /// <param name="value">Whether the scan markers are on or off</param>
+        private void ToggleScanMarkers(bool value)
+        {
+            _taskService.Enqueue(() =>
+            {
+                var markerType = (value) ? MarkerType.Circle : MarkerType.None;
+                foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
+                {
+                    if (series is XicSeries)
+                    {
+                        var lineSeries = series as XicSeries;
+                        lineSeries.MarkerType = markerType;
+                    }
+                }
+                Plot.InvalidatePlot(false);
+            });
+        }
+
+        /// <summary>
+        /// Begin toggling legend on xic plot on/off.
+        /// </summary>
+        /// <param name="value">Whether the legend is on or off</param>
+        private void ToggleLegend(bool value)
+        {
+            _taskService.Enqueue(() =>
+            {
+                Plot.IsLegendVisible = value;
+                Plot.InvalidatePlot(false);
+            });
+        }
 
         /// <summary>
         /// Get the plot title in the format "[Title] (Area: ###)".
@@ -301,14 +406,6 @@ namespace LcmsSpectator.ViewModels
             var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", area);
             var title = String.Format("{0} (Area: {1})", _title, areaStr);
             return title;
-        }
-
-        private void SelectedChargeChanged(PropertyChangedMessage<int> message)
-        {
-            if (message.PropertyName == "Charge")
-            {
-                _selectedCharge = message.NewValue;
-            }
         }
 
         /// <summary>
@@ -385,6 +482,11 @@ namespace LcmsSpectator.ViewModels
             return plot;
         }
 
+        /// <summary>
+        /// Calculate an XIC for a given ion.
+        /// </summary>
+        /// <param name="label">Labeled ion to calculate XIC for</param>
+        /// <returns>Labeled XIC containing calculated XIC and labeled ion</returns>
         private LabeledXic GetXic(LabeledIon label)
         {
             LabeledXic lxic;
@@ -405,25 +507,6 @@ namespace LcmsSpectator.ViewModels
             return lxic;
         }
 
-        private void LabeledIonSelectedChanged(PropertyChangedMessage<bool> message)
-        {
-            if (message.PropertyName == "Selected" && message.Sender is LabeledIonViewModel)
-            {
-                var labeledIonVm = message.Sender as LabeledIonViewModel;
-                var label = labeledIonVm.LabeledIon.Label;
-                foreach (var series in Plot.Series)
-                {
-                    var lineSeries = series as LineSeries;
-                    if (lineSeries != null && lineSeries.Title == label)
-                    {
-                        lineSeries.IsVisible = message.NewValue;
-                        Plot.AdjustForZoom();
-                        _taskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea()); });
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Open a save file dialog and save plot as png image to user selected location.
         /// </summary>
@@ -440,7 +523,9 @@ namespace LcmsSpectator.ViewModels
                 _dialogService.ExceptionAlert(e);
             }
         }
+#endregion
 
+        #region Private Fields
         private readonly IDialogService _dialogService;
         private readonly ITaskService _taskService;
 
@@ -458,5 +543,16 @@ namespace LcmsSpectator.ViewModels
         private SelectablePlotModel _plot;
         private double _area;
         private int _selectedCharge;
+        #endregion
+
+        public class SelectedScanChangedMessage : NotificationMessage
+        {
+            public int Scan { get; private set; }
+            public SelectedScanChangedMessage(object sender, int scan, string notification = "SelectedScanChanged")
+                : base(sender, notification)
+            {
+                Scan = scan;
+            }
+        }
     }
 }
