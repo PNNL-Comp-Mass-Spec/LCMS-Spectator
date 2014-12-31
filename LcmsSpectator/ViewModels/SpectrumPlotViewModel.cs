@@ -387,21 +387,24 @@ namespace LcmsSpectator.ViewModels
             {
                 var labeledIonVm = message.Sender as LabeledIonViewModel;
                 var label = labeledIonVm.LabeledIon.Label;
+                StemSeries selectedlineseries = null;
                 foreach (var series in Plot.Series)
                 {
-                    var lineSeries = series as StemSeries;
-                    if (lineSeries != null && lineSeries.Title == label)
+                    var lineseries = series as StemSeries;
+                    if (lineseries != null && lineseries.Title == label)
                     {
-                        lineSeries.IsVisible = message.NewValue;
+                        lineseries.IsVisible = message.NewValue;
+                        selectedlineseries = lineseries;
                         Plot.AdjustForZoom();
                     }
                 }
                 foreach (var annotation in Plot.Annotations)
                 {
                     var textAnnotation = annotation as TextAnnotation;
-                    if (textAnnotation != null && textAnnotation.Text == label)
+                    if (textAnnotation != null && textAnnotation.Text == label && selectedlineseries != null)
                     {
-                        textAnnotation.FontSize = message.NewValue ? 0 : 12;
+                        textAnnotation.TextColor = message.NewValue ? selectedlineseries.Color : OxyColors.Transparent;
+                        Plot.InvalidatePlot(true);
                     }
                 }
             }

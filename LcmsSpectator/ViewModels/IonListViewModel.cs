@@ -176,7 +176,7 @@ namespace LcmsSpectator.ViewModels
                             ? sequence.GetComposition(0, i)
                             : sequence.GetComposition(i, sequence.Count);
                         var labelIndex = ionType.IsPrefixIon ? i : (sequence.Count - i);
-                        label = new LabeledIonViewModel(new LabeledIon(composition, labelIndex, ionType, true, precursorIon));
+                        label = new LabeledIonViewModel(new LabeledIon(composition, labelIndex, ionType, true, precursorIon), MessengerInstance);
                         if (useCache) _fragmentLabelCache.Add(key, label);
                     }
                     ionFragments.Add(label);
