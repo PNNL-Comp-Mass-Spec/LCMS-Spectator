@@ -61,11 +61,13 @@ namespace LcmsSpectator.Views
             FragmentPlotRow.Height = new GridLength(60, GridUnitType.Star);
             FragmentTitleRow.Height = new GridLength(4, GridUnitType.Star);
             FragmentIonXic.Visibility = Visibility.Visible;
+            FragmentIonXic.UpdateLayout();
             PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
             if (ShowHeavy.IsChecked == true)
             {
                 HeavyFragmentIonXic.Visibility = Visibility.Visible;
                 FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                HeavyFragmentIonXic.UpdateLayout();
             }
         }
 
@@ -83,9 +85,11 @@ namespace LcmsSpectator.Views
         {
             LightColumn.Width = new GridLength(50, GridUnitType.Star);
             HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
+            HeavyPrecursorIonXic.UpdateLayout();
             if (ShowFragment.IsChecked == true)
             {
                 HeavyFragmentIonXic.Visibility = Visibility.Visible;
+                HeavyFragmentIonXic.UpdateLayout();
                 FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
             }
         }
