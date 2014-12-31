@@ -26,10 +26,10 @@ namespace LcmsSpectator.TaskServices
         {
             lock (_queueLock)
             {
-                if (_runningTasksCount != 0)
-                {
-                    return;
-                }
+                //if (_runningTasksCount != 0)
+                //{
+                //    return;
+                //}
                 while (_taskQueue.Count > 0 && _taskQueue.Peek().IsParallel)
                 {
                     var task = _taskQueue.Dequeue();
