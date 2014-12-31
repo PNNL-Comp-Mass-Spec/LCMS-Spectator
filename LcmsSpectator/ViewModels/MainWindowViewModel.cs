@@ -172,7 +172,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void OpenIdFile()
         {
-            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
+            const string formatStr = @"TSV Files (*.txt; *.tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
             var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
             if (tsvFileName == "") return;
             var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
@@ -259,7 +259,11 @@ namespace LcmsSpectator.ViewModels
                 {
                     var directory = Directory.GetFiles(directoryName);
                     foreach (var file in directory) // Raw file in same directory as tsv file?
+                    {
+                        var lFile = path.ToLower();
                         if (file == path + ".raw") rawFileName = path + ".raw";
+                        else if (lFile == lFile + ".mzml") rawFileName = lFile + ".mzml";
+                    }
                     if (rawFileName == "")  // Raw file was not in the same directory.
                     {   // prompt user for raw file path
                         /*_dialogService.MessageBox("Please select raw file.");
@@ -387,7 +391,7 @@ namespace LcmsSpectator.ViewModels
                 var dataSetDir = Directory.GetFiles(dataSetDirName);
                 rawFileNames = (from filePath in dataSetDir
                                 let ext = Path.GetExtension(filePath)
-                                where ext == ".raw"
+                                where (ext == ".raw" || ext == ".mzml")
                                 select filePath).ToList();
             }
             if (!String.IsNullOrEmpty(jobDirName))      // did the user actually choose a job?
