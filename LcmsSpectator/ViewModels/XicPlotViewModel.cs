@@ -52,7 +52,7 @@ namespace LcmsSpectator.ViewModels
             Plot = new SelectablePlotModel(xAxis, 1.05);
             _ions = new List<LabeledIonViewModel>();
             _xAxis.AxisChanged += AxisChanged_UpdatePlotTitle;
-            _smoothedXics = new ConcurrentDictionary<string, LabeledXic>();
+            _smoothedXics = new ConcurrentDictionary<string, Tuple<LabeledXic, bool>>();
             _xicCache = new ConcurrentDictionary<string, LabeledXic>();
             MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
             MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
@@ -284,10 +284,11 @@ namespace LcmsSpectator.ViewModels
             var max = _xAxis.ActualMaximum;
             var area = 0.0;
             var xics = _smoothedXics.Values;
-            foreach (var xic in xics)
+            foreach (var val in xics)
             {
-                var xicPoints = xic.Xic;
-                if (xic.Index < 0) continue;
+                var lXic = val.Item1;
+                var xicPoints = lXic.Xic;
+                if (lXic.Index < 0 || !val.Item2) continue;
                 area += (from xicPoint in xicPoints
                          let rt = Lcms.GetElutionTime(xicPoint.ScanNum)
                          where rt >= min && rt <= max
@@ -353,6 +354,9 @@ namespace LcmsSpectator.ViewModels
                     if (lineSeries != null && lineSeries.Title == label)
                     {
                         lineSeries.IsVisible = message.NewValue;
+                        var lXic = _smoothedXics[label].Item1;
+                        var value = new Tuple<LabeledXic, bool>(lXic, message.NewValue);
+                        _smoothedXics.AddOrUpdate(label, value, (key, oldValue) => value);
                         Plot.AdjustForZoom();
                         _taskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea()); });
                     }
@@ -434,7 +438,8 @@ namespace LcmsSpectator.ViewModels
                 if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic);
                 var labeledXic = new LabeledXic(ion.LabeledIon.Composition, ion.LabeledIon.Index, xic,
                                                 ion.LabeledIon.IonType, ion.LabeledIon.IsFragmentIon);
-                _smoothedXics.AddOrUpdate(ion.LabeledIon.Label, labeledXic, (key, oldValue) => labeledXic);   
+                var value = new Tuple<LabeledXic, bool>(labeledXic, ion.Selected);
+                _smoothedXics.AddOrUpdate(ion.LabeledIon.Label, value, (key, oldValue) => value);   
                 var color = colors.GetColor(lxic);
                 var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
                 var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
@@ -538,7 +543,7 @@ namespace LcmsSpectator.ViewModels
         private List<LabeledIonViewModel> _ions;
         private int _pointsToSmooth;
 
-        private readonly ConcurrentDictionary<string, LabeledXic> _smoothedXics;
+        private readonly ConcurrentDictionary<string, Tuple<LabeledXic, bool>> _smoothedXics;
         private readonly ConcurrentDictionary<string, LabeledXic> _xicCache;
         private SelectablePlotModel _plot;
         private double _area;
