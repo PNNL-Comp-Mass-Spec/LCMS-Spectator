@@ -54,7 +54,7 @@ namespace LcmsSpectator.ViewModels
 
         public void UpdateSpectra(int scan, bool fullUpdate=true)
         {
-            if (scan == 0)
+            if (scan == 0 || _lcms == null)
             {
                 PrimarySpectrumViewModel.Clear();
                 Secondary2ViewModel.Clear();

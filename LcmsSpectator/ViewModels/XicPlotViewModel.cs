@@ -280,6 +280,7 @@ namespace LcmsSpectator.ViewModels
         /// <returns></returns>
         public double GetCurrentArea()
         {
+            if (Lcms == null) return 0.0;
             var min = _xAxis.ActualMinimum;
             var max = _xAxis.ActualMaximum;
             var area = 0.0;
@@ -301,7 +302,7 @@ namespace LcmsSpectator.ViewModels
         #region Event Handlers
         private void SelectedScanChanged(PropertyChangedMessage<int> message)
         {
-            if (message.PropertyName == "Scan" && message.Sender is PrSmViewModel)
+            if (message.PropertyName == "Scan" && message.Sender is PrSmViewModel && Lcms != null)
             {
                 var rt = Lcms.GetElutionTime(message.NewValue);
                 _selectedRt = rt;
@@ -424,7 +425,7 @@ namespace LcmsSpectator.ViewModels
                 TitleFontSize = 14,
                 TitlePadding = 0,
             };
-            if (Ions == null || Ions.Count == 0) return plot;
+            if (Ions == null || Lcms == null || Ions.Count == 0) return plot;
             var seriesstore = Ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, List<XicDataPoint>>>(ion => ion.LabeledIon.Label, ion => null);
             var smoother = (PointsToSmooth == 0 || PointsToSmooth == 1) ?
                 null : new SavitzkyGolaySmoother(PointsToSmooth, 2);

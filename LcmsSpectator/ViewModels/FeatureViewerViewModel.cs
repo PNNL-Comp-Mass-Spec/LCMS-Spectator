@@ -298,7 +298,11 @@ namespace LcmsSpectator.ViewModels
                 var featureMs2Scans = ms2ScansMin.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)
                                       .Union(ms2ScansMax.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)).ToList();
                 feature.AssociatedMs2.AddRange(featureMs2Scans);
-                foreach (var scan in featureMs2Scans) TryInsert(scanHash, scan, feature.MinPoint.Mass);
+                foreach (var scan in featureMs2Scans)
+                {
+                    if (!_ids.ContainsKey(scan)) _ids.Add(scan, new PrSm{Scan = scan, Lcms = _lcms});
+                    TryInsert(scanHash, scan, feature.MinPoint.Mass);
+                }
             }
             foreach (var id in _ids.Values)
             {
@@ -510,31 +514,17 @@ namespace LcmsSpectator.ViewModels
                 if (showFoundMs2)
                 {
                     // Add ms2s associated with features
-                    var prsms = new List<PrSm>();
-                    // unidentified ms2s
-                    var unidentifiedms2Series = new ScatterSeries
-                    {
-                        Title = "Ms2 Scan",
-                        MarkerType = MarkerType.Cross,
-                        ColorAxisKey = ms2ColorAxis.Key,
-                        TrackerFormatString =
-                            "{0}" + Environment.NewLine +
-                            "{1}: {2:0.###}" + Environment.NewLine +
-                            "{2}: {4:0.##E0}"
-                    };
-                    foreach (var scan in feature.AssociatedMs2)
-                    {
-                        if (!_ids.ContainsKey(scan))
-                            unidentifiedms2Series.Points.Add(new ScatterPoint(_lcms.GetElutionTime(scan), 
-                                                                              feature1.MinPoint.Mass, Math.Max(size * 0.8, 3.0),
-                                                                              unidColorScore));
-                        else prsms.Add(_ids[scan]);
-                    }
+                    var prsms = feature.AssociatedMs2.Select(scan => _ids[scan]);
                     // identified ms2s
-                    var identifiedms2Series = new ScatterSeries
+                    var ms2Series = new ScatterSeries
                     {
                         ItemsSource = prsms,
-                        Mapping = p => new ScatterPoint(((PrSm)p).RetentionTime, feature1.MinPoint.Mass, Math.Max(size*0.8, 3.0), idColorScore), 
+                        Mapping = p =>
+                        {
+                            var prsm = (PrSm) p;
+                            var colorScore = (prsm.Sequence.Count > 0) ? idColorScore : unidColorScore;
+                            return new ScatterPoint(prsm.RetentionTime, feature1.MinPoint.Mass, Math.Max(size*0.8, 3.0), colorScore);
+                        },
                         Title = "Ms2 Scan",
                         MarkerType = MarkerType.Cross,
                         ColorAxisKey = ms2ColorAxis.Key,
@@ -543,13 +533,12 @@ namespace LcmsSpectator.ViewModels
                             "{1}: {2:0.###}" + Environment.NewLine +
                             "{2}: {4:0.##E0}"
                     };
-                    ms2SeriesCollection.Add(identifiedms2Series);
-                    ms2SeriesCollection.Add(unidentifiedms2Series);
+                    ms2SeriesCollection.Add(ms2Series);
                 }
                 // Add feature
                 var colorIndex = 1 + (int)((feature1.MinPoint.Score - minScore) / (1.0 - minScore) * colors.Count);
                 if (colorIndex < 1) colorIndex = 1;
-                if (colorIndex > colors.Count) colorIndex = colors.Count - 1;
+                if (colorIndex >= colors.Count) colorIndex = colors.Count - 1;
                 var c = colors[colorIndex];
                 var ls = new LineSeries
                 {
@@ -633,7 +622,6 @@ namespace LcmsSpectator.ViewModels
                     Y = mass,
                     Fill = OxyColor.FromArgb(100, 255, 255, 0),
                     Stroke = OxyColors.Green,
-                    //Fill = OxyColors.Transparent,
 
                 };
                 FeatureMap.Annotations.Add(_circleHighlight);
@@ -659,7 +647,7 @@ namespace LcmsSpectator.ViewModels
             //var theoIsotopeProfile = Averagine.GetTheoreticalIsotopeProfile(_selectedFeaturePoint.Mass, _selectedFeaturePoint.Charge);
             var envelope = Averagine.GetIsotopomerEnvelope(_selectedFeaturePoint.Mass);
             var peakMap = new Dictionary<int, Peak>();
-            const double relativeIntensityThreshold = 0.1;
+            //const double relativeIntensityThreshold = 0.1;
 
             for (var isotopeIndex = 0; isotopeIndex < envelope.Envolope.Length; isotopeIndex++)
             {
@@ -739,25 +727,25 @@ namespace LcmsSpectator.ViewModels
             return topNPoints;
         }
 
-        private bool ContainsPoint(Dictionary<int, List<double>> points, int scan, double mass,
-            double massTolerance = 0.01)
-        {
-            bool success = false;
-            List<double> masses;
-            if (points.TryGetValue(scan, out masses))
-            {
-                var index = masses.BinarySearch(mass);
-                if (index < 0) index *= -1;
-                var lowIndex = Math.Min(Math.Max(0, index - 1), masses.Count - 1);
-                var hiIndex = Math.Min(index + 1, masses.Count - 1);
-                if ((Math.Abs(mass - masses[hiIndex]) <= massTolerance &&
-                     Math.Abs(mass - masses[lowIndex]) <= massTolerance))
-                {
-                    success = true;
-                }
-            }
-            return success;
-        }
+        //private bool ContainsPoint(Dictionary<int, List<double>> points, int scan, double mass,
+        //    double massTolerance = 0.01)
+        //{
+        //    bool success = false;
+        //    List<double> masses;
+        //    if (points.TryGetValue(scan, out masses))
+        //    {
+        //        var index = masses.BinarySearch(mass);
+        //        if (index < 0) index *= -1;
+        //        var lowIndex = Math.Min(Math.Max(0, index - 1), masses.Count - 1);
+        //        var hiIndex = Math.Min(index + 1, masses.Count - 1);
+        //        if ((Math.Abs(mass - masses[hiIndex]) <= massTolerance &&
+        //             Math.Abs(mass - masses[lowIndex]) <= massTolerance))
+        //        {
+        //            success = true;
+        //        }
+        //    }
+        //    return success;
+        //}
 
         private bool TryInsert(Dictionary<int, List<double>> points, int scan, double mass, double massTolerance=0.001)
         {

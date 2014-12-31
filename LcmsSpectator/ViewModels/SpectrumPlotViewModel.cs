@@ -256,7 +256,7 @@ namespace LcmsSpectator.ViewModels
 
         private Tuple<IEnumerable<Series>, IEnumerable<Annotation>>  CreateIonSeries(bool useCache=true)
         {
-            if (_ions == null) return new Tuple<IEnumerable<Series>, IEnumerable<Annotation>>(new List<Series>(), new List<Annotation>());
+            if (_ions == null || _spectrum == null) return new Tuple<IEnumerable<Series>, IEnumerable<Annotation>>(new List<Series>(), new List<Annotation>());
             if (!useCache) _ionCache.Clear();
             // add new ion series
             var seriesstore = new Dictionary<string, Tuple<IEnumerable<PeakDataPoint>, Series, Annotation>>();

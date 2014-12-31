@@ -93,7 +93,7 @@ namespace LcmsSpectator.ViewModels
 
         private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
         {
-            if (message.NewValue == null) return;
+            if (message.NewValue == null || Lcms == null) return;
             var prsm = message.NewValue;
             // calculate rt bounds
             var rt = Lcms.GetElutionTime(prsm.Scan);

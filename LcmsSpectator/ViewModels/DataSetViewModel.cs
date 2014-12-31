@@ -26,6 +26,7 @@ namespace LcmsSpectator.ViewModels
         public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
         public IonListViewModel IonListViewModel { get; private set; }
         public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
+        public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
         #endregion
 
         #region Commands
@@ -46,7 +47,12 @@ namespace LcmsSpectator.ViewModels
             ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService1), new List<PrSm>(), messenger);
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService, messenger);
             IonListViewModel = new IonListViewModel(_dialogService, taskService1, messenger);
-            CreateSequenceViewModel = new CreateSequenceViewModel(new ObservableCollection<DataSetViewModel>(), _dialogService, messenger);
+            CreateSequenceViewModel = new CreateSequenceViewModel(new ObservableCollection<DataSetViewModel>(),
+                _dialogService, messenger)
+            {
+                SelectedDataSetViewModel = this
+            };
+            LoadingScreenViewModel = new LoadingScreenViewModel(TaskServiceFactory.GetTaskServiceLike(taskService));
 
             _showFeatureMapSplash = true;
 
@@ -84,7 +90,8 @@ namespace LcmsSpectator.ViewModels
             get { return _rawFilePath; }
             set
             {
-                IsLoading = true;
+                //IsLoading = true;
+                LoadingScreenViewModel.IsLoading = true;
                 _rawFilePath = value;
                 RawFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(RawFilePath));
                 var extension = Path.GetExtension(value);
@@ -102,9 +109,11 @@ namespace LcmsSpectator.ViewModels
                 XicViewModel.Lcms = Lcms;
                 SpectrumViewModel.Lcms = Lcms;
                 ScanViewModel.AddIds(prsmScans);
+                SelectedPrSm.Lcms = Lcms;
                 // set bounds for shared x axis
                 //var maxRt = Math.Max(Lcms.GetElutionTime(Lcms.MaxLcScan), 1.0);
-                IsLoading = false;
+                LoadingScreenViewModel.IsLoading = false;
+                //IsLoading = false;
                 RaisePropertyChanged();
             }
         }

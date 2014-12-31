@@ -46,7 +46,7 @@ namespace LcmsSpectator.ViewModels
                 PrSm newPrSm = value ?? new PrSm();
                 MessengerInstance.Send(new ClearAllNotification(this));
                 var oldValue = PrSm;
-                Lcms = newPrSm.Lcms;
+                //Lcms = newPrSm.Lcms;
                 RawFileName = newPrSm.RawFileName;
                 Heavy = newPrSm.Heavy;
                 Score = newPrSm.Score;

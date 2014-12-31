@@ -212,7 +212,7 @@ namespace LcmsSpectator.ViewModels
         {
             _precursorTaskService.Enqueue(() =>
             {
-                var heavySequence = IonUtils.GetHeavySequence(_currentSequence, IcParameters.Instance.LightModifications);
+                var heavySequence = IonUtils.GetHeavySequence(_currentSequence, IcParameters.Instance.HeavyModifications);
                 HeavyPrecursorLabels = (_precursorViewMode == PrecursorViewMode.Charges)
                     ? GenerateChargePrecursorLabels(heavySequence)
                     : GenerateIsotopePrecursorLabels(heavySequence);

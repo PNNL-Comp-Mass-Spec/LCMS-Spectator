@@ -83,28 +83,9 @@
                                                     </HierarchicalDataTemplate>
                                                 </controls:MvvmTreeView.Resources>
                                             </controls:MvvmTreeView>
-                                            <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" 
-                                            VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
-                                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="50*"/>
-                                                        <RowDefinition Height="50*"/>
-                                                    </Grid.RowDefinitions>
-                                                    <TextBlock Margin="0"
-                                                        TextWrapping="Wrap"
-                                                        VerticalAlignment="Bottom"
-                                                        Grid.Row="0"
-                                                        TextAlignment="Center"
-                                                        FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
-                                                Loading<LineBreak />Please Wait...
-                                                    </TextBlock >
-                                                </Grid>
-                                            </Border>
+                                            <views1:LoadingScreen DataContext="{Binding LoadingScreenViewModel}" />
                                         </Grid>
                                     </xcad:LayoutAnchorable>
-                                    <!--<xcad:LayoutAnchorable Title="TargetView">
-                                        <views1:CreateSequenceView DataContext="{Binding CreateSequenceViewModel}" x:Name="CreateSequence"/>
-                                    </xcad:LayoutAnchorable> -->
                                 </xcad:LayoutAnchorablePane>
                             </xcad:LayoutAnchorablePaneGroup>
                     </xcad:LayoutPanel>

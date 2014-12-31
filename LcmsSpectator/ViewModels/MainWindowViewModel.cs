@@ -34,7 +34,8 @@ namespace LcmsSpectator.ViewModels
         // Child view models
         public ScanViewModel ScanViewModel { get; private set; }
         public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
-        public ObservableCollection<DataSetViewModel> DataSets { get; private set; } 
+        public ObservableCollection<DataSetViewModel> DataSets { get; private set; }
+        public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
 
         /// <summary>
         /// Constructor for creating a new, empty MainWindowViewModel
@@ -51,6 +52,7 @@ namespace LcmsSpectator.ViewModels
             ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService), new List<PrSm>(), Messenger.Default);
             DataSets = new ObservableCollection<DataSetViewModel>();
             CreateSequenceViewModel = new CreateSequenceViewModel(DataSets, _dialogService, Messenger.Default);
+            LoadingScreenViewModel = new LoadingScreenViewModel(TaskServiceFactory.GetTaskServiceLike(_taskService));
 
             OpenDataSetCommand = new RelayCommand(OpenDataSet);
             OpenRawFileCommand = new RelayCommand(OpenRawFile);
@@ -61,7 +63,6 @@ namespace LcmsSpectator.ViewModels
             OpenAboutBoxCommand = new RelayCommand(OpenAboutBox);
 
             ShowSplash = true;
-            IsLoading = false;
             FileOpen = false;
         }
 
@@ -99,19 +100,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// A file is currently being loaded
-        /// </summary>
-        public bool IsLoading
-        {
-            get { return _isLoading; }
-            set
-            {
-                _isLoading = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        /// <summary>
         /// Tracks whether or not a file is currently open
         /// </summary>
         public bool FileOpen
@@ -143,7 +131,7 @@ namespace LcmsSpectator.ViewModels
                         if (!String.IsNullOrEmpty(openDataVm.FeatureFilePath))
                             dsVm.OpenFeatureFile(openDataVm.FeatureFilePath);
                     }
-                });
+                }, true);
             }
         }
 
@@ -306,7 +294,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="dsVm">Data Set View model to associate with id file.</param>
         public void ReadIdFile(string idFileName, string rawFileName, DataSetViewModel dsVm)
         {
-            IsLoading = true;
+            LoadingScreenViewModel.IsLoading = true;
             var ids = new IdentificationTree();
             bool attemptToReadFile = true;
             var modIgnoreList = new List<string>();
@@ -323,7 +311,7 @@ namespace LcmsSpectator.ViewModels
                 {
                     _dialogService.ExceptionAlert(e);
                     FileOpen = false;
-                    IsLoading = false;
+                    LoadingScreenViewModel.IsLoading = false;
                     return;
                 }
                 catch (InvalidModificationNameException e)
@@ -357,7 +345,7 @@ namespace LcmsSpectator.ViewModels
             ScanViewModel.AddIds(data);
             ScanViewModel.HideUnidentifiedScans = true;
             FileOpen = true;
-            IsLoading = false;
+            LoadingScreenViewModel.IsLoading = false;
         }
 
         /// <summary>
@@ -405,7 +393,7 @@ namespace LcmsSpectator.ViewModels
             if (rawFileNames == null || rawFileNames.Count == 0)
             {   // no data set chosen or no raw files found for data set
                 _dialogService.MessageBox("No raw files found for that data set.");
-                IsLoading = false;
+                LoadingScreenViewModel.IsLoading = false;
                 return null;
             }
             ShowSplash = false;
@@ -462,7 +450,6 @@ namespace LcmsSpectator.ViewModels
         private readonly IMainDialogService _dialogService;
         private readonly ITaskService _taskService;
 
-        private bool _isLoading;
         private bool _fileOpen;
         private bool _showSplash;
     }
