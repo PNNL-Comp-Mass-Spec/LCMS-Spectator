@@ -25,6 +25,7 @@ namespace LcmsSpectator.ViewModels
             PrimarySpectrumViewModel = new SpectrumPlotViewModel(dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), messenger, 1.05, false);
             Secondary1ViewModel = new SpectrumPlotViewModel(dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), messenger, 1.1, true);
             Secondary2ViewModel = new SpectrumPlotViewModel(dialogService, taskService, messenger, 1.1, true);
+            _selectedScan = 0;
             _selectedPrecursorMz = 0;
             MessengerInstance.Register<PropertyChangedMessage<double>>(this, SelectedPrecursorMzChanged);
             MessengerInstance.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);
@@ -218,19 +219,22 @@ namespace LcmsSpectator.ViewModels
         private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
         {
             if (message.PropertyName != "PrSm" || !(message.Sender is PrSmViewModel)) return;
+            _selectedScan = message.NewValue.Scan;
             UpdateSpectra(message.NewValue.Scan, false);
         }
 
         private void SelectedScanChanged(XicPlotViewModel.SelectedScanChangedMessage message)
         {
+            _selectedScan = message.Scan;
             UpdateSpectra(message.Scan);
         }
 
         private void SettingsChanged(SettingsChangedNotification notification)
         {
-            PrimarySpectrumViewModel.SpectrumUpdate();
-            Secondary1ViewModel.SpectrumUpdate();
-            Secondary2ViewModel.SpectrumUpdate();
+            UpdateSpectra(_selectedScan);
+            //PrimarySpectrumViewModel.SpectrumUpdate();
+            //Secondary1ViewModel.SpectrumUpdate();
+            //Secondary2ViewModel.SpectrumUpdate();
         }
 
         private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, ILcMsRun lcms)
@@ -290,6 +294,7 @@ namespace LcmsSpectator.ViewModels
             return nextMs2;
         }
 
+        private int _selectedScan;
         private double _selectedPrecursorMz;
     }
 }
