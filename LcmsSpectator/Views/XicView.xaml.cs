@@ -36,7 +36,6 @@ namespace LcmsSpectator.Views
                 PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
                 if (ShowHeavy.IsChecked == true)
                 {
-                    HeavyFragmentIonXic.Visibility = Visibility.Visible;
                     FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
                 }
             }
@@ -44,8 +43,6 @@ namespace LcmsSpectator.Views
             {
                 FragmentPlotRow.Height = new GridLength(0, GridUnitType.Pixel);
                 FragmentTitleRow.Height = new GridLength(0, GridUnitType.Pixel);
-                FragmentIonXic.Visibility = Visibility.Collapsed;
-                HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
                 PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
                 FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
             }
@@ -60,7 +57,6 @@ namespace LcmsSpectator.Views
         {
             FragmentPlotRow.Height = new GridLength(60, GridUnitType.Star);
             FragmentTitleRow.Height = new GridLength(4, GridUnitType.Star);
-            FragmentIonXic.Visibility = Visibility.Visible;
             FragmentIonXic.UpdateLayout();
             PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
             if (ShowHeavy.IsChecked == true)
@@ -75,8 +71,6 @@ namespace LcmsSpectator.Views
         {
             FragmentPlotRow.Height = new GridLength(0, GridUnitType.Pixel);
             FragmentTitleRow.Height = new GridLength(0, GridUnitType.Pixel);
-            FragmentIonXic.Visibility = Visibility.Collapsed;
-            HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
             PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
             FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
         }
@@ -88,7 +82,6 @@ namespace LcmsSpectator.Views
             HeavyPrecursorIonXic.UpdateLayout();
             if (ShowFragment.IsChecked == true)
             {
-                HeavyFragmentIonXic.Visibility = Visibility.Visible;
                 HeavyFragmentIonXic.UpdateLayout();
                 FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
             }
