@@ -10,23 +10,6 @@ namespace LcmsSpectatorModels.Models
 {
     public class PrSm: IComparable<PrSm>
     {
-        public String RawFileName { get; set; }
-        public ILcMsRun Lcms { get; set; }
-        public int Scan { get; set; }
-        public int Charge { get; set; }
-        public string SequenceText { get; set; }
-        public Sequence Sequence { get; set; }
-        public string ProteinName { get; set; }
-        public string ProteinDesc { get; set; }
-        public double Score { get; set; }
-        public bool UseGolfScoring { get; set; } // lower the score the better
-        public double QValue { get; set; }
-        public bool Heavy { get; set; }
-
-        public double RetentionTime { get { return (Lcms == null) ? 0.0 : Lcms.GetElutionTime(Scan); } }
-        public Spectrum Ms2Spectrum { get { return (Lcms == null) ? null : Lcms.GetSpectrum(Scan); } }
-        public string ProteinNameDesc { get { return String.Format("{0} {1}", ProteinName, ProteinDesc); } }
-        
         public PrSm()
         {
             RawFileName = "";
@@ -38,12 +21,39 @@ namespace LcmsSpectatorModels.Models
             Heavy = false;
         }
 
-        public string ScanText
-        {
-            get { return String.Format("{0} ({1})", Scan, RawFileName); }
-        }
+        #region Public Properties
+        /// <summary>
+        /// Name of the raw file or data set that this is associated with.
+        /// </summary>
+        public String RawFileName { get; set; }
+        
+        /// <summary>
+        /// Raw file or data set that this is associated with.
+        /// </summary>
+        public ILcMsRun Lcms { get; set; }
+        
+        /// <summary>
+        /// Ms2 Scan number of identification.
+        /// </summary>
+        public int Scan { get; set; }
 
-        public Spectrum PreviousMs1 
+        /// <summary>
+        /// Retention time of identification.
+        /// Requires both Lcms and Scan to be set.
+        /// </summary>
+        public double RetentionTime { get { return (Lcms == null) ? 0.0 : Lcms.GetElutionTime(Scan); } }
+
+        /// <summary>
+        /// Ms2 Spectrum associated with Scan.
+        /// Requires both Lcms and Scan to be set.
+        /// </summary>
+        public Spectrum Ms2Spectrum { get { return (Lcms == null) ? null : Lcms.GetSpectrum(Scan); } }
+
+        /// <summary>
+        /// Spectrum for previous ms1 scan before Scan.
+        /// Requires both Lcms and Scan to be set.
+        /// </summary>
+        public Spectrum PreviousMs1
         {
             get
             {
@@ -53,6 +63,10 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
+        /// <summary>
+        /// Spectrum for next ms1 scan after Scan.
+        /// Requires both Lcms and Scan to be set.
+        /// </summary>
         public Spectrum NextMs1
         {
             get
@@ -63,15 +77,86 @@ namespace LcmsSpectatorModels.Models
             }
         }
 
-        public double Mass
+        /// <summary>
+        /// Scan and data set label for identification.
+        /// </summary>
+        public string ScanText
         {
-            get
+            get { return String.Format("{0} ({1})", Scan, RawFileName); }
+        }
+
+        /// <summary>
+        /// Charge state of identification.
+        /// </summary>
+        public int Charge { get; set; }
+
+        /// <summary>
+        /// String representing the sequence of the identification.
+        /// </summary>
+        public string SequenceText { get; set; }
+
+        /// <summary>
+        /// Name of identified protein.
+        /// </summary>
+        public string ProteinName { get; set; }
+
+        /// <summary>
+        /// Description of identified protein.
+        /// </summary>
+        public string ProteinDesc { get; set; }
+
+        /// <summary>
+        /// Conjoined protein name and description.
+        /// </summary>
+        public string ProteinNameDesc { get { return String.Format("{0} {1}", ProteinName, ProteinDesc); } }
+
+        /// <summary>
+        /// Identification score.
+        /// </summary>
+        public double Score { get; set; }
+        
+        /// <summary>
+        /// Are higher scores better or lower scores better?
+        /// True = lower score is better
+        /// False = higher score is better
+        /// Default is False.
+        /// </summary>
+        public bool UseGolfScoring { get; set; }
+
+        /// <summary>
+        /// QValue of identification.
+        /// </summary>
+        public double QValue { get; set; }
+        
+        /// <summary>
+        /// Is this identification sequence have a heavy label?
+        /// Default is False.
+        /// </summary>
+        public bool Heavy { get; set; }
+
+        /// <summary>
+        /// Actual sequence of identification.
+        /// </summary>
+        public Sequence Sequence
+        {
+            get { return _sequence; }
+            set
             {
+                _sequence = value;
                 var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
-                return Math.Round(composition.Mass, 2);
+                Mass = Math.Round(composition.Mass, 2);
             }
         }
 
+        /// <summary>
+        /// Monoisotopic mass of identification.
+        /// This is updated when Sequence changes.
+        /// </summary>
+        public double Mass { get; set; }
+
+        /// <summary>
+        /// M/Z of most abundant isotope of identification.
+        /// </summary>
         public double PrecursorMz
         {
             get
@@ -82,14 +167,25 @@ namespace LcmsSpectatorModels.Models
                 return Math.Round(ion.GetMostAbundantIsotopeMz(), 2);
             }
         }
+        #endregion
 
+        /// <summary>
+        /// Compares this to another PrSm object by Score.
+        /// </summary>
+        /// <param name="other">PrSm object to compare to.</param>
+        /// <returns>Integer indicating if this is greater than the PrSm object.</returns>
         public int CompareTo(PrSm other)
         {
             var comp = UseGolfScoring ? other.Score.CompareTo(Score) : Score.CompareTo(other.Score);
             return comp;
         }
+
+        private Sequence _sequence;
     }
 
+    /// <summary>
+    /// Compares two PrSm objects by Score.
+    /// </summary>
     public class PrSmScoreComparer : IComparer<PrSm>
     {
         public int Compare(PrSm x, PrSm y)
