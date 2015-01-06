@@ -36,6 +36,7 @@ namespace LcmsSpectator.ViewModels
             };
             IsotopicEnvelope.GenerateYAxis("Relative Intensity", "");
             IsotopicEnvelopeCorrelation = 0.0;
+            _isotopicEnvelopeExpanded = false;
             _isLoading = false;
             FeatureMap.MouseDown += FeatureMap_MouseDown;
             _pointsDisplayed = 2000;
@@ -71,6 +72,19 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _isotopicEnvelope = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Whether or not the expander control for the isotopic envelope plot should be expanded or not.
+        /// </summary>
+        public bool IsotopicEnvelopeExpanded
+        {
+            get { return _isotopicEnvelopeExpanded; }
+            set
+            {
+                _isotopicEnvelopeExpanded = value;
                 RaisePropertyChanged();
             }
         }
@@ -410,7 +424,29 @@ namespace LcmsSpectator.ViewModels
             {
                 var result = series.GetNearestPoint(args.Position, false);
                 if (result == null) return;
-                _selectedFeaturePoint = result.Item as FeaturePoint;
+                var featurePoint = result.Item as FeaturePoint;
+                if (featurePoint != null)
+                {
+                    // See if there is a ms2 point closer than this feature point
+                    var ms2Scans = _lcms.GetFragmentationSpectraScanNums(featurePoint.Mz);
+                    var minDist = result.Position.DistanceToSquared(args.Position);
+                    PrSm closestPrSm = null;
+                    foreach (var scan in ms2Scans)
+                    {
+                        if (!_ids.ContainsKey(scan)) continue;
+                        var prsm = _ids[scan];
+                        var mass = (prsm.Mass.Equals(0.0)) ? featurePoint.Mass : prsm.Mass; 
+                        var sp = _xAxis.Transform(prsm.RetentionTime, prsm.Mass, _yAxis);
+                        var distSq = sp.DistanceToSquared(args.Position);
+                        if (distSq < minDist)
+                        {
+                            closestPrSm = prsm;
+                            minDist = distSq;
+                        }
+                    }
+                    if (closestPrSm != null) _selectedPrSmPoint = closestPrSm;
+                    else _selectedFeaturePoint = featurePoint;
+                }
             }
             else if (series is ScatterSeries)
             {
@@ -510,20 +546,31 @@ namespace LcmsSpectator.ViewModels
             {
                 var feature1 = feature;
                 var size = Math.Min(feature.MinPoint.Abundance / (2*medianAbundance), 7.0);
-                var ms2SeriesCollection = new List<ScatterSeries>();
                 if (showFoundMs2)
                 {
                     // Add ms2s associated with features
                     var prsms = feature.AssociatedMs2.Select(scan => _ids[scan]);
                     // identified ms2s
+                    Feature feature2 = feature;
                     var ms2Series = new ScatterSeries
                     {
                         ItemsSource = prsms,
                         Mapping = p =>
                         {
                             var prsm = (PrSm) p;
-                            var colorScore = (prsm.Sequence.Count > 0) ? idColorScore : unidColorScore;
-                            return new ScatterPoint(prsm.RetentionTime, feature1.MinPoint.Mass, Math.Max(size*0.8, 3.0), colorScore);
+                            int colorScore;
+                            double mass;
+                            if (prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature2.MinPoint.Mass) < 0.01)
+                            {
+                                colorScore = idColorScore;
+                                mass = prsm.Mass;
+                            }
+                            else
+                            {
+                                colorScore = unidColorScore;
+                                mass = feature2.MinPoint.Mass;
+                            }
+                            return new ScatterPoint(prsm.RetentionTime, mass, Math.Max(size*0.8, 3.0), colorScore);
                         },
                         Title = "Ms2 Scan",
                         MarkerType = MarkerType.Cross,
@@ -531,9 +578,9 @@ namespace LcmsSpectator.ViewModels
                         TrackerFormatString =
                             "{0}" + Environment.NewLine +
                             "{1}: {2:0.###}" + Environment.NewLine +
-                            "{2}: {4:0.##E0}"
+                            "{2}: {4:0.##E0}",
                     };
-                    ms2SeriesCollection.Add(ms2Series);
+                    FeatureMap.Series.Add(ms2Series);
                 }
                 // Add feature
                 var colorIndex = 1 + (int)((feature1.MinPoint.Score - minScore) / (1.0 - minScore) * colors.Count);
@@ -558,7 +605,6 @@ namespace LcmsSpectator.ViewModels
                         "Score: {Score:0.###}"
                 };
                 FeatureMap.Series.Add(ls);
-                foreach (var series in ms2SeriesCollection) FeatureMap.Series.Add(series);
             }
             // Add identified Ms2s with no associated features
             if (showNotFoundMs2)
@@ -704,6 +750,7 @@ namespace LcmsSpectator.ViewModels
             IsotopicEnvelopeCorrelation = _selectedFeaturePoint.Score;
                 /*FitScoreCalculator.GetPearsonCorrelation(theoIsotopeProfile.Select(p => p.Intensity).ToArray(),
                     isotopes.Select(p => p.Ratio).ToArray()); */
+            IsotopicEnvelopeExpanded = true;
             IsotopicEnvelope.InvalidatePlot(true);
             IsLoading = false;
         }
@@ -804,6 +851,7 @@ namespace LcmsSpectator.ViewModels
         private bool _showFoundMs2;
         private bool _showNotFoundMs2;
         private PrSm _selectedPrSm;
+        private bool _isotopicEnvelopeExpanded;
         #endregion
     }
 }
