@@ -1001,14 +1001,16 @@
             Encoded sequence with modification data
             </summary>
         </member>
-        <member name="P:MTDBFramework.Data.Evidence.SpectralProbability">
-            <summary>
-            Spectral Probability
-            </summary>
-        </member>
         <member name="P:MTDBFramework.Data.Evidence.NetShift">
             <summary>
             NET amount evidence was shifted by from LCMS Warp
+            </summary>
+        </member>
+        <member name="P:MTDBFramework.Data.Evidence.DiscriminantValue">
+            <summary>
+            Discriminant score used in conjunction with spectral probability
+            for filtering evidences. QValue for MSGF+ and mzId files, LogPeptide
+            EValue for Xtandem, xCorr for Sequest, EValue for MSAlign
             </summary>
         </member>
         <member name="P:MTDBFramework.Data.Evidence.Proteins">
@@ -2239,6 +2241,18 @@
             <summary>
             Event Handler
             </summary>
+        </member>
+        <member name="T:MTDBFramework.IO.ITextToDbConverter">
+            <summary>
+            Interface for converting text file to a database file
+            </summary>
+        </member>
+        <member name="M:MTDBFramework.IO.ITextToDbConverter.ConvertToDbFormat(System.String)">
+            <summary>
+            Interface for converting temporarily saved .txt files to database
+            at designated path
+            </summary>
+            <param name="path">Location of saved database</param>
         </member>
         <member name="T:MTDBFramework.IO.MsAlignPhrpReader">
             <summary>

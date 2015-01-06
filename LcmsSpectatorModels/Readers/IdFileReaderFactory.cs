@@ -9,8 +9,12 @@ namespace LcmsSpectatorModels.Readers
             IIdFileReader reader = null;
 
             var extension = Path.GetExtension(fileName);
+	        if (extension == ".gz") // "gz" is a compound extension - the original extension precedes it.
+	        {
+		        extension = Path.GetExtension(Path.GetFileNameWithoutExtension(fileName)) + extension;
+	        }
 
-            switch (extension)
+            switch (extension.ToLower())
             {
                 case ".tsv":
                 case ".txt":
@@ -20,8 +24,8 @@ namespace LcmsSpectatorModels.Readers
                     if (line != null && line.Contains("#MatchedFragments")) reader = new IcFileReader(fileName);
                     streamReader.Close();
                     break;
-                case ".gz":
-                case ".mzId":
+				case ".mzid":
+				case ".mzid.gz":
                     reader = new MzIdentMlReader(fileName);
                     break;
 				case ".mtdb":

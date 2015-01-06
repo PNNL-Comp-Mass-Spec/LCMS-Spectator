@@ -1280,6 +1280,20 @@
             Negates the next boolean option.
             </summary>
         </member>
+        <member name="P:FluentNHibernate.Cfg.Db.OracleManagedDataClientConfiguration.Oracle9">
+            <summary>
+            Initializes a new instance of the <see cref="T:FluentNHibernate.Cfg.Db.OracleDataClientConfiguration"/> class using the
+            Oracle Data Provider (Oracle.DataAccess) library specifying the Oracle 9i dialect. 
+            The Oracle.DataAccess library must be available to the calling application/library. 
+            </summary>
+        </member>
+        <member name="P:FluentNHibernate.Cfg.Db.OracleManagedDataClientConfiguration.Oracle10">
+            <summary>
+            Initializes a new instance of the <see cref="T:FluentNHibernate.Cfg.Db.OracleDataClientConfiguration"/> class using the
+            Oracle Data Provider (Oracle.DataAccess) library specifying the Oracle 10g dialect. 
+            The Oracle.DataAccess library must be available to the calling application/library. 
+            </summary>
+        </member>
         <member name="T:FluentNHibernate.CombinedAssemblyTypeSource">
             <summary>
             Provides types for mapping from multiple assemblies
@@ -3843,12 +3857,37 @@
         </member>
         <member name="M:FluentNHibernate.Mapping.CascadeExpression`1.Merge">
             <summary>
-            Cascade deletes
+            Cascade merges
             </summary>
         </member>
         <member name="M:FluentNHibernate.Mapping.CascadeExpression`1.Replicate">
             <summary>
             Cascade on replication
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CascadeExpression`1.Refresh">
+            <summary>
+            Cascade refreshes
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CascadeExpression`1.DeleteOrphans">
+            <summary>
+            Cascade deletes orphans
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CascadeExpression`1.Evict">
+            <summary>
+            Cascade evicts
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CascadeExpression`1.Lock">
+            <summary>
+            Cascade locks
+            </summary>
+        </member>
+        <member name="M:FluentNHibernate.Mapping.CascadeExpression`1.Persist">
+            <summary>
+            Cascade persists
             </summary>
         </member>
         <member name="M:FluentNHibernate.Mapping.CollectionCascadeExpression`1.AllDeleteOrphan">

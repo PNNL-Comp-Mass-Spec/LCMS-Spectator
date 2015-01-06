@@ -20,17 +20,17 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="400" />
         </Grid.ColumnDefinitions>
-        <wpf:Plot Grid.Row="0" Name="FeatureMap" Model="{Binding FeatureMap}" Grid.RowSpan="2" Margin="0,0,10,0">
-            <wpf:Plot.ContextMenu>
+        <wpf:PlotView Grid.Row="0" Name="FeatureMap" Model="{Binding FeatureMap}" Grid.RowSpan="2" Margin="0,0,10,0">
+            <wpf:PlotView.ContextMenu>
                 <ContextMenu>
                     <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundMs2}" Header="Show Found Ms2s"/>
                     <MenuItem IsCheckable="True" IsChecked="{Binding ShowNotFoundMs2}" Header="Show Not Found Ms2s"/>
                 </ContextMenu>
-            </wpf:Plot.ContextMenu>
-            <wpf:Plot.InputBindings>
+            </wpf:PlotView.ContextMenu>
+            <wpf:PlotView.InputBindings>
                 <MouseBinding Command="{Binding FeatureSelectedCommand}" MouseAction="LeftDoubleClick" />
-            </wpf:Plot.InputBindings>
-        </wpf:Plot>
+            </wpf:PlotView.InputBindings>
+        </wpf:PlotView>
         <Grid Grid.Row="0" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -38,7 +38,7 @@
                 <RowDefinition Height="20" />
             </Grid.RowDefinitions>
             <Grid Grid.Row="0" Grid.RowSpan="2">
-                <wpf:Plot Name="TheoreticalIsotopicEnvelope" Model="{Binding IsotopicEnvelope}" Grid.Row="0" />
+                <wpf:PlotView Name="TheoreticalIsotopicEnvelope" Model="{Binding IsotopicEnvelope}" Grid.Row="0" />
                 <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" Grid.RowSpan="6" Grid.ColumnSpan="2"
                 VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
@@ -58,7 +58,7 @@
                 </Border>
             </Grid>
             <!--<Grid Grid.Row="1">
-                <wpf:Plot Name="ActualIsotopicEnvelope" Model="{Binding ActualIsotopicEnvelope}" />
+                <wpf:PlotView Name="ActualIsotopicEnvelope" Model="{Binding ActualIsotopicEnvelope}" />
                 <Border BorderBrush="Black" BorderThickness="1" Background="#80000000" Grid.RowSpan="6" Grid.ColumnSpan="2"
                 VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
