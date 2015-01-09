@@ -11,7 +11,7 @@
             <ColumnDefinition Width="75*" />
             <ColumnDefinition Width="Auto" MaxWidth="450" />
         </Grid.ColumnDefinitions>
-        <wpf:PlotView Name="Ms2Spectrum" DataContext="{Binding PrimarySpectrumViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
+        <wpf:PlotView Name="Ms2Spectrum" DataContext="{Binding PrimarySpectrumViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="0">
             <wpf:PlotView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
@@ -26,7 +26,7 @@
         </wpf:PlotView>
         <Expander Grid.Row="0" Grid.Column="1" ExpandDirection="Right" IsExpanded="True" BorderThickness="0">
             <Expander.Header>
-                <TextBlock Text="Ms1">
+                <TextBlock Text="Secondary Spectra">
                     <TextBlock.LayoutTransform>
                         <RotateTransform Angle="-90" />
                     </TextBlock.LayoutTransform>
