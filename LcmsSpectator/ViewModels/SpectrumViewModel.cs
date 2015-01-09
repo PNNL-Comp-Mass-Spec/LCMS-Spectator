@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -16,9 +17,6 @@ namespace LcmsSpectator.ViewModels
     public class SpectrumViewModel: ViewModelBase
     {
         private ILcMsRun _lcms;
-        public SpectrumPlotViewModel PrimarySpectrumViewModel { get; private set; }
-        public SpectrumPlotViewModel Secondary1ViewModel { get; private set; }
-        public SpectrumPlotViewModel Secondary2ViewModel { get; private set; }
         public SpectrumViewModel(IDialogService dialogService, ITaskService taskService, IMessenger messenger)
         {
             MessengerInstance = messenger;
@@ -33,6 +31,45 @@ namespace LcmsSpectator.ViewModels
             MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
             MessengerInstance.Register<XicPlotViewModel.SelectedScanChangedMessage>(this, SelectedScanChanged);
             Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
+
+            SwapSecondary1Command = new RelayCommand(SwapSecondary1);
+            SwapSecondary2Command = new RelayCommand(SwapSecondary2);
+        }
+
+        public RelayCommand SwapSecondary1Command { get; private set; }
+        public RelayCommand SwapSecondary2Command { get; private set; }
+
+        private SpectrumPlotViewModel _primarySpectrumViewModel ;
+        public SpectrumPlotViewModel PrimarySpectrumViewModel
+        {
+            get { return _primarySpectrumViewModel; }
+            private set
+            {
+                _primarySpectrumViewModel = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private SpectrumPlotViewModel _secondary1ViewModel;
+        public SpectrumPlotViewModel Secondary1ViewModel
+        {
+            get { return _secondary1ViewModel; }
+            private set
+            {
+                _secondary1ViewModel = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private SpectrumPlotViewModel _secondary2ViewModel;
+        public SpectrumPlotViewModel Secondary2ViewModel
+        {
+            get { return _secondary2ViewModel; }
+            private set
+            {
+                _secondary2ViewModel = value;
+                RaisePropertyChanged();
+            }
         }
 
         public void ClearPlots()
@@ -136,6 +173,26 @@ namespace LcmsSpectator.ViewModels
                 xAxis1.Zoom(xAxis2.ActualMinimum, xAxis2.ActualMaximum);
                 isInternalChange = false;
             };
+        }
+
+        public void SwapSecondary1()
+        {
+            var primary = PrimarySpectrumViewModel;
+            var secondary = Secondary1ViewModel;
+            PrimarySpectrumViewModel = null;
+            Secondary1ViewModel = null;
+            PrimarySpectrumViewModel = secondary;
+            Secondary1ViewModel = primary;
+        }
+
+        public void SwapSecondary2()
+        {
+            var primary = PrimarySpectrumViewModel;
+            var secondary = Secondary2ViewModel;
+            PrimarySpectrumViewModel = null;
+            Secondary2ViewModel = null;
+            PrimarySpectrumViewModel = secondary;
+            Secondary2ViewModel = primary;
         }
 
         private void SelectedPrecursorMzChanged(PropertyChangedMessage<double> message)
