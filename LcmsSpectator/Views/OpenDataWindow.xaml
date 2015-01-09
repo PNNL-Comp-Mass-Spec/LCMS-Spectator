@@ -1,36 +1,47 @@
 ﻿<Window x:Class="FeatureMap.Views.OpenDataWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="OpenDataWindow" Height="195" Width="600">
+        Title="Open Data Set" Height="230" Width="600">
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="10" />
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="10" />
-            <ColumnDefinition Width="60"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold"
+        <GroupBox>
+            <GroupBox.Header>
+                <TextBlock FontWeight="Bold">Open Data Set</TextBlock>
+            </GroupBox.Header>
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="60"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold"
                    Height="25" VerticalAlignment="Top">Raw/MzMl File</TextBlock>
-        <TextBox Grid.Row="0" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding RawFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <Button Grid.Row="0" Grid.Column="3" Height="25" VerticalAlignment="Top" Command="{Binding BrowseRawFilesCommand}">Browse</Button>
-        
-        <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold"
+                <TextBox Grid.Row="0" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding RawFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Row="0" Grid.Column="3" Height="25" VerticalAlignment="Top" Command="{Binding BrowseRawFilesCommand}">Browse</Button>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold"
                    Height="25" VerticalAlignment="Top">Feature File</TextBlock>
-        <TextBox Grid.Row="1" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding FeatureFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <Button Grid.Row="1" Grid.Column="3" Height="25" VerticalAlignment="Top" Command="{Binding BrowseFeatureFilesCommand}">Browse</Button>
+                <TextBox Grid.Row="1" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding FeatureFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Row="1" Grid.Column="3" Height="25" VerticalAlignment="Top" Command="{Binding BrowseFeatureFilesCommand}">Browse</Button>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold"
+                <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold"
                    Height="25" VerticalAlignment="Top">ID File</TextBlock>
-        <TextBox Grid.Row="2" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding IdFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-        <Button Grid.Row="2" Grid.Column="3" Height="25" VerticalAlignment="Top" Command="{Binding BrowseIdFilesCommand}">Browse</Button>
+                <TextBox Grid.Row="2" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding IdFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Row="2" Grid.Column="3" Height="25" VerticalAlignment="Top" Command="{Binding BrowseIdFilesCommand}">Browse</Button>
 
+            </Grid>
+        </GroupBox>
         <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Right">
             <Button Width="60" Margin="0,0,10,0" Command="{Binding CancelCommand}">Cancel</Button>
             <Button Width="60" Command="{Binding OkCommand}" IsEnabled="{Binding OpenEnabled, UpdateSourceTrigger=PropertyChanged}">Open</Button>

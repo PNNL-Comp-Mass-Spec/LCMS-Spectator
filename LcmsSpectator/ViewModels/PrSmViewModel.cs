@@ -62,6 +62,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private ILcMsRun _lcms;
         public ILcMsRun Lcms
         {
             get { return _lcms; }
@@ -73,6 +74,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private string _rawFileName;
         public string RawFileName
         {
             get { return _rawFileName; }
@@ -84,6 +86,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private int _scan;
         public int Scan
         {
             get { return _scan; }
@@ -95,6 +98,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private string _proteinNameDesc;
         public string ProteinNameDesc
         {
             get { return _proteinNameDesc; }
@@ -106,6 +110,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private Sequence _sequence;
         public Sequence Sequence
         {
             get { return _sequence; }
@@ -117,6 +122,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private Sequence _lightSequence;
         public Sequence LightSequence
         {
             get { return _lightSequence; }
@@ -128,6 +134,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private Sequence _heavySequence;
         public Sequence HeavySequence
         {
             get { return _heavySequence; }
@@ -139,6 +146,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private string _sequenceText;
         public string SequenceText
         {
             get { return _sequenceText; }
@@ -150,6 +158,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private int _charge;
         public int Charge
         {
             get { return _charge; }
@@ -161,6 +170,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private bool _heavy;
         public bool Heavy
         {
             get { return _heavy; }
@@ -173,6 +183,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private double _qValue;
         public double QValue
         {
             get { return _qValue; }
@@ -184,6 +195,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private double _score;
         public double Score
         {
             get { return _score; }
@@ -195,6 +207,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private double _precursorMz;
         public double PrecursorMz
         {
             get { return _precursorMz; }
@@ -205,22 +218,6 @@ namespace LcmsSpectator.ViewModels
                 RaisePropertyChanged("PrecursorMz", oldValue, _precursorMz, true);
             }
         }
-
-        private Sequence _sequence;
-        private string _sequenceText;
-        private int _charge;
-        private bool _heavy;
-        private int _scan;
-        private ILcMsRun _lcms;
-        private string _rawFileName;
-        private double _qValue;
-        private double _score;
-        private double _precursorMz;
-        private double _noLabelPrecursorMz;
-        private double _heavyPrecursorMz;
-        private string _proteinNameDesc;
-        private Sequence _lightSequence;
-        private Sequence _heavySequence;
 
         #endregion
 
@@ -242,6 +239,9 @@ namespace LcmsSpectator.ViewModels
             LightSequence = IonUtils.GetHeavySequence(Sequence, IcParameters.Instance.LightModifications);
             HeavySequence = IonUtils.GetHeavySequence(Sequence, IcParameters.Instance.HeavyModifications);
         }
+
+        private double _noLabelPrecursorMz;
+        private double _heavyPrecursorMz;
     }
 
     public class ClearAllNotification : NotificationMessage

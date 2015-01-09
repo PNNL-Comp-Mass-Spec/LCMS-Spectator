@@ -1,6 +1,7 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Sequence;
@@ -12,32 +13,15 @@ namespace LcmsSpectator.ViewModels
 {
     public class SettingsViewModel: ViewModelBase
     {
-        public List<ToleranceUnit> ToleranceUnits { get; set; }
-        public double PrecursorIonTolerance { get; set; }
-        public ToleranceUnit PrecursorIonToleranceUnit { get; set; }
-        public double ProductIonTolerance { get; set; }
-        public ToleranceUnit ProductIonToleranceUnit { get; set; }
-        public double QValueThreshold { get; set; }
-        public int ModificationsPerSequence { get; set; }
-        public double IonCorrelationThreshold { get; set; }
-        public int PointsToSmooth { get; set; }
-        public double SpectrumFilterWindowSize { get; set; }
-        public double PrecursorRelativeIntensityThreshold { get; set; }
-        public PrecursorViewMode PrecursorViewMode { get; set; }
-
-        public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; } 
-        public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
-        public RelayCommand AddModificationCommand { get; private set; }
-        public RelayCommand CreateNewModificationCommand { get; private set; }
-
-        public RelayCommand SaveCommand { get; private set; }
-        public RelayCommand CancelCommand { get; private set; }
-
         public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
-
         public event EventHandler ReadyToClose;
 
-        public bool Status { get; private set; }
+        #region Commands
+        public RelayCommand AddModificationCommand { get; private set; }
+        public RelayCommand CreateNewModificationCommand { get; private set; }
+        public RelayCommand SaveCommand { get; private set; }
+        public RelayCommand CancelCommand { get; private set; }
+        #endregion
 
         public SettingsViewModel(IMainDialogService dialogService)
         {
@@ -47,9 +31,7 @@ namespace LcmsSpectator.ViewModels
             PrecursorIonToleranceUnit = IcParameters.Instance.PrecursorTolerancePpm.GetUnit();
             ProductIonTolerance = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
             ProductIonToleranceUnit = IcParameters.Instance.ProductIonTolerancePpm.GetUnit();
-            QValueThreshold = IcParameters.Instance.QValueThreshold;
             IonCorrelationThreshold = IcParameters.Instance.IonCorrelationThreshold;
-            ModificationsPerSequence = IcParameters.Instance.MaxDynamicModificationsPerSequence;
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
             SpectrumFilterWindowSize = IcParameters.Instance.SpectrumFilterWindowSize;
             PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
@@ -79,6 +61,25 @@ namespace LcmsSpectator.ViewModels
             Status = false;
         }
 
+        #region Public properties
+        public List<ToleranceUnit> ToleranceUnits { get; set; }
+        public double PrecursorIonTolerance { get; set; }
+        public ToleranceUnit PrecursorIonToleranceUnit { get; set; }
+        public double ProductIonTolerance { get; set; }
+        public ToleranceUnit ProductIonToleranceUnit { get; set; }
+        public double QValueThreshold { get; set; }
+        public int ModificationsPerSequence { get; set; }
+        public double IonCorrelationThreshold { get; set; }
+        public int PointsToSmooth { get; set; }
+        public double SpectrumFilterWindowSize { get; set; }
+        public double PrecursorRelativeIntensityThreshold { get; set; }
+        public PrecursorViewMode PrecursorViewMode { get; set; }
+        public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; }
+        public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
+        public bool Status { get; private set; }
+        #endregion
+
+        #region Private methods
         private void AddModification()
         {
             var modVm = new ModificationViewModel();
@@ -91,7 +92,7 @@ namespace LcmsSpectator.ViewModels
             var customModVm = new CustomModificationViewModel("", false);
             if (_dialogService.OpenCustomModification(customModVm))
             {
-                var mod = Modification.RegisterAndGetModification(customModVm.ModificationName, customModVm.Composition);
+                Modification.RegisterAndGetModification(customModVm.ModificationName, customModVm.Composition);
             }
         }
 
@@ -105,20 +106,14 @@ namespace LcmsSpectator.ViewModels
 
             IcParameters.Instance.PrecursorTolerancePpm = new Tolerance(PrecursorIonTolerance, PrecursorIonToleranceUnit);
             IcParameters.Instance.ProductIonTolerancePpm = new Tolerance(ProductIonTolerance, ProductIonToleranceUnit);
-            IcParameters.Instance.QValueThreshold = QValueThreshold;
-            IcParameters.Instance.MaxDynamicModificationsPerSequence = ModificationsPerSequence;
             IcParameters.Instance.IonCorrelationThreshold = IonCorrelationThreshold;
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
             IcParameters.Instance.SpectrumFilterWindowSize = SpectrumFilterWindowSize;
             IcParameters.Instance.PrecursorRelativeIntensityThreshold = PrecursorRelativeIntensityThreshold;
             IcParameters.Instance.PrecursorViewMode = PrecursorViewMode;
 
-            var modificationList = new List<SearchModification>();
-            foreach (var searchModificationVm in Modifications)
-            {
-                var searchModification = searchModificationVm.SearchModification;
-                if (searchModification != null) modificationList.Add(searchModification);
-            }
+            var modificationList = Modifications.Select(searchModificationVm => searchModificationVm.SearchModification)
+                                                .Where(searchModification => searchModification != null).ToList();
             IcParameters.Instance.SearchModifications = modificationList;
 
             HeavyModificationsViewModel.Save();
@@ -139,7 +134,10 @@ namespace LcmsSpectator.ViewModels
             var modVm = sender as ModificationViewModel;
             if (modVm != null) Modifications.Remove(modVm);
         }
+        #endregion
 
+        #region Private fields
         private readonly IMainDialogService _dialogService;
+        #endregion
     }
 }

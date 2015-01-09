@@ -9,7 +9,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="65*" />
             <RowDefinition Height="35*" />
-            <RowDefinition Height="25" />
         </Grid.RowDefinitions>
         <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                    IsReadOnly="True" RowHeaderWidth="0" Grid.Row="0"
@@ -35,6 +34,5 @@
                 <DataGridTextColumn Header="Precursor" Width="*" Binding="{Binding LabeledIon.Label}" />
             </DataGrid.Columns>
         </DataGrid>
-        <ComboBox Grid.Row="2" ItemsSource="{Binding PrecursorViewModes}" SelectedItem="{Binding PrecursorViewMode}"/>
     </Grid>
 </UserControl>

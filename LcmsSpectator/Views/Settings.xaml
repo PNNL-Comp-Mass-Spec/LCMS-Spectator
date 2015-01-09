@@ -34,7 +34,7 @@
             <TabItem Header="Data">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="14*" />
+                        <RowDefinition Height="33" />
                         <RowDefinition Height="14*" />
                         <RowDefinition Height="14*" />
                         <RowDefinition Height="14*" />
@@ -47,27 +47,27 @@
                         <ColumnDefinition Width="30*" />
                         <ColumnDefinition Width="10*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold">Precursor Ion Tolerance</TextBlock>
-                    <TextBox Grid.Row="0" Grid.Column="1" TextAlignment="Right" Text="{Binding PrecursorIonTolerance}" Height="25" VerticalAlignment="Top" />
-                    <ComboBox Grid.Row="0" Grid.Column="2" ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding PrecursorIonToleranceUnit}"
+                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold">Precursor Ion Tolerance</TextBlock>
+                    <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Right" Text="{Binding PrecursorIonTolerance}" Height="25" VerticalAlignment="Top" />
+                    <ComboBox Grid.Row="1" Grid.Column="2" ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding PrecursorIonToleranceUnit}"
                               Height="25" VerticalAlignment="Top"/>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold">Product Ion Tolerance</TextBlock>
-                    <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Right" Text="{Binding ProductIonTolerance}" Height="25" VerticalAlignment="Top"  />
-                    <ComboBox Grid.Row="1" Grid.Column="2" ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding ProductIonToleranceUnit}"
+                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold">Product Ion Tolerance</TextBlock>
+                    <TextBox Grid.Row="2" Grid.Column="1" TextAlignment="Right" Text="{Binding ProductIonTolerance}" Height="25" VerticalAlignment="Top"  />
+                    <ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding ProductIonToleranceUnit}"
                               Height="25" VerticalAlignment="Top"/>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold">Ion Correlation Threshold</TextBlock>
-                    <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding IonCorrelationThreshold}" Height="25" VerticalAlignment="Top" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">Ion Correlation Threshold</TextBlock>
+                    <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding IonCorrelationThreshold}" Height="25" VerticalAlignment="Top" />
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" ToolTip="Must be an odd integer of at least 3. 0 = No smoothing.">Default Points To Smooth</TextBlock>
-                    <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PointsToSmooth}" Height="25" VerticalAlignment="Top"
+                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" ToolTip="Must be an odd integer of at least 3. 0 = No smoothing.">Default Points To Smooth</TextBlock>
+                    <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PointsToSmooth}" Height="25" VerticalAlignment="Top"
                              ToolTip="Must be an odd integer of at least 3. 0 = No smoothing."/>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold">Spectrum Filter Window Size</TextBlock>
-                    <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterWindowSize}" Height="25" VerticalAlignment="Top" />
-                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope Relative Intensity Threshold</TextBlock>
-                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Spectrum Filter Window Size</TextBlock>
+                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterWindowSize}" Height="25" VerticalAlignment="Top" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope Relative Intensity Threshold</TextBlock>
+                    <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
                     <!--<TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Precursor View Mode</TextBlock>
                     <ComboBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Height="25" VerticalAlignment="Top" ItemsSource="{Binding PrecursorViewModes}"
                               SelectedItem="{Binding PrecursorViewMode}"/> -->
@@ -76,7 +76,7 @@
             <TabItem Header="Modifications">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="25" />
+                        <RowDefinition Height="20" />
                         <RowDefinition Height="25" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
@@ -87,8 +87,8 @@
                         <ColumnDefinition Width="25*" />
                         <ColumnDefinition Width="25*" />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Row="0" Grid.Column="0" 
-                            Width="25" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold" Command="{Binding AddModificationCommand}">+</Button>
+                    <Button Grid.Row="0" Grid.Column="0"
+                            Width="25" HorizontalAlignment="Left" FontSize="13" FontWeight="Bold" Command="{Binding AddModificationCommand}">+</Button>
                     <!--<Button Grid.Row="0" Grid.Column="4" Command="{Binding CreateNewModificationCommand}"
                             HorizontalAlignment="Right">Create New Modification</Button> -->
                     <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Modification</TextBlock>

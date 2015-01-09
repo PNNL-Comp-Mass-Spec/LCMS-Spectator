@@ -1,8 +1,9 @@
 ﻿<Application x:Class="LcmsSpectator.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:xcpt="http://schemas.xceed.com/wpf/xaml/themes"
              Startup="Application_Startup">
     <Application.Resources>
-         
+        <xcpt:Office2007SilverResourceDictionary LicenseKey="XPT21-T7ADA-HA4EN-UBUA" />
     </Application.Resources>
 </Application>

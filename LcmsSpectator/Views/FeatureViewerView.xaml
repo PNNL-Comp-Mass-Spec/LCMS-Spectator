@@ -6,15 +6,15 @@
              xmlns:wpf="http://oxyplot.org/wpf"
              xmlns:utils="clr-namespace:LcmsSpectator.Utils"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="1100">
+             d:DesignHeight="300" d:DesignWidth="1100" Background="White">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:ScoreToStringConverter x:Key="ScoreFormatter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="50" />
+            <RowDefinition Height="20" />
+            <RowDefinition Height="45" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -23,8 +23,8 @@
         <wpf:PlotView Grid.Column="0" Name="FeatureMap" Model="{Binding FeatureMap}" Margin="0,0,10,0">
             <wpf:PlotView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundMs2}" Header="Show Found Ms2s"/>
-                    <MenuItem IsCheckable="True" IsChecked="{Binding ShowNotFoundMs2}" Header="Show Not Found Ms2s"/>
+                    <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundMs2}" Header="Show ms2s with features"/>
+                    <MenuItem IsCheckable="True" IsChecked="{Binding ShowNotFoundMs2}" Header="Show ids with no features"/>
                 </ContextMenu>
             </wpf:PlotView.ContextMenu>
             <wpf:PlotView.InputBindings>
@@ -45,17 +45,47 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="20" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="20" />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" Grid.RowSpan="2">
-                    <wpf:PlotView Name="TheoreticalIsotopicEnvelope" Model="{Binding IsotopicEnvelope}" Grid.Row="0" Width="400" />
+                    <wpf:PlotView Name="TheoreticalIsotopicEnvelope" Model="{Binding IsotopicEnvelope}" Grid.Row="0" Width="350" />
                 </Grid>
-                <StackPanel Orientation="Horizontal" Grid.Row="2">
-                    <TextBlock Width="110">Correlation:</TextBlock>
-                    <TextBlock Width="70" FontWeight="Bold" Text="{Binding IsotopicEnvelopeCorrelation, Converter={StaticResource ScoreFormatter}}" />
+                <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="10,0,0,0">
+                    <TextBlock Width="110" FontWeight="Bold">Correlation:</TextBlock>
+                    <TextBlock Width="70" Text="{Binding SelectedFeature.Score, Converter={StaticResource ScoreFormatter}}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="10,0,0,0">
+                    <TextBlock Width="110" FontWeight="Bold">Scan:</TextBlock>
+                    <TextBlock Width="70" Text="{Binding SelectedFeature.Scan}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="4" Margin="10,0,0,0">
+                    <TextBlock Width="110" FontWeight="Bold">Retention Time:</TextBlock>
+                    <TextBlock Width="70" Text="{Binding SelectedFeature.RetentionTime, Converter={StaticResource ScoreFormatter}}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="5" Margin="10,0,0,0">
+                    <TextBlock Width="110" FontWeight="Bold">Mass:</TextBlock>
+                    <TextBlock Width="70" Text="{Binding SelectedFeature.Mass, Converter={StaticResource ScoreFormatter}}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="6" Margin="10,0,0,0">
+                    <TextBlock Width="110" FontWeight="Bold">Abundance:</TextBlock>
+                    <TextBlock Width="70" Text="{Binding SelectedFeature.Abundance, Converter={StaticResource ScoreFormatter}}" />
                 </StackPanel>
             </Grid>
         </Expander>
-        <Grid Margin="5" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+        <StackPanel Margin="5,0,0,0" Grid.Row="1" Grid.Column="0"  Orientation="Horizontal">
+            <TextBlock Width="110" FontWeight="Bold">Score Range:</TextBlock>
+            <TextBlock Width="55"  Text="{Binding MinimumScore}" />
+            <TextBlock Width="10"  Text="-" />
+            <TextBlock Width="55"  Text="{Binding MaximumScore}" />
+            <TextBlock Width="125" FontWeight="Bold">Abundance Range:</TextBlock>
+            <TextBlock Width="55"  Text="{Binding MinimumAbundance, Converter={StaticResource ScoreFormatter}}" />
+            <TextBlock Width="10"  Text="-" />
+            <TextBlock Width="55"  Text="{Binding MaximumAbundance, Converter={StaticResource ScoreFormatter}}" />
+        </StackPanel>
+        <Grid Margin="5" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="70*" />
                 <RowDefinition Height="30*" />
@@ -66,11 +96,11 @@
                 <ColumnDefinition Width="33*" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Grid.Row="0"  Orientation="Horizontal">
-                <TextBlock Width="150"># Features Displayed</TextBlock>
+                <TextBlock Width="150" FontWeight="Bold"># Features Displayed</TextBlock>
                 <TextBox Width="100" Text="{Binding PointsDisplayed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Name="PointsDisplayedTextBox" />
                 <StackPanel Orientation="vertical">
-                    <RepeatButton Content="˄" Name="Up"  Height="10"  Width="20" Click="UpClicked" />
-                    <RepeatButton Content="˅" Name="Down" Height="10" Width="20" Click="DownClicked" />
+                    <RepeatButton Content="˄" Name="Up"   Height="12.5" Width="20" FontSize="10" Click="UpClicked" />
+                    <RepeatButton Content="˅" Name="Down" Height="12.5" Width="20" FontSize="10" Click="DownClicked" />
                 </StackPanel>
             </StackPanel>
             <Slider Grid.Column="1" Grid.Row="0" Margin="0,0,5,0"

@@ -20,8 +20,6 @@ namespace LcmsSpectator.ViewModels
     {
         public Task<List<LabeledIonViewModel>> FragmentLabelUpdate { get; private set; }
         public Task<List<LabeledIonViewModel>> PrecursorLabelUpdate { get; private set; }
-
-        public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; }
         
         public IonListViewModel(IMainDialogService dialogService, ITaskService taskService, Messenger messenger)
         {
@@ -38,17 +36,13 @@ namespace LcmsSpectator.ViewModels
 
             _currentSequence = new Sequence(new List<AminoAcid>());
 
-            PrecursorViewModes = new ObservableCollection<PrecursorViewMode>
-            {
-                PrecursorViewMode.Isotopes,
-                PrecursorViewMode.Charges
-            };
             _precursorViewMode = PrecursorViewMode.Isotopes;
 
             MessengerInstance.Register<PropertyChangedMessage<bool>>(this, ShowHeavyChanged);
             MessengerInstance.Register<PropertyChangedMessage<List<IonType>>>(this, SelectedIonTypesChanged);
             MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
             MessengerInstance.Register<PropertyChangedMessage<Sequence>>(this, SelectedSequenceChanged);
+            MessengerInstance.Register<PropertyChangedMessage<PrecursorViewMode>>(this, PrecursorViewModeChanged);
             Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
 
             FragmentLabelUpdate = Task.Run(() => GenerateFragmentLabels(_currentSequence, false));
@@ -56,25 +50,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         #region Ion label properties
-
-        public PrecursorViewMode PrecursorViewMode
-        {
-            get { return _precursorViewMode; }
-            set
-            {
-                _precursorViewMode = value;
-                UpdateFragmentLabels();
-                UpdatePrecursorLabels();
-                if (_showHeavyCount > 0)
-                {
-                    UpdateLightFragmentLabels();
-                    UpdateHeavyFragmentLabels();
-                    UpdateLightPrecursorLabels();
-                    UpdateHeavyPrecursorLabels();
-                }
-                RaisePropertyChanged();
-            }
-        }
 
         public List<LabeledIonViewModel> FragmentLabels
         {
@@ -306,6 +281,21 @@ namespace LcmsSpectator.ViewModels
             else if (_showHeavyCount > 0)
             {
                 _showHeavyCount--;
+            }
+        }
+
+        private void PrecursorViewModeChanged(PropertyChangedMessage<PrecursorViewMode> message)
+        {
+            if (message.PropertyName != "PrecursorViewMode" || !(message.Sender is XicViewModel)) return;
+            _precursorViewMode = message.NewValue;
+            UpdateFragmentLabels();
+            UpdatePrecursorLabels();
+            if (_showHeavyCount > 0)
+            {
+                UpdateLightFragmentLabels();
+                UpdateHeavyFragmentLabels();
+                UpdateLightPrecursorLabels();
+                UpdateHeavyPrecursorLabels();
             }
         }
 

@@ -86,6 +86,7 @@ namespace LcmsSpectator.ViewModels
             get { return System.Net.Dns.GetHostEntry("").HostName.Contains("pnl.gov"); }
         }
 
+        private bool _showSplash;
         /// <summary>
         /// Toggles whether or not splash screen is shown.
         /// </summary>
@@ -99,6 +100,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private bool _fileOpen;
         /// <summary>
         /// Tracks whether or not a file is currently open
         /// </summary>
@@ -123,13 +125,38 @@ namespace LcmsSpectator.ViewModels
                 ShowSplash = false;
                 _taskService.Enqueue(() =>
                 {
-                    var dsVm = ReadRawFile(openDataVm.RawFilePath);
+                    DataSetViewModel dsVm;
+                    try
+                    {
+                        dsVm = ReadRawFile(openDataVm.RawFilePath);
+                    }
+                    catch (Exception)
+                    {
+                        _dialogService.ExceptionAlert(new Exception("Cannot read raw file."));
+                        if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count-1));
+                        return;
+                    }
                     if (dsVm != null)
                     {
                         if (!String.IsNullOrEmpty(openDataVm.IdFilePath))
-                            ReadIdFile(openDataVm.IdFilePath, dsVm.RawFilePath, dsVm);
+                            try
+                            {
+                                ReadIdFile(openDataVm.IdFilePath, dsVm.RawFilePath, dsVm);
+                            }
+                            catch (Exception)
+                            {
+                                _dialogService.ExceptionAlert(new Exception("Cannot read ID file."));
+                            }
                         if (!String.IsNullOrEmpty(openDataVm.FeatureFilePath))
-                            dsVm.OpenFeatureFile(openDataVm.FeatureFilePath);
+                            try
+                            {
+                                dsVm.OpenFeatureFile(openDataVm.FeatureFilePath);
+                            }
+                            catch (Exception)
+                            {
+                                _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
+                                throw;
+                            }
                     }
                 }, true);
             }
@@ -146,9 +173,18 @@ namespace LcmsSpectator.ViewModels
             foreach (var rawFileName in rawFileNames)
             {
                 var name = rawFileName;
+                string fileName = rawFileName;
                 _taskService.Enqueue(() =>
                 {
-                    ReadRawFile(name);
+                    try
+                    {
+                        ReadRawFile(name);
+                    }
+                    catch (Exception)
+                    {
+                        _dialogService.ExceptionAlert(new Exception(String.Format("Cannot read {0}.", fileName)));
+                        if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count - 1));
+                    }
                     if (DataSets.Count > 0) ScanViewModel.HideUnidentifiedScans = false;
                 }, true);
             }
@@ -211,7 +247,16 @@ namespace LcmsSpectator.ViewModels
                 _taskService.Enqueue(() =>
                 {
                     // Name of raw file was found
-                    if (dsVm == null) dsVm = ReadRawFile(rawFileName); // raw file isn't open yet
+                    if (dsVm == null) // raw file isn't open yet
+                        try
+                        {
+                            dsVm = ReadRawFile(rawFileName);
+                        }
+                        catch (Exception)
+                        {
+                            _dialogService.ExceptionAlert(new Exception("Cannot read raw file."));
+                            if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count - 1));
+                        }
                     ReadIdFile(tsvFileName, rawFileName, dsVm); // finally read the TSV file
                 }, true);
             }
@@ -279,11 +324,28 @@ namespace LcmsSpectator.ViewModels
                 _taskService.Enqueue(() =>
                 {
                     // Name of raw file was found
-                    if (dsVm == null) dsVm = ReadRawFile(rawFileName); // raw file isn't open yet
-                    if (dsVm != null) dsVm.OpenFeatureFile(tsvFileName);
+                    if (dsVm == null) // raw file isn't open yet
+                        try
+                        {
+                            dsVm = ReadRawFile(rawFileName);
+                        }
+                        catch (Exception)
+                        {
+                            _dialogService.ExceptionAlert(new Exception("Cannot read raw file."));
+                            if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count - 1));
+                        }
+                    if (dsVm != null)
+                        try
+                        {
+                            dsVm.OpenFeatureFile(tsvFileName);
+                        }
+                        catch (Exception)
+                        {
+                            _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
+                        }
                 }, true);
             }
-            else _dialogService.MessageBox("Cannot open ID file.");
+            else _dialogService.MessageBox("Cannot open feature file.");
         }
 
         /// <summary>
@@ -318,7 +380,9 @@ namespace LcmsSpectator.ViewModels
                 {
                     var result =
                         _dialogService.ConfirmationBox(
-                            String.Format("{0}\nWould you like to add this modification?\nIf not, all sequences containing this modification will be ignored.", e.Message),
+                            String.Format(
+                                "{0}\nWould you like to add this modification?\nIf not, all sequences containing this modification will be ignored.",
+                                e.Message),
                             "Unknown Modification");
                     if (result)
                     {
@@ -326,7 +390,8 @@ namespace LcmsSpectator.ViewModels
                         GuiInvoker.Invoke(() => _dialogService.OpenCustomModification(customModVm));
                         if (customModVm.Status)
                         {
-                            Modification.RegisterAndGetModification(customModVm.ModificationName, customModVm.Composition);   
+                            Modification.RegisterAndGetModification(customModVm.ModificationName,
+                                customModVm.Composition);
                         }
                         else
                         {
@@ -337,6 +402,13 @@ namespace LcmsSpectator.ViewModels
                     {
                         modIgnoreList.Add(e.ModificationName);
                     }
+                }
+                catch (Exception)
+                {
+                    _dialogService.ExceptionAlert(new Exception("Cannot read ID file."));
+                    FileOpen = false;
+                    LoadingScreenViewModel.IsLoading = false;
+                    return;
                 }
             } while (attemptToReadFile);
             var data = ScanViewModel.Data;
@@ -449,9 +521,6 @@ namespace LcmsSpectator.ViewModels
 
         private readonly IMainDialogService _dialogService;
         private readonly ITaskService _taskService;
-
-        private bool _fileOpen;
-        private bool _showSplash;
     }
 
     public class SettingsChangedNotification : NotificationMessage

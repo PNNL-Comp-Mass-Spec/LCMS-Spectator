@@ -1,32 +1,41 @@
 ﻿<Window x:Name="WindowAboutBox" x:Class="LcmsSpectator.Views.AboutBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="About" Height="350" Width="500">
-    <Grid HorizontalAlignment="Center" Height="auto" Margin="3" VerticalAlignment="Center" Width="auto" Grid.ColumnSpan="2">
+        Title="About" Height="385" Width="500">
+    <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="1*"/>
-            <RowDefinition Height="5*"/>
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="25" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*"/>
-            <ColumnDefinition Width="2*"/>
-        </Grid.ColumnDefinitions>
-        <Image x:Name="LogoPictureBox" Margin="3" Grid.Column="0" Grid.Row="0" Grid.RowSpan="6"/>
-        <Label x:Name="LabelProductName" Content="Product Name" Grid.Column="1" Grid.Row="0"/>
-        <Label x:Name="LabelVersion" Content="Version" Grid.Column="1" Grid.Row="1"/>
-        <Label x:Name="LabelCopyright" Content="Copyright" Grid.Column="1" Grid.Row="2"/>
-        <Label x:Name="LabelCompanyName" Content="Company Name" Grid.Column="1" Grid.Row="3"/>
-        <TextBox x:Name="TextBoxDescription" Grid.Column="1" Grid.Row="4" TextWrapping="Wrap" Text="Description" Margin="3"/>
-        <Grid Grid.Column="1" Grid.Row="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
-            <Button x:Name="ButtonClose" Content="Close" Grid.Column="1" Margin="3" IsCancel="True"/>
+        <GroupBox Grid.Row="0">
+            <GroupBox.Header>
+                <TextBlock FontWeight="Bold">About</TextBlock>
+            </GroupBox.Header>
+            <Grid HorizontalAlignment="Center" Height="auto" Margin="3" VerticalAlignment="Center" Width="auto" Grid.ColumnSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="5*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <Image x:Name="LogoPictureBox" Margin="3" Grid.Column="0" Grid.Row="0" Grid.RowSpan="6"/>
+                <Label x:Name="LabelProductName" Content="Product Name" Grid.Column="1" Grid.Row="0"
+                       FontWeight="Bold" FontSize="22" />
+                <Label x:Name="LabelVersion" Content="Version" Grid.Column="1" Grid.Row="1"/>
+                <Label x:Name="LabelCopyright" Content="Copyright" Grid.Column="1" Grid.Row="2"/>
+                <Label x:Name="LabelCompanyName" Content="Company Name" Grid.Column="1" Grid.Row="3"/>
+                <TextBox x:Name="TextBoxDescription" Grid.Column="1" Grid.Row="4" TextWrapping="Wrap" Text="Description" Margin="3"/>
+            </Grid>
+        </GroupBox>
+        <Grid Grid.Row="2" Width="100" HorizontalAlignment="Right">
+            <Button x:Name="ButtonClose" Content="Close" IsCancel="True"/>
         </Grid>
     </Grid>
 </Window>

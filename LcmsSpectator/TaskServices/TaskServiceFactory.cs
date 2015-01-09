@@ -9,6 +9,7 @@ namespace LcmsSpectator.TaskServices
             ITaskService newTaskService = null;
             if (taskService is TaskService) newTaskService = new TaskService();
             else if (taskService is MockTaskService) newTaskService = new MockTaskService();
+            else if (taskService is TimedTaskService) newTaskService = new TimedTaskService();
             return newTaskService;
         }
     }

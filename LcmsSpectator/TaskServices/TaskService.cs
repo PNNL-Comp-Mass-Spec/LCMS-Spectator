@@ -26,10 +26,6 @@ namespace LcmsSpectator.TaskServices
         {
             lock (_queueLock)
             {
-                //if (_runningTasksCount != 0)
-                //{
-                //    return;
-                //}
                 while (_taskQueue.Count > 0 && _taskQueue.Peek().IsParallel)
                 {
                     var task = _taskQueue.Dequeue();
@@ -68,10 +64,11 @@ namespace LcmsSpectator.TaskServices
         private readonly Queue<QTask> _taskQueue; 
         private readonly Object _queueLock;
 
-        private class QTask
-        {
-            public Action Action { get; set; }
-            public bool IsParallel { get; set; }
-        }
+    }
+    
+    internal class QTask
+    {
+        public Action Action { get; set; }
+        public bool IsParallel { get; set; }
     }
 }

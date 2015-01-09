@@ -8,13 +8,17 @@
             <RowDefinition Height="100*" />
             <RowDefinition Height="10" />
             <RowDefinition Height="25" />
-            <RowDefinition Height="10" />
         </Grid.RowDefinitions>
-        <views:HeavyModificationsView DataContext="{Binding HeavyModificationsViewModel}" Grid.Row="0"/>
+        <GroupBox Grid.Row="0">
+            <GroupBox.Header>
+                <TextBlock FontWeight="Bold">Heavy Modifications</TextBlock>
+            </GroupBox.Header>
+            <views:HeavyModificationsView DataContext="{Binding HeavyModificationsViewModel}" />
+        </GroupBox>
         <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
-            <Button Width="70" Command="{Binding SaveCommand}">Save</Button>
-            <Label Width="10" />
             <Button Width="70" Command="{Binding CancelCommand}">Cancel</Button>
+            <Label Width="10" />
+            <Button Width="70" Command="{Binding SaveCommand}">Save</Button>
         </StackPanel>
     </Grid>
 </Window>

@@ -22,6 +22,7 @@ namespace LcmsSpectator.ViewModels
     {
         public FeatureViewerViewModel(ITaskService taskService, IMessenger messenger)
         {
+            if (taskService is TaskService) taskService = new TimedTaskService(500);
             MessengerInstance = messenger;
             _taskService = taskService;
             MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
@@ -35,21 +36,50 @@ namespace LcmsSpectator.ViewModels
                 Title = "Isotopic Envelope"
             };
             IsotopicEnvelope.GenerateYAxis("Relative Intensity", "");
-            IsotopicEnvelopeCorrelation = 0.0;
             _isotopicEnvelopeExpanded = false;
             _isLoading = false;
             FeatureMap.MouseDown += FeatureMap_MouseDown;
-            _pointsDisplayed = 2000;
+            _pointsDisplayed = 5000;
+            _showFoundMs2 = false;
+            _showNotFoundMs2 = false;
             _yAxis = new LinearAxis { Position = AxisPosition.Left, Title="Monoisotopic Mass" };
             _xAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time" };
+            bool isInternalChange = false;
+            _xAxis.AxisChanged += (o, e) =>
+            {
+                if (!isInternalChange && _highlight != null &&
+                    _highlight.TextPosition.X >= _xAxis.ActualMinimum && _highlight.TextPosition.X <= _xAxis.ActualMaximum &&
+                    _highlight.TextPosition.Y >= _yAxis.ActualMinimum && _highlight.TextPosition.Y <= _yAxis.ActualMaximum)
+                {
+                    var x = _highlight.TextPosition.X;
+                    isInternalChange = true;
+                    _highlight.MinimumX = x - (_xAxis.ActualMaximum - _xAxis.ActualMinimum) * HighlightSize * 0.5;
+                    _highlight.MaximumX = x + (_xAxis.ActualMaximum - _xAxis.ActualMinimum) * HighlightSize * 0.5;
+                }
+                isInternalChange = false;
+            };
+            _yAxis.AxisChanged += (o, e) =>
+            {
+                if (!isInternalChange && _highlight != null &&
+                    _highlight.TextPosition.X >= _xAxis.ActualMinimum && _highlight.TextPosition.X <= _xAxis.ActualMaximum &&
+                    _highlight.TextPosition.Y >= _yAxis.ActualMinimum && _highlight.TextPosition.Y <= _yAxis.ActualMaximum)
+                {
+                    var y = _highlight.TextPosition.Y;
+                    isInternalChange = true;
+                    _highlight.MinimumY = y - (_yAxis.ActualMaximum - _yAxis.ActualMinimum) * HighlightSize;
+                    _highlight.MaximumY = y + (_yAxis.ActualMaximum - _yAxis.ActualMinimum) * HighlightSize;
+                }
+                isInternalChange = false;
+            };
         }
-        #region Properties
+        #region Public Properties
         /// <summary>
         /// Command activated when a feature is selected (double clicked) on the
         /// feature map plot.
         /// </summary>
         public RelayCommand FeatureSelectedCommand { get; private set; }
 
+        private PlotModel _featureMap;
         /// <summary>
         /// The Plot model for the feature map.
         /// </summary>
@@ -63,6 +93,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private AutoAdjustedYPlotModel _isotopicEnvelope;
         /// <summary>
         /// Plot model for the isotopic envelope spectrum.
         /// </summary>
@@ -76,6 +107,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private bool _isotopicEnvelopeExpanded;
         /// <summary>
         /// Whether or not the expander control for the isotopic envelope plot should be expanded or not.
         /// </summary>
@@ -89,6 +121,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private bool _isLoading;
         /// <summary>
         /// IsLoading toggles whether or not the loading screen is being shown.
         /// </summary>
@@ -102,19 +135,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        /// <summary>
-        /// Pearson correlation of observed isotope evelope vs theoretical.
-        /// </summary>
-        public double IsotopicEnvelopeCorrelation
-        {
-            get { return _isotopicEnvelopeCorrelation; }
-            set
-            {
-                _isotopicEnvelopeCorrelation = value;
-                RaisePropertyChanged();
-            }
-        }
-
+        private double _minimumScore;
         /// <summary>
         /// Score of lowest point currently being shown on feature map.
         /// </summary>
@@ -128,6 +149,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private double _maximumScore;
         /// <summary>
         /// Score of highest point currently being shown on feature map.
         /// </summary>
@@ -141,6 +163,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private double _minimumAbundance;
         /// <summary>
         /// Lowest abundance currently being shown on feature map.
         /// </summary>
@@ -154,6 +177,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private double _maximumAbundance;
         /// <summary>
         /// Highest abundance currently being shown on feature map.
         /// </summary>
@@ -167,6 +191,8 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+
+        private double _minimumAbundanceThreshold;
         /// <summary>
         /// Minimum value of the abundance threshold slider.
         /// </summary>
@@ -180,6 +206,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private double _maximumAbundanceThreshold;
         /// <summary>
         /// Maximum value of the abundance threshold slider.
         /// </summary>
@@ -193,6 +220,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private int _pointsDisplayed;
         /// <summary>
         /// Total number of features being displayed on feature map
         /// </summary>
@@ -207,6 +235,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private double _abundanceThreshold;
         /// <summary>
         /// Lowest possible abundance. This is stored in Log10(Abundance).
         /// This is set by the abundance threshold slider.
@@ -222,6 +251,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private double _scoreThreshold;
         /// <summary>
         /// Lowest possible score.
         /// This is set by the score threshold slider.
@@ -237,6 +267,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private bool _showFoundMs2;
         /// <summary>
         /// Toggles whether or not the ms2 points associated with features are being shown on
         /// the feature map plot.
@@ -247,11 +278,16 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showFoundMs2 = value;
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed, _showFoundMs2, _showNotFoundMs2));
+                foreach (var series in _foundMs2S)
+                {
+                    series.IsVisible = value;
+                }
+                FeatureMap.InvalidatePlot(true);
                 RaisePropertyChanged();
             }
         }
 
+        private bool _showNotFoundMs2;
         /// <summary>
         /// Toggles whether or not the ms2 points not associated with features are being shown
         /// on the feature map plot.
@@ -262,11 +298,13 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showNotFoundMs2 = value;
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed, _showFoundMs2, _showNotFoundMs2));
+                _notFoundMs2S.IsVisible = value;
+                FeatureMap.InvalidatePlot(true);
                 RaisePropertyChanged();
             }
         }
 
+        private PrSm _selectedPrSm;
         /// <summary>
         /// The currently selected identification. This is the ID highlighted on the feature
         /// map plot.
@@ -279,6 +317,20 @@ namespace LcmsSpectator.ViewModels
                 var oldValue = _selectedPrSm;
                 _selectedPrSm = value;
                 RaisePropertyChanged("SelectedPrSm", oldValue, _selectedPrSm, true);
+            }
+        }
+
+        private FeaturePoint _selectedFeature;
+        /// <summary>
+        /// Feature selected by double clicking on feature map.
+        /// </summary>
+        public FeaturePoint SelectedFeature
+        {
+            get { return _selectedFeature; }
+            private set
+            {
+                _selectedFeature = value;
+                RaisePropertyChanged();
             }
         }
         #endregion
@@ -302,25 +354,50 @@ namespace LcmsSpectator.ViewModels
             _features = features.ToList();
             var scanHash = new Dictionary<int, List<double>>();
             _notFoundMs2 = new List<PrSm>();
+            var accountedFor = new HashSet<int>();
+            var sortedIds = _ids.Values.OrderBy(id => id.Scan).ToList();
             foreach (var feature in _features)
             {
                 feature.MinPoint.RetentionTime = _lcms.GetElutionTime(feature.MinPoint.Scan);
                 feature.MaxPoint.RetentionTime = _lcms.GetElutionTime(feature.MaxPoint.Scan);
-                var ms2ScansMin = lcms.GetFragmentationSpectraScanNums(feature.MinPoint.Mz);
-                var ms2ScansMax = lcms.GetFragmentationSpectraScanNums(feature.MaxPoint.Mz);
+                var ms2ScansMin = lcms.GetFragmentationSpectraScanNums(feature.MinPoint.Mz).ToList();
+                var ms2ScansMax = lcms.GetFragmentationSpectraScanNums(feature.MaxPoint.Mz).ToList();
                 Feature feature1 = feature;
-                var featureMs2Scans = ms2ScansMin.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)
-                                      .Union(ms2ScansMax.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)).ToList();
+                var featureMs2Scans = (ms2ScansMin.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)
+                                        .Union(ms2ScansMax.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan))).ToList();
                 feature.AssociatedMs2.AddRange(featureMs2Scans);
-                foreach (var scan in featureMs2Scans)
+                var minIndex = sortedIds.BinarySearch(new PrSm {Scan = feature.MinPoint.Scan}, new PrSmScanComparer());
+                if (minIndex < 0) minIndex *= -1;
+                minIndex = Math.Max(Math.Min(minIndex, sortedIds.Count-1), 0);
+                var maxIndex = sortedIds.BinarySearch(new PrSm {Scan = feature.MaxPoint.Scan}, new PrSmScanComparer());
+                if (maxIndex < 0) maxIndex *= -1;
+                maxIndex = Math.Max(Math.Min(maxIndex, sortedIds.Count-1), 0);
+                for (int i = minIndex; i < maxIndex; i++)
                 {
-                    if (!_ids.ContainsKey(scan)) _ids.Add(scan, new PrSm{Scan = scan, Lcms = _lcms});
-                    TryInsert(scanHash, scan, feature.MinPoint.Mass);
+                    var id = sortedIds[i];
+                    if (accountedFor.Contains(id.Scan)) continue;
+                    if (id.Scan >= feature.MinPoint.Scan && id.Scan <= feature.MaxPoint.Scan &&
+                        Math.Abs(id.Mass - feature.MinPoint.Mass) < 2)
+                    {
+                        if (!feature.AssociatedMs2.Contains(id.Scan))
+                        {
+                            feature.AssociatedMs2.Add(id.Scan);
+                            accountedFor.Add(id.Scan);
+                        }
+                    }   
+                }
+                foreach (var scan in feature.AssociatedMs2)
+                {
+                    if (!_ids.ContainsKey(scan))
+                        _ids.Add(scan, new PrSm { Scan = scan, Lcms = _lcms, Mass = feature.MinPoint.Mass });
+                    if (!accountedFor.Contains(scan)) accountedFor.Add(scan);
+                    TryInsert(scanHash, scan, _ids[scan].Mass, 1);
                 }
             }
             foreach (var id in _ids.Values)
             {
-                if (TryInsert(scanHash, id.Scan, id.Mass))
+                //if (TryInsert(scanHash, id.Scan, id.Mass, 1) && id.Sequence.Count > 0)
+                if (!accountedFor.Contains(id.Scan))
                 {
                     _notFoundMs2.Add(id);
                 }
@@ -331,10 +408,8 @@ namespace LcmsSpectator.ViewModels
             RaisePropertyChanged("AbundanceThreshold");
             _yAxis.AbsoluteMinimum = 0;
             _yAxis.AbsoluteMaximum = _features.Max(f => f.MinPoint.Mass);
-            _xAxis.AbsoluteMinimum = 0; 
+            _xAxis.AbsoluteMinimum = 0;
             _xAxis.AbsoluteMaximum = _lcms.MaxLcScan;
-            _showFoundMs2 = true;
-            _showNotFoundMs2 = true;
             if (updatePlot)
                 _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed, _showFoundMs2, _showNotFoundMs2));
         }
@@ -351,21 +426,50 @@ namespace LcmsSpectator.ViewModels
             if (_features == null) return;
             _notFoundMs2 = new List<PrSm>();
             var scanHash = new Dictionary<int, List<double>>();
+            var accountedFor = new HashSet<int>();
+            var sortedIds = _ids.Values.OrderBy(id => id.Scan).ToList();
             foreach (var feature in _features)
             {
                 feature.MinPoint.RetentionTime = _lcms.GetElutionTime(feature.MinPoint.Scan);
                 feature.MaxPoint.RetentionTime = _lcms.GetElutionTime(feature.MaxPoint.Scan);
-                var ms2ScansMin = _lcms.GetFragmentationSpectraScanNums(feature.MinPoint.Mz);
-                var ms2ScansMax = _lcms.GetFragmentationSpectraScanNums(feature.MaxPoint.Mz);
+                var ms2ScansMin = _lcms.GetFragmentationSpectraScanNums(feature.MinPoint.Mz).ToList();
+                var ms2ScansMax = _lcms.GetFragmentationSpectraScanNums(feature.MaxPoint.Mz).ToList();
                 Feature feature1 = feature;
-                var featureMs2Scans = ms2ScansMin.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)
-                                      .Union(ms2ScansMax.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)).ToList();
+                var featureMs2Scans = (ms2ScansMin.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)
+                                        .Union(ms2ScansMax.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan))).ToList();
                 feature.AssociatedMs2.AddRange(featureMs2Scans);
-                foreach (var scan in featureMs2Scans) TryInsert(scanHash, scan, feature.MinPoint.Mass);
+                var minIndex = sortedIds.BinarySearch(new PrSm { Scan = feature.MinPoint.Scan }, new PrSmScanComparer());
+                if (minIndex < 0) minIndex *= -1;
+                minIndex = Math.Max(Math.Min(minIndex, sortedIds.Count), 0);
+                var maxIndex = sortedIds.BinarySearch(new PrSm { Scan = feature.MaxPoint.Scan }, new PrSmScanComparer());
+                if (maxIndex < 0) maxIndex *= -1;
+                maxIndex = Math.Max(Math.Min(maxIndex, sortedIds.Count), 0);
+                for (int i = minIndex; i < maxIndex; i++)
+                {
+                    var id = sortedIds[i];
+                    if (accountedFor.Contains(id.Scan)) continue;
+                    if (id.Scan >= feature.MinPoint.Scan && id.Scan <= feature.MaxPoint.Scan &&
+                        Math.Abs(id.Mass - feature.MinPoint.Mass) < 2)
+                    {
+                        if (!feature.AssociatedMs2.Contains(id.Scan))
+                        {
+                            feature.AssociatedMs2.Add(id.Scan);
+                            accountedFor.Add(id.Scan);
+                        }
+                    }
+                }
+                foreach (var scan in feature.AssociatedMs2)
+                {
+                    if (!_ids.ContainsKey(scan))
+                        _ids.Add(scan, new PrSm { Scan = scan, Lcms = _lcms, Mass = feature.MinPoint.Mass });
+                    if (!accountedFor.Contains(scan)) accountedFor.Add(scan);
+                    TryInsert(scanHash, scan, _ids[scan].Mass, 1);
+                }
             }
             foreach (var id in _ids.Values)
             {
-                if (TryInsert(scanHash, id.Scan, id.Mass))
+                //if (TryInsert(scanHash, id.Scan, id.Mass, 1) && id.Sequence.Count > 0)
+                if (!accountedFor.Contains(id.Scan))
                 {
                     _notFoundMs2.Add(id);
                 }
@@ -435,7 +539,7 @@ namespace LcmsSpectator.ViewModels
                     {
                         if (!_ids.ContainsKey(scan)) continue;
                         var prsm = _ids[scan];
-                        var mass = (prsm.Mass.Equals(0.0)) ? featurePoint.Mass : prsm.Mass; 
+                        var mass = featurePoint.Mass; 
                         var sp = _xAxis.Transform(prsm.RetentionTime, prsm.Mass, _yAxis);
                         var distSq = sp.DistanceToSquared(args.Position);
                         if (distSq < minDist)
@@ -480,7 +584,7 @@ namespace LcmsSpectator.ViewModels
             // Filter features based on score threshold, abundance threshold, points to display
             var filteredFeatures = FilterData(_features, scoreThreshold, abundanceThreshold, pointsDisplayed);
             // Calculate min/max abundance and min/max score
-            
+            _foundMs2S = new List<Series>();
             if (filteredFeatures.Count > 0)
             {
                 MinimumAbundance = Math.Round(filteredFeatures[filteredFeatures.Count - 1].MinPoint.Abundance, 3);
@@ -542,46 +646,47 @@ namespace LcmsSpectator.ViewModels
             FeatureMap.Axes.Add(_yAxis);
             var colors = colorAxis.Palette.Colors;
             //var colors = OxyPalette.Interpolate(numColors, new[] {minColor, maxColor}).Colors;
+            var featureCount = 0;
             foreach (var feature in filteredFeatures)
             {
                 var feature1 = feature;
                 var size = Math.Min(feature.MinPoint.Abundance / (2*medianAbundance), 7.0);
-                if (showFoundMs2)
+                // Add ms2s associated with features
+                var prsms = feature.AssociatedMs2.Where(scan => _ids.ContainsKey(scan)).Select(scan => _ids[scan]);
+                // identified ms2s
+                Feature feature2 = feature;
+                var ms2Series = new ScatterSeries
                 {
-                    // Add ms2s associated with features
-                    var prsms = feature.AssociatedMs2.Select(scan => _ids[scan]);
-                    // identified ms2s
-                    Feature feature2 = feature;
-                    var ms2Series = new ScatterSeries
+                    ItemsSource = prsms,
+                    Mapping = p =>
                     {
-                        ItemsSource = prsms,
-                        Mapping = p =>
+                        var prsm = (PrSm) p;
+                        int colorScore;
+                        double mass;
+                        //if (prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature2.MinPoint.Mass) < 1)
+                        if (prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature2.MinPoint.Mass) < 1)
                         {
-                            var prsm = (PrSm) p;
-                            int colorScore;
-                            double mass;
-                            if (prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature2.MinPoint.Mass) < 0.01)
-                            {
-                                colorScore = idColorScore;
-                                mass = prsm.Mass;
-                            }
-                            else
-                            {
-                                colorScore = unidColorScore;
-                                mass = feature2.MinPoint.Mass;
-                            }
-                            return new ScatterPoint(prsm.RetentionTime, mass, Math.Max(size*0.8, 3.0), colorScore);
-                        },
-                        Title = "Ms2 Scan",
-                        MarkerType = MarkerType.Cross,
-                        ColorAxisKey = ms2ColorAxis.Key,
-                        TrackerFormatString =
-                            "{0}" + Environment.NewLine +
-                            "{1}: {2:0.###}" + Environment.NewLine +
-                            "{2}: {4:0.##E0}",
-                    };
-                    FeatureMap.Series.Add(ms2Series);
-                }
+                            colorScore = idColorScore;
+                            mass = prsm.Mass;
+                        }
+                        else
+                        {
+                            colorScore = unidColorScore;
+                            mass = feature2.MinPoint.Mass;
+                        }
+                        return new ScatterPoint(prsm.RetentionTime, mass, Math.Max(size*0.8, 3.0), colorScore);
+                    },
+                    //Title = "Ms2 Scan",
+                    MarkerType = MarkerType.Cross,
+                    ColorAxisKey = ms2ColorAxis.Key,
+                    TrackerFormatString =
+                        "{0}" + Environment.NewLine +
+                        "{1}: {2:0.###}" + Environment.NewLine +
+                        "{2}: {4:0.##E0}",
+                    IsVisible = _showFoundMs2,
+                };
+                _foundMs2S.Add(ms2Series);
+                FeatureMap.Series.Add(ms2Series);
                 // Add feature
                 var colorIndex = 1 + (int)((feature1.MinPoint.Score - minScore) / (1.0 - minScore) * colors.Count);
                 if (colorIndex < 1) colorIndex = 1;
@@ -591,7 +696,7 @@ namespace LcmsSpectator.ViewModels
                 {
                     ItemsSource = new [] { feature.MinPoint, feature.MaxPoint },
                     Mapping = fp => new DataPoint(((FeaturePoint)fp).RetentionTime, ((FeaturePoint)fp).Mass), 
-                    Title="",
+                    Title=(featureCount++ == 0) ? "Feature" : "",
                     Color = c,
                     LineStyle = LineStyle.Solid,
                     StrokeThickness = size,
@@ -607,23 +712,22 @@ namespace LcmsSpectator.ViewModels
                 FeatureMap.Series.Add(ls);
             }
             // Add identified Ms2s with no associated features
-            if (showNotFoundMs2)
+            _notFoundMs2S = new ScatterSeries
             {
-                var ids = new ScatterSeries
-                {
-                    ItemsSource = _notFoundMs2,
-                    Mapping = p => new ScatterPoint(_lcms.GetElutionTime(((PrSm)p).Scan), ((PrSm)p).Mass, 3.0, 1000),
-                    Title = "Identified Ms2 With No Feature",
-                    MarkerType = MarkerType.Cross,
-                    ColorAxisKey = ms2ColorAxis.Key,
-                    TrackerFormatString =
-                        "{0}" + Environment.NewLine +
-                        "{1}: {2:0.###}" + Environment.NewLine +
-                        "{3}: {4:0.##E0}" + Environment.NewLine +
-                        "QValue: {QValue:0.###}"
-                };
-                FeatureMap.Series.Add(ids);
-            }
+                ItemsSource = _notFoundMs2,
+                Mapping = p => new ScatterPoint(_lcms.GetElutionTime(((PrSm)p).Scan), ((PrSm)p).Mass, 3.0, 1000),
+                Title = "Identified Ms2 (No Feature)",
+                MarkerType = MarkerType.Cross,
+                ColorAxisKey = ms2ColorAxis.Key,
+                TrackerFormatString =
+                    "{0}" + Environment.NewLine +
+                    "{1}: {2:0.###}" + Environment.NewLine +
+                    "{3}: {4:0.##E0}" + Environment.NewLine +
+                    "QValue: {QValue:0.###}",
+                MarkerStrokeThickness = 1,
+                IsVisible = _showNotFoundMs2,
+            };
+            FeatureMap.Series.Add(_notFoundMs2S);
             // Highlight selected identification.
             if (SelectedPrSm != null)
             {
@@ -658,24 +762,28 @@ namespace LcmsSpectator.ViewModels
             prsm.Lcms = _lcms;
             var rt = prsm.RetentionTime;
             var mass = prsm.Mass;
-            if (_circleHighlight == null)
+            if (_highlight == null)
             {
-                _circleHighlight = new EllipseAnnotation
+                _highlight = new RectangleAnnotation
                 {
-                    Height = 3000,
-                    Width = 6,
-                    X = rt,
-                    Y = mass,
+                    TextPosition = new DataPoint(rt, mass),
                     Fill = OxyColor.FromArgb(100, 255, 255, 0),
-                    Stroke = OxyColors.Green,
-
+                    Stroke = OxyColor.FromRgb(0,255,0),
+                    StrokeThickness = 2,
+                    MinimumX = rt - (_xAxis.ActualMaximum - _xAxis.ActualMinimum) * HighlightSize * 0.5,
+                    MaximumX = rt + (_xAxis.ActualMaximum - _xAxis.ActualMinimum) * HighlightSize * 0.5,
+                    MinimumY = mass - (_yAxis.ActualMaximum - _yAxis.ActualMinimum) * HighlightSize,
+                    MaximumY = mass + (_yAxis.ActualMaximum - _yAxis.ActualMinimum) * HighlightSize,
                 };
-                FeatureMap.Annotations.Add(_circleHighlight);
+                FeatureMap.Annotations.Add(_highlight);
             }
             else
             {
-                _circleHighlight.X = rt;
-                _circleHighlight.Y = mass;
+                _highlight.TextPosition = new DataPoint(rt, mass);
+                _highlight.MinimumX = rt - (_xAxis.ActualMaximum - _xAxis.ActualMinimum) * HighlightSize * 0.5;
+                _highlight.MaximumX = rt + (_xAxis.ActualMaximum - _xAxis.ActualMinimum) * HighlightSize * 0.5;
+                _highlight.MinimumY = mass - (_yAxis.ActualMaximum - _yAxis.ActualMinimum) * HighlightSize;
+                _highlight.MaximumY = mass + (_yAxis.ActualMaximum - _yAxis.ActualMinimum) * HighlightSize;
             }
         }
 
@@ -688,6 +796,7 @@ namespace LcmsSpectator.ViewModels
             {
                 return;   
             }
+            SelectedFeature = _selectedFeaturePoint;
             var isotopes = _selectedFeaturePoint.Isotopes;
             IsLoading = true;
             //var theoIsotopeProfile = Averagine.GetTheoreticalIsotopeProfile(_selectedFeaturePoint.Mass, _selectedFeaturePoint.Charge);
@@ -714,6 +823,7 @@ namespace LcmsSpectator.ViewModels
 
             var theoSeries = new StemSeries
             {
+                Title = "Theoretical",
                 ItemsSource = peakMap.Values,
                 Mapping = p => new DataPoint(((Peak)p).Mz, ((Peak)p).Intensity),
                 Color = OxyColor.FromArgb(120, 0, 0, 0),
@@ -729,6 +839,7 @@ namespace LcmsSpectator.ViewModels
 
             var actSeries = new StemSeries
             {
+                Title = "Observed",
                 ItemsSource = isotopes,
                 Mapping = p => new DataPoint(peakMap[((Isotope)p).Index].Mz, ((Isotope)p).Ratio),
                 Color = OxyColor.FromArgb(120, 255, 0, 0),
@@ -747,9 +858,7 @@ namespace LcmsSpectator.ViewModels
             _ipxAxis.Zoom(min, max);
             IsotopicEnvelope.AdjustForZoom();
 
-            IsotopicEnvelopeCorrelation = _selectedFeaturePoint.Score;
-                /*FitScoreCalculator.GetPearsonCorrelation(theoIsotopeProfile.Select(p => p.Intensity).ToArray(),
-                    isotopes.Select(p => p.Ratio).ToArray()); */
+            IsotopicEnvelope.IsLegendVisible = true;
             IsotopicEnvelopeExpanded = true;
             IsotopicEnvelope.InvalidatePlot(true);
             IsLoading = false;
@@ -794,7 +903,7 @@ namespace LcmsSpectator.ViewModels
         //    return success;
         //}
 
-        private bool TryInsert(Dictionary<int, List<double>> points, int scan, double mass, double massTolerance=0.001)
+        private bool TryInsert(Dictionary<int, List<double>> points, int scan, double mass, double massTolerance=0.1)
         {
             bool success = false;
             List<double> masses;
@@ -825,33 +934,21 @@ namespace LcmsSpectator.ViewModels
 
         private readonly LinearAxis _xAxis;
         private readonly LinearAxis _yAxis;
-        private EllipseAnnotation _circleHighlight;
+        private RectangleAnnotation _highlight;
+        private List<Series> _foundMs2S;
+        private Series _notFoundMs2S; 
 
         private LcMsRun _lcms;
         private List<Feature> _features;
         private Dictionary<int, PrSm> _ids;
-        private List<PrSm> _notFoundMs2; 
-        private double _abundanceThreshold;
-        private double _scoreThreshold;
-        private PlotModel _featureMap;
-        private double _maximumAbundance;
-        private int _pointsDisplayed;
-        private double _minimumAbundance;
-        private double _maximumAbundanceThreshold;
-        private double _minimumAbundanceThreshold;
-        private double _minimumScore;
-        private double _maximumScore;
-        private AutoAdjustedYPlotModel _isotopicEnvelope;
-        private double _isotopicEnvelopeCorrelation;
-       
+        private List<PrSm> _notFoundMs2;
+
         private FeaturePoint _selectedFeaturePoint;
         private PrSm _selectedPrSmPoint;
-        private bool _isLoading;
         private readonly LinearAxis _ipxAxis;
-        private bool _showFoundMs2;
-        private bool _showNotFoundMs2;
-        private PrSm _selectedPrSm;
-        private bool _isotopicEnvelopeExpanded;
+
+        private const double HighlightSize = 0.008;
+
         #endregion
     }
 }

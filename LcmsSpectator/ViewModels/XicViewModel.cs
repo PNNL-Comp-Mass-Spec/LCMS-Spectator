@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -7,6 +8,7 @@ using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.TaskServices;
+using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using OxyPlot.Axes;
 
@@ -19,6 +21,7 @@ namespace LcmsSpectator.ViewModels
         public XicPlotViewModel PrecursorPlotViewModel { get; set; }
         public XicPlotViewModel HeavyPrecursorPlotViewModel { get; set; }
         public RelayCommand OpenHeavyModificationsCommand { get; private set; }
+        public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; }
         public XicViewModel(IMainDialogService dialogService, ITaskService taskService, Messenger messenger)
         {
             MessengerInstance = messenger;
@@ -58,6 +61,12 @@ namespace LcmsSpectator.ViewModels
             _precursorLabels = new List<LabeledIonViewModel>();
             _lightPrecursorLabels = new List<LabeledIonViewModel>();
             _heavyPrecursorLabels = new List<LabeledIonViewModel>();
+
+            PrecursorViewModes = new ObservableCollection<PrecursorViewMode>
+            {
+                PrecursorViewMode.Isotopes,
+                PrecursorViewMode.Charges
+            };
 
             MessengerInstance.Register<ClearAllNotification>(this, ClearAllNotificationHandler);
             MessengerInstance.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedPrecursorLabelsChanged);
@@ -282,6 +291,17 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        public PrecursorViewMode PrecursorViewMode
+        {
+            get { return _precursorViewMode; }
+            set
+            {
+                var oldValue = _precursorViewMode;
+                _precursorViewMode = value;
+                RaisePropertyChanged("PrecursorViewMode", oldValue, _precursorViewMode, true);
+            }
+        }
+
         public void ClearCache()
         {
             FragmentPlotViewModel.ClearCache();
@@ -461,5 +481,6 @@ namespace LcmsSpectator.ViewModels
         private readonly LinearAxis _precursorXAxis;
         private readonly LinearAxis _heavyPrecursorXAxis;
         private ILcMsRun _lcms;
+        private LcmsSpectatorModels.Config.PrecursorViewMode _precursorViewMode;
     }
 }

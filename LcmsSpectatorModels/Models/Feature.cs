@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Spectrometry;
 
 namespace LcmsSpectatorModels.Models
@@ -21,6 +22,7 @@ namespace LcmsSpectatorModels.Models
     public class FeaturePoint
     {
         public int Scan { get; set; }
+        public Ion Ion { get; set; }
         public double RetentionTime { get; set; }
         public double Mass { get; set; }
         public double Mz { get; set; }

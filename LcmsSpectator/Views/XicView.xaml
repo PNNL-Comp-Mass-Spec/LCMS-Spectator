@@ -5,10 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:wpf="http://oxyplot.org/wpf"
              mc:Ignorable="d" Background="White"
-             d:DesignHeight="300" d:DesignWidth="300">
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
-    </UserControl.Resources>
+             d:DesignHeight="500" d:DesignWidth="500">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="4*" Name="FragmentTitleRow" />
@@ -133,11 +130,13 @@
         </Grid>
         <Grid Grid.Row="5" Grid.Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50*" />
-                <ColumnDefinition Width="50*" />
+                <ColumnDefinition Width="33*" />
+                <ColumnDefinition Width="33*" />
+                <ColumnDefinition Width="33*" />
             </Grid.ColumnDefinitions>
             <CheckBox Grid.Column="0" IsChecked="{Binding ShowFragmentXic}" Checked="ShowFragment_OnChecked" Unchecked="ShowFragment_OnUnChecked" Name="ShowFragment" >Show Fragment XIC</CheckBox>
             <CheckBox Grid.Column="1" IsChecked="{Binding ShowHeavy}" Checked="ShowHeavy_OnChecked" Unchecked="ShowHeavy_OnUnchecked" Name="ShowHeavy">Show Heavy</CheckBox>
+            <ComboBox Grid.Column="2" ItemsSource="{Binding PrecursorViewModes}" SelectedItem="{Binding PrecursorViewMode}" Width="100" HorizontalAlignment="Right" Margin="0,0,5,0" />
         </Grid>
     </Grid>
 </UserControl>

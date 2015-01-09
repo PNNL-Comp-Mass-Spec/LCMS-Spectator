@@ -7,13 +7,9 @@
              mc:Ignorable="d" Background="White"
              d:DesignHeight="300" d:DesignWidth="800">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50*" />
-            <RowDefinition Height="50*" />
-        </Grid.RowDefinitions> 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="75*" />
-            <ColumnDefinition Width="25*" />
+            <ColumnDefinition Width="Auto" MaxWidth="450" />
         </Grid.ColumnDefinitions>
         <wpf:PlotView Name="Ms2Spectrum" DataContext="{Binding PrimarySpectrumViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
             <wpf:PlotView.ContextMenu>
@@ -28,31 +24,46 @@
                 </ContextMenu>
             </wpf:PlotView.ContextMenu>
         </wpf:PlotView>
-        <wpf:PlotView Name="PreviousMs1" DataContext="{Binding Secondary1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="1">
-            <wpf:PlotView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
-                    <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
-                    <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
-                    <MenuItem Header="Save As _Image">
-                        <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
-                        <MenuItem Header="Save as _Svg" Command="{Binding SaveAsImageCommand}" CommandParameter="svg" />
-                    </MenuItem>
-                </ContextMenu>
-            </wpf:PlotView.ContextMenu>
-        </wpf:PlotView>
-        <wpf:PlotView Name="NextMs1" DataContext="{Binding Secondary2ViewModel}" Model="{Binding Path=Plot}" Grid.Row="1" Grid.Column="1">
-            <wpf:PlotView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
-                    <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
-                    <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
-                    <MenuItem Header="Save As _Image">
-                        <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
-                        <MenuItem Header="Save as _Svg" Command="{Binding SaveAsImageCommand}" CommandParameter="svg" />
-                    </MenuItem>
-                </ContextMenu>
-            </wpf:PlotView.ContextMenu>
-        </wpf:PlotView>
+        <Expander Grid.Row="0" Grid.Column="1" ExpandDirection="Right" IsExpanded="True" BorderThickness="0">
+            <Expander.Header>
+                <TextBlock Text="Ms1">
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="-90" />
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </Expander.Header>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*" />
+                    <RowDefinition Height="50*" />
+                </Grid.RowDefinitions>
+                <wpf:PlotView Name="PreviousMs1" DataContext="{Binding Secondary1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Width="400">
+                    <wpf:PlotView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+                            <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
+                            <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                            <MenuItem Header="Save As _Image">
+                                <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
+                                <MenuItem Header="Save as _Svg" Command="{Binding SaveAsImageCommand}" CommandParameter="svg" />
+                            </MenuItem>
+                        </ContextMenu>
+                    </wpf:PlotView.ContextMenu>
+                </wpf:PlotView>
+                <wpf:PlotView Name="NextMs1" DataContext="{Binding Secondary2ViewModel}" Model="{Binding Path=Plot}" Grid.Row="1" Width="400">
+                    <wpf:PlotView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+                            <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
+                            <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                            <MenuItem Header="Save As _Image">
+                                <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
+                                <MenuItem Header="Save as _Svg" Command="{Binding SaveAsImageCommand}" CommandParameter="svg" />
+                            </MenuItem>
+                        </ContextMenu>
+                    </wpf:PlotView.ContextMenu>
+                </wpf:PlotView>
+            </Grid>
+        </Expander>
     </Grid>
 </UserControl>

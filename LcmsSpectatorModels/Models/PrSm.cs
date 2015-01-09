@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -143,8 +144,9 @@ namespace LcmsSpectatorModels.Models
             set
             {
                 _sequence = value;
-                var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
-                Mass = Math.Round(composition.Mass, 2);
+                var composition = new Composition(Composition.H2O);
+                composition = _sequence.Aggregate(composition, (current, aa) => current + aa.Composition);
+                Mass = composition.Mass;
             }
         }
 
@@ -162,9 +164,9 @@ namespace LcmsSpectatorModels.Models
             get
             {
                 if (Sequence.Count == 0) return 0.0;
-                var composition = Sequence.Aggregate(InformedProteomics.Backend.Data.Composition.Composition.Zero, (current, aa) => current + aa.Composition);
-                var ion = new Ion(composition + InformedProteomics.Backend.Data.Composition.Composition.H2O, Charge);
-                return Math.Round(ion.GetMostAbundantIsotopeMz(), 2);
+                var composition = Sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
+                var ion = new Ion(composition + Composition.H2O, Charge);
+                return ion.GetMostAbundantIsotopeMz();
             }
         }
         #endregion
@@ -191,6 +193,17 @@ namespace LcmsSpectatorModels.Models
         public int Compare(PrSm x, PrSm y)
         {
             return (x.Score.CompareTo(y.Score));
+        }
+    }
+
+    /// <summary>
+    /// Compares two PrSm objects by Scan.
+    /// </summary>
+    public class PrSmScanComparer : IComparer<PrSm>
+    {
+        public int Compare(PrSm x, PrSm y)
+        {
+            return (x.Scan.CompareTo(y.Scan));
         }
     }
 }

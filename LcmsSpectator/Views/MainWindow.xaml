@@ -7,6 +7,7 @@
         xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
         xmlns:utils="clr-namespace:LcmsSpectator.Utils"
         xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
+        xmlns:xcpt="http://schemas.xceed.com/wpf/xaml/themes"
         Title="LcMsSpectator" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -37,7 +38,6 @@
         </Menu>
         <!-- End Menu -->
         <Grid HorizontalAlignment="Stretch" Margin="0,22,0,0">
-<!--                <xcad:DockingManager Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Name="AvDock"> -->
             <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
                 <xcad:DockingManager.LayoutItemContainerStyle>
                     <Style TargetType="{x:Type xcad:LayoutItem}">

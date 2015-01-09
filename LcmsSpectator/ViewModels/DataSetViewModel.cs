@@ -68,6 +68,7 @@ namespace LcmsSpectator.ViewModels
         #region Public Properties
         public ILcMsRun Lcms { get; private set; }
 
+        private string _rawFileName;
         /// <summary>
         /// Raw file name without path or extension. For displaying on tab header.
         /// </summary>
@@ -82,6 +83,7 @@ namespace LcmsSpectator.ViewModels
         }
 
 
+        private string _rawFilePath;
         /// <summary>
         /// Full path to the raw file including extension.
         /// </summary>
@@ -118,6 +120,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private bool _showFeatureMapSplash;
         /// <summary>
         /// Sets/Gets whether the loading screen is currently being shown.
         /// </summary>
@@ -131,6 +134,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private bool _isLoading;
         /// <summary>
         /// Sets/Gets whether the loading screen is currently being shown.
         /// </summary>
@@ -145,20 +149,37 @@ namespace LcmsSpectator.ViewModels
         }
         #endregion
 
+        #region Public Methods
+        /// <summary>
+        /// Add Identifications associated with data set.
+        /// </summary>
+        /// <param name="ids">Identifications</param>
         public void AddIds(IdentificationTree ids)
         {
             ScanViewModel.AddIds(ids.AllPrSms);
         }
 
+        /// <summary>
+        /// Read features and display feature map for this data set.
+        /// </summary>
+        /// <param name="filePath">Path of feature file.</param>
         public void OpenFeatureFile(string filePath)
         {
             ShowFeatureMapSplash = false;
-            //ShowLoadingScreen = true;
-            var features = FeatureReader.Read(filePath);
-            FeatureMapViewModel.SetData((LcMsRun)Lcms, features.ToList(), ScanViewModel.FilteredData);
-            //ShowLoadingScreen = false;
+            try
+            {
+                var features = FeatureReader.Read(filePath);
+                FeatureMapViewModel.SetData((LcMsRun) Lcms, features.ToList(), ScanViewModel.FilteredData);
+            }
+            catch (InvalidCastException)
+            {
+                _dialogService.MessageBox("Cannot open features for this type of data set.");
+            }
         }
 
+        /// <summary>
+        /// Display open file dialog to select feature file and then read and display features.
+        /// </summary>
         public void OpenFeatureFile()
         {
             const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv";
@@ -170,14 +191,10 @@ namespace LcmsSpectator.ViewModels
                 FeatureMapViewModel.SetData((LcMsRun)Lcms, features.ToList(), ScanViewModel.FilteredData);
             }
         }
+        #endregion
 
         #region Private members
         private readonly IMainDialogService _dialogService;
-
-        private string _rawFilePath;
-        private string _rawFileName;
-        private bool _isLoading;
-        private bool _showFeatureMapSplash;
         #endregion
     }
 }
