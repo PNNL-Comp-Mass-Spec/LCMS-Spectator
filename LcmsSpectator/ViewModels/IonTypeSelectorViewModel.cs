@@ -39,6 +39,7 @@ namespace LcmsSpectator.ViewModels
             SelectedNeutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
 
             MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
+            MessengerInstance.Register<PropertyChangedMessage<ActivationMethod>>(this, ActivationMethodChanged);
 
             UpdateIonTypes();
 
@@ -154,6 +155,18 @@ namespace LcmsSpectator.ViewModels
                 var maxCharge = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
                 MaxCharge = maxCharge;
                 UpdateIonTypes();
+            }
+        }
+
+        private void ActivationMethodChanged(PropertyChangedMessage<ActivationMethod> message)
+        {
+            if (message.NewValue == ActivationMethod.ETD)
+            {
+                SelectedBaseIonTypes = IcParameters.Instance.EtdIonTypes;
+            }
+            else
+            {
+                SelectedBaseIonTypes = IcParameters.Instance.CidHcdIonTypes;
             }
         }
 

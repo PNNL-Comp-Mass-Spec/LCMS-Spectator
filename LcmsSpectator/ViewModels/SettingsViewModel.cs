@@ -35,7 +35,9 @@ namespace LcmsSpectator.ViewModels
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
             SpectrumFilterWindowSize = IcParameters.Instance.SpectrumFilterWindowSize;
             PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
-            PrecursorViewMode = IcParameters.Instance.PrecursorViewMode;
+            AutomaticallySelectIonTypes = IcParameters.Instance.AutomaticallySelectIonTypes;
+            CidHcdIonTypes = IcParameters.Instance.GetCidHcdIonTypes();
+            EtdIonTypes = IcParameters.Instance.GetEtdIonTypes();
 
             PrecursorViewModes = new ObservableCollection<PrecursorViewMode>
             {
@@ -73,10 +75,22 @@ namespace LcmsSpectator.ViewModels
         public int PointsToSmooth { get; set; }
         public double SpectrumFilterWindowSize { get; set; }
         public double PrecursorRelativeIntensityThreshold { get; set; }
-        public PrecursorViewMode PrecursorViewMode { get; set; }
         public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; }
         public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
         public bool Status { get; private set; }
+
+        public string CidHcdIonTypes { get; set; }
+        public string EtdIonTypes { get; set; }
+        private bool _automaticallySelectIonTypes;
+        public bool AutomaticallySelectIonTypes 
+        {
+            get { return _automaticallySelectIonTypes; }
+            set
+            {
+                _automaticallySelectIonTypes = value;
+                RaisePropertyChanged();
+            }
+        }
         #endregion
 
         #region Private methods
@@ -110,7 +124,10 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
             IcParameters.Instance.SpectrumFilterWindowSize = SpectrumFilterWindowSize;
             IcParameters.Instance.PrecursorRelativeIntensityThreshold = PrecursorRelativeIntensityThreshold;
-            IcParameters.Instance.PrecursorViewMode = PrecursorViewMode;
+            IcParameters.Instance.AutomaticallySelectIonTypes = AutomaticallySelectIonTypes;
+            IcParameters.Instance.CidHcdIonTypes = IcParameters.IonTypeStringParse(CidHcdIonTypes);
+            IcParameters.Instance.EtdIonTypes = IcParameters.IonTypeStringParse(EtdIonTypes);
+
 
             var modificationList = Modifications.Select(searchModificationVm => searchModificationVm.SearchModification)
                                                 .Where(searchModification => searchModification != null).ToList();

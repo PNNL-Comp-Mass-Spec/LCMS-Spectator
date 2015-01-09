@@ -72,6 +72,18 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private ActivationMethod _activationMethod;
+        public ActivationMethod ActivationMethod
+        {
+            get { return _activationMethod; }
+            set
+            {
+                var old = _activationMethod;
+                _activationMethod = value;
+                RaisePropertyChanged("ActivationMethod", old, _activationMethod, true);
+            }
+        }
+
         public void ClearPlots()
         {
             PrimarySpectrumViewModel.Clear();
@@ -173,6 +185,7 @@ namespace LcmsSpectator.ViewModels
                 xAxis1.Zoom(xAxis2.ActualMinimum, xAxis2.ActualMaximum);
                 isInternalChange = false;
             };
+            ActivationMethod = ((ProductSpectrum) primary).ActivationMethod;
         }
 
         public void SwapSecondary1()

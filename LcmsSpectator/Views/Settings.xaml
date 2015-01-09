@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:views="clr-namespace:LcmsSpectator.Views"
              mc:Ignorable="d" Title="LcMsSpectator: Settings"
-             Height="360" Width="800">
+             Height="460" Width="800">
     <Window.Resources>
         <DataTemplate x:Key="ModItemTemplate">
             <Grid>
@@ -24,7 +24,7 @@
             </Grid>
         </DataTemplate>
     </Window.Resources>
-    <Grid Height="300" Margin="10,10,10,10" VerticalAlignment="Top">
+    <Grid Height="400" Margin="10,10,10,10" VerticalAlignment="Top">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="10" /> <!-- Spacer -->
@@ -66,11 +66,9 @@
 
                     <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Spectrum Filter Window Size</TextBlock>
                     <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterWindowSize}" Height="25" VerticalAlignment="Top" />
+                    
                     <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope Relative Intensity Threshold</TextBlock>
                     <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
-                    <!--<TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Precursor View Mode</TextBlock>
-                    <ComboBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Height="25" VerticalAlignment="Top" ItemsSource="{Binding PrecursorViewModes}"
-                              SelectedItem="{Binding PrecursorViewMode}"/> -->
                 </Grid>
             </TabItem>
             <TabItem Header="Modifications">
@@ -108,6 +106,41 @@
             </TabItem>
             <TabItem Header="Heavy Modifications">
                 <views:HeavyModificationsView DataContext="{Binding HeavyModificationsViewModel}" />
+            </TabItem>
+            <TabItem Header="Default Ion Types">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60*" />
+                        <ColumnDefinition Width="30*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Height="30" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Top">Activation Method</TextBlock>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold">CID/HCD</TextBlock>
+                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold">ETD</TextBlock>
+                    <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding AutomaticallySelectIonTypes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                              >Automatically select ion types based on activation method of currently select ms2 spectrum
+                    </CheckBox>
+
+                    <TextBlock Grid.Row="0" Grid.Column="1"
+                               Height="30" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Top">
+                        Ion Types
+                        <LineBreak />
+                        (Separated by Spaces)
+                    </TextBlock>
+
+                    <TextBox Grid.Row="1" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding CidHcdIonTypes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             IsEnabled="{Binding AutomaticallySelectIonTypes, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding EtdIonTypes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                             IsEnabled="{Binding AutomaticallySelectIonTypes, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
             </TabItem>
         </TabControl>
 
