@@ -160,11 +160,14 @@ namespace LcmsSpectator.ViewModels
 
         private void ActivationMethodChanged(PropertyChangedMessage<ActivationMethod> message)
         {
-            if (message.NewValue == ActivationMethod.ETD)
+            if (!IcParameters.Instance.AutomaticallySelectIonTypes) return;
+            if (message.NewValue == ActivationMethod.ETD &&
+                !Equals(SelectedBaseIonTypes, IcParameters.Instance.EtdIonTypes))
             {
                 SelectedBaseIonTypes = IcParameters.Instance.EtdIonTypes;
             }
-            else
+            else if (message.NewValue != ActivationMethod.ETD &&
+                     !Equals(SelectedBaseIonTypes, IcParameters.Instance.CidHcdIonTypes))
             {
                 SelectedBaseIonTypes = IcParameters.Instance.CidHcdIonTypes;
             }
