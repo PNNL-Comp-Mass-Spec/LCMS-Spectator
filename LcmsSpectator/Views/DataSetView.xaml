@@ -104,8 +104,9 @@
                                             <DataGridTextColumn Header="Retention Time" Width="5*" Binding="{Binding RetentionTime}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" IsReadOnly="False" />
-                                            <DataGridTextColumn Header="Mass" Width="5*" Binding="{Binding Mass}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Mass" Width="5*" Binding="{Binding Mass, Converter={StaticResource ScoreFormatter}}" IsReadOnly="True" />
                                             <DataGridTextColumn Header="Precursor M/Z" Width="5*" Binding="{Binding PrecursorMz, Converter={StaticResource ScoreFormatter}}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Activation Method" Width="7*" Binding="{Binding Ms2Spectrum.ActivationMethod}" IsReadOnly="True" />
                                             <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue, Converter={StaticResource QValueFormatter}}" IsReadOnly="False" />
