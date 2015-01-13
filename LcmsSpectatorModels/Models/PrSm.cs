@@ -144,9 +144,15 @@ namespace LcmsSpectatorModels.Models
             set
             {
                 _sequence = value;
-                var composition = new Composition(Composition.H2O);
-                composition = _sequence.Aggregate(composition, (current, aa) => current + aa.Composition);
-                Mass = composition.Mass;
+                double mass;
+                if (_sequence.Count > 0)
+                {
+                    var composition = new Composition(Composition.H2O);
+                    composition = _sequence.Aggregate(composition, (current, aa) => current + aa.Composition);
+                    mass = composition.Mass;
+                }
+                else mass = Double.NaN;
+                Mass = mass;
             }
         }
 
@@ -163,7 +169,7 @@ namespace LcmsSpectatorModels.Models
         {
             get
             {
-                if (Sequence.Count == 0) return 0.0;
+                if (Sequence.Count == 0) return Double.NaN;
                 var composition = Sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
                 var ion = new Ion(composition + Composition.H2O, Charge);
                 return ion.GetMostAbundantIsotopeMz();
