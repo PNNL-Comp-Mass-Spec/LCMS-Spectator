@@ -708,7 +708,7 @@ namespace LcmsSpectator.ViewModels
                         "{0}" + Environment.NewLine +
                         "{1}: {2:0.###}" + Environment.NewLine +
                         "Scan: {Scan:0}" + Environment.NewLine +
-                        "{3}: {4:0.##E0}" + Environment.NewLine +
+                        "{3}: {4:0.###E0}" + Environment.NewLine +
                         "Abundance: {Abundance:0.###E0}" + Environment.NewLine +
                         "Charge: {Charge:0}" + Environment.NewLine +
                         "Score: {Score:0.###}"
@@ -726,7 +726,7 @@ namespace LcmsSpectator.ViewModels
                 TrackerFormatString =
                     "{0}" + Environment.NewLine +
                     "{1}: {2:0.###}" + Environment.NewLine +
-                    "{3}: {4:0.##E0}" + Environment.NewLine +
+                    "{3}: {4:0.###E0}" + Environment.NewLine +
                     "QValue: {QValue:0.###}",
                 MarkerStrokeThickness = 1,
                 IsVisible = _showNotFoundMs2,
