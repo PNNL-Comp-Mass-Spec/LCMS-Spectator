@@ -230,7 +230,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _pointsDisplayed = value;
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed, _showFoundMs2, _showNotFoundMs2));
+                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
                 RaisePropertyChanged();
             }
         }
@@ -246,7 +246,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _abundanceThreshold = value;
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed, _showFoundMs2, _showNotFoundMs2));
+                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
                 RaisePropertyChanged();
             }
         }
@@ -262,7 +262,7 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _scoreThreshold = value;
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed, _showFoundMs2, _showNotFoundMs2));
+                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
                 RaisePropertyChanged();
             }
         }
@@ -359,16 +359,8 @@ namespace LcmsSpectator.ViewModels
             _featuresByScan = new Dictionary<FeaturePoint, Feature>();
             foreach (var feature in _features)
             {
-                try
-                {
-                    _featuresByScan.Add(feature.MinPoint, feature);
-                    _featuresByScan.Add(feature.MaxPoint, feature);
-                }
-                catch (Exception)
-                {
-                    
-                    throw;
-                }
+                _featuresByScan.Add(feature.MinPoint, feature);
+                _featuresByScan.Add(feature.MaxPoint, feature);
                 feature.MinPoint.RetentionTime = _lcms.GetElutionTime(feature.MinPoint.Scan);
                 feature.MaxPoint.RetentionTime = _lcms.GetElutionTime(feature.MaxPoint.Scan);
                 var ms2ScansMin = lcms.GetFragmentationSpectraScanNums(feature.MinPoint.Mz).ToList();
@@ -422,7 +414,7 @@ namespace LcmsSpectator.ViewModels
             _xAxis.AbsoluteMinimum = 0;
             _xAxis.AbsoluteMaximum = _lcms.MaxLcScan;
             if (updatePlot)
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed, _showFoundMs2, _showNotFoundMs2));
+                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
         }
 
         /// <summary>
@@ -485,7 +477,7 @@ namespace LcmsSpectator.ViewModels
                     _notFoundMs2.Add(id);
                 }
             }
-            _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed, _showFoundMs2, _showNotFoundMs2));
+            _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
         }
         #endregion
 
@@ -519,7 +511,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (FeatureMap != null)
                 {
-                    SetHighlight(new PrSm() { Scan = message.NewValue, Sequence = _selectedPrSm.Sequence, Lcms = _selectedPrSm.Lcms });
+                    SetHighlight(new PrSm { Scan = message.NewValue, Sequence = _selectedPrSm.Sequence, Lcms = _selectedPrSm.Lcms });
                     FeatureMap.InvalidatePlot(true);
                 }
             }
@@ -585,15 +577,14 @@ namespace LcmsSpectator.ViewModels
 #endregion
 
         #region Private methods
+
         /// <summary>
         /// Build feature map plot.
         /// </summary>
         /// <param name="scoreThreshold"></param>
         /// <param name="abundanceThreshold"></param>
         /// <param name="pointsDisplayed"></param>
-        /// <param name="showFoundMs2"></param>
-        /// <param name="showNotFoundMs2"></param>
-        private void BuildPlot(double scoreThreshold, double abundanceThreshold, int pointsDisplayed, bool showFoundMs2, bool showNotFoundMs2)
+        private void BuildPlot(double scoreThreshold, double abundanceThreshold, int pointsDisplayed)
         {
             // Filter features based on score threshold, abundance threshold, points to display
             var filteredFeatures = FilterData(_features, scoreThreshold, abundanceThreshold, pointsDisplayed);
@@ -695,7 +686,7 @@ namespace LcmsSpectator.ViewModels
                     TrackerFormatString =
                         "{0}" + Environment.NewLine +
                         "{1}: {2:0.###}" + Environment.NewLine +
-                        "{2}: {4:0.##E0}",
+                        "{2}: {4:0.###E0}",
                     IsVisible = _showFoundMs2,
                 };
                 _foundMs2S.Add(ms2Series);
@@ -718,7 +709,7 @@ namespace LcmsSpectator.ViewModels
                         "{1}: {2:0.###}" + Environment.NewLine +
                         "Scan: {Scan:0}" + Environment.NewLine +
                         "{3}: {4:0.##E0}" + Environment.NewLine +
-                        "Abundance: {Abundance:0.##E0}" + Environment.NewLine +
+                        "Abundance: {Abundance:0.###E0}" + Environment.NewLine +
                         "Charge: {Charge:0}" + Environment.NewLine +
                         "Score: {Score:0.###}"
                 };
