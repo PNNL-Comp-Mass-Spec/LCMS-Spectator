@@ -64,11 +64,11 @@
                     <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PointsToSmooth}" Height="25" VerticalAlignment="Top"
                              ToolTip="Must be an odd integer of at least 3. 0 = No smoothing."/>
 
-                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Spectrum Filter Window Size</TextBlock>
-                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterWindowSize}" Height="25" VerticalAlignment="Top" />
+                    <!--<TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Spectrum Filter Window Size</TextBlock>
+                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterWindowSize}" Height="25" VerticalAlignment="Top" />-->
                     
-                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope Relative Intensity Threshold</TextBlock>
-                    <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope Relative Intensity Threshold</TextBlock>
+                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
                 </Grid>
             </TabItem>
             <TabItem Header="Modifications">
