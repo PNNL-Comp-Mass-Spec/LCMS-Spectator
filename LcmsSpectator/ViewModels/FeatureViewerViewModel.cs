@@ -356,8 +356,19 @@ namespace LcmsSpectator.ViewModels
             _notFoundMs2 = new List<PrSm>();
             var accountedFor = new HashSet<int>();
             var sortedIds = _ids.Values.OrderBy(id => id.Scan).ToList();
+            _featuresByScan = new Dictionary<FeaturePoint, Feature>();
             foreach (var feature in _features)
             {
+                try
+                {
+                    _featuresByScan.Add(feature.MinPoint, feature);
+                    _featuresByScan.Add(feature.MaxPoint, feature);
+                }
+                catch (Exception)
+                {
+                    
+                    throw;
+                }
                 feature.MinPoint.RetentionTime = _lcms.GetElutionTime(feature.MinPoint.Scan);
                 feature.MaxPoint.RetentionTime = _lcms.GetElutionTime(feature.MaxPoint.Scan);
                 var ms2ScansMin = lcms.GetFragmentationSpectraScanNums(feature.MinPoint.Mz).ToList();
@@ -532,21 +543,24 @@ namespace LcmsSpectator.ViewModels
                 if (featurePoint != null)
                 {
                     // See if there is a ms2 point closer than this feature point
-                    var ms2Scans = _lcms.GetFragmentationSpectraScanNums(featurePoint.Mz);
-                    var minDist = result.Position.DistanceToSquared(args.Position);
                     PrSm closestPrSm = null;
-                    foreach (var scan in ms2Scans)
+                    if (_showFoundMs2)
                     {
-                        if (!_ids.ContainsKey(scan)) continue;
-                        var prsm = _ids[scan];
-                        var mass = featurePoint.Mass; 
-                        var sp = _xAxis.Transform(prsm.RetentionTime, prsm.Mass, _yAxis);
-                        var distSq = sp.DistanceToSquared(args.Position);
-                        if (distSq < minDist)
+                        var feature = _featuresByScan[featurePoint];
+                        var ms2Scans = feature.AssociatedMs2;
+                        var minDist = result.Position.DistanceToSquared(args.Position);
+                        foreach (var scan in ms2Scans)
                         {
-                            closestPrSm = prsm;
-                            minDist = distSq;
-                        }
+                            if (!_ids.ContainsKey(scan)) continue;
+                            var prsm = _ids[scan];
+                            var sp = _xAxis.Transform(prsm.RetentionTime, featurePoint.Mass, _yAxis);
+                            var distSq = sp.DistanceToSquared(args.Position);
+                            if (distSq < minDist)
+                            {
+                                closestPrSm = prsm;
+                                minDist = distSq;
+                            }
+                        }   
                     }
                     if (closestPrSm != null) _selectedPrSmPoint = closestPrSm;
                     else _selectedFeaturePoint = featurePoint;
@@ -663,11 +677,10 @@ namespace LcmsSpectator.ViewModels
                         var prsm = (PrSm) p;
                         int colorScore;
                         double mass;
-                        //if (prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature2.MinPoint.Mass) < 1)
                         if (prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature2.MinPoint.Mass) < 1)
                         {
                             colorScore = idColorScore;
-                            mass = prsm.Mass;
+                            mass = feature2.MinPoint.Mass;
                         }
                         else
                         {
@@ -940,6 +953,7 @@ namespace LcmsSpectator.ViewModels
 
         private LcMsRun _lcms;
         private List<Feature> _features;
+        private Dictionary<FeaturePoint, Feature> _featuresByScan; 
         private Dictionary<int, PrSm> _ids;
         private List<PrSm> _notFoundMs2;
 

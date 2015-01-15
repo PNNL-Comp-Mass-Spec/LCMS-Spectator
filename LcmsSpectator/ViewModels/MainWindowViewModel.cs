@@ -155,7 +155,6 @@ namespace LcmsSpectator.ViewModels
                             catch (Exception)
                             {
                                 _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
-                                throw;
                             }
                     }
                 }, true);
