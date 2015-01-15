@@ -24,8 +24,8 @@
                 <TextBlock Text="Charge: " FontWeight="Bold" />
                 <TextBox Text="{Binding Path=Charge, Mode=OneWay}" FontWeight="Bold" Width="75"
                                  Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap" />
-                <TextBlock Text="Precursor M/z: " FontWeight="Bold" />
-                <TextBox Text="{Binding Path=PrecursorMz, Mode=OneWay}" FontWeight="Bold" Width="75"
+                <TextBlock Text="Most Abundant Isotope m/z: " FontWeight="Bold" />
+                <TextBox Text="{Binding Path=PrecursorMz, Converter={StaticResource ScoreFormatter}, Mode=OneWay}" FontWeight="Bold" Width="75"
                                  Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"/>
                 <TextBlock Text="Score: " FontWeight="Bold" />
                 <TextBox Text="{Binding Path=Score, Converter={StaticResource ScoreFormatter}, Mode=OneWay}" FontWeight="Bold" Width="75"

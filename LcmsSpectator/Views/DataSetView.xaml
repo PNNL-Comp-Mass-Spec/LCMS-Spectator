@@ -89,7 +89,7 @@
                                                     <MenuItem Header="_Sequence" IsCheckable="True" IsChecked="{Binding SequenceFilterChecked}" />
                                                     <MenuItem Header="_Protein" IsCheckable="True" IsChecked="{Binding ProteinFilterChecked}" />
                                                     <MenuItem Header="Mass" IsCheckable="True" IsChecked="{Binding MassFilterChecked}" />
-                                                    <MenuItem Header="Precursor M/_Z" IsCheckable="True" IsChecked="{Binding PrecursorMzFilterChecked}" />
+                                                    <MenuItem Header="Most Abundant Isotope m/z" IsCheckable="True" IsChecked="{Binding PrecursorMzFilterChecked}" />
                                                     <MenuItem Header="_Charge" IsCheckable="True" IsChecked="{Binding ChargeFilterChecked}" />
                                                     <MenuItem Header="_Score" IsCheckable="True" IsChecked="{Binding ScoreFilterChecked}"/>
                                                     <MenuItem Header="_Q Value" IsCheckable="True" IsChecked="{Binding QValueFilterChecked}"/>
@@ -100,16 +100,16 @@
                                             </ContextMenu>
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="Scan" Width="5*" Binding="{Binding Scan}" IsReadOnly="False" />
-                                            <DataGridTextColumn Header="Retention Time" Width="5*" Binding="{Binding RetentionTime}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Scan" Width="3*" Binding="{Binding Scan}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Retention Time" Width="5*" Binding="{Binding RetentionTime, Converter={StaticResource ScoreFormatter}}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" IsReadOnly="False" />
-                                            <DataGridTextColumn Header="Protein" Width="15*" Binding="{Binding ProteinName}" IsReadOnly="False" />
-                                            <DataGridTextColumn Header="Mass" Width="5*" Binding="{Binding Mass, Converter={StaticResource ScoreFormatter}}" IsReadOnly="True" />
-                                            <DataGridTextColumn Header="Precursor M/Z" Width="5*" Binding="{Binding PrecursorMz, Converter={StaticResource ScoreFormatter}}" IsReadOnly="True" />
-                                            <DataGridTextColumn Header="Activation Method" Width="7*" Binding="{Binding Ms2Spectrum.ActivationMethod}" IsReadOnly="True" />
-                                            <DataGridTextColumn Header="Charge" Width="5*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" IsReadOnly="False" />
-                                            <DataGridTextColumn Header="Score" Width="5*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" IsReadOnly="False" />
-                                            <DataGridTextColumn Header="QValue" Width="5*" Binding="{Binding QValue, Converter={StaticResource QValueFormatter}}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Protein" Width="5*" Binding="{Binding ProteinName}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Mass" Width="3*" Binding="{Binding Mass, Converter={StaticResource ScoreFormatter}}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Most Abundant Isotope m/z" Width="7*" Binding="{Binding PrecursorMz, Converter={StaticResource ScoreFormatter}}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Activation Method" Width="5*" Binding="{Binding Ms2Spectrum.ActivationMethod}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Charge" Width="3*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Score" Width="3*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="QValue" Width="3*" Binding="{Binding QValue, Converter={StaticResource QValueFormatter}}" IsReadOnly="False" />
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </Grid>
