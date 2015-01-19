@@ -137,6 +137,7 @@ namespace LcmsSpectatorModels.Models
 
         /// <summary>
         /// Actual sequence of identification.
+        /// Mass and PrecursorMz are updated to stay consistent with the sequence.
         /// </summary>
         public Sequence Sequence
         {
@@ -144,15 +145,19 @@ namespace LcmsSpectatorModels.Models
             set
             {
                 _sequence = value;
-                double mass;
                 if (_sequence.Count > 0)
                 {
                     var composition = new Composition(Composition.H2O);
                     composition = _sequence.Aggregate(composition, (current, aa) => current + aa.Composition);
-                    mass = composition.Mass;
+                    Mass = composition.Mass;
+                    var ion = new Ion(composition, Charge);
+                    PrecursorMz = ion.GetMostAbundantIsotopeMz();
                 }
-                else mass = Double.NaN;
-                Mass = mass;
+                else
+                {
+                    Mass = Double.NaN;
+                    PrecursorMz = Double.NaN;
+                }
             }
         }
 
@@ -164,17 +169,9 @@ namespace LcmsSpectatorModels.Models
 
         /// <summary>
         /// M/Z of most abundant isotope of identification.
+        /// This is updated when Sequence changes.
         /// </summary>
-        public double PrecursorMz
-        {
-            get
-            {
-                if (Sequence.Count == 0) return Double.NaN;
-                var composition = Sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
-                var ion = new Ion(composition + Composition.H2O, Charge);
-                return ion.GetMostAbundantIsotopeMz();
-            }
-        }
+        public double PrecursorMz { get; set; }
         #endregion
 
         /// <summary>
