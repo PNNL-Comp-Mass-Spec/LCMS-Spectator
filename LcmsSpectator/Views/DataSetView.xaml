@@ -11,7 +11,8 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:ChargeToStringConverter x:Key="ChargeFormatter" />
-        <utils:ScoreToStringConverter x:Key="ScoreFormatter" />
+        <utils:DoubleToStringConverter x:Key="MassFormatter" />
+        <utils:DoubleToStringConverterSci x:Key="ScoreFormatter" />
         <utils:QValueToStringConverter x:Key="QValueFormatter" />
     </UserControl.Resources>
     <Grid>
@@ -81,8 +82,8 @@
                                 <Grid x:Name="ScanView">
                                     <DataGrid AutoGenerateColumns="False" SelectionMode="Extended" DataContext="{Binding ScanViewModel}"
                                               IsReadOnly="True" RowHeaderWidth="0"
-                                              ItemsSource="{Binding FilteredData}" SelectedItem="{Binding SelectedPrSm}"
-                                              Grid.Row="0">
+                                              ItemsSource="{Binding FilteredData}" SelectedItem="{Binding SelectedPrSm, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                                              Grid.Row="0" Name="ScanDataGrid">
                                         <DataGrid.ContextMenu>
                                             <ContextMenu>
                                                 <MenuItem Header="_Filter by">
@@ -101,12 +102,12 @@
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Scan" Width="3*" Binding="{Binding Scan}" IsReadOnly="False" />
-                                            <DataGridTextColumn Header="Retention Time" Width="5*" Binding="{Binding RetentionTime, Converter={StaticResource ScoreFormatter}}" IsReadOnly="False" />
+                                            <DataGridTextColumn Header="Activation Method" Width="5*" Binding="{Binding Ms2Spectrum.ActivationMethod}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Retention Time" Width="5*" Binding="{Binding RetentionTime, Converter={StaticResource MassFormatter}}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Protein" Width="5*" Binding="{Binding ProteinName}" IsReadOnly="False" />
-                                            <DataGridTextColumn Header="Mass" Width="3*" Binding="{Binding Mass, Converter={StaticResource ScoreFormatter}}" IsReadOnly="True" />
-                                            <DataGridTextColumn Header="Most Abundant Isotope m/z" Width="7*" Binding="{Binding PrecursorMz, Converter={StaticResource ScoreFormatter}}" IsReadOnly="True" />
-                                            <DataGridTextColumn Header="Activation Method" Width="5*" Binding="{Binding Ms2Spectrum.ActivationMethod}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Mass" Width="3*" Binding="{Binding Mass, Converter={StaticResource MassFormatter}}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Most Abundant Isotope m/z" Width="7*" Binding="{Binding PrecursorMz, Converter={StaticResource MassFormatter}}" IsReadOnly="True" />
                                             <DataGridTextColumn Header="Charge" Width="3*" Binding="{Binding Charge, Converter={StaticResource ChargeFormatter}}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Score" Width="3*" Binding="{Binding Score, Converter={StaticResource ScoreFormatter}}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="QValue" Width="3*" Binding="{Binding QValue, Converter={StaticResource QValueFormatter}}" IsReadOnly="False" />

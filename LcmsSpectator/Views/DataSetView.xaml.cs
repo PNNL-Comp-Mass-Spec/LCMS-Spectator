@@ -17,6 +17,12 @@ namespace LcmsSpectator.Views
         public DataSetView()
         {
             InitializeComponent();
+
+            ScanDataGrid.SelectionChanged += (o, e) =>
+            {
+                ScanDataGrid.ScrollIntoView(ScanDataGrid.SelectedItem);
+                ScanDataGrid.UpdateLayout();
+            };
         }
 
         private void Window_OnLoaded(object sender, RoutedEventArgs e)
