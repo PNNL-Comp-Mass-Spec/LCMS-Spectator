@@ -69,6 +69,9 @@
                     
                     <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope Relative Intensity Threshold</TextBlock>
                     <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" ToolTip="Show monoisotopic m/z and charge reported by instrument">Show monoisotopic m/z and charge reported by instrument</TextBlock>
+                    <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" IsChecked="{Binding ShowInstrumentData}"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Modifications">

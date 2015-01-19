@@ -8,7 +8,8 @@
              d:DesignHeight="200" d:DesignWidth="900">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
-        <utils:ScoreToStringConverter x:Key="ScoreFormatter" />
+        <utils:DoubleToStringConverter x:Key="MassFormatter" />
+        <utils:DoubleToStringConverterSci x:Key="ScoreFormatter" />
     </UserControl.Resources>
     <ScrollViewer VerticalAlignment="Top"
                               VerticalScrollBarVisibility="Auto"
@@ -24,8 +25,11 @@
                 <TextBlock Text="Charge: " FontWeight="Bold" />
                 <TextBox Text="{Binding Path=Charge, Mode=OneWay}" FontWeight="Bold" Width="75"
                                  Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap" />
+                <TextBlock Text="Mass: " FontWeight="Bold" />
+                <TextBox Text="{Binding Path=Mass, Converter={StaticResource MassFormatter}, Mode=OneWay}" FontWeight="Bold" Width="75"
+                                 Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"/>
                 <TextBlock Text="Most Abundant Isotope m/z: " FontWeight="Bold" />
-                <TextBox Text="{Binding Path=PrecursorMz, Converter={StaticResource ScoreFormatter}, Mode=OneWay}" FontWeight="Bold" Width="75"
+                <TextBox Text="{Binding Path=PrecursorMz, Converter={StaticResource MassFormatter}, Mode=OneWay}" FontWeight="Bold" Width="75"
                                  Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"/>
                 <TextBlock Text="Score: " FontWeight="Bold" />
                 <TextBox Text="{Binding Path=Score, Converter={StaticResource ScoreFormatter}, Mode=OneWay}" FontWeight="Bold" Width="75"
