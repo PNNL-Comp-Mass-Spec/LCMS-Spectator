@@ -68,11 +68,11 @@ namespace LcmsSpectatorModels.Readers
                 {
                     Heavy = false,
                     Scan = Convert.ToInt32(parts[headers["Scan"]]),
+                    Charge = Convert.ToInt32(parts[headers["Charge"]]),
                     Sequence = sequenceData.Item1,
                     SequenceText = sequenceData.Item2,
                     ProteinName = protein,
                     ProteinDesc = parts[headers["ProteinDesc"]].Split(';').FirstOrDefault(),
-                    Charge = Convert.ToInt32(parts[headers["Charge"]]),
                     Score = Math.Round(score, 3),
                     QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),
                 };
