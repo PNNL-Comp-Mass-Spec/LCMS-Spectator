@@ -24,6 +24,7 @@ namespace LcmsSpectatorModels.Config
         public int PointsToSmooth { get; set; }
         public double SpectrumFilterWindowSize { get; set; }
         public double PrecursorRelativeIntensityThreshold { get; set; }
+        public bool ShowInstrumentData { get; set; }
         public PrecursorViewMode PrecursorViewMode { get; set; }
         public List<SearchModification> SearchModifications { get; set; }
         public List<Modification> LightModifications { get; set; } 
@@ -89,6 +90,7 @@ namespace LcmsSpectatorModels.Config
             PointsToSmooth = 9;
             SpectrumFilterWindowSize = 2.5;
             PrecursorRelativeIntensityThreshold = 0.1;
+            ShowInstrumentData = false;
             PrecursorViewMode = PrecursorViewMode.Isotopes;
             SearchModifications = new List<SearchModification>
             {
