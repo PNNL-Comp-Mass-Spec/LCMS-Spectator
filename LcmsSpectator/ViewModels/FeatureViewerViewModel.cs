@@ -359,15 +359,19 @@ namespace LcmsSpectator.ViewModels
             _featuresByScan = new Dictionary<FeaturePoint, Feature>();
             foreach (var feature in _features)
             {
+                var mass = feature.MinPoint.Mass;
                 _featuresByScan.Add(feature.MinPoint, feature);
                 _featuresByScan.Add(feature.MaxPoint, feature);
+                var ms2Scans = new List<int>();
+                for (int c = feature.MinPoint.Scan; c <= feature.MaxPoint.Scan; c++)
+                {
+                    var mz = (mass + c*Constants.Proton)/c;
+                    ms2Scans.AddRange(lcms.GetFragmentationSpectraScanNums(mz));
+                }
                 feature.MinPoint.RetentionTime = _lcms.GetElutionTime(feature.MinPoint.Scan);
                 feature.MaxPoint.RetentionTime = _lcms.GetElutionTime(feature.MaxPoint.Scan);
-                var ms2ScansMin = lcms.GetFragmentationSpectraScanNums(feature.MinPoint.Mz).ToList();
-                var ms2ScansMax = lcms.GetFragmentationSpectraScanNums(feature.MaxPoint.Mz).ToList();
                 Feature feature1 = feature;
-                var featureMs2Scans = (ms2ScansMin.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)
-                                        .Union(ms2ScansMax.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan))).ToList();
+                var featureMs2Scans = (ms2Scans.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan));
                 feature.AssociatedMs2.AddRange(featureMs2Scans);
                 var minIndex = sortedIds.BinarySearch(new PrSm {Scan = feature.MinPoint.Scan}, new PrSmScanComparer());
                 if (minIndex < 0) minIndex *= -1;
@@ -431,15 +435,22 @@ namespace LcmsSpectator.ViewModels
             var scanHash = new Dictionary<int, List<double>>();
             var accountedFor = new HashSet<int>();
             var sortedIds = _ids.Values.OrderBy(id => id.Scan).ToList();
+            _featuresByScan.Clear();
             foreach (var feature in _features)
             {
+                var mass = feature.MinPoint.Mass;
+                _featuresByScan.Add(feature.MinPoint, feature);
+                _featuresByScan.Add(feature.MaxPoint, feature);
+                var ms2Scans = new List<int>();
+                for (int c = feature.MinPoint.Scan; c <= feature.MaxPoint.Scan; c++)
+                {
+                    var mz = (mass + c * Constants.Proton) / c;
+                    ms2Scans.AddRange(_lcms.GetFragmentationSpectraScanNums(mz));
+                }
                 feature.MinPoint.RetentionTime = _lcms.GetElutionTime(feature.MinPoint.Scan);
                 feature.MaxPoint.RetentionTime = _lcms.GetElutionTime(feature.MaxPoint.Scan);
-                var ms2ScansMin = _lcms.GetFragmentationSpectraScanNums(feature.MinPoint.Mz).ToList();
-                var ms2ScansMax = _lcms.GetFragmentationSpectraScanNums(feature.MaxPoint.Mz).ToList();
                 Feature feature1 = feature;
-                var featureMs2Scans = (ms2ScansMin.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan)
-                                        .Union(ms2ScansMax.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan))).ToList();
+                var featureMs2Scans = (ms2Scans.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan));
                 feature.AssociatedMs2.AddRange(featureMs2Scans);
                 var minIndex = sortedIds.BinarySearch(new PrSm { Scan = feature.MinPoint.Scan }, new PrSmScanComparer());
                 if (minIndex < 0) minIndex *= -1;
@@ -547,7 +558,7 @@ namespace LcmsSpectator.ViewModels
                             var prsm = _ids[scan];
                             var sp = _xAxis.Transform(prsm.RetentionTime, featurePoint.Mass, _yAxis);
                             var distSq = sp.DistanceToSquared(args.Position);
-                            if (distSq < minDist)
+                            if (closestPrSm == null || distSq < minDist)
                             {
                                 closestPrSm = prsm;
                                 minDist = distSq;
@@ -555,7 +566,7 @@ namespace LcmsSpectator.ViewModels
                         }   
                     }
                     if (closestPrSm != null) _selectedPrSmPoint = closestPrSm;
-                    else _selectedFeaturePoint = featurePoint;
+                    _selectedFeaturePoint = featurePoint;
                 }
             }
             else if (series is ScatterSeries)
@@ -751,7 +762,7 @@ namespace LcmsSpectator.ViewModels
         {
             if (_selectedFeaturePoint != null)
                 BuildIsotopePlots();
-            else if (_selectedPrSmPoint != null)
+            if (_selectedPrSmPoint != null)
             {
                 SelectedPrSm = _selectedPrSmPoint;
             }
@@ -886,26 +897,6 @@ namespace LcmsSpectator.ViewModels
             var topNPoints = filteredFeatures.GetRange(0, numDisplayed);
             return topNPoints;
         }
-
-        //private bool ContainsPoint(Dictionary<int, List<double>> points, int scan, double mass,
-        //    double massTolerance = 0.01)
-        //{
-        //    bool success = false;
-        //    List<double> masses;
-        //    if (points.TryGetValue(scan, out masses))
-        //    {
-        //        var index = masses.BinarySearch(mass);
-        //        if (index < 0) index *= -1;
-        //        var lowIndex = Math.Min(Math.Max(0, index - 1), masses.Count - 1);
-        //        var hiIndex = Math.Min(index + 1, masses.Count - 1);
-        //        if ((Math.Abs(mass - masses[hiIndex]) <= massTolerance &&
-        //             Math.Abs(mass - masses[lowIndex]) <= massTolerance))
-        //        {
-        //            success = true;
-        //        }
-        //    }
-        //    return success;
-        //}
 
         private bool TryInsert(Dictionary<int, List<double>> points, int scan, double mass, double massTolerance=0.1)
         {

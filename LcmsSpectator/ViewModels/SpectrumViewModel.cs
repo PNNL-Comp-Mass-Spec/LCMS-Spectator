@@ -121,7 +121,7 @@ namespace LcmsSpectator.ViewModels
 
             if (primary is ProductSpectrum)
             {
-                primaryTitle = "Ms2 Spectrum";
+                primaryTitle = "MS/MS Spectrum";
                 secondary1Title = "Previous Ms1 Spectrum";
                 secondary2Title = "Next Ms1 Spectrum";
                 secondary1 = _lcms.GetSpectrum(_lcms.GetPrevScanNum(scan, 1));
@@ -139,7 +139,7 @@ namespace LcmsSpectator.ViewModels
                 }
                 if (primary.ScanNum < scan)
                 {
-                    primaryTitle = "Previous Ms2 Spectrum";
+                    primaryTitle = "Previous MS1 Spectrum";
                     secondary1Title = "Previous Ms1 Spectrum";
                     secondary2Title = "Ms1 Spectrum";
                     secondary1 = _lcms.GetSpectrum(_lcms.GetPrevScanNum(primary.ScanNum, 1));
@@ -147,9 +147,9 @@ namespace LcmsSpectator.ViewModels
                 }
                 else
                 {
-                    primaryTitle = "Next Ms2 Spectrum";
-                    secondary1Title = "Ms1 Spectrum";
-                    secondary2Title = "Next Ms1 Spectrum";
+                    primaryTitle = "Next MS/MS Spectrum";
+                    secondary1Title = "MS1 Spectrum";
+                    secondary2Title = "Next MS1 Spectrum";
                     secondary1 = _lcms.GetSpectrum(scan);
                     secondary2 = _lcms.GetSpectrum(_lcms.GetNextScanNum(primary.ScanNum, 1));
                 }
@@ -238,7 +238,7 @@ namespace LcmsSpectator.ViewModels
             var xAxis = new LinearAxis
             {
                 Position = AxisPosition.Bottom,
-                Title = "M/Z",
+                Title = "m/z",
                 Minimum = ms1MinMz,
                 Maximum = ms1MaxMz,
                 AbsoluteMinimum = 0,
@@ -302,9 +302,6 @@ namespace LcmsSpectator.ViewModels
         private void SettingsChanged(SettingsChangedNotification notification)
         {
             UpdateSpectra(_selectedScan);
-            //PrimarySpectrumViewModel.SpectrumUpdate();
-            //Secondary1ViewModel.SpectrumUpdate();
-            //Secondary2ViewModel.SpectrumUpdate();
         }
 
         private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, ILcMsRun lcms)

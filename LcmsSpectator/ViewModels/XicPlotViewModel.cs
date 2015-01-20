@@ -36,7 +36,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="xAxis">XAxis for XIC plo.</param>
         /// <param name="heavy">Does this XIC represent a heavy peptide?</param>
         /// <param name="showLegend">Should a legend be shown on the plot?</param>
-        public XicPlotViewModel(IDialogService dialogService, ITaskService taskService, Messenger messenger, string title, LinearAxis xAxis, bool heavy, bool showLegend=true)
+        public XicPlotViewModel(IDialogService dialogService, ITaskService taskService, IMessenger messenger, string title, LinearAxis xAxis, bool heavy, bool showLegend=true)
         {
             MessengerInstance = messenger;
             _taskService = taskService;
@@ -55,7 +55,6 @@ namespace LcmsSpectator.ViewModels
             _smoothedXics = new ConcurrentDictionary<string, Tuple<LabeledXic, bool>>();
             _xicCache = new ConcurrentDictionary<string, LabeledXic>();
             MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
-            MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
             MessengerInstance.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
             UpdatePlot();
         }
@@ -316,18 +315,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Captures when the data set's selected charge has changed.
-        /// </summary>
-        /// <param name="message">Event message containing new charge.</param>
-        private void SelectedChargeChanged(PropertyChangedMessage<int> message)
-        {
-            if (message.PropertyName == "Charge")
-            {
-                _selectedCharge = message.NewValue;
-            }
-        }
-
-        /// <summary>
         /// Update plot title when XAxis axis changed to reflect updated area of the currently
         /// visible portion of the plot.
         /// </summary>
@@ -429,7 +416,8 @@ namespace LcmsSpectator.ViewModels
             var seriesstore = Ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, List<XicDataPoint>>>(ion => ion.LabeledIon.Label, ion => null);
             var smoother = (PointsToSmooth == 0 || PointsToSmooth == 1) ?
                 null : new SavitzkyGolaySmoother(PointsToSmooth, 2);
-            var colors = new ColorDictionary(Math.Min(Math.Max(_selectedCharge - 1, 2), 15));
+            var maxCharge = (_ions.Count > 0) ? _ions.Max(ion => ion.LabeledIon.IonType.Charge) : 2;
+            var colors = new ColorDictionary(Math.Min(Math.Max(maxCharge, 2), 15));
             Parallel.ForEach(Ions, ion =>
             {
                 var lxic = GetXic(ion.LabeledIon);
@@ -548,7 +536,6 @@ namespace LcmsSpectator.ViewModels
         private readonly ConcurrentDictionary<string, LabeledXic> _xicCache;
         private SelectablePlotModel _plot;
         private double _area;
-        private int _selectedCharge;
         #endregion
 
         public class SelectedScanChangedMessage : NotificationMessage

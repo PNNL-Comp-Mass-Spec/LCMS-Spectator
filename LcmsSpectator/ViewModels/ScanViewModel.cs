@@ -18,6 +18,7 @@ namespace LcmsSpectator.ViewModels
         public ScanViewModel(IMainDialogService dialogService, ITaskService taskService, List<PrSm> data, IMessenger messenger)
         {
             MessengerInstance = messenger;
+            MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
             ClearFiltersCommand = new RelayCommand(ClearFilters);
             _taskService = taskService;
             _dialogService = dialogService;
@@ -445,7 +446,7 @@ namespace LcmsSpectator.ViewModels
         }
         #endregion
 
-        private void FilterData()
+        public void FilterData()
         {
             var filtered = _data;
             foreach (var filter in _filters)
@@ -489,6 +490,15 @@ namespace LcmsSpectator.ViewModels
         private void UpdateActualIds()
         {
             _actualIds = _data.Any(id => id.Sequence.Count > 0);
+        }
+
+        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
+        {
+            if (message.Sender is PrSmViewModel)
+            {
+                _selectedPrSm = message.NewValue;
+                RaisePropertyChanged("SelectedPrSm");
+            }
         }
 
         private readonly IMainDialogService _dialogService;

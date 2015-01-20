@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
+using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.TaskServices;
 using LcmsSpectator.Utils;
+using LcmsSpectatorModels.Config;
 using LcmsSpectatorModels.Models;
 using LcmsSpectatorModels.Readers;
 
@@ -40,6 +43,7 @@ namespace LcmsSpectator.ViewModels
             ITaskService taskService1 = taskService;
             var messenger = new Messenger();
             MessengerInstance = messenger;
+            Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
             SelectedPrSm = new PrSmViewModel(messenger);
             XicViewModel = new XicViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService1), messenger);
             SpectrumViewModel = new SpectrumViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService1), messenger);
@@ -55,6 +59,8 @@ namespace LcmsSpectator.ViewModels
             LoadingScreenViewModel = new LoadingScreenViewModel(TaskServiceFactory.GetTaskServiceLike(taskService));
 
             _showFeatureMapSplash = true;
+
+            _showInstrumentData = IcParameters.Instance.ShowInstrumentData;
 
             OpenFeatureFileCommand = new RelayCommand(OpenFeatureFile);
 
@@ -92,7 +98,6 @@ namespace LcmsSpectator.ViewModels
             get { return _rawFilePath; }
             set
             {
-                //IsLoading = true;
                 LoadingScreenViewModel.IsLoading = true;
                 _rawFilePath = value;
                 RawFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(RawFilePath));
@@ -102,20 +107,20 @@ namespace LcmsSpectator.ViewModels
                 var massSpecDataType = (extension == ".mzml") ? MassSpecDataType.MzMLFile : MassSpecDataType.XCaliburRun;
                 Lcms = PbfLcMsRun.GetLcMsRun(_rawFilePath, massSpecDataType, 0, 0);
                 var scans = Lcms.GetScanNumbers(2);
-                //scans.AddRange(Lcms.GetScanNumbers(2));
-                //scans.Sort();
                 var prsmScans = scans.Select(scan => new PrSm
                 {
-                    Scan = scan, RawFileName = RawFileName, Lcms = Lcms, QValue = 1.0, Score = Double.NaN,
+                    Scan = scan,
+                    RawFileName = RawFileName,
+                    Lcms = Lcms,
+                    QValue = 1.0,
+                    Score = Double.NaN,
                 });
+                ScanViewModel.AddIds(prsmScans);
+                ToggleShowInstrumentData(_showInstrumentData);
                 XicViewModel.Lcms = Lcms;
                 SpectrumViewModel.Lcms = Lcms;
-                ScanViewModel.AddIds(prsmScans);
                 SelectedPrSm.Lcms = Lcms;
-                // set bounds for shared x axis
-                //var maxRt = Math.Max(Lcms.GetElutionTime(Lcms.MaxLcScan), 1.0);
                 LoadingScreenViewModel.IsLoading = false;
-                //IsLoading = false;
                 RaisePropertyChanged();
             }
         }
@@ -130,20 +135,6 @@ namespace LcmsSpectator.ViewModels
             set
             {
                 _showFeatureMapSplash = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        private bool _isLoading;
-        /// <summary>
-        /// Sets/Gets whether the loading screen is currently being shown.
-        /// </summary>
-        public bool IsLoading
-        {
-            get { return _isLoading; }
-            set
-            {
-                _isLoading = value;
                 RaisePropertyChanged();
             }
         }
@@ -193,8 +184,57 @@ namespace LcmsSpectator.ViewModels
         }
         #endregion
 
-        #region Private members
+        #region Private Methods
+
+        private async void SettingsChanged(SettingsChangedNotification message)
+        {
+            if (IcParameters.Instance.ShowInstrumentData != _showInstrumentData)
+            {
+                _showInstrumentData = IcParameters.Instance.ShowInstrumentData;
+                await ToggleShowInstrumentData(IcParameters.Instance.ShowInstrumentData);   
+            }
+        }
+
+        public async Task ToggleShowInstrumentData(bool value)
+        {
+
+            await Task.Run(() =>
+            {
+                LoadingScreenViewModel.IsLoading = true;
+                if (value)
+                {
+                    var pbfLcmsRun = Lcms as PbfLcMsRun;
+                    if (pbfLcmsRun != null)
+                    {
+                        var scans = ScanViewModel.Data;
+                        foreach (var scan in scans.Where(scan => scan.Sequence.Count == 0))
+                        {
+                            IsolationWindow isolationWindow = pbfLcmsRun.GetIsolationWindow(scan.Scan);
+                            scan.PrecursorMz = isolationWindow.MonoisotopicMz == null ? Double.NaN : isolationWindow.MonoisotopicMz.Value;
+                            scan.Charge = isolationWindow.Charge == null ? 0 : isolationWindow.Charge.Value;
+                            scan.Mass = isolationWindow.MonoisotopicMass == null ? Double.NaN : isolationWindow.MonoisotopicMass.Value;
+                        }
+                    }
+                }
+                else
+                {
+                    var scans = ScanViewModel.Data;
+                    foreach (var scan in scans.Where(scan => scan.Sequence.Count == 0))
+                    {
+                        scan.PrecursorMz = Double.NaN;
+                        scan.Charge = 0;
+                        scan.Mass = Double.NaN;
+                    }
+                }
+                ScanViewModel.FilterData();
+                LoadingScreenViewModel.IsLoading = false;
+            });
+        }
+        #endregion
+
+        #region Private Members
         private readonly IMainDialogService _dialogService;
+        private bool _showInstrumentData;
         #endregion
     }
 }

@@ -199,7 +199,6 @@
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
-    <Compile Include="Utils\PrSmChangedEventArgs.cs" />
     <Compile Include="TaskServices\TaskService.cs" />
     <Compile Include="Utils\XicCloseRequest.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />

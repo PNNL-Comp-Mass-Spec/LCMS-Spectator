@@ -19,6 +19,8 @@ namespace LcmsSpectatorModels.Readers.SequenceReaders
             const string aminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
             const string massRegex = @"[+-]?\d+\.\d+";
 
+            if (String.IsNullOrEmpty(msgfPlusPeptideStr)) return new Sequence(new List<AminoAcid>());
+
             if (!Regex.IsMatch(msgfPlusPeptideStr, "(" + aminoAcidRegex + "|" + massRegex + ")+")) return null;
 
             var stdAaSet = _aminoAcidSet;

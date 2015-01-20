@@ -178,7 +178,7 @@ namespace LcmsSpectator.ViewModels
         private void CreatePrSm()
         {
             var sequenceReader = new SequenceReader();
-            Sequence sequence;
+            Sequence sequence=null;
             try
             {
                 sequence = sequenceReader.Read(SequenceText);
@@ -186,46 +186,39 @@ namespace LcmsSpectator.ViewModels
             }
             catch (FormatException e)
             {
-                _dialogService.ExceptionAlert(e);
+                _dialogService.MessageBox(e.Message);
                 return;
             }
-            ILcMsRun lcms = null;
-            if (SelectedCharge < 1)
+            finally
             {
-                _dialogService.MessageBox("Invalid Charge.");
+                if (sequence == null) sequence = new Sequence(new List<AminoAcid>()); 
+            }
+
+            if (sequence.Count == 0 && SelectedCharge == 0)
+            {
+                    _dialogService.MessageBox("Invalid Charge.");
+                    return;
+            }
+            if (sequence.Count == 0 && SelectedScan < 0)
+            {
+                _dialogService.MessageBox("Invalid sequence and scan number.");
                 return;
             }
-            if (SelectedScan < 0)
-            {
-                _dialogService.MessageBox("Invalid Scan.");
-                return;
-            }
-            string rawFileName = "";
-            if (SelectedDataSetViewModel == null || SelectedDataSetViewModel.Lcms == null) SelectedScan = 0;
-            else
-            {
-                rawFileName = SelectedDataSetViewModel.RawFileName;
-                lcms = SelectedDataSetViewModel.Lcms;
-            }
+            ILcMsRun lcms = SelectedDataSetViewModel.Lcms;
+            string rawFileName = SelectedDataSetViewModel.RawFileName;
             var prsm = new PrSm
             {
                 Heavy = false,
                 RawFileName = rawFileName,
                 ProteinName = "",
                 ProteinDesc = "",
-                Scan = SelectedScan,
+                Scan = Math.Min(Math.Max(SelectedScan, 0), lcms.MaxLcScan),
                 Lcms = lcms,
                 Sequence = sequence,
                 SequenceText = SequenceText,
                 Charge = SelectedCharge,
                 Score = -1.0,
             };
-            var ms2Prod = prsm.Ms2Spectrum as ProductSpectrum;
-            if (ms2Prod == null)
-            {
-                prsm.Scan = 0;
-                prsm.Lcms = null;
-            }
             SelectedPrSm = prsm;
         }
 
@@ -316,27 +309,6 @@ namespace LcmsSpectator.ViewModels
             }
             foreach (var target in targets) Targets.Add(target);
         }
-
-        //private void SelectedRawFileChanged(PropertyChangedMessage<string> message)
-        //{
-        //    if (message.PropertyName == "RawFileName" && message.Sender == SelectedPrSmViewModel.Instance)
-        //    {
-        //        var rawFileName = message.NewValue;
-        //        foreach (var xicVm in DataSetViewModels)
-        //        {
-        //            if (xicVm.RawFileName == rawFileName) SelectedDataSetViewModel = xicVm;
-        //        }
-        //    }
-        //}
-
-        //private void SelectedScanChanged(PropertyChangedMessage<int> message)
-        //{
-        //    if (message.PropertyName == "Scan" && message.Sender == SelectedPrSmViewModel.Instance)
-        //    {
-        //        var scan = message.NewValue;
-        //        SelectedScan = scan;
-        //    }
-        //}
         #endregion
 
         #region Private Members

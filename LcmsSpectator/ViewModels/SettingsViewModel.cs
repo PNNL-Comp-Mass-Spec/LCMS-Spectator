@@ -35,6 +35,7 @@ namespace LcmsSpectator.ViewModels
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
             SpectrumFilterWindowSize = IcParameters.Instance.SpectrumFilterWindowSize;
             PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
+            ShowInstrumentData = IcParameters.Instance.ShowInstrumentData;
             AutomaticallySelectIonTypes = IcParameters.Instance.AutomaticallySelectIonTypes;
             CidHcdIonTypes = IcParameters.Instance.GetCidHcdIonTypes();
             EtdIonTypes = IcParameters.Instance.GetEtdIonTypes();
@@ -75,6 +76,7 @@ namespace LcmsSpectator.ViewModels
         public int PointsToSmooth { get; set; }
         public double SpectrumFilterWindowSize { get; set; }
         public double PrecursorRelativeIntensityThreshold { get; set; }
+        public bool ShowInstrumentData { get; private set; }
         public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; }
         public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
         public bool Status { get; private set; }
@@ -124,6 +126,7 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
             IcParameters.Instance.SpectrumFilterWindowSize = SpectrumFilterWindowSize;
             IcParameters.Instance.PrecursorRelativeIntensityThreshold = PrecursorRelativeIntensityThreshold;
+            IcParameters.Instance.ShowInstrumentData = ShowInstrumentData;
             IcParameters.Instance.AutomaticallySelectIonTypes = AutomaticallySelectIonTypes;
             IcParameters.Instance.CidHcdIonTypes = IcParameters.IonTypeStringParse(CidHcdIonTypes);
             IcParameters.Instance.EtdIonTypes = IcParameters.IonTypeStringParse(EtdIonTypes);

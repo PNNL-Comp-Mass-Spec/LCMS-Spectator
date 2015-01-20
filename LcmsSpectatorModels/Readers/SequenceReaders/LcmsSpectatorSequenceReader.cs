@@ -14,6 +14,7 @@ namespace LcmsSpectatorModels.Readers.SequenceReaders
             //const string modRegex = @"\[([A-Z]|[a-z])+\]";
             const string modRegex = @"\[([A-Z]|[a-z]|[0-9])+\]";
 
+            if (String.IsNullOrEmpty(sequence)) return new Sequence(new List<AminoAcid>());
             if (!Regex.IsMatch(sequence, "(" + aminoAcidRegex + "|" + modRegex + ")+")) return null;
 
             var stdAaSet = new AminoAcidSet();

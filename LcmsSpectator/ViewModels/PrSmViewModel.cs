@@ -52,6 +52,7 @@ namespace LcmsSpectator.ViewModels
                 Score = newPrSm.Score;
                 _noLabelPrecursorMz = newPrSm.PrecursorMz;
                 _heavyPrecursorMz = IonUtils.GetPrecursorMz(IonUtils.GetHeavySequence(newPrSm.Sequence, IcParameters.Instance.HeavyModifications), newPrSm.Charge);
+                Mass = newPrSm.Mass;
                 PrecursorMz = Heavy ? _heavyPrecursorMz : _noLabelPrecursorMz;
                 ProteinNameDesc = newPrSm.ProteinNameDesc;
                 Scan = newPrSm.Scan;
@@ -204,6 +205,18 @@ namespace LcmsSpectator.ViewModels
                 var oldValue = _score;
                 _score = value;
                 RaisePropertyChanged("Score", oldValue, _score, true);
+            }
+        }
+
+        private double _mass;
+        public double Mass
+        {
+            get { return _mass; }
+            set
+            {
+                var oldValue = _mass;
+                _mass = value;
+                RaisePropertyChanged("Mass", oldValue, _mass, true);
             }
         }
 

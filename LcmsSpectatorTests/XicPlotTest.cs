@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.PlotModels;
@@ -33,9 +34,8 @@ namespace LcmsSpectatorTests
             var id = ids.GetHighestScoringPrSm();
 
             // init XicPlotViewModel
-            SelectedPrSmViewModel.Instance.Charge = 2;
             var dialogService = new TestableMainDialogService();
-            var xicPlotViewModel = new XicPlotViewModel(dialogService, new MockTaskService(), "", new LinearAxis(),
+            var xicPlotViewModel = new XicPlotViewModel(dialogService, new MockTaskService(), Messenger.Default, "", new LinearAxis(),
                 false)
             {
                 Lcms = lcms
@@ -66,7 +66,7 @@ namespace LcmsSpectatorTests
                                                                                             IcParameters.Instance.ProductIonTolerancePpm,
                                                                                             label.PrecursorIon.GetMostAbundantIsotopeMz());
                 else xic = lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
-                xicMap.Add(label.Label, new LabeledXic(label.Composition, label.Index, xic, label.IonType, label.IsFragmentIon));
+                xicMap.Add(label.Label, new LabeledXic(label.Composition, label.Index,  xic, label.IonType, label.IsFragmentIon));
             }
 
             // Check to see that correct XICs are showing

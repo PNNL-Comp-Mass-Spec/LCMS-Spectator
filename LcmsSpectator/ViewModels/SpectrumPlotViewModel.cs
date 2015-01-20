@@ -32,10 +32,7 @@ namespace LcmsSpectator.ViewModels
         public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, IMessenger messenger,  double multiplier, bool updateXAxis)
         {
             MessengerInstance = messenger;
-            MessengerInstance.Register<SettingsChangedNotification>(this, SettingsChanged);
-            MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
             MessengerInstance.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
-            //Messenger.Default.Register<PropertyChangedMessage<double>>(this, PrecursorChanged);
             _taskService = taskService;
             SaveAsImageCommand = new RelayCommand<string>(SaveAsImage);
             _dialogService = dialogService;
@@ -168,14 +165,6 @@ namespace LcmsSpectator.ViewModels
                 IonUpdate();
             });
         }
-
-        private void SelectedChargeChanged(PropertyChangedMessage<int> message)
-        {
-            if (message.PropertyName == "Charge")
-            {
-                _selectedCharge = message.NewValue;
-            }
-        }
         
         private AutoAdjustedYPlotModel BuildSpectrumPlot()
         {
@@ -270,7 +259,8 @@ namespace LcmsSpectator.ViewModels
             {
                 if (!seriesstore.ContainsKey(ion.LabeledIon.Label)) seriesstore.Add(ion.LabeledIon.Label, null);
             }
-            var colors = new ColorDictionary(Math.Min(Math.Max(_selectedCharge - 1, 2), 15));
+            var maxCharge = (_ions.Count > 0) ? _ions.Max(ion => ion.LabeledIon.IonType.Charge) : 2;
+            var colors = new ColorDictionary(Math.Min(Math.Max(maxCharge, 2), 15));
             IonTypeFactory deconIonTypeFactory = null;
             if (ShowDeconvolutedSpectrum) deconIonTypeFactory = IonTypeFactory.GetDeconvolutedIonTypeFactory(BaseIonType.AllBaseIonTypes,
                                                                                    NeutralLoss.CommonNeutralLosses);
@@ -379,7 +369,7 @@ namespace LcmsSpectator.ViewModels
                 //Minimum = 0,
                 //Maximum = ms2MaxMz,
                 Position = AxisPosition.Bottom,
-                Title="Mz",
+                Title="m/z",
                 AbsoluteMinimum = 0,
                 AbsoluteMaximum = ms2MaxMz
             };
@@ -415,20 +405,6 @@ namespace LcmsSpectator.ViewModels
                 }
             }
         }
-
-        private void SettingsChanged(SettingsChangedNotification notification)
-        {
-            if (_updateXAxis) SpectrumUpdate(_spectrum, _xAxis);
-            else SpectrumUpdate();
-        }
-
-        //private void PrecursorChanged(PropertyChangedMessage<double> message)
-        //{
-        //    if (message.PropertyName == "PrecursorMz")
-        //    {
-        //        _taskService.Enqueue(() =>_updateIons = false);
-        //    }
-        //}
 
         private void SaveAsImage(string fileType)
         {
@@ -476,7 +452,5 @@ namespace LcmsSpectator.ViewModels
         private readonly Dictionary<string, IEnumerable<PeakDataPoint>> _ionCache;
         private bool _showDeconvolutedSpectrum;
         private AutoAdjustedYPlotModel _plot;
-
-        private int _selectedCharge;
     }
 }
