@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using InformedProteomics.Backend.Data.Biology;
+using System.Runtime.Remoting.Messaging;
+using System.Security.Cryptography.X509Certificates;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectatorModels.Models;
@@ -42,12 +43,14 @@ namespace LcmsSpectatorModels.Readers
         private static Feature ReadFeature(string line, char delimeter, Dictionary<string, int> headers)
         {
             var parts = line.Split(delimeter);
-            var mass = Convert.ToDouble(parts[headers["monoisotopic_mw"]]);
-            var abundance = Convert.ToDouble(parts[headers["abundance"]]);
-            var score = Convert.ToDouble(parts[headers["envelope_corr"]]);
-            var isotopes = ReadIsotopicEnvelope(parts[headers["isotopic_envelope"]]);
-            var minCharge = Convert.ToInt32(parts[headers["min_charge"]]);
-            var maxCharge = Convert.ToInt32(parts[headers["max_charge"]]);
+            var mass = Convert.ToDouble(parts[headers["MonoMass"]]);
+            var abundance = Convert.ToDouble(parts[headers["Abundance"]]);
+            var score = Convert.ToDouble(parts[headers["Probability"]]);
+            var isotopes = ReadIsotopicEnvelope(parts[headers["Envelope"]]);
+            var minCharge = Convert.ToInt32(parts[headers["MinCharge"]]);
+            var maxCharge = Convert.ToInt32(parts[headers["MaxCharge"]]);
+            var id = Convert.ToInt32(parts[headers["FeatureID"]]);
+            var summedCorr = Convert.ToDouble(parts[headers["SummedCorr"]]);
 
             int mostAbundantIsotopeIndex;
             List<Peak> minIsotopicProfile;
@@ -60,24 +63,26 @@ namespace LcmsSpectatorModels.Readers
             var minPoint = new FeaturePoint
             {
                 Mass = mass,
-                Scan = Convert.ToInt32(parts[headers["min_scan_num"]]),
+                Scan = Convert.ToInt32(parts[headers["MinScan"]]),
                 Mz = minIsotopicProfile[mostAbundantIsotopeIndex].Mz,
                 Charge = minCharge,
                 Abundance = abundance,
                 Score = score,
                 Isotopes = isotopes,
+                Correlation = summedCorr
             };
             var maxPoint = new FeaturePoint
             {
                 Mass = mass,
-                Scan = Convert.ToInt32(parts[headers["max_scan_num"]]),
+                Scan = Convert.ToInt32(parts[headers["MaxScan"]]),
                 Mz = maxIsotopicProfile[mostAbundantIsotopeIndex].Mz,
                 Charge = maxCharge,
                 Abundance = abundance,
                 Score = score,
-                Isotopes = isotopes
+                Isotopes = isotopes,
+                Correlation = summedCorr,
             };
-            return new Feature { MinPoint = minPoint, MaxPoint = maxPoint };
+            return new Feature { MinPoint = minPoint, MaxPoint = maxPoint, Id = id };
         }
 
         private static Isotope[] ReadIsotopicEnvelope(string env)

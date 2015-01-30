@@ -11,6 +11,7 @@ namespace LcmsSpectatorModels.Models
     {
         public FeaturePoint MinPoint { get; set; }
         public FeaturePoint MaxPoint { get; set; }
+        public int Id { get; set; }
         public List<int> AssociatedMs2 { get; private set; }
 
         public Feature(int minPoint=0, int maxPoint=0)
@@ -30,5 +31,6 @@ namespace LcmsSpectatorModels.Models
         public double Abundance { get; set; }
         public double Score { get; set; }
         public Isotope[] Isotopes { get; set; }
+        public double Correlation { get; set; }
     }
 }

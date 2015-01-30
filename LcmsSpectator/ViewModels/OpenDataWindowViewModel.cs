@@ -83,8 +83,8 @@ namespace LcmsSpectator.ViewModels
 
         private void BrowseFeatureFiles()
         {
-            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv";
-            var featureFilePath = _dialogService.OpenFile(".txt", formatStr);
+            const string formatStr = @"Ms1FT Files (*.ms1ft)|*.ms1ft";
+            var featureFilePath = _dialogService.OpenFile(".ms1ft", formatStr);
             if (!String.IsNullOrEmpty(featureFilePath)) FeatureFilePath = featureFilePath;
         }
 

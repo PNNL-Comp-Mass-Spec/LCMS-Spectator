@@ -720,9 +720,10 @@ namespace LcmsSpectator.ViewModels
                         "{1}: {2:0.###}" + Environment.NewLine +
                         "Scan: {Scan:0}" + Environment.NewLine +
                         "{3}: {4:0.###E0}" + Environment.NewLine +
+                        "Probability: {Score:0.###}" + Environment.NewLine +
+                        "Correlation: {Correlation:0.###}" + Environment.NewLine +
                         "Abundance: {Abundance:0.###E0}" + Environment.NewLine +
-                        "Charge: {Charge:0}" + Environment.NewLine +
-                        "Score: {Score:0.###}"
+                        "Charge: {Charge:0}"
                 };
                 FeatureMap.Series.Add(ls);
             }

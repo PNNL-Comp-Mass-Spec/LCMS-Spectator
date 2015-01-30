@@ -148,14 +148,14 @@ namespace LcmsSpectator.ViewModels
                                 _dialogService.ExceptionAlert(new Exception("Cannot read ID file."));
                             }
                         if (!String.IsNullOrEmpty(openDataVm.FeatureFilePath))
-                            try
-                            {
+                            //try
+                            //{
                                 dsVm.OpenFeatureFile(openDataVm.FeatureFilePath);
-                            }
-                            catch (Exception)
-                            {
-                                _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
-                            }
+                            //}
+                            //catch (Exception)
+                            //{
+                            //    _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
+                            //}
                     }
                 }, true);
             }
@@ -268,8 +268,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void OpenFeatureFile()
         {
-            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv";
-            var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
+            const string formatStr = @"Ms1FT Files (*.ms1ft)|*.ms1ft";
+            var tsvFileName = _dialogService.OpenFile(".ms1ft", formatStr);
             if (tsvFileName == "") return;
             var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
             var ext = Path.GetExtension(tsvFileName);
@@ -334,14 +334,14 @@ namespace LcmsSpectator.ViewModels
                             if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count - 1));
                         }
                     if (dsVm != null)
-                        try
-                        {
+                        //try
+                        //{
                             dsVm.OpenFeatureFile(tsvFileName);
-                        }
-                        catch (Exception)
-                        {
-                            _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
-                        }
+                        //}
+                        //catch (Exception)
+                        //{
+                        //    _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
+                        //}
                 }, true);
             }
             else _dialogService.MessageBox("Cannot open feature file.");

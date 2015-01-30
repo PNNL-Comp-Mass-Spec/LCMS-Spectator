@@ -49,27 +49,32 @@
                     <RowDefinition Height="20" />
                     <RowDefinition Height="20" />
                     <RowDefinition Height="20" />
+                    <RowDefinition Height="20" />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0" Grid.RowSpan="2">
                     <wpf:PlotView Name="TheoreticalIsotopicEnvelope" Model="{Binding IsotopicEnvelope}" Grid.Row="0" Width="350" />
                 </Grid>
                 <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="10,0,0,0">
-                    <TextBlock Width="110" FontWeight="Bold">Correlation:</TextBlock>
+                    <TextBlock Width="110" FontWeight="Bold">Probability:</TextBlock>
                     <TextBlock Width="70" Text="{Binding SelectedFeature.Score, Converter={StaticResource ScoreFormatter}}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="10,0,0,0">
+                    <TextBlock Width="110" FontWeight="Bold">Summed Correlation:</TextBlock>
+                    <TextBlock Width="70" Text="{Binding SelectedFeature.Correlation, Converter={StaticResource ScoreFormatter}}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="4" Margin="10,0,0,0">
                     <TextBlock Width="110" FontWeight="Bold">Scan:</TextBlock>
                     <TextBlock Width="70" Text="{Binding SelectedFeature.Scan}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="4" Margin="10,0,0,0">
+                <StackPanel Orientation="Horizontal" Grid.Row="5" Margin="10,0,0,0">
                     <TextBlock Width="110" FontWeight="Bold">Retention Time:</TextBlock>
                     <TextBlock Width="70" Text="{Binding SelectedFeature.RetentionTime, Converter={StaticResource ScoreFormatter}}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="5" Margin="10,0,0,0">
+                <StackPanel Orientation="Horizontal" Grid.Row="6" Margin="10,0,0,0">
                     <TextBlock Width="110" FontWeight="Bold">Mass:</TextBlock>
                     <TextBlock Width="70" Text="{Binding SelectedFeature.Mass, Converter={StaticResource ScoreFormatter}}" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Grid.Row="6" Margin="10,0,0,0">
+                <StackPanel Orientation="Horizontal" Grid.Row="7" Margin="10,0,0,0">
                     <TextBlock Width="110" FontWeight="Bold">Abundance:</TextBlock>
                     <TextBlock Width="70" Text="{Binding SelectedFeature.Abundance, Converter={StaticResource ScoreFormatter}}" />
                 </StackPanel>
