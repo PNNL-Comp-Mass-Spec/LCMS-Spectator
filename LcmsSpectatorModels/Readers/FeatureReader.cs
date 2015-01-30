@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography.X509Certificates;
 using InformedProteomics.Backend.Data.Composition;
@@ -42,6 +43,24 @@ namespace LcmsSpectatorModels.Readers
 
         private static Feature ReadFeature(string line, char delimeter, Dictionary<string, int> headers)
         {
+            var expectedHeaders = new List<string>
+            {
+                "MonoMass",
+                "Abundance",
+                "Probability",
+                "Envelope",
+                "MinCharge",
+                "MaxCharge",
+                "SummedCorr",
+                "MinScan",
+                "MaxScan"
+            };
+
+            foreach (var header in expectedHeaders.Where(header => !headers.ContainsKey(header)))
+            {
+                throw new KeyNotFoundException(String.Format("Missing expected column header \"{0}\" in feature file.", header));
+            }
+
             var parts = line.Split(delimeter);
             var mass = Convert.ToDouble(parts[headers["MonoMass"]]);
             var abundance = Convert.ToDouble(parts[headers["Abundance"]]);
@@ -49,7 +68,7 @@ namespace LcmsSpectatorModels.Readers
             var isotopes = ReadIsotopicEnvelope(parts[headers["Envelope"]]);
             var minCharge = Convert.ToInt32(parts[headers["MinCharge"]]);
             var maxCharge = Convert.ToInt32(parts[headers["MaxCharge"]]);
-            var id = Convert.ToInt32(parts[headers["FeatureID"]]);
+            //var id = Convert.ToInt32(parts[headers["FeatureID"]]);
             var summedCorr = Convert.ToDouble(parts[headers["SummedCorr"]]);
 
             int mostAbundantIsotopeIndex;
@@ -82,7 +101,7 @@ namespace LcmsSpectatorModels.Readers
                 Isotopes = isotopes,
                 Correlation = summedCorr,
             };
-            return new Feature { MinPoint = minPoint, MaxPoint = maxPoint, Id = id };
+            return new Feature { MinPoint = minPoint, MaxPoint = maxPoint };
         }
 
         private static Isotope[] ReadIsotopicEnvelope(string env)

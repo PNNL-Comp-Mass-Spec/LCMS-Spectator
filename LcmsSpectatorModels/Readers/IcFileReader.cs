@@ -44,6 +44,23 @@ namespace LcmsSpectatorModels.Readers
 
         private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers, IEnumerable<string> modIgnoreList=null)
         {
+            var expectedHeaders = new List<string>
+            {
+                "#MatchedFragments",
+                "ProteinName",
+                "Modifications",
+                "Sequence",
+                "Scan",
+                "Charge",
+                "ProteinDesc",
+                "QValue",
+            };
+
+            foreach (var header in expectedHeaders.Where(header => !headers.ContainsKey(header)))
+            {
+                throw new KeyNotFoundException(String.Format("Missing expected column header \"{0}\" in ID file.", header));
+            }
+
             var parts = line.Split('\t');
             var scoreLabel = "IcScore";
             if (!headers.ContainsKey(scoreLabel)) scoreLabel = "#MatchedFragments";

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
@@ -50,6 +51,21 @@ namespace LcmsSpectatorModels.Readers
 
         private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers, IEnumerable<string> modIgnoreList = null)
         {
+            var expectedHeaders = new List<string>
+            {
+                "SpecEValue",
+                "Protein",
+                "Peptide",
+                "ScanNum",
+                "Charge",
+                "QValue",
+            };
+
+            foreach (var header in expectedHeaders.Where(header => !headers.ContainsKey(header)))
+            {
+                throw new KeyNotFoundException(String.Format("Missing expected column header \"{0}\" in ID file.", header));
+            }
+
             var parts = line.Split('\t');
             var score = Convert.ToDouble(parts[headers["SpecEValue"]]);
 

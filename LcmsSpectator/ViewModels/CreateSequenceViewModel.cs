@@ -214,9 +214,9 @@ namespace LcmsSpectator.ViewModels
                 ProteinDesc = "",
                 Scan = Math.Min(Math.Max(SelectedScan, 0), lcms.MaxLcScan),
                 Lcms = lcms,
+                Charge = SelectedCharge,
                 Sequence = sequence,
                 SequenceText = SequenceText,
-                Charge = SelectedCharge,
                 Score = -1.0,
             };
             SelectedPrSm = prsm;

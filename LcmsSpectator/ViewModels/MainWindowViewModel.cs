@@ -143,19 +143,27 @@ namespace LcmsSpectator.ViewModels
                             {
                                 ReadIdFile(openDataVm.IdFilePath, dsVm.RawFilePath, dsVm);
                             }
+                            catch (KeyNotFoundException e)
+                            {
+                                _dialogService.ExceptionAlert(e);
+                            }
                             catch (Exception)
                             {
                                 _dialogService.ExceptionAlert(new Exception("Cannot read ID file."));
                             }
                         if (!String.IsNullOrEmpty(openDataVm.FeatureFilePath))
-                            //try
-                            //{
+                            try
+                            {
                                 dsVm.OpenFeatureFile(openDataVm.FeatureFilePath);
-                            //}
-                            //catch (Exception)
-                            //{
-                            //    _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
-                            //}
+                            }
+                            catch (KeyNotFoundException e)
+                            {
+                                _dialogService.ExceptionAlert(e);
+                            }
+                            catch (Exception)
+                            {
+                                _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
+                            }
                     }
                 }, true);
             }
@@ -334,14 +342,18 @@ namespace LcmsSpectator.ViewModels
                             if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count - 1));
                         }
                     if (dsVm != null)
-                        //try
-                        //{
+                        try
+                        {
                             dsVm.OpenFeatureFile(tsvFileName);
-                        //}
-                        //catch (Exception)
-                        //{
-                        //    _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
-                        //}
+                        }
+                        catch (KeyNotFoundException e)
+                        {
+                            _dialogService.ExceptionAlert(e);
+                        }
+                        catch (Exception)
+                        {
+                            _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
+                        }
                 }, true);
             }
             else _dialogService.MessageBox("Cannot open feature file.");
@@ -367,6 +379,13 @@ namespace LcmsSpectator.ViewModels
                     ids = reader.Read(modIgnoreList);
                     ids.SetLcmsRun(dsVm.Lcms, dsVm.RawFileName);
                     attemptToReadFile = false;
+                }
+                catch (KeyNotFoundException e)
+                {
+                    _dialogService.ExceptionAlert(e);
+                    FileOpen = false;
+                    LoadingScreenViewModel.IsLoading = false;
+                    return;
                 }
                 catch (IOException e)
                 {
