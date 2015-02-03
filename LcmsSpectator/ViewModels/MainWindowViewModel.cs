@@ -464,14 +464,31 @@ namespace LcmsSpectator.ViewModels
             var jobDirName = data.Item2;
             var idFilePaths = new List<string>();
             string featureFilePath = "";
+            string pbfFilePath = "";
             List<string> rawFileNames = null;
             if (!String.IsNullOrEmpty(dataSetDirName))      // did the user actually choose a dataset?
             {
-                var dataSetDir = Directory.GetFiles(dataSetDirName);
-                rawFileNames = (from filePath in dataSetDir
+                var dataSetDirFiles = Directory.GetFiles(dataSetDirName);
+                var dataSetDirDirectories = Directory.GetDirectories(dataSetDirName);
+                rawFileNames = (from filePath in dataSetDirFiles
                                 let ext = Path.GetExtension(filePath)
                                 where (ext == ".raw" || ext == ".mzml")
                                 select filePath).ToList();
+                var pbfFolderPath = (from folderPath in dataSetDirDirectories
+                                     let folderName = Path.GetFileNameWithoutExtension(folderPath)
+                                     where (folderName.StartsWith("PBF_Gen"))
+                                     select folderPath).FirstOrDefault();
+                if (!String.IsNullOrEmpty(pbfFolderPath))
+                {
+                    var pbfIndirectionPath =
+                        rawFileNames.Select(
+                            fn => String.Format(@"{0}\{1}.pbf_CacheInfo.txt", pbfFolderPath, Path.GetFileNameWithoutExtension(fn))).FirstOrDefault();
+                    if (!String.IsNullOrEmpty(pbfIndirectionPath) && File.Exists(pbfIndirectionPath))
+                    {
+                        var lines = File.ReadAllLines(pbfIndirectionPath);
+                        if (lines.Length > 0) pbfFilePath = lines[0];
+                    }
+                }  
             }
             if (!String.IsNullOrEmpty(jobDirName))      // did the user actually choose a job?
             {
@@ -479,7 +496,7 @@ namespace LcmsSpectator.ViewModels
                 idFilePaths = (from idFp in jobDir
                               let ext = Path.GetExtension(idFp)
                               where ext == ".mzid" || ext == ".gz" || ext == ".zip"
-                                select idFp).ToList();
+                              select idFp).ToList();
                 featureFilePath = (from idFp in jobDir
                                    let ext = Path.GetExtension(idFp)
                                    where ext == ".ms1ft"
@@ -494,7 +511,7 @@ namespace LcmsSpectator.ViewModels
             ShowSplash = false;
             foreach (var rawFilePath in rawFileNames)
             {
-                var raw = rawFilePath;
+                var raw = String.IsNullOrEmpty(pbfFilePath) ? rawFilePath : pbfFilePath;
                 var filePaths = idFilePaths;
                 task = Task.Factory.StartNew(() =>
                 {
