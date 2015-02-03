@@ -16,6 +16,9 @@ namespace LcmsSpectatorModels.Readers
 
             switch (extension.ToLower())
             {
+                case ".zip":
+                    reader = new IcFileReader(fileName);
+                    break;
                 case ".tsv":
                 case ".txt":
                     var streamReader = new StreamReader(fileName);

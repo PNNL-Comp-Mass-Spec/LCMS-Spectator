@@ -7,7 +7,6 @@
         xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
         xmlns:utils="clr-namespace:LcmsSpectator.Utils"
         xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
-        xmlns:xcpt="http://schemas.xceed.com/wpf/xaml/themes"
         Title="LcMsSpectator" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -104,6 +103,8 @@
                         <RowDefinition Height="30" />
                         <RowDefinition Height="10" />
                         <RowDefinition Height="30" />
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="30" />
                         <RowDefinition Height="50*"/>
                     </Grid.RowDefinitions>
                     <TextBlock Margin="0"
@@ -123,6 +124,9 @@
                             Background="#7EFFFFFF" FontWeight="Bold">Open _Id File</Button>
                     <Button Grid.Row="8" Command="{Binding OpenFeatureFileCommand}"
                             Background="#7EFFFFFF" BorderThickness="0" FontWeight="Bold">Open Feature File</Button>
+                    <Button Grid.Row="10" Command="{Binding OpenFromDmsCommand}" 
+                            Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}"
+                            Background="#7EFFFFFF" BorderThickness="0" FontWeight="Bold">Open From DMS</Button>
                 </Grid>
             </Border>
         </Grid>

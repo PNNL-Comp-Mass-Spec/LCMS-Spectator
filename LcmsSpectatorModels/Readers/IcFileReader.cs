@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectatorModels.Models;
@@ -11,19 +12,38 @@ namespace LcmsSpectatorModels.Readers
     {
         public IcFileReader(string tsvFile)
         {
-            _tsvFile = tsvFile;
+            _fileName = tsvFile;
         }
 
         public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
         {
-            var idTree = new IdentificationTree(ToolType.MsPathFinder);
-            var file = new StreamReader(File.Open(_tsvFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            var ext = Path.GetExtension(_fileName);
+            IdentificationTree idTree;
+            if (ext == ".tsv")
+            {
+                var file = new StreamReader(File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                idTree = ReadTsv(file, modIgnoreList);
+            }
+            else if (ext == ".zip")
+            {
+                idTree = ReadZip(modIgnoreList);
+            }
+            else
+            {
+                throw new ArgumentException(String.Format("Cannot read file with extension \"{0}\"", ext));
+            }
+            return idTree;
+        }
+
+        private IdentificationTree ReadTsv(StreamReader stream, IEnumerable<string> modIgnoreList = null)
+        {
             //var file = File.ReadLines(_tsvFile);
+            var idTree = new IdentificationTree(ToolType.MsPathFinder);
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
-            while(!file.EndOfStream)
+            while (!stream.EndOfStream)
             {
-                var line = file.ReadLine();
+                var line = stream.ReadLine();
                 lineCount++;
                 if (lineCount == 1 && line != null) // first line
                 {
@@ -37,9 +57,27 @@ namespace LcmsSpectatorModels.Readers
                 var idData = CreatePrSms(line, headers, modIgnoreList);
                 if (idData != null) idTree.Add(idData);
             }
-            file.Close();
-
+            stream.Close();
             return idTree;
+        }
+
+        private IdentificationTree ReadZip(IEnumerable<string> modIgnoreList = null)
+        {
+            var zipFilePath = _fileName;
+            var fileName = Path.GetFileNameWithoutExtension(zipFilePath);
+            if (fileName != null && fileName.EndsWith("_IcTsv")) fileName = fileName.Substring(0, fileName.Length - 6);
+            var tsvFileName = String.Format("{0}_IcTda.tsv", fileName);
+
+            var zipArchive = ZipFile.OpenRead(zipFilePath);
+            var entry = zipArchive.GetEntry(tsvFileName);
+            if (entry != null)
+            {
+                using (var fileStream = new StreamReader(entry.Open()))
+                {
+                    return ReadTsv(fileStream, modIgnoreList);
+                }
+            }
+            return new IdentificationTree();
         }
 
         private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers, IEnumerable<string> modIgnoreList=null)
@@ -140,7 +178,7 @@ namespace LcmsSpectatorModels.Readers
             return parsedMods;
         }
 
-        private readonly string _tsvFile;
+        private readonly string _fileName;
     }
 
     public class InvalidModificationNameException : Exception

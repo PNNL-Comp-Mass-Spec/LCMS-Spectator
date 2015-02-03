@@ -421,13 +421,13 @@ namespace LcmsSpectator.ViewModels
                         modIgnoreList.Add(e.ModificationName);
                     }
                 }
-                catch (Exception)
-                {
-                    _dialogService.ExceptionAlert(new Exception("Cannot read ID file."));
-                    FileOpen = false;
-                    LoadingScreenViewModel.IsLoading = false;
-                    return;
-                }
+                //catch (Exception)
+                //{
+                //    _dialogService.ExceptionAlert(new Exception("Cannot read ID file."));
+                //    FileOpen = false;
+                //    LoadingScreenViewModel.IsLoading = false;
+                //    return;
+                //}
             } while (attemptToReadFile);
             var data = ScanViewModel.Data;
             dsVm.AddIds(ids);
@@ -462,7 +462,8 @@ namespace LcmsSpectator.ViewModels
             if (data == null) return null;
             var dataSetDirName = data.Item1;
             var jobDirName = data.Item2;
-            string idFilePath = "";
+            var idFilePaths = new List<string>();
+            string featureFilePath = "";
             List<string> rawFileNames = null;
             if (!String.IsNullOrEmpty(dataSetDirName))      // did the user actually choose a dataset?
             {
@@ -475,10 +476,14 @@ namespace LcmsSpectator.ViewModels
             if (!String.IsNullOrEmpty(jobDirName))      // did the user actually choose a job?
             {
                 var jobDir = Directory.GetFiles(jobDirName);
-                idFilePath = (from idFp in jobDir
+                idFilePaths = (from idFp in jobDir
                               let ext = Path.GetExtension(idFp)
-                              where ext == ".mzid" || ext == ".gz"
-                                select idFp).FirstOrDefault();
+                              where ext == ".mzid" || ext == ".gz" || ext == ".zip"
+                                select idFp).ToList();
+                featureFilePath = (from idFp in jobDir
+                                   let ext = Path.GetExtension(idFp)
+                                   where ext == ".ms1ft"
+                                   select idFp).FirstOrDefault();
             }
             if (rawFileNames == null || rawFileNames.Count == 0)
             {   // no data set chosen or no raw files found for data set
@@ -490,11 +495,29 @@ namespace LcmsSpectator.ViewModels
             foreach (var rawFilePath in rawFileNames)
             {
                 var raw = rawFilePath;
-                var filePath = idFilePath;
+                var filePaths = idFilePaths;
                 task = Task.Factory.StartNew(() =>
                 {
-                    var xicVm = ReadRawFile(raw);
-                    if (!String.IsNullOrEmpty(filePath)) ReadIdFile(filePath, xicVm.RawFileName, xicVm);
+                    var dsVm = ReadRawFile(raw);
+                    foreach (var filePath in filePaths)
+                    {
+                        if (!String.IsNullOrEmpty(filePath)) ReadIdFile(filePath, dsVm.RawFileName, dsVm);   
+                    }
+                    if (!String.IsNullOrEmpty(featureFilePath))
+                    {
+                        try
+                        {
+                            dsVm.OpenFeatureFile(featureFilePath);
+                        }
+                        catch (KeyNotFoundException e)
+                        {
+                            _dialogService.ExceptionAlert(e);
+                        }
+                        catch (Exception)
+                        {
+                            _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
+                        }   
+                    }
                 });
             }
             return task;

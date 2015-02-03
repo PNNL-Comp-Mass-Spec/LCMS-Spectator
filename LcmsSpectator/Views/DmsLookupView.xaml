@@ -68,9 +68,10 @@
                 </ComboBox>
 
                 <DataGrid AutoGenerateColumns="False" SelectionMode="Extended"
-                  IsReadOnly="False" RowHeaderWidth="0"
-                  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
-                  ItemsSource="{Binding Jobs}" SelectedItem="{Binding SelectedJob}">
+                          CanUserAddRows="False"
+                          IsReadOnly="False" RowHeaderWidth="0"
+                          Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                          ItemsSource="{Binding Jobs}" SelectedItem="{Binding SelectedJob}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Job ID" Width="7*" Binding="{Binding Job}" />
                         <DataGridTextColumn Header="Tool" Width="7*" Binding="{Binding Tool}"/>

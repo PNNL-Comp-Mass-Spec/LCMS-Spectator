@@ -13,6 +13,8 @@ namespace LcmsSpectatorModels.Readers
 		public const string DmsConnectionString = "Data Source=gigasax;Initial Catalog=DMS5;Integrated Security=SSPI;";
 
 		protected const string MsgfplusToolFilter = "MSGFPlus%";
+        protected const string MsPathFinderToolFilter = "MSPathFinder%";
+	    protected const string ProMexToolFilter = "ProMex%";
 		protected const int MaxRetries = 3;
 
 		#endregion
@@ -218,7 +220,11 @@ namespace LcmsSpectatorModels.Readers
 		/// <remarks>If datasetNameFilter does not have a % sign, then will auto-add % signs at the beginning and end to result in partial name matches</remarks>
 		public Dictionary<int, List<UdtJobInfo>> GetJobsByDataset(int mostRecentWeeks, string datasetNameFilter)
 		{
-			return GetJobsByDataset(mostRecentWeeks, datasetNameFilter, MsgfplusToolFilter);
+		    var msgfPlusJobs = GetJobsByDataset(mostRecentWeeks, datasetNameFilter, MsgfplusToolFilter);
+		    var msPathFinderJobs = GetJobsByDataset(mostRecentWeeks, datasetNameFilter, MsPathFinderToolFilter);
+            var proMexJobs = GetJobsByDataset(mostRecentWeeks, datasetNameFilter, ProMexToolFilter);
+		    var allJobs = msgfPlusJobs.Concat(msPathFinderJobs).Concat(proMexJobs).ToDictionary(x=> x.Key, x=> x.Value);
+		    return allJobs;
 		}
 
 		/// <summary>
@@ -234,7 +240,7 @@ namespace LcmsSpectatorModels.Readers
 
 			var lstDatasets = GetDatasets(mostRecentWeeks, datasetNameFilter);
 
-			// Find the MSGF+ jobs for the datasets
+			// Find the MSGF+/MSPathFinder jobs for the datasets
 			var lstMsgfPlusJobs = GetJobsByDataset(lstDatasets.Values.ToList(), toolNameFilter);
 
 			return lstMsgfPlusJobs;
@@ -247,7 +253,11 @@ namespace LcmsSpectatorModels.Readers
 		/// <returns>Dictionary where key is Dataset ID and value is a list of jobs for the dataset</returns>
 		public Dictionary<int, List<UdtJobInfo>> GetJobsByDataset(IEnumerable<UdtDatasetInfo> lstDatasets)
 		{
-			return GetJobsByDataset(lstDatasets, MsgfplusToolFilter);
+            var msgfPlusJobs = GetJobsByDataset(lstDatasets, MsgfplusToolFilter);
+            var msPathFinderJobs = GetJobsByDataset(lstDatasets, MsPathFinderToolFilter);
+            var proMexJobs = GetJobsByDataset(lstDatasets, ProMexToolFilter);
+            var allJobs = msgfPlusJobs.Concat(msPathFinderJobs).Concat(proMexJobs).ToDictionary(x => x.Key, x => x.Value);
+            return allJobs;
 		}
 
 		/// <summary>
