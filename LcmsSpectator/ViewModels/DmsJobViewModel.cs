@@ -1,10 +1,10 @@
 ﻿using System;
-using GalaSoft.MvvmLight;
-using LcmsSpectatorModels.Readers;
+using LcmsSpectator.Readers;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class DmsJobViewModel: ViewModelBase
+    public class DmsJobViewModel: ReactiveObject
     {
 
         public DmsJobViewModel(DmsLookupUtility.UdtJobInfo jobInfo)
@@ -53,108 +53,71 @@ namespace LcmsSpectator.ViewModels
                 SettingsFile = jobInfo.SettingsFile;
                 ProteinCollection = jobInfo.ProteinCollection;
                 OrganismDb = jobInfo.OrganismDb;
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
+        private int _job;
         public int Job
         {
             get { return _job; }
-            set
-            {
-                _job = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _job, value); }
         }
 
+        private int _datasetId;
         public int DatasetId
         {
             get { return _datasetId; }
-            set
-            {
-                _datasetId = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _datasetId, value); }
         }
 
+        private string _tool;
         public string Tool
         {
             get { return _tool; }
-            set
-            {
-                _tool = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _tool, value); }
         }
 
+        private DateTime _completed;
         public DateTime Completed
         {
             get { return _completed; }
-            set
-            {
-                _completed = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _completed, value); }
         }
 
+        private string _jobFolderPath;
         public string JobFolderPath
         {
             get { return _jobFolderPath; }
-            set
-            {
-                _jobFolderPath = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _jobFolderPath, value); }
         }
 
+        private string _parameterFile;
         public string ParameterFile
         {
             get { return _parameterFile; }
-            set
-            {
-                _parameterFile = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _parameterFile, value); }
         }
 
+        private string _settingsFile;
         public string SettingsFile
         {
             get { return _settingsFile; }
-            set
-            {
-                _settingsFile = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _settingsFile, value); }
         }
 
+        private string _proteinCollection;
         public string ProteinCollection
         {
             get { return _proteinCollection; }
-            set
-            {
-                _proteinCollection = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _proteinCollection, value); }
         }
 
+        private string _organismDb;
         public string OrganismDb
         {
             get { return _organismDb; }
-            set
-            {
-                _organismDb = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _organismDb, value); }
         }
-        
-        private int _job;
-        private int _datasetId;
-        private string _tool;
-        private DateTime _completed;
-        private string _jobFolderPath;
-        private string _parameterFile;
-        private string _settingsFile;
-        private string _proteinCollection;
-        private string _organismDb;
     }
 }

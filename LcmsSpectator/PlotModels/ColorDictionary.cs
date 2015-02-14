@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using InformedProteomics.Backend.Data.Spectrometry;
-using LcmsSpectatorModels.Models;
+using LcmsSpectator.ViewModels;
 using OxyPlot;
 
 namespace LcmsSpectator.PlotModels
@@ -13,7 +13,7 @@ namespace LcmsSpectator.PlotModels
             BuildColorDictionary(length);
         }
 
-        public OxyColor GetColor(LabeledIon label)
+        public OxyColor GetColor(LabeledIonViewModel label)
         {
             OxyColor color;
             if (label.IsFragmentIon)

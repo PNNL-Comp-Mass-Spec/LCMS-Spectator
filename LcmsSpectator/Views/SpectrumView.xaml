@@ -11,7 +11,7 @@
             <ColumnDefinition Width="75*" />
             <ColumnDefinition Width="Auto" MaxWidth="450" />
         </Grid.ColumnDefinitions>
-        <wpf:PlotView Name="Ms2Spectrum" DataContext="{Binding PrimarySpectrumViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="0">
+        <wpf:PlotView Name="Ms2Spectrum" DataContext="{Binding PrimarySpectrumViewModel}" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="0">
             <wpf:PlotView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
@@ -43,7 +43,7 @@
                 </Grid.ColumnDefinitions>
                 <Button Margin="5" Height="30" Grid.Row="0" Grid.Column="0" Command="{Binding SwapSecondary1Command}" ToolTip="Show this spectrum in primary view">&lt;-&gt;</Button>
                 <Button Margin="5" Height="30" Grid.Row="1" Grid.Column="0" Command="{Binding SwapSecondary2Command}" ToolTip="Show this spectrum in primary view">&lt;-&gt;</Button>
-                <wpf:PlotView Name="PreviousMs1" DataContext="{Binding Secondary1ViewModel}" Model="{Binding Path=Plot}" Grid.Row="0" Grid.Column="1" Width="400">
+                <wpf:PlotView Name="PreviousMs1" DataContext="{Binding Secondary1ViewModel}" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="1" Width="400">
                     <wpf:PlotView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
@@ -56,7 +56,7 @@
                         </ContextMenu>
                     </wpf:PlotView.ContextMenu>
                 </wpf:PlotView>
-                <wpf:PlotView Name="NextMs1" DataContext="{Binding Secondary2ViewModel}" Model="{Binding Path=Plot}" Grid.Row="1"  Grid.Column="1" Width="400">
+                <wpf:PlotView Name="NextMs1" DataContext="{Binding Secondary2ViewModel}" Model="{Binding Path=PlotModel}" Grid.Row="1"  Grid.Column="1" Width="400">
                     <wpf:PlotView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />

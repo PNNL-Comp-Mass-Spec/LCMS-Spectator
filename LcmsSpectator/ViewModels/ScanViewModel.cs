@@ -2,24 +2,21 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Windows;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
 using LcmsSpectator.TaskServices;
-using LcmsSpectatorModels.Models;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class ScanViewModel: ViewModelBase
+    public class ScanViewModel: ReactiveObject
     {
-        public RelayCommand ClearFiltersCommand { get; private set; }
-        public ScanViewModel(IMainDialogService dialogService, ITaskService taskService, List<PrSm> data, IMessenger messenger)
+        public IReactiveCommand ClearFiltersCommand { get; private set; }
+        public ScanViewModel(IMainDialogService dialogService, ITaskService taskService, List<PrSm> data)
         {
-            MessengerInstance = messenger;
-            MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
-            ClearFiltersCommand = new RelayCommand(ClearFilters);
+            var clearFiltersCommand = ReactiveCommand.Create();
+            clearFiltersCommand.Subscribe(_ => ClearFilters());
+            ClearFiltersCommand = clearFiltersCommand;
             _taskService = taskService;
             _dialogService = dialogService;
             _filters = new Dictionary<string, string>();
@@ -51,15 +48,15 @@ namespace LcmsSpectator.ViewModels
 
         public void ClearFilters()
         {
-            _sequenceFilterChecked = false; RaisePropertyChanged("SequenceFilterChecked");
-            _proteinFilterChecked = false; RaisePropertyChanged("ProteinFilterChecked");
-            _precursorMzFilterChecked = false; RaisePropertyChanged("MassFilterChecked");
-            _precursorMzFilterChecked = false; RaisePropertyChanged("PrecursorMzFilterChecked");
-            _chargeFilterChecked = false; RaisePropertyChanged("ChargeFilterChecked");
-            _scoreFilterChecked = false; RaisePropertyChanged("ScoreFilterChecked");
-            _qValueFilterChecked = false; RaisePropertyChanged("QValueFilterChecked");
-            _rawFileFilterChecked = false; RaisePropertyChanged("RawFileFilterChecked");
-            _hideUnidentifiedScans = false; RaisePropertyChanged("HideUnidentifiedScans");
+            _sequenceFilterChecked = false; this.RaisePropertyChanged("SequenceFilterChecked");
+            _proteinFilterChecked = false; this.RaisePropertyChanged("ProteinFilterChecked");
+            _precursorMzFilterChecked = false; this.RaisePropertyChanged("MassFilterChecked");
+            _precursorMzFilterChecked = false; this.RaisePropertyChanged("PrecursorMzFilterChecked");
+            _chargeFilterChecked = false; this.RaisePropertyChanged("ChargeFilterChecked");
+            _scoreFilterChecked = false; this.RaisePropertyChanged("ScoreFilterChecked");
+            _qValueFilterChecked = false; this.RaisePropertyChanged("QValueFilterChecked");
+            _rawFileFilterChecked = false; this.RaisePropertyChanged("RawFileFilterChecked");
+            _hideUnidentifiedScans = false; this.RaisePropertyChanged("HideUnidentifiedScans");
             _filters.Clear();
             _taskService.Enqueue(FilterData);
         }
@@ -86,22 +83,13 @@ namespace LcmsSpectator.ViewModels
         public List<PrSm> FilteredData
         {
             get { return _filteredData; }
-            private set
-            {
-                var oldData = _filteredData;
-                _filteredData = value;
-                RaisePropertyChanged("FilteredData", oldData, _filteredData, true);
-            }
+            private set { this.RaiseAndSetIfChanged(ref _filteredData, value); }
         }
 
         public List<ProteinId> FilteredProteins
         {
             get { return _filteredProteins; }
-            private set
-            {
-                _filteredProteins = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _filteredProteins, value); }
         }
 
         /// <summary>
@@ -127,7 +115,7 @@ namespace LcmsSpectator.ViewModels
                         var highest = selected.GetHighestScoringPrSm();
                         SelectedPrSm = highest;
                     }
-                    RaisePropertyChanged();
+                    this.RaisePropertyChanged();
                 }
             }
         }
@@ -137,9 +125,7 @@ namespace LcmsSpectator.ViewModels
             get { return _selectedPrSm; }
             set
             {
-                var oldValue = _selectedPrSm;
-                _selectedPrSm = value;
-                RaisePropertyChanged("SelectedPrSm", oldValue, _selectedPrSm, true);
+                this.RaiseAndSetIfChanged(ref _selectedPrSm, value);
             }
         }
 
@@ -161,7 +147,7 @@ namespace LcmsSpectator.ViewModels
             if (_actualIds && !_firstActualIds && _data.Count > 0)
             {
                 _firstActualIds = false;
-                _qValueFilterChecked = true; RaisePropertyChanged("QValueFilterChecked");
+                _qValueFilterChecked = true; this.RaisePropertyChanged("QValueFilterChecked");
                 if (!_filters.ContainsKey("QValue")) _filters.Add("QValue", "0.01");
 
                 var highestScoringPrsm = _data[0];
@@ -190,7 +176,7 @@ namespace LcmsSpectator.ViewModels
             {
                 _hideUnidentifiedScans = value;
                 _taskService.Enqueue(FilterData);
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
@@ -218,7 +204,7 @@ namespace LcmsSpectator.ViewModels
                     if (_filters.ContainsKey("Sequence")) _filters.Remove("Sequence");
                     _taskService.Enqueue(FilterData);
                 }
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
@@ -246,7 +232,7 @@ namespace LcmsSpectator.ViewModels
                     if (_filters.ContainsKey("Protein")) _filters.Remove("Protein");
                     _taskService.Enqueue(FilterData);
                 }
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
@@ -279,7 +265,7 @@ namespace LcmsSpectator.ViewModels
                     if (_filters.ContainsKey("Mass")) _filters.Remove("Mass");
                     _taskService.Enqueue(FilterData);
                 }
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
@@ -312,7 +298,7 @@ namespace LcmsSpectator.ViewModels
                     if (_filters.ContainsKey("PrecursorMz")) _filters.Remove("PrecursorMz");
                     _taskService.Enqueue(FilterData);
                 }
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
@@ -347,7 +333,7 @@ namespace LcmsSpectator.ViewModels
                     if (_filters.ContainsKey("Charge")) _filters.Remove("Charge");
                     _taskService.Enqueue(FilterData);
                 }
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
@@ -380,7 +366,7 @@ namespace LcmsSpectator.ViewModels
                     if (_filters.ContainsKey("Score")) _filters.Remove("Score");
                     _taskService.Enqueue(FilterData);
                 }
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
@@ -413,7 +399,7 @@ namespace LcmsSpectator.ViewModels
                     if (_filters.ContainsKey("QValue")) _filters.Remove("QValue");
                     _taskService.Enqueue(FilterData);
                 }
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
@@ -441,7 +427,7 @@ namespace LcmsSpectator.ViewModels
                     if (_filters.ContainsKey("RawFile")) _filters.Remove("RawFile");
                     _taskService.Enqueue(FilterData);
                 }
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
         #endregion
@@ -490,15 +476,6 @@ namespace LcmsSpectator.ViewModels
         private void UpdateActualIds()
         {
             _actualIds = _data.Any(id => id.Sequence.Count > 0);
-        }
-
-        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
-        {
-            if (message.Sender is PrSmViewModel)
-            {
-                _selectedPrSm = message.NewValue;
-                RaisePropertyChanged("SelectedPrSm");
-            }
         }
 
         private readonly IMainDialogService _dialogService;

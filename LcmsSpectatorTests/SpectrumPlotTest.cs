@@ -6,12 +6,12 @@ using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using InformedProteomics.TopDown.Scoring;
+using LcmsSpectator.Config;
 using LcmsSpectator.PlotModels;
+using LcmsSpectator.Readers;
 using LcmsSpectator.TaskServices;
+using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;
-using LcmsSpectatorModels.Config;
-using LcmsSpectatorModels.Readers;
-using LcmsSpectatorModels.Utils;
 using LcmsSpectatorTests.DialogServices;
 using NUnit.Framework;
 using OxyPlot.Annotations;
@@ -45,10 +45,10 @@ namespace LcmsSpectatorTests
             spectrumPlotViewModel.IonUpdate(ions);
 
             // plot should not be null
-            Assert.True(spectrumPlotViewModel.Plot != null);
+            Assert.True(spectrumPlotViewModel.PlotModel != null);
 
             // plot should contain 1 stem series (the spectrum stem series)
-            Assert.True(spectrumPlotViewModel.Plot.Series.Count == 1);
+            Assert.True(spectrumPlotViewModel.PlotModel.Series.Count == 1);
         }
 
         [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
@@ -85,7 +85,7 @@ namespace LcmsSpectatorTests
             spectrumPlotViewModel.IonUpdate(ionVms);
 
             // there should be ions.count + 1 (spectrum series) plot series
-            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
+            Assert.True(spectrumPlotViewModel.PlotModel.Series.Count == (expectedIons.Count + 1));
 
             // Remove ion types
             baseIonTypes = new List<BaseIonType> { BaseIonType.Y };
@@ -101,7 +101,7 @@ namespace LcmsSpectatorTests
             //spectrumPlotViewModel.UpdateSpectrum();
 
             // there should be ions.count + 1 (spectrum series) plot series
-            Assert.True(spectrumPlotViewModel.Plot.Series.Count == (expectedIons.Count + 1));
+            Assert.True(spectrumPlotViewModel.PlotModel.Series.Count == (expectedIons.Count + 1));
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace LcmsSpectatorTests
 
                 // check unfiltered spectrum
                 specPlotVm.ShowFilteredSpectrum = false;
-                var spectrumSeries = specPlotVm.Plot.Series[0] as StemSeries;
+                var spectrumSeries = specPlotVm.PlotModel.Series[0] as StemSeries;
                 Assert.False(spectrumSeries == null);
                 Assert.True(spectrumSeries.Points.Count == spectrum.Peaks.Length);  // should be the same length
                 for (int i = 0; i < spectrumSeries.Points.Count; i++)
@@ -137,7 +137,7 @@ namespace LcmsSpectatorTests
                 // check filtered spectrum
                 specPlotVm.ShowFilteredSpectrum = true;
                 //if (!specPlotVm.PlotTask.IsCompleted) await specPlotVm.PlotTask;
-                var filteredSeries = specPlotVm.Plot.Series[0] as StemSeries;
+                var filteredSeries = specPlotVm.PlotModel.Series[0] as StemSeries;
                 Assert.True(filteredSeries.Points.Count == filteredSpectrum.Peaks.Length);   // should be the same length
                 for (int i = 0; i < filteredSeries.Points.Count; i++)
                 {
@@ -172,7 +172,7 @@ namespace LcmsSpectatorTests
                 var ions = IonUtils.GetFragmentIonLabels(prsm.Sequence, prsm.Charge, ionTypes.ToList());
                 var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
                 specPlotVm.IonUpdate(ionVms);
-                foreach (var annotation in specPlotVm.Plot.Annotations)
+                foreach (var annotation in specPlotVm.PlotModel.Annotations)
                 {
                     var textAnnotation = annotation as TextAnnotation;
                     Assert.True(textAnnotation.Text.Contains("'"));
@@ -220,7 +220,7 @@ namespace LcmsSpectatorTests
                 spectrumPlotViewModel.IonUpdate(ionVms);
                 spectrumPlotViewModel.SpectrumUpdate(prsm.Ms2Spectrum);
 
-                foreach (var series in spectrumPlotViewModel.Plot.Series)
+                foreach (var series in spectrumPlotViewModel.PlotModel.Series)
                 {
                     if (series is StemSeries)
                     {

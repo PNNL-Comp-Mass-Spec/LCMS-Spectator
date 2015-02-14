@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Windows;
-using LcmsSpectator.DialogServices;
 using Microsoft.Win32;
 using Xceed.Wpf.AvalonDock.Layout.Serialization;
 

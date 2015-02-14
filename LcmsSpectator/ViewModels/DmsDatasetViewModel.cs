@@ -1,10 +1,10 @@
 ﻿using System;
-using GalaSoft.MvvmLight;
-using LcmsSpectatorModels.Readers;
+using LcmsSpectator.Readers;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class DmsDatasetViewModel: ViewModelBase
+    public class DmsDatasetViewModel: ReactiveObject
     {
 
         public DmsDatasetViewModel(DmsLookupUtility.UdtDatasetInfo datasetInfo)
@@ -47,86 +47,57 @@ namespace LcmsSpectator.ViewModels
                 Instrument = datasetInfo.Instrument;
                 Created = datasetInfo.Created;
                 DatasetFolderPath = datasetInfo.DatasetFolderPath;
-                RaisePropertyChanged();
+                this.RaisePropertyChanged();
             }
         }
 
+        private int _datasetId;
         public int DatasetId
         {
             get { return _datasetId; }
-            set
-            {
-                _datasetId = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _datasetId, value); }
         }
 
+        private string _dataset;
         public string Dataset
         {
             get { return _dataset; }
-            set
-            {
-                _dataset = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _dataset, value); }
         }
 
+        private string _experiment;
         public string Experiment
         {
             get { return _experiment; }
-            set
-            {
-                _experiment = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _experiment, value); }
         }
 
+        private string _organism;
         public string Organism
         {
             get { return _organism; }
-            set
-            {
-                _organism = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _organism, value); }
         }
 
+        private string _instrument;
         public string Instrument
         {
             get { return _instrument; }
-            set
-            {
-                _instrument = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _instrument, value); }
         }
 
+        private DateTime _created;
         public DateTime Created
         {
             get { return _created; }
-            set
-            {
-                _created = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _created, value); }
         }
 
+        private string _datasetFolderPath;
         public string DatasetFolderPath
         {
             get { return _datasetFolderPath; }
-            set
-            {
-                _datasetFolderPath = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _datasetFolderPath, value); }
         }
-        
-        private int _datasetId;
-        private string _dataset;
-        private string _experiment;
-        private string _organism;
-        private string _instrument;
-        private DateTime _created;
-        private string _datasetFolderPath;
     }
 }

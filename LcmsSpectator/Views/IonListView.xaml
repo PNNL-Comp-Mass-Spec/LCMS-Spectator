@@ -19,7 +19,7 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Product Ions" Width="*" Binding="{Binding LabeledIon.Label}"/>
+                <DataGridTextColumn Header="Product Ions" Width="*" Binding="{Binding Label}"/>
             </DataGrid.Columns>
         </DataGrid>
         <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
@@ -31,7 +31,7 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Precursor" Width="*" Binding="{Binding LabeledIon.Label}" />
+                <DataGridTextColumn Header="Precursor" Width="*" Binding="{Binding Label}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

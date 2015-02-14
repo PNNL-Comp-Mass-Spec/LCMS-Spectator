@@ -1,26 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
-using LcmsSpectatorModels.Config;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class SettingsViewModel: ViewModelBase
+    public class SettingsViewModel: ReactiveObject
     {
         public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
         public event EventHandler ReadyToClose;
 
         #region Commands
-        public RelayCommand AddModificationCommand { get; private set; }
-        public RelayCommand CreateNewModificationCommand { get; private set; }
-        public RelayCommand SaveCommand { get; private set; }
-        public RelayCommand CancelCommand { get; private set; }
+        public IReactiveCommand AddModificationCommand { get; private set; }
+        public IReactiveCommand CreateNewModificationCommand { get; private set; }
+        public IReactiveCommand SaveCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; private set; }
         #endregion
 
         public SettingsViewModel(IMainDialogService dialogService)
@@ -40,26 +38,36 @@ namespace LcmsSpectator.ViewModels
             CidHcdIonTypes = IcParameters.Instance.GetCidHcdIonTypes();
             EtdIonTypes = IcParameters.Instance.GetEtdIonTypes();
 
-            PrecursorViewModes = new ObservableCollection<PrecursorViewMode>
+            PrecursorViewModes = new ReactiveList<PrecursorViewMode>
             {
                 PrecursorViewMode.Isotopes,
                 PrecursorViewMode.Charges
             };
 
-            Modifications = new ObservableCollection<ModificationViewModel>();
+            Modifications = new ReactiveList<ModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
             {
                 var modificationVm = new ModificationViewModel(searchModification);
-                modificationVm.RequestModificationRemoval += RemoveModification;
+                modificationVm.RemoveModificationCommand.Subscribe(_ => RemoveModification(modificationVm));
                 Modifications.Add(modificationVm);
             }
-            AddModificationCommand = new RelayCommand(AddModification);
-            CreateNewModificationCommand = new RelayCommand(CreateNewModification);
+            var addModificationCommand = ReactiveCommand.Create();
+            addModificationCommand.Subscribe(_ => AddModification());
+            AddModificationCommand = addModificationCommand;
+
+            var createNewModificationCommand = ReactiveCommand.Create();
+            createNewModificationCommand.Subscribe(_ => CreateNewModification());
+            CreateNewModificationCommand = createNewModificationCommand;
+
+            var saveCommand = ReactiveCommand.Create();
+            saveCommand.Subscribe(_ => Save());
+            SaveCommand = saveCommand;
+
+            var cancelCommand = ReactiveCommand.Create();
+            cancelCommand.Subscribe(_ => Cancel());
+            CancelCommand = cancelCommand;
 
             HeavyModificationsViewModel = new HeavyModificationsViewModel();
-
-            SaveCommand = new RelayCommand(Save);
-            CancelCommand = new RelayCommand(Cancel);
 
             Status = false;
         }
@@ -77,8 +85,8 @@ namespace LcmsSpectator.ViewModels
         public double SpectrumFilterWindowSize { get; set; }
         public double PrecursorRelativeIntensityThreshold { get; set; }
         public bool ShowInstrumentData { get; private set; }
-        public ObservableCollection<PrecursorViewMode> PrecursorViewModes { get; private set; }
-        public ObservableCollection<ModificationViewModel> Modifications { get; private set; }
+        public ReactiveList<PrecursorViewMode> PrecursorViewModes { get; private set; }
+        public ReactiveList<ModificationViewModel> Modifications { get; private set; }
         public bool Status { get; private set; }
 
         public string CidHcdIonTypes { get; set; }
@@ -87,11 +95,7 @@ namespace LcmsSpectator.ViewModels
         public bool AutomaticallySelectIonTypes 
         {
             get { return _automaticallySelectIonTypes; }
-            set
-            {
-                _automaticallySelectIonTypes = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _automaticallySelectIonTypes, value); }
         }
         #endregion
 
@@ -99,7 +103,7 @@ namespace LcmsSpectator.ViewModels
         private void AddModification()
         {
             var modVm = new ModificationViewModel();
-            modVm.RequestModificationRemoval += RemoveModification;
+            modVm.RemoveModificationCommand.Subscribe(_ => RemoveModification(modVm));
             Modifications.Add(modVm);
         }
 
@@ -149,9 +153,8 @@ namespace LcmsSpectator.ViewModels
             if (ReadyToClose != null) ReadyToClose(this, null);
         }
 
-        private void RemoveModification(object sender, EventArgs e)
+        private void RemoveModification(ModificationViewModel modVm)
         {
-            var modVm = sender as ModificationViewModel;
             if (modVm != null) Modifications.Remove(modVm);
         }
         #endregion

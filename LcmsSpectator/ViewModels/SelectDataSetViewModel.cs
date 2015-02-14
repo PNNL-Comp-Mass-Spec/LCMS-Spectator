@@ -1,61 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
+using System.Reactive.Linq;
 using LcmsSpectator.DialogServices;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class SelectDataSetViewModel: ViewModelBase
+    public class SelectDataSetViewModel: ReactiveObject
     {
-        public ObservableCollection<DataSetViewModel> DataSets { get; private set; }
+        public ReactiveList<DataSetViewModel> DataSets { get; private set; }
 
-        public DataSetViewModel SelectedDataSet
-        {
-            get { return _selectedDataSet; }
-            set
-            {
-                _selectedDataSet = value;
-                if (!String.IsNullOrEmpty(_rawFilePath) || SelectedDataSet != null)
-                {
-                    SelectEnabled = true;
-                }
-                else SelectEnabled = false;
-                RaisePropertyChanged();
-            }
-        }
-
-        public string RawFilePath
-        {
-            get { return _rawFilePath; }
-            set
-            {
-                _rawFilePath = value;
-                if (!String.IsNullOrEmpty(_rawFilePath) || SelectedDataSet != null)
-                {
-                    SelectEnabled = true;
-                }
-                else SelectEnabled = false;
-                RaisePropertyChanged();
-            }
-        }
-
-        public bool SelectEnabled
-        {
-            get { return _selectEnabled; }
-            set
-            {
-                _selectEnabled = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public RelayCommand BrowseRawFilesCommand { get; private set; }
-        public RelayCommand ClearRawFilesCommand { get; private set; }
-
-        public RelayCommand OkCommand { get; private set; }
-        public RelayCommand CancelCommand { get; private set; }
+        public IReactiveCommand BrowseRawFilesCommand { get; private set; }
+        public IReactiveCommand ClearRawFilesCommand { get; private set; }
+        public IReactiveCommand OkCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; private set; }
 
         public bool Status { get; private set; }
         public event EventHandler ReadyToClose;
@@ -64,17 +22,40 @@ namespace LcmsSpectator.ViewModels
         public SelectDataSetViewModel(IDialogService dialogService, IEnumerable<DataSetViewModel> dataSets)
         {
             _dialogService = dialogService;
-            DataSets = new ObservableCollection<DataSetViewModel>(dataSets);
+            DataSets = new ReactiveList<DataSetViewModel>(dataSets);
 
-            BrowseRawFilesCommand = new RelayCommand(BrowseRawFiles);
-            ClearRawFilesCommand = new RelayCommand(ClearRawFiles);
+            var browseRawFilesCommand = ReactiveCommand.Create();
+            browseRawFilesCommand.Subscribe(_ => BrowseRawFiles());
+            BrowseRawFilesCommand = browseRawFilesCommand;
 
-            SelectEnabled = false;
+            var clearRawFilesCommand = ReactiveCommand.Create();
+            clearRawFilesCommand.Subscribe(_ => ClearRawFiles());
+            ClearRawFilesCommand = clearRawFilesCommand;
+            
+            // Ok command is only available if RawFilePath isn't empty or SelectedDataSet isn't null
+            var okCommand = ReactiveCommand.Create(
+                        this.WhenAnyValue(x => x.RawFilePath, x => x.SelectedDataSet)
+                            .Select(p => (!String.IsNullOrEmpty(p.Item1) || p.Item2 != null)));
+            okCommand.Subscribe(_ => Ok());
+            OkCommand = okCommand;
 
-            OkCommand = new RelayCommand(Ok);
-            CancelCommand = new RelayCommand(Cancel);
+            var cancelCommand = ReactiveCommand.Create();
+            cancelCommand.Subscribe(_ => Cancel());
+            CancelCommand = cancelCommand;
 
             Status = false;
+        }
+
+        public DataSetViewModel SelectedDataSet
+        {
+            get { return _selectedDataSet; }
+            set { this.RaiseAndSetIfChanged(ref _selectedDataSet, value); }
+        }
+
+        public string RawFilePath
+        {
+            get { return _rawFilePath; }
+            set { this.RaiseAndSetIfChanged(ref _rawFilePath, value); }
         }
 
         private void BrowseRawFiles()
@@ -108,6 +89,5 @@ namespace LcmsSpectator.ViewModels
 
         private readonly IDialogService _dialogService;
         private DataSetViewModel _selectedDataSet;
-        private bool _selectEnabled;
     }
 }

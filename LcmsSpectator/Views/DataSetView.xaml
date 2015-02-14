@@ -24,9 +24,9 @@
         </Grid.RowDefinitions>
         <views:PrSmView DataContext="{Binding SelectedPrSm}" Grid.Row="0" />
         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ShowsPreview="True" Background="Transparent"/>
-        <!--<xcad:DockingManager Grid.Row="2" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Name="AvDock"> -->
+        <!--<xcad:DockingManager Grid.Row="2" Name="AvDock" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded"> -->
         <xcad:DockingManager Grid.Row="2" Name="AvDock" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
-            <!--<xcad:DockingManager.Theme>
+            <!-- <xcad:DockingManager.Theme>
                 <xcad:Office2007SilverTheme />
             </xcad:DockingManager.Theme> -->
             <xcad:LayoutRoot>
@@ -122,7 +122,7 @@
                         </xcad:LayoutAnchorablePane>
                     </xcad:LayoutAnchorablePaneGroup>
                 </xcad:LayoutPanel>
-            </xcad:LayoutRoot>
+            </xcad:LayoutRoot> 
         </xcad:DockingManager>
         <Grid Grid.Row="3" Grid.Column="0" DataContext="{Binding CreateSequenceViewModel}">
             <Grid.ColumnDefinitions>

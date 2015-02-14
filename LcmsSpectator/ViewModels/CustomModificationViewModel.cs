@@ -1,15 +1,14 @@
 ﻿using System;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Composition;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class CustomModificationViewModel: ViewModelBase
+    public class CustomModificationViewModel: ReactiveObject
     {
         public bool Status { get; private set; }
-        public RelayCommand SaveCommand { get; private set; }
-        public RelayCommand CancelCommand { get; private set; }
+        public IReactiveCommand SaveCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; private set; }
         public event EventHandler ReadyToClose;
         public CustomModificationViewModel(string modificationName, bool modificationNameReadOnly)
         {
@@ -22,8 +21,13 @@ namespace LcmsSpectator.ViewModels
             S = 0;
             P = 0;
             Status = false;
-            SaveCommand = new RelayCommand(Save);
-            CancelCommand = new RelayCommand(Cancel);
+            var saveCommand = ReactiveCommand.Create();
+            saveCommand.Subscribe(_ => Save());
+            SaveCommand = saveCommand;
+
+            var cancelCommand = ReactiveCommand.Create();
+            cancelCommand.Subscribe(_ => Cancel());
+            CancelCommand = cancelCommand;
         }
 
         public CustomModificationViewModel(string modificationName, bool modificationNameEditable, Composition composition): this(modificationName, modificationNameEditable)
@@ -34,81 +38,49 @@ namespace LcmsSpectator.ViewModels
         public string ModificationName
         {
             get { return _modificationName; }
-            set
-            {
-                _modificationName = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _modificationName, value); }
         }
 
         public bool ModificationNameReadOnly
         {
             get { return _modificationNameReadOnly; }
-            set
-            {
-                _modificationNameReadOnly = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _modificationNameReadOnly, value); }
         }
 
         public int C
         {
             get { return _c; }
-            set
-            {
-                _c = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _c, value); }
         }
 
         public int H
         {
             get { return _h; }
-            set
-            {
-                _h = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _h, value); }
         }
 
         public int N
         {
             get { return _n; }
-            set
-            {
-                _n = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _n, value); }
         }
 
         public int O
         {
             get { return _o; }
-            set
-            {
-                _o = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _o, value); }
         }
 
         public int S
         {
             get { return _s; }
-            set
-            {
-                _s = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _s, value); }
         }
 
         public int P
         {
             get { return _p; }
-            set
-            {
-                _p = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _p, value); }
         }
 
         public Composition Composition
@@ -140,7 +112,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         private string _modificationName;
-        private bool _modificationNameEditable;
         private int _c;
         private int _h;
         private int _n;

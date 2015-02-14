@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using LcmsSpectator.DialogServices;
-using LcmsSpectatorModels.Readers;
+using LcmsSpectator.Readers;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class DmsLookupViewModel: ViewModelBase
+    public class DmsLookupViewModel: ReactiveObject
     {
-        public ObservableCollection<DmsDatasetViewModel> Datasets { get; private set; } 
-        public ObservableCollection<DmsJobViewModel> Jobs { get; private set; } 
+        public ReactiveList<DmsDatasetViewModel> Datasets { get; private set; } 
+        public ReactiveList<DmsJobViewModel> Jobs { get; private set; } 
 
         public int NumberOfWeeks { get; set; }
         public string DatasetFilter { get; set; }
 
-        public RelayCommand LookupCommand { get; private set; }
-        public RelayCommand OpenCommand { get; private set; }
-        public RelayCommand CloseCommand { get; private set; }
+        public IReactiveCommand LookupCommand { get; private set; }
+        public IReactiveCommand OpenCommand { get; private set; }
+        public IReactiveCommand CloseCommand { get; private set; }
 
         public bool Status { get; private set; }
         public event EventHandler ReadyToClose;
@@ -28,46 +26,55 @@ namespace LcmsSpectator.ViewModels
             Status = false;
             _dialogService = dialogService;
             NumberOfWeeks = 2;
-            Datasets = new ObservableCollection<DmsDatasetViewModel>();
-            Jobs = new ObservableCollection<DmsJobViewModel>();
+            Datasets = new ReactiveList<DmsDatasetViewModel>();
+            Jobs = new ReactiveList<DmsJobViewModel>();
             _dmsLookupUtility = new DmsLookupUtility();
-            LookupCommand = new RelayCommand(Lookup);
-            OpenCommand = new RelayCommand(Open);
-            CloseCommand = new RelayCommand(Close);
+
+            var lookUpCommand = ReactiveCommand.Create();
+            lookUpCommand.Subscribe(_ => Lookup());
+            LookupCommand = lookUpCommand;
+
+            var openCommand = ReactiveCommand.Create();
+            openCommand.Subscribe(_ => Open());
+            OpenCommand = openCommand;
+
+            var closeCommand = ReactiveCommand.Create();
+            closeCommand.Subscribe(_ => Close());
+            CloseCommand = closeCommand;
+
             SelectedDataset = new DmsDatasetViewModel();
             SelectedJob = new DmsJobViewModel();
+
+            this.WhenAnyValue(x => x.SelectedDataset)
+                .Subscribe(x =>
+                {
+                    Jobs.Clear();
+                    if (_selectedDataset == null) return;
+                    var jobMap = _dmsLookupUtility.GetJobsByDataset(new List<DmsLookupUtility.UdtDatasetInfo> { _selectedDataset.UdtDatasetInfo });
+                    List<DmsLookupUtility.UdtJobInfo> jobs;
+                    if (jobMap.TryGetValue(_selectedDataset.DatasetId, out jobs))
+                    {
+                        foreach (var job in jobs)
+                        {
+                            Jobs.Add(new DmsJobViewModel(job));
+                        }
+                    }
+                    if (Jobs.Count > 0) SelectedJob = Jobs[0];
+                });
         }
 
+        private DmsDatasetViewModel _selectedDataset;
         public DmsDatasetViewModel SelectedDataset
         {
             get { return _selectedDataset; }
-            set
-            {
-                _selectedDataset = value;
-                Jobs.Clear();
-                RaisePropertyChanged();
-                if (_selectedDataset == null) return;
-                var jobMap = _dmsLookupUtility.GetJobsByDataset(new List<DmsLookupUtility.UdtDatasetInfo>{ _selectedDataset.UdtDatasetInfo});
-                List<DmsLookupUtility.UdtJobInfo> jobs;
-                if (jobMap.TryGetValue(_selectedDataset.DatasetId, out jobs))
-                {
-                    foreach (var job in jobs)
-                    {
-                        Jobs.Add(new DmsJobViewModel(job));
-                    }
-                }
-                if (Jobs.Count > 0) SelectedJob = Jobs[0];
-            }
+            set { this.RaiseAndSetIfChanged(ref _selectedDataset, value); }
         }
 
+        private DmsJobViewModel _selectedJob;
         public DmsJobViewModel SelectedJob
         {
             get { return _selectedJob; }
-            set
-            {
-                _selectedJob = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _selectedJob, value); }
         }
 
         /// <summary>
@@ -113,7 +120,5 @@ namespace LcmsSpectator.ViewModels
 
         private readonly DmsLookupUtility _dmsLookupUtility;
         private readonly IDialogService _dialogService;
-        private DmsDatasetViewModel _selectedDataset;
-        private DmsJobViewModel _selectedJob;
     }
 }

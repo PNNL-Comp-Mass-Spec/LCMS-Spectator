@@ -1,115 +1,78 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
-using LcmsSpectator.TaskServices;
-using LcmsSpectatorModels.Models;
-using OxyPlot.Axes;
+using ReactiveUI;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class SpectrumViewModel: ViewModelBase
+    public class SpectrumViewModel: ReactiveObject
     {
-        private ILcMsRun _lcms;
-        public SpectrumViewModel(IDialogService dialogService, ITaskService taskService, IMessenger messenger)
+        public SpectrumViewModel(IDialogService dialogService, ILcMsRun lcms)
         {
-            MessengerInstance = messenger;
-            PrimarySpectrumViewModel = new SpectrumPlotViewModel(dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), messenger, 1.05, false);
-            Secondary1ViewModel = new SpectrumPlotViewModel(dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), messenger, 1.1, true);
-            Secondary2ViewModel = new SpectrumPlotViewModel(dialogService, taskService, messenger, 1.1, true);
-            _selectedScan = 0;
-            _selectedPrecursorMz = 0;
-            MessengerInstance.Register<PropertyChangedMessage<double>>(this, SelectedPrecursorMzChanged);
-            MessengerInstance.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedFragmentLabelsChanged);
-            MessengerInstance.Register<PropertyChangedMessage<List<LabeledIonViewModel>>>(this, SelectedPrecursorLabelsChanged);
-            MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
-            MessengerInstance.Register<XicPlotViewModel.SelectedScanChangedMessage>(this, SelectedScanChanged);
-            Messenger.Default.Register<SettingsChangedNotification>(this, SettingsChanged);
+            _lcms = lcms;
+            PrimarySpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05);
+            Secondary1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
+            Secondary2ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
 
-            SwapSecondary1Command = new RelayCommand(SwapSecondary1);
-            SwapSecondary2Command = new RelayCommand(SwapSecondary2);
+            _isAxisInternalChange = false;
+            Secondary1ViewModel.XAxis.AxisChanged += (o, e) =>
+            {
+                if (_isAxisInternalChange) return;
+                _isAxisInternalChange = true;
+                Secondary2ViewModel.XAxis.Zoom(Secondary1ViewModel.XAxis.ActualMinimum, Secondary1ViewModel.XAxis.ActualMaximum);
+                _isAxisInternalChange = false;
+            };
+
+            Secondary2ViewModel.XAxis.AxisChanged += (o, e) =>
+            {
+                if (_isAxisInternalChange) return;
+                _isAxisInternalChange = true;
+                Secondary1ViewModel.XAxis.Zoom(Secondary2ViewModel.XAxis.ActualMinimum, Secondary2ViewModel.XAxis.ActualMaximum);
+                _isAxisInternalChange = false;
+            };
+
+            var swapSecondary1Command = ReactiveCommand.Create();
+            swapSecondary1Command.Subscribe(_ => SwapSecondary1());
+            SwapSecondary1Command = swapSecondary1Command;
+
+            var swapSecondary2Command = ReactiveCommand.Create();
+            swapSecondary2Command.Subscribe(_ => SwapSecondary2());
+            SwapSecondary2Command = swapSecondary2Command;
         }
 
-        public RelayCommand SwapSecondary1Command { get; private set; }
-        public RelayCommand SwapSecondary2Command { get; private set; }
+        #region Public Properties
+        public IReactiveCommand SwapSecondary1Command { get; private set; }
+        public IReactiveCommand SwapSecondary2Command { get; private set; }
 
         private SpectrumPlotViewModel _primarySpectrumViewModel ;
         public SpectrumPlotViewModel PrimarySpectrumViewModel
         {
             get { return _primarySpectrumViewModel; }
-            private set
-            {
-                _primarySpectrumViewModel = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _primarySpectrumViewModel, value); }
         }
 
         private SpectrumPlotViewModel _secondary1ViewModel;
         public SpectrumPlotViewModel Secondary1ViewModel
         {
             get { return _secondary1ViewModel; }
-            private set
-            {
-                _secondary1ViewModel = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _secondary1ViewModel, value); }
         }
 
         private SpectrumPlotViewModel _secondary2ViewModel;
         public SpectrumPlotViewModel Secondary2ViewModel
         {
             get { return _secondary2ViewModel; }
-            private set
-            {
-                _secondary2ViewModel = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _secondary2ViewModel, value); }
         }
+        #endregion
 
-        private ActivationMethod _activationMethod;
-        public ActivationMethod ActivationMethod
+        #region Public Methods
+        public void UpdateSpectra(int scan, double precursorMz = 0)
         {
-            get { return _activationMethod; }
-            set
-            {
-                var old = _activationMethod;
-                _activationMethod = value;
-                RaisePropertyChanged("ActivationMethod", old, _activationMethod, true);
-            }
-        }
-
-        public void ClearPlots()
-        {
-            PrimarySpectrumViewModel.Clear();
-            Secondary2ViewModel.Clear();
-            Secondary1ViewModel.Clear();
-        }
-
-        public ILcMsRun Lcms
-        {
-            get { return _lcms; }
-            set
-            {
-                _lcms = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public void UpdateSpectra(int scan, bool fullUpdate=true)
-        {
-            if (scan == 0 || _lcms == null)
-            {
-                PrimarySpectrumViewModel.Clear();
-                Secondary2ViewModel.Clear();
-                Secondary1ViewModel.Clear();
-                return;
-            }
+            if (scan == 0 || _lcms == null) return;
             var primary = _lcms.GetSpectrum(scan);
 
             string primaryTitle;
@@ -129,14 +92,8 @@ namespace LcmsSpectator.ViewModels
             }
             else
             {
-                primary = FindNearestMs2Spectrum(scan, _lcms);
-                if (primary == null)
-                {
-                    PrimarySpectrumViewModel.Clear();
-                    Secondary1ViewModel.Clear();
-                    Secondary2ViewModel.Clear();
-                    return;
-                }
+                primary = FindNearestMs2Spectrum(scan, precursorMz, _lcms);
+                if (primary == null) return;
                 if (primary.ScanNum < scan)
                 {
                     primaryTitle = "Previous MS1 Spectrum";
@@ -156,36 +113,17 @@ namespace LcmsSpectator.ViewModels
             }
 
             // Ms2 spectrum plot
-            //var heavyStr = "";//SelectedPrSmViewModel.Instance.Heavy ? ", Heavy" : "";
             PrimarySpectrumViewModel.Title = String.Format("{0} (Scan: {1})", primaryTitle, primary.ScanNum);
-            PrimarySpectrumViewModel.SpectrumUpdate(primary);
+            PrimarySpectrumViewModel.Spectrum = primary;
             // Ms1 spectrum plots
             // previous Ms1
-            var xAxis1 = GenerateMs1XAxis(primary, secondary1, secondary2);
-            Secondary1ViewModel.SpectrumUpdate(secondary1, xAxis1);
+            SetMs1XAxis(Secondary1ViewModel.XAxis, primary, secondary1);
+            Secondary1ViewModel.Spectrum = secondary1;
             Secondary1ViewModel.Title = secondary1 == null ? "" : String.Format("{0} (Scan: {1})", secondary1Title, secondary1.ScanNum);
             // next Ms1
-            var xAxis2 = GenerateMs1XAxis(primary, secondary1, secondary2);
-            Secondary2ViewModel.SpectrumUpdate(secondary2, xAxis2);
+            SetMs1XAxis(Secondary2ViewModel.XAxis, primary, secondary1);
+            Secondary2ViewModel.Spectrum = secondary2;
             Secondary2ViewModel.Title = secondary2 == null ? "" : String.Format("{0} (Scan: {1})", secondary2Title, secondary2.ScanNum);
-
-            bool isInternalChange = false;
-            xAxis1.AxisChanged += (o, e) =>
-            {
-                if (isInternalChange) return;
-                isInternalChange = true;
-                xAxis2.Zoom(xAxis1.ActualMinimum, xAxis1.ActualMaximum);
-                isInternalChange = false;
-            };
-
-            xAxis2.AxisChanged += (o, e) =>
-            {
-                if (isInternalChange) return;
-                isInternalChange = true;
-                xAxis1.Zoom(xAxis2.ActualMinimum, xAxis2.ActualMaximum);
-                isInternalChange = false;
-            };
-            ActivationMethod = ((ProductSpectrum) primary).ActivationMethod;
         }
 
         public void SwapSecondary1()
@@ -207,106 +145,38 @@ namespace LcmsSpectator.ViewModels
             PrimarySpectrumViewModel = secondary;
             Secondary2ViewModel = primary;
         }
+        #endregion
 
-        private void SelectedPrecursorMzChanged(PropertyChangedMessage<double> message)
-        {
-            if (message.PropertyName == "PrecursorMz")
-            {
-                _selectedPrecursorMz = message.NewValue;
-            }
-        }
+        #region Private Methods
 
         /// <summary>
-        /// Generate Shared XAxis for Ms1 spectra plots
+        /// Set Shared XAxis for Ms1 spectra plots
         /// </summary>
+        /// <param name="xAxis"></param>
         /// <param name="ms2">Ms2 Spectrum to get Isoloation Window bounds from.</param>
-        /// <param name="prevms1">Closest Ms1 Spectrum before Ms2 Spectrum.</param>
-        /// <param name="nextms1">Closest Ms1 Spectrum after Ms2 Spectrum.</param>
+        /// <param name="ms1"></param>
         /// <returns>XAxis</returns>
-        private LinearAxis GenerateMs1XAxis(Spectrum ms2, Spectrum prevms1, Spectrum nextms1)
+        private void SetMs1XAxis(LinearAxis xAxis, Spectrum ms2, Spectrum ms1)
         {
             var ms2Prod = ms2 as ProductSpectrum;
-            if (ms2Prod == null || prevms1 == null || nextms1 == null) return new LinearAxis {Minimum = 0, Maximum = 100};
-            var prevms1AbsMax = prevms1.Peaks.Max().Mz;
-            var nextms1AbsMax = nextms1.Peaks.Max().Mz;
-            var ms1AbsoluteMaximum = (prevms1AbsMax >= nextms1AbsMax) ? prevms1AbsMax : nextms1AbsMax;
+            if (ms2Prod == null || ms1 == null) return;
+            var ms1AbsMax = ms1.Peaks.Max().Mz;
             var ms1Min = ms2Prod.IsolationWindow.MinMz;
             var ms1Max = ms2Prod.IsolationWindow.MaxMz;
             var diff = ms1Max - ms1Min;
             var ms1MinMz = ms2Prod.IsolationWindow.MinMz - 0.25*diff;
             var ms1MaxMz = ms2Prod.IsolationWindow.MaxMz + 0.25*diff;
-            var xAxis = new LinearAxis
-            {
-                Position = AxisPosition.Bottom,
-                Title = "m/z",
-                Minimum = ms1MinMz,
-                Maximum = ms1MaxMz,
-                AbsoluteMinimum = 0,
-                AbsoluteMaximum = ms1AbsoluteMaximum * 1.25
-            };
+            xAxis.Minimum = ms1MinMz;
+            xAxis.Maximum = ms1MaxMz;
+            xAxis.AbsoluteMinimum = 0;
+            xAxis.AbsoluteMaximum = ms1AbsMax;
             xAxis.Zoom(ms1MinMz, ms1MaxMz);
-            return xAxis;
         }
 
-        private void SelectedFragmentLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
-        {
-            if (message.PropertyName != "FragmentLabels") return;
-            var ionListVm = message.Sender as IonListViewModel;
-            if (ionListVm == null) return;
-            var fragmentLabels = message.NewValue;
-            //var labels = (!heavy) ? fragmentLabels : await ionListVm.GetHeavyFragmentIons();
-            var labels = fragmentLabels;
-            // add precursor ion
-            /*if (labels.Count > 0)
-            {
-                var label1 = labels[0];
-                var precursorIon = label1.LabeledIon.PrecursorIon;
-                var charge = precursorIon.Charge;
-                var precursorIonType = new IonType("Precursor", Composition.H2O, charge, false);
-                var ion = new LabeledIon(precursorIon.Composition, 0, precursorIonType, false);
-                labels.Add(new LabeledIonViewModel(ion));
-            } */
-            PrimarySpectrumViewModel.IonUpdate(labels);
-        }
 
-        private void SelectedPrecursorLabelsChanged(PropertyChangedMessage<List<LabeledIonViewModel>> message)
+        private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, double precursorMz, ILcMsRun lcms)
         {
-            if (message.PropertyName != "PrecursorLabels") return;
-            var ionListVm = message.Sender as IonListViewModel;
-            if (ionListVm == null) return;
-            List<LabeledIonViewModel> precursorLabels = message.NewValue;
-            //if (!heavy) precursorLabels = message.NewValue;
-            //else precursorLabels = await ionListVm.GetHeavyPrecursorIons();
-            if (precursorLabels.Count < 1) return;
-            LabeledIonViewModel precursorLabel = precursorLabels.FirstOrDefault(label => label.LabeledIon.Index == 0);
-            if (precursorLabel != null)
-            {
-                Secondary2ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });
-                Secondary1ViewModel.IonUpdate(new List<LabeledIonViewModel> { precursorLabel });   
-            }
-        }
-
-        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
-        {
-            if (message.PropertyName != "PrSm" || !(message.Sender is PrSmViewModel)) return;
-            _selectedScan = message.NewValue.Scan;
-            UpdateSpectra(message.NewValue.Scan, false);
-        }
-
-        private void SelectedScanChanged(XicPlotViewModel.SelectedScanChangedMessage message)
-        {
-            _selectedScan = message.Scan;
-            UpdateSpectra(message.Scan);
-        }
-
-        private void SettingsChanged(SettingsChangedNotification notification)
-        {
-            UpdateSpectra(_selectedScan);
-        }
-
-        private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, ILcMsRun lcms)
-        {
-            var precursormz = _selectedPrecursorMz;
+            if (precursorMz.Equals(0)) return null;
 
             int highScan = ms1Scan;
             ProductSpectrum highSpec = null;
@@ -322,8 +192,8 @@ namespace LcmsSpectator.ViewModels
                 }
                 var spectrum = lcms.GetSpectrum(highScan);
                 var prodSpectrum = spectrum as ProductSpectrum;
-                if (prodSpectrum == null) continue;
-                if (prodSpectrum.IsolationWindow.Contains(precursormz))
+                if (prodSpectrum == null) break;
+                if (prodSpectrum.IsolationWindow.Contains(precursorMz))
                 {
                     highSpec = prodSpectrum;
                     found = true;
@@ -345,8 +215,8 @@ namespace LcmsSpectator.ViewModels
                 }
                 var spectrum = lcms.GetSpectrum(lowScan);
                 var prodSpectrum = spectrum as ProductSpectrum;
-                if (prodSpectrum == null) continue;
-                if (prodSpectrum.IsolationWindow.Contains(precursormz))
+                if (prodSpectrum == null) break;
+                if (prodSpectrum.IsolationWindow.Contains(precursorMz))
                 {
                     lowSpec = prodSpectrum;
                     found = true;
@@ -360,8 +230,9 @@ namespace LcmsSpectator.ViewModels
 
             return nextMs2;
         }
+        #endregion
 
-        private int _selectedScan;
-        private double _selectedPrecursorMz;
+        private readonly ILcMsRun _lcms;
+        private bool _isAxisInternalChange;
     }
 }

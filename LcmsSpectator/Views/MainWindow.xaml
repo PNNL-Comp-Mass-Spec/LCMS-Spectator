@@ -4,9 +4,9 @@
         xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
         xmlns:views1="clr-namespace:LcmsSpectator.Views"
         xmlns:controls="clr-namespace:LcmsSpectator.Controls"
-        xmlns:models="clr-namespace:LcmsSpectatorModels.Models;assembly=LcmsSpectatorModels"
         xmlns:utils="clr-namespace:LcmsSpectator.Utils"
         xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
+        xmlns:models1="clr-namespace:LcmsSpectator.Models"
         Title="LcMsSpectator" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -37,14 +37,15 @@
         </Menu>
         <!-- End Menu -->
         <Grid HorizontalAlignment="Stretch" Margin="0,22,0,0">
-            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
+<!--            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Layout="{Binding AvLayout}"> -->
+            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Layout="{Binding AvLayout}">
                 <xcad:DockingManager.LayoutItemContainerStyle>
                     <Style TargetType="{x:Type xcad:LayoutItem}">
                         <Setter Property="Title" Value="{Binding Model.RawFileName}" />
                         <Setter Property="CloseCommand" Value="{Binding Model.CloseCommand}" />
                     </Style>
                 </xcad:DockingManager.LayoutItemContainerStyle>
-                <xcad:LayoutRoot>
+<!--                <xcad:LayoutRoot>
                     <xcad:LayoutPanel>
                         <xcad:LayoutDocumentPane />
                         <xcad:LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="*" DockHeight="200">
@@ -68,16 +69,16 @@
                                                     </ContextMenu>
                                                 </controls:MvvmTreeView.ContextMenu>
                                                 <controls:MvvmTreeView.Resources>
-                                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
+                                                    <HierarchicalDataTemplate DataType="{x:Type models1:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
                                                         <TextBlock Text="{Binding ProteinName}" />
                                                     </HierarchicalDataTemplate>
-                                                    <HierarchicalDataTemplate DataType="{x:Type models:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
+                                                    <HierarchicalDataTemplate DataType="{x:Type models1:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
                                                         <TextBlock Text="{Binding SequenceText}" />
                                                     </HierarchicalDataTemplate>
-                                                    <HierarchicalDataTemplate DataType="{x:Type models:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
+                                                    <HierarchicalDataTemplate DataType="{x:Type models1:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
                                                         <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
                                                     </HierarchicalDataTemplate>
-                                                    <HierarchicalDataTemplate DataType="{x:Type models:PrSm}">
+                                                    <HierarchicalDataTemplate DataType="{x:Type models1:PrSm}">
                                                         <TextBlock Text="{Binding ScanText}" />
                                                     </HierarchicalDataTemplate>
                                                 </controls:MvvmTreeView.Resources>
@@ -88,7 +89,7 @@
                                 </xcad:LayoutAnchorablePane>
                             </xcad:LayoutAnchorablePaneGroup>
                     </xcad:LayoutPanel>
-                </xcad:LayoutRoot>
+                </xcad:LayoutRoot> -->
             </xcad:DockingManager>
             <Border BorderBrush="Black" BorderThickness="1" Background="#F0000000" Grid.RowSpan="6" Grid.ColumnSpan="2"
                                  VerticalAlignment="Stretch" Visibility="{Binding ShowSplash, Converter={StaticResource BoolToVis}}">

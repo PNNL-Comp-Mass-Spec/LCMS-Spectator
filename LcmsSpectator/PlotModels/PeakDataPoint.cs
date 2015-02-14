@@ -4,12 +4,13 @@ namespace LcmsSpectator.PlotModels
 {
     public class PeakDataPoint: IDataPoint, IDataPointProvider
     {
-        public PeakDataPoint(double x, double y, double error, double correlation)
+        public PeakDataPoint(double x, double y, double error, double correlation, string title)
         {
             X = x;
             Y = y;
             Error = error;
             Correlation = correlation;
+            Title = title;
         }
 
 		public DataPoint GetDataPoint()
@@ -20,5 +21,6 @@ namespace LcmsSpectator.PlotModels
         public double Y { get; set; }
         public double Error { get; set; }
         public double Correlation { get; set; }
+        public string Title { get; set; }
     }
 }

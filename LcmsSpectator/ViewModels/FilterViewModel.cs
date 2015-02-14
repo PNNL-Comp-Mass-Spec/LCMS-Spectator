@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using LcmsSpectator.DialogServices;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class FilterViewModel: ViewModelBase
+    public class FilterViewModel: ReactiveObject
     {
         public string Title { get; private set; }
         public string Description { get; private set; }
         public List<string> Values { get; private set; }
         public string SelectedValue { get; set; }
-        public RelayCommand FilterCommand { get; private set; }
-        public RelayCommand CancelCommand { get; private set; }
+        public IReactiveCommand FilterCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; private set; }
         public bool Status { get; private set; }
         public event EventHandler ReadyToClose;
         public Validate Validator { get; private set; }
@@ -24,9 +23,12 @@ namespace LcmsSpectator.ViewModels
             Description = description;
             Values = values;
             Validator = validator;
-            FilterCommand = new RelayCommand(Filter);
-            CancelCommand = new RelayCommand(Cancel);
-            _defaultValue = defaultValue;
+            var filterCommand = ReactiveCommand.Create();
+            filterCommand.Subscribe(_ => Filter());
+            FilterCommand = filterCommand;
+            var cancelCommand = ReactiveCommand.Create();
+            cancelCommand.Subscribe(_ => Cancel());
+            CancelCommand = cancelCommand;
             SelectedValue = defaultValue;
             _dialogService = dialogService;
             Status = false;
@@ -52,6 +54,5 @@ namespace LcmsSpectator.ViewModels
         }
 
         private readonly IDialogService _dialogService;
-        private readonly string _defaultValue;
     }
 }

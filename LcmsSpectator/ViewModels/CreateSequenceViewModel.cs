@@ -1,132 +1,132 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
+using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
-using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
-using LcmsSpectatorModels.Config;
-using LcmsSpectatorModels.Models;
-using LcmsSpectatorModels.Readers;
-using LcmsSpectatorModels.Readers.SequenceReaders;
+using LcmsSpectator.Models;
+using LcmsSpectator.Readers;
+using LcmsSpectator.Readers.SequenceReaders;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class CreateSequenceViewModel: ViewModelBase
+    public class CreateSequenceViewModel: ReactiveObject
     {
-        public ObservableCollection<DataSetViewModel> DataSetViewModels { get; private set; }
-        public ObservableCollection<Target> Targets { get; private set; } 
-        public ObservableCollection<Modification> Modifications { get; private set; }
+        public ReactiveList<DataSetViewModel> DataSetViewModels { get; private set; }
+        public ReactiveList<Target> Targets { get; private set; } 
+        public ReactiveList<Modification> Modifications { get; private set; }
         public Modification SelectedModification { get; set; }
 
         #region Commands
-        public RelayCommand OpenTargetListCommand { get; private set; }
-        public RelayCommand CreatePrSmCommand { get; private set; }
-        public RelayCommand InsertModificationCommand { get; private set; }
-        public RelayCommand InsertStaticModificationsCommand { get; private set; }
-        public RelayCommand PasteCommand { get; private set; }
+        public IReactiveCommand OpenTargetListCommand { get; private set; }
+        public IReactiveCommand CreatePrSmCommand { get; private set; }
+        public IReactiveCommand InsertModificationCommand { get; private set; }
+        public IReactiveCommand InsertStaticModificationsCommand { get; private set; }
+        public IReactiveCommand PasteCommand { get; private set; }
         #endregion
 
-        public CreateSequenceViewModel(ObservableCollection<DataSetViewModel> dataSetViewModels, IDialogService dialogService, IMessenger messenger)
+        public CreateSequenceViewModel(ReactiveList<DataSetViewModel> dataSetViewModels, IDialogService dialogService)
         {
-            MessengerInstance = messenger;
             DataSetViewModels = dataSetViewModels;
-            Targets = new ObservableCollection<Target>();
+            Targets = new ReactiveList<Target>();
             _dialogService = dialogService;
             SequenceText = "";
-            OpenTargetListCommand = new RelayCommand(OpenTargetList);
-            //CreatePrSmCommand = new RelayCommand(CreatePrSm, () => (DataSetViewModels != null && DataSetViewModels.Count > 0));
-            CreatePrSmCommand = new RelayCommand(CreatePrSm);
-            InsertModificationCommand = new RelayCommand(InsertModification);
-            InsertStaticModificationsCommand = new RelayCommand(InsertStaticModifications);
-            PasteCommand = new RelayCommand(Paste);
+            var openTargetListCommand = ReactiveCommand.Create();
+            openTargetListCommand.Subscribe(_ => OpenTargetList());
+            OpenTargetListCommand = openTargetListCommand;
+
+            var createPrSmCommand = ReactiveCommand.Create();
+            createPrSmCommand.Subscribe(_ => CreatePrSm());
+            CreatePrSmCommand = createPrSmCommand;
+
+            var insertModificationCommand = ReactiveCommand.Create();
+            insertModificationCommand.Subscribe(_ => InsertModification());
+            InsertModificationCommand = insertModificationCommand;
+
+            var insertStaticModificationsCommand = ReactiveCommand.Create();
+            insertStaticModificationsCommand.Subscribe(_ => InsertStaticModifications());
+            InsertStaticModificationsCommand = insertStaticModificationsCommand;
+
+            var pasteCommand = ReactiveCommand.Create();
+            pasteCommand.Subscribe(_ => Paste());
+            PasteCommand = pasteCommand;
+
             SelectedCharge = 2;
             SelectedScan = 0;
             if (DataSetViewModels.Count > 0) SelectedDataSetViewModel = DataSetViewModels[0];
 
-            MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
-            MessengerInstance.Register<XicPlotViewModel.SelectedScanChangedMessage>(this, SelectedScanChanged);
-            //Messenger.Default.Register<PropertyChangedMessage<string>>(this, SelectedRawFileChanged);
+            // When target changes, update sequence text, charge, insert static modifications.
+            this.WhenAnyValue(x => x.SelectedTarget)
+                .Where(target => (target != null && !String.IsNullOrEmpty(target.SequenceText)))
+                .Subscribe(target =>
+                {
+                    SequenceText = _selectedTarget.SequenceText;
+                    InsertStaticModifications();
+                    if (_selectedTarget.Charge > 0) SelectedCharge = _selectedTarget.Charge;
+                });
 
-            Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
+            // When PrSm changes, update scan, sequence text, and charge
+            this.WhenAnyValue(x => x.SelectedPrSm)
+                .Where(prsm => prsm != null)
+                .Subscribe(prsm =>
+            {
+                SelectedScan = prsm.Scan;
+                SequenceText = prsm.SequenceText;
+                SelectedCharge = prsm.Charge;
+            });
+
+            Modifications = new ReactiveList<Modification>(Modification.CommonModifications);
         }
 
         #region Public Properties
         public int SequencePosition { get; set; }
 
+        private PrSm _selectedPrSm;
         public PrSm SelectedPrSm
         {
             get { return _selectedPrSm; }
-            set
-            {
-                var oldSelectedPrSm = _selectedPrSm;
-                _selectedPrSm = value;
-                RaisePropertyChanged("SelectedPrSm", oldSelectedPrSm, _selectedPrSm, true);
-            }
+            set { this.RaiseAndSetIfChanged(ref _selectedPrSm, value); }
         }
 
+        private int _selectedScan;
         public int SelectedScan
         {
             get { return _selectedScan; }
-            set
-            {
-                _selectedScan = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _selectedScan, value); }
         }
 
+        private int _selectedCharge;
         public int SelectedCharge
         {
-            get { return _selectedChage; }
-            set
-            {
-                _selectedChage = value;
-                RaisePropertyChanged();
-            }
+            get { return _selectedCharge; }
+            set { this.RaiseAndSetIfChanged(ref _selectedCharge, value); }
         }
 
+        private string _sequenceText;
         public string SequenceText
         {
             get { return _sequenceText; }
-            set
-            {
-                _sequenceText = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _sequenceText, value); }
         }
 
+        private DataSetViewModel _selectedDataSetViewModel;
         public DataSetViewModel SelectedDataSetViewModel
         {
-            get { return _selectedXicViewModel; }
-            set
-            {
-                if (_selectedXicViewModel == value) return;
-                _selectedXicViewModel = value;
-                RaisePropertyChanged();
-            }
+            get { return _selectedDataSetViewModel; }
+            set { this.RaiseAndSetIfChanged(ref _selectedDataSetViewModel, value); }
         }
 
+        private Target _selectedTarget;
         public Target SelectedTarget
         {
             get { return _selectedTarget; }
-            set
-            {
-                _selectedTarget = value;
-                SequenceText = _selectedTarget.SequenceText;
-                InsertStaticModifications();
-                if (_selectedTarget.Charge != 0)
-                {
-                    SelectedCharge = _selectedTarget.Charge;
-                }
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _selectedTarget, value); }
         }
         #endregion
 
@@ -147,24 +147,6 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
             foreach (var target in targets) Targets.Add(target);
-        }
-        #endregion
-
-        #region Event Handlers
-        private void SelectedScanChanged(XicPlotViewModel.SelectedScanChangedMessage message)
-        {
-            SelectedScan = message.Scan;
-        }
-
-        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
-        {
-            if (message.PropertyName == "PrSm" && message.Sender is PrSmViewModel)
-            {
-                var prsm = message.NewValue;
-                SelectedScan = prsm.Scan;
-                SequenceText = prsm.SequenceText;
-                SelectedCharge = prsm.Charge;
-            }
         }
         #endregion
 
@@ -313,12 +295,6 @@ namespace LcmsSpectator.ViewModels
 
         #region Private Members
         private readonly IDialogService _dialogService;
-        private DataSetViewModel _selectedXicViewModel;
-        private Target _selectedTarget;
-        private int _selectedScan;
-        private int _selectedChage;
-        private string _sequenceText;
-        private PrSm _selectedPrSm;
         #endregion
     }
 }

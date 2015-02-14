@@ -7,8 +7,8 @@ using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
-using LcmsSpectatorModels.Readers;
-using LcmsSpectatorModels.Utils;
+using LcmsSpectator.Readers;
+using LcmsSpectator.Utils;
 using NUnit.Framework;
 
 namespace LcmsSpectatorTests

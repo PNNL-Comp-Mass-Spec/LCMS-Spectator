@@ -1,21 +1,20 @@
 ﻿using System.Collections;
-using System.Collections.ObjectModel;
 using System.Linq;
-using GalaSoft.MvvmLight;
 using InformedProteomics.Backend.Data.Sequence;
-using LcmsSpectatorModels.Config;
+using LcmsSpectator.Config;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class HeavyModificationsViewModel: ViewModelBase
+    public class HeavyModificationsViewModel: ReactiveObject
     {
-        public ObservableCollection<Modification> Modifications { get; private set; }
+        public ReactiveList<Modification> Modifications { get; private set; }
         public IList SelectedLightModifications { get; set; }
         public IList SelectedHeavyModifications { get; set; }
 
         public HeavyModificationsViewModel()
         {
-            Modifications = new ObservableCollection<Modification>
+            Modifications = new ReactiveList<Modification>
             {
                 Modification.LysToHeavyLys,
                 Modification.ArgToHeavyArg

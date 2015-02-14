@@ -1,78 +1,65 @@
 ﻿using System;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
+using System.Reactive.Linq;
 using LcmsSpectator.DialogServices;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class OpenDataWindowViewModel: ViewModelBase
+    public class OpenDataWindowViewModel: ReactiveObject
     {
-        public RelayCommand BrowseRawFilesCommand { get; private set; }
-        public RelayCommand BrowseFeatureFilesCommand { get; private set; }
-        public RelayCommand BrowseIdFilesCommand { get; private set; }
+        public IReactiveCommand BrowseRawFilesCommand { get; private set; }
+        public IReactiveCommand BrowseFeatureFilesCommand { get; private set; }
+        public IReactiveCommand BrowseIdFilesCommand { get; private set; }
+        public IReactiveCommand OkCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; private set; }
 
         public bool Status { get; private set; }
         public event EventHandler ReadyToClose;
-        public RelayCommand OkCommand { get; private set; }
-        public RelayCommand CancelCommand { get; private set; }
         public OpenDataWindowViewModel(IDialogService dialogService)
         {
             _dialogService = dialogService;
-            BrowseRawFilesCommand = new RelayCommand(BrowseRawFiles);
-            BrowseFeatureFilesCommand = new RelayCommand(BrowseFeatureFiles);
-            BrowseIdFilesCommand = new RelayCommand(BrowseIdFiles);
+            var browseRawFilesCommand = ReactiveCommand.Create();
+            browseRawFilesCommand.Subscribe(_ => BrowseRawFiles());
+            BrowseRawFilesCommand = browseRawFilesCommand;
+
+            var browseFeatureFilesCommand = ReactiveCommand.Create();
+            browseFeatureFilesCommand.Subscribe(_ => BrowseFeatureFiles());
+            BrowseFeatureFilesCommand = browseRawFilesCommand;
+
+            var browseIdFilesCommand = ReactiveCommand.Create();
+            browseIdFilesCommand.Subscribe(_ => BrowseIdFiles());
+            BrowseIdFilesCommand = browseRawFilesCommand;
+
+            // Ok button should be enabled if RawFilePath isn't null or empty
+            var okCommand =
+            ReactiveCommand.Create(
+                    this.WhenAnyValue(x => x.RawFilePath).Select(rawFilePath => !String.IsNullOrEmpty(rawFilePath)));
+            okCommand.Subscribe(_ => Ok());
+            OkCommand = okCommand;
+
+            var cancelCommand = ReactiveCommand.Create();
+            cancelCommand.Subscribe(_ => Cancel());
+            CancelCommand = cancelCommand;
+
             Status = false;
-            OpenEnabled = false;
-            OkCommand = new RelayCommand(Ok);
-            CancelCommand = new RelayCommand(Cancel);
         }
 
         public string RawFilePath
         {
             get { return _rawFilePath; }
-            set
-            {
-                _rawFilePath = value;
-                if (!String.IsNullOrEmpty(_rawFilePath))
-                {
-                    OpenEnabled = true;
-                }
-                else
-                {
-                    OpenEnabled = false;
-                }
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _rawFilePath, value); }
         }
 
         public string FeatureFilePath
         {
             get { return _featureFilePath; }
-            set
-            {
-                _featureFilePath = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _featureFilePath, value); }
         }
 
         public string IdFilePath
         {
             get { return _idFilePath; }
-            set
-            {
-                _idFilePath = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public bool OpenEnabled
-        {
-            get { return _openEnabled; }
-            set
-            {
-                _openEnabled = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _idFilePath, value); }
         }
 
         private void BrowseRawFiles()
@@ -111,6 +98,5 @@ namespace LcmsSpectator.ViewModels
         private string _rawFilePath;
         private string _featureFilePath;
         private string _idFilePath;
-        private bool _openEnabled;
     }
 }

@@ -1,16 +1,15 @@
 ﻿using System;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using LcmsSpectatorModels.Config;
+using LcmsSpectator.Config;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class HeavyModificationsWindowViewModel: ViewModelBase
+    public class HeavyModificationsWindowViewModel: ReactiveObject
     {
         public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
         
-        public RelayCommand SaveCommand { get; private set; }
-        public RelayCommand CancelCommand { get; private set; }
+        public IReactiveCommand SaveCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; private set; }
 
         public bool Status { get; private set; }
 
@@ -20,8 +19,13 @@ namespace LcmsSpectator.ViewModels
         {
             HeavyModificationsViewModel = new HeavyModificationsViewModel();
 
-            SaveCommand = new RelayCommand(Save);
-            CancelCommand = new RelayCommand(Cancel);
+            var saveCommand = ReactiveCommand.Create();
+            saveCommand.Subscribe(_ => Save());
+            SaveCommand = saveCommand;
+
+            var cancelCommand = ReactiveCommand.Create();
+            cancelCommand.Subscribe(_ => Cancel());
+            CancelCommand = cancelCommand;
 
             Status = false;
         }

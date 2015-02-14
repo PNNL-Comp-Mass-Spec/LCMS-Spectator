@@ -1,455 +1,251 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
-using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
-using LcmsSpectator.TaskServices;
-using LcmsSpectatorModels.Config;
-using LcmsSpectatorModels.Models;
-using LcmsSpectatorModels.Utils;
-using MultiDimensionalPeakFinding;
 using OxyPlot;
-using OxyPlot.Axes;
 using OxyPlot.Wpf;
+using ReactiveUI;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
 using LineSeries = OxyPlot.Series.LineSeries;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class XicPlotViewModel: ViewModelBase
+    public class XicPlotViewModel: ReactiveObject
     {
         /// <summary>
         /// Xic Plot View Model constructor
         /// </summary>
         /// <param name="dialogService">Dialog service</param>
-        /// <param name="taskService">Task scheduler</param>
-        /// <param name="messenger">Messenger instance to raise property changes/events to</param>
+        /// <param name="lcms">Lcms run data set for this Xic plot.</param>
         /// <param name="title">Title of XIC plot</param>
-        /// <param name="xAxis">XAxis for XIC plo.</param>
-        /// <param name="heavy">Does this XIC represent a heavy peptide?</param>
-        /// <param name="showLegend">Should a legend be shown on the plot?</param>
-        public XicPlotViewModel(IDialogService dialogService, ITaskService taskService, IMessenger messenger, string title, LinearAxis xAxis, bool heavy, bool showLegend=true)
+        /// <param name="xAxis">XAxis for XIC plot.</param>
+        /// <param name="showLegend">Should a legend be shown on the plot by default?</param>
+        public XicPlotViewModel(IDialogService dialogService, ILcMsRun lcms, string title, LinearAxis xAxis, bool showLegend=true)
         {
-            MessengerInstance = messenger;
-            _taskService = taskService;
             _dialogService = dialogService;
             _title = title;
+            _lcms = lcms;
             _showLegend = showLegend;
             _xAxis = xAxis;
-            Heavy = heavy;
-            PlotTitle = _title;
-            SetScanChangedCommand = new RelayCommand(SetSelectedRt);
-            SaveAsImageCommand = new RelayCommand(SaveAsImage);
             _pointsToSmooth = IcParameters.Instance.PointsToSmooth;
-            Plot = new SelectablePlotModel(xAxis, 1.05);
-            _ions = new List<LabeledIonViewModel>();
-            _xAxis.AxisChanged += AxisChanged_UpdatePlotTitle;
-            _smoothedXics = new ConcurrentDictionary<string, Tuple<LabeledXic, bool>>();
-            _xicCache = new ConcurrentDictionary<string, LabeledXic>();
-            MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
-            MessengerInstance.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
-            UpdatePlot();
+            PlotTitle = _title;
+            PlotModel = new SelectablePlotModel(xAxis, 1.05);
+            _ions = new ReactiveList<LabeledIonViewModel>();
+
+            var retentionTimeSelectedCommand = ReactiveCommand.Create();
+            retentionTimeSelectedCommand.Subscribe(_ =>
+            {
+                var dataPoint = PlotModel.SelectedDataPoint as XicDataPoint;
+                if (dataPoint == null) return;
+                SelectedScan = dataPoint.ScanNum;
+            });
+            RetentionTimeSelectedCommand = retentionTimeSelectedCommand;
+
+            var saveAsImageCommand = ReactiveCommand.Create();
+            saveAsImageCommand.Subscribe(_ => SaveAsImage());
+            SaveAsImageCommand = saveAsImageCommand;
+
+            // When ShowLegend is updated, IsLegendVisible on the plot should be updated
+            this.WhenAnyValue(x => x.ShowLegend).Subscribe(v =>
+            {
+                PlotModel.IsLegendVisible = v;
+                PlotModel.InvalidatePlot(true);
+            });
+
+            // When area updates, plot title should update
+            this.WhenAnyValue(x => x.Area).Subscribe(area =>
+            {
+                var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", area);
+                PlotTitle = String.Format("{0} (Area: {1})", _title, areaStr);
+            });
+
+            // Update area when x Axis is zoomed/panned
+            _xAxis.AxisChanged += (async (o, e) =>
+            {
+                Area = await GetCurrentAreaAsync();
+            });
+
+            // Update point marker when selected scan changes
+            this.WhenAnyValue(x => x.SelectedScan, x => x.IsPlotVisible)
+                .Where(x => x.Item2)
+                .Throttle(TimeSpan.FromMilliseconds(50), RxApp.TaskpoolScheduler)
+                .Subscribe(x => PlotModel.SetUniquePointMarker(_lcms.GetElutionTime(x.Item1)));
+
+            // Update plot when ions change, or plot visibility changes
+            this.WhenAnyValue(x => x.Ions, x => x.IsPlotVisible, x => x.PointsToSmooth)
+                .Where(x => x.Item2)    // Do not do anything if plot isn't visible
+                .Throttle(TimeSpan.FromMilliseconds(250), RxApp.TaskpoolScheduler)
+                .SelectMany(async x => await GetXicDataPointsAsync(x.Item1, x.Item3))
+                .Subscribe(UpdatePlotModel);       // Update plot when data changes
+
+            // Show/hide series when ion is selected/unselected
+            this.WhenAnyValue(x => x.Ions)
+                .Where(ions => ions != null)
+                .Subscribe(ions => ions.ItemChanged.Where(x => x.PropertyName == "Selected")
+                .Select(x => x.Sender)
+                .Subscribe(LabeledIonSelectedChanged));
+
+            // Update plot when settings change
+            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold, x => x.ProductIonTolerancePpm)
+                .Where(_ => Ions != null)
+                .Throttle(TimeSpan.FromMilliseconds(250), RxApp.TaskpoolScheduler)
+                .SelectMany(async x => await GetXicDataPointsAsync(Ions, PointsToSmooth, false))
+                .Subscribe(UpdatePlotModel);
+
         }
 
         #region Public Properties
-
-        /// <summary>
-        /// Name of data sets (without file extension or folder path)
-        /// </summary>
-        public string RawFileName { get; set; }
-
-        /// <summary>
-        /// LcMsRun data set
-        /// </summary>
-        public ILcMsRun Lcms { get; set; }
-
         /// <summary>
         /// Command triggered when new scan is selected (double clicked) on XIC.
         /// </summary>
-        public RelayCommand SetScanChangedCommand { get; private set; }
+        public IReactiveCommand RetentionTimeSelectedCommand { get; private set; }
 
         /// <summary>
         /// Command for exporting xic plot as an image.
         /// </summary>
-        public RelayCommand SaveAsImageCommand { get; private set; }
+        public IReactiveCommand SaveAsImageCommand { get; private set; }
 
-        /// <summary>
-        /// Whether or not this xic plot represents a heavy peptide/protein.
-        /// </summary>
-        public bool Heavy { get; private set; }
-
-        /// <summary>
-        /// Event that is triggered when the XIC plot is updated.
-        /// </summary>
-        public event EventHandler XicPlotChanged;
-
+        private SelectablePlotModel _plotModel;
         /// <summary>
         /// Plot model for XIC
         /// </summary>
-        public SelectablePlotModel Plot
+        public SelectablePlotModel PlotModel
         {
-            get { return _plot; }
-            private set
-            {
-                _plot = value;
-                RaisePropertyChanged();
-            }
+            get { return _plotModel; }
+            private set { this.RaiseAndSetIfChanged(ref _plotModel, value); }
         }
 
+        private bool _isPlotVisible;
         /// <summary>
-        /// Shows and hides the point markers on the XIC plots.
-        /// Regenerates the plot with or without markers.
+        /// Get/set if the plot should be showing data.
         /// </summary>
-        public bool ShowScanMarkers
+        public bool IsPlotVisible
         {
-            get { return _showScanMarkers; }
-            set
-            {
-                if (_showScanMarkers == value) return;
-                _showScanMarkers = value;
-                ToggleScanMarkers(value);
-                RaisePropertyChanged();
-            }
+            get { return _isPlotVisible; }
+            set { this.RaiseAndSetIfChanged(ref _isPlotVisible, value); }
         }
 
+        private bool _showLegend;
         /// <summary>
         /// Shows or hides the legend for the plot.
         /// </summary>
         public bool ShowLegend
         {
             get { return _showLegend; }
-            set
-            {
-                if (_showLegend == value) return;
-                _showLegend = value;
-                ToggleLegend(value);
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _showLegend, value); }
         }
 
+        private int _pointsToSmooth;
         /// <summary>
         /// Property for setting the smoothing window size
         /// </summary>
         public int PointsToSmooth
         {
             get { return _pointsToSmooth; }
-            set
-            {
-                _pointsToSmooth = value;
-                _taskService.Enqueue(() => _smoothedXics.Clear());
-                UpdatePlot();
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _pointsToSmooth, value); }
         }
 
+        private ReactiveList<LabeledIonViewModel> _ions;
         /// <summary>
         /// Ions to generate XICs from
         /// </summary>
-        public List<LabeledIonViewModel> Ions
+        public ReactiveList<LabeledIonViewModel> Ions
         {
             get { return _ions; }
-            set
-            {
-                _ions = value;
-                UpdatePlot();
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _ions, value); }
         }
 
+        private int _selectedScan;
         /// <summary>
-        /// Retention time currently selected in the plot.
-        /// Sets a ordinary point marker at this point.
+        /// The scan number selected on plot.
         /// </summary>
-        public double SelectedRt
+        public int SelectedScan
         {
-            get { return _selectedRt;  }
-            private set
-            {
-                _selectedRt = value;
-                RaisePropertyChanged();
-            }
+            get { return _selectedScan; }
+            set { this.RaiseAndSetIfChanged(ref _selectedScan, value); }
         }
 
+        private double _area;
         /// <summary>
         /// Area under curve of XIC
         /// </summary>
         public double Area
         {
             get { return _area; }
-            set
-            {
-                _area = value;
-                PlotTitle = GetPlotTitleWithArea(_area);
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _area, value); }
         }
 
+        private string _plotTitle;
         /// <summary>
         /// Title of plot, including area
         /// </summary>
         public string PlotTitle
         {
             get { return _plotTitle; }
-            set
-            {
-                _plotTitle = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _plotTitle, value); }
         }
 #endregion
 
         #region Public Methods
         /// <summary>
-        /// Highlight Rt and call SelectedScanChanged to inform XicViewModel
+        /// Clear data on plot.
         /// </summary>
-        public void SetSelectedRt()
+        public void ClearPlot()
         {
-            _taskService.Enqueue(() =>
-            {
-                var dataPoint = Plot.SelectedDataPoint as XicDataPoint;
-                if (dataPoint == null) return;
-                SelectedRt = Plot.SelectedDataPoint.X;
-                MessengerInstance.Send(new SelectedScanChangedMessage(this, dataPoint.ScanNum));
-            });
+            PlotModel.Series.Clear();
         }
 
         /// <summary>
-        /// Highlight (place marker at) retention time.
+        /// Get current area under curve of XIC plot
         /// </summary>
-        /// <param name="rt">Retention time to put marker at.</param>
-        public void HighlightRt(double rt)
+        /// <returns></returns> 
+        public double GetCurrentArea()
         {
-            _taskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));
-        }
-
-        /// <summary>
-        /// Clear XIC cache
-        /// </summary>
-        public void ClearCache()
-        {
-            _taskService.Enqueue(() =>
-            {
-                _xicCache.Clear();
-                _smoothedXics.Clear();
-            });
-        }
-
-        /// <summary>
-        /// Start update of XIC plot.
-        /// </summary>
-        public void UpdatePlot()
-        {
-            _taskService.Enqueue(() =>
-            { 
-                Plot.ClearAxes();
-                Plot = GeneratePlot();
-                Plot.InvalidatePlot(true);
-                if (XicPlotChanged != null) XicPlotChanged(this, EventArgs.Empty);
-            });
-        }
-
-        /// <summary>
-        /// Start update of plot title with current area.
-        /// </summary>
-        public void UpdateArea()
-        {
-            _taskService.Enqueue(() => { Area = GetCurrentArea();  });
+            var area =  PlotModel.Series.OfType<XicPointSeries>().Where(xicPointSeries => xicPointSeries.IsVisible && xicPointSeries.Index >= 0)
+                .Sum(xicPointSeries => xicPointSeries.GetArea(_xAxis.ActualMinimum, _xAxis.ActualMaximum));
+            return area;
         }
 
         /// <summary>
         /// Get an awaitable task for XIC area.
         /// </summary>
         /// <returns></returns>
-        public Task<double> GetAreaTask()
+        public Task<double> GetCurrentAreaAsync()
         {
             return Task.Run(() => GetCurrentArea());
-        } 
-
-        /// <summary>
-        /// Get current area under curve of XIC plot
-        /// </summary>
-        /// <returns></returns>
-        public double GetCurrentArea()
-        {
-            if (Lcms == null) return 0.0;
-            var min = _xAxis.ActualMinimum;
-            var max = _xAxis.ActualMaximum;
-            var area = 0.0;
-            var xics = _smoothedXics.Values;
-            foreach (var val in xics)
-            {
-                var lXic = val.Item1;
-                var xicPoints = lXic.Xic;
-                if (lXic.Index < 0 || !val.Item2) continue;
-                area += (from xicPoint in xicPoints
-                         let rt = Lcms.GetElutionTime(xicPoint.ScanNum)
-                         where rt >= min && rt <= max
-                         select xicPoint.Intensity).Sum();
-            }
-            return area;
-        }
-#endregion
-
-        #region Event Handlers
-        private void SelectedScanChanged(PropertyChangedMessage<int> message)
-        {
-            if (message.PropertyName == "Scan" && message.Sender is PrSmViewModel && Lcms != null)
-            {
-                var rt = Lcms.GetElutionTime(message.NewValue);
-                _selectedRt = rt;
-                /*if (SelectedPrSmViewModel.Instance.Heavy == Heavy)
-                {
-                    _taskService.Enqueue(() => Plot.SetUniquePointMarker(rt));
-                }
-                else _taskService.Enqueue(() => Plot.SetOrdinaryPointMarker(rt));*/
-                _taskService.Enqueue(() => Plot.SetUniquePointMarker(rt));
-            }
-        }
-
-        /// <summary>
-        /// Update plot title when XAxis axis changed to reflect updated area of the currently
-        /// visible portion of the plot.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void AxisChanged_UpdatePlotTitle(object sender, AxisChangedEventArgs e)
-        {
-            if (Plot == null || Plot.Series.Count == 0) return;
-            UpdateArea();
-        }
-
-        /// <summary>
-        /// Ion label has been selected/unselected
-        /// </summary>
-        /// <param name="message">Event message containing whether or not sender is selected.</param>
-        private void LabeledIonSelectedChanged(PropertyChangedMessage<bool> message)
-        {
-            if (message.PropertyName == "Selected" && message.Sender is LabeledIonViewModel)
-            {
-                var labeledIonVm = message.Sender as LabeledIonViewModel;
-                var label = labeledIonVm.LabeledIon.Label;
-                foreach (var series in Plot.Series)
-                {
-                    var lineSeries = series as LineSeries;
-                    if (lineSeries != null && lineSeries.Title == label)
-                    {
-                        lineSeries.IsVisible = message.NewValue;
-                        var lXic = _smoothedXics[label].Item1;
-                        var value = new Tuple<LabeledXic, bool>(lXic, message.NewValue);
-                        _smoothedXics.AddOrUpdate(label, value, (key, oldValue) => value);
-                        Plot.AdjustForZoom();
-                        _taskService.Enqueue(() => { PlotTitle = GetPlotTitleWithArea(GetCurrentArea()); });
-                    }
-                }
-            }
-        }
-        #endregion
-
-        #region Private Methods
-        /// <summary>
-        /// Begin toggling scan markers on xic plot on/off.
-        /// The scan markers are the markers at each point in each series.
-        /// </summary>
-        /// <param name="value">Whether the scan markers are on or off</param>
-        private void ToggleScanMarkers(bool value)
-        {
-            _taskService.Enqueue(() =>
-            {
-                var markerType = (value) ? MarkerType.Circle : MarkerType.None;
-                foreach (var series in Plot.Series)     // Turn markers of on every line series in plot
-                {
-                    if (series is XicSeries)
-                    {
-                        var lineSeries = series as XicSeries;
-                        lineSeries.MarkerType = markerType;
-                    }
-                }
-                Plot.InvalidatePlot(false);
-            });
-        }
-
-        /// <summary>
-        /// Begin toggling legend on xic plot on/off.
-        /// </summary>
-        /// <param name="value">Whether the legend is on or off</param>
-        private void ToggleLegend(bool value)
-        {
-            _taskService.Enqueue(() =>
-            {
-                Plot.IsLegendVisible = value;
-                Plot.InvalidatePlot(false);
-            });
-        }
-
-        /// <summary>
-        /// Get the plot title in the format "[Title] (Area: ###)".
-        /// </summary>
-        /// <returns>Plot title with area as a string.</returns>
-        private string GetPlotTitleWithArea(double area)
-        {
-            var areaStr = String.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", area);
-            var title = String.Format("{0} (Area: {1})", _title, areaStr);
-            return title;
         }
 
         /// <summary>
         /// Generate plot by smoothing XICs, creating a LineSeries for each xic, and adding it to the Plot
         /// </summary>
-        private SelectablePlotModel GeneratePlot()
+        public void UpdatePlotModel(IList<XicDataPoint>[] xicPoints)
         {
             // add XICs
-            Plot.Axes.Clear();
-            var plot = new SelectablePlotModel(_xAxis, 1.05)
+            PlotModel.Series.Clear();
+            if (xicPoints == null) return;
+            var seriesstore = Ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, IList<XicDataPoint>>>(ion => ion.Label, ion => null);
+            var maxCharge = (_ions.Count > 0) ? _ions.Max(ion => ion.IonType.Charge) : 2;
+            var colors = new ColorDictionary(maxCharge);
+            for (int i = 0; i < Ions.Count; i++)
             {
-                TitleFontSize = 14,
-                TitlePadding = 0,
-            };
-            if (Ions == null || Lcms == null || Ions.Count == 0) return plot;
-            var seriesstore = Ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, List<XicDataPoint>>>(ion => ion.LabeledIon.Label, ion => null);
-            var smoother = (PointsToSmooth == 0 || PointsToSmooth == 1) ?
-                null : new SavitzkyGolaySmoother(PointsToSmooth, 2);
-            var maxCharge = (_ions.Count > 0) ? _ions.Max(ion => ion.LabeledIon.IonType.Charge) : 2;
-            var colors = new ColorDictionary(Math.Min(Math.Max(maxCharge, 2), 15));
-            Parallel.ForEach(Ions, ion =>
-            {
-                var lxic = GetXic(ion.LabeledIon);
-                var xic = lxic.Xic;
-                if (xic == null) return;
-                // smooth
-                if (smoother != null) xic = IonUtils.SmoothXic(smoother, xic);
-                var labeledXic = new LabeledXic(ion.LabeledIon.Composition, ion.LabeledIon.Index, xic,
-                                                ion.LabeledIon.IonType, ion.LabeledIon.IsFragmentIon);
-                var value = new Tuple<LabeledXic, bool>(labeledXic, ion.Selected);
-                _smoothedXics.AddOrUpdate(ion.LabeledIon.Label, value, (key, oldValue) => value);   
-                var color = colors.GetColor(lxic);
-                var markerType = (_showScanMarkers) ? MarkerType.Circle : MarkerType.None;
-                var lineStyle = (!lxic.IsFragmentIon && lxic.Index == -1) ? LineStyle.Dash : LineStyle.Solid;
-                var xicPoints = new List<XicDataPoint>();
-                for (int i = 0; i < xic.Length; i++)
-                {
-                    // remove plateau points (line will connect them anyway)
-                    if (i > 1 && i < xic.Length - 1 && xic[i - 1].Intensity.Equals(xic[i].Intensity) &&
-                        xic[i + 1].Intensity.Equals(xic[i].Intensity)) continue;
-                    xicPoints.Add(new XicDataPoint(Lcms.GetElutionTime(xic[i].ScanNum), xic[i].ScanNum, xic[i].Intensity, ion.LabeledIon.Index));
-                }
+                var xic = xicPoints[i];
+                if (xic == null || xic.Count == 0) continue;
+                var color = colors.GetColor(Ions[i]);
                 // create line series for xic
-                var series = new LineSeries
+                var series = new XicPointSeries
                 {
-                    ItemsSource = xicPoints,
-                    Mapping = x => new DataPoint(((XicDataPoint)x).X, ((XicDataPoint)x).Y),
+                    Index = Ions[i].Index,
+                    ItemsSource = xic,
                     StrokeThickness = 1.5,
-                    Title = lxic.Label,
+                    Title = xic[0].Title,
                     Color = color,
-                    LineStyle = lineStyle,
-                    MarkerType = markerType,
+                    LineStyle = xic[0].Index >= 0 ? LineStyle.Solid : LineStyle.Dash,
                     MarkerSize = 3,
                     MarkerStroke = color,
                     MarkerStrokeThickness = 1,
@@ -460,57 +256,26 @@ namespace LcmsSpectator.ViewModels
                         "Scan #: {ScanNum}" + Environment.NewLine +
                         "{3}: {4:0.##E0}"
                 };
-                seriesstore[ion.LabeledIon.Label] = new Tuple<LineSeries, List<XicDataPoint>>(series, xicPoints);
-            });
-            foreach (var ion in seriesstore)
-            {
-                if (ion.Value == null) continue;
-                plot.Series.Insert(0, ion.Value.Item1);
-                plot.AddSeries(ion.Value.Item2);
+                seriesstore[xic[0].Title] = new Tuple<LineSeries, IList<XicDataPoint>>(series, xic);
+                PlotModel.Series.Insert(0, series);
             }
-            plot.GenerateYAxis("Intensity", "0e0");
-            plot.IsLegendVisible = _showLegend;
-            plot.UniqueHighlight = (Plot != null) && Plot.UniqueHighlight;
-            plot.SetPointMarker(SelectedRt);
+            if (String.IsNullOrEmpty(PlotModel.YAxis.Title)) PlotModel.GenerateYAxis("Intensity", "0e0");
+            PlotModel.IsLegendVisible = _showLegend;
+            PlotModel.InvalidatePlot(true);
+            PlotModel.AdjustForZoom();
             Area = GetCurrentArea();
-            return plot;
-        }
-
-        /// <summary>
-        /// Calculate an XIC for a given ion.
-        /// </summary>
-        /// <param name="label">Labeled ion to calculate XIC for</param>
-        /// <returns>Labeled XIC containing calculated XIC and labeled ion</returns>
-        private LabeledXic GetXic(LabeledIon label)
-        {
-            LabeledXic lxic;
-            if (_xicCache.ContainsKey(label.Label)) lxic = _xicCache[label.Label];
-            else
-            {
-                var ion = label.Ion;
-                Xic xic;
-                if (label.IsFragmentIon) xic = Lcms.GetFullProductExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(),
-                                                                                            IcParameters.Instance.ProductIonTolerancePpm,
-                                                                                            label.PrecursorIon.GetMostAbundantIsotopeMz());
-                else if (label.IsChargeState) xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetMostAbundantIsotopeMz(), 
-                                                                                                     IcParameters.Instance.PrecursorTolerancePpm);
-                else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(ion.GetIsotopeMz(label.Index), IcParameters.Instance.PrecursorTolerancePpm);
-                lxic = new LabeledXic(label.Composition, label.Index, xic.ToArray(), label.IonType, label.IsFragmentIon, label.PrecursorIon, label.IsChargeState);
-                _xicCache.AddOrUpdate(label.Label, lxic, (key, oldValue) => lxic);
-            }
-            return lxic;
         }
 
         /// <summary>
         /// Open a save file dialog and save plot as png image to user selected location.
         /// </summary>
-        private void SaveAsImage()
+        public void SaveAsImage()
         {
-            if (Plot == null) return;
+            if (PlotModel == null) return;
             var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
-                if (fileName != "") PngExporter.Export(Plot, fileName, (int)Plot.Width, (int)Plot.Height, OxyColors.White);
+                if (fileName != "") PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
             }
             catch (Exception e)
             {
@@ -519,33 +284,41 @@ namespace LcmsSpectator.ViewModels
         }
 #endregion
 
+        #region Private Methods
+        /// <summary>
+        /// Finds series associated with labeledIonVm and shows/hides it depending on
+        /// labeledIonVm selected property.
+        /// </summary>
+        /// <param name="labeledIonVm">Ion to hide series for.</param>
+        private void LabeledIonSelectedChanged(LabeledIonViewModel labeledIonVm)
+        {
+            foreach (var series in PlotModel.Series)
+            {
+                var lineSeries = series as LineSeries;
+                if (lineSeries != null && lineSeries.Title == labeledIonVm.Label)
+                {
+                    lineSeries.IsVisible = labeledIonVm.Selected;
+                    PlotModel.AdjustForZoom();
+                    Area = GetCurrentArea();
+                }
+            }
+            Area = GetCurrentArea();
+            PlotModel.AdjustForZoom();
+        }
+
+        private async Task<IList<XicDataPoint>[]> GetXicDataPointsAsync(IEnumerable<LabeledIonViewModel> ions, int smoothingPoints, bool useCache=true)
+        {
+            return await Task.WhenAll(ions.Select(ion => ion.GetXicAsync(smoothingPoints, useCache)));
+        }
+#endregion
+
         #region Private Fields
         private readonly IDialogService _dialogService;
-        private readonly ITaskService _taskService;
+        private readonly ILcMsRun _lcms;
 
         private readonly string _title;
-        private bool _showLegend;
-        private bool _showScanMarkers;
-        private double _selectedRt;
         private readonly LinearAxis _xAxis;
-        private string _plotTitle;
-        private List<LabeledIonViewModel> _ions;
-        private int _pointsToSmooth;
 
-        private readonly ConcurrentDictionary<string, Tuple<LabeledXic, bool>> _smoothedXics;
-        private readonly ConcurrentDictionary<string, LabeledXic> _xicCache;
-        private SelectablePlotModel _plot;
-        private double _area;
         #endregion
-
-        public class SelectedScanChangedMessage : NotificationMessage
-        {
-            public int Scan { get; private set; }
-            public SelectedScanChangedMessage(object sender, int scan, string notification = "SelectedScanChanged")
-                : base(sender, notification)
-            {
-                Scan = scan;
-            }
-        }
     }
 }

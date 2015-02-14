@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.TaskServices;
-using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;
 using LcmsSpectator.Views;
 

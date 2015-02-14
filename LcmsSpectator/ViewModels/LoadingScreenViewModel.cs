@@ -1,39 +1,32 @@
-﻿using System.Threading;
-using GalaSoft.MvvmLight;
-using LcmsSpectator.TaskServices;
+﻿using System;
+using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class LoadingScreenViewModel: ViewModelBase
+    public class LoadingScreenViewModel: ReactiveObject
     {
-        public LoadingScreenViewModel(ITaskService taskService, string text="Loading\nPlease Wait")
+        public LoadingScreenViewModel()
         {
-            _taskService = taskService;
-            _text = text;
+            this.WhenAnyValue(x => x.IsLoading)
+                .Where(isLoading => isLoading)
+                .Subscribe(_ => StartLoading());
         }
 
+        private string _text;
         public string Text
         {
             get { return _text; }
-            private set
-            {
-                _text = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _text, value); }
         }
 
+        private bool _isLoading;
         public bool IsLoading
         {
             get { return _isLoading; }
-            set
-            {
-                _isLoading = value;
-                if (_isLoading)
-                {
-                    StartLoading();
-                }
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _isLoading, value); }
         }
 
         public void StartLoading()
@@ -46,7 +39,7 @@ namespace LcmsSpectator.ViewModels
 				"Loading...\nPlease Wait"
 			};
 
-            _taskService.Enqueue(() =>
+            Task.Run(() =>
             {
                 int index = 0;
                 while (IsLoading)
@@ -55,12 +48,7 @@ namespace LcmsSpectator.ViewModels
                     Text = loadingStrings[index % 4];
                     index++;
                 }
-            }, true);
+            });
         }
-
-
-        private string _text;
-        private bool _isLoading;
-        private readonly ITaskService _taskService;
     }
 }

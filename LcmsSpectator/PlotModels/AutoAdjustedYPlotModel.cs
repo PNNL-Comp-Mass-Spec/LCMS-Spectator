@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -18,6 +19,9 @@ namespace LcmsSpectator.PlotModels
             YAxis = new LinearAxis();
             if (xAxis != null) xAxis.AxisChanged += XAxisChanged;
         }
+
+        public Axis YAxis { get; protected set; }
+        public Axis XAxis { get; protected set; }
 
         /// <summary>
         /// Generate Y axis. Set Max Y axis to highest point in current visible x range.
@@ -40,6 +44,8 @@ namespace LcmsSpectator.PlotModels
                 IsZoomEnabled = false,
                 IsPanEnabled = false
             };
+            Axes.Clear();
+            Axes.Add(XAxis);
             Axes.Add(YAxis);
         }
 
@@ -67,31 +73,6 @@ namespace LcmsSpectator.PlotModels
         }
 
         /// <summary>
-        /// Add Series to AutoAdjustedYPlotModel. This should be used in addtion to Plot.Series.Add.
-        /// In the new version of OxyPlot, the actual points of a series are no longer exposed
-        /// externally. Most of the time Series.Points once the plot is rendered
-        /// just returns an empty list even if a series has points.
-        /// </summary>
-        /// <param name="dataPoints">Points to add to plot</param>
-        public virtual void AddSeries(IEnumerable<IDataPoint> dataPoints) 
-        {
-            foreach (var point in dataPoints) DataPoints.Add(point);
-        }
-
-        public virtual void ClearSeries()
-        {
-            DataPoints = new ConcurrentBag<IDataPoint>();
-            Series.Clear();
-        }
-
-        public virtual void ClearAxes()
-        {
-            XAxis.AxisChanged -= XAxisChanged;
-            Axes.Clear();
-            InvalidatePlot(false);
-        }
-
-        /// <summary>
         /// Get maximum y point in a given x range.
         /// </summary>
         /// <param name="minX">Min x of range</param>
@@ -99,32 +80,18 @@ namespace LcmsSpectator.PlotModels
         /// <returns></returns>
         protected double GetMaxYInRange(double minX, double maxX)
         {
-            double[] maxY = { 0.0 };
-            var dataPoints = DataPoints.ToArray();
-            if (dataPoints.Length > 0)
+            double maxY = 0.0;
+            foreach (var series in Series)
             {
-                foreach (var point in dataPoints.Where(point => point.Y >= maxY[0] &&
-                                                        point.X >= minX && point.X <= maxX))
+                var dataPointSeries = series as IDataPointSeries;
+                if (dataPointSeries != null)
                 {
-                    maxY[0] = point.Y;
-                }   
+                    var seriesMaxY = dataPointSeries.GetMaxYInRange(minX, maxX);
+                    if (seriesMaxY >= maxY) maxY = seriesMaxY;
+                }
             }
-            else
-            {
-                foreach (var series in Series)
-                {
-                    var lSeries = series as DataPointSeries;
-                    if (lSeries == null || lSeries.IsVisible == false) continue;
-                    foreach (var point in lSeries.Points)
-                    {
-                        if (point.Y >= maxY[0] && point.X >= minX && point.X <= maxX) maxY[0] = point.Y;
-                    }
-                }   
-            }
-            return maxY[0];
+            return maxY;
         }
-        protected Axis YAxis;
-        protected Axis XAxis;
         protected ConcurrentBag<IDataPoint> DataPoints;
         protected double Multiplier;
 

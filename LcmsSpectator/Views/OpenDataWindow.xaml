@@ -44,7 +44,7 @@
         </GroupBox>
         <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Right">
             <Button Width="60" Margin="0,0,10,0" Command="{Binding CancelCommand}">Cancel</Button>
-            <Button Width="60" Command="{Binding OkCommand}" IsEnabled="{Binding OpenEnabled, UpdateSourceTrigger=PropertyChanged}">Open</Button>
+            <Button Width="60" Command="{Binding OkCommand}">Open</Button>
         </StackPanel>
     </Grid>
 </Window>

@@ -2,26 +2,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
-using LcmsSpectatorModels.Config;
-using LcmsSpectatorModels.Utils;
+using LcmsSpectator.Utils;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class IonTypeSelectorViewModel: ViewModelBase
+    public class IonTypeSelectorViewModel: ReactiveObject
     {
         public List<BaseIonType> BaseIonTypes { get; private set; }
         public List<NeutralLoss> NeutralLosses { get; private set; }
-        public RelayCommand SetIonChargesCommand { get; private set; }
-        public IonTypeSelectorViewModel(IDialogService dialogService, Messenger messenger)
+        public IReactiveCommand SetIonChargesCommand { get; private set; }
+        public IonTypeSelectorViewModel(IDialogService dialogService)
         {
-            MessengerInstance = messenger;
             _dialogService = dialogService;
-            SetIonChargesCommand = new RelayCommand(SetIonCharges);
+            _minSelectedCharge = 1;
+            _minSelectedCharge = 2;
+            MinCharge = 2;
+            AbsoluteMaxCharge = 50;
+            var setIonChargesCommand = ReactiveCommand.Create();
+            setIonChargesCommand.Subscribe(_ => SetIonCharges());
+            SetIonChargesCommand = setIonChargesCommand;
 
             BaseIonTypes = new List<BaseIonType>
             {
@@ -38,85 +41,87 @@ namespace LcmsSpectator.ViewModels
             NeutralLosses = NeutralLoss.CommonNeutralLosses.ToList();
             SelectedNeutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
 
-            MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedChargeChanged);
-            MessengerInstance.Register<PropertyChangedMessage<ActivationMethod>>(this, ActivationMethodChanged);
-
             UpdateIonTypes();
 
-            _minSelectedCharge = 1;
-            _minSelectedCharge = 2;
-            MinCharge = 2;
-            AbsoluteMaxCharge = 50;
+            this.WhenAnyValue(x => x.SelectedCharge)
+                .Subscribe(charge =>
+                {
+                    MinCharge = 1;
+                    var maxCharge = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
+                    MaxCharge = maxCharge;
+                    UpdateIonTypes();
+                });
+
+            this.WhenAnyValue(x => x.SelectedBaseIonTypes, x => x.SelectedNeutralLosses)
+                .Subscribe(_ => UpdateIonTypes());
+
+            this.WhenAnyValue(x => x.MinCharge, x => x.MaxCharge)
+                .Subscribe(_ => SetIonCharges());
+
+            this.WhenAnyValue(x => x.ActivationMethod)
+                .Subscribe(SetActivationMethod);
         }
 
+        #region Public Properties
+        private ReactiveList<IonType> _ionTypes;
         /// <summary>
         /// All ion types currently selected
         /// </summary>
-        public List<IonType> IonTypes
+        public ReactiveList<IonType> IonTypes
         {
             get { return _ionTypes; }
-            private set
-            {
-                var oldIonTypes = _ionTypes;
-                _ionTypes = value;
-                RaisePropertyChanged("IonTypes", oldIonTypes, _ionTypes, true);
-            }
+            private set { this.RaiseAndSetIfChanged(ref _ionTypes, value); }
         }
 
+        private IList _selectedBaseIonTypes;
         public IList SelectedBaseIonTypes
         {
             get { return _selectedBaseIonTypes; }
-            set
-            {
-                if (value == null) return;
-                _selectedBaseIonTypes = value;
-                UpdateIonTypes();
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _selectedBaseIonTypes, value); }
         }
 
+        private IList _selectedNeutralLosses;
         public IList SelectedNeutralLosses
         {
             get { return _selectedNeutralLosses; }
-            set
-            {
-                if (value == null) return;
-                _selectedNeutralLosses = value;
-                UpdateIonTypes();
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _selectedNeutralLosses, value); }
         }
 
+        private int _selectedCharge;
+        public int SelectedCharge
+        {
+            get { return _selectedCharge; }
+            set { this.RaiseAndSetIfChanged(ref _selectedCharge, value); }
+        }
+
+        private int _minCharge;
         public int MinCharge
         {
             get { return _minCharge; }
-            set
-            {
-                _minCharge = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _minCharge, value); }
         }
 
+        private int _maxCharge;
         public int MaxCharge
         {
             get { return _maxCharge; }
-            set
-            {
-                _maxCharge = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _maxCharge, value); }
         }
 
+        private int _absoluteMaxCharge;
         public int AbsoluteMaxCharge
         {
             get { return _absoluteMaxCharge; }
-            set
-            {
-                _absoluteMaxCharge = value;
-                MaxCharge = _absoluteMaxCharge;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _absoluteMaxCharge, value); }
         }
+
+        private ActivationMethod _activationMethod;
+        public ActivationMethod ActivationMethod
+        {
+            get { return _activationMethod; }
+            set { this.RaiseAndSetIfChanged(ref _activationMethod, value); }
+        }
+#endregion
 
         private void SetIonCharges()
         {
@@ -142,31 +147,19 @@ namespace LcmsSpectator.ViewModels
             // set ion types
             var selectedBaseIonTypes = SelectedBaseIonTypes.Cast<BaseIonType>().ToList();
             var selectedNeutralLosses = SelectedNeutralLosses.Cast<NeutralLoss>().ToList();
-            IonTypes = IonUtils.GetIonTypes(IcParameters.Instance.IonTypeFactory, selectedBaseIonTypes,
-                selectedNeutralLosses, MinCharge, MaxCharge);
+            IonTypes = new ReactiveList<IonType>(IonUtils.GetIonTypes(IcParameters.Instance.IonTypeFactory, selectedBaseIonTypes,
+                selectedNeutralLosses, MinCharge, MaxCharge));
         }
 
-        private void SelectedChargeChanged(PropertyChangedMessage<int> message)
-        {
-            if (message.PropertyName == "Charge")
-            {
-                var charge = message.NewValue;
-                MinCharge = 1;
-                var maxCharge = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
-                MaxCharge = maxCharge;
-                UpdateIonTypes();
-            }
-        }
-
-        private void ActivationMethodChanged(PropertyChangedMessage<ActivationMethod> message)
+        private void SetActivationMethod(ActivationMethod activationMethod)
         {
             if (!IcParameters.Instance.AutomaticallySelectIonTypes) return;
-            if (message.NewValue == ActivationMethod.ETD &&
+            if (activationMethod == ActivationMethod.ETD &&
                 !Equals(SelectedBaseIonTypes, IcParameters.Instance.EtdIonTypes))
             {
                 SelectedBaseIonTypes = IcParameters.Instance.EtdIonTypes;
             }
-            else if (message.NewValue != ActivationMethod.ETD &&
+            else if (activationMethod != ActivationMethod.ETD &&
                      !Equals(SelectedBaseIonTypes, IcParameters.Instance.CidHcdIonTypes))
             {
                 SelectedBaseIonTypes = IcParameters.Instance.CidHcdIonTypes;
@@ -174,13 +167,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         private readonly IDialogService _dialogService;
-        private IList _selectedBaseIonTypes;
-        private IList _selectedNeutralLosses;
-        private int _minCharge;
-        private int _maxCharge;
-        private int _absoluteMaxCharge;
         private int _minSelectedCharge;
         private int _maxSelectedCharge;
-        private List<IonType> _ionTypes;
     }
 }

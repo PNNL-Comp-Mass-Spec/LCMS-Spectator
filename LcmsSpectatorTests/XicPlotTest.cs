@@ -5,13 +5,13 @@ using System.Linq;
 using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
+using LcmsSpectator.Models;
 using LcmsSpectator.PlotModels;
+using LcmsSpectator.Readers;
 using LcmsSpectator.TaskServices;
+using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;
-using LcmsSpectatorModels.Config;
-using LcmsSpectatorModels.Models;
-using LcmsSpectatorModels.Readers;
-using LcmsSpectatorModels.Utils;
 using LcmsSpectatorTests.DialogServices;
 using NUnit.Framework;
 using OxyPlot;
@@ -52,8 +52,8 @@ namespace LcmsSpectatorTests
             var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
             xicPlotViewModel.Ions = ionVms;
 
-            Assert.True(xicPlotViewModel.Plot != null);
-            Assert.True(xicPlotViewModel.Plot.Series.Count == ionVms.Count+1);
+            Assert.True(xicPlotViewModel.PlotModel != null);
+            Assert.True(xicPlotViewModel.PlotModel.Series.Count == ionVms.Count+1);
 
             // Create xics
             var xicMap = new Dictionary<string, LabeledXic>();
@@ -70,7 +70,7 @@ namespace LcmsSpectatorTests
             }
 
             // Check to see that correct XICs are showing
-            foreach (var series in xicPlotViewModel.Plot.Series)
+            foreach (var series in xicPlotViewModel.PlotModel.Series)
             {
                 var xicSeries = series as XicSeries;
                 if (xicSeries == null) continue;
@@ -121,7 +121,7 @@ namespace LcmsSpectatorTests
             {
                 ionVm.Selected = false;
                 bool foundSeries = false;
-                foreach (var series in xicPlotViewModel.Plot.Series)
+                foreach (var series in xicPlotViewModel.PlotModel.Series)
                 {
                     var xicSeries = series as XicSeries;
                     if (xicSeries == null) continue;
@@ -167,7 +167,7 @@ namespace LcmsSpectatorTests
             xicPlotViewModel.Ions = ionVms;
 
             // Check to ensure all scan markers are off (initial condition)
-            foreach (var series in xicPlotViewModel.Plot.Series)
+            foreach (var series in xicPlotViewModel.PlotModel.Series)
             {
                 var xicSeries = series as XicSeries;
                 if (xicSeries == null) continue;
@@ -178,7 +178,7 @@ namespace LcmsSpectatorTests
             xicPlotViewModel.ShowScanMarkers = true;
 
             // Check to ensure all scan markers are on
-            foreach (var series in xicPlotViewModel.Plot.Series)
+            foreach (var series in xicPlotViewModel.PlotModel.Series)
             {
                 var xicSeries = series as XicSeries;
                 if (xicSeries == null) continue;
@@ -189,7 +189,7 @@ namespace LcmsSpectatorTests
             xicPlotViewModel.ShowScanMarkers = false;
 
             // Check to ensure all scan markers are turned back off
-            foreach (var series in xicPlotViewModel.Plot.Series)
+            foreach (var series in xicPlotViewModel.PlotModel.Series)
             {
                 var xicSeries = series as XicSeries;
                 if (xicSeries == null) continue;
@@ -228,19 +228,19 @@ namespace LcmsSpectatorTests
             xicPlotViewModel.Ions = ionVms;
 
             // Check to legend is off (initial condition)
-            Assert.True(xicPlotViewModel.Plot.IsLegendVisible == false);
+            Assert.True(xicPlotViewModel.PlotModel.IsLegendVisible == false);
 
             // toggle ShowLegend on
             xicPlotViewModel.ShowLegend = true;
 
             // Check to ensure legend is visible
-            Assert.True(xicPlotViewModel.Plot.IsLegendVisible);
+            Assert.True(xicPlotViewModel.PlotModel.IsLegendVisible);
 
             // toggle ShowLegend off
             xicPlotViewModel.ShowLegend = false;
 
             // Check to ensure legend is back off
-            Assert.True(xicPlotViewModel.Plot.IsLegendVisible == false);
+            Assert.True(xicPlotViewModel.PlotModel.IsLegendVisible == false);
         }
 
         [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
@@ -269,7 +269,7 @@ namespace LcmsSpectatorTests
                 SelectedPrSmViewModel.Instance.Scan = scan;
                 var rt = lcms.GetElutionTime(scan);
                 Assert.True(xicPlotViewModel.SelectedRt.Equals(rt));
-                var marker = xicPlotViewModel.Plot.GetPointMarker();
+                var marker = xicPlotViewModel.PlotModel.GetPointMarker();
                 Assert.True(marker != null);
                 Assert.True(marker.X.Equals(rt));
             }

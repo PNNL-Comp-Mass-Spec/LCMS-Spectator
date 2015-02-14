@@ -96,7 +96,6 @@
     <Compile Include="Readers\FeatureReader.cs" />
     <Compile Include="Readers\IcFileReader.cs" />
     <Compile Include="Readers\IcFileWriter.cs" />
-    <Compile Include="Config\IcParameters.cs" />
     <Compile Include="Readers\IdFileReaderFactory.cs" />
     <Compile Include="Readers\IIdFileReader.cs" />
     <Compile Include="Readers\MsgfFileReader.cs" />
@@ -120,7 +119,6 @@
     <Compile Include="Readers\SequenceReaders\LcmsSpectatorSequenceReader.cs" />
     <Compile Include="Readers\SequenceReaders\SequenceReader.cs" />
     <Compile Include="Utils\Constants.cs" />
-    <Compile Include="Utils\IonUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

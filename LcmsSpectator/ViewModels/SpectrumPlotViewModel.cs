@@ -1,427 +1,170 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
+using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
-using LcmsSpectator.TaskServices;
-using LcmsSpectatorModels.Config;
-using LcmsSpectatorModels.Models;
-using LcmsSpectatorModels.Utils;
+using LcmsSpectator.Utils;
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using OxyPlot.Wpf;
-using Annotation = OxyPlot.Annotations.Annotation;
+using ReactiveUI;
 using LinearAxis = OxyPlot.Axes.LinearAxis;
-using Series = OxyPlot.Series.Series;
 using TextAnnotation = OxyPlot.Annotations.TextAnnotation;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class SpectrumPlotViewModel: ViewModelBase
+    public class SpectrumPlotViewModel: ReactiveObject
     {
-        public RelayCommand<string> SaveAsImageCommand { get; private set; }
-
-        public SpectrumPlotViewModel(IDialogService dialogService, ITaskService taskService, IMessenger messenger,  double multiplier, bool updateXAxis)
+        public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, bool autoZoomXAxis=true)
         {
-            MessengerInstance = messenger;
-            MessengerInstance.Register<PropertyChangedMessage<bool>>(this, LabeledIonSelectedChanged);
-            _taskService = taskService;
-            SaveAsImageCommand = new RelayCommand<string>(SaveAsImage);
             _dialogService = dialogService;
-            _showUnexplainedPeaks = true;
-            _showFilteredSpectrum = false;
-            _showDeconvolutedSpectrum = false;
-            _multiplier = multiplier;
-            _updateXAxis = updateXAxis;
+            _autoZoomXAxis = autoZoomXAxis;
+            ShowUnexplainedPeaks = true;
+            ShowFilteredSpectrum = false;
+            ShowDeconvolutedSpectrum = false;
             Title = "";
-            _ionCache = new Dictionary<string, IEnumerable<PeakDataPoint>>();
-            Clear();
+            XAxis = new LinearAxis
+            {
+                Title = "m/z",
+                Position = AxisPosition.Bottom,
+            };
+            PlotModel = new AutoAdjustedYPlotModel(XAxis, multiplier) { IsLegendVisible = false };
+            _ions = new ReactiveList<LabeledIonViewModel>();
+
+            this.WhenAnyValue(x => x.Spectrum)
+                .Subscribe(spectrum =>
+                {
+                    _spectrumDirty = true;
+                    _filteredSpectrum = null;
+                    _deconvolutedSpectrum = null;
+                    _filteredDeconvolutedSpectrum = null;
+                });
+
+            this.WhenAnyValue(x => x.Spectrum, x => x.Ions,
+                x => x.ShowDeconvolutedSpectrum, x => x.ShowFilteredSpectrum,
+                x => x.ShowUnexplainedPeaks)
+                .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
+                .Where(x => x.Item1 != null)
+                .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(GetSpectrum()))))
+                .Subscribe(UpdatePlotModel);       // Update plot when data changes
+
+            // Update plot when settings change
+            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold, x => x.ProductIonTolerancePpm,
+                        x => x.SpectrumFilterWindowSize, x => x.IonCorrelationThreshold)
+                        .Where(_ => Ions != null)
+                        .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
+                        .SelectMany(async x => await Task.WhenAll(Ions.Select(ion => ion.GetPeaksAsync(GetSpectrum(), false))))
+                        .Subscribe(UpdatePlotModel);
+
+            // Show/hide series when ion is selected/unselected
+            this.WhenAnyValue(x => x.Ions)
+                .Where(ions => ions != null)
+                .Subscribe(ions => ions.ItemChanged.Where(x => x.PropertyName == "Selected")
+                .Select(x => x.Sender)
+                .Subscribe(LabeledIonSelectedChanged));
+
+            var saveAsImageCommand = ReactiveCommand.Create();
+            saveAsImageCommand.Subscribe(_ => SaveAsImage());
+            SaveAsImageCommand = saveAsImageCommand;
         }
 
+        #region Public Properties
+        private AutoAdjustedYPlotModel _plotModel; 
         /// <summary>
         /// The spectrum plot.
         /// </summary>
-        public AutoAdjustedYPlotModel Plot
+        public AutoAdjustedYPlotModel PlotModel
         {
-            get { return _plot; }
-            private set
-            {
-                _plot = value;
-                RaisePropertyChanged();
-            }
+            get { return _plotModel; }
+            private set { this.RaiseAndSetIfChanged(ref _plotModel, value); }
         }
 
+        private string _title;
         /// <summary>
         /// Title of spectrum plot.
         /// </summary>
         public string Title
         {
             get { return _title; }
-            set
-            {
-                _title = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _title, value); }
         }
 
+        private bool _showUnexplainedPeaks ;
         /// <summary>
         /// Toggle "Unexplained Peaks" (spectrum series)
         /// </summary>
         public bool ShowUnexplainedPeaks
         {
             get { return _showUnexplainedPeaks; }
-            set
-            {
-                if (_showUnexplainedPeaks == value) return;
-                _showUnexplainedPeaks = value;
-                SpectrumUpdate();
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _showUnexplainedPeaks, value); }
         }
 
+        private bool _showFilteredSpectrum;
         /// <summary>
         /// Toggle whether or not the filtered spectrum is showed
         /// </summary>
         public bool ShowFilteredSpectrum
         {
             get { return _showFilteredSpectrum; }
-            set
-            {
-                _showFilteredSpectrum = value;
-                if (_updateXAxis) SpectrumUpdate(_spectrum, _xAxis);
-                else SpectrumUpdate();
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _showFilteredSpectrum, value); }
         }
 
+        private bool _showDeconvolutedSpectrum;
         /// <summary>
         /// Toggle whether or not deconvoluted spectrum is shown
         /// </summary>
         public bool ShowDeconvolutedSpectrum
         {
             get { return _showDeconvolutedSpectrum; }
+            set { this.RaiseAndSetIfChanged(ref _showDeconvolutedSpectrum, value); }
+        }
+
+        private LinearAxis _xAxis;
+        public LinearAxis XAxis
+        {
+            get { return _xAxis; }
+            private set { this.RaiseAndSetIfChanged(ref _xAxis, value); }
+        }
+
+        private Spectrum _spectrum;
+        public Spectrum Spectrum
+        {
+            get { return _spectrum; }
             set
             {
-                _showDeconvolutedSpectrum = value;
-                if (_updateXAxis) SpectrumUpdate(_spectrum, _xAxis);
-                else SpectrumUpdate();
-                RaisePropertyChanged();
+                this.RaiseAndSetIfChanged(ref _spectrum, value);
             }
         }
 
+        private ReactiveList<LabeledIonViewModel> _ions;
+        public ReactiveList<LabeledIonViewModel> Ions
+        {
+            get { return _ions; }
+            set { this.RaiseAndSetIfChanged(ref _ions, value); }
+        }
+
+        public IReactiveCommand SaveAsImageCommand { get; private set; }
+        #endregion
+
+        #region Public Methods
         /// <summary>
-        /// Update spectrum and ion highlights
+        /// Prompt user for file path and save plot as image to that path.
         /// </summary>
-        public void SpectrumUpdate(Spectrum spectrum=null, LinearAxis xAxis=null, bool fullUpdate=true)
+        public void SaveAsImage()
         {
-            _taskService.Enqueue(() =>
-            {
-                if (spectrum != null) _spectrum = spectrum;
-                _xAxis = xAxis;
-                _filteredSpectrum = null; // reset filtered spectrum
-                _deconvolutedSpectrum = null;
-                _filtDeconSpectrum = null; 
-                Plot = BuildSpectrumPlot();
-                if (fullUpdate) IonUpdate();
-            });
-        }
-
-        public void IonUpdate(List<LabeledIonViewModel> ions = null)
-        {
-            _taskService.Enqueue(() =>
-            {
-                bool useCache = false;
-                if (ions != null)
-                {
-                    _ions = ions;
-                    useCache = true;
-                }
-                var s = CreateIonSeries(useCache);
-                SetPlotSeries(s.Item1, s.Item2);
-            });
-        }
-
-        /// <summary>
-        /// Clear spectrum plot
-        /// </summary>
-        public void Clear()
-        {
-            _taskService.Enqueue(() =>
-            {
-                _spectrum = null;
-                _xAxis = null;
-                _filteredSpectrum = null; // reset filtered spectrum
-                _deconvolutedSpectrum = null;
-                _filtDeconSpectrum = null;
-                Plot = BuildSpectrumPlot();
-                IonUpdate();
-            });
-        }
-        
-        private AutoAdjustedYPlotModel BuildSpectrumPlot()
-        {
-            if (_spectrum == null) return new AutoAdjustedYPlotModel(new LinearAxis{Position=AxisPosition.Bottom}, 1.05);
-            // Filtered/Deconvoluted Spectrum?
-            var spectrum = _spectrum;
-            var tolerance = (_spectrum is ProductSpectrum)
-                                ? IcParameters.Instance.ProductIonTolerancePpm
-                                : IcParameters.Instance.PrecursorTolerancePpm;
-            if (ShowFilteredSpectrum && ShowDeconvolutedSpectrum)
-            {
-                if (_filtDeconSpectrum == null)
-                {
-                    if (_filteredSpectrum == null)
-                    {
-                        _filteredSpectrum = new Spectrum(spectrum.Peaks, spectrum.ScanNum);
-                        _filteredSpectrum.FilterNosieByIntensityHistogram();
-                    }
-                    _filtDeconSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(_filteredSpectrum,
-                                    Constants.MinCharge, Constants.MaxCharge, tolerance,
-                                    IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
-                }
-                spectrum = _filtDeconSpectrum;
-            }
-            else if (ShowFilteredSpectrum)
-            {
-                if (_filteredSpectrum == null)
-                {
-                    _filteredSpectrum = new Spectrum(_spectrum.Peaks, _spectrum.ScanNum);
-                    _filteredSpectrum.FilterNosieByIntensityHistogram();
-                }
-                spectrum = _filteredSpectrum;
-            }
-            else if (ShowDeconvolutedSpectrum)
-            {
-                if (_deconvolutedSpectrum == null)
-                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
-                        spectrum,
-                        Constants.MinCharge, Constants.MaxCharge, tolerance,
-                        IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
-                spectrum = _deconvolutedSpectrum;
-            }
-            _currentSpectrum = spectrum;
-            var spectrumSeries = new StemSeries
-            {
-                Color=OxyColors.Black,
-                StrokeThickness = 0.5,
-                TrackerFormatString =
-                    "{0}" + Environment.NewLine +
-                    "{1}: {2:0.###}" + Environment.NewLine +
-                    "{3}: {4:0.##E0}"
-            };
-            if (ShowUnexplainedPeaks)
-            {
-                foreach (var peak in spectrum.Peaks) spectrumSeries.Points.Add(new DataPoint(peak.Mz, peak.Intensity));
-            }
-            // Create XAxis if there is none
-            var xAxis = _xAxis ?? (_xAxis = GenerateXAxis(spectrum));
-            var plot = new AutoAdjustedYPlotModel(xAxis, _multiplier)
-            {
-                Title = Title,
-                TitleFontSize = 14,
-                TitlePadding = 0
-            };
-            if (ShowUnexplainedPeaks) plot.Series.Add(spectrumSeries);
-            plot.GenerateYAxis("Intensity", "0e0");
-            return plot;
-        }
-
-        private void SetPlotSeries(IEnumerable<Series> series, IEnumerable<Annotation> annotations)
-        {
-            if (Plot == null || _currentSpectrum == null) return;
-            StemSeries spectrumSeries = null;
-            if (ShowUnexplainedPeaks && Plot.Series.Count > 0) spectrumSeries = Plot.Series[0] as StemSeries;
-            Plot.Series.Clear();
-            Plot.Annotations.Clear();
-            if (spectrumSeries != null) Plot.Series.Add(spectrumSeries);
-            foreach (var s in series) if (s != null) Plot.Series.Add(s);
-            foreach (var a in annotations) if (a != null) Plot.Annotations.Add(a);
-            Plot.IsLegendVisible = false;
-            Plot.AdjustForZoom();
-            Plot.InvalidatePlot(true);
-        }
-
-        private Tuple<IEnumerable<Series>, IEnumerable<Annotation>>  CreateIonSeries(bool useCache=true)
-        {
-            if (_ions == null || _spectrum == null) return new Tuple<IEnumerable<Series>, IEnumerable<Annotation>>(new List<Series>(), new List<Annotation>());
-            if (!useCache) _ionCache.Clear();
-            // add new ion series
-            var seriesstore = new Dictionary<string, Tuple<IEnumerable<PeakDataPoint>, Series, Annotation>>();
-            foreach (var ion in _ions)
-            {
-                if (!seriesstore.ContainsKey(ion.LabeledIon.Label)) seriesstore.Add(ion.LabeledIon.Label, null);
-            }
-            var maxCharge = (_ions.Count > 0) ? _ions.Max(ion => ion.LabeledIon.IonType.Charge) : 2;
-            var colors = new ColorDictionary(Math.Min(Math.Max(maxCharge, 2), 15));
-            IonTypeFactory deconIonTypeFactory = null;
-            if (ShowDeconvolutedSpectrum) deconIonTypeFactory = IonTypeFactory.GetDeconvolutedIonTypeFactory(BaseIonType.AllBaseIonTypes,
-                                                                                   NeutralLoss.CommonNeutralLosses);
-            Parallel.ForEach(_ions, ionVm =>
-            {
-                var ditf = deconIonTypeFactory;
-                if (ionVm.LabeledIon.IonType.Charge == 0 || (ShowDeconvolutedSpectrum && ionVm.LabeledIon.IonType.Charge > 1)) return;
-                var ionPeaks = (useCache && _ionCache.ContainsKey(ionVm.LabeledIon.Label)) ? _ionCache[ionVm.LabeledIon.Label] : GetPeakDataPoints(ionVm.LabeledIon, _currentSpectrum, ditf);
-                var ionSeries = GetIonSeries(ionVm.LabeledIon, ionPeaks, colors);
-                seriesstore[ionVm.LabeledIon.Label] = ionSeries;
-            });
-            if (useCache)
-            {
-                foreach (var series in seriesstore.Where(series => series.Value != null))
-                {
-                        if (!_ionCache.ContainsKey(series.Key)) _ionCache.Add(series.Key, series.Value.Item1);
-                        else _ionCache[series.Key] = series.Value.Item1;
-                }   
-            }
-            var values = seriesstore.Values.ToList();
-            var s = new Series[values.Count];
-            var a = new Annotation[values.Count];
-            for (int i = 0; i < values.Count; i++)
-            {
-                if (values[i] == null) continue;
-                s[i] = values[i].Item2;
-                a[i] = values[i].Item3;
-            }
-            return new Tuple<IEnumerable<Series>, IEnumerable<Annotation>>(s, a);
-        }
-
-        private IEnumerable<PeakDataPoint> GetPeakDataPoints(LabeledIon labeledIon, Spectrum spectrum, IonTypeFactory ionTypeFactory = null)
-        {
-            if (ShowDeconvolutedSpectrum && ionTypeFactory != null && labeledIon.IsFragmentIon)
-            {
-                labeledIon = IonUtils.GetDeconvolutedLabeledIon(labeledIon, ionTypeFactory);
-            }
-            var labeledIonPeaks = IonUtils.GetIonPeaks(labeledIon, spectrum,
-                                           IcParameters.Instance.ProductIonTolerancePpm,
-                                           IcParameters.Instance.PrecursorTolerancePpm, ShowDeconvolutedSpectrum);
-            var obsPeaks = labeledIonPeaks.Peaks;
-            if (labeledIonPeaks.CorrelationScore < IcParameters.Instance.IonCorrelationThreshold || 
-                obsPeaks == null || 
-                obsPeaks.Length < 1) 
-                    return null;
-            var errors = IonUtils.GetIsotopePpmError(obsPeaks, labeledIonPeaks.Ion, 0.1);
-            var peakDataPoints = new List<PeakDataPoint> {Capacity = errors.Length};
-            for (int i = 0; i < errors.Length; i++)
-            {
-                if (errors[i] != null)
-                {
-                    peakDataPoints.Add(new PeakDataPoint(obsPeaks[i].Mz, obsPeaks[i].Intensity, errors[i].Value, labeledIonPeaks.CorrelationScore));
-                }
-            }
-            return peakDataPoints;
-        }
-
-        private Tuple<IEnumerable<PeakDataPoint>, Series, Annotation> GetIonSeries(LabeledIon labeledIon, IEnumerable<PeakDataPoint> peakDataPoints, ColorDictionary colors)
-        {
-            if (peakDataPoints == null) return null;
-            PeakDataPoint maxPeak = null;
-            var color = colors.GetColor(labeledIon);
-            var peaks = peakDataPoints as IList<PeakDataPoint> ?? peakDataPoints.ToList();
-            var ionSeries = new StemSeries
-            {
-                Color = color,
-                StrokeThickness = 1.5,
-                ItemsSource = peaks,
-                Mapping = x => new DataPoint(((PeakDataPoint)x).X, ((PeakDataPoint)x).Y),
-                Title = labeledIon.Label,
-                TrackerFormatString =
-                    "{0}" + Environment.NewLine +
-                    "{1}: {2:0.###}" + Environment.NewLine +
-                    "{3}: {4:0.##E0}" + Environment.NewLine +
-                    "Error: {Error:G4}ppm" + Environment.NewLine +
-                    "Correlation: {Correlation:0.###}"
-            };
-            foreach (PeakDataPoint p in peaks)
-            {
-                if (maxPeak == null || p.Y >= maxPeak.Y) maxPeak = p;
-            }
-            if (maxPeak == null) return null;
-            // Create ion name annotation
-            var annotation = new TextAnnotation
-            {
-                Text = labeledIon.Label,
-                TextColor = color,
-                FontWeight = FontWeights.Bold,
-                Layer = AnnotationLayer.AboveSeries,
-                FontSize = 12,
-                Background = OxyColors.White,
-                Padding = new OxyThickness(0.1),
-                TextPosition = new DataPoint(maxPeak.X, maxPeak.Y),
-                StrokeThickness = 0
-            };
-            return new Tuple<IEnumerable<PeakDataPoint>, Series, Annotation>(peaks, ionSeries, annotation);
-        }
-
-        private LinearAxis GenerateXAxis(Spectrum spectrum)
-        {
-            var peaks = spectrum.Peaks;
-            var ms2MaxMz = 1.0;    // plot maximum needs to be bigger than 0
-            if (peaks.Length > 0) ms2MaxMz = peaks.Max().Mz * 1.1;
-            var xAxis = new LinearAxis
-            {
-                //Minimum = 0,
-                //Maximum = ms2MaxMz,
-                Position = AxisPosition.Bottom,
-                Title="m/z",
-                AbsoluteMinimum = 0,
-                AbsoluteMaximum = ms2MaxMz
-            };
-            xAxis.Zoom(0, ms2MaxMz);
-            return xAxis;
-        }
-
-        private void LabeledIonSelectedChanged(PropertyChangedMessage<bool> message)
-        {
-            if (message.PropertyName == "Selected" && message.Sender is LabeledIonViewModel)
-            {
-                var labeledIonVm = message.Sender as LabeledIonViewModel;
-                var label = labeledIonVm.LabeledIon.Label;
-                StemSeries selectedlineseries = null;
-                foreach (var series in Plot.Series)
-                {
-                    var lineseries = series as StemSeries;
-                    if (lineseries != null && lineseries.Title == label)
-                    {
-                        lineseries.IsVisible = message.NewValue;
-                        selectedlineseries = lineseries;
-                        Plot.AdjustForZoom();
-                    }
-                }
-                foreach (var annotation in Plot.Annotations)
-                {
-                    var textAnnotation = annotation as TextAnnotation;
-                    if (textAnnotation != null && textAnnotation.Text == label && selectedlineseries != null)
-                    {
-                        textAnnotation.TextColor = message.NewValue ? selectedlineseries.Color : OxyColors.Transparent;
-                        Plot.InvalidatePlot(true);
-                    }
-                }
-            }
-        }
-
-        private void SaveAsImage(string fileType)
-        {
-            string fileName = fileType == "png" ? _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png") 
-                : _dialogService.SaveFile(".svg", @"Svg Files (*.svg)|*.svg");
+            var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
-                if (fileName != "" && fileType == "png")
+                if (fileName != "")
                 {
-                    PngExporter.Export(Plot, fileName, (int)Plot.Width, (int)Plot.Height, OxyColors.White);
-                }
-                else if (fileName != "" && fileType == "svg")
-                {
-                    /*using (var svgStream = )
-                    {
-                        OxyPlot.SvgExporter.Export(Plot, svgStream, (int)Plot.Width, (int)Plot.Height, false);   
-                    }*/
+                    PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
                 }
             }
             catch (Exception e)
@@ -429,28 +172,158 @@ namespace LcmsSpectator.ViewModels
                 _dialogService.ExceptionAlert(e);
             }
         }
+        #endregion
 
+        #region Private Methods
+        private void UpdatePlotModel(IList<PeakDataPoint>[] peakDataPoints)
+        {
+            if (Spectrum == null) return;
+            PlotModel.Series.Clear();
+            PlotModel.Annotations.Clear();
+            var spectrum = GetSpectrum();
+            var spectrumSeries = new PeakPointSeries
+            {
+                ItemsSource = spectrum.Peaks,
+                Mapping = (peak => new DataPoint(((Peak)peak).Mz, ((Peak)peak).Intensity)),
+                Color = OxyColors.Black,
+                StrokeThickness = 0.5,
+                TrackerFormatString =
+                    "{0}" + Environment.NewLine +
+                    "{1}: {2:0.###}" + Environment.NewLine +
+                    "{3}: {4:0.##E0}"
+            };
+            if (ShowUnexplainedPeaks) PlotModel.Series.Add(spectrumSeries);
+            if (_autoZoomXAxis && _spectrumDirty)
+            {
+                // zoom spectrum if this plot is supposed to be auto zoomed, and only if spectrum has changed
+                var peaks = spectrum.Peaks;
+                var ms2MaxMz = 1.0; // plot maximum needs to be bigger than 0
+                if (peaks.Length > 0) ms2MaxMz = peaks.Max().Mz * 1.1;
+                XAxis.AbsoluteMinimum = 0;
+                XAxis.AbsoluteMaximum = ms2MaxMz;
+                XAxis.Zoom(0, ms2MaxMz);
+                _spectrumDirty = false;
+            }
+            if (String.IsNullOrEmpty(PlotModel.YAxis.Title)) PlotModel.GenerateYAxis("Intensity", "0e0");
+
+            var maxCharge = peakDataPoints.Length > 0 ? Ions.Max(x => x.IonType.Charge) : 2;
+            var colors = new ColorDictionary(maxCharge);
+            for (int i = 0; i < peakDataPoints.Length; i++)
+            {
+                var points = peakDataPoints[i];
+                if (points.Count == 0) continue;
+                var labeledIon = Ions[i];
+                var color = colors.GetColor(labeledIon);
+                var ionSeries = new PeakPointSeries
+                {
+                    Color = color,
+                    StrokeThickness = 1.5,
+                    ItemsSource = points,
+                    Title = points[0].Title,
+                    TrackerFormatString =
+                        "{0}" + Environment.NewLine +
+                        "{1}: {2:0.###}" + Environment.NewLine +
+                        "{3}: {4:0.##E0}" + Environment.NewLine +
+                        "Error: {Error:G4}ppm" + Environment.NewLine +
+                        "Correlation: {Correlation:0.###}"
+                };
+                // Create ion name annotation
+                var annotation = new TextAnnotation
+                {
+                    Text = points[0].Title,
+                    TextColor = color,
+                    FontWeight = FontWeights.Bold,
+                    Layer = AnnotationLayer.AboveSeries,
+                    FontSize = 12,
+                    Background = OxyColors.White,
+                    Padding = new OxyThickness(0.1),
+                    TextPosition = new DataPoint(points[0].X, points[0].Y),
+                    StrokeThickness = 0
+                };
+                PlotModel.Series.Add(ionSeries);
+                PlotModel.Annotations.Add(annotation);
+            }
+            PlotModel.Title = Title;
+            PlotModel.InvalidatePlot(true);
+            PlotModel.AdjustForZoom();
+        }
+
+        private void LabeledIonSelectedChanged(LabeledIonViewModel labeledIonVm)
+        {
+            var label = labeledIonVm.Label;
+            StemSeries selectedlineseries = null;
+            foreach (var series in PlotModel.Series)
+            {
+                var lineseries = series as StemSeries;
+                if (lineseries != null && lineseries.Title == label)
+                {
+                    lineseries.IsVisible = labeledIonVm.Selected;
+                    selectedlineseries = lineseries;
+                    PlotModel.AdjustForZoom();
+                }
+            }
+            foreach (var annotation in PlotModel.Annotations)
+            {
+                var textAnnotation = annotation as TextAnnotation;
+                if (textAnnotation != null && textAnnotation.Text == label && selectedlineseries != null)
+                {
+                    textAnnotation.TextColor = labeledIonVm.Selected ? selectedlineseries.Color : OxyColors.Transparent;
+                    PlotModel.InvalidatePlot(true);
+                }
+            }
+        }
+
+        private Spectrum GetSpectrum()
+        {
+            // Filtered/Deconvoluted Spectrum?
+            var spectrum = Spectrum;
+            var tolerance = (_spectrum is ProductSpectrum)
+                                ? IcParameters.Instance.ProductIonTolerancePpm
+                                : IcParameters.Instance.PrecursorTolerancePpm;
+            if (ShowFilteredSpectrum || ShowDeconvolutedSpectrum)
+            {
+                if (_filteredDeconvolutedSpectrum == null)
+                {
+                    _filteredDeconvolutedSpectrum = new Spectrum(spectrum.Peaks, spectrum.ScanNum);
+                    _filteredDeconvolutedSpectrum.FilterNosieByIntensityHistogram(); 
+                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(spectrum,
+                    Constants.MinCharge, Constants.MaxCharge, tolerance,
+                    IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);
+                }
+                spectrum = _filteredDeconvolutedSpectrum;
+            }
+            else if (ShowFilteredSpectrum)
+            {
+                if (_filteredSpectrum == null) 
+                {
+                    _filteredSpectrum = new Spectrum(spectrum.Peaks, spectrum.ScanNum);
+                    _filteredSpectrum.FilterNosieByIntensityHistogram(); 
+                }
+                spectrum = _filteredSpectrum;
+            }
+            else if (ShowDeconvolutedSpectrum)
+            {
+                if (_deconvolutedSpectrum == null)
+                {
+                    _deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(spectrum,
+                    Constants.MinCharge, Constants.MaxCharge, tolerance,
+                    IcParameters.Instance.IonCorrelationThreshold, Constants.IsotopeOffsetTolerance);   
+                }
+                spectrum = _deconvolutedSpectrum;
+            }
+            return spectrum;
+        }
+        #endregion
+
+        #region Private Fields
         private readonly IDialogService _dialogService;
-        private readonly ITaskService _taskService;
+        private readonly bool _autoZoomXAxis;
 
-        private string _title;
-        private LinearAxis _xAxis;
-        private readonly double _multiplier;
-
-        private bool _showFilteredSpectrum;
-        private Spectrum _currentSpectrum;
+        private bool _spectrumDirty; // Tracks whether or not the spectrum has changed
         private Spectrum _filteredSpectrum;
         private Spectrum _deconvolutedSpectrum;
-        private Spectrum _filtDeconSpectrum;
-        private Spectrum _spectrum;
+        private Spectrum _filteredDeconvolutedSpectrum;
 
-        private List<LabeledIonViewModel> _ions;
-        private bool _showUnexplainedPeaks;
-        private readonly bool _updateXAxis;
-
-
-        private readonly Dictionary<string, IEnumerable<PeakDataPoint>> _ionCache;
-        private bool _showDeconvolutedSpectrum;
-        private AutoAdjustedYPlotModel _plot;
+        #endregion
     }
 }

@@ -20,7 +20,11 @@ namespace LcmsSpectator.Views
 
             ScanDataGrid.SelectionChanged += (o, e) =>
             {
-                ScanDataGrid.ScrollIntoView(ScanDataGrid.SelectedItem);
+                object item;
+                if (ScanDataGrid.SelectedItem == null && _selectedItem != null) item = _selectedItem;
+                else return;
+                _selectedItem = item;
+                ScanDataGrid.ScrollIntoView(item);
                 ScanDataGrid.UpdateLayout();
             };
         }
@@ -59,8 +63,8 @@ namespace LcmsSpectator.Views
 
         private void LoadLayout(string layoutFile)
         {
-            try
-            {
+            //try
+            //{
                 var serializer = new XmlLayoutSerializer(AvDock);
                 using (var stream = new StreamReader(layoutFile))
                 {
@@ -70,11 +74,11 @@ namespace LcmsSpectator.Views
                     };
                     serializer.Deserialize(stream);
                 }
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Could not load layout file.", "", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            //}
+            //catch (Exception)
+            //{
+            //    MessageBox.Show("Could not load layout file.", "", MessageBoxButton.OK, MessageBoxImage.Error);
+            //}
         }
 
         private void DockingManager_OnUnloaded(object sender, RoutedEventArgs e)
@@ -112,5 +116,7 @@ namespace LcmsSpectator.Views
                 InsertModification();
             }
         }
+
+        private Object _selectedItem;
     }
 }

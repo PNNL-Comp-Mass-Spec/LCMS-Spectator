@@ -1,48 +1,41 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Globalization;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class ModificationViewModel: ViewModelBase
+    public class ModificationViewModel: ReactiveObject
     {
-        public ObservableCollection<Modification> Modifications { get; private set; }
-        public ObservableCollection<char> AminoAcidResidues { get; private set; }
-        public ObservableCollection<SequenceLocation> SequenceLocations { get; private set; }
-        public ObservableCollection<string> IsFixed { get; private set; } 
+        public ReactiveList<Modification> Modifications { get; private set; }
+        public ReactiveList<char> AminoAcidResidues { get; private set; }
+        public ReactiveList<SequenceLocation> SequenceLocations { get; private set; }
+        public ReactiveList<string> IsFixed { get; private set; } 
 
         public Modification SelectedModification { get; set; }
         public char SelectedResidue { get; set; }
         public SequenceLocation SelectedSequenceLocation { get; set; }
         public string FixedSelection { get; set; }
 
-        public RelayCommand RemoveModificationCommand { get; private set; }
-
-        public event EventHandler RequestModificationRemoval;
+        public ReactiveCommand<Object> RemoveModificationCommand { get; private set; }
 
         /// <summary>
         /// Create new ModificationViewModel with default values for all properties.
         /// </summary>
         public ModificationViewModel()
         {
-            Modifications = new ObservableCollection<Modification>(Modification.CommonModifications);
-            AminoAcidResidues = new ObservableCollection<char>(AminoAcid.StandardAminoAcidCharacters) { '*' };
-            SequenceLocations = new ObservableCollection<SequenceLocation>
+            Modifications = new ReactiveList<Modification>(Modification.CommonModifications);
+            AminoAcidResidues = new ReactiveList<char>(AminoAcid.StandardAminoAcidCharacters) { '*' };
+            SequenceLocations = new ReactiveList<SequenceLocation>
             {
                 SequenceLocation.Everywhere, SequenceLocation.PeptideNTerm, SequenceLocation.PeptideCTerm
             };
             SelectedSequenceLocation = SequenceLocation.Everywhere;
-            IsFixed = new ObservableCollection<string> { "Fixed", "Optional" };
+            IsFixed = new ReactiveList<string> { "Fixed", "Optional" };
             FixedSelection = "Fixed";
 
-            RemoveModificationCommand = new RelayCommand(() =>
-            {
-                if (RequestModificationRemoval != null) RequestModificationRemoval(this, EventArgs.Empty);
-            });
+            RemoveModificationCommand = ReactiveCommand.Create();
         }
 
         /// <summary>

@@ -27,7 +27,7 @@
                 <ColumnDefinition Width="30" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <wpf:PlotView Grid.Column="1" Name="FragmentIonXic" Model="{Binding Path=Plot, UpdateSourceTrigger=PropertyChanged}">
+            <wpf:PlotView Grid.Column="1" Name="FragmentIonXic" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
@@ -36,7 +36,7 @@
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
                 <wpf:PlotView.InputBindings>
-                    <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
+                    <MouseBinding Command="{Binding RetentionTimeSelectedCommand}" MouseAction="LeftDoubleClick" />
                 </wpf:PlotView.InputBindings>
             </wpf:PlotView>
             <Slider Grid.Column="0" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
@@ -52,7 +52,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="30" />
             </Grid.ColumnDefinitions>
-            <wpf:PlotView Grid.Column="0" Name="HeavyFragmentIonXic" Model="{Binding Path=Plot, UpdateSourceTrigger=PropertyChanged}">
+            <wpf:PlotView Grid.Column="0" Name="HeavyFragmentIonXic" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
@@ -61,7 +61,7 @@
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
                 <wpf:PlotView.InputBindings>
-                    <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
+                    <MouseBinding Command="{Binding RetentionTimeSelectedCommand}" MouseAction="LeftDoubleClick" />
                 </wpf:PlotView.InputBindings>
             </wpf:PlotView>
             <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
@@ -78,7 +78,7 @@
                 <ColumnDefinition Width="30" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <wpf:PlotView Name="PrecursorIonXic" Grid.Column="1" Model="{Binding Path=Plot, UpdateSourceTrigger=PropertyChanged}">
+            <wpf:PlotView Name="PrecursorIonXic" Grid.Column="1" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
@@ -87,7 +87,7 @@
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
                 <wpf:PlotView.InputBindings>
-                    <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
+                    <MouseBinding Command="{Binding RetentionTimeSelectedCommand}" MouseAction="LeftDoubleClick" />
                 </wpf:PlotView.InputBindings>
             </wpf:PlotView>
             <Slider Grid.Column="0" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
@@ -103,7 +103,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="30" />
             </Grid.ColumnDefinitions>
-            <wpf:PlotView Name="HeavyPrecursorIonXic" Grid.Column="0" Model="{Binding Path=Plot, UpdateSourceTrigger=PropertyChanged}">
+            <wpf:PlotView Name="HeavyPrecursorIonXic" Grid.Column="0" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
@@ -112,7 +112,7 @@
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
                 <wpf:PlotView.InputBindings>
-                    <MouseBinding Command="{Binding SetScanChangedCommand}" MouseAction="LeftDoubleClick" />
+                    <MouseBinding Command="{Binding RetentionTimeSelectedCommand}" MouseAction="LeftDoubleClick" />
                 </wpf:PlotView.InputBindings>
             </wpf:PlotView>
             <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"

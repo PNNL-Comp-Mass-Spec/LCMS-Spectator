@@ -1,34 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Command;
-using GalaSoft.MvvmLight.Messaging;
+using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Models;
 using LcmsSpectator.PlotModels;
-using LcmsSpectator.TaskServices;
-using LcmsSpectatorModels.Models;
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
-    public class FeatureViewerViewModel: ViewModelBase
+    public class FeatureViewerViewModel: ReactiveObject
     {
-        public FeatureViewerViewModel(ITaskService taskService, IMessenger messenger)
+        public FeatureViewerViewModel()
         {
-            if (taskService is TaskService) taskService = new TimedTaskService(500);
-            MessengerInstance = messenger;
-            _taskService = taskService;
-            MessengerInstance.Register<PropertyChangedMessage<PrSm>>(this, SelectedPrSmChanged);
-            MessengerInstance.Register<PropertyChangedMessage<int>>(this, SelectedScanChanged);
-            MessengerInstance.Register<PropertyChangedMessage<List<PrSm>>>(this, FilteredIdsChanged);
-            FeatureSelectedCommand = new RelayCommand(FeatureSelected);
+            var featureSelectedCommand = ReactiveCommand.Create();
+            featureSelectedCommand.Subscribe(_ => FeatureSelected());
+            FeatureSelectedCommand = featureSelectedCommand;
+
             FeatureMap = new PlotModel {Title = "Feature Map"};
             _ipxAxis = new LinearAxis {Position = AxisPosition.Bottom, Title = "Mass"};
             IsotopicEnvelope = new AutoAdjustedYPlotModel(_ipxAxis, 1.05)
@@ -71,13 +66,50 @@ namespace LcmsSpectator.ViewModels
                 }
                 isInternalChange = false;
             };
+
+            // When ShowNoutFoundMs2 changes, update the NoutFoundMs2 series
+            this.WhenAnyValue(x => x.ShowNotFoundMs2)
+                .Where(_ => _notFoundMs2S != null && FeatureMap != null)
+                .Subscribe(showNotFoundMs2 =>
+                {
+                    _notFoundMs2S.IsVisible = showNotFoundMs2;
+                    FeatureMap.InvalidatePlot(true);
+                });
+
+            // When ShowFoundMs2 changes, update all ms2 series
+            this.WhenAnyValue(x => x.ShowFoundMs2)
+                .Where(_ => _foundMs2S != null && FeatureMap != null)
+                .Subscribe(showFoundMs2 =>
+                {
+                    foreach (var ms2 in _foundMs2S) ms2.IsVisible = showFoundMs2;
+                    FeatureMap.InvalidatePlot(true);
+                });
+
+            this.WhenAnyValue(x => x.SelectedPrSm)
+                .Where(selectedPrSm => selectedPrSm != null)
+                .Subscribe(selectedPrSm =>
+                {
+                    SetHighlight(selectedPrSm);
+                    FeatureMap.InvalidatePlot(true);
+                    SelectedPrSm.WhenAnyValue(x => x.Scan)
+                                .Subscribe(scan =>
+                                {
+                                    SetHighlight(selectedPrSm);
+                                    FeatureMap.InvalidatePlot(true);
+                                });
+                });
+
+            // Update plot if score threshold, abundance threshold, or points displayed changes
+            this.WhenAnyValue(x => x.ScoreThreshold, x => x.AbundanceThreshold, x => x.PointsDisplayed)
+                .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
+                .Subscribe(x => BuildPlot(x.Item1, x.Item2, x.Item3));
         }
         #region Public Properties
         /// <summary>
         /// Command activated when a feature is selected (double clicked) on the
         /// feature map plot.
         /// </summary>
-        public RelayCommand FeatureSelectedCommand { get; private set; }
+        public IReactiveCommand FeatureSelectedCommand { get; private set; }
 
         private PlotModel _featureMap;
         /// <summary>
@@ -86,11 +118,7 @@ namespace LcmsSpectator.ViewModels
         public PlotModel FeatureMap
         {
             get { return _featureMap; }
-            private set
-            {
-                _featureMap = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _featureMap, value); }
         }
 
         private AutoAdjustedYPlotModel _isotopicEnvelope;
@@ -100,11 +128,7 @@ namespace LcmsSpectator.ViewModels
         public AutoAdjustedYPlotModel IsotopicEnvelope
         {
             get { return _isotopicEnvelope; }
-            set
-            {
-                _isotopicEnvelope = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _isotopicEnvelope, value); }
         }
 
         private bool _isotopicEnvelopeExpanded;
@@ -114,11 +138,7 @@ namespace LcmsSpectator.ViewModels
         public bool IsotopicEnvelopeExpanded
         {
             get { return _isotopicEnvelopeExpanded; }
-            set
-            {
-                _isotopicEnvelopeExpanded = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _isotopicEnvelopeExpanded, value); }
         }
 
         private bool _isLoading;
@@ -128,11 +148,7 @@ namespace LcmsSpectator.ViewModels
         public bool IsLoading
         {
             get { return _isLoading; }
-            private set
-            {
-                _isLoading = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _isLoading, value); }
         }
 
         private double _minimumScore;
@@ -142,11 +158,7 @@ namespace LcmsSpectator.ViewModels
         public double MinimumScore
         {
             get { return _minimumScore; }
-            private set
-            {
-                _minimumScore = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _minimumScore, value); }
         }
 
         private double _maximumScore;
@@ -156,11 +168,7 @@ namespace LcmsSpectator.ViewModels
         public double MaximumScore
         {
             get { return _maximumScore; }
-            set
-            {
-                _maximumScore = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _maximumScore, value); }
         }
 
         private double _minimumAbundance;
@@ -170,11 +178,7 @@ namespace LcmsSpectator.ViewModels
         public double MinimumAbundance
         {
             get { return _minimumAbundance; }
-            private set
-            {
-                _minimumAbundance = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _minimumAbundance, value); }
         }
 
         private double _maximumAbundance;
@@ -184,11 +188,7 @@ namespace LcmsSpectator.ViewModels
         public double MaximumAbundance
         {
             get { return _maximumAbundance; }
-            private set
-            {
-                _maximumAbundance = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _maximumAbundance, value); }
         }
 
 
@@ -199,11 +199,7 @@ namespace LcmsSpectator.ViewModels
         public double MinimumAbundanceThreshold
         {
             get { return _minimumAbundanceThreshold; }
-            set
-            {
-                _minimumAbundanceThreshold = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _minimumAbundanceThreshold, value); }
         }
 
         private double _maximumAbundanceThreshold;
@@ -213,11 +209,7 @@ namespace LcmsSpectator.ViewModels
         public double MaximumAbundanceThreshold
         {
             get { return _maximumAbundanceThreshold; }
-            set
-            {
-                _maximumAbundanceThreshold = value;
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _maximumAbundanceThreshold, value); }
         }
 
         private int _pointsDisplayed;
@@ -227,12 +219,7 @@ namespace LcmsSpectator.ViewModels
         public int PointsDisplayed
         {
             get { return _pointsDisplayed; }
-            set
-            {
-                _pointsDisplayed = value;
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _pointsDisplayed, value); }
         }
 
         private double _abundanceThreshold;
@@ -243,12 +230,7 @@ namespace LcmsSpectator.ViewModels
         public double AbundanceThreshold
         {
             get { return _abundanceThreshold; }
-            set
-            {
-                _abundanceThreshold = value;
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _abundanceThreshold, value); }
         }
 
         private double _scoreThreshold;
@@ -259,12 +241,7 @@ namespace LcmsSpectator.ViewModels
         public double ScoreThreshold
         {
             get { return _scoreThreshold; }
-            set
-            {
-                _scoreThreshold = value;
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _scoreThreshold, value); }
         }
 
         private bool _showFoundMs2;
@@ -275,16 +252,7 @@ namespace LcmsSpectator.ViewModels
         public bool ShowFoundMs2
         {
             get { return _showFoundMs2; }
-            set
-            {
-                _showFoundMs2 = value;
-                foreach (var series in _foundMs2S)
-                {
-                    series.IsVisible = value;
-                }
-                FeatureMap.InvalidatePlot(true);
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _showFoundMs2, value); }
         }
 
         private bool _showNotFoundMs2;
@@ -295,13 +263,7 @@ namespace LcmsSpectator.ViewModels
         public bool ShowNotFoundMs2
         {
             get { return _showNotFoundMs2; }
-            set
-            {
-                _showNotFoundMs2 = value;
-                _notFoundMs2S.IsVisible = value;
-                FeatureMap.InvalidatePlot(true);
-                RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _showNotFoundMs2, value); }
         }
 
         private PrSm _selectedPrSm;
@@ -312,12 +274,7 @@ namespace LcmsSpectator.ViewModels
         public PrSm SelectedPrSm
         {
             get { return _selectedPrSm; }
-            set
-            {
-                var oldValue = _selectedPrSm;
-                _selectedPrSm = value;
-                RaisePropertyChanged("SelectedPrSm", oldValue, _selectedPrSm, true);
-            }
+            set { this.RaiseAndSetIfChanged(ref _selectedPrSm, value); }
         }
 
         private FeaturePoint _selectedFeature;
@@ -327,11 +284,7 @@ namespace LcmsSpectator.ViewModels
         public FeaturePoint SelectedFeature
         {
             get { return _selectedFeature; }
-            private set
-            {
-                _selectedFeature = value;
-                RaisePropertyChanged();
-            }
+            private set { this.RaiseAndSetIfChanged(ref _selectedFeature, value); }
         }
         #endregion
 
@@ -398,7 +351,7 @@ namespace LcmsSpectator.ViewModels
                     if (!_ids.ContainsKey(scan))
                         _ids.Add(scan, new PrSm { Scan = scan, Lcms = _lcms, Mass = feature.MinPoint.Mass });
                     if (!accountedFor.Contains(scan)) accountedFor.Add(scan);
-                    TryInsert(scanHash, scan, _ids[scan].Mass, 1);
+                    Insert(scanHash, scan, _ids[scan].Mass, massTolerance: 1);
                 }
             }
             foreach (var id in _ids.Values)
@@ -411,14 +364,13 @@ namespace LcmsSpectator.ViewModels
             }
             MaximumAbundanceThreshold = Math.Log10(_features.Max(f => f.MinPoint.Abundance));
             MinimumAbundanceThreshold = Math.Log10(_features.Min(f => f.MinPoint.Abundance));
-            _abundanceThreshold = Math.Max(_maximumAbundanceThreshold, _minimumAbundance);
-            RaisePropertyChanged("AbundanceThreshold");
+            AbundanceThreshold = Math.Max(_maximumAbundanceThreshold, _minimumAbundance);
             _yAxis.AbsoluteMinimum = 0;
             _yAxis.AbsoluteMaximum = _features.Max(f => f.MinPoint.Mass);
             _xAxis.AbsoluteMinimum = 0;
             _xAxis.AbsoluteMaximum = _lcms.MaxLcScan;
             if (updatePlot)
-                _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
+                BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed);
         }
 
         /// <summary>
@@ -477,7 +429,7 @@ namespace LcmsSpectator.ViewModels
                     if (!_ids.ContainsKey(scan))
                         _ids.Add(scan, new PrSm { Scan = scan, Lcms = _lcms, Mass = feature.MinPoint.Mass });
                     if (!accountedFor.Contains(scan)) accountedFor.Add(scan);
-                    TryInsert(scanHash, scan, _ids[scan].Mass, 1);
+                    Insert(scanHash, scan, _ids[scan].Mass, massTolerance: 1);
                 }
             }
             foreach (var id in _ids.Values)
@@ -488,46 +440,11 @@ namespace LcmsSpectator.ViewModels
                     _notFoundMs2.Add(id);
                 }
             }
-            _taskService.Enqueue(() => BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed));
+            BuildPlot(_scoreThreshold, _abundanceThreshold, _pointsDisplayed);
         }
         #endregion
 
         #region Event Handlers
-        /// <summary>
-        /// A new identification has been selected for the data set.
-        /// Highlights the point associated with this identification.
-        /// </summary>
-        /// <param name="message">Event message containing identification selected.</param>
-        private void SelectedPrSmChanged(PropertyChangedMessage<PrSm> message)
-        {
-            if (message.PropertyName != "PrSm" || !(message.Sender is PrSmViewModel)) return;
-            var prsm = message.NewValue;
-            if (prsm == null) return;
-            _selectedPrSm = prsm;
-            _taskService.Enqueue(() =>
-            {
-                SetHighlight(prsm);
-                FeatureMap.InvalidatePlot(true);
-            });
-            RaisePropertyChanged("SelectedPrSm");
-        }
-
-        /// <summary>
-        /// A new scan number has been selected for this data set.
-        /// </summary>
-        /// <param name="message">Event message containing new scan number.</param>
-        private void SelectedScanChanged(PropertyChangedMessage<int> message)
-        {
-            if (message.PropertyName == "Scan" && message.Sender is PrSmViewModel && SelectedPrSm != null)
-            {
-                if (FeatureMap != null)
-                {
-                    SetHighlight(new PrSm { Scan = message.NewValue, Sequence = _selectedPrSm.Sequence, Lcms = _selectedPrSm.Lcms });
-                    FeatureMap.InvalidatePlot(true);
-                }
-            }
-        }
-
         /// <summary>
         /// Event handler for mouse click event to set SelectedDataPoint
         /// </summary>
@@ -575,15 +492,6 @@ namespace LcmsSpectator.ViewModels
                 if (result == null) return;
                 _selectedPrSmPoint = result.Item as PrSm;
             }
-        }
-
-        /// <summary>
-        /// Identifications have been filtered.
-        /// </summary>
-        /// <param name="message">Event message containing new list of filtered identifications.</param>
-        private void FilteredIdsChanged(PropertyChangedMessage<List<PrSm>> message)
-        {
-            UpdateIds(message.NewValue);
         }
 #endregion
 
@@ -835,9 +743,11 @@ namespace LcmsSpectator.ViewModels
             var max = peakMap.Values.Max(p => p.Mz);
 
             min -= (max - min)/3;
+            var absMin = Math.Max(0, min - 10);
             max += (max - min)/3;
+            var absMax = max + 10;
 
-            var theoSeries = new StemSeries
+            var theoSeries = new PeakPointSeries
             {
                 Title = "Theoretical",
                 ItemsSource = peakMap.Values,
@@ -853,7 +763,7 @@ namespace LcmsSpectator.ViewModels
 
             IsotopicEnvelope.Series.Add(theoSeries);
 
-            var actSeries = new StemSeries
+            var actSeries = new PeakPointSeries
             {
                 Title = "Observed",
                 ItemsSource = isotopes,
@@ -870,13 +780,16 @@ namespace LcmsSpectator.ViewModels
             IsotopicEnvelope.Series.Add(actSeries);
 
             _ipxAxis.Minimum = min;
+            _ipxAxis.AbsoluteMinimum = absMin;
             _ipxAxis.Maximum = max;
+            _ipxAxis.AbsoluteMaximum = absMax;
             _ipxAxis.Zoom(min, max);
             IsotopicEnvelope.AdjustForZoom();
 
             IsotopicEnvelope.IsLegendVisible = true;
             IsotopicEnvelopeExpanded = true;
             IsotopicEnvelope.InvalidatePlot(true);
+            IsotopicEnvelope.AdjustForZoom();
             IsLoading = false;
         }
 
@@ -891,6 +804,7 @@ namespace LcmsSpectator.ViewModels
         private List<Feature> FilterData(IEnumerable<Feature> features, double scoreThreshold, double abundanceThreshold, int pointsDisplayed)
         {
             var maxAbundance = Math.Pow(abundanceThreshold, 10);
+            if (features == null) return new List<Feature>();
             var filteredFeatures =
                 features.Where(feature => feature.MinPoint.Abundance <= maxAbundance && feature.MinPoint.Score >= scoreThreshold)
                          .OrderByDescending(feature => feature.MinPoint.Abundance).ToList();
@@ -899,14 +813,12 @@ namespace LcmsSpectator.ViewModels
             return topNPoints;
         }
 
-        private bool TryInsert(Dictionary<int, List<double>> points, int scan, double mass, double massTolerance=0.1)
+        private void Insert(Dictionary<int, List<double>> points, int scan, double mass, double massTolerance = 0.1)
         {
-            bool success = false;
             List<double> masses;
             if (!points.TryGetValue(scan, out masses))
             {
                 points.Add(scan, new List<double>{mass});
-                success = true;
             }
             else
             {
@@ -918,16 +830,12 @@ namespace LcmsSpectator.ViewModels
                      Math.Abs(mass - masses[lowIndex]) <= massTolerance))
                 {
                     masses.Insert(hiIndex, mass);
-                    success = true;
                 }
             }
-            return success;
         }
         #endregion
 
         #region Private Fields
-        private readonly ITaskService _taskService;
-
         private readonly LinearAxis _xAxis;
         private readonly LinearAxis _yAxis;
         private RectangleAnnotation _highlight;
