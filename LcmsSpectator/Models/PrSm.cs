@@ -22,16 +22,17 @@ namespace LcmsSpectator.Models
             ProteinDesc = "";
             UseGolfScoring = false;
             Heavy = false;
+            Scan = 0;
 
             // When Scan or Lcms change, update ms2Spectrum
             this.WhenAnyValue(x => x.Scan, x => x.Lcms)
                 .Where(x => x.Item1 > 0 && x.Item2 != null)
-                .Select(x => x.Item2.GetSpectrum(x.Item1))
+                .Select(x => x.Item2.GetSpectrum(x.Item1) as ProductSpectrum)
+                .Where(productSpectrum => productSpectrum != null)
                 .ToProperty(this, x => x.Ms2Spectrum, out _ms2Spectrum);
 
             // When Ms2Spectrum changes, update ActivationMethod
             this.WhenAnyValue(x => x.Ms2Spectrum)
-                .Select(ms2Spectrum => ms2Spectrum as ProductSpectrum)
                 .Where(ms2Spectrum => ms2Spectrum != null)
                 .Select(ms2Spectrum => ms2Spectrum.ActivationMethod)
                 .ToProperty(this, x => x.ActivationMethod, out _activationMethod);
@@ -75,12 +76,12 @@ namespace LcmsSpectator.Models
         /// </summary>
         public double RetentionTime { get { return (Lcms == null) ? 0.0 : Lcms.GetElutionTime(Scan); } }
 
-        private readonly ObservableAsPropertyHelper<Spectrum> _ms2Spectrum; 
+        private readonly ObservableAsPropertyHelper<ProductSpectrum> _ms2Spectrum; 
         /// <summary>
         /// Ms2 Spectrum associated with Scan.
         /// Requires both Lcms and Scan to be set.
         /// </summary>
-        public Spectrum Ms2Spectrum { get { return _ms2Spectrum.Value; } }
+        public ProductSpectrum Ms2Spectrum { get { return _ms2Spectrum.Value; } }
 
         /// <summary>
         /// Spectrum for previous ms1 scan before Scan.
