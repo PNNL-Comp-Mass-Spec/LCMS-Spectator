@@ -20,6 +20,7 @@ namespace LcmsSpectator.ViewModels
         {
             _lcms = lcms;
             _fragmentCache = new MemoizingMRUCache<Tuple<Composition, int, IonType>, LabeledIonViewModel>(GetLabeledIonViewModel, 2000);
+            _fragmentCacheLock = new object();
             IonTypes = new ReactiveList<IonType>();
             ShowHeavy = false;
             this.WhenAnyValue(x => x.SelectedPrSm, x => x.PrecursorViewMode, x => x.ShowHeavy)
@@ -128,22 +129,24 @@ namespace LcmsSpectator.ViewModels
             var fragmentLabels = new ReactiveList<LabeledIonViewModel> { ChangeTrackingEnabled = true };
             if (SelectedPrSm.Sequence.Count < 1) return fragmentLabels;
             var precursorIon = IonUtils.GetPrecursorIon(SelectedPrSm.Sequence, SelectedPrSm.Charge);
-            foreach (var ionType in IonTypes)
+            lock (_fragmentCacheLock)
             {
-                var ionFragments = new List<LabeledIonViewModel>();
-                for (int i = 1; i < SelectedPrSm.Sequence.Count; i++)
+                foreach (var ionType in IonTypes)
                 {
-                    LabeledIonViewModel label;
-                    var composition = ionType.IsPrefixIon
-                        ? SelectedPrSm.Sequence.GetComposition(0, i)
-                        : SelectedPrSm.Sequence.GetComposition(i, SelectedPrSm.Sequence.Count);
-                    var labelIndex = ionType.IsPrefixIon ? i : (SelectedPrSm.Sequence.Count - i);
-                    label = _fragmentCache.Get(new Tuple<Composition, int, IonType>(composition, labelIndex, ionType));
-                    if (label.PrecursorIon == null) label.PrecursorIon = precursorIon;
-                    ionFragments.Add(label);
-                }
-                if (!ionType.IsPrefixIon) ionFragments.Reverse();
-                fragmentLabels.AddRange(ionFragments);
+                    var ionFragments = new List<LabeledIonViewModel>();
+                    for (int i = 1; i < SelectedPrSm.Sequence.Count; i++)
+                    {
+                        var composition = ionType.IsPrefixIon
+                            ? SelectedPrSm.Sequence.GetComposition(0, i)
+                            : SelectedPrSm.Sequence.GetComposition(i, SelectedPrSm.Sequence.Count);
+                        var labelIndex = ionType.IsPrefixIon ? i : (SelectedPrSm.Sequence.Count - i);
+                        LabeledIonViewModel label = _fragmentCache.Get(new Tuple<Composition, int, IonType>(composition, labelIndex, ionType));
+                        if (label.PrecursorIon == null) label.PrecursorIon = precursorIon;
+                        ionFragments.Add(label);
+                    }
+                    if (!ionType.IsPrefixIon) ionFragments.Reverse();
+                    fragmentLabels.AddRange(ionFragments);
+                }   
             }
             return fragmentLabels;
         }
@@ -191,6 +194,7 @@ namespace LcmsSpectator.ViewModels
         }
 #endregion
 
+        private readonly Object _fragmentCacheLock;
         private readonly MemoizingMRUCache<Tuple<Composition, int, IonType>, LabeledIonViewModel> _fragmentCache; 
         private readonly ILcMsRun _lcms;
     }
