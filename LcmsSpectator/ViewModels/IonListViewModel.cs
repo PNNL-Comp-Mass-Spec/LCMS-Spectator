@@ -10,6 +10,7 @@ using LcmsSpectator.Config;
 using LcmsSpectator.Models;
 using LcmsSpectator.Utils;
 using ReactiveUI;
+using Splat;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -18,6 +19,7 @@ namespace LcmsSpectator.ViewModels
         public IonListViewModel(ILcMsRun lcms)
         {
             _lcms = lcms;
+            _fragmentCache = new MemoizingMRUCache<Tuple<Composition, int, IonType>, LabeledIonViewModel>(GetLabeledIonViewModel, 2000);
             IonTypes = new ReactiveList<IonType>();
             ShowHeavy = false;
             this.WhenAnyValue(x => x.SelectedPrSm, x => x.PrecursorViewMode, x => x.ShowHeavy)
@@ -136,13 +138,19 @@ namespace LcmsSpectator.ViewModels
                         ? SelectedPrSm.Sequence.GetComposition(0, i)
                         : SelectedPrSm.Sequence.GetComposition(i, SelectedPrSm.Sequence.Count);
                     var labelIndex = ionType.IsPrefixIon ? i : (SelectedPrSm.Sequence.Count - i);
-                    label = new LabeledIonViewModel(composition, labelIndex, ionType, true, _lcms, precursorIon);
+                    label = _fragmentCache.Get(new Tuple<Composition, int, IonType>(composition, labelIndex, ionType));
+                    if (label.PrecursorIon == null) label.PrecursorIon = precursorIon;
                     ionFragments.Add(label);
                 }
                 if (!ionType.IsPrefixIon) ionFragments.Reverse();
                 fragmentLabels.AddRange(ionFragments);
             }
             return fragmentLabels;
+        }
+
+        private LabeledIonViewModel GetLabeledIonViewModel(Tuple<Composition, int, IonType> key, Object ob)
+        {
+            return new LabeledIonViewModel(key.Item1, key.Item2, key.Item3, true, _lcms);
         }
 
         private ReactiveList<LabeledIonViewModel> GenerateIsotopePrecursorLabels()
@@ -182,7 +190,8 @@ namespace LcmsSpectator.ViewModels
             return ions;
         }
 #endregion
- 
+
+        private readonly MemoizingMRUCache<Tuple<Composition, int, IonType>, LabeledIonViewModel> _fragmentCache; 
         private readonly ILcMsRun _lcms;
     }
 }

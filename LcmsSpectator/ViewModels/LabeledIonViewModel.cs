@@ -36,7 +36,7 @@ namespace LcmsSpectator.ViewModels
         #region Public Properties
 
         public Composition Composition { get; private set; }
-        public Ion PrecursorIon { get; private set; }
+        public Ion PrecursorIon { get; set; }
         public int Index { get; private set; }
         public IonType IonType { get; private set; }
         public bool IsFragmentIon { get; private set; }
