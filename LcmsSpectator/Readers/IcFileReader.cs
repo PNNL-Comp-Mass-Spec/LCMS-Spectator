@@ -13,12 +13,6 @@ namespace LcmsSpectator.Readers
         public IcFileReader(string tsvFile)
         {
             _fileName = tsvFile;
-
-            _nameToModName = new Dictionary<string, string>();
-            foreach (var modification in Modification.CommonModifications)
-            {
-                _nameToModName.Add(modification.Name.ToLower(), modification.Name);
-            }
         }
 
         public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
@@ -184,7 +178,6 @@ namespace LcmsSpectator.Readers
             return parsedMods;
         }
 
-        private readonly Dictionary<string, string> _nameToModName; 
         private readonly string _fileName;
     }
 
