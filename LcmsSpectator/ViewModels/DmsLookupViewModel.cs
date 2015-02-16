@@ -24,6 +24,7 @@ namespace LcmsSpectator.ViewModels
 
         public DmsLookupViewModel(IDialogService dialogService)
         {
+            IsFirstSearch = true;
             Status = false;
             _dialogService = dialogService;
             NumberOfWeeks = 2;
@@ -66,6 +67,10 @@ namespace LcmsSpectator.ViewModels
                     }
                     if (Jobs.Count > 0) SelectedJob = Jobs[0];
                 });
+
+            this.WhenAnyValue(x => x.SelectedDataset, x => x.IsFirstSearch)
+                .Select(x => (x.Item1 == null || String.IsNullOrEmpty(x.Item1.DatasetFolderPath) && !x.Item2))
+                .ToProperty(this, x => x.IsNoResultsShown, out _isNoResultsShown);
         }
 
         private DmsDatasetViewModel _selectedDataset;
@@ -80,6 +85,19 @@ namespace LcmsSpectator.ViewModels
         {
             get { return _selectedJob; }
             set { this.RaiseAndSetIfChanged(ref _selectedJob, value); }
+        }
+
+        private readonly ObservableAsPropertyHelper<bool> _isNoResultsShown;
+        public bool IsNoResultsShown
+        {
+            get { return _isNoResultsShown.Value; }
+        }
+
+        private bool _isFirstSearch;
+        private bool IsFirstSearch
+        {
+            get { return _isFirstSearch; }
+            set { this.RaiseAndSetIfChanged(ref _isFirstSearch, value); }
         }
 
         /// <summary>
@@ -98,6 +116,8 @@ namespace LcmsSpectator.ViewModels
                 _dialogService.MessageBox("Please enter a dataset filter.");
                 return;
             }
+
+            IsFirstSearch = false;
 
             Datasets.Clear();
             var dataSets =_dmsLookupUtility.GetDatasets(NumberOfWeeks, DatasetFilter);

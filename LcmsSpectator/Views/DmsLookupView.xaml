@@ -4,6 +4,7 @@
         Title="Search DMS" Height="375" Width="1100">
     
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <DataTemplate x:Key="DatasetItemTemplate">
             <Grid Background="Transparent" ShowGridLines="False">
                 <Grid.ColumnDefinitions>
@@ -32,8 +33,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="20" />
                     <RowDefinition Height="30" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="90*" />
+                    <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="50*" />
@@ -57,28 +57,52 @@
 
                 <Button Grid.Row="1" Grid.Column="2" Command="{Binding LookupCommand}" Height="25">Search</Button>
 
-                <ComboBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Height="25" 
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="90*" />
+                    </Grid.RowDefinitions>
+                    
+                    <ComboBox Grid.Row="0" Grid.Column="0" Height="25" 
                   ItemsSource="{Binding Datasets}" SelectedItem="{Binding SelectedDataset}"
                   ItemTemplate="{StaticResource ResourceKey=DatasetItemTemplate}">
-                    <ComboBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        </Style>
-                    </ComboBox.ItemContainerStyle>
-                </ComboBox>
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                    </ComboBox>
 
-                <DataGrid AutoGenerateColumns="False" SelectionMode="Extended"
+                    <DataGrid AutoGenerateColumns="False" SelectionMode="Extended"
                           CanUserAddRows="False"
                           IsReadOnly="False" RowHeaderWidth="0"
-                          Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                          Grid.Row="1" Grid.Column="0"
                           ItemsSource="{Binding Jobs}" SelectedItem="{Binding SelectedJob}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Job ID" Width="7*" Binding="{Binding Job}" />
-                        <DataGridTextColumn Header="Tool" Width="7*" Binding="{Binding Tool}"/>
-                        <DataGridTextColumn Header="Path" Width="46*" Binding="{Binding JobFolderPath}" />
-                        <DataGridTextColumn Header="Completed" Width="15*" Binding="{Binding Completed}" />
-                    </DataGrid.Columns>
-                </DataGrid>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Job ID" Width="7*" Binding="{Binding Job}" />
+                            <DataGridTextColumn Header="Tool" Width="7*" Binding="{Binding Tool}"/>
+                            <DataGridTextColumn Header="Path" Width="46*" Binding="{Binding JobFolderPath}" />
+                            <DataGridTextColumn Header="Completed" Width="15*" Binding="{Binding Completed}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border BorderBrush="Black" Grid.RowSpan="2" BorderThickness="1" Background="#80000000"
+                VerticalAlignment="Stretch" Visibility="{Binding IsNoResultsShown, Converter={StaticResource BoolToVis}}">
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="50*"/>
+                                <RowDefinition Height="50*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Margin="0"
+                           TextWrapping="Wrap"
+                           VerticalAlignment="Bottom"
+                           Grid.Row="0"
+                           TextAlignment="Center"
+                           FontSize="24" FontWeight="Bold" Foreground="#FF1919">No Datasets Found</TextBlock>
+                        </Grid>
+                    </Border>
+
+                </Grid>
             </Grid>
         </GroupBox>
         <StackPanel Orientation="Horizontal" 

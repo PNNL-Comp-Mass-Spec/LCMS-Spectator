@@ -43,6 +43,8 @@ namespace LcmsSpectator.ViewModels
             cancelCommand.Subscribe(_ => Cancel());
             CancelCommand = cancelCommand;
 
+
+
             Status = false;
         }
 
