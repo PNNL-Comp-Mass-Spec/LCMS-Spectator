@@ -466,9 +466,10 @@ namespace LcmsSpectator.ViewModels
         /// <param name="rawFilePath">Path to raw file to open</param>
         public DataSetViewModel ReadRawFile(string rawFilePath)
         {
-            var dsVm = new DataSetViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService), rawFilePath); // create data set view model
+            var dsVm = new DataSetViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService)); // create data set view model
             GuiInvoker.Invoke(() => DataSets.Add(dsVm)); // add data set view model. Can only add to ObservableCollection in thread that created it (gui thread)
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedDataSetViewModel = DataSets[0]; });
+            dsVm.RawFilePath = rawFilePath;
             FileOpen = true;
             return dsVm;
         }

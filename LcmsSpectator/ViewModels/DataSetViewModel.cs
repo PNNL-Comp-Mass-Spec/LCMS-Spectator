@@ -31,31 +31,69 @@ namespace LcmsSpectator.ViewModels
         public IReactiveCommand CloseCommand { get; private set; }
         #endregion
 
-        public DataSetViewModel(IMainDialogService dialogService, ITaskService taskService, string rawFilePath)
+        public DataSetViewModel(IMainDialogService dialogService, ITaskService taskService)
         {
             _dialogService = dialogService;
             ITaskService taskService1 = taskService;
             _showFeatureMapSplash = true;
             ReadyToClose = false;
-            RawFilePath = rawFilePath;
             LoadingScreenViewModel = new LoadingScreenViewModel();
             SelectedPrSm = new PrSm();
             FeatureMapViewModel = new FeatureViewerViewModel();
             ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService1), new List<PrSm>());
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
-            LoadRawFile();
             CreateSequenceViewModel = new CreateSequenceViewModel(new ReactiveList<DataSetViewModel>(),
                 _dialogService)
             {
                 SelectedDataSetViewModel = this
             };
-            XicViewModel = new XicViewModel(_dialogService, Lcms);
-            SpectrumViewModel = new SpectrumViewModel(_dialogService, Lcms);
-
             var openFeatureFileCommand = ReactiveCommand.Create();
             openFeatureFileCommand.Subscribe(_ => OpenFeatureFile());
             OpenFeatureFileCommand = openFeatureFileCommand;
-            IonListViewModel = new IonListViewModel(Lcms);
+
+            this.WhenAnyValue(x => x.RawFilePath).Where(rawFilePath => !String.IsNullOrEmpty(rawFilePath))
+                .Subscribe(rawFilePath =>
+                {
+                    LoadRawFile();
+                    // When the selected scan changes in the xic plots, the selected scan for the prsm should update
+                    XicViewModel.WhenAnyValue(x => x.FragmentPlotViewModel.SelectedScan)
+                        .Subscribe(scan => SelectedPrSm.Scan = scan);
+                    XicViewModel.WhenAnyValue(x => x.HeavyFragmentPlotViewModel.SelectedScan)
+                        .Subscribe(scan => SelectedPrSm.Scan = scan);
+                    XicViewModel.WhenAnyValue(x => x.PrecursorPlotViewModel.SelectedScan)
+                        .Subscribe(scan => SelectedPrSm.Scan = scan);
+                    XicViewModel.WhenAnyValue(x => x.HeavyPrecursorPlotViewModel.SelectedScan)
+                        .Subscribe(scan => SelectedPrSm.Scan = scan);
+
+                    // When precursor view mode is selected in XicViewModel, ion lists should be recalculated.
+                    XicViewModel.WhenAnyValue(x => x.PrecursorViewMode, x => x.ShowHeavy)
+                        .Subscribe(x =>
+                        {
+                            IonListViewModel.PrecursorViewMode = x.Item1;
+                            IonListViewModel.ShowHeavy = x.Item2;
+                        });
+
+                    IonListViewModel.WhenAnyValue(x => x.FragmentLabels)
+                    .Subscribe(labels =>
+                    {
+                        SpectrumViewModel.PrimarySpectrumViewModel.Ions = labels;
+                        XicViewModel.FragmentPlotViewModel.Ions = labels;
+                    });
+                    IonListViewModel.WhenAnyValue(x => x.PrecursorLabels)
+                    .Where(labels => labels != null)
+                    .Select(labels => new ReactiveList<LabeledIonViewModel>(labels.Where(l => l.Index == 0)) { ChangeTrackingEnabled = true })
+                    .Subscribe(labels =>
+                    {
+                        SpectrumViewModel.Secondary1ViewModel.Ions = labels;
+                        SpectrumViewModel.Secondary2ViewModel.Ions = labels;
+                    });
+                    IonListViewModel.WhenAnyValue(x => x.PrecursorLabels)
+                    .Where(labels => labels != null)
+                    .Subscribe(labels =>
+                    {
+                        XicViewModel.PrecursorPlotViewModel.Ions = labels;
+                    });
+                });
 
             ScanViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(x => SelectedPrSm = x);
 
@@ -71,29 +109,11 @@ namespace LcmsSpectator.ViewModels
                 XicViewModel.HeavyPrecursorPlotViewModel.SelectedScan = prsm.Scan;
             });
 
-            // When the selected scan changes in the xic plots, the selected scan for the prsm should update
-            XicViewModel.WhenAnyValue(x => x.FragmentPlotViewModel.SelectedScan)
-                .Subscribe(scan => SelectedPrSm.Scan = scan);
-            XicViewModel.WhenAnyValue(x => x.HeavyFragmentPlotViewModel.SelectedScan)
-                .Subscribe(scan => SelectedPrSm.Scan = scan);
-            XicViewModel.WhenAnyValue(x => x.PrecursorPlotViewModel.SelectedScan)
-                .Subscribe(scan => SelectedPrSm.Scan = scan);
-            XicViewModel.WhenAnyValue(x => x.HeavyPrecursorPlotViewModel.SelectedScan)
-                .Subscribe(scan => SelectedPrSm.Scan = scan);
-
-            // When precursor view mode is selected in XicViewModel, ion lists should be recalculated.
-            XicViewModel.WhenAnyValue(x => x.PrecursorViewMode, x => x.ShowHeavy)
-                .Subscribe(x =>
-                {
-                    IonListViewModel.PrecursorViewMode = x.Item1;
-                    IonListViewModel.ShowHeavy = x.Item2;
-                });
-
             // When the prsm changes, the ion lists should be recalculated
             // When the prsm changes, update the sequence creator
             this.WhenAnyValue(x => x.SelectedPrSm).Subscribe(prsm =>
             {
-                IonListViewModel.SelectedPrSm = prsm;
+                if (IonListViewModel != null) IonListViewModel.SelectedPrSm = prsm;
                 IonTypeSelectorViewModel.ActivationMethod = prsm.ActivationMethod;
                 IonTypeSelectorViewModel.SelectedCharge = prsm.Charge;
                 CreateSequenceViewModel.SelectedPrSm = prsm;
@@ -102,12 +122,15 @@ namespace LcmsSpectator.ViewModels
                     .Where(_ => SelectedPrSm != null && SpectrumViewModel != null && XicViewModel != null)
                     .Subscribe(scan =>
                     {
-                        SpectrumViewModel.UpdateSpectra(scan, SelectedPrSm.PrecursorMz);
-                        XicViewModel.FragmentPlotViewModel.SelectedScan = scan;
-                        XicViewModel.PrecursorPlotViewModel.SelectedScan = scan;
-                        XicViewModel.HeavyFragmentPlotViewModel.SelectedScan = scan;
-                        XicViewModel.HeavyPrecursorPlotViewModel.SelectedScan = scan;
-                        XicViewModel.ZoomToScan(scan);
+                        if (SpectrumViewModel != null) SpectrumViewModel.UpdateSpectra(scan, SelectedPrSm.PrecursorMz);
+                        if (XicViewModel != null)
+                        {
+                            XicViewModel.FragmentPlotViewModel.SelectedScan = scan;
+                            XicViewModel.PrecursorPlotViewModel.SelectedScan = scan;
+                            XicViewModel.HeavyFragmentPlotViewModel.SelectedScan = scan;
+                            XicViewModel.HeavyPrecursorPlotViewModel.SelectedScan = scan;
+                            XicViewModel.ZoomToScan(scan);   
+                        }
                     });
             });
 
@@ -118,28 +141,7 @@ namespace LcmsSpectator.ViewModels
             FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => SelectedPrSm = prsm);
 
             // When the ion types change, the ion lists should be recalculated.
-            IonTypeSelectorViewModel.WhenAnyValue(x => x.IonTypes).Subscribe(ionTypes => IonListViewModel.IonTypes = ionTypes);
-
-            IonListViewModel.WhenAnyValue(x => x.FragmentLabels)
-                            .Subscribe(labels =>
-            {
-                SpectrumViewModel.PrimarySpectrumViewModel.Ions = labels;
-                XicViewModel.FragmentPlotViewModel.Ions = labels;
-            });
-            IonListViewModel.WhenAnyValue(x => x.PrecursorLabels)
-            .Where(labels => labels != null)
-            .Select(labels => new ReactiveList<LabeledIonViewModel>(labels.Where(l => l.Index == 0)) { ChangeTrackingEnabled = true })
-            .Subscribe(labels =>
-            {
-                SpectrumViewModel.Secondary1ViewModel.Ions = labels;
-                SpectrumViewModel.Secondary2ViewModel.Ions = labels;
-            });
-            IonListViewModel.WhenAnyValue(x => x.PrecursorLabels)
-            .Where(labels => labels != null)
-            .Subscribe(labels =>
-            {
-                XicViewModel.PrecursorPlotViewModel.Ions = labels;
-            });
+            IonTypeSelectorViewModel.WhenAnyValue(x => x.IonTypes).Where(_ => IonListViewModel != null).Subscribe(ionTypes => IonListViewModel.IonTypes = ionTypes);
 
             ScanViewModel.WhenAnyValue(x => x.FilteredData).Subscribe(data => FeatureMapViewModel.UpdateIds(data));
 
@@ -192,7 +194,7 @@ namespace LcmsSpectator.ViewModels
         public string RawFilePath
         {
             get { return _rawFilePath; }
-            private set { this.RaiseAndSetIfChanged(ref _rawFilePath, value); }
+            set { this.RaiseAndSetIfChanged(ref _rawFilePath, value); }
         }
 
         private bool _readyToClose;
@@ -211,6 +213,11 @@ namespace LcmsSpectator.ViewModels
             // load raw file
             var massSpecDataType = (extension == ".mzml") ? MassSpecDataType.MzMLFile : MassSpecDataType.XCaliburRun;
             Lcms = PbfLcMsRun.GetLcMsRun(_rawFilePath, massSpecDataType, 0, 0);
+
+            XicViewModel = new XicViewModel(_dialogService, Lcms);
+            SpectrumViewModel = new SpectrumViewModel(_dialogService, Lcms);
+            IonListViewModel = new IonListViewModel(Lcms);
+
             var scans = Lcms.GetScanNumbers(2);
             var prsmScans = scans.Select(scan => new PrSm
             {
