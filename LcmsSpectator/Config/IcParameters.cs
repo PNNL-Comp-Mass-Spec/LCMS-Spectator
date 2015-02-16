@@ -154,6 +154,13 @@ namespace LcmsSpectator.Config
             private set { this.RaiseAndSetIfChanged(ref _ionTypeFactory, value); }
         }
 
+        private IonTypeFactory _deconvolutedIonTypeFactory;
+        public IonTypeFactory DeconvolutedIonTypeFactory
+        {
+            get { return _deconvolutedIonTypeFactory; }
+            private set { this.RaiseAndSetIfChanged(ref _deconvolutedIonTypeFactory, value); }
+        }
+
         private bool _automaticallySelectIonTypes;
         public bool AutomaticallySelectIonTypes
         {
@@ -194,6 +201,8 @@ namespace LcmsSpectator.Config
             LightModifications = new List<Modification>();
             HeavyModifications = new List<Modification> { Modification.LysToHeavyLys, Modification.ArgToHeavyArg };
             IonTypeFactory = new IonTypeFactory(100);
+            DeconvolutedIonTypeFactory = IonTypeFactory.GetDeconvolutedIonTypeFactory(BaseIonType.AllBaseIonTypes,
+                                                                                      NeutralLoss.CommonNeutralLosses);
             AutomaticallySelectIonTypes = true;
             CidHcdIonTypes = new List<BaseIonType>{BaseIonType.B, BaseIonType.Y};
             EtdIonTypes = new List<BaseIonType>{BaseIonType.C, BaseIonType.Z};
