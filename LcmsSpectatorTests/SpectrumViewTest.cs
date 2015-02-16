@@ -31,9 +31,8 @@ namespace LcmsSpectatorTests
             var id = ids.GetHighestScoringPrSm();
 
             // init XicPlotViewModel
-            SelectedPrSmViewModel.Instance.Charge = 2;
             var dialogService = new TestableMainDialogService();
-            var spectrumViewModel = new SpectrumViewModel(dialogService, new MockTaskService());
+            var spectrumViewModel = new SpectrumViewModel(dialogService, lcms);
 
             // init test ions
             var baseIonTypes = new List<BaseIonType> { BaseIonType.B, BaseIonType.Y };
@@ -43,7 +42,7 @@ namespace LcmsSpectatorTests
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
             var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-            var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
+            var ionVms = ions.Select(label => new LabeledIonViewModel(label.Composition, label.Index, label.IonType, label.IsFragmentIon, lcms, label.PrecursorIon, label.IsChargeState)).ToList();
 
         }
     }

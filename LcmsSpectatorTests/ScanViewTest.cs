@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using GalaSoft.MvvmLight.Messaging;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers;
@@ -47,7 +46,7 @@ namespace LcmsSpectatorTests
             prsms.Add(new PrSm { RawFileName = "asdf"});
 
             // init scan vm
-            var scanVm = new ScanViewModel(new TestableMainDialogService(), new MockTaskService(), prsms, Messenger.Default);
+            var scanVm = new ScanViewModel(new TestableMainDialogService(), new MockTaskService(), prsms);
             scanVm.ClearFilters();
 
             // Add filters
@@ -104,7 +103,7 @@ namespace LcmsSpectatorTests
             var prsms = ids.AllPrSms;
 
             // init scan vm
-            var scanVm = new ScanViewModel(new TestableMainDialogService(), new MockTaskService(), prsms, Messenger.Default);
+            var scanVm = new ScanViewModel(new TestableMainDialogService(), new MockTaskService(), prsms);
             scanVm.ClearFilters();
 
             // add filters
@@ -134,7 +133,7 @@ namespace LcmsSpectatorTests
             var prsms = ids.AllPrSms;
 
             // init scan vm
-            var scanVm = new ScanViewModel(new TestableMainDialogService(), new MockTaskService(), prsms, Messenger.Default);
+            var scanVm = new ScanViewModel(new TestableMainDialogService(), new MockTaskService(), prsms);
             scanVm.ClearFilters();
 
             Assert.True(prsms.Count == scanVm.FilteredData.Count);
