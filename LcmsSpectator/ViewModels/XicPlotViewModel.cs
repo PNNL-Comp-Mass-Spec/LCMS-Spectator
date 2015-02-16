@@ -79,7 +79,7 @@ namespace LcmsSpectator.ViewModels
 
             // Update plot when ions change, or plot visibility changes
             this.WhenAnyValue(x => x.Ions, x => x.IsPlotVisible, x => x.PointsToSmooth)
-                .Where(x => x.Item2)    // Do not do anything if plot isn't visible
+                .Where(x => x.Item1 != null && x.Item2)    // Do not do anything if plot isn't visible
                 .Throttle(TimeSpan.FromMilliseconds(250), RxApp.TaskpoolScheduler)
                 .SelectMany(async x => await GetXicDataPointsAsync(x.Item1, x.Item3))
                 .Subscribe(UpdatePlotModel);       // Update plot when data changes
@@ -228,7 +228,7 @@ namespace LcmsSpectator.ViewModels
         {
             // add XICs
             PlotModel.Series.Clear();
-            if (xicPoints == null || Ions == null) return;
+            if (xicPoints == null) return;
             var seriesstore = Ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, IList<XicDataPoint>>>(ion => ion.Label, ion => null);
             var maxCharge = (_ions.Count > 0) ? _ions.Max(ion => ion.IonType.Charge) : 2;
             var colors = new ColorDictionary(maxCharge);

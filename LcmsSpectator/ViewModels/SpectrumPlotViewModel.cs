@@ -50,8 +50,8 @@ namespace LcmsSpectator.ViewModels
             this.WhenAnyValue(x => x.Spectrum, x => x.Ions,
                 x => x.ShowDeconvolutedSpectrum, x => x.ShowFilteredSpectrum,
                 x => x.ShowUnexplainedPeaks)
+                .Where(x => x.Item1 != null && x.Item2 != null)
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                .Where(x => x.Item1 != null)
                 .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(GetSpectrum()))))
                 .Subscribe(UpdatePlotModel);       // Update plot when data changes
 
