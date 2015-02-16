@@ -38,14 +38,14 @@
         <!-- End Menu -->
         <Grid HorizontalAlignment="Stretch" Margin="0,22,0,0">
 <!--            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Layout="{Binding AvLayout}"> -->
-            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Layout="{Binding AvLayout}">
+            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
                 <xcad:DockingManager.LayoutItemContainerStyle>
                     <Style TargetType="{x:Type xcad:LayoutItem}">
                         <Setter Property="Title" Value="{Binding Model.RawFileName}" />
                         <Setter Property="CloseCommand" Value="{Binding Model.CloseCommand}" />
                     </Style>
                 </xcad:DockingManager.LayoutItemContainerStyle>
-<!--                <xcad:LayoutRoot>
+                <xcad:LayoutRoot>
                     <xcad:LayoutPanel>
                         <xcad:LayoutDocumentPane />
                         <xcad:LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="*" DockHeight="200">
@@ -89,7 +89,7 @@
                                 </xcad:LayoutAnchorablePane>
                             </xcad:LayoutAnchorablePaneGroup>
                     </xcad:LayoutPanel>
-                </xcad:LayoutRoot> -->
+                </xcad:LayoutRoot> 
             </xcad:DockingManager>
             <Border BorderBrush="Black" BorderThickness="1" Background="#F0000000" Grid.RowSpan="6" Grid.ColumnSpan="2"
                                  VerticalAlignment="Stretch" Visibility="{Binding ShowSplash, Converter={StaticResource BoolToVis}}">
