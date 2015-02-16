@@ -228,7 +228,7 @@ namespace LcmsSpectator.ViewModels
         {
             // add XICs
             PlotModel.Series.Clear();
-            if (xicPoints == null) return;
+            if (xicPoints == null || Ions == null) return;
             var seriesstore = Ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, IList<XicDataPoint>>>(ion => ion.Label, ion => null);
             var maxCharge = (_ions.Count > 0) ? _ions.Max(ion => ion.IonType.Charge) : 2;
             var colors = new ColorDictionary(maxCharge);
