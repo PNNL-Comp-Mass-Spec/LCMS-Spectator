@@ -38,6 +38,7 @@ namespace LcmsSpectator.ViewModels
             PlotModel = new AutoAdjustedYPlotModel(XAxis, multiplier) { IsLegendVisible = false };
             _ions = new ReactiveList<LabeledIonViewModel>();
 
+            // When Spectrum updates, clear the filtered spectrum, deconvoluted spectrum, and filtered+deconvoluted spectrum
             this.WhenAnyValue(x => x.Spectrum)
                 .Subscribe(spectrum =>
                 {
@@ -47,12 +48,17 @@ namespace LcmsSpectator.ViewModels
                     _filteredDeconvolutedSpectrum = null;
                 });
 
+            // If deconvolution option has changed, the X Axis should change.
+            this.WhenAnyValue(x => x.ShowDeconvolutedSpectrum)
+                .Subscribe(_ => _spectrumDirty = true);
+
+            // When Spectrum or ions change, or deconvoluted or filtered spectrum are selected, update spectrum plot
             this.WhenAnyValue(x => x.Spectrum, x => x.Ions,
                 x => x.ShowDeconvolutedSpectrum, x => x.ShowFilteredSpectrum,
                 x => x.ShowUnexplainedPeaks)
                 .Where(x => x.Item1 != null && x.Item2 != null)
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(GetSpectrum()))))
+                .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(GetSpectrum(), ShowDeconvolutedSpectrum))))
                 .Subscribe(UpdatePlotModel);       // Update plot when data changes
 
             // Update plot when settings change
@@ -60,7 +66,7 @@ namespace LcmsSpectator.ViewModels
                         x => x.SpectrumFilterWindowSize, x => x.IonCorrelationThreshold)
                         .Where(_ => Ions != null)
                         .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                        .SelectMany(async x => await Task.WhenAll(Ions.Select(ion => ion.GetPeaksAsync(GetSpectrum(), false))))
+                        .SelectMany(async x => await Task.WhenAll(Ions.Select(ion => ion.GetPeaksAsync(GetSpectrum(), ShowDeconvolutedSpectrum, false))))
                         .Subscribe(UpdatePlotModel);
 
             // Show/hide series when ion is selected/unselected
@@ -280,7 +286,7 @@ namespace LcmsSpectator.ViewModels
             var tolerance = (_spectrum is ProductSpectrum)
                                 ? IcParameters.Instance.ProductIonTolerancePpm
                                 : IcParameters.Instance.PrecursorTolerancePpm;
-            if (ShowFilteredSpectrum || ShowDeconvolutedSpectrum)
+            if (ShowFilteredSpectrum && ShowDeconvolutedSpectrum)
             {
                 if (_filteredDeconvolutedSpectrum == null)
                 {

@@ -29,7 +29,7 @@ namespace LcmsSpectator.ViewModels
             _selected = true;
             _xicCacheLock = new object();
             _peakCacheLock = new object();
-            _peakCache = new MemoizingMRUCache<Spectrum, IList<PeakDataPoint>>(GetPeakDataPoints, 5);
+            _peakCache = new MemoizingMRUCache<Tuple<Spectrum, bool>, IList<PeakDataPoint>>(GetPeakDataPoints, 5);
             _xicCache = new MemoizingMRUCache<int, IList<XicDataPoint>>(GetXic, 10);
             Lcms = lcms;
         }
@@ -95,20 +95,21 @@ namespace LcmsSpectator.ViewModels
             return Label.Equals(other.Label);
         }
 
-        public Task<IList<PeakDataPoint>> GetPeaksAsync(Spectrum spectrum, bool useCache=true)
+        public Task<IList<PeakDataPoint>> GetPeaksAsync(Spectrum spectrum, bool deconvoluted, bool useCache=true)
         {
-            return Task.Run(() => GetPeaks(spectrum, useCache));
+            return Task.Run(() => GetPeaks(spectrum, deconvoluted, useCache));
         }
 
-        public IList<PeakDataPoint> GetPeaks(Spectrum spectrum, bool useCache=true)
+        public IList<PeakDataPoint> GetPeaks(Spectrum spectrum, bool deconvoluted, bool useCache=true)
         {
             IList<PeakDataPoint> peaks;
             lock (_peakCacheLock)
             {
                 // MemoizingMRUCache isn't threadsafe. Shouldn't matter for my purposes,
                 // but I'm putting a lock around it just in case.
-                if (!useCache) _peakCache.Invalidate(spectrum);
-                peaks = _peakCache.Get(spectrum, useCache);
+                var key = new Tuple<Spectrum, bool>(spectrum, deconvoluted);
+                if (!useCache) _peakCache.Invalidate(key);
+                peaks = _peakCache.Get(key, useCache);
             }
             return peaks;
         }
@@ -133,18 +134,28 @@ namespace LcmsSpectator.ViewModels
         #endregion
 
         #region Private Methods
-        private IList<PeakDataPoint> GetPeakDataPoints(Spectrum spectrum, object o)
+        private IList<PeakDataPoint> GetPeakDataPoints(Tuple<Spectrum, bool> spectrum, object o)
         {
             var peakDataPoints = new List<PeakDataPoint>();
             var tolerance = IsFragmentIon
                 ? IcParameters.Instance.ProductIonTolerancePpm
                 : IcParameters.Instance.PrecursorTolerancePpm;
-            var labeledIonPeaks = IonUtils.GetIonPeaks(Ion, spectrum, tolerance);
+            var deconvoluted = spectrum.Item2;
+            Ion ion;
+            if (deconvoluted)
+            {
+                if (IonType.Charge > 1) return peakDataPoints; // Deconvoluted spectrum means decharged (only charge 1 ions shown)
+                var ionTypeFactory = IcParameters.Instance.DeconvolutedIonTypeFactory;
+                var ionTypeName = IonType.Name.Insert(1, @"'");
+                ion = ionTypeFactory.GetIonType(ionTypeName).GetIon(Composition);
+            }
+            else ion = Ion;
+            var labeledIonPeaks = IonUtils.GetIonPeaks(ion, spectrum.Item1, tolerance);
             if (labeledIonPeaks.Item1 == null) return peakDataPoints;
             var peaks = labeledIonPeaks.Item1;
             var correlation = labeledIonPeaks.Item2;
             if (correlation < IcParameters.Instance.IonCorrelationThreshold) return peakDataPoints;
-            var errors = IonUtils.GetIsotopePpmError(peaks, Ion, 0.1);
+            var errors = IonUtils.GetIsotopePpmError(peaks, ion, 0.1);
             peakDataPoints = new List<PeakDataPoint> { Capacity = errors.Length };
             for (int i = 0; i < errors.Length; i++)
             {
@@ -191,7 +202,7 @@ namespace LcmsSpectator.ViewModels
         private readonly Object _xicCacheLock;
         private readonly Object _peakCacheLock;
         private readonly MemoizingMRUCache<int, IList<XicDataPoint>> _xicCache;
-        private readonly MemoizingMRUCache<Spectrum, IList<PeakDataPoint>> _peakCache;
+        private readonly MemoizingMRUCache<Tuple<Spectrum, bool>, IList<PeakDataPoint>> _peakCache;
         private IList<XicPoint> _xic;
         #endregion
     }
