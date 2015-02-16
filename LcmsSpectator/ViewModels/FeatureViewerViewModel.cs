@@ -351,7 +351,7 @@ namespace LcmsSpectator.ViewModels
                     if (!_ids.ContainsKey(scan))
                         _ids.Add(scan, new PrSm { Scan = scan, Lcms = _lcms, Mass = feature.MinPoint.Mass });
                     if (!accountedFor.Contains(scan)) accountedFor.Add(scan);
-                    Insert(scanHash, scan, _ids[scan].Mass, massTolerance: 1);
+                    Insert(scanHash, scan, _ids[scan].Mass, 1);
                 }
             }
             foreach (var id in _ids.Values)
@@ -615,6 +615,15 @@ namespace LcmsSpectator.ViewModels
                 if (colorIndex < 1) colorIndex = 1;
                 if (colorIndex >= colors.Count) colorIndex = colors.Count - 1;
                 var c = colors[colorIndex];
+                string trackerString = "{0}" + Environment.NewLine +
+                                       "{1}: {2:0.###}" + Environment.NewLine +
+                                       "Scan: {Scan:0}" + Environment.NewLine +
+                                       "{3}: {4:0.###E0}" + Environment.NewLine +
+                                       "Probability: {Score:0.###}" + Environment.NewLine +
+                                       "Correlation: {Correlation:0.###}" + Environment.NewLine +
+                                       "Abundance: {Abundance:0.###E0}" + Environment.NewLine +
+                                       "Charge: {Charge:0}";
+                if (feature.Id > 0) trackerString += Environment.NewLine + "ID: {Id:0}";
                 var ls = new LineSeries
                 {
                     ItemsSource = new [] { feature.MinPoint, feature.MaxPoint },
@@ -623,15 +632,7 @@ namespace LcmsSpectator.ViewModels
                     Color = c,
                     LineStyle = LineStyle.Solid,
                     StrokeThickness = size,
-                    TrackerFormatString =
-                        "{0}" + Environment.NewLine +
-                        "{1}: {2:0.###}" + Environment.NewLine +
-                        "Scan: {Scan:0}" + Environment.NewLine +
-                        "{3}: {4:0.###E0}" + Environment.NewLine +
-                        "Probability: {Score:0.###}" + Environment.NewLine +
-                        "Correlation: {Correlation:0.###}" + Environment.NewLine +
-                        "Abundance: {Abundance:0.###E0}" + Environment.NewLine +
-                        "Charge: {Charge:0}"
+                    TrackerFormatString = trackerString
                 };
                 FeatureMap.Series.Add(ls);
             }
@@ -844,7 +845,7 @@ namespace LcmsSpectator.ViewModels
 
         private LcMsRun _lcms;
         private List<Feature> _features;
-        private Dictionary<FeaturePoint, Feature> _featuresByScan; 
+        private Dictionary<FeaturePoint, Feature> _featuresByScan;
         private Dictionary<int, PrSm> _ids;
         private List<PrSm> _notFoundMs2;
 

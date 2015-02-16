@@ -66,7 +66,9 @@ namespace LcmsSpectator.Readers
             var isotopes = ReadIsotopicEnvelope(parts[headers["Envelope"]]);
             var minCharge = Convert.ToInt32(parts[headers["MinCharge"]]);
             var maxCharge = Convert.ToInt32(parts[headers["MaxCharge"]]);
-            //var id = Convert.ToInt32(parts[headers["FeatureID"]]);
+            int id = -1;
+            if (headers.ContainsKey("FeatureID"))
+                id = Convert.ToInt32(parts[headers["FeatureID"]]);
             var summedCorr = Convert.ToDouble(parts[headers["SummedCorr"]]);
 
             int mostAbundantIsotopeIndex;
@@ -79,6 +81,7 @@ namespace LcmsSpectator.Readers
 
             var minPoint = new FeaturePoint
             {
+                Id = id,
                 Mass = mass,
                 Scan = Convert.ToInt32(parts[headers["MinScan"]]),
                 Mz = minIsotopicProfile[mostAbundantIsotopeIndex].Mz,
@@ -90,6 +93,7 @@ namespace LcmsSpectator.Readers
             };
             var maxPoint = new FeaturePoint
             {
+                Id = id,
                 Mass = mass,
                 Scan = Convert.ToInt32(parts[headers["MaxScan"]]),
                 Mz = maxIsotopicProfile[mostAbundantIsotopeIndex].Mz,
@@ -99,7 +103,7 @@ namespace LcmsSpectator.Readers
                 Isotopes = isotopes,
                 Correlation = summedCorr,
             };
-            return new Feature { MinPoint = minPoint, MaxPoint = maxPoint };
+            return new Feature { MinPoint = minPoint, MaxPoint = maxPoint, Id = id };
         }
 
         private static Isotope[] ReadIsotopicEnvelope(string env)

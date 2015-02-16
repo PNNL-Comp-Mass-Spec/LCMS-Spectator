@@ -9,6 +9,7 @@
              d:DesignHeight="300" d:DesignWidth="1100" Background="White">
     <UserControl.Resources>
         <utils:DoubleToStringConverterSci x:Key="ScoreFormatter" />
+        <utils:NumToStringConverter x:Key="NumFormatter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -62,24 +63,29 @@
                             <RowDefinition Height="20" />
                             <RowDefinition Height="20" />
                             <RowDefinition Height="20" />
+                            <RowDefinition Height="20" />
                         </Grid.RowDefinitions>
-                        <TextBlock  Grid.Row="0" Grid.Column="0" FontWeight="Bold">Probability:</TextBlock>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedFeature.Score, Converter={StaticResource ScoreFormatter}}" />
 
-                        <TextBlock Grid.Row="1" Grid.Column="0"  FontWeight="Bold">Summed Correlation:</TextBlock>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedFeature.Correlation, Converter={StaticResource ScoreFormatter}}" />
+                        <TextBlock  Grid.Row="0" Grid.Column="0" FontWeight="Bold">Feature ID:</TextBlock>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedFeature.Id, Converter={StaticResource NumFormatter}}" />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold">Scan:</TextBlock>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedFeature.Scan}" />
+                        <TextBlock  Grid.Row="1" Grid.Column="0" FontWeight="Bold">Probability:</TextBlock>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedFeature.Score, Converter={StaticResource ScoreFormatter}}" />
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">Retention Time:</TextBlock>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedFeature.RetentionTime, Converter={StaticResource ScoreFormatter}}" />
+                        <TextBlock Grid.Row="2" Grid.Column="0"  FontWeight="Bold">Summed Correlation:</TextBlock>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedFeature.Correlation, Converter={StaticResource ScoreFormatter}}" />
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold">Mass:</TextBlock>
-                        <TextBlock Grid.Row="4" Grid.Column="1"  Text="{Binding SelectedFeature.Mass, Converter={StaticResource ScoreFormatter}}" />
+                        <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">Scan:</TextBlock>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedFeature.Scan}" />
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Abundance:</TextBlock>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding SelectedFeature.Abundance, Converter={StaticResource ScoreFormatter}}" />
+                        <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold">Retention Time:</TextBlock>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedFeature.RetentionTime, Converter={StaticResource ScoreFormatter}}" />
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Mass:</TextBlock>
+                        <TextBlock Grid.Row="5" Grid.Column="1"  Text="{Binding SelectedFeature.Mass, Converter={StaticResource ScoreFormatter}}" />
+
+                        <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Abundance:</TextBlock>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SelectedFeature.Abundance, Converter={StaticResource ScoreFormatter}}" />
                     </Grid>
                 </ScrollViewer>
             </Grid>

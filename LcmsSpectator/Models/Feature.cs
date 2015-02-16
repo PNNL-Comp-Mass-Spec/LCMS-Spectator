@@ -19,6 +19,7 @@ namespace LcmsSpectator.Models
 
     public class FeaturePoint
     {
+        public int Id { get; set; }
         public int Scan { get; set; }
         public Ion Ion { get; set; }
         public double RetentionTime { get; set; }
