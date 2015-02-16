@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Readers;
 using ReactiveUI;
@@ -34,7 +35,11 @@ namespace LcmsSpectator.ViewModels
             lookUpCommand.Subscribe(_ => Lookup());
             LookupCommand = lookUpCommand;
 
-            var openCommand = ReactiveCommand.Create();
+            var openCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedDataset, x => x.SelectedJob)
+                                                     .Select(x => x.Item1 != null
+                                                               && !String.IsNullOrEmpty(x.Item1.DatasetFolderPath) 
+                                                               && x.Item2 != null
+                                                               && !String.IsNullOrEmpty(x.Item2.JobFolderPath)));
             openCommand.Subscribe(_ => Open());
             OpenCommand = openCommand;
 
