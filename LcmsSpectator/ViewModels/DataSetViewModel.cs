@@ -158,13 +158,6 @@ namespace LcmsSpectator.ViewModels
 
         #region Public Properties
 
-        private object _layout;
-        public object Layout
-        {
-            get { return _layout; }
-            private set { this.RaiseAndSetIfChanged(ref _layout, value); }
-        }
-
         public ILcMsRun Lcms { get; private set; }
 
         private XicViewModel _xicViewModel;
