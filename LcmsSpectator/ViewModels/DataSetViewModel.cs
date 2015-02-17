@@ -79,6 +79,11 @@ namespace LcmsSpectator.ViewModels
                         SpectrumViewModel.PrimarySpectrumViewModel.Ions = labels;
                         XicViewModel.FragmentPlotViewModel.Ions = labels;
                     });
+                    IonListViewModel.WhenAnyValue(x => x.HeavyFragmentLabels)
+                    .Subscribe(labels =>
+                    {
+                        XicViewModel.HeavyFragmentPlotViewModel.Ions = labels;
+                    });
                     IonListViewModel.WhenAnyValue(x => x.PrecursorLabels)
                     .Where(labels => labels != null)
                     .Select(labels => new ReactiveList<LabeledIonViewModel>(labels.Where(l => l.Index == 0)) { ChangeTrackingEnabled = true })
@@ -92,6 +97,12 @@ namespace LcmsSpectator.ViewModels
                     .Subscribe(labels =>
                     {
                         XicViewModel.PrecursorPlotViewModel.Ions = labels;
+                    });
+                    IonListViewModel.WhenAnyValue(x => x.HeavyPrecursorLabels)
+                    .Where(labels => labels != null)
+                    .Subscribe(labels =>
+                    {
+                        XicViewModel.HeavyPrecursorPlotViewModel.Ions = labels;
                     });
                 });
 

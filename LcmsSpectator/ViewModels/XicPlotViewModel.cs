@@ -263,6 +263,7 @@ namespace LcmsSpectator.ViewModels
             PlotModel.IsLegendVisible = _showLegend;
             PlotModel.InvalidatePlot(true);
             PlotModel.AdjustForZoom();
+            PlotModel.SetUniquePointMarker(_lcms.GetElutionTime(SelectedScan));
             Area = GetCurrentArea();
         }
 
