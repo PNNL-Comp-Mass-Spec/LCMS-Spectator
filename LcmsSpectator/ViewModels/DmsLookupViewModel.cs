@@ -36,6 +36,7 @@ namespace LcmsSpectator.ViewModels
             lookUpCommand.Subscribe(_ => Lookup());
             LookupCommand = lookUpCommand;
 
+            // If there is no data set selected or there is no job selected, disable open button
             var openCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedDataset, x => x.SelectedJob)
                                                      .Select(x => x.Item1 != null
                                                                && !String.IsNullOrEmpty(x.Item1.DatasetFolderPath) 

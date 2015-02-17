@@ -104,6 +104,11 @@ namespace LcmsSpectator.PlotModels
             SetPointMarker(xPoint, GetMarkerColor()); // add marker
         }
 
+        public void ClearSeries()
+        {
+            while (Series.Count > 1) Series.RemoveAt(Series.Count-1);
+        }
+
         /// <summary>
         /// Event handler for mouse click event to set SelectedDataPoint
         /// </summary>
