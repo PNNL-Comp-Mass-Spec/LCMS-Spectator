@@ -36,6 +36,28 @@ namespace LcmsSpectator.Models
                 .Where(ms2Spectrum => ms2Spectrum != null)
                 .Select(ms2Spectrum => ms2Spectrum.ActivationMethod)
                 .ToProperty(this, x => x.ActivationMethod, out _activationMethod);
+
+            // When sequence updates, update mass
+            this.WhenAnyValue(x => x.Sequence)
+                .Where(sequence => sequence.Count > 0)
+                .Select(sequence =>
+                {
+                    var composition = new Composition(Composition.H2O);
+                    return _sequence.Aggregate(composition, (current, aa) => current + aa.Composition).Mass;
+                })
+                .Subscribe(mass => _precursorMz = mass);
+
+            // When sequence updates, update precursor m/z
+            this.WhenAnyValue(x => x.Sequence)
+                .Where(sequence => sequence.Count > 0)
+                .Select(sequence =>
+                {
+                    var composition = new Composition(Composition.H2O);
+                    composition = _sequence.Aggregate(composition, (current, aa) => current + aa.Composition);
+                    var ion = new Ion(composition, Charge);
+                    return ion.GetMostAbundantIsotopeMz();
+                })
+                .Subscribe(precursorMz => _precursorMz = precursorMz);
         }
 
         #region Public Properties
@@ -217,24 +239,7 @@ namespace LcmsSpectator.Models
         public Sequence Sequence
         {
             get { return _sequence; }
-            set
-            {
-                _sequence = value;
-                if (_sequence.Count > 0)
-                {
-                    var composition = new Composition(Composition.H2O);
-                    composition = _sequence.Aggregate(composition, (current, aa) => current + aa.Composition);
-                    Mass = composition.Mass;
-                    var ion = new Ion(composition, Charge);
-                    PrecursorMz = ion.GetMostAbundantIsotopeMz();
-                }
-                else
-                {
-                    Mass = Double.NaN;
-                    PrecursorMz = Double.NaN;
-                }
-                this.RaisePropertyChanged();
-            }
+            set { this.RaiseAndSetIfChanged(ref _sequence, value); }
         }
 
         private double _mass;
@@ -244,7 +249,7 @@ namespace LcmsSpectator.Models
         /// </summary>
         public double Mass
         {
-            get { return _mass; } 
+            get { return _mass; }
             set { this.RaiseAndSetIfChanged(ref _mass, value); }
         }
 
@@ -255,7 +260,7 @@ namespace LcmsSpectator.Models
         /// </summary>
         public double PrecursorMz
         {
-            get { return _precursorMz; } 
+            get { return _precursorMz; }
             set { this.RaiseAndSetIfChanged(ref _precursorMz, value); }
         }
 
@@ -278,8 +283,6 @@ namespace LcmsSpectator.Models
         }
 
         private Sequence _sequence;
-        private Sequence _lightSequence;
-        private Sequence _heavySequence;
     }
 
     /// <summary>
