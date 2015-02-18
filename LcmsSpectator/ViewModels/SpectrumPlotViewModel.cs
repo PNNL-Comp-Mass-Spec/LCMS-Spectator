@@ -33,6 +33,7 @@ namespace LcmsSpectator.ViewModels
             XAxis = new LinearAxis
             {
                 Title = "m/z",
+                StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
             };
             PlotModel = new AutoAdjustedYPlotModel(XAxis, multiplier) { IsLegendVisible = false };

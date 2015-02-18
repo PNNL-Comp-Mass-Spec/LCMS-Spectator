@@ -18,13 +18,16 @@ namespace LcmsSpectator.ViewModels
             _lcms = lcms;
             _fragmentXAxis = new LinearAxis
             {
+                StringFormat = "0.###",
                 Position = AxisPosition.Bottom, Title = "Retention Time",
-                AbsoluteMinimum = lcms.MinLcScan, AbsoluteMaximum = lcms.MaxLcScan
+                AbsoluteMinimum = lcms.MinLcScan, 
+                AbsoluteMaximum = lcms.MaxLcScan
             };
             _fragmentXAxis.AxisChanged += XAxisChanged;
             FragmentPlotViewModel = new XicPlotViewModel(_dialogService, lcms, "Fragment XIC", _fragmentXAxis, false);
             _heavyFragmentXAxis = new LinearAxis
             {
+                StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
                 Title = "Retention Time",
                 AbsoluteMinimum = lcms.MinLcScan,
@@ -34,6 +37,7 @@ namespace LcmsSpectator.ViewModels
             HeavyFragmentPlotViewModel = new XicPlotViewModel(_dialogService, lcms, "Heavy Fragment XIC", _heavyFragmentXAxis, false);
             _precursorXAxis = new LinearAxis
             {
+                StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
                 Title = "Retention Time",
                 AbsoluteMinimum = lcms.MinLcScan,
@@ -43,6 +47,7 @@ namespace LcmsSpectator.ViewModels
             PrecursorPlotViewModel = new XicPlotViewModel(_dialogService, lcms, "Precursor XIC", _precursorXAxis) {IsPlotVisible = true};
             _heavyPrecursorXAxis = new LinearAxis
             {
+                StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
                 Title = "Retention Time",
                 AbsoluteMinimum = lcms.MinLcScan,

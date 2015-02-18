@@ -25,7 +25,7 @@ namespace LcmsSpectator.ViewModels
             FeatureSelectedCommand = featureSelectedCommand;
 
             FeatureMap = new PlotModel {Title = "Feature Map"};
-            _ipxAxis = new LinearAxis {Position = AxisPosition.Bottom, Title = "Mass"};
+            _ipxAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Mass", StringFormat = "0.###"};
             IsotopicEnvelope = new AutoAdjustedYPlotModel(_ipxAxis, 1.05)
             {
                 Title = "Isotopic Envelope"
@@ -37,8 +37,8 @@ namespace LcmsSpectator.ViewModels
             _pointsDisplayed = 5000;
             _showFoundMs2 = false;
             _showNotFoundMs2 = false;
-            _yAxis = new LinearAxis { Position = AxisPosition.Left, Title="Monoisotopic Mass" };
-            _xAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time" };
+            _yAxis = new LinearAxis { Position = AxisPosition.Left, Title = "Monoisotopic Mass", StringFormat = "0.###" };
+            _xAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time", StringFormat = "0.###", };
             bool isInternalChange = false;
             _xAxis.AxisChanged += (o, e) =>
             {
