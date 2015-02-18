@@ -21,7 +21,6 @@ namespace LcmsSpectator.ViewModels
         public FeatureViewerViewModel FeatureMapViewModel { get; private set; }
         public ScanViewModel ScanViewModel { get; private set; }
         public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
-        public IonListViewModel IonListViewModel { get; private set; }
         public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
         public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
         #endregion
@@ -172,6 +171,13 @@ namespace LcmsSpectator.ViewModels
         #region Public Properties
 
         public ILcMsRun Lcms { get; private set; }
+
+        private IonListViewModel _ionListViewModel;
+        public IonListViewModel IonListViewModel
+        {
+            get { return _ionListViewModel; }
+            private set { this.RaiseAndSetIfChanged(ref _ionListViewModel, value); }
+        }
 
         private MsPfParameters _mspfParameters;
         public MsPfParameters MsPfParameters
