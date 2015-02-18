@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -159,10 +158,7 @@ namespace LcmsSpectator.ViewModels
             var fragmentLabels = new ReactiveList<LabeledIonViewModel> { ChangeTrackingEnabled = true };
             if (SelectedPrSm.Sequence.Count < 1) return fragmentLabels;
             var sequence = SelectedPrSm.Sequence;
-            if (ShowHeavy && !SelectedPrSm.Heavy)
-                sequence = IonUtils.GetHeavySequence(sequence, IcParameters.Instance.LightModifications);
-            if (ShowHeavy && SelectedPrSm.Heavy)
-                sequence = IonUtils.GetHeavySequence(sequence, IcParameters.Instance.HeavyModifications);
+            if (labelModifications != null) sequence = IonUtils.GetHeavySequence(sequence, labelModifications);
             var precursorIon = IonUtils.GetPrecursorIon(sequence, SelectedPrSm.Charge);
             lock (_fragmentCacheLock)
             {
