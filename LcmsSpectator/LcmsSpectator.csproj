@@ -199,6 +199,7 @@
     <Compile Include="Models\LabeledIon.cs" />
     <Compile Include="Models\LabeledIonPeaks.cs" />
     <Compile Include="Models\LabeledXic.cs" />
+    <Compile Include="Models\MsPfParameters.cs" />
     <Compile Include="Models\ProteinId.cs" />
     <Compile Include="Models\ProteoformId.cs" />
     <Compile Include="Models\PrSm.cs" />

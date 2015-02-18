@@ -393,6 +393,15 @@ namespace LcmsSpectator.ViewModels
             var ids = new IdentificationTree();
             bool attemptToReadFile = true;
             var modIgnoreList = new List<string>();
+            try
+            {
+                dsVm.MsPfParameters = MsPfParameters.ReadFromIdFilePath(idFileName);
+            }
+            catch (FormatException e)
+            {
+                _dialogService.ExceptionAlert(!String.IsNullOrEmpty(e.Message) ? e
+                    : new Exception("MsPathFinder param file is incorrectly formatted."));
+            }
             do
             {
                 try

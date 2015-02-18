@@ -173,6 +173,13 @@ namespace LcmsSpectator.ViewModels
 
         public ILcMsRun Lcms { get; private set; }
 
+        private MsPfParameters _mspfParameters;
+        public MsPfParameters MsPfParameters
+        {
+            get { return _mspfParameters; }
+            set { this.RaiseAndSetIfChanged(ref _mspfParameters, value); }
+        }
+
         private XicViewModel _xicViewModel;
         public XicViewModel XicViewModel
         {
