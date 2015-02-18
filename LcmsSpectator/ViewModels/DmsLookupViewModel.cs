@@ -121,7 +121,7 @@ namespace LcmsSpectator.ViewModels
             IsFirstSearch = false;
 
             Datasets.Clear();
-            var dataSets =_dmsLookupUtility.GetDatasets(NumberOfWeeks, DatasetFilter);
+            var dataSets =_dmsLookupUtility.GetDatasets(NumberOfWeeks, DatasetFilter.Trim());
             foreach (var dataset in dataSets) Datasets.Add(new DmsDatasetViewModel(dataset.Value));
             if (Datasets.Count > 0) SelectedDataset = Datasets[0];
         }
