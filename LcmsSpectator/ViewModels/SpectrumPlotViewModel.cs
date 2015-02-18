@@ -213,6 +213,7 @@ namespace LcmsSpectator.ViewModels
             if (String.IsNullOrEmpty(PlotModel.YAxis.Title)) PlotModel.GenerateYAxis("Intensity", "0e0");
 
             var maxCharge = peakDataPoints.Length > 0 ? Ions.Max(x => x.IonType.Charge) : 2;
+            maxCharge = Math.Max(maxCharge, 2);
             var colors = new ColorDictionary(maxCharge);
             for (int i = 0; i < peakDataPoints.Length; i++)
             {
