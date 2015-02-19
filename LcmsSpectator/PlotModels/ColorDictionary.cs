@@ -32,6 +32,22 @@ namespace LcmsSpectator.PlotModels
             return color;
         }
 
+        public OxyColor GetColor(BaseIonType baseIonType, int charge)
+        {
+            var index = Math.Min(charge - 1, _fragmentColors[baseIonType.Symbol].Count - 1);
+            return _fragmentColors[baseIonType.Symbol][index];
+        }
+
+        public OxyColor GetColor(int precursorIndex)
+        {
+            OxyColor color;
+            if (_precursorColors.ContainsKey(precursorIndex))
+                color = _precursorColors[precursorIndex];
+            else
+                color = precursorIndex > 0 ? OxyColors.DarkRed : OxyColors.AliceBlue;
+            return color;
+        }
+
         public void BuildColorDictionary(int length)
         {
             const byte colorMin = 150;

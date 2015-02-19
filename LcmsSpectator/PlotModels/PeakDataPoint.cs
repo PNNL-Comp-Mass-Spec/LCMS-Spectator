@@ -1,4 +1,5 @@
-﻿using OxyPlot;
+﻿using InformedProteomics.Backend.Data.Spectrometry;
+using OxyPlot;
 
 namespace LcmsSpectator.PlotModels
 {
@@ -22,5 +23,8 @@ namespace LcmsSpectator.PlotModels
         public double Error { get; set; }
         public double Correlation { get; set; }
         public string Title { get; set; }
+
+        public int Index { get; set; }
+        public BaseIonType BaseIonType { get; set; }
     }
 }

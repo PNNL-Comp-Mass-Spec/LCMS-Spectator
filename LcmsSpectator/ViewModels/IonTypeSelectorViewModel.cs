@@ -60,6 +60,9 @@ namespace LcmsSpectator.ViewModels
 
             this.WhenAnyValue(x => x.ActivationMethod)
                 .Subscribe(SetActivationMethod);
+
+            IcParameters.Instance.WhenAnyValue(x => x.CidHcdIonTypes, x => x.EtdIonTypes)
+                .Subscribe(_ => SetActivationMethod(ActivationMethod));
         }
 
         #region Public Properties

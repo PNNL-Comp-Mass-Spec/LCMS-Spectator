@@ -140,6 +140,8 @@ namespace LcmsSpectator.ViewModels
             var tolerance = IsFragmentIon
                 ? IcParameters.Instance.ProductIonTolerancePpm
                 : IcParameters.Instance.PrecursorTolerancePpm;
+            BaseIonType baseIonType = null;
+            if (IsFragmentIon) baseIonType = IonType.BaseIonType;
             var deconvoluted = spectrum.Item2;
             Ion ion;
             if (deconvoluted)
@@ -161,7 +163,11 @@ namespace LcmsSpectator.ViewModels
             {
                 if (errors[i] != null)
                 {
-                    peakDataPoints.Add(new PeakDataPoint(peaks[i].Mz, peaks[i].Intensity, errors[i].Value, correlation, Label));
+                    peakDataPoints.Add(new PeakDataPoint(peaks[i].Mz, peaks[i].Intensity, errors[i].Value, correlation, Label)
+                    {
+                        Index = Index,
+                        BaseIonType = baseIonType,
+                    });
                 }
             }
             peakDataPoints = peakDataPoints.OrderByDescending(x => x.Y).ToList();
@@ -172,6 +178,8 @@ namespace LcmsSpectator.ViewModels
         {
             if (_xic == null) _xic = GetXic();
             var xic = _xic;
+            BaseIonType baseIonType = null;
+            if (IsFragmentIon) baseIonType = IonType.BaseIonType;
             // smooth
             if (pointsToSmooth > 2)
             {
@@ -182,7 +190,7 @@ namespace LcmsSpectator.ViewModels
                             !_xic[i - 1].Intensity.Equals(t.Intensity) ||
                             !_xic[i + 1].Intensity.Equals(t.Intensity))
                        .Select(t => new XicDataPoint(Lcms.GetElutionTime(t.ScanNum),
-                               t.ScanNum, t.Intensity, Index, Label)).ToList();
+                               t.ScanNum, t.Intensity, Index, Label){BaseIonType = baseIonType}).ToList();
         }
 
         private Xic GetXic()

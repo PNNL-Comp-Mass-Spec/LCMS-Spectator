@@ -216,12 +216,12 @@ namespace LcmsSpectator.ViewModels
             var maxCharge = peakDataPoints.Length > 0 ? Ions.Max(x => x.IonType.Charge) : 2;
             maxCharge = Math.Max(maxCharge, 2);
             var colors = new ColorDictionary(maxCharge);
-            for (int i = 0; i < peakDataPoints.Length; i++)
+            foreach (var points in peakDataPoints)
             {
-                var points = peakDataPoints[i];
                 if (points.Count == 0) continue;
-                var labeledIon = Ions[i];
-                var color = colors.GetColor(labeledIon);
+                var firstPoint = points[0];
+                var color = firstPoint.BaseIonType != null ? colors.GetColor(firstPoint.BaseIonType, firstPoint.Index)
+                                                           : colors.GetColor(firstPoint.Index);
                 var ionSeries = new PeakPointSeries
                 {
                     Color = color,
