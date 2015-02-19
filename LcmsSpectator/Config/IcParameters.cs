@@ -5,6 +5,7 @@ using System.Linq;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.ViewModels;
 using ReactiveUI;
 
 namespace LcmsSpectator.Config
@@ -133,18 +134,18 @@ namespace LcmsSpectator.Config
             set { this.RaiseAndSetIfChanged(ref _searchModifications, value); }
         }
 
-        private List<Modification> _lightModifications;
-        public List<Modification> LightModifications
+        private ReactiveList<ModificationViewModel> _lightModifications;
+        public ReactiveList<ModificationViewModel> LightModifications
         {
             get { return _lightModifications; }
-            set { this.RaiseAndSetIfChanged(ref _lightModifications, value); }
+            private set { this.RaiseAndSetIfChanged(ref _lightModifications, value); }
         }
 
-        private List<Modification> _heavyModifications;
-        public List<Modification> HeavyModifications
+        private ReactiveList<ModificationViewModel> _heavyModifications;
+        public ReactiveList<ModificationViewModel> HeavyModifications
         {
             get { return _heavyModifications; }
-            set { this.RaiseAndSetIfChanged(ref _heavyModifications, value); }
+            private set { this.RaiseAndSetIfChanged(ref _heavyModifications, value); }
         }
 
         private IonTypeFactory _ionTypeFactory;
@@ -198,8 +199,16 @@ namespace LcmsSpectator.Config
             {
                 new SearchModification(Modification.Carbamidomethylation, 'C', SequenceLocation.Everywhere, true)
             };
-            LightModifications = new List<Modification>();
-            HeavyModifications = new List<Modification> { Modification.LysToHeavyLys, Modification.ArgToHeavyArg };
+            LightModifications = new ReactiveList<ModificationViewModel>
+            {
+                new ModificationViewModel(Modification.LysToHeavyLys){Selected = false}, 
+                new ModificationViewModel(Modification.ArgToHeavyArg) {Selected = false}
+            };
+            HeavyModifications = new ReactiveList<ModificationViewModel>
+            {
+                new ModificationViewModel(Modification.LysToHeavyLys), 
+                new ModificationViewModel(Modification.ArgToHeavyArg)
+            };
             IonTypeFactory = new IonTypeFactory(100);
             DeconvolutedIonTypeFactory = IonTypeFactory.GetDeconvolutedIonTypeFactory(BaseIonType.AllBaseIonTypes,
                                                                                       NeutralLoss.CommonNeutralLosses);
