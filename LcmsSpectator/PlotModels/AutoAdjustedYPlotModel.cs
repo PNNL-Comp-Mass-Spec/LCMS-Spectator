@@ -13,6 +13,7 @@ namespace LcmsSpectator.PlotModels
             Axes.Add(xAxis);
             XAxis = xAxis;
             YAxis = new LinearAxis();
+            Axes.Add(YAxis);
             if (xAxis != null) xAxis.AxisChanged += XAxisChanged;
         }
 
@@ -28,21 +29,15 @@ namespace LcmsSpectator.PlotModels
         {
             var maxY = GetMaxYInRange(XAxis.ActualMinimum, XAxis.ActualMaximum);
             var absoluteMaxY = GetMaxYInRange(0, XAxis.AbsoluteMaximum);
-            YAxis = new LinearAxis
-            {
-                Position = AxisPosition.Left,
-                Title = title,
-                AbsoluteMinimum = 0,
-                AbsoluteMaximum = (absoluteMaxY * Multiplier) + 1,
-                Maximum = maxY * Multiplier,
-                Minimum = 0,
-                StringFormat = format,
-                IsZoomEnabled = false,
-                IsPanEnabled = false
-            };
-            Axes.Clear();
-            Axes.Add(XAxis);
-            Axes.Add(YAxis);
+            YAxis.Position = AxisPosition.Left;
+            YAxis.Title = title;
+            YAxis.AbsoluteMinimum = 0;
+            YAxis.AbsoluteMaximum = (absoluteMaxY*Multiplier) + 1;
+            YAxis.Maximum = maxY*Multiplier;
+            YAxis.Minimum = 0;
+            YAxis.StringFormat = format;
+            YAxis.IsZoomEnabled = false;
+            YAxis.IsPanEnabled = false;
         }
 
         /// <summary>
