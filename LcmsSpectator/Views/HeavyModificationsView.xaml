@@ -6,21 +6,6 @@
              xmlns:controls="clr-namespace:LcmsSpectator.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="500">
-    <UserControl.Resources>
-        <Style TargetType="{x:Type ListBoxItem}" >
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate>
-                        <CheckBox
-                            Content="{TemplateBinding ContentPresenter.Content}"
-                            IsChecked="{Binding Path=IsSelected,
-                                RelativeSource={RelativeSource TemplatedParent},
-                                Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20" />
@@ -35,9 +20,13 @@
         <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" TextAlignment="Center">Light</TextBlock>
         <TextBlock Grid.Row="0" Grid.Column="2" FontWeight="Bold" TextAlignment="Center">Heavy</TextBlock>
 
-        <controls:MultiSelectListBox Grid.Column="0" Grid.Row="1" SelectionMode="Extended"  
-                                     ItemsSource="{Binding Modifications}" SelectedItemsSource="{Binding SelectedLightModifications, Mode=TwoWay}" />
-        <controls:MultiSelectListBox Grid.Column="2" Grid.Row="1" SelectionMode="Extended"
-                                     ItemsSource="{Binding Modifications}" SelectedItemsSource="{Binding SelectedHeavyModifications, Mode=TwoWay}" />
+        <DataGrid Grid.Column="0" Grid.Row="1" SelectionMode="Extended" IsReadOnly="False" CanUserAddRows="False" ItemsSource="{Binding LightModifications}">
+            <DataGridCheckBoxColumn Width="5" Binding="{Binding Selected}" IsReadOnly="False" />
+            <DataGridTextColumn Header="Light" Width="5*" Binding="{Binding Modification}" IsReadOnly="True" />
+        </DataGrid>
+        <DataGrid Grid.Column="2" Grid.Row="1" SelectionMode="Extended" IsReadOnly="False" CanUserAddRows="False" ItemsSource="{Binding HeavyModifications}">
+            <DataGridCheckBoxColumn Width="5" Binding="{Binding Selected}" IsReadOnly="False" />
+            <DataGridTextColumn Header="Light" Width="5*" Binding="{Binding Modification}" IsReadOnly="True" />
+        </DataGrid>
     </Grid>
 </UserControl>

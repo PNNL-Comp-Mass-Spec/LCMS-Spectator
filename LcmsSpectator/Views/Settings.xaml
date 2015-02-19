@@ -107,9 +107,9 @@
                     </ListBox>
                 </Grid>
             </TabItem>-->
-            <TabItem Header="Heavy Modifications">
+            <!--<TabItem Header="Heavy Modifications">
                 <views:HeavyModificationsView DataContext="{Binding HeavyModificationsViewModel}" />
-            </TabItem>
+            </TabItem>-->
             <TabItem Header="Default Ion Types">
                 <Grid>
                     <Grid.RowDefinitions>

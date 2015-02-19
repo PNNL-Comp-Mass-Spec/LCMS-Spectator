@@ -26,8 +26,8 @@ namespace LcmsSpectator.ViewModels
 
         public void Save()
         {
-            IcParameters.Instance.LightModifications = SelectedLightModifications.Cast<Modification>().ToList();
-            IcParameters.Instance.HeavyModifications = SelectedHeavyModifications.Cast<Modification>().ToList();
+            //IcParameters.Instance.LightModifications = new ReactiveList<ModificationViewModel>(SelectedLightModifications.Cast<ModificationViewModel>().ToList());
+            //IcParameters.Instance.HeavyModifications = new ReactiveList<ModificationViewModel>(SelectedHeavyModifications.Cast<ModificationViewModel>().ToList());
         }
     }
 }

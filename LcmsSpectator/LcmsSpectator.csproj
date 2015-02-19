@@ -253,6 +253,7 @@
     <Compile Include="ViewModels\LoadingScreenViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModificationViewModel.cs" />
+    <Compile Include="ViewModels\SelectModificationViewModel.cs" />
     <Compile Include="ViewModels\OpenDataWindowViewModel.cs" />
     <Compile Include="ViewModels\ScanViewModel.cs" />
     <Compile Include="ViewModels\SelectDataSetViewModel.cs" />

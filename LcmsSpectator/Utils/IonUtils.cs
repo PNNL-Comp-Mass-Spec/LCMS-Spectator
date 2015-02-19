@@ -8,6 +8,8 @@ using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.Utils;
 using LcmsSpectator.Models;
+using LcmsSpectator.ViewModels;
+using ReactiveUI;
 
 namespace LcmsSpectator.Utils
 {
@@ -200,7 +202,7 @@ namespace LcmsSpectator.Utils
             return smoothedXic;
         }
 
-        public static Sequence GetHeavySequence(Sequence sequence, List<Modification> mods)
+        public static Sequence GetHeavySequence(Sequence sequence, ReactiveList<ModificationViewModel> mods)
         {
             if (sequence.Count == 0) return sequence;
             var lastAa = sequence[sequence.Count - 1];
@@ -209,11 +211,11 @@ namespace LcmsSpectator.Utils
             {
                 if (mod.Equals(Modification.ArgToHeavyArg) && lastAa.Residue == 'R')
                 {
-                    lastAa = new ModifiedAminoAcid(lastAa, mod);
+                    lastAa = new ModifiedAminoAcid(lastAa, mod.Modification);
                 }
                 else if (mod.Equals(Modification.LysToHeavyLys) && lastAa.Residue == 'K')
                 {
-                    lastAa = new ModifiedAminoAcid(lastAa, mod);
+                    lastAa = new ModifiedAminoAcid(lastAa, mod.Modification);
                 }
             }
 
