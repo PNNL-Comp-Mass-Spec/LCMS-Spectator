@@ -576,40 +576,43 @@ namespace LcmsSpectator.ViewModels
                 var feature1 = feature;
                 var size = Math.Min(feature.MinPoint.Abundance / (2*medianAbundance), 7.0);
                 // Add ms2s associated with features
-                var prsms = feature.AssociatedMs2.Where(scan => _ids.ContainsKey(scan)).Select(scan => _ids[scan]);
+                var prsms = feature.AssociatedMs2.Where(scan => _ids.ContainsKey(scan)).Select(scan => _ids[scan]).ToList();
                 // identified ms2s
-                Feature feature2 = feature;
-                var ms2Series = new ScatterSeries
+                if (prsms.Count > 0)
                 {
-                    ItemsSource = prsms,
-                    Mapping = p =>
+                    Feature feature2 = feature;
+                    var ms2Series = new ScatterSeries
                     {
-                        var prsm = (PrSm) p;
-                        int colorScore;
-                        double mass;
-                        if (prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature2.MinPoint.Mass) < 1)
+                        ItemsSource = prsms,
+                        Mapping = p =>
                         {
-                            colorScore = idColorScore;
-                            mass = feature2.MinPoint.Mass;
-                        }
-                        else
-                        {
-                            colorScore = unidColorScore;
-                            mass = feature2.MinPoint.Mass;
-                        }
-                        return new ScatterPoint(prsm.RetentionTime, mass, Math.Max(size*0.8, 3.0), colorScore);
-                    },
-                    //Title = "Ms2 Scan",
-                    MarkerType = MarkerType.Cross,
-                    ColorAxisKey = ms2ColorAxis.Key,
-                    TrackerFormatString =
-                        "{0}" + Environment.NewLine +
-                        "{1}: {2:0.###}" + Environment.NewLine +
-                        "{2}: {4:0.###E0}",
-                    IsVisible = _showFoundMs2,
-                };
-                _foundMs2S.Add(ms2Series);
-                FeatureMap.Series.Add(ms2Series);
+                            var prsm = (PrSm)p;
+                            int colorScore;
+                            double mass;
+                            if (prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature2.MinPoint.Mass) < 1)
+                            {
+                                colorScore = idColorScore;
+                                mass = feature2.MinPoint.Mass;
+                            }
+                            else
+                            {
+                                colorScore = unidColorScore;
+                                mass = feature2.MinPoint.Mass;
+                            }
+                            return new ScatterPoint(prsm.RetentionTime, mass, Math.Max(size * 0.8, 3.0), colorScore);
+                        },
+                        //Title = "Ms2 Scan",
+                        MarkerType = MarkerType.Cross,
+                        ColorAxisKey = ms2ColorAxis.Key,
+                        TrackerFormatString =
+                            "{0}" + Environment.NewLine +
+                            "{1}: {2:0.###}" + Environment.NewLine +
+                            "{2}: {4:0.###E0}",
+                        IsVisible = _showFoundMs2,
+                    };
+                    _foundMs2S.Add(ms2Series);
+                    FeatureMap.Series.Add(ms2Series);   
+                }
                 // Add feature
                 var colorIndex = 1 + (int)((feature1.MinPoint.Score - minScore) / (1.0 - minScore) * colors.Count);
                 if (colorIndex < 1) colorIndex = 1;
