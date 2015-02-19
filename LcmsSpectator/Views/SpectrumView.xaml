@@ -9,7 +9,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="75*" />
-            <ColumnDefinition Width="Auto" MaxWidth="450" />
+            <ColumnDefinition Width="Auto" MaxWidth="500" />
         </Grid.ColumnDefinitions>
         <wpf:PlotView Name="Ms2Spectrum" DataContext="{Binding PrimarySpectrumViewModel}" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="0">
             <wpf:PlotView.ContextMenu>
