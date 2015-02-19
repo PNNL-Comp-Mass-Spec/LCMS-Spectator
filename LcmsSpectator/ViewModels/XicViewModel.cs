@@ -185,8 +185,10 @@ namespace LcmsSpectator.ViewModels
         public void ZoomToScan(int scanNum)
         {
             var rt = _lcms.GetElutionTime(scanNum);
-            var min = Math.Max(rt - 1, 0);
-            var max = Math.Min(rt + 1, _lcms.MaxLcScan);
+            var lcRange = _lcms.GetElutionTime(_lcms.MaxLcScan) - _lcms.GetElutionTime(_lcms.MinLcScan);
+            var offset = lcRange*0.01;
+            var min = Math.Max(rt - offset, 0);
+            var max = Math.Min(rt + offset, _lcms.MaxLcScan);
             _precursorXAxis.Minimum = min;
             _precursorXAxis.Maximum = max;
             _precursorXAxis.Zoom(min, max);

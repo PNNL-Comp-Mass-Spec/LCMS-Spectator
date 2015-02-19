@@ -35,6 +35,7 @@ namespace LcmsSpectator.ViewModels
             _isLoading = false;
             FeatureMap.MouseDown += FeatureMap_MouseDown;
             _pointsDisplayed = 5000;
+            _viewDivisions = 9;
             _showFoundMs2 = false;
             _showNotFoundMs2 = false;
             _yAxis = new LinearAxis { Position = AxisPosition.Left, Title = "Monoisotopic Mass", StringFormat = "0.###" };
@@ -66,6 +67,13 @@ namespace LcmsSpectator.ViewModels
                 }
                 isInternalChange = false;
             };
+
+            //var axisChangedObs = Observable.FromEventPattern<AxisChangedEventArgs>(ev => _xAxis.AxisChanged += ev,
+            //                                            ev => _xAxis.AxisChanged -= ev)
+            //    .Take(1)
+            //    .Throttle(TimeSpan.FromMilliseconds(100), RxApp.TaskpoolScheduler);
+
+            // axisChangedObs.Subscribe(args => BuildPlot(ScoreThreshold, AbundanceThreshold, PointsDisplayed));
 
             // When ShowNoutFoundMs2 changes, update the NoutFoundMs2 series
             this.WhenAnyValue(x => x.ShowNotFoundMs2)
@@ -814,8 +822,57 @@ namespace LcmsSpectator.ViewModels
                          .OrderByDescending(feature => feature.MinPoint.Abundance).ToList();
             var numDisplayed = Math.Min(pointsDisplayed, filteredFeatures.Count);
             var topNPoints = filteredFeatures.GetRange(0, numDisplayed);
+            //var topNPoints = Partition(filteredFeatures, numDisplayed);
             return topNPoints;
         }
+
+        //private List<Feature> Partition(IList<Feature> features, int pointsDisplayed)
+        //{
+        //    var minX = _xAxis.ActualMinimum;
+        //    var maxX = _xAxis.ActualMaximum;
+
+        //    if (minX.Equals(maxX))
+        //    {
+        //        minX = features.Min(feature => feature.MinPoint.RetentionTime);
+        //        maxX = features.Max(feature => feature.MaxPoint.RetentionTime);
+        //    }
+
+        //    var minY = _yAxis.ActualMinimum;
+        //    var maxY = _yAxis.ActualMaximum;
+
+        //    if (minY.Equals(maxY))
+        //    {
+        //        minY = features.Min(feature => feature.MinPoint.Mass);
+        //        maxY = features.Max(feature => feature.MinPoint.Mass);
+        //    }
+
+        //    var yParSize = (maxY - minY)/_viewDivisions;
+        //    var xParSize = (maxX - minX)/_viewDivisions;
+
+        //    features = features.OrderByDescending(feature => feature.MinPoint.Abundance).ToList();
+
+        //    var resultFeatures = new List<Feature>();
+
+        //    for (int i = 0; i < _viewDivisions; i++)
+        //    {
+        //        var minXPar = minX + (i * xParSize);
+        //        var maxXPar = minX + ((i + 1) * xParSize);
+        //        for (int j = 0; j < _viewDivisions; j++)
+        //        {
+        //            var minYPar = minY + (j * yParSize);
+        //            var maxYPar = minY + ((j + 1) * yParSize);
+
+        //            var parFeatures = features.Where(feature => feature.MinPoint.RetentionTime >= minXPar &&
+        //                                                         feature.MinPoint.RetentionTime <= maxXPar &&
+        //                                                         feature.MinPoint.Mass >= minYPar &&
+        //                                                         feature.MinPoint.Mass <= maxYPar).ToList();
+        //            var maxPoints = Math.Min(pointsDisplayed, Math.Max(parFeatures.Count-1, 0));
+        //            resultFeatures.AddRange(parFeatures.GetRange(0, maxPoints));   
+        //        }
+
+        //    }
+        //    return resultFeatures;
+        //}
 
         private void Insert(Dictionary<int, List<double>> points, int scan, double mass, double massTolerance = 0.1)
         {
@@ -857,6 +914,7 @@ namespace LcmsSpectator.ViewModels
         private readonly LinearAxis _ipxAxis;
 
         private const double HighlightSize = 0.008;
+        private int _viewDivisions;
 
         #endregion
     }

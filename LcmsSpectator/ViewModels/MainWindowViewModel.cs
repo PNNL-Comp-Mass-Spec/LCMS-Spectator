@@ -54,6 +54,7 @@ namespace LcmsSpectator.ViewModels
                     var rawFileName = dataSet.RawFileName;
                     ScanViewModel.RemovePrSmsFromRawFile(rawFileName);
                     DataSets.Remove(dataSet);
+                    if (DataSets.Count == 0) ShowSplash = true;
                 });
 
             // When a PrSm is selected in the Protein Tree, make all data sets show the PrSm
