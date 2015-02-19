@@ -44,10 +44,10 @@ namespace LcmsSpectator.ViewModels
                 PrecursorViewMode.Charges
             };
 
-            Modifications = new ReactiveList<ModificationViewModel>();
+            Modifications = new ReactiveList<SelectModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
             {
-                var modificationVm = new ModificationViewModel(searchModification);
+                var modificationVm = new SelectModificationViewModel(searchModification);
                 modificationVm.RemoveModificationCommand.Subscribe(_ => RemoveModification(modificationVm));
                 Modifications.Add(modificationVm);
             }
@@ -86,7 +86,7 @@ namespace LcmsSpectator.ViewModels
         public double PrecursorRelativeIntensityThreshold { get; set; }
         public bool ShowInstrumentData { get; private set; }
         public ReactiveList<PrecursorViewMode> PrecursorViewModes { get; private set; }
-        public ReactiveList<ModificationViewModel> Modifications { get; private set; }
+        public ReactiveList<SelectModificationViewModel> Modifications { get; private set; }
         public bool Status { get; private set; }
 
         public string CidHcdIonTypes { get; set; }
@@ -102,7 +102,7 @@ namespace LcmsSpectator.ViewModels
         #region Private methods
         private void AddModification()
         {
-            var modVm = new ModificationViewModel();
+            var modVm = new SelectModificationViewModel();
             modVm.RemoveModificationCommand.Subscribe(_ => RemoveModification(modVm));
             Modifications.Add(modVm);
         }
@@ -153,7 +153,7 @@ namespace LcmsSpectator.ViewModels
             if (ReadyToClose != null) ReadyToClose(this, null);
         }
 
-        private void RemoveModification(ModificationViewModel modVm)
+        private void RemoveModification(SelectModificationViewModel modVm)
         {
             if (modVm != null) Modifications.Remove(modVm);
         }
