@@ -23,6 +23,8 @@ namespace LcmsSpectator.Models
             UseGolfScoring = false;
             Heavy = false;
             Scan = 0;
+            Mass = Double.NaN;
+            PrecursorMz = Double.NaN;
 
             // When Scan or Lcms change, update ms2Spectrum
             this.WhenAnyValue(x => x.Scan, x => x.Lcms)
@@ -45,7 +47,7 @@ namespace LcmsSpectator.Models
                     var composition = new Composition(Composition.H2O);
                     return _sequence.Aggregate(composition, (current, aa) => current + aa.Composition).Mass;
                 })
-                .Subscribe(mass => _precursorMz = mass);
+                .Subscribe(mass => _mass = mass);
 
             // When sequence updates, update precursor m/z
             this.WhenAnyValue(x => x.Sequence)
