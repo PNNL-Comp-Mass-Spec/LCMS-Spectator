@@ -219,7 +219,7 @@ namespace LcmsSpectator.ViewModels
                     string defaultValue;
                     _previousFilters.TryGetValue("Protein", out defaultValue);
                     var proteins = (from prsm in Data where prsm.ProteinName.Length > 0 select prsm.ProteinName).Distinct().ToList();
-                    var filterBoxVm = new FilterViewModel("Filter by Protein", "Enter Sequence to filter by:", defaultValue, proteins, o=>true, _dialogService);
+                    var filterBoxVm = new FilterViewModel("Filter by Protein", "Enter protein name to filter by:", defaultValue, proteins, o=>true, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
                         AddFilter("Protein", filterBoxVm.SelectedValue);
@@ -285,7 +285,7 @@ namespace LcmsSpectator.ViewModels
                         var str = o as string;
                         return Double.TryParse(str, out conv);
                     };
-                    var filterBoxVm = new FilterViewModel("Filter by Precursor M/Z", "Enter minimum Precursor M/Z to display:", defaultValue, new List<string>(), validator, _dialogService);
+                    var filterBoxVm = new FilterViewModel("Filter by Most Abundant Isotope M/Z", "Enter minimum M/Z to display:", defaultValue, new List<string>(), validator, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
                         AddFilter("PrecursorMz", filterBoxVm.SelectedValue);
@@ -414,7 +414,7 @@ namespace LcmsSpectator.ViewModels
                     string defaultValue;
                     _previousFilters.TryGetValue("RawFile", out defaultValue);
                     var rawFiles = (from prsm in Data where prsm.RawFileName.Length > 0 select prsm.RawFileName).Distinct().ToList();
-                    var filterBoxVm = new FilterViewModel("Filter by Sequence", "Enter Sequence to filter by:", defaultValue, rawFiles, o => true, _dialogService);
+                    var filterBoxVm = new FilterViewModel("Filter by data set name", "Enter data set to filter by:", defaultValue, rawFiles, o => true, _dialogService);
                     if (_dialogService.FilterBox(filterBoxVm))
                     {
                         AddFilter("RawFile", filterBoxVm.SelectedValue);
