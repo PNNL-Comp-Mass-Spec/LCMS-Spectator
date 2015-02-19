@@ -186,7 +186,7 @@ namespace LcmsSpectator.ViewModels
         {
             var rt = _lcms.GetElutionTime(scanNum);
             var lcRange = _lcms.GetElutionTime(_lcms.MaxLcScan) - _lcms.GetElutionTime(_lcms.MinLcScan);
-            var offset = lcRange*0.01;
+            var offset = lcRange*0.03;
             var min = Math.Max(rt - offset, 0);
             var max = Math.Min(rt + offset, _lcms.MaxLcScan);
             _precursorXAxis.Minimum = min;
