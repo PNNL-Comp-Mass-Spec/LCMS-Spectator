@@ -106,7 +106,10 @@ namespace LcmsSpectator.PlotModels
 
         public void ClearSeries()
         {
-            while (Series.Count > 1) Series.RemoveAt(Series.Count-1);
+            while (Series.Count > 1)
+            {
+                if (Series[0] != _pointMarkers) Series.RemoveAt(0);
+            }
         }
 
         /// <summary>
