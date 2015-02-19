@@ -188,10 +188,10 @@ namespace LcmsSpectator.ViewModels
             PlotModel.Series.Clear();
             PlotModel.Annotations.Clear();
             var spectrum = GetSpectrum();
+            var spectrumPeaks = spectrum.Peaks.Select(peak => new PeakDataPoint(peak.Mz, peak.Intensity, 0.0, 0.0, ""));
             var spectrumSeries = new PeakPointSeries
             {
-                ItemsSource = spectrum.Peaks,
-                Mapping = (peak => new DataPoint(((Peak)peak).Mz, ((Peak)peak).Intensity)),
+                ItemsSource = spectrumPeaks,
                 Color = OxyColors.Black,
                 StrokeThickness = 0.5,
                 TrackerFormatString =

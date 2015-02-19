@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Drawing;
+using System.Linq;
 using System.Threading;
+using System.Windows.Forms.VisualStyles;
 using OxyPlot.Series;
 
 namespace LcmsSpectator.PlotModels
@@ -16,6 +18,7 @@ namespace LcmsSpectator.PlotModels
 
         public double GetArea(double min, double max)
         {
+            if (ItemsSource != null) return GetAreaItemsSource(min, max);
             if (ActualPoints == null) return 0;
             _plotModelLock.EnterReadLock();
             var area =  ActualPoints.Where(point => point.X >= min && point.X <= max).Sum(point => point.Y);
@@ -25,6 +28,7 @@ namespace LcmsSpectator.PlotModels
 
         public double GetMaxYInRange(double minX, double maxX)
         {
+            if (ItemsSource != null) return GetMaxYInRangeItemsSource(minX, maxX);
             double maxY = 0.0;
             var dataPoints = ActualPoints;
             _plotModelLock.EnterReadLock();
@@ -37,6 +41,26 @@ namespace LcmsSpectator.PlotModels
                 }
             }
             _plotModelLock.ExitReadLock();
+            return maxY;
+        }
+
+        private double GetAreaItemsSource(double minX, double maxX)
+        {
+            return (from object item in ItemsSource 
+                           select item as IDataPoint into point 
+                           where point != null && point.X >= minX && point.X <= maxX 
+                           select point.Y).Sum();
+        }
+
+        private double GetMaxYInRangeItemsSource(double minX, double maxX)
+        {
+            double maxY = 0.0;
+            foreach (var item in ItemsSource)
+            {
+                var point =  item as IDataPoint;
+                if (point != null && point.X >= minX && point.X <= maxX && point.Y >= maxY)
+                    maxY = point.Y;
+            }
             return maxY;
         }
 
