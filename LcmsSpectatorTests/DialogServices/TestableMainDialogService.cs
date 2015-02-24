@@ -153,5 +153,11 @@ namespace LcmsSpectatorTests.DialogServices
 		{
 			throw new NotImplementedException();
 		}
-	}
+
+
+        public void OpenErrorMapWindow(ErrorMapViewModel errorMapViewModel)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
