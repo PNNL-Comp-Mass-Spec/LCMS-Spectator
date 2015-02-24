@@ -914,7 +914,7 @@ namespace LcmsSpectator.ViewModels
         private readonly LinearAxis _ipxAxis;
 
         private const double HighlightSize = 0.008;
-        private int _viewDivisions;
+//        private int _viewDivisions;
 
         #endregion
     }
