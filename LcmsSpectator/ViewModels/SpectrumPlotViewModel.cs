@@ -86,7 +86,7 @@ namespace LcmsSpectator.ViewModels
             openErrorMapCommand.Subscribe(_ => _dialogService.OpenErrorMapWindow(new ErrorMapViewModel
             {
                 Sequence = Sequence,
-                DataPoints = GetMostAbundantIsotopePeaks(_currentPeakDataPoints)
+                DataPoints = GetMostAbundantIsotopePeaks(_currentPeakDataPoints, Sequence)
             }));
             OpenErrorMapCommand = openErrorMapCommand;
         }
@@ -299,12 +299,18 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private ReactiveList<PeakDataPoint> GetMostAbundantIsotopePeaks(IEnumerable<IList<PeakDataPoint>> peakDataPoints)
+        private ReactiveList<PeakDataPoint> GetMostAbundantIsotopePeaks(IEnumerable<IList<PeakDataPoint>> peakDataPoints, Sequence sequence=null)
         {
             var mostAbundantPeaks = new ReactiveList<PeakDataPoint>();
             foreach (var peaks in peakDataPoints)
             {
-                mostAbundantPeaks.Add(peaks.OrderByDescending(p => p.Y).FirstOrDefault());
+                var peak = peaks.OrderByDescending(p => p.Y).FirstOrDefault();
+                if (peak != null)
+                {
+                    var index = peak.Index - 1;
+                    if (sequence != null && index >= 0 && index <= sequence.Count - 1) peak.Residue = sequence[index].Residue;
+                    mostAbundantPeaks.Add(peak);   
+                }
             }
             return mostAbundantPeaks;
         }

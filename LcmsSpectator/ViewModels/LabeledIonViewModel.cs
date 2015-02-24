@@ -139,7 +139,7 @@ namespace LcmsSpectator.ViewModels
             var tolerance = IsFragmentIon
                             ? IcParameters.Instance.ProductIonTolerancePpm
                             : IcParameters.Instance.PrecursorTolerancePpm;
-            var noPeaks = new List<PeakDataPoint> {new PeakDataPoint(0, 0, Double.NaN, -1, Label){IonType = IonType}};
+            var noPeaks = new List<PeakDataPoint> {new PeakDataPoint(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Label){IonType = IonType, Index = Index}};
             var peakDataPoints = new List<PeakDataPoint>();
             IonType ionType = null;
             if (IsFragmentIon) ionType = IonType;

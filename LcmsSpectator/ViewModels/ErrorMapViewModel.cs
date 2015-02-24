@@ -65,7 +65,7 @@ namespace LcmsSpectator.ViewModels
         #region Public Properties
         public PlotModel PlotModel { get; private set; }
 
-        private ObservableAsPropertyHelper<int> _plotHeight;
+        private readonly ObservableAsPropertyHelper<int> _plotHeight;
         public int PlotHeight
         {
             get { return _plotHeight.Value; }
@@ -99,7 +99,7 @@ namespace LcmsSpectator.ViewModels
             var maxColor = OxyColor.FromRgb(255, 0, 0);
             var colorAxis = new LinearColorAxis
             {
-                //Title = "Error",
+                Title = "Error",
                 Position = AxisPosition.Right,
                 Palette = OxyPalette.Interpolate(1000, new[] { minColor, maxColor }),
                 AbsoluteMinimum = 0,

@@ -4,8 +4,28 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:utils="clr-namespace:LcmsSpectator.Utils"
              mc:Ignorable="d">
-    <ScrollViewer Height="850" Width="850" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-        <oxy:PlotView Model="{Binding PlotModel}" Height="{Binding PlotHeight}" Width="800" />
-    </ScrollViewer>
+    <UserControl.Resources>
+        <utils:DoubleToStringConverter x:Key="DoubleToStringConverter" />
+    </UserControl.Resources>
+    <TabControl Height="850" Width="850" >
+        <TabItem Header="Heat Map">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <oxy:PlotView Model="{Binding PlotModel}" Height="{Binding PlotHeight}" Width="800" />
+            </ScrollViewer>
+        </TabItem>
+        <TabItem Header="Table">
+            <DataGrid ItemsSource="{Binding DataPoints}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Residue" Binding="{Binding Residue}" />
+                    <DataGridTextColumn Header="Ion" Binding="{Binding IonType.Name}" />
+                    <DataGridTextColumn Header="M/Z" Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" />
+                    <DataGridTextColumn Header="Intensity" Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" />
+                    <DataGridTextColumn Header="Error (ppm)" Binding="{Binding Error, Converter={StaticResource DoubleToStringConverter}}" />
+                    <DataGridTextColumn Header="Correlation" Width="*" Binding="{Binding Correlation, Converter={StaticResource DoubleToStringConverter}}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </TabItem>
+    </TabControl>
 </UserControl>
