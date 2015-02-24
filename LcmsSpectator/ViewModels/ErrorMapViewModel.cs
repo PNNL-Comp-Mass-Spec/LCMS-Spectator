@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Sequence;
@@ -56,6 +57,7 @@ namespace LcmsSpectator.ViewModels
                 .Select(x => GetDataArray(x.Item2))
                 .Subscribe(BuildPlotModel);
 
+            // When sequence changes, adjust plot height
             this.WhenAnyValue(x => x.Sequence)
                 .Where(sequence => sequence != null && sequence.Count > 0)
                 .Select(sequence => sequence.Count*_heighMultiplier)
@@ -63,22 +65,34 @@ namespace LcmsSpectator.ViewModels
         }
 
         #region Public Properties
+        /// <summary>
+        /// Plot Model for error heat map
+        /// </summary>
         public PlotModel PlotModel { get; private set; }
 
         private readonly ObservableAsPropertyHelper<int> _plotHeight;
+        /// <summary>
+        /// Height of plot, based on sequence length
+        /// </summary>
         public int PlotHeight
         {
             get { return _plotHeight.Value; }
         }
 
         private int _scan;
+        /// <summary>
+        /// Scan number of spectrum
+        /// </summary>
         public int Scan
         {
             get { return _scan; }
             set { this.RaiseAndSetIfChanged(ref _scan, value); }
         }
 
-        private ReactiveList<PeakDataPoint> _peakDataPoints; 
+        private ReactiveList<PeakDataPoint> _peakDataPoints;
+        /// <summary>
+        /// The peak data points for the most abundant isotope of each ion
+        /// </summary>
         public ReactiveList<PeakDataPoint> DataPoints
         {
             get { return _peakDataPoints; }
@@ -86,6 +100,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private Sequence _sequence;
+        /// <summary>
+        /// The sequence to display
+        /// </summary>
         public Sequence Sequence
         {
             get { return _sequence; }
@@ -93,6 +110,15 @@ namespace LcmsSpectator.ViewModels
         }
         #endregion
 
+        #region Private Methods
+        /// <summary>
+        /// Build error heatmap
+        /// </summary>
+        /// <param name="data">
+        /// Data to be shown on the heatmap.
+        /// First dimension is sequence
+        /// Second dimension is ion type
+        /// </param>
         private void BuildPlotModel(double[,] data)
         {
             var minColor = OxyColor.FromRgb(127, 255, 0);
@@ -124,11 +150,17 @@ namespace LcmsSpectator.ViewModels
 
             heatMapSeries.Y0 = 0;
             heatMapSeries.Y1 = data.GetLength(0);
-            _yAxis.LabelFormatter = y => Sequence[Math.Max(Math.Min((int) y, Sequence.Count-1), 0)].Residue.ToString();
+            _yAxis.LabelFormatter = y => Sequence[Math.Max(Math.Min((int) y, Sequence.Count-1), 0)]
+                                         .Residue.ToString(CultureInfo.InvariantCulture);
 
             PlotModel.InvalidatePlot(true);
         }
 
+        /// <summary>
+        /// Organize the peak data points by ion type
+        /// </summary>
+        /// <param name="dataPoints">Most abundant isotope peak data point for each ion type</param>
+        /// <returns>2d array where first dimension is sequence and second dimension is ion type</returns>
         private double[,] GetDataArray(IEnumerable<PeakDataPoint> dataPoints)
         {
             var dataDict = new Dictionary<IonType, List<double>>();
@@ -155,10 +187,13 @@ namespace LcmsSpectator.ViewModels
             }
             return data;
         }
+        #endregion
 
+        #region Private Members
         private readonly int _heighMultiplier;
         private IonType[] _ionTypes;  
         private readonly LinearAxis _xAxis;
         private readonly LinearAxis _yAxis;
+        #endregion
     }
 }
