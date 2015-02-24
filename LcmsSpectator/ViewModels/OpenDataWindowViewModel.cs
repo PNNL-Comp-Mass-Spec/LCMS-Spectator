@@ -24,11 +24,11 @@ namespace LcmsSpectator.ViewModels
 
             var browseFeatureFilesCommand = ReactiveCommand.Create();
             browseFeatureFilesCommand.Subscribe(_ => BrowseFeatureFiles());
-            BrowseFeatureFilesCommand = browseRawFilesCommand;
+            BrowseFeatureFilesCommand = browseFeatureFilesCommand;
 
             var browseIdFilesCommand = ReactiveCommand.Create();
             browseIdFilesCommand.Subscribe(_ => BrowseIdFiles());
-            BrowseIdFilesCommand = browseRawFilesCommand;
+            BrowseIdFilesCommand = browseIdFilesCommand;
 
             // Ok button should be enabled if RawFilePath isn't null or empty
             var okCommand =
