@@ -78,10 +78,13 @@ namespace LcmsSpectator.ViewModels
                 .Select(x => x.Sender)
                 .Subscribe(LabeledIonSelectedChanged));
 
+            // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
             var saveAsImageCommand = ReactiveCommand.Create();
             saveAsImageCommand.Subscribe(_ => SaveAsImage());
             SaveAsImageCommand = saveAsImageCommand;
 
+            // Error map command opens a new error map window and passes it the most abundant isotope peak data points
+            // and the current sequence.
             var openErrorMapCommand = ReactiveCommand.Create();
             openErrorMapCommand.Subscribe(_ => _dialogService.OpenErrorMapWindow(new ErrorMapViewModel
             {
@@ -143,6 +146,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private LinearAxis _xAxis;
+        /// <summary>
+        /// XAxis of Spectrum plot
+        /// </summary>
         public LinearAxis XAxis
         {
             get { return _xAxis; }
@@ -150,6 +156,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private Spectrum _spectrum;
+        /// <summary>
+        /// Spectrum currently displayed on the spectrum plot
+        /// </summary>
         public Spectrum Spectrum
         {
             get { return _spectrum; }
@@ -160,6 +169,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private Sequence _sequence;
+        /// <summary>
+        /// Sequence currently displayed on the spectrum plot.
+        /// </summary>
         public Sequence Sequence
         {
             get { return _sequence; }
@@ -167,13 +179,23 @@ namespace LcmsSpectator.ViewModels
         }
 
         private ReactiveList<LabeledIonViewModel> _ions;
+        /// <summary>
+        /// Ions that are highlighted on the spectrum plot.
+        /// </summary>
         public ReactiveList<LabeledIonViewModel> Ions
         {
             get { return _ions; }
             set { this.RaiseAndSetIfChanged(ref _ions, value); }
         }
 
+        /// <summary>
+        /// Prompt user for file path and save plot as image.
+        /// </summary>
         public IReactiveCommand SaveAsImageCommand { get; private set; }
+
+        /// <summary>
+        /// Open error heatmap and table for this spectrum and ions
+        /// </summary>
         public IReactiveCommand OpenErrorMapCommand { get; private set; }
         #endregion
 
@@ -199,6 +221,10 @@ namespace LcmsSpectator.ViewModels
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Build spectrum plot model.
+        /// </summary>
+        /// <param name="peakDataPoints">Ion peaks to highlight and annotate on spectrum plot.</param>
         private void UpdatePlotModel(IList<PeakDataPoint>[] peakDataPoints)
         {
             if (Spectrum == null) return;
@@ -274,6 +300,11 @@ namespace LcmsSpectator.ViewModels
             PlotModel.AdjustForZoom();
         }
 
+        /// <summary>
+        /// An ion has been selected or deselected. Find the ion peaks and annotation on the map
+        /// and toggle their visibility.
+        /// </summary>
+        /// <param name="labeledIonVm">Ion that has been selected or deselected.</param>
         private void LabeledIonSelectedChanged(LabeledIonViewModel labeledIonVm)
         {
             var label = labeledIonVm.Label;
@@ -299,6 +330,13 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        /// <summary>
+        /// Get list of only most abundant isotope peaks of the ion peak data points
+        /// Associate residue with the sequence
+        /// </summary>
+        /// <param name="peakDataPoints">Peak data points for ions on the spectrum plot</param>
+        /// <param name="sequence">Sequence for ions display on the spectrum plot</param>
+        /// <returns>List of most abundant isotope peak data points</returns>
         private ReactiveList<PeakDataPoint> GetMostAbundantIsotopePeaks(IEnumerable<IList<PeakDataPoint>> peakDataPoints, Sequence sequence=null)
         {
             var mostAbundantPeaks = new ReactiveList<PeakDataPoint>();
@@ -315,6 +353,10 @@ namespace LcmsSpectator.ViewModels
             return mostAbundantPeaks;
         }
 
+        /// <summary>
+        /// Get correctly filtered and/or deconvoluted spectrum
+        /// </summary>
+        /// <returns>Filtered and/or deconvoluted spectrum</returns>
         private Spectrum GetSpectrum()
         {
             // Filtered/Deconvoluted Spectrum?
