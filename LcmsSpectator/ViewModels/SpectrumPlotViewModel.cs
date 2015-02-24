@@ -264,7 +264,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (points.Count == 0 || points[0].Error.Equals(Double.NaN)) continue;
                 var firstPoint = points[0];
-                var color = firstPoint.IonType != null ? colors.GetColor(firstPoint.IonType.BaseIonType, firstPoint.Index)
+                var color = firstPoint.IonType != null ? colors.GetColor(firstPoint.IonType.BaseIonType, firstPoint.IonType.Charge)
                                                            : colors.GetColor(firstPoint.Index);
                 var ionSeries = new PeakPointSeries
                 {

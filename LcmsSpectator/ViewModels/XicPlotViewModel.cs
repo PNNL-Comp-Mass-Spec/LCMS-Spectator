@@ -237,7 +237,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (xic == null || xic.Count == 0) continue;
                 var firstPoint = xic[0];
-                var color = firstPoint.BaseIonType != null ? colors.GetColor(firstPoint.BaseIonType, firstPoint.Index)
+                var color = firstPoint.IonType != null ? colors.GetColor(firstPoint.IonType.BaseIonType, firstPoint.IonType.Charge)
                                                            : colors.GetColor(firstPoint.Index);
                 // create line series for xic
                 var series = new XicPointSeries

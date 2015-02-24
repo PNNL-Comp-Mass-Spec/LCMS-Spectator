@@ -179,8 +179,8 @@ namespace LcmsSpectator.ViewModels
         {
             if (_xic == null) _xic = GetXic();
             var xic = _xic;
-            BaseIonType baseIonType = null;
-            if (IsFragmentIon) baseIonType = IonType.BaseIonType;
+            IonType ionType = null;
+            if (IsFragmentIon) ionType = IonType;
             // smooth
             if (pointsToSmooth > 2)
             {
@@ -191,7 +191,7 @@ namespace LcmsSpectator.ViewModels
                             !_xic[i - 1].Intensity.Equals(t.Intensity) ||
                             !_xic[i + 1].Intensity.Equals(t.Intensity))
                        .Select(t => new XicDataPoint(Lcms.GetElutionTime(t.ScanNum),
-                               t.ScanNum, t.Intensity, Index, Label){BaseIonType = baseIonType}).ToList();
+                               t.ScanNum, t.Intensity, Index, Label){IonType = ionType}).ToList();
         }
 
         private Xic GetXic()
