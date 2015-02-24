@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Biology;
-using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -22,7 +20,8 @@ namespace LcmsSpectator.Models
             ProteinDesc = "";
             UseGolfScoring = false;
             Heavy = false;
-            Scan = 0;
+            _lcms = null;
+            _scan = 0;
             Mass = Double.NaN;
             PrecursorMz = Double.NaN;
 
@@ -41,11 +40,7 @@ namespace LcmsSpectator.Models
             // When sequence updates, update mass
             this.WhenAnyValue(x => x.Sequence)
                 .Where(sequence => sequence.Count > 0)
-                .Select(sequence =>
-                {
-                    var composition = new Composition(Composition.H2O);
-                    return sequence.Aggregate(composition, (current, aa) => current + aa.Composition).Mass;
-                })
+                .Select(sequence => sequence.Mass)
                 .Subscribe(mass => Mass = mass);
 
             // When sequence updates, update precursor m/z
@@ -53,9 +48,7 @@ namespace LcmsSpectator.Models
                 .Where(sequence => sequence.Count > 0)
                 .Select(sequence =>
                 {
-                    var composition = new Composition(Composition.H2O);
-                    composition = sequence.Aggregate(composition, (current, aa) => current + aa.Composition);
-                    var ion = new Ion(composition, Charge);
+                    var ion = new Ion(sequence.Composition, Charge);
                     return ion.GetMostAbundantIsotopeMz();
                 })
                 .Subscribe(precursorMz => PrecursorMz = precursorMz);
