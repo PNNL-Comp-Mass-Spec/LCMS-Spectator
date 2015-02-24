@@ -35,7 +35,7 @@ namespace LcmsSpectator.ViewModels
             _isLoading = false;
             FeatureMap.MouseDown += FeatureMap_MouseDown;
             _pointsDisplayed = 5000;
-            _viewDivisions = 9;
+            //_viewDivisions = 9;
             _showFoundMs2 = false;
             _showNotFoundMs2 = false;
             _yAxis = new LinearAxis { Position = AxisPosition.Left, Title = "Monoisotopic Mass", StringFormat = "0.###" };
