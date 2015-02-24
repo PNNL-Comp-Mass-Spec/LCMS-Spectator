@@ -193,6 +193,18 @@ namespace LcmsSpectator.ViewModels
             _precursorXAxis.Maximum = max;
             _precursorXAxis.Zoom(min, max);
         }
+
+        /// <summary>
+        /// Set the selected scan marker on all XIC plots
+        /// </summary>
+        /// <param name="scan">Scan number to put marker at</param>
+        public void SetSelectedScan(int scan)
+        {
+            FragmentPlotViewModel.SelectedScan = scan;
+            PrecursorPlotViewModel.SelectedScan = scan;
+            HeavyFragmentPlotViewModel.SelectedScan = scan;
+            HeavyPrecursorPlotViewModel.SelectedScan = scan;
+        }
         #endregion
 
         #region Private Members

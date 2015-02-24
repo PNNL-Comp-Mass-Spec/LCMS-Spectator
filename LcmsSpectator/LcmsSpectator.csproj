@@ -243,6 +243,7 @@
     <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\DmsJobViewModel.cs" />
     <Compile Include="ViewModels\DmsLookupViewModel.cs" />
+    <Compile Include="ViewModels\ErrorMapViewModel.cs" />
     <Compile Include="ViewModels\FeatureViewerViewModel.cs" />
     <Compile Include="ViewModels\FilterViewModel.cs" />
     <Compile Include="ViewModels\HeavyModificationsViewModel.cs" />
@@ -276,6 +277,12 @@
     </Compile>
     <Compile Include="Views\DmsLookupView.xaml.cs">
       <DependentUpon>DmsLookupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ErrorMap.xaml.cs">
+      <DependentUpon>ErrorMap.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ErrorMapWindow.xaml.cs">
+      <DependentUpon>ErrorMapWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\FeatureViewerView.xaml.cs">
       <DependentUpon>FeatureViewerView.xaml</DependentUpon>
@@ -374,6 +381,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DmsLookupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ErrorMap.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ErrorMapWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

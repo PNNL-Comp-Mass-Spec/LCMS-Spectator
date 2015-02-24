@@ -10,7 +10,7 @@ namespace LcmsSpectator.ViewModels
 {
     public class SpectrumViewModel: ReactiveObject
     {
-        public SpectrumViewModel(IDialogService dialogService, ILcMsRun lcms)
+        public SpectrumViewModel(IMainDialogService dialogService, ILcMsRun lcms)
         {
             _lcms = lcms;
             PrimarySpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05);

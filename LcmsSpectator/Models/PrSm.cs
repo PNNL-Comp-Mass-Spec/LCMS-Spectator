@@ -26,18 +26,17 @@ namespace LcmsSpectator.Models
             Mass = Double.NaN;
             PrecursorMz = Double.NaN;
 
-            // When Scan or Lcms change, update ms2Spectrum
-            this.WhenAnyValue(x => x.Scan, x => x.Lcms)
+            var ms2Observable = this.WhenAnyValue(x => x.Scan, x => x.Lcms)
                 .Where(x => x.Item1 > 0 && x.Item2 != null)
                 .Select(x => x.Item2.GetSpectrum(x.Item1) as ProductSpectrum)
-                .Where(productSpectrum => productSpectrum != null)
-                .ToProperty(this, x => x.Ms2Spectrum, out _ms2Spectrum);
+                .Where(productSpectrum => productSpectrum != null);
+                
+            // When Scan or Lcms change, update ms2Spectrum
+            ms2Observable.ToProperty(this, x => x.Ms2Spectrum, out _ms2Spectrum);
 
             // When Ms2Spectrum changes, update ActivationMethod
-            this.WhenAnyValue(x => x.Ms2Spectrum)
-                .Where(ms2Spectrum => ms2Spectrum != null)
-                .Select(ms2Spectrum => ms2Spectrum.ActivationMethod)
-                .ToProperty(this, x => x.ActivationMethod, out _activationMethod);
+            ms2Observable.Select(ms2Spectrum => ms2Spectrum.ActivationMethod)
+                         .ToProperty(this, x => x.ActivationMethod, out _activationMethod);
 
             // When sequence updates, update mass
             this.WhenAnyValue(x => x.Sequence)
@@ -45,9 +44,9 @@ namespace LcmsSpectator.Models
                 .Select(sequence =>
                 {
                     var composition = new Composition(Composition.H2O);
-                    return _sequence.Aggregate(composition, (current, aa) => current + aa.Composition).Mass;
+                    return sequence.Aggregate(composition, (current, aa) => current + aa.Composition).Mass;
                 })
-                .Subscribe(mass => _mass = mass);
+                .Subscribe(mass => Mass = mass);
 
             // When sequence updates, update precursor m/z
             this.WhenAnyValue(x => x.Sequence)
@@ -55,11 +54,11 @@ namespace LcmsSpectator.Models
                 .Select(sequence =>
                 {
                     var composition = new Composition(Composition.H2O);
-                    composition = _sequence.Aggregate(composition, (current, aa) => current + aa.Composition);
+                    composition = sequence.Aggregate(composition, (current, aa) => current + aa.Composition);
                     var ion = new Ion(composition, Charge);
                     return ion.GetMostAbundantIsotopeMz();
                 })
-                .Subscribe(precursorMz => _precursorMz = precursorMz);
+                .Subscribe(precursorMz => PrecursorMz = precursorMz);
         }
 
         #region Public Properties

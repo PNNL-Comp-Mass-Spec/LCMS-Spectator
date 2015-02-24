@@ -25,6 +25,6 @@ namespace LcmsSpectator.PlotModels
         public string Title { get; set; }
 
         public int Index { get; set; }
-        public BaseIonType BaseIonType { get; set; }
+        public IonType IonType { get; set; }
     }
 }

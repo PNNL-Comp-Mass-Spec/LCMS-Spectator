@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Documents;
 using FeatureMap.Views;
 using LcmsSpectator.ViewModels;
 using LcmsSpectator.Views;
@@ -81,6 +80,13 @@ namespace LcmsSpectator.DialogServices
         {
             var dialog = new AboutBox();
             dialog.ShowDialog();
+        }
+
+
+        public void OpenErrorMapWindow(ErrorMapViewModel errorMapViewModel)
+        {
+            var errorMapWindow = new ErrorMapWindow{DataContext = errorMapViewModel, Height=950, Width=900};
+            errorMapWindow.Show();
         }
     }
 }

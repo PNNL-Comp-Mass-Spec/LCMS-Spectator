@@ -50,6 +50,7 @@ namespace LcmsSpectator.ViewModels
             openFeatureFileCommand.Subscribe(_ => OpenFeatureFile());
             OpenFeatureFileCommand = openFeatureFileCommand;
 
+            // When a the LcMsRun is loaded, wire up the dataset view models
             this.WhenAnyValue(x => x.RawFilePath).Where(rawFilePath => !String.IsNullOrEmpty(rawFilePath))
                 .Subscribe(rawFilePath =>
                 {
@@ -119,28 +120,38 @@ namespace LcmsSpectator.ViewModels
                 XicViewModel.HeavyPrecursorPlotViewModel.SelectedScan = prsm.Scan;
             });
 
+            var prsmObservable = this.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null);
+
             // When the prsm changes, the ion lists should be recalculated
-            // When the prsm changes, update the sequence creator
-            this.WhenAnyValue(x => x.SelectedPrSm).Subscribe(prsm =>
+            prsmObservable.Where(_ => IonListViewModel != null)
+                .Subscribe(prsm => IonListViewModel.SelectedPrSm = prsm);
+
+            // When the prsm changes, update activation method and selected charge in the ion type selector
+            prsmObservable.Subscribe(prsm => IonTypeSelectorViewModel.ActivationMethod = prsm.ActivationMethod);
+            prsmObservable.Subscribe(prsm => IonTypeSelectorViewModel.SelectedCharge = prsm.Charge);
+
+            // When the prsm updates, update the prsm in the sequence creator
+            prsmObservable.Subscribe(prsm => CreateSequenceViewModel.SelectedPrSm = prsm);
+
+            // When the prsm updates, update the feature map
+            prsmObservable.Subscribe(prsm => FeatureMapViewModel.SelectedPrSm = prsm);
+
+            // When prsm updates, update sequence in spectrum plot view model
+            prsmObservable.Where(prsm => prsm.Sequence != null && SpectrumViewModel != null)
+                .Select(prsm => prsm.Sequence)
+                .Subscribe(sequence => SpectrumViewModel.PrimarySpectrumViewModel.Sequence = sequence);
+
+            // When prsm updates, subscribe to scan updates
+            prsmObservable.Subscribe(prsm =>
             {
-                if (IonListViewModel != null) IonListViewModel.SelectedPrSm = prsm;
-                IonTypeSelectorViewModel.ActivationMethod = prsm.ActivationMethod;
-                IonTypeSelectorViewModel.SelectedCharge = prsm.Charge;
-                CreateSequenceViewModel.SelectedPrSm = prsm;
-                FeatureMapViewModel.SelectedPrSm = prsm;
-                prsm.WhenAnyValue(x => x.Scan)
-                    .Where(_ => SelectedPrSm != null && SpectrumViewModel != null && XicViewModel != null)
+                prsm.WhenAnyValue(x => x.Scan, x => x.PrecursorMz)
+                    .Where(x => x.Item1 > 0 && x.Item2 > 0 && SpectrumViewModel != null)
+                    .Subscribe(x => SpectrumViewModel.UpdateSpectra(x.Item1, x.Item2));
+                prsm.WhenAnyValue(x => x.Scan).Where(scan => scan > 0 && XicViewModel != null)
                     .Subscribe(scan =>
                     {
-                        if (SpectrumViewModel != null) SpectrumViewModel.UpdateSpectra(scan, SelectedPrSm.PrecursorMz);
-                        if (XicViewModel != null)
-                        {
-                            XicViewModel.FragmentPlotViewModel.SelectedScan = scan;
-                            XicViewModel.PrecursorPlotViewModel.SelectedScan = scan;
-                            XicViewModel.HeavyFragmentPlotViewModel.SelectedScan = scan;
-                            XicViewModel.HeavyPrecursorPlotViewModel.SelectedScan = scan;
-                            XicViewModel.ZoomToScan(scan);   
-                        }
+                        XicViewModel.SetSelectedScan(scan);
+                        XicViewModel.ZoomToScan(scan);
                     });
             });
 
@@ -156,8 +167,9 @@ namespace LcmsSpectator.ViewModels
             ScanViewModel.WhenAnyValue(x => x.FilteredData).Subscribe(data => FeatureMapViewModel.UpdateIds(data));
 
             // Toggle instrument data when ShowInstrumentData setting is changed.
-            IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Subscribe(async x => await ToggleShowInstrumentData(x));
+            IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Select(async x => await ToggleShowInstrumentData(x)).Subscribe();
 
+            // Close command verifies that the user wants to close the dataset, then sets ReadyToClose to true if they are
             var closeCommand = ReactiveCommand.Create();
             closeCommand.Subscribe(_ =>
             {
@@ -169,10 +181,15 @@ namespace LcmsSpectator.ViewModels
         }
 
         #region Public Properties
-
+        /// <summary>
+        /// The LcMsRun representing the raw file for this dataset.
+        /// </summary>
         public ILcMsRun Lcms { get; private set; }
 
         private IonListViewModel _ionListViewModel;
+        /// <summary>
+        /// View model for fragment and precursor ion selection.
+        /// </summary>
         public IonListViewModel IonListViewModel
         {
             get { return _ionListViewModel; }
@@ -180,6 +197,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private MsPfParameters _mspfParameters;
+        /// <summary>
+        /// Parsed MsPathFinder parameters (configuration for database search)
+        /// </summary>
         public MsPfParameters MsPfParameters
         {
             get { return _mspfParameters; }
@@ -187,6 +207,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private XicViewModel _xicViewModel;
+        /// <summary>
+        /// View model for extracted ion chromatogram
+        /// </summary>
         public XicViewModel XicViewModel
         {
             get { return _xicViewModel; }
@@ -194,6 +217,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private SpectrumViewModel _spectrumViewModel;
+        /// <summary>
+        /// View model for spectrum plots (ms/ms, prev ms1, next ms1) 
+        /// </summary>
         public SpectrumViewModel SpectrumViewModel
         {
             get { return _spectrumViewModel; } 
@@ -222,6 +248,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private bool _readyToClose;
+        /// <summary>
+        /// Is this data set ready to be closed?
+        /// </summary>
         public bool ReadyToClose
         {
             get { return _readyToClose; }
@@ -317,10 +346,13 @@ namespace LcmsSpectator.ViewModels
                 FeatureMapViewModel.SetData((LcMsRun)Lcms, features.ToList(), ScanViewModel.FilteredData);
             }
         }
-        #endregion
 
-        #region Private Methods
-
+        /// <summary>
+        /// Shows or hides instrument Precursor m/z and mass from the instrument
+        /// Reads data from LcMsRun if necessary
+        /// </summary>
+        /// <param name="value">Should the instrument data be shown?</param>
+        /// <returns>Awaitable task</returns>
         public Task ToggleShowInstrumentData(bool value)
         {
             return Task.Run(() =>

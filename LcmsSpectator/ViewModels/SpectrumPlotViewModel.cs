@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.TopDown.Scoring;
 using LcmsSpectator.Config;
@@ -22,7 +23,7 @@ namespace LcmsSpectator.ViewModels
 {
     public class SpectrumPlotViewModel: ReactiveObject
     {
-        public SpectrumPlotViewModel(IDialogService dialogService, double multiplier, bool autoZoomXAxis=true)
+        public SpectrumPlotViewModel(IMainDialogService dialogService, double multiplier, bool autoZoomXAxis=true)
         {
             _dialogService = dialogService;
             _autoZoomXAxis = autoZoomXAxis;
@@ -80,6 +81,14 @@ namespace LcmsSpectator.ViewModels
             var saveAsImageCommand = ReactiveCommand.Create();
             saveAsImageCommand.Subscribe(_ => SaveAsImage());
             SaveAsImageCommand = saveAsImageCommand;
+
+            var openErrorMapCommand = ReactiveCommand.Create();
+            openErrorMapCommand.Subscribe(_ => _dialogService.OpenErrorMapWindow(new ErrorMapViewModel
+            {
+                Sequence = Sequence,
+                DataPoints = GetMostAbundantIsotopePeaks(_currentPeakDataPoints)
+            }));
+            OpenErrorMapCommand = openErrorMapCommand;
         }
 
         #region Public Properties
@@ -150,6 +159,13 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private Sequence _sequence;
+        public Sequence Sequence
+        {
+            get { return _sequence; }
+            set { this.RaiseAndSetIfChanged(ref _sequence, value); }
+        }
+
         private ReactiveList<LabeledIonViewModel> _ions;
         public ReactiveList<LabeledIonViewModel> Ions
         {
@@ -158,6 +174,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         public IReactiveCommand SaveAsImageCommand { get; private set; }
+        public IReactiveCommand OpenErrorMapCommand { get; private set; }
         #endregion
 
         #region Public Methods
@@ -185,6 +202,7 @@ namespace LcmsSpectator.ViewModels
         private void UpdatePlotModel(IList<PeakDataPoint>[] peakDataPoints)
         {
             if (Spectrum == null) return;
+            _currentPeakDataPoints = peakDataPoints;
             PlotModel.Series.Clear();
             PlotModel.Annotations.Clear();
             var spectrum = GetSpectrum();
@@ -218,9 +236,9 @@ namespace LcmsSpectator.ViewModels
             var colors = new ColorDictionary(maxCharge);
             foreach (var points in peakDataPoints)
             {
-                if (points.Count == 0) continue;
+                if (points.Count == 0 || points[0].Error.Equals(Double.NaN)) continue;
                 var firstPoint = points[0];
-                var color = firstPoint.BaseIonType != null ? colors.GetColor(firstPoint.BaseIonType, firstPoint.Index)
+                var color = firstPoint.IonType != null ? colors.GetColor(firstPoint.IonType.BaseIonType, firstPoint.Index)
                                                            : colors.GetColor(firstPoint.Index);
                 var ionSeries = new PeakPointSeries
                 {
@@ -281,6 +299,16 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private ReactiveList<PeakDataPoint> GetMostAbundantIsotopePeaks(IEnumerable<IList<PeakDataPoint>> peakDataPoints)
+        {
+            var mostAbundantPeaks = new ReactiveList<PeakDataPoint>();
+            foreach (var peaks in peakDataPoints)
+            {
+                mostAbundantPeaks.Add(peaks.OrderByDescending(p => p.Y).FirstOrDefault());
+            }
+            return mostAbundantPeaks;
+        }
+
         private Spectrum GetSpectrum()
         {
             // Filtered/Deconvoluted Spectrum?
@@ -324,8 +352,10 @@ namespace LcmsSpectator.ViewModels
         #endregion
 
         #region Private Fields
-        private readonly IDialogService _dialogService;
+        private readonly IMainDialogService _dialogService;
         private readonly bool _autoZoomXAxis;
+
+        private IList<PeakDataPoint>[] _currentPeakDataPoints;
 
         private bool _spectrumDirty; // Tracks whether or not the spectrum has changed
         private Spectrum _filteredSpectrum;

@@ -13,5 +13,6 @@ namespace LcmsSpectator.DialogServices
         bool OpenSelectDataWindow(SelectDataSetViewModel selectDataViewModel);
         bool FilterBox(FilterViewModel filterViewModel);
         void OpenAboutBox();
+        void OpenErrorMapWindow(ErrorMapViewModel errorMapViewModel);
     }
 }

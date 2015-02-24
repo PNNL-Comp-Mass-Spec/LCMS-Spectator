@@ -136,12 +136,13 @@ namespace LcmsSpectator.ViewModels
         #region Private Methods
         private IList<PeakDataPoint> GetPeakDataPoints(Tuple<Spectrum, bool> spectrum, object o)
         {
-            var peakDataPoints = new List<PeakDataPoint>();
             var tolerance = IsFragmentIon
-                ? IcParameters.Instance.ProductIonTolerancePpm
-                : IcParameters.Instance.PrecursorTolerancePpm;
-            BaseIonType baseIonType = null;
-            if (IsFragmentIon) baseIonType = IonType.BaseIonType;
+                            ? IcParameters.Instance.ProductIonTolerancePpm
+                            : IcParameters.Instance.PrecursorTolerancePpm;
+            var noPeaks = new List<PeakDataPoint> {new PeakDataPoint(0, 0, Double.NaN, -1, Label){IonType = IonType}};
+            var peakDataPoints = new List<PeakDataPoint>();
+            IonType ionType = null;
+            if (IsFragmentIon) ionType = IonType;
             var deconvoluted = spectrum.Item2;
             Ion ion;
             if (deconvoluted)
@@ -153,10 +154,10 @@ namespace LcmsSpectator.ViewModels
             }
             else ion = Ion;
             var labeledIonPeaks = IonUtils.GetIonPeaks(ion, spectrum.Item1, tolerance);
-            if (labeledIonPeaks.Item1 == null) return peakDataPoints;
+            if (labeledIonPeaks.Item1 == null) return noPeaks;
             var peaks = labeledIonPeaks.Item1;
             var correlation = labeledIonPeaks.Item2;
-            if (correlation < IcParameters.Instance.IonCorrelationThreshold) return peakDataPoints;
+            if (correlation < IcParameters.Instance.IonCorrelationThreshold) return noPeaks;
             var errors = IonUtils.GetIsotopePpmError(peaks, ion, 0.1);
             peakDataPoints = new List<PeakDataPoint> { Capacity = errors.Length };
             for (int i = 0; i < errors.Length; i++)
@@ -166,7 +167,7 @@ namespace LcmsSpectator.ViewModels
                     peakDataPoints.Add(new PeakDataPoint(peaks[i].Mz, peaks[i].Intensity, errors[i].Value, correlation, Label)
                     {
                         Index = Index,
-                        BaseIonType = baseIonType,
+                        IonType = ionType,
                     });
                 }
             }
