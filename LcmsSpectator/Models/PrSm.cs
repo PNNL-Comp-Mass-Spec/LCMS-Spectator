@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -25,33 +25,21 @@ namespace LcmsSpectator.Models
             Mass = Double.NaN;
             PrecursorMz = Double.NaN;
 
-            var ms2Observable = this.WhenAnyValue(x => x.Scan, x => x.Lcms)
-                .Where(x => x.Item1 > 0 && x.Item2 != null)
-                .Select(x => x.Item2.GetSpectrum(x.Item1) as ProductSpectrum)
-                .Where(productSpectrum => productSpectrum != null);
-                
-            // When Scan or Lcms change, update ms2Spectrum
-            ms2Observable.ToProperty(this, x => x.Ms2Spectrum, out _ms2Spectrum);
-
-            // When Ms2Spectrum changes, update ActivationMethod
-            ms2Observable.Select(ms2Spectrum => ms2Spectrum.ActivationMethod)
-                         .ToProperty(this, x => x.ActivationMethod, out _activationMethod);
-
             // When sequence updates, update mass
-            this.WhenAnyValue(x => x.Sequence)
-                .Where(sequence => sequence.Count > 0)
-                .Select(sequence => sequence.Mass)
-                .Subscribe(mass => Mass = mass);
+            //this.WhenAnyValue(x => x.Sequence)
+            //    .Where(sequence => sequence.Count > 0)
+            //    .Select(sequence => sequence.Mass + Composition.H2O.Mass)
+            //    .Subscribe(mass => Mass = mass);
 
-            // When sequence updates, update precursor m/z
-            this.WhenAnyValue(x => x.Sequence)
-                .Where(sequence => sequence.Count > 0)
-                .Select(sequence =>
-                {
-                    var ion = new Ion(sequence.Composition, Charge);
-                    return ion.GetMostAbundantIsotopeMz();
-                })
-                .Subscribe(precursorMz => PrecursorMz = precursorMz);
+            //// When sequence updates, update precursor m/z
+            //this.WhenAnyValue(x => x.Sequence)
+            //    .Where(sequence => sequence.Count > 0)
+            //    .Select(sequence =>
+            //    {
+            //        var ion = new Ion(sequence.Composition + Composition.H2O, Charge);
+            //        return ion.GetMostAbundantIsotopeMz();
+            //    })
+            //    .Subscribe(precursorMz => PrecursorMz = precursorMz);
         }
 
         #region Public Properties
@@ -92,12 +80,11 @@ namespace LcmsSpectator.Models
         /// </summary>
         public double RetentionTime { get { return (Lcms == null) ? 0.0 : Lcms.GetElutionTime(Scan); } }
 
-        private readonly ObservableAsPropertyHelper<ProductSpectrum> _ms2Spectrum; 
         /// <summary>
         /// Ms2 Spectrum associated with Scan.
         /// Requires both Lcms and Scan to be set.
         /// </summary>
-        public ProductSpectrum Ms2Spectrum { get { return _ms2Spectrum.Value; } }
+        public ProductSpectrum Ms2Spectrum { get { return (Lcms == null) ? null : Lcms.GetSpectrum(Scan) as ProductSpectrum; } }
 
         /// <summary>
         /// Spectrum for previous ms1 scan before Scan.
@@ -233,7 +220,17 @@ namespace LcmsSpectator.Models
         public Sequence Sequence
         {
             get { return _sequence; }
-            set { this.RaiseAndSetIfChanged(ref _sequence, value); }
+            set
+            {
+                if (value != null && !value.Equals(_sequence))
+                {
+                    _sequence = value;
+                    Mass = _sequence.Mass + Composition.H2O.Mass;
+                    var ion = new Ion(_sequence.Composition + Composition.H2O, Charge);
+                    PrecursorMz = ion.GetMostAbundantIsotopeMz();
+                }
+                this.RaisePropertyChanged();
+            }
         }
 
         private double _mass;
@@ -256,12 +253,6 @@ namespace LcmsSpectator.Models
         {
             get { return _precursorMz; }
             set { this.RaiseAndSetIfChanged(ref _precursorMz, value); }
-        }
-
-        private readonly ObservableAsPropertyHelper<ActivationMethod> _activationMethod;
-        public ActivationMethod ActivationMethod
-        {
-             get { return _activationMethod.Value; }
         }
         #endregion
 
