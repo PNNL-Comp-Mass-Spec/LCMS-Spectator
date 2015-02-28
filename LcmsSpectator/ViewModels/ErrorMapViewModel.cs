@@ -18,7 +18,7 @@ namespace LcmsSpectator.ViewModels
     {
         public ErrorMapViewModel()
         {
-            PlotModel = new PlotModel();
+            PlotModel = new PlotModel { Title = "Error Map" };
 
             _heighMultiplier = 12;
 
@@ -126,7 +126,7 @@ namespace LcmsSpectator.ViewModels
             var colorAxis = new LinearColorAxis
             {
                 Title = "Error",
-                Position = AxisPosition.Right,
+                Position = AxisPosition.Bottom,
                 Palette = OxyPalette.Interpolate(1000, new[] { minColor, maxColor }),
                 AbsoluteMinimum = 0,
                 Minimum = -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
@@ -138,19 +138,22 @@ namespace LcmsSpectator.ViewModels
 
             var heatMapSeries = new HeatMapSeries
             {
-                //Title = "Error Map",
                 Data = data,
                 Interpolate = false,
+                X0 = 0,
+                X1 = data.GetLength(1),
+                Y0 = 0,
+                Y1 = data.GetLength(0)-3
             };
             PlotModel.Series.Add(heatMapSeries);
 
-            heatMapSeries.X0 = 0;
-            heatMapSeries.X1 = data.GetLength(1);
             _xAxis.LabelFormatter = x => _ionTypes[Math.Min((int) x, _ionTypes.Length-1)].Name;
 
-            heatMapSeries.Y0 = 0;
-            heatMapSeries.Y1 = data.GetLength(0);
-            _yAxis.LabelFormatter = y => Sequence[Math.Max(Math.Min((int) y, Sequence.Count-1), 0)]
+            var revSequence = new Sequence(Sequence);
+            revSequence.Reverse();
+
+            _yAxis.AbsoluteMaximum = Sequence.Count;
+            _yAxis.LabelFormatter = y => revSequence[Math.Max(Math.Min((int) y, revSequence.Count-1), 0)]
                                          .Residue.ToString(CultureInfo.InvariantCulture);
 
             PlotModel.InvalidatePlot(true);
@@ -169,7 +172,11 @@ namespace LcmsSpectator.ViewModels
                 if (!dataDict.ContainsKey(dataPoint.IonType)) dataDict.Add(dataPoint.IonType, new List<double>());
                 var points = dataDict[dataPoint.IonType];
 
-                var position = Math.Max(0, Math.Min(dataPoint.Index, points.Count - 1));
+                int index = dataPoint.Index;
+
+                if (!dataPoint.IonType.IsPrefixIon) index = Sequence.Count - (dataPoint.Index + 1);
+
+                var position = Math.Max(0, Math.Min(Sequence.Count - (index+1), points.Count - 1));
                 points.Insert(position, dataPoint.Error);
             }
 
@@ -194,6 +201,7 @@ namespace LcmsSpectator.ViewModels
         private IonType[] _ionTypes;  
         private readonly LinearAxis _xAxis;
         private readonly LinearAxis _yAxis;
+
         #endregion
     }
 }

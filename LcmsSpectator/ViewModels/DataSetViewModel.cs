@@ -76,7 +76,7 @@ namespace LcmsSpectator.ViewModels
                     IonListViewModel.WhenAnyValue(x => x.FragmentLabels)
                     .Subscribe(labels =>
                     {
-                        SpectrumViewModel.PrimarySpectrumViewModel.Ions = labels;
+                        SpectrumViewModel.Ms2SpectrumViewModel.Ions = labels;
                         XicViewModel.FragmentPlotViewModel.Ions = labels;
                     });
                     IonListViewModel.WhenAnyValue(x => x.HeavyFragmentLabels)
@@ -89,8 +89,8 @@ namespace LcmsSpectator.ViewModels
                     .Select(labels => new ReactiveList<LabeledIonViewModel>(labels.Where(l => l.Index == 0)) { ChangeTrackingEnabled = true })
                     .Subscribe(labels =>
                     {
-                        SpectrumViewModel.Secondary1ViewModel.Ions = labels;
-                        SpectrumViewModel.Secondary2ViewModel.Ions = labels;
+                        SpectrumViewModel.PrevMs1SpectrumViewModel.Ions = labels;
+                        SpectrumViewModel.NextMs1SpectrumViewModel.Ions = labels;
                     });
                     IonListViewModel.WhenAnyValue(x => x.PrecursorLabels)
                     .Where(labels => labels != null)
@@ -114,10 +114,8 @@ namespace LcmsSpectator.ViewModels
             .Subscribe(prsm =>
             {
                 SpectrumViewModel.UpdateSpectra(prsm.Scan, SelectedPrSm.PrecursorMz);
-                XicViewModel.FragmentPlotViewModel.SelectedScan = prsm.Scan;
-                XicViewModel.PrecursorPlotViewModel.SelectedScan = prsm.Scan;
-                XicViewModel.HeavyFragmentPlotViewModel.SelectedScan = prsm.Scan;
-                XicViewModel.HeavyPrecursorPlotViewModel.SelectedScan = prsm.Scan;
+                XicViewModel.SetSelectedScan(prsm.Scan);
+                XicViewModel.ZoomToScan(prsm.Scan);
             });
 
             var prsmObservable = this.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null);
@@ -127,7 +125,8 @@ namespace LcmsSpectator.ViewModels
                 .Subscribe(prsm => IonListViewModel.SelectedPrSm = prsm);
 
             // When the prsm changes, update activation method and selected charge in the ion type selector
-            prsmObservable.Subscribe(prsm => IonTypeSelectorViewModel.ActivationMethod = prsm.ActivationMethod);
+            prsmObservable.Select(prsm => prsm.Ms2Spectrum).Where(ms2 => ms2 != null)
+                          .Subscribe(ms2 => IonTypeSelectorViewModel.ActivationMethod = ms2.ActivationMethod);
             prsmObservable.Subscribe(prsm => IonTypeSelectorViewModel.SelectedCharge = prsm.Charge);
 
             // When the prsm updates, update the prsm in the sequence creator
@@ -139,7 +138,7 @@ namespace LcmsSpectator.ViewModels
             // When prsm updates, update sequence in spectrum plot view model
             prsmObservable.Where(prsm => prsm.Sequence != null && SpectrumViewModel != null)
                 .Select(prsm => prsm.Sequence)
-                .Subscribe(sequence => SpectrumViewModel.PrimarySpectrumViewModel.Sequence = sequence);
+                .Subscribe(sequence => SpectrumViewModel.Ms2SpectrumViewModel.Sequence = sequence);
 
             // When prsm updates, subscribe to scan updates
             prsmObservable.Subscribe(prsm =>
@@ -148,11 +147,7 @@ namespace LcmsSpectator.ViewModels
                     .Where(x => x.Item1 > 0 && x.Item2 > 0 && SpectrumViewModel != null)
                     .Subscribe(x => SpectrumViewModel.UpdateSpectra(x.Item1, x.Item2));
                 prsm.WhenAnyValue(x => x.Scan).Where(scan => scan > 0 && XicViewModel != null)
-                    .Subscribe(scan =>
-                    {
-                        XicViewModel.SetSelectedScan(scan);
-                        XicViewModel.ZoomToScan(scan);
-                    });
+                    .Subscribe(scan => XicViewModel.SetSelectedScan(scan));
             });
 
             // When a new prsm is created by CreateSequenceViewModel, update SelectedPrSm

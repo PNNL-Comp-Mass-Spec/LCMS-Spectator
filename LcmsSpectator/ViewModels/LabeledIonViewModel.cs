@@ -18,7 +18,7 @@ namespace LcmsSpectator.ViewModels
 {
     public class LabeledIonViewModel : ReactiveObject
     {
-        public LabeledIonViewModel(Composition composition, int index, IonType ionType, bool isFragmentIon, ILcMsRun lcms, Ion precursorIon = null, bool isChargeState = false)
+        public LabeledIonViewModel(Composition composition, IonType ionType, bool isFragmentIon, ILcMsRun lcms, Ion precursorIon = null, bool isChargeState = false, int index=0)
         {
             Composition = composition;
             PrecursorIon = precursorIon;
@@ -37,7 +37,7 @@ namespace LcmsSpectator.ViewModels
 
         public Composition Composition { get; private set; }
         public Ion PrecursorIon { get; set; }
-        public int Index { get; private set; }
+        public int Index { get; set; }
         public IonType IonType { get; private set; }
         public bool IsFragmentIon { get; private set; }
         public bool IsChargeState { get; private set; }

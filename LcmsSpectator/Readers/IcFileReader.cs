@@ -155,7 +155,7 @@ namespace LcmsSpectator.Readers
                 var modaa = new ModifiedAminoAcid(aa, mod.Item2);
                 sequence[pos] = modaa;
             }
-            return new Tuple<Sequence, string>(sequence, sequenceText);
+            return new Tuple<Sequence, string>(new Sequence(sequence), sequenceText);
         }
 
         private List<Tuple<int, Modification>> ParseModifications(string modifications)

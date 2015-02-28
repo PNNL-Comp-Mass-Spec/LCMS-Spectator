@@ -13,12 +13,12 @@ namespace LcmsSpectator.ViewModels
         public SpectrumViewModel(IMainDialogService dialogService, ILcMsRun lcms)
         {
             _lcms = lcms;
-            PrimarySpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05);
-            Secondary1ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
-            Secondary2ViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
+            Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05);
+            PrevMs1SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
+            NextMs1SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
 
             _isAxisInternalChange = false;
-            Secondary1ViewModel.XAxis.AxisChanged += (o, e) =>
+            PrevMs1SpectrumViewModel.XAxis.AxisChanged += (o, e) =>
             {
                 if (_isAxisInternalChange) return;
                 _isAxisInternalChange = true;
@@ -26,13 +26,17 @@ namespace LcmsSpectator.ViewModels
                 _isAxisInternalChange = false;
             };
 
-            Secondary2ViewModel.XAxis.AxisChanged += (o, e) =>
+            PrevMs1SpectrumViewModel.XAxis.AxisChanged += (o, e) =>
             {
                 if (_isAxisInternalChange) return;
                 _isAxisInternalChange = true;
                 Secondary1ViewModel.XAxis.Zoom(Secondary2ViewModel.XAxis.ActualMinimum, Secondary2ViewModel.XAxis.ActualMaximum);
                 _isAxisInternalChange = false;
             };
+
+            PrimarySpectrumViewModel = Ms2SpectrumViewModel;
+            Secondary1ViewModel = PrevMs1SpectrumViewModel;
+            Secondary2ViewModel = NextMs1SpectrumViewModel;
 
             var swapSecondary1Command = ReactiveCommand.Create();
             swapSecondary1Command.Subscribe(_ => SwapSecondary1());
@@ -47,7 +51,40 @@ namespace LcmsSpectator.ViewModels
         public IReactiveCommand SwapSecondary1Command { get; private set; }
         public IReactiveCommand SwapSecondary2Command { get; private set; }
 
-        private SpectrumPlotViewModel _primarySpectrumViewModel ;
+        private SpectrumPlotViewModel _ms2SpectrumViewModel;
+        /// <summary>
+        /// Spectrum plot view model for MS/MS spectrum
+        /// </summary>
+        public SpectrumPlotViewModel Ms2SpectrumViewModel
+        {
+            get { return _ms2SpectrumViewModel; }
+            set { this.RaiseAndSetIfChanged(ref _ms2SpectrumViewModel, value); }
+        }
+
+        private SpectrumPlotViewModel _prevMs1SpectrumViewModel;
+        /// <summary>
+        /// Spectrum plot view model for previous MS1 spectrum.
+        /// </summary>
+        public SpectrumPlotViewModel PrevMs1SpectrumViewModel
+        {
+            get { return _prevMs1SpectrumViewModel; }
+            set { this.RaiseAndSetIfChanged(ref _prevMs1SpectrumViewModel, value); }
+        }
+
+        private SpectrumPlotViewModel _nextMs1SpectrumViewModel;
+        /// <summary>
+        /// Spectrum plot view model for next MS1 spectrum.
+        /// </summary>
+        public SpectrumPlotViewModel NextMs1SpectrumViewModel
+        {
+            get { return _nextMs1SpectrumViewModel; }
+            set { this.RaiseAndSetIfChanged(ref _nextMs1SpectrumViewModel, value); }
+        }
+
+        private SpectrumPlotViewModel _primarySpectrumViewModel;
+        /// <summary>
+        /// Spectrum shown in the primary spectrum plot view
+        /// </summary>
         public SpectrumPlotViewModel PrimarySpectrumViewModel
         {
             get { return _primarySpectrumViewModel; }
@@ -55,6 +92,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private SpectrumPlotViewModel _secondary1ViewModel;
+        /// <summary>
+        /// Spectrum shown in the first secondary plot view (top by default)
+        /// </summary>
         public SpectrumPlotViewModel Secondary1ViewModel
         {
             get { return _secondary1ViewModel; }
@@ -62,6 +102,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         private SpectrumPlotViewModel _secondary2ViewModel;
+        /// <summary>
+        /// Spectrum shown in the first secondary plot view (bottom by default)
+        /// </summary>
         public SpectrumPlotViewModel Secondary2ViewModel
         {
             get { return _secondary2ViewModel; }
@@ -113,17 +156,17 @@ namespace LcmsSpectator.ViewModels
             }
 
             // Ms2 spectrum plot
-            PrimarySpectrumViewModel.Title = String.Format("{0} (Scan: {1})", primaryTitle, primary.ScanNum);
-            PrimarySpectrumViewModel.Spectrum = primary;
+            Ms2SpectrumViewModel.Title = String.Format("{0} (Scan: {1})", primaryTitle, primary.ScanNum);
+            Ms2SpectrumViewModel.Spectrum = primary;
             // Ms1 spectrum plots
             // previous Ms1
-            SetMs1XAxis(Secondary1ViewModel.XAxis, primary, secondary1);
-            Secondary1ViewModel.Spectrum = secondary1;
-            Secondary1ViewModel.Title = secondary1 == null ? "" : String.Format("{0} (Scan: {1})", secondary1Title, secondary1.ScanNum);
+            SetMs1XAxis(PrevMs1SpectrumViewModel.XAxis, primary, secondary1);
+            PrevMs1SpectrumViewModel.Spectrum = secondary1;
+            PrevMs1SpectrumViewModel.Title = secondary1 == null ? "" : String.Format("{0} (Scan: {1})", secondary1Title, secondary1.ScanNum);
             // next Ms1
             SetMs1XAxis(Secondary2ViewModel.XAxis, primary, secondary1);
-            Secondary2ViewModel.Spectrum = secondary2;
-            Secondary2ViewModel.Title = secondary2 == null ? "" : String.Format("{0} (Scan: {1})", secondary2Title, secondary2.ScanNum);
+            NextMs1SpectrumViewModel.Spectrum = secondary2;
+            NextMs1SpectrumViewModel.Title = secondary2 == null ? "" : String.Format("{0} (Scan: {1})", secondary2Title, secondary2.ScanNum);
         }
 
         public void SwapSecondary1()

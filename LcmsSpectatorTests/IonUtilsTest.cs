@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -10,6 +11,8 @@ using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Readers;
 using LcmsSpectator.Utils;
 using NUnit.Framework;
+using OxyPlot;
+using Splat;
 
 namespace LcmsSpectatorTests
 {
@@ -75,6 +78,45 @@ namespace LcmsSpectatorTests
             var modp = new ModifiedAminoAcid(p, itraqMod);
             var sequence = new Sequence(new List<AminoAcid> {modp, a, q});
             Console.WriteLine(sequence.Mass);
+        }
+
+        [Test]
+        public void TestCacheWithSingleKey()
+        {
+            var results = new List<int>();
+            var cache = new MemoizingMRUCache<Composition, int>((a,b) => { results.Add(0); return 0; }, 10);
+
+            var composition = new Composition(3, 6, 0, 0, 0);
+            Assert.True(results.Count == 0);
+            cache.Get(composition);
+            Assert.True(results.Count == 1);
+            var composition2 = new Composition(3, 6, 0, 0, 0);
+            cache.Get(composition2);
+            Assert.True(results.Count == 1);
+        }
+
+        [Test]
+        public void TestCacheWithTupleKey()
+        {
+            var results = new List<int>();
+            var cache = new MemoizingMRUCache<Tuple<Composition, IonType>, int>((a, b) => { results.Add(0); return 0; }, 10);
+
+            var ionTypeFactory = new IonTypeFactory(10);
+
+            var composition = new Composition(3, 6, 0, 0, 0);
+            var ionType = ionTypeFactory.GetIonType("b");
+            var tuple = new Tuple<Composition, IonType>(composition, ionType);
+            Assert.True(results.Count == 0);
+
+            cache.Get(tuple);
+
+            Assert.True(results.Count == 1);
+
+            var tuple2 = new Tuple<Composition, IonType>(composition, ionType);
+
+            cache.Get(tuple2);
+
+            Assert.True(results.Count == 1);
         }
     }
 }

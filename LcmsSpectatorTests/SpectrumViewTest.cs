@@ -42,7 +42,7 @@ namespace LcmsSpectatorTests
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
             var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-            var ionVms = ions.Select(label => new LabeledIonViewModel(label.Composition, label.Index, label.IonType, label.IsFragmentIon, lcms, label.PrecursorIon, label.IsChargeState)).ToList();
+            var ionVms = ions.Select(label => new LabeledIonViewModel(label.Composition, label.IonType, label.IsFragmentIon, lcms, label.PrecursorIon, label.IsChargeState, label.Index)).ToList();
 
         }
     }
