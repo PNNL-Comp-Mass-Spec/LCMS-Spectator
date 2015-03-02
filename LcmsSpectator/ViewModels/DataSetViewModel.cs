@@ -73,12 +73,22 @@ namespace LcmsSpectator.ViewModels
                             IonListViewModel.ShowHeavy = x.Item2;
                         });
 
-                    IonListViewModel.WhenAnyValue(x => x.FragmentLabels)
-                    .Subscribe(labels =>
+                    IonListViewModel.WhenAnyValue(x => x.FragmentLabels, x => x.ChargePrecursorLabels)
+                    .Where(x => x.Item1 != null && x.Item2 != null && SelectedPrSm != null)
+                    .Throttle(TimeSpan.FromMilliseconds(50), RxApp.TaskpoolScheduler)
+                    .Subscribe(x =>
                     {
+                        var preclabels = x.Item2.Where(l => l.IonType.Charge <= SelectedPrSm.Charge);
+                        var labels = new ReactiveList<LabeledIonViewModel>(x.Item1) { ChangeTrackingEnabled = true };
+                        labels.AddRange(preclabels);
                         SpectrumViewModel.Ms2SpectrumViewModel.Ions = labels;
-                        XicViewModel.FragmentPlotViewModel.Ions = labels;
+
                     });
+                    IonListViewModel.WhenAnyValue(x => x.FragmentLabels)
+                        .Subscribe(labels =>
+                        {
+                            XicViewModel.FragmentPlotViewModel.Ions = labels;
+                        });
                     IonListViewModel.WhenAnyValue(x => x.HeavyFragmentLabels)
                     .Subscribe(labels =>
                     {

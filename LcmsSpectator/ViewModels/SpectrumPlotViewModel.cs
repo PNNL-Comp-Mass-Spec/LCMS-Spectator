@@ -343,7 +343,7 @@ namespace LcmsSpectator.ViewModels
             foreach (var peaks in peakDataPoints)
             {
                 var peak = peaks.OrderByDescending(p => p.Y).FirstOrDefault();
-                if (peak != null)
+                if (peak != null && peak.IonType != null && peak.IonType.Name != "Precursor")
                 {
                     var index = peak.Index - 1;
                     if (sequence != null && index >= 0 && index <= sequence.Count - 1) peak.Residue = sequence[index].Residue;
