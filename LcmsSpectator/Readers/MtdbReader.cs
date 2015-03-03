@@ -2,6 +2,7 @@
 using System.IO;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Config;
 using LcmsSpectator.Models;
 using MTDBFramework;
 using MTDBFramework.Database;
@@ -58,7 +59,7 @@ namespace LcmsSpectator.Readers
 				            rawSequence = rawSequence.Insert(position + 1, symbol + ptm.Mass);
 
 				            Composition modComposition = Composition.ParseFromPlainString(ptm.Formula);
-				            Modification mod = Modification.RegisterAndGetModification(ptm.Name, modComposition);
+				            Modification mod = IcParameters.Instance.RegisterModification(ptm.Name, modComposition);
 				            entry.Sequence[ptm.Location - 1] = new ModifiedAminoAcid(entry.Sequence[ptm.Location - 1], mod);
 				        }
 

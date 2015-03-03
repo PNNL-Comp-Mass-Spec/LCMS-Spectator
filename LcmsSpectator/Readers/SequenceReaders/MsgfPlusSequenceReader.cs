@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Config;
 
 namespace LcmsSpectator.Readers.SequenceReaders
 {
@@ -65,7 +66,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
                     var modList = Modification.GetFromMass(mass);
                     if (modList == null || modList.Count == 1)
                     {
-                        var regMod = Modification.RegisterAndGetModification(element, dblMass);
+                        var regMod = IcParameters.Instance.RegisterModification(element, dblMass);
                         modList = new List<Modification> {regMod};
                     }
                     var mod = modList[0];

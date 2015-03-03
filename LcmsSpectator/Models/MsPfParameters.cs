@@ -5,6 +5,7 @@ using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Config;
 using ReactiveUI;
 
 namespace LcmsSpectator.Models
@@ -158,7 +159,7 @@ namespace LcmsSpectator.Models
             var name = parts[4];
 
             Modification modification = Modification.Get(name) ??
-                                        Modification.RegisterAndGetModification(name, composition);
+                                        IcParameters.Instance.RegisterModification(name, composition);
 
             return new SearchModification(modification, aminoAcid, sequenceLocation, isFixed);
         }

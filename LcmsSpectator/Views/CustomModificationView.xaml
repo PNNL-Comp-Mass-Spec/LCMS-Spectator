@@ -1,13 +1,17 @@
 ﻿<Window x:Class="LcmsSpectator.Views.CustomModificationView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="CustomModificationView" Height="200" Width="500">
+        xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+        Title="CustomModificationView" Height="260" Width="500">
+    <Window.Resources>
+        <utils:NotConverter x:Key="NotConverter" />
+    </Window.Resources>
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
             <RowDefinition Height="60*" />
             <RowDefinition Height="10" />
-            <RowDefinition Height="20*" />
+            <RowDefinition Height="25" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20*" />
@@ -16,7 +20,42 @@
         <TextBlock FontWeight="Bold">Modification Name</TextBlock>
         <TextBox Grid.Column="1" Grid.Row="0" Height="25" VerticalAlignment="Top" Text="{Binding ModificationName, Mode=TwoWay}" IsReadOnly="{Binding ModificationNameReadOnly}" />
 
-        <GroupBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <RadioButton x:Name="FormulaCheck" IsChecked="{Binding FromFormulaChecked, Mode=TwoWay}">
+                <GroupBox>
+                    <GroupBox.Header>
+                        <TextBlock Grid.Row="0" TextAlignment="Center" FontWeight="Bold">From Formula</TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" IsEnabled="{Binding IsChecked, ElementName=FormulaCheck, Mode=OneWay}">
+                        <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">C</TextBlock>
+                        <TextBox Width="40" Height="25" Text="{Binding C, Mode=TwoWay}" Name="C" />
+                        <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">H</TextBlock>
+                        <TextBox Width="40" Height="25" Text="{Binding H, Mode=TwoWay}" Name="H"></TextBox>
+                        <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">N</TextBlock>
+                        <TextBox Width="40" Height="25" Text="{Binding N, Mode=TwoWay}" Name="N"></TextBox>
+                        <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">O</TextBlock>
+                        <TextBox Width="40" Height="25" Text="{Binding O, Mode=TwoWay}" Name="O"></TextBox>
+                        <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">S</TextBlock>
+                        <TextBox Width="40" Height="25" Text="{Binding S, Mode=TwoWay}" Name="S"></TextBox>
+                        <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">P</TextBlock>
+                        <TextBox Width="40" Height="25" Text="{Binding P, Mode=TwoWay}" Name="P"></TextBox>
+                    </StackPanel>
+                </GroupBox>
+            </RadioButton>
+            <RadioButton x:Name="MassCheck" IsChecked="{Binding FromMassChecked, Mode=TwoWay}">
+                <GroupBox IsEnabled="{Binding IsChecked, ElementName=MassCheck, Mode=OneWay}">
+                    <GroupBox.Header>
+                        <TextBlock Grid.Row="0" TextAlignment="Center" FontWeight="Bold">From Mass</TextBlock>
+                    </GroupBox.Header>
+                    <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Width="410">
+                        <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">Delta Mass</TextBlock>
+                        <TextBox Width="40" Height="25" Text="{Binding MassStr, Mode=TwoWay}" MinWidth="327" />
+                    </StackPanel>
+                </GroupBox>
+            </RadioButton>
+        </StackPanel>        
+        
+<!--        <GroupBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
             <GroupBox.Header>
                 <TextBlock Grid.Row="0" TextAlignment="Center" FontWeight="Bold">Formula</TextBlock>
             </GroupBox.Header>
@@ -34,7 +73,7 @@
                 <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">P</TextBlock>
                 <TextBox Width="40" Height="25" Text="{Binding P, Mode=TwoWay}" Name="P"></TextBox>
             </StackPanel>
-        </GroupBox>
+        </GroupBox> -->
         <Grid Grid.Row="3" Grid.Column="1" Margin="100,0,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50*" />

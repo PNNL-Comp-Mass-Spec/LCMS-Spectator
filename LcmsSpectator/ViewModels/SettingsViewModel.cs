@@ -109,10 +109,10 @@ namespace LcmsSpectator.ViewModels
 
         private void CreateNewModification()
         {
-            var customModVm = new CustomModificationViewModel("", false);
+            var customModVm = new CustomModificationViewModel("", false, _dialogService);
             if (_dialogService.OpenCustomModification(customModVm))
             {
-                Modification.RegisterAndGetModification(customModVm.ModificationName, customModVm.Composition);
+                IcParameters.Instance.RegisterModification(customModVm.ModificationName, customModVm.Composition);
             }
         }
 

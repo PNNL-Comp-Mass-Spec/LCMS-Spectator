@@ -4,8 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Composition;
-using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers;
@@ -25,6 +24,7 @@ namespace LcmsSpectator.ViewModels
         public IReactiveCommand OpenFromDmsCommand { get; private set; }
         public IReactiveCommand OpenSettingsCommand { get; private set; }
         public IReactiveCommand OpenAboutBoxCommand { get; private set; }
+        public IReactiveCommand OpenRegisterModificationCommand { get; private set; }
 
         // Child view models
         public ScanViewModel ScanViewModel { get; private set; }
@@ -93,6 +93,21 @@ namespace LcmsSpectator.ViewModels
             var openAboutBoxCommand = ReactiveCommand.Create();
             openAboutBoxCommand.Subscribe(_ => OpenAboutBox());
             OpenAboutBoxCommand = openAboutBoxCommand;
+
+            var openRegisterModificationCommand = ReactiveCommand.Create();
+            openRegisterModificationCommand.Subscribe(_ =>
+            {
+                var custModVm = new CustomModificationViewModel("", false, _dialogService);
+                if (_dialogService.OpenCustomModification(custModVm))
+                {
+                        if (custModVm.FromFormulaChecked)
+                            IcParameters.Instance.RegisterModification(custModVm.ModificationName,
+                                custModVm.Composition);
+                        else if (custModVm.FromMassChecked)
+                            IcParameters.Instance.RegisterModification(custModVm.ModificationName, custModVm.Mass);
+                }
+            });
+            OpenRegisterModificationCommand = openRegisterModificationCommand;
 
             ShowSplash = true;
             FileOpen = false;
@@ -437,12 +452,15 @@ namespace LcmsSpectator.ViewModels
                             "Unknown Modification");
                     if (result)
                     {
-                        var customModVm = new CustomModificationViewModel(e.ModificationName, true);
+                        var customModVm = new CustomModificationViewModel(e.ModificationName, true, _dialogService);
                         GuiInvoker.Invoke(() => _dialogService.OpenCustomModification(customModVm));
                         if (customModVm.Status)
                         {
-                            Modification.RegisterAndGetModification(customModVm.ModificationName,
-                                customModVm.Composition);
+                            if (customModVm.FromFormulaChecked)
+                                IcParameters.Instance.RegisterModification(customModVm.ModificationName,
+                                    customModVm.Composition);
+                            else if (customModVm.FromMassChecked)
+                                IcParameters.Instance.RegisterModification(customModVm.ModificationName, customModVm.Mass);
                         }
                         else
                         {

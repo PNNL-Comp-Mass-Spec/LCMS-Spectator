@@ -1,5 +1,6 @@
 ﻿using System;
 using InformedProteomics.Backend.Data.Composition;
+using LcmsSpectator.DialogServices;
 using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
@@ -10,8 +11,9 @@ namespace LcmsSpectator.ViewModels
         public IReactiveCommand SaveCommand { get; private set; }
         public IReactiveCommand CancelCommand { get; private set; }
         public event EventHandler ReadyToClose;
-        public CustomModificationViewModel(string modificationName, bool modificationNameReadOnly)
+        public CustomModificationViewModel(string modificationName, bool modificationNameReadOnly, IDialogService dialogService)
         {
+            _dialogService = dialogService;
             ModificationName = modificationName;
             ModificationNameReadOnly = modificationNameReadOnly;
             C = 0;
@@ -21,6 +23,10 @@ namespace LcmsSpectator.ViewModels
             S = 0;
             P = 0;
             Status = false;
+
+            FromFormulaChecked = true;
+            FromMassChecked = false;
+
             var saveCommand = ReactiveCommand.Create();
             saveCommand.Subscribe(_ => Save());
             SaveCommand = saveCommand;
@@ -30,7 +36,7 @@ namespace LcmsSpectator.ViewModels
             CancelCommand = cancelCommand;
         }
 
-        public CustomModificationViewModel(string modificationName, bool modificationNameEditable, Composition composition): this(modificationName, modificationNameEditable)
+        public CustomModificationViewModel(string modificationName, bool modificationNameEditable, Composition composition, IDialogService dialogService): this(modificationName, modificationNameEditable, dialogService)
         {
             Composition = composition;
         }
@@ -99,8 +105,45 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
+        private string _massStr;
+        public string MassStr
+        {
+             get { return _massStr; }
+             set { this.RaiseAndSetIfChanged(ref _massStr, value); }
+        }
+
+        private double _mass;
+        public double Mass
+        {
+            get { return _mass; }
+            set { this.RaiseAndSetIfChanged(ref _mass, value); }
+        }
+
+        private bool _fromFormulaChecked;
+        public bool FromFormulaChecked
+        {
+            get { return _fromFormulaChecked; }
+            set { this.RaiseAndSetIfChanged(ref _fromFormulaChecked, value); }
+        }
+
+        private bool _fromMassChecked;
+        public bool FromMassChecked
+        {
+            get { return _fromMassChecked; }
+            set { this.RaiseAndSetIfChanged(ref _fromMassChecked, value); }
+        }
+
         private void Save()
         {
+            double mass = 0.0;
+            if (FromMassChecked && (String.IsNullOrEmpty(_massStr) || !Double.TryParse(_massStr, out mass)))
+            {
+                _dialogService.MessageBox(String.Format("Invalid mass: {0}", _massStr));
+                return;
+            }
+
+            _mass = mass;
+
             Status = true;
             if (ReadyToClose != null) ReadyToClose(this, EventArgs.Empty);
         }
@@ -110,6 +153,8 @@ namespace LcmsSpectator.ViewModels
             Status = false;
             if (ReadyToClose != null) ReadyToClose(this, EventArgs.Empty);
         }
+
+        private readonly IDialogService _dialogService;
 
         private string _modificationName;
         private int _c;

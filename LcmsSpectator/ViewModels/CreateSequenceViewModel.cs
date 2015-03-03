@@ -81,7 +81,7 @@ namespace LcmsSpectator.ViewModels
                 SelectedCharge = prsm.Charge;
             });
 
-            Modifications = new ReactiveList<Modification>(Modification.CommonModifications);
+            Modifications = IcParameters.Instance.RegisteredModifications;
         }
 
         #region Public Properties

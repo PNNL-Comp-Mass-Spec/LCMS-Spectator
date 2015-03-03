@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -181,7 +182,23 @@ namespace LcmsSpectator.Config
         {
             get { return _etdIonTypes; }
             set { this.RaiseAndSetIfChanged(ref _etdIonTypes, value); }
-        } 
+        }
+
+        public ReactiveList<Modification> RegisteredModifications { get; private set; }
+
+        public Modification RegisterModification(string modName, Composition composition)
+        {
+            var mod = Modification.RegisterAndGetModification(modName, composition);
+            RegisteredModifications.Add(mod);
+            return mod;
+        }
+
+        public Modification RegisterModification(string modName, double mass)
+        {
+            var mod = Modification.RegisterAndGetModification(modName, mass);
+            RegisteredModifications.Add(mod);
+            return mod;
+        }
 
         private IcParameters()
         {
@@ -215,6 +232,8 @@ namespace LcmsSpectator.Config
             AutomaticallySelectIonTypes = true;
             CidHcdIonTypes = new List<BaseIonType>{BaseIonType.B, BaseIonType.Y};
             EtdIonTypes = new List<BaseIonType>{BaseIonType.C, BaseIonType.Z};
+
+            RegisteredModifications = new ReactiveList<Modification>(Modification.CommonModifications);
         }
 
         private static IcParameters _instance;

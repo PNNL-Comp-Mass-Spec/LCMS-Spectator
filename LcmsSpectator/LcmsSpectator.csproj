@@ -233,6 +233,7 @@
     <Compile Include="TaskServices\MockTaskService.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\IonUtils.cs" />
+    <Compile Include="Utils\NotConverter.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
