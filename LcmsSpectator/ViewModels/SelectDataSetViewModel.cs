@@ -34,8 +34,8 @@ namespace LcmsSpectator.ViewModels
             
             // Ok command is only available if RawFilePath isn't empty or SelectedDataSet isn't null
             var okCommand = ReactiveCommand.Create(
-                        this.WhenAnyValue(x => x.RawFilePath, x => x.SelectedDataSet)
-                            .Select(p => (!String.IsNullOrEmpty(p.Item1) || p.Item2 != null)));
+                        this.WhenAnyValue(x => x.RawFilePath, x => x.SelectedDataSet, x => x.RawPathSelected, x => x.DatasetSelected)
+                            .Select(p => ((p.Item3 && !String.IsNullOrEmpty(p.Item1)) || (p.Item4 && p.Item2 != null))));
             okCommand.Subscribe(_ => Ok());
             OkCommand = okCommand;
 
@@ -43,7 +43,8 @@ namespace LcmsSpectator.ViewModels
             cancelCommand.Subscribe(_ => Cancel());
             CancelCommand = cancelCommand;
 
-
+            RawPathSelected = true;
+            DatasetSelected = false;
 
             Status = false;
         }
@@ -58,6 +59,20 @@ namespace LcmsSpectator.ViewModels
         {
             get { return _rawFilePath; }
             set { this.RaiseAndSetIfChanged(ref _rawFilePath, value); }
+        }
+
+        private bool _datasetSelected;
+        public bool DatasetSelected
+        {
+            get { return _datasetSelected; }
+            set { this.RaiseAndSetIfChanged(ref _datasetSelected, value); }
+        }
+
+        private bool _rawPathSelected;
+        public bool RawPathSelected
+        {
+            get { return _rawPathSelected; }
+            set { this.RaiseAndSetIfChanged(ref _rawPathSelected, value); }
         }
 
         private void BrowseRawFiles()

@@ -6,6 +6,7 @@ using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;
 using ReactiveUI;
 
@@ -189,14 +190,14 @@ namespace LcmsSpectator.Config
         public Modification RegisterModification(string modName, Composition composition)
         {
             var mod = Modification.RegisterAndGetModification(modName, composition);
-            RegisteredModifications.Add(mod);
+            GuiInvoker.Invoke(() => RegisteredModifications.Add(mod));
             return mod;
         }
 
         public Modification RegisterModification(string modName, double mass)
         {
             var mod = Modification.RegisterAndGetModification(modName, mass);
-            RegisteredModifications.Add(mod);
+            GuiInvoker.Invoke(() => RegisteredModifications.Add(mod));
             return mod;
         }
 

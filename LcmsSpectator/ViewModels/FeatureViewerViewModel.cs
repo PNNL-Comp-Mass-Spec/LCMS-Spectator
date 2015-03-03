@@ -30,7 +30,7 @@ namespace LcmsSpectator.ViewModels
             {
                 Title = "Isotopic Envelope"
             };
-            IsotopicEnvelope.GenerateYAxis("Relative Intensity", "");
+            IsotopicEnvelope.GenerateYAxis("Relative Intensity", "0e0");
             _isotopicEnvelopeExpanded = false;
             _isLoading = false;
             FeatureMap.MouseDown += FeatureMap_MouseDown;
@@ -796,7 +796,6 @@ namespace LcmsSpectator.ViewModels
             _ipxAxis.Maximum = max;
             _ipxAxis.AbsoluteMaximum = absMax;
             _ipxAxis.Zoom(min, max);
-            IsotopicEnvelope.AdjustForZoom();
 
             IsotopicEnvelope.IsLegendVisible = true;
             IsotopicEnvelopeExpanded = true;
@@ -818,7 +817,7 @@ namespace LcmsSpectator.ViewModels
             var maxAbundance = Math.Pow(abundanceThreshold, 10);
             if (features == null) return new List<Feature>();
             var filteredFeatures =
-                features.Where(feature => feature.MinPoint.Abundance <= maxAbundance && feature.MinPoint.Score >= scoreThreshold)
+                features.Where(feature => feature.MinPoint.Abundance <= maxAbundance) //&& feature.MinPoint.Score >= scoreThreshold)
                          .OrderByDescending(feature => feature.MinPoint.Abundance).ToList();
             var numDisplayed = Math.Min(pointsDisplayed, filteredFeatures.Count);
             var topNPoints = filteredFeatures.GetRange(0, numDisplayed);
