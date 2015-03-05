@@ -18,7 +18,7 @@ namespace LcmsSpectator.ViewModels
     {
         public ErrorMapViewModel()
         {
-            PlotModel = new PlotModel { Title = "Error Map", SelectionColor = OxyColors.White };
+            PlotModel = new PlotModel { Title = "Error Map" };
 
             _heighMultiplier = 15;
 
@@ -161,7 +161,7 @@ namespace LcmsSpectator.ViewModels
                 Data = data,
                 Interpolate = false,
                 X0 = 0,
-                X1 = data.GetLength(0),
+                X1 = data.GetLength(0)-1,
                 Y0 = 0,
                 Y1 = data.GetLength(1)-1,
                 TrackerFormatString = 
