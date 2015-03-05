@@ -737,7 +737,7 @@ namespace LcmsSpectator.ViewModels
             IsLoading = true;
             //var theoIsotopeProfile = Averagine.GetTheoreticalIsotopeProfile(_selectedFeaturePoint.Mass, _selectedFeaturePoint.Charge);
             var envelope = Averagine.GetIsotopomerEnvelope(_selectedFeaturePoint.Mass);
-            var peakMap = new Dictionary<int, Peak>();
+            var peakMap = new Dictionary<int, PeakDataPoint>();
             //const double relativeIntensityThreshold = 0.1;
 
             for (var isotopeIndex = 0; isotopeIndex < envelope.Envolope.Length; isotopeIndex++)
@@ -746,13 +746,13 @@ namespace LcmsSpectator.ViewModels
                 //if (intensity < relativeIntensityThreshold) continue;
                 var mz = Ion.GetIsotopeMz(_selectedFeaturePoint.Mass, _selectedFeaturePoint.Charge, isotopeIndex);
                 var mass = (mz*_selectedFeaturePoint.Charge*Constants.Proton) - _selectedFeaturePoint.Charge*Constants.Proton;
-                peakMap.Add(isotopeIndex, new Peak(mass, intensity));
+                peakMap.Add(isotopeIndex, new PeakDataPoint(mass, intensity, 0.0, 0.0, ""));
             }
 
             IsotopicEnvelope.Series.Clear();
 
-            var min = peakMap.Values.Min(p => p.Mz);
-            var max = peakMap.Values.Max(p => p.Mz);
+            var min = peakMap.Values.Min(p => p.X);
+            var max = peakMap.Values.Max(p => p.X);
 
             min -= (max - min)/3;
             var absMin = Math.Max(0, min - 10);
@@ -763,23 +763,25 @@ namespace LcmsSpectator.ViewModels
             {
                 Title = "Theoretical",
                 ItemsSource = peakMap.Values,
-                Mapping = p => new DataPoint(((Peak)p).Mz, ((Peak)p).Intensity),
+                //Mapping = p => new DataPoint(((Peak)p).Mz, ((Peak)p).Intensity),
                 Color = OxyColor.FromArgb(120, 0, 0, 0),
                 StrokeThickness = 3.0
             };
 
-            foreach (Peak p in peakMap.Values)
-            {
-                theoSeries.Points.Add(new DataPoint(p.Mz, p.Intensity));
-            }
+            //foreach (Peak p in peakMap.Values)
+            //{
+            //    theoSeries.Points.Add(new DataPoint(p.Mz, p.Intensity));
+            //}
 
             IsotopicEnvelope.Series.Add(theoSeries);
+
+            var isotopePeaks = isotopes.Select(i => new PeakDataPoint(peakMap[i.Index].X, i.Ratio, 0.0, 0.0, ""){Index = i.Index});
 
             var actSeries = new PeakPointSeries
             {
                 Title = "Observed",
-                ItemsSource = isotopes,
-                Mapping = p => new DataPoint(peakMap[((Isotope)p).Index].Mz, ((Isotope)p).Ratio),
+                ItemsSource = isotopePeaks,
+                //Mapping = p => new DataPoint(peakMap[((Isotope)p).Index].X, ((Isotope)p).Ratio),
                 Color = OxyColor.FromArgb(120, 255, 0, 0),
                 StrokeThickness = 3.0,
                 TrackerFormatString =

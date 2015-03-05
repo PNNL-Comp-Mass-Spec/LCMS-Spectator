@@ -18,9 +18,9 @@ namespace LcmsSpectator.ViewModels
     {
         public ErrorMapViewModel()
         {
-            PlotModel = new PlotModel { Title = "Error Map" };
+            PlotModel = new PlotModel { Title = "Error Map", SelectionColor = OxyColors.White };
 
-            _heighMultiplier = 12;
+            _heighMultiplier = 15;
 
             _xAxis = new LinearAxis
             {
@@ -31,7 +31,10 @@ namespace LcmsSpectator.ViewModels
                 IsZoomEnabled = false,
                 IsPanEnabled = false,
                 MajorStep = 1.0,
-                MinorTickSize = 0,
+                MajorTickSize = 0,
+                MinorStep = 0.5,
+                MinorTickSize = 20,
+                MaximumPadding = 0,
             };
 
             _yAxis = new LinearAxis
@@ -43,8 +46,10 @@ namespace LcmsSpectator.ViewModels
                 IsZoomEnabled = false,
                 IsPanEnabled = false,
                 MajorStep = 1.0,
-                MinorTickSize = 0,
-                FontSize = 9
+                MajorTickSize = 0,
+                MinorStep = 0.5,
+                MinorTickSize = 20,
+                MaximumPadding = 0,
             };
 
             PlotModel.Axes.Add(_xAxis);
@@ -56,6 +61,12 @@ namespace LcmsSpectator.ViewModels
                 .Where(x => x.Item1 != null && x.Item2 != null)
                 .Select(x => GetDataArray(x.Item2))
                 .Subscribe(BuildPlotModel);
+
+            // When data points change, update data table
+            this.WhenAnyValue(x => x.DataPoints)
+                .Select(dataPoints => dataPoints.Where(dp => !dp.Error.Equals(Double.NaN)))
+                .Select(filteredTable => new ReactiveList<PeakDataPoint>(filteredTable))
+                .ToProperty(this, x => x.DataTable, out _dataTable, new ReactiveList<PeakDataPoint>());
 
             // When sequence changes, adjust plot height
             this.WhenAnyValue(x => x.Sequence)
@@ -99,6 +110,15 @@ namespace LcmsSpectator.ViewModels
             set { this.RaiseAndSetIfChanged(ref _peakDataPoints, value); }
         }
 
+        private readonly ObservableAsPropertyHelper<ReactiveList<PeakDataPoint>> _dataTable;
+        /// <summary>
+        /// The data that is shown in the "Table" view. This excludes any fragments without data.
+        /// </summary>
+        public ReactiveList<PeakDataPoint> DataTable
+        {
+            get { return _dataTable.Value; }
+        }
+
         private Sequence _sequence;
         /// <summary>
         /// The sequence to display
@@ -126,7 +146,7 @@ namespace LcmsSpectator.ViewModels
             var colorAxis = new LinearColorAxis
             {
                 Title = "Error",
-                Position = AxisPosition.Bottom,
+                Position = AxisPosition.Right,
                 Palette = OxyPalette.Interpolate(1000, new[] { minColor, maxColor }),
                 AbsoluteMinimum = 0,
                 Minimum = -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
@@ -141,9 +161,13 @@ namespace LcmsSpectator.ViewModels
                 Data = data,
                 Interpolate = false,
                 X0 = 0,
-                X1 = data.GetLength(1),
+                X1 = data.GetLength(0),
                 Y0 = 0,
-                Y1 = data.GetLength(0)-3
+                Y1 = data.GetLength(1)-1,
+                TrackerFormatString = 
+                        "{1}: {2:0}" + Environment.NewLine +
+                        "{3}: {4:0}" + Environment.NewLine +
+                        "{5}: {6:0.###}ppm",
             };
             PlotModel.Series.Add(heatMapSeries);
 
@@ -152,7 +176,6 @@ namespace LcmsSpectator.ViewModels
             var revSequence = new Sequence(Sequence);
             revSequence.Reverse();
 
-            _yAxis.AbsoluteMaximum = Sequence.Count;
             _yAxis.LabelFormatter = y => revSequence[Math.Max(Math.Min((int) y, revSequence.Count-1), 0)]
                                          .Residue.ToString(CultureInfo.InvariantCulture);
 
@@ -180,7 +203,7 @@ namespace LcmsSpectator.ViewModels
                 points.Insert(position, dataPoint.Error);
             }
 
-            var data = new double[Sequence.Count, dataDict.Keys.Count];
+            var data = new double[dataDict.Keys.Count, Sequence.Count];
 
             _ionTypes = dataDict.Keys.ToArray();
             for (int i = 0; i < Sequence.Count - 1; i++)
@@ -189,7 +212,7 @@ namespace LcmsSpectator.ViewModels
                 {
                     var value = dataDict[_ionTypes[j]][i];
                     if (value.Equals(Double.NaN)) value = -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue()-1;
-                    data[i, j] = value;
+                    data[j, i] = value;
                 }
             }
             return data;

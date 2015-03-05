@@ -16,9 +16,10 @@
             </ScrollViewer>
         </TabItem>
         <TabItem Header="Table">
-            <DataGrid ItemsSource="{Binding DataPoints}" AutoGenerateColumns="False">
+            <DataGrid ItemsSource="{Binding DataTable}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Residue" Binding="{Binding Residue}" />
+                    <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
                     <DataGridTextColumn Header="Ion" Binding="{Binding IonType.Name}" />
                     <DataGridTextColumn Header="M/Z" Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" />
                     <DataGridTextColumn Header="Intensity" Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" />
