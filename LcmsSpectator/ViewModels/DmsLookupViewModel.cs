@@ -170,7 +170,6 @@ namespace LcmsSpectator.ViewModels
                     if (!Int32.TryParse(parts[1], out numWeeks)) continue;
                     _previousResultsList.Add(new Tuple<string, int>(dataSetName, numWeeks));
                     if (!prevResults.ContainsKey(dataSetName)) prevResults.Add(dataSetName, numWeeks);
-                    else prevResults[dataSetName] = numWeeks;
                 }
             }
             PreviousDatasets = prevResults;
