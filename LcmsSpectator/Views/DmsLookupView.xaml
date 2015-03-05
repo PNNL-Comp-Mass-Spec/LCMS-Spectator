@@ -49,11 +49,11 @@
                         <KeyBinding Key="Enter" Command="{Binding LookupCommand}" />
                     </TextBox.InputBindings>
                 </TextBox>
-                <TextBox Grid.Row="1" Grid.Column="1" Height="25" Text="{Binding DatasetFilter, UpdateSourceTrigger=PropertyChanged}">
-                    <TextBox.InputBindings>
+                <ComboBox Grid.Row="1" Grid.Column="1" Height="25" IsReadOnly="False" IsEditable="True" ItemsSource="{Binding PreviousDatasets.Keys}" Text="{Binding DatasetFilter, UpdateSourceTrigger=PropertyChanged}">
+                    <ComboBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding LookupCommand}" />
-                    </TextBox.InputBindings>
-                </TextBox>
+                    </ComboBox.InputBindings>
+                </ComboBox>
 
                 <Button Grid.Row="1" Grid.Column="2" Command="{Binding LookupCommand}" Height="25">Search</Button>
 
