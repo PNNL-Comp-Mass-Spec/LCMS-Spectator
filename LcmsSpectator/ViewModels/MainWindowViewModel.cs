@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Composition;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Models;
@@ -111,6 +112,9 @@ namespace LcmsSpectator.ViewModels
 
             ShowSplash = true;
             FileOpen = false;
+
+            // Warm up Informed Proteomics
+            Task.Run(() => Averagine.GetIsotopomerEnvelopeFromNominalMass(50000));
         }
 
         /// <summary>
