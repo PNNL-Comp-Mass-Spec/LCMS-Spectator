@@ -325,6 +325,7 @@ namespace LcmsSpectator.ViewModels
                 if (textAnnotation != null && textAnnotation.Text == label && selectedlineseries != null)
                 {
                     textAnnotation.TextColor = labeledIonVm.Selected ? selectedlineseries.Color : OxyColors.Transparent;
+                    textAnnotation.Background = labeledIonVm.Selected ? OxyColors.White : OxyColors.Transparent;
                     PlotModel.InvalidatePlot(true);
                 }
             }
