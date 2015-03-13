@@ -17,26 +17,31 @@ namespace LcmsSpectator.ViewModels
             PrevMs1SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
             NextMs1SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
 
+            // When prev ms1 spectrum plot is zoomed/panned, next ms1 spectrum plot should zoom/pan
             _isAxisInternalChange = false;
             PrevMs1SpectrumViewModel.XAxis.AxisChanged += (o, e) =>
             {
                 if (_isAxisInternalChange) return;
                 _isAxisInternalChange = true;
-                Secondary2ViewModel.XAxis.Zoom(Secondary1ViewModel.XAxis.ActualMinimum, Secondary1ViewModel.XAxis.ActualMaximum);
+                NextMs1SpectrumViewModel.XAxis.Zoom(PrevMs1SpectrumViewModel.XAxis.ActualMinimum, PrevMs1SpectrumViewModel.XAxis.ActualMaximum);
                 _isAxisInternalChange = false;
             };
 
+            // When next ms1 spectrum plot is zoomed/panned, prev ms1 spectrum plot should zoom/pan
             NextMs1SpectrumViewModel.XAxis.AxisChanged += (o, e) =>
             {
                 if (_isAxisInternalChange) return;
                 _isAxisInternalChange = true;
-                Secondary1ViewModel.XAxis.Zoom(Secondary2ViewModel.XAxis.ActualMinimum, Secondary2ViewModel.XAxis.ActualMaximum);
+                PrevMs1SpectrumViewModel.XAxis.Zoom(NextMs1SpectrumViewModel.XAxis.ActualMinimum, NextMs1SpectrumViewModel.XAxis.ActualMaximum);
                 _isAxisInternalChange = false;
             };
 
+            // By default, MS2 Spectrum is shown in the primary view
             PrimarySpectrumViewModel = Ms2SpectrumViewModel;
             Secondary1ViewModel = PrevMs1SpectrumViewModel;
             Secondary2ViewModel = NextMs1SpectrumViewModel;
+
+            // Wire commands to swap the spectrum that is shown in the primary view
 
             var swapSecondary1Command = ReactiveCommand.Create();
             swapSecondary1Command.Subscribe(_ => SwapSecondary1());
@@ -127,6 +132,7 @@ namespace LcmsSpectator.ViewModels
 
             if (primary is ProductSpectrum)
             {
+                // The primary spectrum we want to show is an MS/MS spectrum
                 primaryTitle = "MS/MS Spectrum";
                 secondary1Title = "Previous Ms1 Spectrum";
                 secondary2Title = "Next Ms1 Spectrum";
@@ -135,10 +141,12 @@ namespace LcmsSpectator.ViewModels
             }
             else
             {
+                // The primary spectrum that we want to show is a MS1 spectrum
                 primary = FindNearestMs2Spectrum(scan, precursorMz, _lcms);
                 if (primary == null) return;
                 if (primary.ScanNum < scan)
                 {
+                    // The primary spectrum scan is above the ms/ms spectrum scan that we selected
                     primaryTitle = "Previous MS1 Spectrum";
                     secondary1Title = "Previous Ms1 Spectrum";
                     secondary2Title = "Ms1 Spectrum";
@@ -147,6 +155,7 @@ namespace LcmsSpectator.ViewModels
                 }
                 else
                 {
+                    // The primary spectrum scan is below the ms/ms spectrum scan that we selected
                     primaryTitle = "Next MS/MS Spectrum";
                     secondary1Title = "MS1 Spectrum";
                     secondary2Title = "Next MS1 Spectrum";
@@ -169,6 +178,10 @@ namespace LcmsSpectator.ViewModels
             NextMs1SpectrumViewModel.Title = secondary2 == null ? "" : String.Format("{0} (Scan: {1})", secondary2Title, secondary2.ScanNum);
         }
 
+        /// <summary>
+        /// Swap the spectrum that is shown in the primary view with spectrum shown in the
+        /// first secondary view
+        /// </summary>
         public void SwapSecondary1()
         {
             var primary = PrimarySpectrumViewModel;
@@ -179,6 +192,10 @@ namespace LcmsSpectator.ViewModels
             Secondary1ViewModel = primary;
         }
 
+        /// <summary>
+        /// Swap the spectrum that is shown in the primary view with spectrum shown in the
+        /// second secondary view
+        /// </summary>
         public void SwapSecondary2()
         {
             var primary = PrimarySpectrumViewModel;
@@ -227,6 +244,7 @@ namespace LcmsSpectator.ViewModels
             double highDist = 0.0;
             while (!found)
             {
+                // look for spectrum in the lower part of the scan range
                 highScan = lcms.GetNextScanNum(highScan, 2);
                 if (highScan == lcms.MaxLcScan + 1)
                 {
@@ -250,6 +268,7 @@ namespace LcmsSpectator.ViewModels
             double lowDist = 0.0;
             while (!found)
             {
+                // look for spectrum in the higher part of the scan range
                 lowScan = lcms.GetPrevScanNum(lowScan, 2);
                 if (lowScan == lcms.MinLcScan - 1)
                 {
