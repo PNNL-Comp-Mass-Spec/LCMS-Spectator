@@ -12,7 +12,7 @@
         </Grid.RowDefinitions>
         <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                    IsReadOnly="True" RowHeaderWidth="0" Grid.Row="0"
-                   ItemsSource="{Binding FragmentLabels}">
+                   ItemsSource="{Binding FragmentLabels}" EnableRowVirtualization="False">
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">
                     <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -24,7 +24,7 @@
         </DataGrid>
         <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                    ItemsSource="{Binding PrecursorLabels}"
-                   IsReadOnly="True" RowHeaderWidth="0" Grid.Row="1">
+                   IsReadOnly="True" RowHeaderWidth="0" Grid.Row="1" EnableRowVirtualization="False">
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">
                     <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
