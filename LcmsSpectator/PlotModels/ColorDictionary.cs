@@ -106,6 +106,16 @@ namespace LcmsSpectator.PlotModels
                 {9, OxyColors.Olive},
                 {10, OxyColors.Beige},
                 {11, OxyColors.Lime},
+                {12, OxyColors.Salmon},
+                {13, OxyColors.MintCream},
+                {14, OxyColors.SteelBlue},
+                {15, OxyColors.Violet},
+                {16, OxyColors.Blue},
+                {17, OxyColors.Navy},
+                {18, OxyColors.Red},
+                {19, OxyColors.SpringGreen},
+                {20, OxyColors.Gold},
+                {21, OxyColors.DarkOrange}
             };
         }
 
