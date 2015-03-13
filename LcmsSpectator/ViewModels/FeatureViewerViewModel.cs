@@ -542,7 +542,7 @@ namespace LcmsSpectator.ViewModels
             var maxAbundance = filteredFeatures.Max(f => f.MaxPoint.Abundance);
             //var minScore = Math.Max(filteredFeatures.Min(f => f.MinPoint.Score), ScoreThreshold);
             const int numColors = 5000;
-            var minColor = OxyColor.FromRgb(255, 220, 233);
+            var minColor = OxyColor.FromRgb(255, 160, 160);
             var midColor = OxyColor.FromRgb(255, 0, 0);
             var maxColor = OxyColor.FromRgb(150, 0, 0);
             var colorAxis = new LinearColorAxis     // Color axis for features
