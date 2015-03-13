@@ -538,20 +538,22 @@ namespace LcmsSpectator.ViewModels
             }
             int medianAbundanceIndex = filteredFeatures.Count/2;
             var medianAbundance = filteredFeatures[medianAbundanceIndex].MinPoint.Abundance;
-            var minScore = Math.Max(filteredFeatures.Min(f => f.MinPoint.Score), ScoreThreshold);
+            var minAbundance = filteredFeatures.Min(f => f.MinPoint.Abundance);
+            var maxAbundance = filteredFeatures.Max(f => f.MaxPoint.Abundance);
+            //var minScore = Math.Max(filteredFeatures.Min(f => f.MinPoint.Score), ScoreThreshold);
             const int numColors = 5000;
             var minColor = OxyColor.FromRgb(255, 220, 233);
             var midColor = OxyColor.FromRgb(255, 0, 0);
             var maxColor = OxyColor.FromRgb(150, 0, 0);
             var colorAxis = new LinearColorAxis     // Color axis for features
             {
-                Title = "Score",
+                Title = "Abundance",
                 Position = AxisPosition.Right,
                 Palette = OxyPalette.Interpolate(numColors, new[] { minColor, midColor, maxColor }),
-                AbsoluteMinimum = minScore,
-                Minimum = minScore,
-                Maximum = 1.0,
-                AbsoluteMaximum = 1.0,
+                AbsoluteMinimum = minAbundance,
+                Minimum = minAbundance,
+                Maximum = maxAbundance,
+                AbsoluteMaximum = maxAbundance,
             };
             var ms2ColorAxis = new LinearColorAxis      // Color axis for ms2s
             {
@@ -622,7 +624,7 @@ namespace LcmsSpectator.ViewModels
                     FeatureMap.Series.Add(ms2Series);   
                 }
                 // Add feature
-                var colorIndex = 1 + (int)((feature1.MinPoint.Score - minScore) / (1.0 - minScore) * colors.Count);
+                var colorIndex = 1 + (int)((feature1.MinPoint.Abundance - minAbundance) / (maxAbundance - minAbundance) * colors.Count);
                 if (colorIndex < 1) colorIndex = 1;
                 if (colorIndex >= colors.Count) colorIndex = colors.Count - 1;
                 var c = colors[colorIndex];
