@@ -347,6 +347,7 @@ namespace LcmsSpectator.ViewModels
                 if (peak != null && peak.IonType != null && peak.IonType.Name != "Precursor")
                 {
                     var index = peak.Index - 1;
+                    if (!peak.IonType.BaseIonType.IsPrefix) index = Sequence.Count - 1 - index;
                     if (sequence != null && index >= 0 && index <= sequence.Count - 1) peak.Residue = sequence[index].Residue;
                     mostAbundantPeaks.Add(peak);   
                 }
