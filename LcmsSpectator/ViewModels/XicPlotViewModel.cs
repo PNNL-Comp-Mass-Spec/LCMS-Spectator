@@ -91,13 +91,21 @@ namespace LcmsSpectator.ViewModels
                 .Select(x => x.Sender)
                 .Subscribe(LabeledIonSelectedChanged));
 
+            this.WhenAnyValue(x => x.ShowPointMarkers)
+                .Select(showPointMarkers => showPointMarkers ? MarkerType.Circle : MarkerType.None)
+                .Subscribe(
+                    markerType =>
+                        {
+                            foreach (var lineSeries in this.PlotModel.Series.OfType<LineSeries>()) lineSeries.MarkerType = markerType;
+                            PlotModel.InvalidatePlot(true);
+                        });
+
             // Update plot when settings change
             IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold, x => x.ProductIonTolerancePpm)
                 .Where(_ => Ions != null)
                 .Throttle(TimeSpan.FromMilliseconds(250), RxApp.TaskpoolScheduler)
                 .SelectMany(async x => await GetXicDataPointsAsync(Ions, PointsToSmooth, false))
                 .Subscribe(UpdatePlotModel);
-
         }
 
         #region Public Properties
@@ -189,6 +197,16 @@ namespace LcmsSpectator.ViewModels
         {
             get { return _plotTitle; }
             private set { this.RaiseAndSetIfChanged(ref _plotTitle, value); }
+        }
+
+        private bool _showPointMarkers;
+        /// <summary>
+        /// Toggles whether or not point markers are displayed on the XIC plot.
+        /// </summary>
+        public bool ShowPointMarkers
+        {
+            get { return _showPointMarkers; }            
+            set { this.RaiseAndSetIfChanged(ref _showPointMarkers, value); }
         }
 #endregion
 

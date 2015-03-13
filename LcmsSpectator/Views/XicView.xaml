@@ -30,9 +30,9 @@
             <wpf:PlotView Grid.Column="1" Name="FragmentIonXic" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
+                        <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowPointMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
-                        <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                        <MenuItem Header="Save as _Image" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
                 <wpf:PlotView.InputBindings>
@@ -55,9 +55,9 @@
             <wpf:PlotView Grid.Column="0" Name="HeavyFragmentIonXic" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
+                        <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowPointMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
-                        <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                        <MenuItem Header="Save as _Image" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
                 <wpf:PlotView.InputBindings>
@@ -81,9 +81,9 @@
             <wpf:PlotView Name="PrecursorIonXic" Grid.Column="1" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
+                        <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowPointMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
-                        <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                        <MenuItem Header="Save as _Image" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
                 <wpf:PlotView.InputBindings>
@@ -106,9 +106,9 @@
             <wpf:PlotView Name="HeavyPrecursorIonXic" Grid.Column="0" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowScanMarkers, Mode=TwoWay}" />
+                        <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowPointMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
-                        <MenuItem Header="Save as _Png" Command="{Binding SaveAsImageCommand}" />
+                        <MenuItem Header="Save as _Image" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
                 <wpf:PlotView.InputBindings>
