@@ -75,7 +75,9 @@ namespace LcmsSpectator.Utils
 
         public static LabeledIon GetLabeledPrecursorIon(Sequence sequence, int charge, int isotopeIndex = 0)
         {
+            #pragma warning disable 0618
             var precursorIonType = new IonType("Precursor", Composition.H2O, charge, false);
+            #pragma warning restore 0618
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             return new LabeledIon(composition, isotopeIndex, precursorIonType, false);
         }
