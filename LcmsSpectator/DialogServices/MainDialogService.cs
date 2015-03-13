@@ -85,7 +85,7 @@ namespace LcmsSpectator.DialogServices
 
         public void OpenErrorMapWindow(ErrorMapViewModel errorMapViewModel)
         {
-            var errorMapWindow = new ErrorMapWindow{DataContext = errorMapViewModel, Height=950, Width=900};
+            var errorMapWindow = new ErrorMapWindow{DataContext = errorMapViewModel, Height=1000, Width=1400};
             errorMapWindow.Show();
         }
     }
