@@ -212,7 +212,9 @@ namespace LcmsSpectator.ViewModels
             if (SelectedPrSm.Sequence.Count == 0) return ions;
             var sequence = SelectedPrSm.Sequence;
             if (labelModifications != null) sequence = IonUtils.GetHeavySequence(sequence, labelModifications);
+            #pragma warning disable 0618
             var precursorIonType = new IonType("Precursor", Composition.H2O, SelectedPrSm.Charge, false);
+            #pragma warning restore 0618
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             var relativeIntensities = composition.GetIsotopomerEnvelope();
             var indices = new List<int> { -1 };
@@ -241,7 +243,9 @@ namespace LcmsSpectator.ViewModels
                 var index = i - minCharge;
                 if (index == 0) index = SelectedPrSm.Charge - minCharge;
                 if (i == SelectedPrSm.Charge) index = 0;         // guarantee that actual charge is index 0
+                #pragma warning disable 0618
                 var precursorIonType = new IonType("Precursor", Composition.H2O, i, false);
+                #pragma warning restore 0618
                 ions.Add(new LabeledIonViewModel(composition, precursorIonType, false, _lcms, null, true, index));
             }
             return ions;
