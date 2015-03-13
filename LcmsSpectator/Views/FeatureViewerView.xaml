@@ -51,10 +51,10 @@
                 <ScrollViewer Grid.Row="1" VerticalAlignment="Top"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <Grid Margin="10,0,0,0">
+                    <Grid Margin="10,0,10,0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120" />
-                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition MinWidth="120" Width="*" />
+                            <ColumnDefinition MinWidth="70" Width="*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="20" />
@@ -67,25 +67,25 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock  Grid.Row="0" Grid.Column="0" FontWeight="Bold">Feature ID:</TextBlock>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedFeature.Id, Converter={StaticResource NumFormatter}}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedFeature.Id, Converter={StaticResource NumFormatter}}" HorizontalAlignment="Right" />
 
                         <TextBlock  Grid.Row="1" Grid.Column="0" FontWeight="Bold">Probability:</TextBlock>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedFeature.Score, Converter={StaticResource ScoreFormatter}}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedFeature.Score, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
 
                         <TextBlock Grid.Row="2" Grid.Column="0"  FontWeight="Bold">Summed Correlation:</TextBlock>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedFeature.Correlation, Converter={StaticResource ScoreFormatter}}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedFeature.Correlation, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
 
                         <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">Scan:</TextBlock>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedFeature.Scan}" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedFeature.Scan}" HorizontalAlignment="Right"  />
 
                         <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold">Retention Time:</TextBlock>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedFeature.RetentionTime, Converter={StaticResource ScoreFormatter}}" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedFeature.RetentionTime, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
 
                         <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Mass:</TextBlock>
-                        <TextBlock Grid.Row="5" Grid.Column="1"  Text="{Binding SelectedFeature.Mass, Converter={StaticResource ScoreFormatter}}" />
+                        <TextBlock Grid.Row="5" Grid.Column="1"  Text="{Binding SelectedFeature.Mass, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
 
                         <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Abundance:</TextBlock>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SelectedFeature.Abundance, Converter={StaticResource ScoreFormatter}}" />
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SelectedFeature.Abundance, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
                     </Grid>
                 </ScrollViewer>
             </Grid>
@@ -124,12 +124,12 @@
                             <RepeatButton Content="˅" Name="Down" Height="15.5" Width="20" FontSize="10" Click="DownClicked" />
                         </StackPanel>
                     </StackPanel>
-                    <Slider Grid.Column="1" Grid.Row="0" Margin="0,0,5,0"
+                    <Slider Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2"  Margin="0,0,5,0"
                 Value="{Binding AbundanceThreshold, Mode=TwoWay}" Orientation="Horizontal"
                 Maximum="{Binding MaximumAbundanceThreshold, Mode=TwoWay}" Minimum="{Binding MinimumAbundanceThreshold, Mode=TwoWay}"
                 TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft" ToolTip="Abundance Threshold (Log10)"
                 TickFrequency="0.5" IsSnapToTickEnabled="True" />
-                    <TextBlock Grid.Row="1" Grid.Column="1"  TextAlignment="Center" FontSize="10" VerticalAlignment="Top">Maximum Abundance (Log10)</TextBlock>
+                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2"  Grid.Column="1"  TextAlignment="Center" FontSize="10" VerticalAlignment="Top">Maximum Abundance (Log10)</TextBlock>
                     <!--<Slider Grid.Column="2" Grid.Row="0" Margin="5,0,0,0"
             Value="{Binding ScoreThreshold, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="1"
                 IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
