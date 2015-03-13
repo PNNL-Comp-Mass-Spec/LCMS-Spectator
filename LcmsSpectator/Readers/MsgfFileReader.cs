@@ -7,6 +7,8 @@ using LcmsSpectator.Readers.SequenceReaders;
 
 namespace LcmsSpectator.Readers
 {
+    using System.Threading;
+
     public class MsgfFileReader: IIdFileReader
     {
         public MsgfFileReader(string tsvFile)
@@ -49,10 +51,8 @@ namespace LcmsSpectator.Readers
         {
             var expectedHeaders = new List<string>
             {
-                "SpecEValue",
                 "Protein",
                 "Peptide",
-                "ScanNum",
                 "Charge",
                 "QValue",
             };
@@ -63,7 +63,15 @@ namespace LcmsSpectator.Readers
             }
 
             var parts = line.Split('\t');
-            var score = Convert.ToDouble(parts[headers["SpecEValue"]]);
+
+            int scoreIndex;
+            double score = 0;
+            if (headers.TryGetValue("SpecEValue", out scoreIndex)) score = Convert.ToDouble(parts[scoreIndex]);
+            else if (headers.TryGetValue("MSGFDB_SpecEValue", out scoreIndex)) score = Convert.ToDouble(parts[scoreIndex]);
+
+            int scanIndex, scan=0;
+            if (headers.TryGetValue("ScanNum", out scanIndex)) scan = Convert.ToInt32(parts[scanIndex]);
+            else if (headers.TryGetValue("Scan", out scanIndex)) scan = Convert.ToInt32(parts[scanIndex]);
 
             var proteinNames = parts[headers["Protein"]].Split(';');
             var prsms = new List<PrSm> { Capacity = proteinNames.Length };
@@ -85,12 +93,12 @@ namespace LcmsSpectator.Readers
                 var prsm = new PrSm
                 {
                     Heavy = false,
-                    Scan = Convert.ToInt32(parts[headers["ScanNum"]]),
+                    Scan = scan,
+                    Charge = Convert.ToInt32(parts[headers["Charge"]]),
                     Sequence = sequenceReader.Read(sequenceText),
                     SequenceText = sequenceText,
                     ProteinName = protein,
                     ProteinDesc = "",
-                    Charge = Convert.ToInt32(parts[headers["Charge"]]),
                     Score = score,
                     UseGolfScoring = true,
                     QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),

@@ -10,6 +10,20 @@ namespace LcmsSpectator.Readers.SequenceReaders
     {
         public Sequence Read(string sequence)
         {
+            var firstIndex = sequence.IndexOf('.');
+            if (firstIndex >= 0)
+            {
+                var index = Math.Min(firstIndex + 1, sequence.Length - 1);
+                sequence = sequence.Substring(index, sequence.Length - index - 1);
+            }
+
+            var lastIndex = sequence.LastIndexOf('.');
+            if (lastIndex >= 0)
+            {
+                var index = Math.Min(lastIndex, sequence.Length - 1);
+                sequence = sequence.Substring(0, index);
+            }
+
             const string aminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
             //const string modRegex = @"\[([A-Z]|[a-z])+\]";
             const string modRegex = @"\[([A-Z]|[a-z]|[0-9])+\]";

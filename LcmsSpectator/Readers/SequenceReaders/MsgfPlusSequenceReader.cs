@@ -17,6 +17,20 @@ namespace LcmsSpectator.Readers.SequenceReaders
 
         public Sequence Read(string msgfPlusPeptideStr)
         {
+            var firstIndex = msgfPlusPeptideStr.IndexOf('.');
+            if (firstIndex >= 0)
+            {
+                var index = Math.Min(firstIndex + 1, msgfPlusPeptideStr.Length - 1);
+                msgfPlusPeptideStr = msgfPlusPeptideStr.Substring(index, msgfPlusPeptideStr.Length - index - 1);
+            }
+
+            var lastIndex = msgfPlusPeptideStr.LastIndexOf('.');
+            if (lastIndex >= 0)
+            {
+                var index = Math.Min(lastIndex, msgfPlusPeptideStr.Length - 1);
+                msgfPlusPeptideStr = msgfPlusPeptideStr.Substring(0, index);
+            }
+
             const string aminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
             const string massRegex = @"[+-]?\d+\.\d+";
 
