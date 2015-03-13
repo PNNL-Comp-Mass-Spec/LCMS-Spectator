@@ -18,7 +18,7 @@ namespace LcmsSpectator.ViewModels
     {
         public ErrorMapViewModel()
         {
-            PlotModel = new PlotModel { Title = "Error Map" };
+            PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
 
             _heighMultiplier = 15;
 
@@ -160,10 +160,10 @@ namespace LcmsSpectator.ViewModels
             {
                 Data = data,
                 Interpolate = false,
-                X0 = 0,
-                X1 = data.GetLength(0)-1,
-                Y0 = 0,
-                Y1 = data.GetLength(1)-1,
+                X0 = 1,
+                X1 = data.GetLength(0),
+                Y0 = 1,
+                Y1 = data.GetLength(1)+1,
                 TrackerFormatString = 
                         "{1}: {2:0}" + Environment.NewLine +
                         "{3}: {4:0}" + Environment.NewLine +
@@ -171,12 +171,12 @@ namespace LcmsSpectator.ViewModels
             };
             PlotModel.Series.Add(heatMapSeries);
 
-            _xAxis.LabelFormatter = x => _ionTypes[Math.Min((int) x, _ionTypes.Length-1)].Name;
+            _xAxis.LabelFormatter = x => x.Equals(0) ? " " : _ionTypes[Math.Min((int) x - 1, _ionTypes.Length-1)].Name;
 
             var revSequence = new Sequence(Sequence);
             revSequence.Reverse();
 
-            _yAxis.LabelFormatter = y => revSequence[Math.Max(Math.Min((int) y, revSequence.Count-1), 0)]
+            _yAxis.LabelFormatter = y => y.Equals(0) ? " " : revSequence[Math.Max(Math.Min((int) y - 1, revSequence.Count-1), 0)]
                                          .Residue.ToString(CultureInfo.InvariantCulture);
 
             PlotModel.InvalidatePlot(true);
@@ -197,16 +197,16 @@ namespace LcmsSpectator.ViewModels
 
                 int index = dataPoint.Index;
 
-                if (!dataPoint.IonType.IsPrefixIon) index = Sequence.Count - (dataPoint.Index + 1);
+                if (dataPoint.IonType.IsPrefixIon) index = points.Count - (dataPoint.Index);
 
-                var position = Math.Max(0, Math.Min(Sequence.Count - (index+1), points.Count - 1));
+                var position = Math.Max(0, Math.Min(index, points.Count - 1));
                 points.Insert(position, dataPoint.Error);
             }
 
-            var data = new double[dataDict.Keys.Count, Sequence.Count];
+            var data = new double[dataDict.Keys.Count, Sequence.Count-1];
 
             _ionTypes = dataDict.Keys.ToArray();
-            for (int i = 0; i < Sequence.Count - 1; i++)
+            for (int i = 0; i < Sequence.Count-1; i++)
             {
                 for (int j = 0; j < _ionTypes.Length; j++)
                 {
