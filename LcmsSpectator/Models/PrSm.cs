@@ -225,9 +225,12 @@ namespace LcmsSpectator.Models
                 if (value != null && !value.Equals(_sequence))
                 {
                     _sequence = value;
-                    Mass = _sequence.Mass + Composition.H2O.Mass;
-                    var ion = new Ion(_sequence.Composition + Composition.H2O, Charge);
-                    PrecursorMz = ion.GetMostAbundantIsotopeMz();
+                    if (_sequence.Count > 0)
+                    {
+                        Mass = _sequence.Mass + Composition.H2O.Mass;
+                        var ion = new Ion(_sequence.Composition + Composition.H2O, Charge);
+                        PrecursorMz = ion.GetMostAbundantIsotopeMz();   
+                    }
                 }
                 this.RaisePropertyChanged();
             }
