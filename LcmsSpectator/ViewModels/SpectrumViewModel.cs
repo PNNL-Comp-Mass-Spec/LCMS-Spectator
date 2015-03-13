@@ -26,7 +26,7 @@ namespace LcmsSpectator.ViewModels
                 _isAxisInternalChange = false;
             };
 
-            PrevMs1SpectrumViewModel.XAxis.AxisChanged += (o, e) =>
+            NextMs1SpectrumViewModel.XAxis.AxisChanged += (o, e) =>
             {
                 if (_isAxisInternalChange) return;
                 _isAxisInternalChange = true;
