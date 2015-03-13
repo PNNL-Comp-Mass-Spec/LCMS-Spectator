@@ -91,6 +91,7 @@ namespace LcmsSpectator.ViewModels
                 .Select(x => x.Sender)
                 .Subscribe(LabeledIonSelectedChanged));
 
+            // When point markers are toggled, change the marker type on each series
             this.WhenAnyValue(x => x.ShowPointMarkers)
                 .Select(showPointMarkers => showPointMarkers ? MarkerType.Circle : MarkerType.None)
                 .Subscribe(
@@ -270,6 +271,7 @@ namespace LcmsSpectator.ViewModels
                     MarkerStroke = color,
                     MarkerStrokeThickness = 1,
                     MarkerFill = OxyColors.White,
+                    MarkerType = ShowPointMarkers ? MarkerType.Circle : MarkerType.None,
                     TrackerFormatString =
                         "{0}" + Environment.NewLine +
                         "{1}: {2:0.###}" + Environment.NewLine +
