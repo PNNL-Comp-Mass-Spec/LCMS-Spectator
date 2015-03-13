@@ -9,10 +9,10 @@
     <UserControl.Resources>
         <utils:DoubleToStringConverter x:Key="DoubleToStringConverter" />
     </UserControl.Resources>
-    <TabControl Height="850" Width="850" >
+    <TabControl Margin="15" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <TabItem Header="Heat Map">
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <oxy:PlotView Model="{Binding PlotModel}" Height="{Binding PlotHeight}" Width="800" />
+                <oxy:PlotView Model="{Binding PlotModel}" MinWidth="1300" Height="{Binding PlotHeight}" />
             </ScrollViewer>
         </TabItem>
         <TabItem Header="Table">
@@ -20,7 +20,8 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Residue" Binding="{Binding Residue}" />
                     <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
-                    <DataGridTextColumn Header="Ion" Binding="{Binding IonType.Name}" />
+                    <DataGridTextColumn Header="Ion" Binding="{Binding IonType.BaseIonType.Symbol}" />
+                    <DataGridTextColumn Header="Charge" Binding="{Binding IonType.Charge}" />
                     <DataGridTextColumn Header="M/Z" Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" />
                     <DataGridTextColumn Header="Intensity" Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" />
                     <DataGridTextColumn Header="Error (ppm)" Binding="{Binding Error, Converter={StaticResource DoubleToStringConverter}}" />
