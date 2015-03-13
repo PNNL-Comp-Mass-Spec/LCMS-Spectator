@@ -513,7 +513,8 @@ namespace LcmsSpectator.ViewModels
         public Task OpenFromDms()
         {
             Task task = null;
-            var data = _dialogService.OpenDmsLookup(new DmsLookupViewModel(_dialogService));
+            var dmsLookUp = new DmsLookupViewModel(_dialogService);
+            var data = _dialogService.OpenDmsLookup(dmsLookUp);
             if (data == null) return null;
             var dataSetDirName = data.Item1;
             var jobDirName = data.Item2;
@@ -521,8 +522,10 @@ namespace LcmsSpectator.ViewModels
             string featureFilePath = "";
             string pbfFilePath = "";
             List<string> rawFileNames = null;
+            string selectedTool ="";
             if (!String.IsNullOrEmpty(dataSetDirName))      // did the user actually choose a dataset?
             {
+                selectedTool = dmsLookUp.SelectedJob.Tool;
                 var dataSetDirFiles = Directory.GetFiles(dataSetDirName);
                 var dataSetDirDirectories = Directory.GetDirectories(dataSetDirName);
                 rawFileNames = (from filePath in dataSetDirFiles
@@ -571,6 +574,7 @@ namespace LcmsSpectator.ViewModels
                 task = Task.Factory.StartNew(() =>
                 {
                     var dsVm = ReadRawFile(raw);
+                    if (selectedTool == "MSPathFinder") dsVm.XicViewModel.PrecursorViewMode = PrecursorViewMode.Charges;
                     foreach (var filePath in filePaths)
                     {
                         if (!String.IsNullOrEmpty(filePath)) ReadIdFile(filePath, dsVm.RawFileName, dsVm);   
