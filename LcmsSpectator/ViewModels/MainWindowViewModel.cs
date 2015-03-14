@@ -217,7 +217,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void OpenRawFile()
         {
-            var rawFileNames = _dialogService.MultiSelectOpenFile(".raw", @"Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl)|*.mzMl");
+            var rawFileNames = _dialogService.MultiSelectOpenFile(".raw", @"Supported Files|*.raw;*.mzML;*.mzML.gz|Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl[.gz])|*.mzMl;*.mzML.gz");
             if (rawFileNames == null) return;
             ShowSplash = false;
             foreach (var rawFileName in rawFileNames)
@@ -246,7 +246,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public void OpenIdFile()
         {
-            const string formatStr = @"TSV Files (*.txt; *.tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
+            const string formatStr = @"Supported Files|*.txt;*.tsv;*.mzId;*.mzId.gz;*.mtdb|TSV Files (*.txt; *.tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
             var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
             if (tsvFileName == "") return;
             var fileName = Path.GetFileNameWithoutExtension(tsvFileName);
@@ -343,9 +343,11 @@ namespace LcmsSpectator.ViewModels
                     var directory = Directory.GetFiles(directoryName);
                     foreach (var file in directory) // Raw file in same directory as tsv file?
                     {
-                        var lFile = path.ToLower();
-                        if (file == path + ".raw") rawFileName = path + ".raw";
-                        else if (lFile == lFile + ".mzml") rawFileName = lFile + ".mzml";
+                        var lPath = path.ToLower();
+                        var lFile = file.ToLower();
+                        if (lFile == lPath + ".raw") rawFileName = lPath + ".raw";
+                        else if (lFile == lPath + ".mzml") rawFileName = lPath + ".mzml";
+                        else if (lFile == lPath + ".mzml.gz") rawFileName = lPath + ".mzml.gz";
                     }
                     if (rawFileName == "")  // Raw file was not in the same directory.
                     {   // prompt user for raw file path
@@ -530,7 +532,7 @@ namespace LcmsSpectator.ViewModels
                 var dataSetDirDirectories = Directory.GetDirectories(dataSetDirName);
                 rawFileNames = (from filePath in dataSetDirFiles
                                 let ext = Path.GetExtension(filePath)
-                                where (ext == ".raw" || ext == ".mzml")
+                                where (ext == ".raw" || ext == ".mzml" || ext == ".gz")
                                 select filePath).ToList();
                 var pbfFolderPath = (from folderPath in dataSetDirDirectories
                                      let folderName = Path.GetFileNameWithoutExtension(folderPath)

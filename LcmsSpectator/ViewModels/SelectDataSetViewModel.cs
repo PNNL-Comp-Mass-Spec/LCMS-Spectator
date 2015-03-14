@@ -77,7 +77,7 @@ namespace LcmsSpectator.ViewModels
 
         private void BrowseRawFiles()
         {
-            var rawFilePath = _dialogService.OpenFile(".raw", @"Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl)|*.mzMl");
+            var rawFilePath = _dialogService.OpenFile(".raw", @"Supported Files|*.raw;*.mzML;*.mzML.gz|Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl[.gz])|*.mzMl;*.mzML.gz");
             if (!String.IsNullOrEmpty(rawFilePath)) RawFilePath = rawFilePath;
         }
 

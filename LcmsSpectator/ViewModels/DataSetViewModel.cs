@@ -268,6 +268,14 @@ namespace LcmsSpectator.ViewModels
             RawFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(RawFilePath));
             var extension = Path.GetExtension(RawFilePath);
             if (extension != null) extension = extension.ToLower();
+            if (extension == ".gz")
+            {
+                extension = Path.GetExtension(Path.GetFileNameWithoutExtension(RawFilePath));
+                if (extension != null)
+                {
+                    extension = extension.ToLower();
+                }
+            }
             // load raw file
             var massSpecDataType = (extension == ".mzml") ? MassSpecDataType.MzMLFile : MassSpecDataType.XCaliburRun;
             Lcms = PbfLcMsRun.GetLcMsRun(_rawFilePath, massSpecDataType, 0, 0);

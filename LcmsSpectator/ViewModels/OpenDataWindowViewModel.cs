@@ -64,7 +64,7 @@ namespace LcmsSpectator.ViewModels
 
         private void BrowseRawFiles()
         {
-            var rawFilePath = _dialogService.OpenFile(".raw", @"Raw/MzML Files (*.raw; *.mzML)|*.raw;*.mzML");
+            var rawFilePath = _dialogService.OpenFile(".raw", @"Raw/MzML Files (*.raw; *.mzML)|*.raw;*.mzML;*.mzML.gz");
             if (!String.IsNullOrEmpty(rawFilePath)) RawFilePath = rawFilePath;
         }
 
@@ -77,7 +77,7 @@ namespace LcmsSpectator.ViewModels
 
         private void BrowseIdFiles()
         {
-            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
+            const string formatStr = @"Supported Files|*.txt;*.tsv;*.mzId;*.mzId.gz;*.mtdb|TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
             var idFilePath = _dialogService.OpenFile(".txt", formatStr);
             if (!String.IsNullOrEmpty(idFilePath)) IdFilePath = idFilePath;
         }
