@@ -205,11 +205,11 @@ namespace LcmsSpectator.ViewModels
                 if (!dataDict.ContainsKey(dataPoint.IonType)) dataDict.Add(dataPoint.IonType, new List<double>());
                 var points = dataDict[dataPoint.IonType];
 
-                int index = dataPoint.Index;
+                int index = dataPoint.Index+1;
 
                 if (dataPoint.IonType.IsPrefixIon) index = points.Count - (dataPoint.Index);
 
-                var position = Math.Max(0, Math.Min(index, points.Count - 1));
+                var position = Math.Max(0, Math.Min(index, points.Count));
                 points.Insert(position, dataPoint.Error);
             }
 
