@@ -160,18 +160,18 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Open raw file and/or id file, feature file
         /// </summary>
-        public void OpenDataSet()
+        public async Task OpenDataSet()
         {
             var openDataVm = new OpenDataWindowViewModel(_dialogService);
             if (_dialogService.OpenDataWindow(openDataVm))
             {
                 ShowSplash = false;
-                _taskService.Enqueue(() =>
+                await Task.Run(async () =>
                 {
                     DataSetViewModel dsVm;
                     //try
                     //{
-                        dsVm = ReadRawFile(openDataVm.RawFilePath);
+                        dsVm = await ReadRawFile(openDataVm.RawFilePath);
                     //}
                     //catch (Exception)
                     //{
@@ -208,14 +208,14 @@ namespace LcmsSpectator.ViewModels
                                 _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
                             }
                     }
-                }, true);
+                });
             }
         }
 
         /// <summary>
         /// Prompt user for raw files and call ReadRawFile() to open file.
         /// </summary>
-        public void OpenRawFile()
+        public async Task OpenRawFile()
         {
             var rawFileNames = _dialogService.MultiSelectOpenFile(".raw", @"Supported Files|*.raw;*.mzML;*.mzML.gz|Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl[.gz])|*.mzMl;*.mzML.gz");
             if (rawFileNames == null) return;
@@ -224,11 +224,11 @@ namespace LcmsSpectator.ViewModels
             {
                 var name = rawFileName;
                 string fileName = rawFileName;
-                _taskService.Enqueue(() =>
+                await Task.Run(async () =>
                 {
                     try
                     {
-                        ReadRawFile(name);
+                        await ReadRawFile(name);
                     }
                     catch (Exception)
                     {
@@ -236,7 +236,7 @@ namespace LcmsSpectator.ViewModels
                         if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count - 1));
                     }
                     if (DataSets.Count > 0) ScanViewModel.HideUnidentifiedScans = false;
-                }, true);
+                });
             }
         }
 
@@ -244,7 +244,7 @@ namespace LcmsSpectator.ViewModels
         /// Open identification file. Checks to ensure that there is a raw file open
         /// corresponding to this ID file.
         /// </summary>
-        public void OpenIdFile()
+        public async Task OpenIdFile()
         {
             const string formatStr = @"Supported Files|*.txt;*.tsv;*.mzId;*.mzId.gz;*.mtdb|TSV Files (*.txt; *.tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
             var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
@@ -294,13 +294,13 @@ namespace LcmsSpectator.ViewModels
             if (!String.IsNullOrEmpty(rawFileName))
             {
                 ShowSplash = false;
-                _taskService.Enqueue(() =>
+                await Task.Run(async () =>
                 {
                     // Name of raw file was found
                     if (dsVm == null) // raw file isn't open yet
                         //try
                         //{
-                            dsVm = ReadRawFile(rawFileName);
+                            dsVm = await ReadRawFile(rawFileName);
                         //}
                         //catch (Exception)
                         //{
@@ -308,7 +308,7 @@ namespace LcmsSpectator.ViewModels
                         //    if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count - 1));
                         //}
                     ReadIdFile(tsvFileName, rawFileName, dsVm); // finally read the TSV file
-                }, true);
+                });
             }
             else _dialogService.MessageBox("Cannot open ID file.");
         }
@@ -317,7 +317,7 @@ namespace LcmsSpectator.ViewModels
         /// Open feature file. Checks to ensure that there is a raw file open
         /// corresponding to this ID file.
         /// </summary>
-        public void OpenFeatureFile()
+        public async Task OpenFeatureFile()
         {
             const string formatStr = @"Ms1FT Files (*.ms1ft)|*.ms1ft";
             var tsvFileName = _dialogService.OpenFile(".ms1ft", formatStr);
@@ -373,13 +373,13 @@ namespace LcmsSpectator.ViewModels
             if (!String.IsNullOrEmpty(rawFileName))
             {
                 ShowSplash = false;
-                _taskService.Enqueue(() =>
+                await Task.Run(async () =>
                 {
                     // Name of raw file was found
                     if (dsVm == null) // raw file isn't open yet
                         //try
                         //{
-                            dsVm = ReadRawFile(rawFileName);
+                            dsVm = await ReadRawFile(rawFileName);
                         //}
                         //catch (Exception)
                         //{
@@ -399,7 +399,7 @@ namespace LcmsSpectator.ViewModels
                         {
                             _dialogService.ExceptionAlert(new Exception("Cannot read feature file."));
                         }
-                }, true);
+                });
             }
             else _dialogService.MessageBox("Cannot open feature file.");
         }
@@ -499,12 +499,13 @@ namespace LcmsSpectator.ViewModels
         /// Open raw file
         /// </summary>
         /// <param name="rawFilePath">Path to raw file to open</param>
-        public DataSetViewModel ReadRawFile(string rawFilePath)
+        public async Task<DataSetViewModel> ReadRawFile(string rawFilePath)
         {
             var dsVm = new DataSetViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(_taskService)); // create data set view model
             GuiInvoker.Invoke(() => DataSets.Add(dsVm)); // add data set view model. Can only add to ObservableCollection in thread that created it (gui thread)
             GuiInvoker.Invoke(() => { CreateSequenceViewModel.SelectedDataSetViewModel = DataSets[0]; });
             dsVm.RawFilePath = rawFilePath;
+            await dsVm.Initialize();
             FileOpen = true;
             return dsVm;
         }
@@ -512,12 +513,12 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Open data set (raw file and ID files) from PNNL DMS system
         /// </summary>
-        public Task OpenFromDms()
+        public async Task OpenFromDms()
         {
             Task task = null;
             var dmsLookUp = new DmsLookupViewModel(_dialogService);
             var data = _dialogService.OpenDmsLookup(dmsLookUp);
-            if (data == null) return null;
+            if (data == null) return;
             var dataSetDirName = data.Item1;
             var jobDirName = data.Item2;
             var idFilePaths = new List<string>();
@@ -566,16 +567,16 @@ namespace LcmsSpectator.ViewModels
             {   // no data set chosen or no raw files found for data set
                 _dialogService.MessageBox("No raw files found for that data set.");
                 LoadingScreenViewModel.IsLoading = false;
-                return null;
+                return;
             }
             ShowSplash = false;
             foreach (var rawFilePath in rawFileNames)
             {
                 var raw = String.IsNullOrEmpty(pbfFilePath) ? rawFilePath : pbfFilePath;
                 var filePaths = idFilePaths;
-                task = Task.Factory.StartNew(() =>
+                await Task.Run(async () =>
                 {
-                    var dsVm = ReadRawFile(raw);
+                    var dsVm = await ReadRawFile(raw);
                     if (selectedTool == "MSPathFinder") dsVm.XicViewModel.PrecursorViewMode = PrecursorViewMode.Charges;
                     foreach (var filePath in filePaths)
                     {
@@ -598,7 +599,6 @@ namespace LcmsSpectator.ViewModels
                     }
                 });
             }
-            return task;
         }
 
         /// <summary>
