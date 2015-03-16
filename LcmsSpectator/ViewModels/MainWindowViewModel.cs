@@ -67,24 +67,19 @@ namespace LcmsSpectator.ViewModels
                     foreach (var dataSet in DataSets) dataSet.SelectedPrSm = selectedPrSm;
                 });
 
-            var openDataSetCommand = ReactiveCommand.Create();
-            openDataSetCommand.Subscribe(_ => OpenDataSet());
+            var openDataSetCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.OpenDataSet());
             OpenDataSetCommand = openDataSetCommand;
 
-            var openRawFileCommand = ReactiveCommand.Create();
-            openRawFileCommand.Subscribe(_ => OpenRawFile());
+            var openRawFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.OpenRawFile());
             OpenRawFileCommand = openRawFileCommand;
 
-            var openTsvFileCommand = ReactiveCommand.Create();
-            openTsvFileCommand.Subscribe(_ => OpenIdFile());
+            var openTsvFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.OpenIdFile());
             OpenTsvFileCommand = openTsvFileCommand;
 
-            var openFeatureFileCommand = ReactiveCommand.Create();
-            openFeatureFileCommand.Subscribe(_ => OpenFeatureFile());
+            var openFeatureFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.OpenFeatureFile());
             OpenFeatureFileCommand = openFeatureFileCommand;
 
-            var openFromDmsCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.ShowOpenFromDms));
-            openFromDmsCommand.Subscribe(_ => OpenFromDms());
+            var openFromDmsCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.OpenFromDms());  //Create(this.WhenAnyValue(x => x.ShowOpenFromDms));
             OpenFromDmsCommand = openFromDmsCommand;
 
             var openSettingsCommand = ReactiveCommand.Create();
@@ -515,7 +510,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public async Task OpenFromDms()
         {
-            Task task = null;
+            //Task task = null;
             var dmsLookUp = new DmsLookupViewModel(_dialogService);
             var data = _dialogService.OpenDmsLookup(dmsLookUp);
             if (data == null) return;
