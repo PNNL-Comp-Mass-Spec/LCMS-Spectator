@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
@@ -11,20 +9,14 @@ namespace LcmsSpectator.ViewModels
 {
     public class SettingsViewModel: ReactiveObject
     {
-        public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
-        public event EventHandler ReadyToClose;
-
-        #region Commands
-        public IReactiveCommand AddModificationCommand { get; private set; }
-        public IReactiveCommand CreateNewModificationCommand { get; private set; }
-        public IReactiveCommand SaveCommand { get; private set; }
-        public IReactiveCommand CancelCommand { get; private set; }
-        #endregion
-
+        /// <summary>
+        /// Tracks settings and then publishes them to application settings when user clicks OK.
+        /// </summary>
+        /// <param name="dialogService">Dialog service for mvvm-friendly dialogs.</param>
         public SettingsViewModel(IMainDialogService dialogService)
         {
             _dialogService = dialogService;
-            ToleranceUnits = new List<ToleranceUnit> {ToleranceUnit.Ppm, ToleranceUnit.Th};
+            ToleranceUnits = new ReactiveList<ToleranceUnit> {ToleranceUnit.Ppm, ToleranceUnit.Th};
             PrecursorIonTolerance = IcParameters.Instance.PrecursorTolerancePpm.GetValue();
             PrecursorIonToleranceUnit = IcParameters.Instance.PrecursorTolerancePpm.GetUnit();
             ProductIonTolerance = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
@@ -37,12 +29,6 @@ namespace LcmsSpectator.ViewModels
             AutomaticallySelectIonTypes = IcParameters.Instance.AutomaticallySelectIonTypes;
             CidHcdIonTypes = IcParameters.Instance.GetCidHcdIonTypes();
             EtdIonTypes = IcParameters.Instance.GetEtdIonTypes();
-
-            PrecursorViewModes = new ReactiveList<PrecursorViewMode>
-            {
-                PrecursorViewMode.Isotopes,
-                PrecursorViewMode.Charges
-            };
 
             Modifications = new ReactiveList<SelectModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
@@ -72,26 +58,111 @@ namespace LcmsSpectator.ViewModels
             Status = false;
         }
 
+        #region Commands
+        public IReactiveCommand AddModificationCommand { get; private set; }
+        public IReactiveCommand CreateNewModificationCommand { get; private set; }
+        public IReactiveCommand SaveCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; private set; }
+        #endregion
+
         #region Public properties
-        public List<ToleranceUnit> ToleranceUnits { get; set; }
+        /// <summary>
+        /// View Model for light/heavy modification selector
+        /// </summary>
+        public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
+
+        /// <summary>
+        /// Event that is triggered when this is ready to close (user has clicked "OK" or "Cancel")
+        /// </summary>
+        public event EventHandler ReadyToClose;
+
+        /// <summary>
+        /// List of possible tolerance units.
+        /// </summary>
+        public ReactiveList<ToleranceUnit> ToleranceUnits { get; set; }
+
+        /// <summary>
+        /// Tolerance for precursor ions.
+        /// </summary>
         public double PrecursorIonTolerance { get; set; }
+
+        /// <summary>
+        /// Unit for tolerance of precursor ions.
+        /// </summary>
         public ToleranceUnit PrecursorIonToleranceUnit { get; set; }
+
+        /// <summary>
+        /// Tolerance for product ions.
+        /// </summary>
         public double ProductIonTolerance { get; set; }
+
+        /// <summary>
+        /// Unit for tolerance of product ions.
+        /// </summary>
         public ToleranceUnit ProductIonToleranceUnit { get; set; }
+
+        /// <summary>
+        /// QValue threshold of identifications displayed.
+        /// </summary>
         public double QValueThreshold { get; set; }
+
+        /// <summary>
+        /// Maximum number of possible modification combinations per sequence.
+        /// </summary>
         public int ModificationsPerSequence { get; set; }
+
+        /// <summary>
+        /// Minimum possible correlation of ions.
+        /// </summary>
         public double IonCorrelationThreshold { get; set; }
+
+        /// <summary>
+        /// Default value for "Points To Smooth" slider.
+        /// </summary>
         public int PointsToSmooth { get; set; }
+
+        /// <summary>
+        /// Maximum size of window for spectrum filtering by intensity histogram.
+        /// </summary>
         public double SpectrumFilterWindowSize { get; set; }
+
+        /// <summary>
+        /// Maximum relative intensity of isotopes to display on precursor ion plot.
+        /// </summary>
         public double PrecursorRelativeIntensityThreshold { get; set; }
+
+        /// <summary>
+        /// Should instrument data (instrument reported mass, instrument reported charge) be
+        /// displayed in the identifications data grid?
+        /// </summary>
         public bool ShowInstrumentData { get; private set; }
-        public ReactiveList<PrecursorViewMode> PrecursorViewModes { get; private set; }
+
+        /// <summary>
+        /// Modifications displayed in the application.
+        /// </summary>
         public ReactiveList<SelectModificationViewModel> Modifications { get; private set; }
+
+        /// <summary>
+        /// Should the settings be saved?
+        /// </summary>
         public bool Status { get; private set; }
 
+        /// <summary>
+        /// String containing list of base ion types for CID and HCD spectra
+        /// separated by a space.
+        /// </summary>
         public string CidHcdIonTypes { get; set; }
+
+        /// <summary>
+        /// String containing list of base ion types for ETD spectra separated
+        /// by a space.
+        /// </summary>
         public string EtdIonTypes { get; set; }
+
         private bool _automaticallySelectIonTypes;
+        /// <summary>
+        /// Should ion types be changed when the activation method of the currently selected ms2 spectrum changes?
+        /// </summary>
         public bool AutomaticallySelectIonTypes 
         {
             get { return _automaticallySelectIonTypes; }

@@ -23,6 +23,12 @@ namespace LcmsSpectator.ViewModels
 {
     public class SpectrumPlotViewModel: ReactiveObject
     {
+        /// <summary>
+        /// Create view model that maintains a spectrum plot.
+        /// </summary>
+        /// <param name="dialogService">Dialog service for mvvm-friendly dialogs.</param>
+        /// <param name="multiplier">How much padding should be before the lowest peak and after the highest peak?</param>
+        /// <param name="autoZoomXAxis">Should this view model automatically zoom the plot?</param>
         public SpectrumPlotViewModel(IMainDialogService dialogService, double multiplier, bool autoZoomXAxis=true)
         {
             _dialogService = dialogService;
