@@ -16,6 +16,9 @@ namespace LcmsSpectator.ViewModels
 {
     public class ErrorMapViewModel: ReactiveObject
     {
+        /// <summary>
+        /// Create new view model that maintains a heatmap showing sequence vs ion type vs error.
+        /// </summary>
         public ErrorMapViewModel()
         {
             PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
@@ -141,6 +144,7 @@ namespace LcmsSpectator.ViewModels
         /// </param>
         private void BuildPlotModel(double[,] data)
         {
+            // initialize color axis
             var minColor = OxyColor.FromRgb(127, 255, 0);
             var maxColor = OxyColor.FromRgb(255, 0, 0);
             var colorAxis = new LinearColorAxis
@@ -156,6 +160,7 @@ namespace LcmsSpectator.ViewModels
             };
             PlotModel.Axes.Add(colorAxis);
 
+            // initialize heat map
             var heatMapSeries = new HeatMapSeries
             {
                 Data = data,
@@ -171,14 +176,17 @@ namespace LcmsSpectator.ViewModels
             };
             PlotModel.Series.Add(heatMapSeries);
 
+            // Set xAxis double -> string label converter function
             _xAxis.LabelFormatter = x => x.Equals(0) ? " " : _ionTypes[Math.Min((int) x - 1, _ionTypes.Length-1)].Name;
 
             var revSequence = new Sequence(Sequence);
             revSequence.Reverse();
 
+            // Set yAxis double -> string label converter function
             _yAxis.LabelFormatter = y => y.Equals(0) ? " " : revSequence[Math.Max(Math.Min((int) y - 1, revSequence.Count-1), 0)]
                                          .Residue.ToString(CultureInfo.InvariantCulture);
 
+            // Update plot
             PlotModel.InvalidatePlot(true);
         }
 
@@ -190,6 +198,8 @@ namespace LcmsSpectator.ViewModels
         private double[,] GetDataArray(IEnumerable<PeakDataPoint> dataPoints)
         {
             var dataDict = new Dictionary<IonType, List<double>>();
+
+            // partition data set by ion type
             foreach (var dataPoint in dataPoints)
             {
                 if (!dataDict.ContainsKey(dataPoint.IonType)) dataDict.Add(dataPoint.IonType, new List<double>());
@@ -203,9 +213,11 @@ namespace LcmsSpectator.ViewModels
                 points.Insert(position, dataPoint.Error);
             }
 
-            var data = new double[dataDict.Keys.Count, Sequence.Count-1];
-
             _ionTypes = dataDict.Keys.ToArray();
+
+            var data = new double[dataDict.Keys.Count, Sequence.Count - 1];
+
+            // create two dimensional array from partitioned data
             for (int i = 0; i < Sequence.Count-1; i++)
             {
                 for (int j = 0; j < _ionTypes.Length; j++)
