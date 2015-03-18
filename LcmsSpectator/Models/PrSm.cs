@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
@@ -144,6 +145,14 @@ namespace LcmsSpectator.Models
             set { this.RaiseAndSetIfChanged(ref _sequenceText, value); }
         }
 
+        /// <summary>
+        /// String containing list of modifications in the sequence and their positions.
+        /// </summary>
+        public string ModificationLocations
+        {
+            get { return GetModificationLocations();  }
+        }
+
         private string _proteinName;
         /// <summary>
         /// Name of identified protein.
@@ -269,6 +278,23 @@ namespace LcmsSpectator.Models
             var comp = UseGolfScoring ? other.Score.CompareTo(Score) : Score.CompareTo(other.Score);
             return comp;
         }
+
+        #region Private Methods
+
+        private string GetModificationLocations()
+        {
+            var modificationLocations = new StringBuilder();
+            for (int i = 0; i < Sequence.Count; i++)
+            {
+                var aa = Sequence[i] as ModifiedAminoAcid;
+                if (aa != null)
+                {
+                    modificationLocations.AppendFormat("{0}[{1}] ", i+1, aa.Modification.Name);
+                }
+            }
+            return modificationLocations.ToString();
+        }
+        #endregion
 
         private Sequence _sequence;
     }

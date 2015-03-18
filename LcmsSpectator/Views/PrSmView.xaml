@@ -21,6 +21,8 @@
                              FontSize="14"/>
             <TextBox TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=SequenceText, Mode=OneWay}"
                              Background="Transparent" BorderThickness="0" IsReadOnly="True" FontWeight="Bold"/>
+            <TextBox TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=ModificationLocations, Mode=OneWay}"
+                             Background="Transparent" BorderThickness="0" IsReadOnly="True" FontWeight="Bold"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <TextBlock Text="Charge: " FontWeight="Bold" />
                 <TextBox Text="{Binding Path=Charge, Mode=OneWay}" FontWeight="Bold" Width="75"
