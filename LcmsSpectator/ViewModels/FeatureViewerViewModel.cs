@@ -36,7 +36,8 @@ namespace LcmsSpectator.ViewModels
             FeatureMap.MouseDown += FeatureMap_MouseDown;
             _pointsDisplayed = 5000;
             //_viewDivisions = 9;
-            _showFoundMs2 = false;
+            _showFoundIdMs2 = false;
+            _showFoundUnIdMs2 = false;
             _showNotFoundMs2 = false;
             _yAxis = new LinearAxis { Position = AxisPosition.Left, Title = "Monoisotopic Mass", StringFormat = "0.###" };
             _xAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time", StringFormat = "0.###", };
@@ -84,12 +85,21 @@ namespace LcmsSpectator.ViewModels
                     FeatureMap.InvalidatePlot(true);
                 });
 
-            // When ShowFoundMs2 changes, update all ms2 series
-            this.WhenAnyValue(x => x.ShowFoundMs2)
-                .Where(_ => _foundMs2S != null && FeatureMap != null)
+            // When ShowFoundIdMs2 changes, update all ms2 series
+            this.WhenAnyValue(x => x.ShowFoundIdMs2)
+                .Where(_ => _foundIdMs2S != null && FeatureMap != null)
                 .Subscribe(showFoundMs2 =>
                 {
-                    foreach (var ms2 in _foundMs2S) ms2.IsVisible = showFoundMs2;
+                    foreach (var ms2 in _foundIdMs2S) ms2.IsVisible = showFoundMs2;
+                    FeatureMap.InvalidatePlot(true);
+                });
+
+            // When ShowFoundUnIdMs2 changes, update all ms2 series
+            this.WhenAnyValue(x => x.ShowFoundUnIdMs2)
+                .Where(_ => _foundUnIdMs2S != null && FeatureMap != null)
+                .Subscribe(showFoundMs2 =>
+                {
+                    foreach (var ms2 in _foundUnIdMs2S) ms2.IsVisible = showFoundMs2;
                     FeatureMap.InvalidatePlot(true);
                 });
 
@@ -252,15 +262,26 @@ namespace LcmsSpectator.ViewModels
             set { this.RaiseAndSetIfChanged(ref _scoreThreshold, value); }
         }
 
-        private bool _showFoundMs2;
+        private bool _showFoundIdMs2;
         /// <summary>
-        /// Toggles whether or not the ms2 points associated with features are being shown on
+        /// Toggles whether or not the  identified ms2 points associated with features are being shown on
         /// the feature map plot.
         /// </summary>
-        public bool ShowFoundMs2
+        public bool ShowFoundIdMs2
         {
-            get { return _showFoundMs2; }
-            set { this.RaiseAndSetIfChanged(ref _showFoundMs2, value); }
+            get { return _showFoundIdMs2; }
+            set { this.RaiseAndSetIfChanged(ref _showFoundIdMs2, value); }
+        }
+
+        private bool _showFoundUnIdMs2;
+        /// <summary>
+        /// Toggles whether or not the unidentified ms2 points associated with features are being shown on
+        /// the feature map plot.
+        /// </summary>
+        public bool ShowFoundUnIdMs2
+        {
+            get { return _showFoundUnIdMs2; }
+            set { this.RaiseAndSetIfChanged(ref _showFoundUnIdMs2, value); }
         }
 
         private bool _showNotFoundMs2;
@@ -472,7 +493,7 @@ namespace LcmsSpectator.ViewModels
                 {
                     // See if there is a ms2 point closer than this feature point
                     PrSm closestPrSm = null;
-                    if (_showFoundMs2)
+                    if (_showFoundIdMs2 || _showFoundUnIdMs2)
                     {
                         var feature = _featuresByScan[featurePoint];
                         var ms2Scans = feature.AssociatedMs2;
@@ -481,6 +502,8 @@ namespace LcmsSpectator.ViewModels
                         {
                             if (!_ids.ContainsKey(scan)) continue;
                             var prsm = _ids[scan];
+                            if ((prsm.Sequence.Count == 0 && !_showFoundUnIdMs2)
+                                || (prsm.Sequence.Count > 0 && !_showFoundIdMs2)) continue;
                             var sp = _xAxis.Transform(prsm.RetentionTime, featurePoint.Mass, _yAxis);
                             var distSq = sp.DistanceToSquared(args.Position);
                             if (closestPrSm == null || distSq < minDist)
@@ -516,7 +539,8 @@ namespace LcmsSpectator.ViewModels
             // Filter features based on score threshold, abundance threshold, points to display
             var filteredFeatures = FilterData(_features, scoreThreshold, abundanceThreshold, pointsDisplayed);
             // Calculate min/max abundance and min/max score
-            _foundMs2S = new List<Series>();
+            _foundIdMs2S = new List<Series>();
+            _foundUnIdMs2S = new List<Series>();
             if (filteredFeatures.Count > 0)
             {
                 MinimumAbundance = Math.Round(filteredFeatures[filteredFeatures.Count - 1].MinPoint.Abundance, 3);
@@ -554,6 +578,7 @@ namespace LcmsSpectator.ViewModels
                 Minimum = minAbundance,
                 Maximum = maxAbundance,
                 AbsoluteMaximum = maxAbundance,
+                StringFormat = "0.###E0"
             };
             var ms2ColorAxis = new LinearColorAxis      // Color axis for ms2s
             {
@@ -587,41 +612,50 @@ namespace LcmsSpectator.ViewModels
                 var size = Math.Min(feature.MinPoint.Abundance / (2*medianAbundance), 7.0);
                 // Add ms2s associated with features
                 var prsms = feature.AssociatedMs2.Where(scan => _ids.ContainsKey(scan)).Select(scan => _ids[scan]).ToList();
+                var idPrSms = prsms.Where(prsm => prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature1.MinPoint.Mass) < 1);
+                var unIdPrSms = prsms.Where(prsm => prsm.Sequence.Count == 0 || Math.Abs(prsm.Mass - feature1.MinPoint.Mass) >= 1);
                 // identified ms2s
                 if (prsms.Count > 0)
                 {
                     Feature feature2 = feature;
-                    var ms2Series = new ScatterSeries
+                    var ms2IdSeries = new ScatterSeries
                     {
-                        ItemsSource = prsms,
+                        ItemsSource = idPrSms,
                         Mapping = p =>
                         {
                             var prsm = (PrSm)p;
-                            int colorScore;
-                            double mass;
-                            if (prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature2.MinPoint.Mass) < 1)
-                            {
-                                colorScore = idColorScore;
-                                mass = feature2.MinPoint.Mass;
-                            }
-                            else
-                            {
-                                colorScore = unidColorScore;
-                                mass = feature2.MinPoint.Mass;
-                            }
-                            return new ScatterPoint(prsm.RetentionTime, mass, Math.Max(size * 0.8, 3.0), colorScore);
+                            return new ScatterPoint(prsm.RetentionTime, feature2.MinPoint.Mass, Math.Max(size * 0.8, 3.0), idColorScore);
                         },
-                        //Title = "Ms2 Scan",
+                        Title = "Identified Ms2 Scan",
                         MarkerType = MarkerType.Cross,
                         ColorAxisKey = ms2ColorAxis.Key,
                         TrackerFormatString =
                             "{0}" + Environment.NewLine +
                             "{1}: {2:0.###}" + Environment.NewLine +
                             "{2}: {4:0.###E0}",
-                        IsVisible = _showFoundMs2,
+                        IsVisible = _showFoundIdMs2,
                     };
-                    _foundMs2S.Add(ms2Series);
-                    FeatureMap.Series.Add(ms2Series);   
+                    var ms2UnIdSeries = new ScatterSeries
+                    {
+                        ItemsSource = unIdPrSms,
+                        Mapping = p =>
+                        {
+                            var prsm = (PrSm)p;
+                            return new ScatterPoint(prsm.RetentionTime, feature2.MinPoint.Mass, Math.Max(size * 0.8, 3.0), unidColorScore);
+                        },
+                        Title = "Unidentified Ms2 Scan",
+                        MarkerType = MarkerType.Cross,
+                        ColorAxisKey = ms2ColorAxis.Key,
+                        TrackerFormatString =
+                            "{0}" + Environment.NewLine +
+                            "{1}: {2:0.###}" + Environment.NewLine +
+                            "{2}: {4:0.###E0}",
+                        IsVisible = _showFoundUnIdMs2,
+                    };
+                    _foundIdMs2S.Add(ms2IdSeries);
+                    _foundUnIdMs2S.Add(ms2UnIdSeries);
+                    FeatureMap.Series.Add(ms2IdSeries); 
+                    FeatureMap.Series.Add(ms2UnIdSeries);
                 }
                 // Add feature
                 var colorIndex = 1 + (int)((feature1.MinPoint.Abundance - minAbundance) / (maxAbundance - minAbundance) * colors.Count);
@@ -903,7 +937,8 @@ namespace LcmsSpectator.ViewModels
         private readonly LinearAxis _xAxis;
         private readonly LinearAxis _yAxis;
         private RectangleAnnotation _highlight;
-        private List<Series> _foundMs2S;
+        private List<Series> _foundIdMs2S;
+        private List<Series> _foundUnIdMs2S; 
         private Series _notFoundMs2S; 
 
         private LcMsRun _lcms;

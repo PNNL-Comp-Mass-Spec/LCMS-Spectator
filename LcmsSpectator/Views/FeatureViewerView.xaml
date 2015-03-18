@@ -23,7 +23,8 @@
         <wpf:PlotView Grid.Column="0" Name="FeatureMap" Model="{Binding FeatureMap}" Margin="0,0,10,0">
             <wpf:PlotView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundMs2}" Header="Show ms2s with features"/>
+                    <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundIdMs2}" Header="Show Identified ms2s with features"/>
+                    <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundUnIdMs2}" Header="Show Unidentified ms2s with features"/>
                     <!--<MenuItem IsCheckable="True" IsChecked="{Binding ShowNotFoundMs2}" Header="Show ids with no features"/> -->
                 </ContextMenu>
             </wpf:PlotView.ContextMenu>
