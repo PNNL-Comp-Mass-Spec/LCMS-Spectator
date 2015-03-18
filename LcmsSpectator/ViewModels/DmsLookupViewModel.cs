@@ -8,6 +8,8 @@ using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
 {
+    using System.Linq;
+
     public class DmsLookupViewModel: ReactiveObject
     {
         public ReactiveList<DmsDatasetViewModel> Datasets { get; private set; } 
@@ -130,6 +132,53 @@ namespace LcmsSpectator.ViewModels
             private set { this.RaiseAndSetIfChanged(ref _previousDatasets, value); }
         }
 
+        public bool ValidateDataSet()
+        {
+            return (SelectedDataset != null && !String.IsNullOrEmpty(SelectedDataset.DatasetFolderPath)
+                    && Directory.Exists(SelectedDataset.DatasetFolderPath));
+        }
+
+        public bool ValidateJob()
+        {
+            return (SelectedJob != null
+                    && !String.IsNullOrEmpty(SelectedJob.JobFolderPath) && Directory.Exists(SelectedJob.JobFolderPath));
+        }
+
+        public List<string> GetRawFileNames()
+        {
+            if (!this.ValidateDataSet()) return new List<string>();
+            var dataSetDirFiles = Directory.GetFiles(this.SelectedDataset.DatasetFolderPath);
+            var rawFileNames = (from filePath in dataSetDirFiles
+                            let ext = Path.GetExtension(filePath)
+                            where !String.IsNullOrEmpty(ext)
+                            let extL = ext.ToLower()
+                            where (extL == ".raw" || extL == ".mzml" || extL == ".gz")
+                            select filePath).ToList();
+            for (int i = 0; i < rawFileNames.Count; i++)
+            {
+                var pbfFile = this.GetPbfFileName(rawFileNames[i]);
+                if (!String.IsNullOrEmpty(pbfFile)) rawFileNames[i] = pbfFile;
+            }
+            return rawFileNames;
+        }
+
+        public List<string> GetIdFileNames()
+        {
+            if (!this.ValidateJob()) return new List<string>();
+            var jobDir = Directory.GetFiles(SelectedJob.JobFolderPath);
+            return (from idFp in jobDir
+                           let ext = Path.GetExtension(idFp)
+                           where ext == ".mzid" || ext == ".gz" || ext == ".zip"
+                           select idFp).ToList();
+        }
+
+        public string GetFeatureFileName()
+        {
+            if (!this.ValidateJob()) return null;
+            var jobDir = Directory.GetFiles(SelectedJob.JobFolderPath);
+            return (from idFp in jobDir let ext = Path.GetExtension(idFp) where ext == ".ms1ft" select idFp).FirstOrDefault();
+        }
+
         /// <summary>
         /// Lookup datasets and jobs for the past NumberOfWeeks with a filter given by DatasetFilter
         /// </summary>
@@ -186,6 +235,27 @@ namespace LcmsSpectator.ViewModels
                     outFile.WriteLine("{0}\t{1}", item.Item1, item.Item2);
                 }
             }
+        }
+
+        private string GetPbfFileName(string rawFileName)
+        {
+            string pbfFilePath = null;
+            if (!this.ValidateDataSet()) return null;
+            var dataSetDirDirectories = Directory.GetDirectories(SelectedDataset.DatasetFolderPath);
+            var pbfFolderPath = (from folderPath in dataSetDirDirectories
+                                 let folderName = Path.GetFileNameWithoutExtension(folderPath)
+                                 where (folderName.StartsWith("PBF_Gen"))
+                                 select folderPath).FirstOrDefault();
+            if (!String.IsNullOrEmpty(pbfFolderPath))
+            {
+                var pbfIndirectionPath = String.Format(@"{0}\{1}.pbf_CacheInfo.txt", pbfFolderPath, Path.GetFileNameWithoutExtension(rawFileName));
+                if (!String.IsNullOrEmpty(pbfIndirectionPath) && File.Exists(pbfIndirectionPath))
+                {
+                    var lines = File.ReadAllLines(pbfIndirectionPath);
+                    if (lines.Length > 0) pbfFilePath = lines[0];
+                }
+            }
+            return pbfFilePath;
         }
 
         /// <summary>
