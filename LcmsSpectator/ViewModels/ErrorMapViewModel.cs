@@ -60,13 +60,14 @@ namespace LcmsSpectator.ViewModels
 
             // When sequence or data points change, update plot
             this.WhenAnyValue(x => x.Sequence, x => x.DataPoints)
-                .Throttle(TimeSpan.FromMilliseconds(100), RxApp.TaskpoolScheduler)
                 .Where(x => x.Item1 != null && x.Item2 != null)
-                .Select(x => GetDataArray(x.Item2))
+                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
+                .Select(_ => GetDataArray())
                 .Subscribe(BuildPlotModel);
 
             // When data points change, update data table
             this.WhenAnyValue(x => x.DataPoints)
+                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Select(dataPoints => dataPoints.Where(dp => !dp.Error.Equals(Double.NaN)))
                 .Select(filteredTable => new ReactiveList<PeakDataPoint>(filteredTable))
                 .ToProperty(this, x => x.DataTable, out _dataTable, new ReactiveList<PeakDataPoint>());
@@ -74,6 +75,7 @@ namespace LcmsSpectator.ViewModels
             // When sequence changes, adjust plot height
             this.WhenAnyValue(x => x.Sequence)
                 .Where(sequence => sequence != null && sequence.Count > 0)
+                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Select(sequence => sequence.Count*_heighMultiplier)
                 .ToProperty(this, x => x.PlotHeight, out _plotHeight, 500);
         }
@@ -177,7 +179,12 @@ namespace LcmsSpectator.ViewModels
             PlotModel.Series.Add(heatMapSeries);
 
             // Set xAxis double -> string label converter function
-            _xAxis.LabelFormatter = x => x.Equals(0) ? " " : _ionTypes[Math.Min((int) x - 1, _ionTypes.Length-1)].Name;
+            _xAxis.LabelFormatter = x =>
+            {
+                if (x.Equals(0)) return " ";
+                var ionType = _ionTypes[Math.Min((int) x - 1, _ionTypes.Length - 1)];
+                return String.Format("{0}({1}+)", ionType.BaseIonType.Symbol, ionType.Charge);
+            };
 
             var revSequence = new Sequence(Sequence);
             revSequence.Reverse();
@@ -193,14 +200,13 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Organize the peak data points by ion type
         /// </summary>
-        /// <param name="dataPoints">Most abundant isotope peak data point for each ion type</param>
         /// <returns>2d array where first dimension is sequence and second dimension is ion type</returns>
-        private double[,] GetDataArray(IEnumerable<PeakDataPoint> dataPoints)
+        private double[,] GetDataArray()
         {
             var dataDict = new Dictionary<IonType, List<double>>();
 
             // partition data set by ion type
-            foreach (var dataPoint in dataPoints)
+            foreach (var dataPoint in DataPoints)
             {
                 if (!dataDict.ContainsKey(dataPoint.IonType)) dataDict.Add(dataPoint.IonType, new List<double>());
                 var points = dataDict[dataPoint.IonType];

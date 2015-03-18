@@ -23,7 +23,7 @@
                     <xcad:LayoutDocument Title="Table" CanClose="False">
                         <DataGrid ItemsSource="{Binding DataTable}" AutoGenerateColumns="False">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Residue" Binding="{Binding Residue}" />
+                                <!--<DataGridTextColumn Header="Residue" Binding="{Binding Residue}" /> -->
                                 <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
                                 <DataGridTextColumn Header="Ion" Binding="{Binding IonType.BaseIonType.Symbol}" />
                                 <DataGridTextColumn Header="Charge" Binding="{Binding IonType.Charge}" />

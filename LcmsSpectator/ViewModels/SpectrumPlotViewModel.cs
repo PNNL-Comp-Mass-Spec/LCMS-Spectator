@@ -33,6 +33,7 @@ namespace LcmsSpectator.ViewModels
         {
             _dialogService = dialogService;
             _autoZoomXAxis = autoZoomXAxis;
+            _errorMapViewModel = new ErrorMapViewModel();
             ShowUnexplainedPeaks = true;
             ShowFilteredSpectrum = false;
             ShowDeconvolutedSpectrum = false;
@@ -89,14 +90,19 @@ namespace LcmsSpectator.ViewModels
             saveAsImageCommand.Subscribe(_ => SaveAsImage());
             SaveAsImageCommand = saveAsImageCommand;
 
+            // When sequence changes or currentPeakDataPoints changes, update error map
+            this.WhenAnyValue(x => x.Sequence, x => x.CurrentPeakDataPoints)
+                .Where(x => x.Item1 != null && x.Item2 != null && x.Item1.Count > 0)
+                .Subscribe(x =>
+                {
+                    _errorMapViewModel.Sequence = x.Item1;
+                    _errorMapViewModel.DataPoints = GetMostAbundantIsotopePeaks(x.Item2);
+                });
+
             // Error map command opens a new error map window and passes it the most abundant isotope peak data points
             // and the current sequence.
             var openErrorMapCommand = ReactiveCommand.Create();
-            openErrorMapCommand.Subscribe(_ => _dialogService.OpenErrorMapWindow(new ErrorMapViewModel
-            {
-                Sequence = Sequence,
-                DataPoints = GetMostAbundantIsotopePeaks(_currentPeakDataPoints, Sequence)
-            }));
+            openErrorMapCommand.Subscribe(_ => _dialogService.OpenErrorMapWindow(_errorMapViewModel));
             OpenErrorMapCommand = openErrorMapCommand;
         }
 
@@ -234,7 +240,7 @@ namespace LcmsSpectator.ViewModels
         private void UpdatePlotModel(IList<PeakDataPoint>[] peakDataPoints)
         {
             if (Spectrum == null) return;
-            _currentPeakDataPoints = peakDataPoints;
+            CurrentPeakDataPoints = peakDataPoints;
             PlotModel.Series.Clear();
             PlotModel.Annotations.Clear();
             var spectrum = GetSpectrum();
@@ -412,11 +418,18 @@ namespace LcmsSpectator.ViewModels
         private readonly bool _autoZoomXAxis;
 
         private IList<PeakDataPoint>[] _currentPeakDataPoints;
+        private IList<PeakDataPoint>[] CurrentPeakDataPoints
+        {
+            get { return _currentPeakDataPoints; }
+            set { this.RaiseAndSetIfChanged(ref _currentPeakDataPoints, value); }
+        }
 
         private bool _spectrumDirty; // Tracks whether or not the spectrum has changed
         private Spectrum _filteredSpectrum;
         private Spectrum _deconvolutedSpectrum;
         private Spectrum _filteredDeconvolutedSpectrum;
+
+        private readonly ErrorMapViewModel _errorMapViewModel;
 
         #endregion
     }
