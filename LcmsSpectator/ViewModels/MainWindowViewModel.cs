@@ -528,7 +528,9 @@ namespace LcmsSpectator.ViewModels
                 var dataSetDirDirectories = Directory.GetDirectories(dataSetDirName);
                 rawFileNames = (from filePath in dataSetDirFiles
                                 let ext = Path.GetExtension(filePath)
-                                where (ext == ".raw" || ext == ".mzml" || ext == ".gz")
+                                where ext != null
+                                let extL = ext.ToLower()
+                                where (extL == ".raw" || extL == ".mzml" || extL == ".gz")
                                 select filePath).ToList();
                 var pbfFolderPath = (from folderPath in dataSetDirDirectories
                                      let folderName = Path.GetFileNameWithoutExtension(folderPath)
@@ -551,11 +553,15 @@ namespace LcmsSpectator.ViewModels
                 var jobDir = Directory.GetFiles(jobDirName);
                 idFilePaths = (from idFp in jobDir
                               let ext = Path.GetExtension(idFp)
-                              where ext == ".mzid" || ext == ".gz" || ext == ".zip"
+                              where ext != null
+                              let extL = ext.ToLower()
+                              where extL == ".mzid" || extL == ".gz" || extL == ".zip"
                               select idFp).ToList();
                 featureFilePath = (from idFp in jobDir
                                    let ext = Path.GetExtension(idFp)
-                                   where ext == ".ms1ft"
+                                   where ext != null
+                                   let extL = ext.ToLower()
+                                   where extL == ".ms1ft"
                                    select idFp).FirstOrDefault();
             }
             if (rawFileNames == null || rawFileNames.Count == 0)
