@@ -6,7 +6,6 @@
              xmlns:oxy="http://oxyplot.org/wpf"
              xmlns:utils="clr-namespace:LcmsSpectator.Utils"
              xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
-             xmlns:views="clr-namespace:LcmsSpectator.Views"
              mc:Ignorable="d">
     <UserControl.Resources>
         <utils:DoubleToStringConverter x:Key="DoubleToStringConverter" />
@@ -17,7 +16,7 @@
                 <xcad:LayoutDocumentPane DockWidth="*">
                     <xcad:LayoutDocument Title="Heat Map" CanClose="False">
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                            <oxy:PlotView Model="{Binding PlotModel}" MinWidth="1300" Height="{Binding PlotHeight}" />
+                            <oxy:PlotView Model="{Binding PlotModel}" Width="{Binding PlotWidth}" MinHeight="900" />
                         </ScrollViewer>
                     </xcad:LayoutDocument>
                     <xcad:LayoutDocument Title="Table" CanClose="False">

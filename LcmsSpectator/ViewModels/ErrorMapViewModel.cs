@@ -27,7 +27,7 @@ namespace LcmsSpectator.ViewModels
 
             _xAxis = new LinearAxis
             {
-                Title = "Ion Type",
+                Title = "Amino Acid",
                 Position = AxisPosition.Top,
                 AbsoluteMinimum = 0,
                 Minimum = 0,
@@ -42,7 +42,7 @@ namespace LcmsSpectator.ViewModels
 
             _yAxis = new LinearAxis
             {
-                Title = "Amino Acid",
+                Title = "Ion Type",
                 Position = AxisPosition.Left,
                 AbsoluteMinimum = 0,
                 Minimum = 0,
@@ -77,7 +77,7 @@ namespace LcmsSpectator.ViewModels
                 .Where(sequence => sequence != null && sequence.Count > 0)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Select(sequence => sequence.Count*_heighMultiplier)
-                .ToProperty(this, x => x.PlotHeight, out _plotHeight, 500);
+                .ToProperty(this, x => x.PlotWidth, out _plotWidth, 500);
         }
 
         #region Public Properties
@@ -86,13 +86,13 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public PlotModel PlotModel { get; private set; }
 
-        private readonly ObservableAsPropertyHelper<int> _plotHeight;
+        private readonly ObservableAsPropertyHelper<int> _plotWidth;
         /// <summary>
-        /// Height of plot, based on sequence length
+        /// Width of plot, based on sequence length
         /// </summary>
-        public int PlotHeight
+        public int PlotWidth
         {
-            get { return _plotHeight.Value; }
+            get { return _plotWidth.Value; }
         }
 
         private int _scan;
@@ -168,9 +168,9 @@ namespace LcmsSpectator.ViewModels
                 Data = data,
                 Interpolate = false,
                 X0 = 1,
-                X1 = data.GetLength(0),
+                X1 = data.GetLength(0)+1,
                 Y0 = 1,
-                Y1 = data.GetLength(1)+1,
+                Y1 = data.GetLength(1),
                 TrackerFormatString = 
                         "{1}: {2:0}" + Environment.NewLine +
                         "{3}: {4:0}" + Environment.NewLine +
@@ -178,19 +178,19 @@ namespace LcmsSpectator.ViewModels
             };
             PlotModel.Series.Add(heatMapSeries);
 
-            // Set xAxis double -> string label converter function
-            _xAxis.LabelFormatter = x =>
+            // Set yAxis double -> string label converter function
+            _yAxis.LabelFormatter = y =>
             {
-                if (x.Equals(0)) return " ";
-                var ionType = _ionTypes[Math.Min((int) x - 1, _ionTypes.Length - 1)];
+                if (y.Equals(0)) return " ";
+                var ionType = _ionTypes[Math.Min((int) y - 1, _ionTypes.Length - 1)];
                 return String.Format("{0}({1}+)", ionType.BaseIonType.Symbol, ionType.Charge);
             };
 
-            var revSequence = new Sequence(Sequence);
-            revSequence.Reverse();
+            //var revSequence = new Sequence(Sequence);
+            //revSequence.Reverse();
 
             // Set yAxis double -> string label converter function
-            _yAxis.LabelFormatter = y => y.Equals(0) ? " " : revSequence[Math.Max(Math.Min((int) y - 1, revSequence.Count-1), 0)]
+            _xAxis.LabelFormatter = x => x.Equals(0) ? " " : Sequence[Math.Max(Math.Min((int) x - 1, Sequence.Count-1), 0)]
                                          .Residue.ToString(CultureInfo.InvariantCulture);
 
             // Update plot
@@ -213,7 +213,7 @@ namespace LcmsSpectator.ViewModels
 
                 int index = dataPoint.Index+1;
 
-                if (dataPoint.IonType.IsPrefixIon) index = points.Count - (dataPoint.Index);
+                if (!dataPoint.IonType.IsPrefixIon) index = points.Count - (dataPoint.Index);
 
                 var position = Math.Max(0, Math.Min(index, points.Count));
                 points.Insert(position, dataPoint.Error);
@@ -221,7 +221,7 @@ namespace LcmsSpectator.ViewModels
 
             _ionTypes = dataDict.Keys.ToArray();
 
-            var data = new double[dataDict.Keys.Count, Sequence.Count - 1];
+            var data = new double[Sequence.Count - 1, dataDict.Keys.Count];
 
             // create two dimensional array from partitioned data
             for (int i = 0; i < Sequence.Count-1; i++)
@@ -230,7 +230,7 @@ namespace LcmsSpectator.ViewModels
                 {
                     var value = dataDict[_ionTypes[j]][i];
                     if (value.Equals(Double.NaN)) value = -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue()-1;
-                    data[j, i] = value;
+                    data[i, j] = value;
                 }
             }
             return data;
