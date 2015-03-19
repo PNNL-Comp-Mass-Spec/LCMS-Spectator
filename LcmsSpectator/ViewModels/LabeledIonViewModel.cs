@@ -33,8 +33,6 @@ namespace LcmsSpectator.ViewModels
             _xicCache = new MemoizingMRUCache<int, IList<XicDataPoint>>(GetXic, 10);
             Lcms = lcms;
         }
-        #region Public Properties
-
         public Composition Composition { get; private set; }
         public Ion PrecursorIon { get; set; }
         public int Index { get; set; }
@@ -82,9 +80,7 @@ namespace LcmsSpectator.ViewModels
                 return annotation;
             }
         }
-        #endregion
 
-        #region Public Methods
         public int CompareTo(LabeledIon other)
         {
             return String.Compare(Label, other.Label, StringComparison.Ordinal);
@@ -131,9 +127,7 @@ namespace LcmsSpectator.ViewModels
             }
             return xic;
         }
-        #endregion
 
-        #region Private Methods
         private IList<PeakDataPoint> GetPeakDataPoints(Tuple<Spectrum, bool> spectrum, object o)
         {
             var tolerance = IsFragmentIon
@@ -205,14 +199,11 @@ namespace LcmsSpectator.ViewModels
             else xic = Lcms.GetFullPrecursorIonExtractedIonChromatogram(Ion.GetIsotopeMz(Index), IcParameters.Instance.PrecursorTolerancePpm);
             return xic;
         }
-        #endregion
 
-        #region Private Members
         private readonly Object _xicCacheLock;
         private readonly Object _peakCacheLock;
         private readonly MemoizingMRUCache<int, IList<XicDataPoint>> _xicCache;
         private readonly MemoizingMRUCache<Tuple<Spectrum, bool>, IList<PeakDataPoint>> _peakCache;
         private IList<XicPoint> _xic;
-        #endregion
     }
 }

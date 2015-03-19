@@ -87,17 +87,8 @@ namespace LcmsSpectator.ViewModels
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
             var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => SaveAsImage());
+            saveAsImageCommand.Subscribe(_ => SaveAsImageImpl());
             SaveAsImageCommand = saveAsImageCommand;
-
-            // When sequence changes or currentPeakDataPoints changes, update error map
-            this.WhenAnyValue(x => x.Sequence, x => x.CurrentPeakDataPoints)
-                .Where(x => x.Item1 != null && x.Item2 != null && x.Item1.Count > 0)
-                .Subscribe(x =>
-                {
-                    _errorMapViewModel.Sequence = x.Item1;
-                    _errorMapViewModel.DataPoints = GetMostAbundantIsotopePeaks(x.Item2);
-                });
 
             // Error map command opens a new error map window and passes it the most abundant isotope peak data points
             // and the current sequence.
@@ -106,7 +97,6 @@ namespace LcmsSpectator.ViewModels
             OpenErrorMapCommand = openErrorMapCommand;
         }
 
-        #region Public Properties
         private AutoAdjustedYPlotModel _plotModel; 
         /// <summary>
         /// The spectrum plot.
@@ -127,7 +117,7 @@ namespace LcmsSpectator.ViewModels
             set { this.RaiseAndSetIfChanged(ref _title, value); }
         }
 
-        private bool _showUnexplainedPeaks ;
+        private bool _showUnexplainedPeaks;
         /// <summary>
         /// Toggle "Unexplained Peaks" (spectrum series)
         /// </summary>
@@ -209,30 +199,7 @@ namespace LcmsSpectator.ViewModels
         /// Open error heatmap and table for this spectrum and ions
         /// </summary>
         public IReactiveCommand OpenErrorMapCommand { get; private set; }
-        #endregion
 
-        #region Public Methods
-        /// <summary>
-        /// Prompt user for file path and save plot as image to that path.
-        /// </summary>
-        public void SaveAsImage()
-        {
-            var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
-            try
-            {
-                if (fileName != "")
-                {
-                    PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
-                }
-            }
-            catch (Exception e)
-            {
-                _dialogService.ExceptionAlert(e);
-            }
-        }
-        #endregion
-
-        #region Private Methods
         /// <summary>
         /// Build spectrum plot model.
         /// </summary>
@@ -240,7 +207,7 @@ namespace LcmsSpectator.ViewModels
         private void UpdatePlotModel(IList<PeakDataPoint>[] peakDataPoints)
         {
             if (Spectrum == null) return;
-            CurrentPeakDataPoints = peakDataPoints;
+            _errorMapViewModel.SetData(Sequence, peakDataPoints);
             PlotModel.Series.Clear();
             PlotModel.Annotations.Clear();
             var spectrum = GetSpectrum();
@@ -344,30 +311,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Get list of only most abundant isotope peaks of the ion peak data points
-        /// Associate residue with the sequence
-        /// </summary>
-        /// <param name="peakDataPoints">Peak data points for ions on the spectrum plot</param>
-        /// <param name="sequence">Sequence for ions display on the spectrum plot</param>
-        /// <returns>List of most abundant isotope peak data points</returns>
-        private ReactiveList<PeakDataPoint> GetMostAbundantIsotopePeaks(IEnumerable<IList<PeakDataPoint>> peakDataPoints, Sequence sequence=null)
-        {
-            var mostAbundantPeaks = new ReactiveList<PeakDataPoint>();
-            foreach (var peaks in peakDataPoints)
-            {
-                var peak = peaks.OrderByDescending(p => p.Y).FirstOrDefault();
-                if (peak != null && peak.IonType != null && peak.IonType.Name != "Precursor")
-                {
-                    var index = peak.Index - 1;
-                    if (!peak.IonType.BaseIonType.IsPrefix) index = Sequence.Count - 1 - index;
-                    if (sequence != null && index >= 0 && index <= sequence.Count - 1) peak.Residue = sequence[index].Residue;
-                    mostAbundantPeaks.Add(peak);   
-                }
-            }
-            return mostAbundantPeaks;
-        }
-
-        /// <summary>
         /// Get correctly filtered and/or deconvoluted spectrum
         /// </summary>
         /// <returns>Filtered and/or deconvoluted spectrum</returns>
@@ -411,18 +354,28 @@ namespace LcmsSpectator.ViewModels
             }
             return spectrum;
         }
-        #endregion
 
-        #region Private Fields
+        /// <summary>
+        /// Prompt user for file path and save plot as image to that path.
+        /// </summary>
+        private void SaveAsImageImpl()
+        {
+            var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            try
+            {
+                if (fileName != "")
+                {
+                    PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
+                }
+            }
+            catch (Exception e)
+            {
+                _dialogService.ExceptionAlert(e);
+            }
+        }
+
         private readonly IMainDialogService _dialogService;
         private readonly bool _autoZoomXAxis;
-
-        private IList<PeakDataPoint>[] _currentPeakDataPoints;
-        private IList<PeakDataPoint>[] CurrentPeakDataPoints
-        {
-            get { return _currentPeakDataPoints; }
-            set { this.RaiseAndSetIfChanged(ref _currentPeakDataPoints, value); }
-        }
 
         private bool _spectrumDirty; // Tracks whether or not the spectrum has changed
         private Spectrum _filteredSpectrum;
@@ -430,7 +383,5 @@ namespace LcmsSpectator.ViewModels
         private Spectrum _filteredDeconvolutedSpectrum;
 
         private readonly ErrorMapViewModel _errorMapViewModel;
-
-        #endregion
     }
 }

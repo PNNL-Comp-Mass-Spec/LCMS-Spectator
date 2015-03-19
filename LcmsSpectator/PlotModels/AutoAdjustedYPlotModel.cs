@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using OxyPlot;
 using OxyPlot.Axes;
 
@@ -8,6 +9,7 @@ namespace LcmsSpectator.PlotModels
     {
         public AutoAdjustedYPlotModel(Axis xAxis, double multiplier)
         {
+            _seriesLock = new object();
             DataPoints = new ConcurrentBag<IDataPoint>();
             Multiplier = multiplier;
             Axes.Add(xAxis);
@@ -50,6 +52,14 @@ namespace LcmsSpectator.PlotModels
             SetBounds(minX, maxX);
         }
 
+        public virtual void ClearSeries()
+        {
+            lock (_seriesLock)
+            {
+                Series.Clear();
+            }
+        }
+
         /// <summary>
         /// Set min visibile x and y bounds and update y axis max by highest point in that range.
         /// </summary>
@@ -71,20 +81,24 @@ namespace LcmsSpectator.PlotModels
         /// <returns></returns>
         protected double GetMaxYInRange(double minX, double maxX)
         {
-            double maxY = 0.0;
-            foreach (var series in Series)
+            lock (_seriesLock)
             {
-                var dataPointSeries = series as IDataPointSeries;
-                if (dataPointSeries != null)
+                double maxY = 0.0;
+                foreach (var series in Series)
                 {
-                    var seriesMaxY = dataPointSeries.GetMaxYInRange(minX, maxX);
-                    if (seriesMaxY >= maxY) maxY = seriesMaxY;
+                    var dataPointSeries = series as IDataPointSeries;
+                    if (dataPointSeries != null)
+                    {
+                        var seriesMaxY = dataPointSeries.GetMaxYInRange(minX, maxX);
+                        if (seriesMaxY >= maxY) maxY = seriesMaxY;
+                    }
                 }
+                return maxY;
             }
-            return maxY;
         }
         protected ConcurrentBag<IDataPoint> DataPoints;
         protected double Multiplier;
+        protected Object _seriesLock;
 
         /// <summary>
         /// Update Y axis when X axis changes

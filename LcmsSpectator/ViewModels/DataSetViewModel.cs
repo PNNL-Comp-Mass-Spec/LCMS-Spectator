@@ -280,6 +280,8 @@ namespace LcmsSpectator.ViewModels
                 var preclabels = x.Item2.Where(l => l.IonType.Charge <= SelectedPrSm.Charge);
                 var labels = new ReactiveList<LabeledIonViewModel>(x.Item1) { ChangeTrackingEnabled = true };
                 labels.AddRange(preclabels);
+                if (SpectrumViewModel.Ms2SpectrumViewModel.Ions != null)
+                    SpectrumViewModel.Ms2SpectrumViewModel.Ions.ChangeTrackingEnabled = false;
                 SpectrumViewModel.Ms2SpectrumViewModel.Ions = labels;
 
             });

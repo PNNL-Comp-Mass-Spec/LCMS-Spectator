@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.Config;
@@ -55,112 +54,91 @@ namespace LcmsSpectator.ViewModels
                 MaximumPadding = 0,
             };
 
+            _colorAxis = new LinearColorAxis
+            {
+                Title = "Error",
+                Position = AxisPosition.Right,
+                AbsoluteMinimum = 0,
+                Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
+                Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
+                AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
+                LowColor = OxyColors.Navy,
+            };
+
             PlotModel.Axes.Add(_xAxis);
             PlotModel.Axes.Add(_yAxis);
-
-            // When sequence or data points change, update plot
-            this.WhenAnyValue(x => x.Sequence, x => x.DataPoints)
-                .Where(x => x.Item1 != null && x.Item2 != null)
-                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Select(_ => GetDataArray())
-                .Subscribe(BuildPlotModel);
-
-            // When data points change, update data table
-            this.WhenAnyValue(x => x.DataPoints)
-                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Select(dataPoints => dataPoints.Where(dp => !dp.Error.Equals(Double.NaN)))
-                .Select(filteredTable => new ReactiveList<PeakDataPoint>(filteredTable))
-                .ToProperty(this, x => x.DataTable, out _dataTable, new ReactiveList<PeakDataPoint>());
-
-            // When sequence changes, adjust plot height
-            this.WhenAnyValue(x => x.Sequence)
-                .Where(sequence => sequence != null && sequence.Count > 0)
-                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Select(sequence => sequence.Count*_heighMultiplier)
-                .ToProperty(this, x => x.PlotWidth, out _plotWidth, 500);
+            PlotModel.Axes.Add(_colorAxis);
         }
 
-        #region Public Properties
         /// <summary>
         /// Plot Model for error heat map
         /// </summary>
         public PlotModel PlotModel { get; private set; }
 
-        private readonly ObservableAsPropertyHelper<int> _plotWidth;
+        private int _plotWidth;
         /// <summary>
         /// Width of plot, based on sequence length
         /// </summary>
         public int PlotWidth
         {
-            get { return _plotWidth.Value; }
+            get { return _plotWidth; }
+            set { this.RaiseAndSetIfChanged(ref _plotWidth, value); }
         }
 
-        private int _scan;
-        /// <summary>
-        /// Scan number of spectrum
-        /// </summary>
-        public int Scan
-        {
-            get { return _scan; }
-            set { this.RaiseAndSetIfChanged(ref _scan, value); }
-        }
-
-        private ReactiveList<PeakDataPoint> _peakDataPoints;
-        /// <summary>
-        /// The peak data points for the most abundant isotope of each ion
-        /// </summary>
-        public ReactiveList<PeakDataPoint> DataPoints
-        {
-            get { return _peakDataPoints; }
-            set { this.RaiseAndSetIfChanged(ref _peakDataPoints, value); }
-        }
-
-        private readonly ObservableAsPropertyHelper<ReactiveList<PeakDataPoint>> _dataTable;
+        private ReactiveList<PeakDataPoint> _dataTable;
         /// <summary>
         /// The data that is shown in the "Table" view. This excludes any fragments without data.
         /// </summary>
         public ReactiveList<PeakDataPoint> DataTable
         {
-            get { return _dataTable.Value; }
+            get { return _dataTable; }
+            set { this.RaiseAndSetIfChanged(ref _dataTable, value); }
         }
 
-        private Sequence _sequence;
         /// <summary>
-        /// The sequence to display
+        /// Set sequence and data displayed on heat map.
         /// </summary>
-        public Sequence Sequence
+        /// <param name="sequence">The sequence to display as the x axis of the plot.</param>
+        /// <param name="peakDataPoints">The peak data points to extract error values from.</param>
+        public void SetData(Sequence sequence, IEnumerable<IList<PeakDataPoint>> peakDataPoints)
         {
-            get { return _sequence; }
-            set { this.RaiseAndSetIfChanged(ref _sequence, value); }
-        }
-        #endregion
+            // Remove all points except for most abundant isotope peaks
+            var dataPoints = GetMostAbundantIsotopePeaks(peakDataPoints).ToArray();
 
-        #region Private Methods
+            // No data, nothing to do
+            if (dataPoints.Length == 0) return;
+
+            // Remove NaN values for data table (only showing fragment ions found in spectrum in data table)
+            DataTable = new ReactiveList<PeakDataPoint>(dataPoints.Where(dp => !dp.Error.Equals(Double.NaN)));
+
+            // Build Plot
+            BuildPlotModel(sequence, GetDataArray(dataPoints));
+
+            // Set plot width based on sequence length
+            PlotWidth = sequence.Count*_heighMultiplier;
+        }
+
         /// <summary>
         /// Build error heatmap
         /// </summary>
+        /// <param name="sequence">The sequence to display as x axis on the plot</param>
         /// <param name="data">
         /// Data to be shown on the heatmap.
         /// First dimension is sequence
         /// Second dimension is ion type
         /// </param>
-        private void BuildPlotModel(double[,] data)
+        private void BuildPlotModel(IReadOnlyList<AminoAcid> sequence, double[,] data)
         {
             // initialize color axis
             var minColor = OxyColor.FromRgb(127, 255, 0);
             var maxColor = OxyColor.FromRgb(255, 0, 0);
-            var colorAxis = new LinearColorAxis
-            {
-                Title = "Error",
-                Position = AxisPosition.Right,
-                Palette = OxyPalette.Interpolate(1000, new[] { minColor, maxColor }),
-                AbsoluteMinimum = 0,
-                Minimum = -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
-                Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
-                AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
-                LowColor = OxyColors.Navy,
-            };
-            PlotModel.Axes.Add(colorAxis);
+            _colorAxis.Palette = OxyPalette.Interpolate(1000, new[] {minColor, maxColor});
+            _colorAxis.Minimum = -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+            _colorAxis.Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+            _colorAxis.AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+            _colorAxis.LowColor = OxyColors.Navy;
+
+            PlotModel.Series.Clear();
 
             // initialize heat map
             var heatMapSeries = new HeatMapSeries
@@ -186,11 +164,8 @@ namespace LcmsSpectator.ViewModels
                 return String.Format("{0}({1}+)", ionType.BaseIonType.Symbol, ionType.Charge);
             };
 
-            //var revSequence = new Sequence(Sequence);
-            //revSequence.Reverse();
-
-            // Set yAxis double -> string label converter function
-            _xAxis.LabelFormatter = x => x.Equals(0) ? " " : Sequence[Math.Max(Math.Min((int) x - 1, Sequence.Count-1), 0)]
+            // Set xAxis double -> string label converter function
+            _xAxis.LabelFormatter = x => x.Equals(0) ? " " : sequence[Math.Max(Math.Min((int) x - 1, sequence.Count-1), 0)]
                                          .Residue.ToString(CultureInfo.InvariantCulture);
 
             // Update plot
@@ -201,12 +176,12 @@ namespace LcmsSpectator.ViewModels
         /// Organize the peak data points by ion type
         /// </summary>
         /// <returns>2d array where first dimension is sequence and second dimension is ion type</returns>
-        private double[,] GetDataArray()
+        private double[,] GetDataArray(IEnumerable<PeakDataPoint> dataPoints)
         {
             var dataDict = new Dictionary<IonType, List<double>>();
 
             // partition data set by ion type
-            foreach (var dataPoint in DataPoints)
+            foreach (var dataPoint in dataPoints)
             {
                 if (!dataDict.ContainsKey(dataPoint.IonType)) dataDict.Add(dataPoint.IonType, new List<double>());
                 var points = dataDict[dataPoint.IonType];
@@ -219,12 +194,14 @@ namespace LcmsSpectator.ViewModels
                 points.Insert(position, dataPoint.Error);
             }
 
+            var seqLength = dataDict.Values.Max(v => v.Count);
+
             _ionTypes = dataDict.Keys.ToArray();
 
-            var data = new double[Sequence.Count - 1, dataDict.Keys.Count];
+            var data = new double[seqLength - 1, dataDict.Keys.Count];
 
             // create two dimensional array from partitioned data
-            for (int i = 0; i < Sequence.Count-1; i++)
+            for (int i = 0; i < seqLength-1; i++)
             {
                 for (int j = 0; j < _ionTypes.Length; j++)
                 {
@@ -235,14 +212,31 @@ namespace LcmsSpectator.ViewModels
             }
             return data;
         }
-        #endregion
 
-        #region Private Members
+        /// <summary>
+        /// Get list of only most abundant isotope peaks of the ion peak data points
+        /// Associate residue with the sequence
+        /// </summary>
+        /// <param name="peakDataPoints">Peak data points for ions on the spectrum plot</param>
+        /// <returns>List of most abundant isotope peak data points</returns>
+        private IEnumerable<PeakDataPoint> GetMostAbundantIsotopePeaks(IEnumerable<IList<PeakDataPoint>> peakDataPoints)
+        {
+            var mostAbundantPeaks = new ReactiveList<PeakDataPoint>();
+            foreach (var peaks in peakDataPoints)
+            {
+                var peak = peaks.OrderByDescending(p => p.Y).FirstOrDefault();
+                if (peak != null && peak.IonType != null && peak.IonType.Name != "Precursor")
+                {
+                    mostAbundantPeaks.Add(peak);
+                }
+            }
+            return mostAbundantPeaks;
+        }
+
         private readonly int _heighMultiplier;
         private IonType[] _ionTypes;  
         private readonly LinearAxis _xAxis;
         private readonly LinearAxis _yAxis;
-
-        #endregion
+        private readonly LinearColorAxis _colorAxis;
     }
 }

@@ -22,40 +22,45 @@ namespace LcmsSpectator.ViewModels
             _prefixCompositionCache = new MemoizingMRUCache<Sequence, Composition[]>(GetPrefixCompositions, 20);
             _suffixCompositionCache = new MemoizingMRUCache<Sequence, Composition[]>(GetSuffixCompositions, 20);
             _lcms = lcms;
-            _fragmentCache = new MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel>(GetLabeledIonViewModel, 50000);
+            _fragmentCache = new MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel>(GetLabeledIonViewModel, 1000);
             _cacheLock = new object();
             IonTypes = new ReactiveList<IonType>();
             ShowHeavy = false;
+
+            FragmentLabels = new ReactiveList<LabeledIonViewModel>();
+            HeavyFragmentLabels = new ReactiveList<LabeledIonViewModel>();
+            PrecursorLabels = new ReactiveList<LabeledIonViewModel>();
+            HeavyPrecursorLabels = new ReactiveList<LabeledIonViewModel>();
+            ChargePrecursorLabels = new ReactiveList<LabeledIonViewModel>();
+            IsotopePrecursorLabels = new ReactiveList<LabeledIonViewModel>();
+
             var precursorObservable = this.WhenAnyValue(x => x.SelectedPrSm, x => x.ShowHeavy).Where(x => x.Item1 != null);
             precursorObservable.Select(x => x.Item2 ? IcParameters.Instance.LightModifications : null)
                                .SelectMany(async mods => await GenerateChargeLabelsAsync(mods))
                                .Subscribe(labels => ChargePrecursorLabels = labels);
             precursorObservable.Select(x => x.Item2 ? IcParameters.Instance.LightModifications : null)
                                .SelectMany(async mods => await GenerateIsotopeLabelsAsync(mods))
-                               .Subscribe(labels => IsotopePrecursorLabels = labels);
+                               .Subscribe(labels =>{ IsotopePrecursorLabels.ChangeTrackingEnabled = false; IsotopePrecursorLabels = labels; });
             precursorObservable.Where(x => x.Item2)
                 .SelectMany(async x => PrecursorViewMode == PrecursorViewMode.Isotopes ? await GenerateIsotopeLabelsAsync(IcParameters.Instance.HeavyModifications) 
                                                                              : await GenerateChargeLabelsAsync(IcParameters.Instance.HeavyModifications))
-                .Subscribe(labels => HeavyPrecursorLabels = labels);
+                .Subscribe(labels => {HeavyPrecursorLabels.ChangeTrackingEnabled = false; HeavyPrecursorLabels = labels;});
             IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold, x => x.LightModifications)
                 .Where(_ => SelectedPrSm != null).Select(x => ShowHeavy ? x.Item2 : null)
                 .SelectMany(async mods => await GenerateChargeLabelsAsync(mods))
-                .Subscribe(labels => ChargePrecursorLabels = labels);
+                .Subscribe(labels => {ChargePrecursorLabels.ChangeTrackingEnabled = false; ChargePrecursorLabels = labels;});
             IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold, x => x.LightModifications)
                         .Where(_ => SelectedPrSm != null).Select(x => ShowHeavy ? x.Item2 : null)
                         .SelectMany(async mods => await GenerateIsotopeLabelsAsync(mods))
-                        .Subscribe(labels => IsotopePrecursorLabels = labels);
+                        .Subscribe(labels => {IsotopePrecursorLabels.ChangeTrackingEnabled = false; IsotopePrecursorLabels = labels;});
             IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold, x => x.HeavyModifications)
                         .Where(_ => SelectedPrSm != null && ShowHeavy)
                         .SelectMany(async x => PrecursorViewMode == PrecursorViewMode.Isotopes ? await GenerateIsotopeLabelsAsync(x.Item2)
                                                                                                : await GenerateChargeLabelsAsync(x.Item2))
-                        .Subscribe(labels => HeavyPrecursorLabels = labels);
+                        .Subscribe(labels => { HeavyPrecursorLabels.ChangeTrackingEnabled = false; HeavyPrecursorLabels = labels; });
             this.WhenAnyValue(x => x.IsotopePrecursorLabels, x => x.ChargePrecursorLabels, x => x.PrecursorViewMode)
                 .Select(x => x.Item3 == PrecursorViewMode.Isotopes ? x.Item1 : x.Item2)
-                .Subscribe(labels =>
-                {
-                    PrecursorLabels = labels;
-                });
+                .Subscribe(labels => PrecursorLabels = labels);
 
             var fragmentObservable = this.WhenAnyValue(x => x.SelectedPrSm, x => x.IonTypes, x => x.ShowHeavy)
                 .Where(x => x.Item1 != null)
@@ -65,7 +70,7 @@ namespace LcmsSpectator.ViewModels
                 .Subscribe(labels => FragmentLabels = labels);
             fragmentObservable.Where(x => x.Item3)
                 .SelectMany(async mods => await GenerateFragmentLabelsAsync(IcParameters.Instance.HeavyModifications))
-                .Subscribe(labels => HeavyFragmentLabels = labels);
+                .Subscribe(labels =>{ HeavyFragmentLabels.ChangeTrackingEnabled = false; HeavyFragmentLabels = labels;});
             IcParameters.Instance.WhenAnyValue(x => x.LightModifications)
                 .Where(_ => SelectedPrSm != null).Select(mods => ShowHeavy ? mods : null)
                 .SelectMany(async mods => await GenerateFragmentLabelsAsync(mods))
@@ -73,10 +78,8 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.WhenAnyValue(x => x.HeavyModifications)
                 .Where(_ => SelectedPrSm != null && ShowHeavy)
                 .SelectMany(async mods => await GenerateFragmentLabelsAsync(mods))
-                .Subscribe(labels => HeavyFragmentLabels = labels);
+                .Subscribe(labels => {HeavyFragmentLabels.ChangeTrackingEnabled = false;HeavyFragmentLabels = labels;});
         }
-
-        #region Ion label properties
 
         private ReactiveList<LabeledIonViewModel> _fragmentLabels; 
         public ReactiveList<LabeledIonViewModel> FragmentLabels
@@ -120,9 +123,7 @@ namespace LcmsSpectator.ViewModels
             get { return _heavyPrecursorLabels; }
             private set { this.RaiseAndSetIfChanged(ref _heavyPrecursorLabels, value); }
         }
-        #endregion
 
-        #region Public Properties
         private bool _showHeavy;
         public bool ShowHeavy
         {
@@ -150,9 +151,7 @@ namespace LcmsSpectator.ViewModels
             get { return _precursorViewMode; }
             set { this.RaiseAndSetIfChanged(ref _precursorViewMode, value); }
         }
-        #endregion
 
-        #region Private Methods
         private Task<ReactiveList<LabeledIonViewModel>> GenerateFragmentLabelsAsync(ReactiveList<ModificationViewModel> labelModifications = null)
         {
             return Task.Run(() => GenerateFragmentLabels(labelModifications));
@@ -270,7 +269,7 @@ namespace LcmsSpectator.ViewModels
             }
             return compositions;
         }
-#endregion
+
         private readonly Object _cacheLock;
         private readonly MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel> _fragmentCache;
         private readonly MemoizingMRUCache<Sequence, Composition[]> _prefixCompositionCache;

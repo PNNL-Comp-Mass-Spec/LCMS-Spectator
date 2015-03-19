@@ -104,11 +104,14 @@ namespace LcmsSpectator.PlotModels
             SetPointMarker(xPoint, GetMarkerColor()); // add marker
         }
 
-        public void ClearSeries()
+        public override void ClearSeries()
         {
-            while (Series.Count > 1)
+            lock (_seriesLock)
             {
-                if (Series[0] != _pointMarkers) Series.RemoveAt(0);
+                while (Series.Count > 1)
+                {
+                    if (Series[0] != _pointMarkers) Series.RemoveAt(0);
+                }   
             }
         }
 

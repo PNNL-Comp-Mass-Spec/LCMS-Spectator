@@ -39,12 +39,10 @@ namespace LcmsSpectator.ViewModels
             _ions = new ReactiveList<LabeledIonViewModel>();
 
             var retentionTimeSelectedCommand = ReactiveCommand.Create();
-            retentionTimeSelectedCommand.Subscribe(_ =>
-            {
-                var dataPoint = PlotModel.SelectedDataPoint as XicDataPoint;
-                if (dataPoint == null) return;
-                SelectedScan = dataPoint.ScanNum;
-            });
+            retentionTimeSelectedCommand
+            .Select(_ => PlotModel.SelectedDataPoint as XicDataPoint)
+            .Where(dp => dp != null)
+            .Subscribe(dp => SelectedScan = dp.ScanNum);
             RetentionTimeSelectedCommand = retentionTimeSelectedCommand;
 
             var saveAsImageCommand = ReactiveCommand.Create();
@@ -109,7 +107,6 @@ namespace LcmsSpectator.ViewModels
                 .Subscribe(UpdatePlotModel);
         }
 
-        #region Public Properties
         /// <summary>
         /// Command triggered when new scan is selected (double clicked) on XIC.
         /// </summary>
@@ -209,15 +206,13 @@ namespace LcmsSpectator.ViewModels
             get { return _showPointMarkers; }            
             set { this.RaiseAndSetIfChanged(ref _showPointMarkers, value); }
         }
-#endregion
 
-        #region Public Methods
         /// <summary>
         /// Clear data on plot.
         /// </summary>
         public void ClearPlot()
         {
-            PlotModel.Series.Clear();
+            PlotModel.ClearSeries();
         }
 
         /// <summary>
@@ -305,9 +300,7 @@ namespace LcmsSpectator.ViewModels
                 _dialogService.ExceptionAlert(e);
             }
         }
-#endregion
 
-        #region Private Methods
         /// <summary>
         /// Finds series associated with labeledIonVm and shows/hides it depending on
         /// labeledIonVm selected property.
@@ -333,15 +326,11 @@ namespace LcmsSpectator.ViewModels
         {
             return await Task.WhenAll(ions.Select(ion => ion.GetXicAsync(smoothingPoints, useCache)));
         }
-#endregion
 
-        #region Private Fields
         private readonly IDialogService _dialogService;
         private readonly ILcMsRun _lcms;
 
         private readonly string _title;
         private readonly LinearAxis _xAxis;
-
-        #endregion
     }
 }
