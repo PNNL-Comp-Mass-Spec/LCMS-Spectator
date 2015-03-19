@@ -289,7 +289,7 @@ namespace LcmsSpectator.Models
                 var aa = Sequence[i] as ModifiedAminoAcid;
                 if (aa != null)
                 {
-                    modificationLocations.AppendFormat("{0}[{1}] ", i+1, aa.Modification.Name);
+                    modificationLocations.AppendFormat("{0}{1}[{2}] ", aa.Residue, i+1, aa.Modification.Name);
                 }
             }
             return modificationLocations.ToString();
