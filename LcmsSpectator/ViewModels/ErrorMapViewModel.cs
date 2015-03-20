@@ -5,11 +5,15 @@ using System.Linq;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using OxyPlot;
 using OxyPlot.Axes;
-using OxyPlot.Series;
+using OxyPlot.Wpf;
 using ReactiveUI;
+using HeatMapSeries = OxyPlot.Series.HeatMapSeries;
+using LinearAxis = OxyPlot.Axes.LinearAxis;
+using LinearColorAxis = OxyPlot.Axes.LinearColorAxis;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -18,11 +22,10 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Create new view model that maintains a heatmap showing sequence vs ion type vs error.
         /// </summary>
-        public ErrorMapViewModel()
+        public ErrorMapViewModel(IDialogService dialogService)
         {
+            _dialogService = dialogService;
             PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
-
-            _heighMultiplier = 15;
 
             _xAxis = new LinearAxis
             {
@@ -30,13 +33,12 @@ namespace LcmsSpectator.ViewModels
                 Position = AxisPosition.Top,
                 AbsoluteMinimum = 0,
                 Minimum = 0,
-                IsZoomEnabled = false,
-                IsPanEnabled = false,
-                MajorStep = 1.0,
                 MajorTickSize = 0,
-                MinorStep = 0.5,
-                MinorTickSize = 20,
+                MinorStep = 2,
+                Angle = -90,
+                MinorTickSize = 10,
                 MaximumPadding = 0,
+                FontSize = 10
             };
 
             _yAxis = new LinearAxis
@@ -45,13 +47,12 @@ namespace LcmsSpectator.ViewModels
                 Position = AxisPosition.Left,
                 AbsoluteMinimum = 0,
                 Minimum = 0,
-                IsZoomEnabled = false,
-                IsPanEnabled = false,
                 MajorStep = 1.0,
                 MajorTickSize = 0,
                 MinorStep = 0.5,
                 MinorTickSize = 20,
                 MaximumPadding = 0,
+                FontSize = 10
             };
 
             _colorAxis = new LinearColorAxis
@@ -68,6 +69,11 @@ namespace LcmsSpectator.ViewModels
             PlotModel.Axes.Add(_xAxis);
             PlotModel.Axes.Add(_yAxis);
             PlotModel.Axes.Add(_colorAxis);
+
+            // Save As Image Command requests a file path from the user and then saves the error map as an image
+            var saveAsImageCommand = ReactiveCommand.Create();
+            saveAsImageCommand.Subscribe(_ => SaveAsImageImpl());
+            SaveAsImageCommand = saveAsImageCommand;
         }
 
         /// <summary>
@@ -75,15 +81,10 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public PlotModel PlotModel { get; private set; }
 
-        private int _plotWidth;
         /// <summary>
-        /// Width of plot, based on sequence length
+        /// Prompt user for file path and save plot as image.
         /// </summary>
-        public int PlotWidth
-        {
-            get { return _plotWidth; }
-            set { this.RaiseAndSetIfChanged(ref _plotWidth, value); }
-        }
+        public IReactiveCommand SaveAsImageCommand { get; private set; }
 
         private ReactiveList<PeakDataPoint> _dataTable;
         /// <summary>
@@ -113,9 +114,6 @@ namespace LcmsSpectator.ViewModels
 
             // Build Plot
             BuildPlotModel(sequence, GetDataArray(dataPoints));
-
-            // Set plot width based on sequence length
-            PlotWidth = sequence.Count*_heighMultiplier;
         }
 
         /// <summary>
@@ -132,7 +130,7 @@ namespace LcmsSpectator.ViewModels
             // initialize color axis
             var minColor = OxyColor.FromRgb(127, 255, 0);
             var maxColor = OxyColor.FromRgb(255, 0, 0);
-            _colorAxis.Palette = OxyPalette.Interpolate(1000, new[] {minColor, maxColor});
+            _colorAxis.Palette = OxyPalette.Interpolate(1000, minColor, maxColor);
             _colorAxis.Minimum = -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue();
             _colorAxis.Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
             _colorAxis.AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
@@ -146,7 +144,7 @@ namespace LcmsSpectator.ViewModels
                 Data = data,
                 Interpolate = false,
                 X0 = 1,
-                X1 = data.GetLength(0)+1,
+                X1 = data.GetLength(0),
                 Y0 = 1,
                 Y1 = data.GetLength(1),
                 TrackerFormatString = 
@@ -155,6 +153,9 @@ namespace LcmsSpectator.ViewModels
                         "{5}: {6:0.###}ppm",
             };
             PlotModel.Series.Add(heatMapSeries);
+
+            _xAxis.AbsoluteMaximum = sequence.Count;
+            _yAxis.AbsoluteMaximum = _ionTypes.Length;
 
             // Set yAxis double -> string label converter function
             _yAxis.LabelFormatter = y =>
@@ -165,8 +166,8 @@ namespace LcmsSpectator.ViewModels
             };
 
             // Set xAxis double -> string label converter function
-            _xAxis.LabelFormatter = x => x.Equals(0) ? " " : sequence[Math.Max(Math.Min((int) x - 1, sequence.Count-1), 0)]
-                                         .Residue.ToString(CultureInfo.InvariantCulture);
+            _xAxis.LabelFormatter = x => x.Equals(0) ? " " : String.Format("{0}{1}", sequence[Math.Max(Math.Min((int)x - 1, sequence.Count - 1), 0)]
+                                         .Residue.ToString(CultureInfo.InvariantCulture), (int)x);
 
             // Update plot
             PlotModel.InvalidatePlot(true);
@@ -233,7 +234,26 @@ namespace LcmsSpectator.ViewModels
             return mostAbundantPeaks;
         }
 
-        private readonly int _heighMultiplier;
+        /// <summary>
+        /// Prompt user for file path and save plot as image to that path.
+        /// </summary>
+        private void SaveAsImageImpl()
+        {
+            var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            try
+            {
+                if (fileName != "")
+                {
+                    PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
+                }
+            }
+            catch (Exception e)
+            {
+                _dialogService.ExceptionAlert(e);
+            }
+        }
+
+        private readonly IDialogService _dialogService;
         private IonType[] _ionTypes;  
         private readonly LinearAxis _xAxis;
         private readonly LinearAxis _yAxis;

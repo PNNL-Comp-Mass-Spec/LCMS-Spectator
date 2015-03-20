@@ -15,9 +15,13 @@
             <xcad:LayoutPanel>
                 <xcad:LayoutDocumentPane DockWidth="*">
                     <xcad:LayoutDocument Title="Heat Map" CanClose="False">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                            <oxy:PlotView Model="{Binding PlotModel}" Width="{Binding PlotWidth}" MinHeight="900" />
-                        </ScrollViewer>
+                        <oxy:PlotView Model="{Binding PlotModel}" Margin="0,0,10,0">
+                            <oxy:PlotView.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="_Save as Image" Command="{Binding SaveAsImageCommand}" />
+                                </ContextMenu>
+                            </oxy:PlotView.ContextMenu>
+                        </oxy:PlotView>
                     </xcad:LayoutDocument>
                     <xcad:LayoutDocument Title="Table" CanClose="False">
                         <DataGrid ItemsSource="{Binding DataTable}" AutoGenerateColumns="False">

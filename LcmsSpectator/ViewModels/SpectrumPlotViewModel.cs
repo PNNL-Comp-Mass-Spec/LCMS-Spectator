@@ -33,7 +33,7 @@ namespace LcmsSpectator.ViewModels
         {
             _dialogService = dialogService;
             _autoZoomXAxis = autoZoomXAxis;
-            _errorMapViewModel = new ErrorMapViewModel();
+            _errorMapViewModel = new ErrorMapViewModel(_dialogService);
             ShowUnexplainedPeaks = true;
             ShowFilteredSpectrum = false;
             ShowDeconvolutedSpectrum = false;
