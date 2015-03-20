@@ -8,20 +8,23 @@ namespace LcmsSpectator.Readers.SequenceReaders
 {
     public class LcmsSpectatorSequenceReader: ISequenceReader
     {
-        public Sequence Read(string sequence)
+        public Sequence Read(string sequence, bool trim=false)
         {
-            var firstIndex = sequence.IndexOf('.');
-            if (firstIndex >= 0)
+            if (trim)
             {
-                var index = Math.Min(firstIndex + 1, sequence.Length - 1);
-                sequence = sequence.Substring(index, sequence.Length - index - 1);
-            }
+                var firstIndex = sequence.IndexOf('.');
+                if (firstIndex >= 0)
+                {
+                    var index = Math.Min(firstIndex + 1, sequence.Length - 1);
+                    sequence = sequence.Substring(index, sequence.Length - index - 1);
+                }
 
-            var lastIndex = sequence.LastIndexOf('.');
-            if (lastIndex >= 0)
-            {
-                var index = Math.Min(lastIndex, sequence.Length - 1);
-                sequence = sequence.Substring(0, index);
+                var lastIndex = sequence.LastIndexOf('.');
+                if (lastIndex >= 0)
+                {
+                    var index = Math.Min(lastIndex, sequence.Length - 1);
+                    sequence = sequence.Substring(0, index);
+                }   
             }
 
             const string aminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";

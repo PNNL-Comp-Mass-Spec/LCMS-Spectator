@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers.SequenceReaders;
 using MTDBFramework.Algorithms;
@@ -41,14 +42,15 @@ namespace LcmsSpectator.Readers
                 {
                     var prsm = new PrSm
                     {
-                        SequenceText = sequenceText,
-                        Sequence = sequenceReader.Read(sequenceText),
+                        Heavy = false,
                         Scan = evidence.Scan,
-                        ProteinName = protein.ProteinName,
                         Charge = evidence.Charge,
+                        Sequence = sequenceReader.Read(sequenceText),
+                        SequenceText = sequenceText,
+                        ProteinName = protein.ProteinName,
                         Score = evidence.SpecProb,
-                        QValue = msgfPlusEvidence.QValue,
                         UseGolfScoring = true,
+                        QValue = msgfPlusEvidence.QValue,
                     };
                     idTree.Add(prsm);
                 }

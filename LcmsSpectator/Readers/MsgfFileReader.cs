@@ -88,6 +88,10 @@ namespace LcmsSpectator.Readers
 
             var sequenceReader = new SequenceReader();
 
+            bool trim = false;
+
+            if (_filePath.Contains("_syn")) trim = true;
+
             foreach (var protein in proteinNames)
             {
                 var prsm = new PrSm
@@ -95,7 +99,7 @@ namespace LcmsSpectator.Readers
                     Heavy = false,
                     Scan = scan,
                     Charge = Convert.ToInt32(parts[headers["Charge"]]),
-                    Sequence = sequenceReader.Read(sequenceText),
+                    Sequence = sequenceReader.Read(sequenceText, trim),
                     SequenceText = sequenceText,
                     ProteinName = protein,
                     ProteinDesc = "",

@@ -15,20 +15,23 @@ namespace LcmsSpectator.Readers.SequenceReaders
             _aminoAcidSet = new AminoAcidSet();
         }
 
-        public Sequence Read(string msgfPlusPeptideStr)
+        public Sequence Read(string msgfPlusPeptideStr, bool trim=false)
         {
-            var firstIndex = msgfPlusPeptideStr.IndexOf('.');
-            if (firstIndex >= 0)
+            if (trim)
             {
-                var index = Math.Min(firstIndex + 1, msgfPlusPeptideStr.Length - 1);
-                msgfPlusPeptideStr = msgfPlusPeptideStr.Substring(index, msgfPlusPeptideStr.Length - index - 1);
-            }
+                var firstIndex = msgfPlusPeptideStr.IndexOf('.');
+                if (firstIndex >= 0)
+                {
+                    var index = Math.Min(firstIndex + 1, msgfPlusPeptideStr.Length - 1);
+                    msgfPlusPeptideStr = msgfPlusPeptideStr.Substring(index, msgfPlusPeptideStr.Length - index - 1);
+                }
 
-            var lastIndex = msgfPlusPeptideStr.LastIndexOf('.');
-            if (lastIndex >= 0)
-            {
-                var index = Math.Min(lastIndex, msgfPlusPeptideStr.Length - 1);
-                msgfPlusPeptideStr = msgfPlusPeptideStr.Substring(0, index);
+                var lastIndex = msgfPlusPeptideStr.LastIndexOf('.');
+                if (lastIndex >= 0)
+                {
+                    var index = Math.Min(lastIndex, msgfPlusPeptideStr.Length - 1);
+                    msgfPlusPeptideStr = msgfPlusPeptideStr.Substring(0, index);
+                }   
             }
 
             const string aminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
