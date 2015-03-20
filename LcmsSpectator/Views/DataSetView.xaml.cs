@@ -104,7 +104,18 @@ namespace LcmsSpectator.Views
                 return;
             }
             var position = Sequence.CaretIndex;
-            var modStr = String.Format("[{0}]", selectedMod.Name);
+            string modStr = "";
+            if (Sequence.Text.Contains("+"))
+            {
+                var sign = selectedMod.Mass > 0 ? "+" : "-";
+                if (!(selectedMod.Name.StartsWith("+") || selectedMod.Name.StartsWith("-")))
+                {
+                    var roundedMass = Math.Round(selectedMod.Mass, 3);
+                    modStr = String.Format("{0}{1}", sign, roundedMass);
+                }
+                else modStr = selectedMod.Name;
+            }
+            else modStr = String.Format("[{0}]", selectedMod.Name);
             Sequence.Text = Sequence.Text.Insert(position, modStr);
         }
 
