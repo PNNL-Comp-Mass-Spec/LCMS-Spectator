@@ -198,10 +198,10 @@ namespace LcmsSpectator.ViewModels
 
             _ionTypes = dataDict.Keys.ToArray();
 
-            var data = new double[seqLength - 1, dataDict.Keys.Count];
+            var data = new double[seqLength, dataDict.Keys.Count];
 
             // create two dimensional array from partitioned data
-            for (int i = 0; i < seqLength-1; i++)
+            for (int i = 0; i < seqLength; i++)
             {
                 for (int j = 0; j < _ionTypes.Length; j++)
                 {
