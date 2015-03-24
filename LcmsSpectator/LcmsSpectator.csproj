@@ -252,6 +252,7 @@
     <Compile Include="ViewModels\HeavyModificationsWindowViewModel.cs" />
     <Compile Include="ViewModels\IonListViewModel.cs" />
     <Compile Include="ViewModels\IonTypeSelectorViewModel.cs" />
+    <Compile Include="ViewModels\IsotopicEnvelopePlotViewModel.cs" />
     <Compile Include="ViewModels\LabeledIonViewModel.cs" />
     <Compile Include="ViewModels\LoadingScreenViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
