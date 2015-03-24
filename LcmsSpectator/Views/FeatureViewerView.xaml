@@ -9,6 +9,7 @@
              d:DesignHeight="300" d:DesignWidth="1100" Background="White">
     <UserControl.Resources>
         <utils:DoubleToStringConverterSci x:Key="ScoreFormatter" />
+        <utils:DoubleToStringConverter x:Key="Rounder" />
         <utils:NumToStringConverter x:Key="NumFormatter" />
     </UserControl.Resources>
     <Grid>
@@ -47,7 +48,7 @@
                     <RowDefinition Height="25*" />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
-                    <wpf:PlotView Name="TheoreticalIsotopicEnvelope" Model="{Binding IsotopicEnvelope}" Grid.Row="0" Width="400" />
+                    <wpf:PlotView Name="TheoreticalIsotopicEnvelope" Model="{Binding IsotopicEnvelope.PlotModel}" Grid.Row="0" Width="400" />
                 </Grid>
                 <ScrollViewer Grid.Row="1" VerticalAlignment="Top"
                               VerticalScrollBarVisibility="Auto"
@@ -83,7 +84,7 @@
                         <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedFeature.RetentionTime, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
 
                         <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Mass:</TextBlock>
-                        <TextBlock Grid.Row="5" Grid.Column="1"  Text="{Binding SelectedFeature.Mass, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
+                        <TextBlock Grid.Row="5" Grid.Column="1"  Text="{Binding SelectedFeature.Mass, Converter={StaticResource Rounder}}" HorizontalAlignment="Right"  />
 
                         <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Abundance:</TextBlock>
                         <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SelectedFeature.Abundance, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
@@ -98,10 +99,6 @@
                     <RowDefinition Height="55" />
                 </Grid.RowDefinitions>
                 <StackPanel Margin="5,0,0,0" Grid.Row="0" Grid.Column="0"  Orientation="Horizontal">
-                    <TextBlock Width="110" FontWeight="Bold">Score Range:</TextBlock>
-                    <TextBlock Width="55"  Text="{Binding MinimumScore}" />
-                    <TextBlock Width="10"  Text="-" />
-                    <TextBlock Width="55"  Text="{Binding MaximumScore}" />
                     <TextBlock Width="125" FontWeight="Bold">Abundance Range:</TextBlock>
                     <TextBlock Width="55"  Text="{Binding MinimumAbundance, Converter={StaticResource ScoreFormatter}}" />
                     <TextBlock Width="10"  Text="-" />
