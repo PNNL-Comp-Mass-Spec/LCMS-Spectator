@@ -242,10 +242,8 @@ namespace LcmsSpectator.ViewModels
             var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
-                if (fileName != "")
-                {
-                    PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
-                }
+                if (!String.IsNullOrEmpty(fileName)) throw new FormatException(String.Format("Cannot save image due to invalid file name: {0}", fileName));
+                PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
             }
             catch (Exception e)
             {
