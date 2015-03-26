@@ -12,7 +12,12 @@
         </Grid.RowDefinitions>
         <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                    IsReadOnly="True" RowHeaderWidth="0" Grid.Row="0"
-                   ItemsSource="{Binding FragmentLabels}" EnableRowVirtualization="False">
+                   ItemsSource="{Binding FragmentLabels}" EnableRowVirtualization="{Binding EnableFragmentRowVirtualization}">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Enable Row Virtualization" IsCheckable="True" IsChecked="{Binding EnableFragmentRowVirtualization}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">
                     <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -24,7 +29,12 @@
         </DataGrid>
         <DataGrid  AutoGenerateColumns="False" SelectionMode="Extended"
                    ItemsSource="{Binding PrecursorLabels}"
-                   IsReadOnly="True" RowHeaderWidth="0" Grid.Row="1" EnableRowVirtualization="False">
+                   IsReadOnly="True" RowHeaderWidth="0" Grid.Row="1" EnableRowVirtualization="{Binding EnablePrecursorRowVirtualization}">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Enable Row Virtualization" IsCheckable="True" IsChecked="{Binding EnablePrecursorRowVirtualization}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Resources>
                 <Style TargetType="DataGridRow">
                     <Setter Property="IsSelected" Value="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />

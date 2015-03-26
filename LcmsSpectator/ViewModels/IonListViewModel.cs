@@ -79,6 +79,9 @@ namespace LcmsSpectator.ViewModels
                 .Where(_ => SelectedPrSm != null && ShowHeavy)
                 .SelectMany(async mods => await GenerateFragmentLabelsAsync(mods))
                 .Subscribe(labels => {HeavyFragmentLabels.ChangeTrackingEnabled = false;HeavyFragmentLabels = labels;});
+
+            EnableFragmentRowVirtualization = true;
+            EnablePrecursorRowVirtualization = false;
         }
 
         private ReactiveList<LabeledIonViewModel> _fragmentLabels; 
@@ -150,6 +153,20 @@ namespace LcmsSpectator.ViewModels
         {
             get { return _precursorViewMode; }
             set { this.RaiseAndSetIfChanged(ref _precursorViewMode, value); }
+        }
+
+        private bool _enableFragmentRowVirtualization;
+        public bool EnableFragmentRowVirtualization
+        {
+            get { return _enableFragmentRowVirtualization; }
+            set { this.RaiseAndSetIfChanged(ref _enableFragmentRowVirtualization, value); }
+        }
+
+        private bool _enablePrecursorRowVirtualization;
+        public bool EnablePrecursorRowVirtualization
+        {
+            get { return _enablePrecursorRowVirtualization; }
+            set { this.RaiseAndSetIfChanged(ref _enablePrecursorRowVirtualization, value); }
         }
 
         private Task<ReactiveList<LabeledIonViewModel>> GenerateFragmentLabelsAsync(ReactiveList<ModificationViewModel> labelModifications = null)
