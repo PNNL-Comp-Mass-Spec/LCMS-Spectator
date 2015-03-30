@@ -164,10 +164,7 @@ namespace LcmsSpectator.ViewModels
         public Spectrum Spectrum
         {
             get { return _spectrum; }
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _spectrum, value);
-            }
+            set { this.RaiseAndSetIfChanged(ref _spectrum, value); }
         }
 
         private Sequence _sequence;

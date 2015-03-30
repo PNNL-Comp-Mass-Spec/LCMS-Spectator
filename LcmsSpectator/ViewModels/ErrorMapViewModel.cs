@@ -27,6 +27,7 @@ namespace LcmsSpectator.ViewModels
             _dialogService = dialogService;
             PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
 
+            // Init error map axes
             _xAxis = new LinearAxis
             {
                 Title = "Amino Acid",
@@ -40,6 +41,7 @@ namespace LcmsSpectator.ViewModels
                 MaximumPadding = 0,
                 FontSize = 10
             };
+            PlotModel.Axes.Add(_xAxis);
 
             _yAxis = new LinearAxis
             {
@@ -54,6 +56,7 @@ namespace LcmsSpectator.ViewModels
                 MaximumPadding = 0,
                 FontSize = 10
             };
+            PlotModel.Axes.Add(_yAxis);
 
             _colorAxis = new LinearColorAxis
             {
@@ -65,9 +68,6 @@ namespace LcmsSpectator.ViewModels
                 AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
                 LowColor = OxyColors.Navy,
             };
-
-            PlotModel.Axes.Add(_xAxis);
-            PlotModel.Axes.Add(_yAxis);
             PlotModel.Axes.Add(_colorAxis);
 
             // Save As Image Command requests a file path from the user and then saves the error map as an image
@@ -103,6 +103,8 @@ namespace LcmsSpectator.ViewModels
         /// <param name="peakDataPoints">The peak data points to extract error values from.</param>
         public void SetData(Sequence sequence, IEnumerable<IList<PeakDataPoint>> peakDataPoints)
         {
+            if (sequence == null || peakDataPoints == null) return;
+
             // Remove all points except for most abundant isotope peaks
             var dataPoints = GetMostAbundantIsotopePeaks(peakDataPoints).ToArray();
 
@@ -112,7 +114,7 @@ namespace LcmsSpectator.ViewModels
             // Remove NaN values for data table (only showing fragment ions found in spectrum in data table)
             DataTable = new ReactiveList<PeakDataPoint>(dataPoints.Where(dp => !dp.Error.Equals(Double.NaN)));
 
-            // Build Plot
+            // Build and invalidate erorr map plot display
             BuildPlotModel(sequence, GetDataArray(dataPoints));
         }
 

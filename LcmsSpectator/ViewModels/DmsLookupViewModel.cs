@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
 using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
 using LcmsSpectator.Readers;
 using ReactiveUI;
 
@@ -146,8 +147,8 @@ namespace LcmsSpectator.ViewModels
 
         public List<string> GetRawFileNames()
         {
-            if (!this.ValidateDataSet()) return new List<string>();
-            var dataSetDirFiles = Directory.GetFiles(this.SelectedDataset.DatasetFolderPath);
+            if (!ValidateDataSet()) return new List<string>();
+            var dataSetDirFiles = Directory.GetFiles(SelectedDataset.DatasetFolderPath);
             var rawFileNames = (from filePath in dataSetDirFiles
                             let ext = Path.GetExtension(filePath)
                             where !String.IsNullOrEmpty(ext)
@@ -156,27 +157,46 @@ namespace LcmsSpectator.ViewModels
                             select filePath).ToList();
             for (int i = 0; i < rawFileNames.Count; i++)
             {
-                var pbfFile = this.GetPbfFileName(rawFileNames[i]);
+                var pbfFile = GetPbfFileName(rawFileNames[i]);
                 if (!String.IsNullOrEmpty(pbfFile)) rawFileNames[i] = pbfFile;
             }
             return rawFileNames;
         }
 
-        public List<string> GetIdFileNames()
+        public string GetIdFileName()
         {
-            if (!this.ValidateJob()) return new List<string>();
+            if (!ValidateJob()) return null;
             var jobDir = Directory.GetFiles(SelectedJob.JobFolderPath);
             return (from idFp in jobDir
                            let ext = Path.GetExtension(idFp)
                            where ext == ".mzid" || ext == ".gz" || ext == ".zip"
-                           select idFp).ToList();
+                           select idFp).FirstOrDefault();
         }
 
         public string GetFeatureFileName()
         {
-            if (!this.ValidateJob()) return null;
+            if (!ValidateJob()) return null;
             var jobDir = Directory.GetFiles(SelectedJob.JobFolderPath);
             return (from idFp in jobDir let ext = Path.GetExtension(idFp) where ext == ".ms1ft" select idFp).FirstOrDefault();
+        }
+
+        public ToolType? GetTool()
+        {
+            if (!ValidateJob()) return null;
+            ToolType toolType;
+            switch (SelectedJob.Tool)
+            {
+                case "MS-GF+":
+                    toolType = ToolType.MsgfPlus;
+                    break;
+                case "MSPathFinder":
+                    toolType = ToolType.MsPathFinder;
+                    break;
+                default:
+                    toolType = ToolType.Other;
+                    break;
+            }
+            return toolType;
         }
 
         /// <summary>
@@ -212,7 +232,7 @@ namespace LcmsSpectator.ViewModels
                 var file = File.ReadAllLines(PreviousResultsFile);
                 foreach (var line in file)
                 {
-                    int numWeeks = 0;
+                    int numWeeks;
                     var parts = line.Split('\t');
                     if (parts.Length < 2) continue;
                     var dataSetName = parts[0];
@@ -240,7 +260,7 @@ namespace LcmsSpectator.ViewModels
         private string GetPbfFileName(string rawFileName)
         {
             string pbfFilePath = null;
-            if (!this.ValidateDataSet()) return null;
+            if (!ValidateDataSet()) return null;
             var dataSetDirDirectories = Directory.GetDirectories(SelectedDataset.DatasetFolderPath);
             var pbfFolderPath = (from folderPath in dataSetDirDirectories
                                  let folderName = Path.GetFileNameWithoutExtension(folderPath)
@@ -280,7 +300,7 @@ namespace LcmsSpectator.ViewModels
 
         private readonly DmsLookupUtility _dmsLookupUtility;
         private readonly IDialogService _dialogService;
-        private List<Tuple<string, int>> _previousResultsList; 
+        private readonly List<Tuple<string, int>> _previousResultsList; 
         private const string PreviousResultsFile = "dmsSearches.txt";
     }
 }

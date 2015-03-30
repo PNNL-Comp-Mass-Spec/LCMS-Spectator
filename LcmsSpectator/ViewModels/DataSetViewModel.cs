@@ -4,12 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Models;
-using LcmsSpectator.Readers;
 using LcmsSpectator.TaskServices;
 using ReactiveUI;
 
@@ -17,42 +15,26 @@ namespace LcmsSpectator.ViewModels
 {
     public class DataSetViewModel: ReactiveObject
     {
-        #region Child View Models
-        public FeatureViewerViewModel FeatureMapViewModel { get; private set; }
-        public ScanViewModel ScanViewModel { get; private set; }
-        public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
-        public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
-        public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
-        #endregion
-
-        #region Commands
-        public IReactiveCommand OpenFeatureFileCommand { get; private set; }
-        public IReactiveCommand CloseCommand { get; private set; }
-        #endregion
-
+        /// <summary>
+        /// Create a new instance of the DataSetViewModel class.
+        /// </summary>
+        /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>
+        /// <param name="taskService">Task scheduler for managing parallel/synchronous tasks.</param>
         public DataSetViewModel(IMainDialogService dialogService, ITaskService taskService)
         {
             _dialogService = dialogService;
-            ITaskService taskService1 = taskService;
-            _showFeatureMapSplash = true;
             ReadyToClose = false;
             LoadingScreenViewModel = new LoadingScreenViewModel();
             SelectedPrSm = new PrSm();
-            FeatureMapViewModel = new FeatureViewerViewModel();
-            ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService1), new List<PrSm>());
+            ScanViewModel = new ScanViewModel(_dialogService, TaskServiceFactory.GetTaskServiceLike(taskService), new List<PrSm>());
             IonTypeSelectorViewModel = new IonTypeSelectorViewModel(_dialogService);
             CreateSequenceViewModel = new CreateSequenceViewModel(new ReactiveList<DataSetViewModel>(),
-                _dialogService)
-            {
-                SelectedDataSetViewModel = this
-            };
-            var openFeatureFileCommand = ReactiveCommand.Create();
-            openFeatureFileCommand.Subscribe(_ => OpenFeatureFile());
-            OpenFeatureFileCommand = openFeatureFileCommand;
+                _dialogService) { SelectedDataSetViewModel = this };
 
+            // When a PrSm is selected from the ScanViewModel, update the SelectedPrSm for this data set
             ScanViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(x => SelectedPrSm = x);
 
-            // When the scan in the prsm changes, the selected scan in the xic plots should update
+            // When the scan number in the selected prsm changes, the selected scan in the xic plots should update
             this.WhenAnyValue(x => x.SelectedPrSm)
             .Where(_ => SelectedPrSm != null && SpectrumViewModel != null && XicViewModel != null)
             .Subscribe(prsm =>
@@ -77,7 +59,7 @@ namespace LcmsSpectator.ViewModels
             prsmObservable.Subscribe(prsm => CreateSequenceViewModel.SelectedPrSm = prsm);
 
             // When the prsm updates, update the feature map
-            prsmObservable.Subscribe(prsm => FeatureMapViewModel.SelectedPrSm = prsm);
+            prsmObservable.Where(_ => FeatureMapViewModel != null).Subscribe(prsm => FeatureMapViewModel.SelectedPrSm = prsm);
 
             // When prsm updates, update sequence in spectrum plot view model
             prsmObservable.Where(prsm => prsm.Sequence != null && SpectrumViewModel != null)
@@ -97,16 +79,14 @@ namespace LcmsSpectator.ViewModels
             // When a new prsm is created by CreateSequenceViewModel, update SelectedPrSm
             CreateSequenceViewModel.WhenAnyValue(x => x.SelectedPrSm).Subscribe(prsm => SelectedPrSm = prsm);
 
-            // When an ID is selected on FeatureMap, update selectedPrSm
-            FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => SelectedPrSm = prsm);
-
             // When the ion types change, the ion lists should be recalculated.
             IonTypeSelectorViewModel.WhenAnyValue(x => x.IonTypes).Where(_ => IonListViewModel != null).Subscribe(ionTypes => IonListViewModel.IonTypes = ionTypes);
 
-            ScanViewModel.WhenAnyValue(x => x.FilteredData).Subscribe(data => FeatureMapViewModel.UpdateIds(data));
+            // When IDs are filtered in the ScanViewModel, update feature map with new IDs
+            ScanViewModel.WhenAnyValue(x => x.FilteredData).Where(_ => FeatureMapViewModel != null).Subscribe(data => FeatureMapViewModel.UpdateIds(data));
 
             // Toggle instrument data when ShowInstrumentData setting is changed.
-            IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Select(async x => await ToggleShowInstrumentData(x)).Subscribe();
+            IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Select(async x => await ScanViewModel.ToggleShowInstrumentDataAsync(x, (PbfLcMsRun)Lcms)).Subscribe();
 
             // Close command verifies that the user wants to close the dataset, then sets ReadyToClose to true if they are
             var closeCommand = ReactiveCommand.Create();
@@ -119,7 +99,17 @@ namespace LcmsSpectator.ViewModels
             CloseCommand = closeCommand;
         }
 
-        #region Public Properties
+        public ScanViewModel ScanViewModel { get; private set; }
+        public IonTypeSelectorViewModel IonTypeSelectorViewModel { get; private set; }
+        public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
+        public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
+
+        /// <summary>
+        /// Command that is activated when the close button is clicked on a dataset.
+        /// Initiates a close request for the main view model
+        /// </summary>
+        public IReactiveCommand CloseCommand { get; private set; }
+
         /// <summary>
         /// The LcMsRun representing the raw file for this dataset.
         /// </summary>
@@ -165,6 +155,16 @@ namespace LcmsSpectator.ViewModels
             private set { this.RaiseAndSetIfChanged(ref _spectrumViewModel, value); }
         }
 
+        private FeatureViewerViewModel _featureMapViewModel;
+        /// <summary>
+        /// View model for ms1 feature map plot
+        /// </summary>
+        public FeatureViewerViewModel FeatureMapViewModel
+        {
+            get { return _featureMapViewModel; } 
+            private set { this.RaiseAndSetIfChanged(ref _featureMapViewModel, value); }
+        }
+
         private string _rawFileName;
         /// <summary>
         /// Raw file name without path or extension. For displaying on tab header.
@@ -173,17 +173,6 @@ namespace LcmsSpectator.ViewModels
         {
             get { return _rawFileName; }
             private set { this.RaiseAndSetIfChanged(ref _rawFileName, value); }
-        }
-
-
-        private string _rawFilePath;
-        /// <summary>
-        /// Full path to the raw file including extension.
-        /// </summary>
-        public string RawFilePath
-        {
-            get { return _rawFilePath; }
-            set { this.RaiseAndSetIfChanged(ref _rawFilePath, value); }
         }
 
         private bool _readyToClose;
@@ -196,28 +185,43 @@ namespace LcmsSpectator.ViewModels
             set { this.RaiseAndSetIfChanged(ref _readyToClose, value); }
         }
 
-        public async Task Initialize()
+        private PrSm _selectedPrSm;
+        /// <summary>
+        /// Currently selected Protein-Spectrum-Match Identification
+        /// </summary>
+        public PrSm SelectedPrSm
         {
-            LoadingScreenViewModel.IsLoading = true;
-            RawFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(RawFilePath));
-            var extension = Path.GetExtension(RawFilePath);
+            get { return _selectedPrSm; }
+            set { this.RaiseAndSetIfChanged(ref _selectedPrSm, value); }
+        }
+
+        /// <summary>
+        /// Initialize this data set by reading the raw file asynchronously and initializing child view models
+        /// </summary>
+        /// <returns></returns>
+        public async Task InitializeAsync(string rawFilePath)
+        {
+            LoadingScreenViewModel.IsLoading = true; //  Show animated loading screen
+            RawFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(rawFilePath));
+            var extension = Path.GetExtension(rawFilePath);
             if (extension != null) extension = extension.ToLower();
             if (extension == ".gz")
             {
-                extension = Path.GetExtension(Path.GetFileNameWithoutExtension(RawFilePath));
-                if (extension != null)
-                {
-                    extension = extension.ToLower();
-                }
+                extension = Path.GetExtension(Path.GetFileNameWithoutExtension(rawFilePath));
+                if (extension != null) extension = extension.ToLower();
             }
             // load raw file
             var massSpecDataType = (extension == ".mzml") ? MassSpecDataType.MzMLFile : MassSpecDataType.XCaliburRun;
-            Lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(_rawFilePath, massSpecDataType, 0, 0));
+            Lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(rawFilePath, massSpecDataType, 0, 0));
 
+            // Now that we have an LcMsRun, initialize viewmodels that require it
             XicViewModel = new XicViewModel(_dialogService, Lcms);
             SpectrumViewModel = new SpectrumViewModel(_dialogService, Lcms);
             IonListViewModel = new IonListViewModel(Lcms);
+            FeatureMapViewModel = new FeatureViewerViewModel(_dialogService, (LcMsRun)Lcms);
+            InitWirings(); // Initialize the wirings for updating these view models
 
+            // Create prsms for scan numbers (unidentified)
             var scans = Lcms.GetScanNumbers(2);
             var prsmScans = scans.Select(scan => new PrSm
             {
@@ -228,41 +232,15 @@ namespace LcmsSpectator.ViewModels
                 Score = Double.NaN,
             });
             ScanViewModel.AddIds(prsmScans);
-            await ToggleShowInstrumentData(IcParameters.Instance.ShowInstrumentData);
-            SelectedPrSm.Lcms = Lcms;
-            this.InitWirings();
-            LoadingScreenViewModel.IsLoading = false;
+            await ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun) Lcms);
+            SelectedPrSm.Lcms = Lcms; // For the selected PrSm, we should always use the LcMsRun for this dataset.
+            LoadingScreenViewModel.IsLoading = false; // Hide animated loading screen
         }
-
-        private bool _showFeatureMapSplash;
-        /// <summary>
-        /// Sets/Gets whether the loading screen is currently being shown.
-        /// </summary>
-        public bool ShowFeatureMapSplash
-        {
-            get { return _showFeatureMapSplash; }
-            set { this.RaiseAndSetIfChanged(ref _showFeatureMapSplash, value); }
-        }
-
-        private PrSm _selectedPrSm;
-        public PrSm SelectedPrSm
-        {
-            get { return _selectedPrSm; }
-            set { this.RaiseAndSetIfChanged(ref _selectedPrSm, value); }
-        }
-        #endregion
 
         private void InitWirings()
         {
             // When the selected scan changes in the xic plots, the selected scan for the prsm should update
-            XicViewModel.WhenAnyValue(x => x.FragmentPlotViewModel.SelectedScan)
-                .Subscribe(scan => SelectedPrSm.Scan = scan);
-            XicViewModel.WhenAnyValue(x => x.HeavyFragmentPlotViewModel.SelectedScan)
-                .Subscribe(scan => SelectedPrSm.Scan = scan);
-            XicViewModel.WhenAnyValue(x => x.PrecursorPlotViewModel.SelectedScan)
-                .Subscribe(scan => SelectedPrSm.Scan = scan);
-            XicViewModel.WhenAnyValue(x => x.HeavyPrecursorPlotViewModel.SelectedScan)
-                .Subscribe(scan => SelectedPrSm.Scan = scan);
+            XicViewModel.SelectedScanUpdated().Subscribe(scan => SelectedPrSm.Scan = scan);
 
             // When precursor view mode is selected in XicViewModel, ion lists should be recalculated.
             XicViewModel.WhenAnyValue(x => x.PrecursorViewMode, x => x.ShowHeavy)
@@ -272,6 +250,7 @@ namespace LcmsSpectator.ViewModels
                     IonListViewModel.ShowHeavy = x.Item2;
                 });
 
+            // When FragmentLabels or ChargePrecursorLabels change, update spectra
             IonListViewModel.WhenAnyValue(x => x.FragmentLabels, x => x.ChargePrecursorLabels)
             .Where(x => x.Item1 != null && x.Item2 != null && SelectedPrSm != null)
             .Throttle(TimeSpan.FromMilliseconds(50), RxApp.TaskpoolScheduler)
@@ -283,127 +262,22 @@ namespace LcmsSpectator.ViewModels
                 if (SpectrumViewModel.Ms2SpectrumViewModel.Ions != null)
                     SpectrumViewModel.Ms2SpectrumViewModel.Ions.ChangeTrackingEnabled = false;
                 SpectrumViewModel.Ms2SpectrumViewModel.Ions = labels;
-
-            });
-            IonListViewModel.WhenAnyValue(x => x.FragmentLabels)
-                .Subscribe(labels =>
-                {
-                    XicViewModel.FragmentPlotViewModel.Ions = labels;
-                });
-            IonListViewModel.WhenAnyValue(x => x.HeavyFragmentLabels)
-            .Subscribe(labels =>
-            {
-                XicViewModel.HeavyFragmentPlotViewModel.Ions = labels;
-            });
-            IonListViewModel.WhenAnyValue(x => x.ChargePrecursorLabels)
-            .Where(labels => labels != null)
-                //.Select(labels => new ReactiveList<LabeledIonViewModel>(labels.Where(l => l.Index == 0)) { ChangeTrackingEnabled = true })
-            .Subscribe(labels =>
-            {
                 SpectrumViewModel.PrevMs1SpectrumViewModel.Ions = labels;
                 SpectrumViewModel.NextMs1SpectrumViewModel.Ions = labels;
             });
-            IonListViewModel.WhenAnyValue(x => x.PrecursorLabels)
-            .Where(labels => labels != null)
-            .Subscribe(labels =>
-            {
-                XicViewModel.PrecursorPlotViewModel.Ions = labels;
-            });
-            IonListViewModel.WhenAnyValue(x => x.HeavyPrecursorLabels)
-            .Where(labels => labels != null)
-            .Subscribe(labels =>
-            {
-                XicViewModel.HeavyPrecursorPlotViewModel.Ions = labels;
-            });
+
+            // When FragmentLabels or PrecursorLabels change, update XICs
+            IonListViewModel.WhenAnyValue(x => x.FragmentLabels).Subscribe(labels => XicViewModel.FragmentPlotViewModel.Ions = labels);
+            IonListViewModel.WhenAnyValue(x => x.HeavyFragmentLabels).Subscribe(labels => XicViewModel.HeavyFragmentPlotViewModel.Ions = labels);
+            IonListViewModel.WhenAnyValue(x => x.PrecursorLabels).Where(labels => labels != null)
+            .Subscribe(labels => XicViewModel.PrecursorPlotViewModel.Ions = labels);
+            IonListViewModel.WhenAnyValue(x => x.HeavyPrecursorLabels).Where(labels => labels != null)
+            .Subscribe(labels => XicViewModel.HeavyPrecursorPlotViewModel.Ions = labels);
+
+            // When an ID is selected on FeatureMap, update selectedPrSm
+            FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => SelectedPrSm = prsm);
         }
 
-        #region Public Methods
-        /// <summary>
-        /// Add Identifications associated with data set.
-        /// </summary>
-        /// <param name="ids">Identifications</param>
-        public void AddIds(IdentificationTree ids)
-        {
-            ScanViewModel.AddIds(ids.AllPrSms);
-        }
-
-        /// <summary>
-        /// Read features and display feature map for this data set.
-        /// </summary>
-        /// <param name="filePath">Path of feature file.</param>
-        public void OpenFeatureFile(string filePath)
-        {
-            ShowFeatureMapSplash = false;
-            try
-            {
-                var features = FeatureReader.Read(filePath);
-                FeatureMapViewModel.SetData((LcMsRun) Lcms, features.ToList(), ScanViewModel.FilteredData);
-            }
-            catch (InvalidCastException)
-            {
-                _dialogService.MessageBox("Cannot open features for this type of data set.");
-            }
-        }
-
-        /// <summary>
-        /// Display open file dialog to select feature file and then read and display features.
-        /// </summary>
-        public void OpenFeatureFile()
-        {
-            const string formatStr = @"TSV Files (*.txt; *tsv)|*.txt;*.tsv";
-            var tsvFileName = _dialogService.OpenFile(".txt", formatStr);
-            if (!String.IsNullOrEmpty(tsvFileName))
-            {
-                ShowFeatureMapSplash = false;
-                var features = FeatureReader.Read(tsvFileName);
-                FeatureMapViewModel.SetData((LcMsRun)Lcms, features.ToList(), ScanViewModel.FilteredData);
-            }
-        }
-
-        /// <summary>
-        /// Shows or hides instrument Precursor m/z and mass from the instrument
-        /// Reads data from LcMsRun if necessary
-        /// </summary>
-        /// <param name="value">Should the instrument data be shown?</param>
-        /// <returns>Awaitable task</returns>
-        public Task ToggleShowInstrumentData(bool value)
-        {
-            return Task.Run(() =>
-            {
-                LoadingScreenViewModel.IsLoading = true;
-                if (value)
-                {
-                    var pbfLcmsRun = Lcms as PbfLcMsRun;
-                    if (pbfLcmsRun != null)
-                    {
-                        var scans = ScanViewModel.Data;
-                        foreach (var scan in scans.Where(scan => scan.Sequence.Count == 0))
-                        {
-                            IsolationWindow isolationWindow = pbfLcmsRun.GetIsolationWindow(scan.Scan);
-                            scan.PrecursorMz = isolationWindow.MonoisotopicMz == null ? Double.NaN : isolationWindow.MonoisotopicMz.Value;
-                            scan.Charge = isolationWindow.Charge == null ? 0 : isolationWindow.Charge.Value;
-                            scan.Mass = isolationWindow.MonoisotopicMass == null ? Double.NaN : isolationWindow.MonoisotopicMass.Value;
-                        }
-                    }
-                }
-                else
-                {
-                    var scans = ScanViewModel.Data;
-                    foreach (var scan in scans.Where(scan => scan.Sequence.Count == 0))
-                    {
-                        scan.PrecursorMz = Double.NaN;
-                        scan.Charge = 0;
-                        scan.Mass = Double.NaN;
-                    }
-                }
-                ScanViewModel.FilterData();
-                LoadingScreenViewModel.IsLoading = false;
-            });
-        }
-        #endregion
-
-        #region Private Members
         private readonly IMainDialogService _dialogService;
-        #endregion
     }
 }

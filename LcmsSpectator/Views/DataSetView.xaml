@@ -51,10 +51,10 @@
                             <views:SpectrumView DataContext="{Binding SpectrumViewModel}" x:Name="SpectrumView" />
                         </xcad:LayoutDocument>
                         <xcad:LayoutDocument Title="Feature Map" CanClose="False">
-                            <Grid x:Name="FeatureMap">
-                                <views:FeatureViewerView DataContext="{Binding FeatureMapViewModel}"/>
+                            <Grid x:Name="FeatureMap" DataContext="{Binding FeatureMapViewModel}">
+                                <views:FeatureViewerView />
                                 <Border BorderBrush="Black" BorderThickness="1" Background="#F0000000" Grid.RowSpan="6" Grid.ColumnSpan="2"
-                                 VerticalAlignment="Stretch" Visibility="{Binding ShowFeatureMapSplash, Converter={StaticResource BoolToVis}}">
+                                 VerticalAlignment="Stretch" Visibility="{Binding ShowSplash, Converter={StaticResource BoolToVis}}">
                                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="50*"/>

@@ -60,7 +60,7 @@ namespace LcmsSpectator.ViewModels
             _showHeavy = false;
             _showFragmentXic = false;
             var openHeavyModificationsCommand = ReactiveCommand.Create();
-            openHeavyModificationsCommand.Subscribe(_ => OpenHeavyModifications());
+            openHeavyModificationsCommand.Subscribe(_ => OpenHeavyModificationsImpl());
             OpenHeavyModificationsCommand = openHeavyModificationsCommand;
 
             PrecursorViewModes = new ReactiveList<PrecursorViewMode>(Enum.GetValues(typeof (PrecursorViewMode)).Cast<PrecursorViewMode>());
@@ -81,7 +81,6 @@ namespace LcmsSpectator.ViewModels
                 });
         }
 
-        #region Public Properties
         public XicPlotViewModel FragmentPlotViewModel { get; private set; }
         public XicPlotViewModel HeavyFragmentPlotViewModel { get; private set; }
         public XicPlotViewModel PrecursorPlotViewModel { get; private set; }
@@ -133,9 +132,47 @@ namespace LcmsSpectator.ViewModels
             HeavyFragmentPlotViewModel.ClearPlot();
             HeavyPrecursorPlotViewModel.ClearPlot();
         }
-        #endregion
 
-        #region Private Methods
+        /// <summary>
+        /// Zoom all XICs to a given scan number.
+        /// </summary>
+        /// <param name="scanNum">Scan number to zoom to.</param>
+        public void ZoomToScan(int scanNum)
+        {
+            var rt = _lcms.GetElutionTime(scanNum);
+            var lcRange = _lcms.GetElutionTime(_lcms.MaxLcScan) - _lcms.GetElutionTime(_lcms.MinLcScan);
+            var offset = lcRange * 0.03;
+            var min = Math.Max(rt - offset, 0);
+            var max = Math.Min(rt + offset, _lcms.MaxLcScan);
+            _precursorXAxis.Minimum = min;
+            _precursorXAxis.Maximum = max;
+            _precursorXAxis.Zoom(min, max);
+        }
+
+        /// <summary>
+        /// Set the selected scan marker on all XIC plots
+        /// </summary>
+        /// <param name="scan">Scan number to put marker at</param>
+        public void SetSelectedScan(int scan)
+        {
+            FragmentPlotViewModel.SelectedScan = scan;
+            PrecursorPlotViewModel.SelectedScan = scan;
+            HeavyFragmentPlotViewModel.SelectedScan = scan;
+            HeavyPrecursorPlotViewModel.SelectedScan = scan;
+        }
+
+        /// <summary>
+        /// Get an observable that is triggered when the selected scan of any xic plot is changed
+        /// </summary>
+        /// <returns>IObservable of integer (selected scan #)</returns>
+        public IObservable<int> SelectedScanUpdated()
+        {
+            return Observable.Merge(FragmentPlotViewModel.WhenAnyValue(x => x.SelectedScan),
+                PrecursorPlotViewModel.WhenAnyValue(x => x.SelectedScan),
+                HeavyFragmentPlotViewModel.WhenAnyValue(x => x.SelectedScan),
+                HeavyPrecursorPlotViewModel.WhenAnyValue(x => x.SelectedScan));
+        }
+
         /// <summary>
         /// Event handler for XAxis changed to update area ratio labels when shared x axis is zoomed or panned.
         /// </summary>
@@ -160,7 +197,7 @@ namespace LcmsSpectator.ViewModels
             }
         }
 
-        private void OpenHeavyModifications()
+        private void OpenHeavyModificationsImpl()
         {
             var heavyModificationsWindowVm = new HeavyModificationsWindowViewModel();
             _dialogService.OpenHeavyModifications(heavyModificationsWindowVm);
@@ -174,40 +211,7 @@ namespace LcmsSpectator.ViewModels
             else formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
             return formatted;
         }
-        #endregion
 
-        #region Public Methods
-
-        /// <summary>
-        /// Zoom all XICs to a given scan number.
-        /// </summary>
-        /// <param name="scanNum">Scan number to zoom to.</param>
-        public void ZoomToScan(int scanNum)
-        {
-            var rt = _lcms.GetElutionTime(scanNum);
-            var lcRange = _lcms.GetElutionTime(_lcms.MaxLcScan) - _lcms.GetElutionTime(_lcms.MinLcScan);
-            var offset = lcRange*0.03;
-            var min = Math.Max(rt - offset, 0);
-            var max = Math.Min(rt + offset, _lcms.MaxLcScan);
-            _precursorXAxis.Minimum = min;
-            _precursorXAxis.Maximum = max;
-            _precursorXAxis.Zoom(min, max);
-        }
-
-        /// <summary>
-        /// Set the selected scan marker on all XIC plots
-        /// </summary>
-        /// <param name="scan">Scan number to put marker at</param>
-        public void SetSelectedScan(int scan)
-        {
-            FragmentPlotViewModel.SelectedScan = scan;
-            PrecursorPlotViewModel.SelectedScan = scan;
-            HeavyFragmentPlotViewModel.SelectedScan = scan;
-            HeavyPrecursorPlotViewModel.SelectedScan = scan;
-        }
-        #endregion
-
-        #region Private Members
         private readonly IMainDialogService _dialogService;
         private readonly ILcMsRun _lcms;
 
@@ -220,6 +224,5 @@ namespace LcmsSpectator.ViewModels
         private readonly LinearAxis _precursorXAxis;
         private readonly LinearAxis _heavyPrecursorXAxis;
         private PrecursorViewMode _precursorViewMode;
-        #endregion
     }
 }

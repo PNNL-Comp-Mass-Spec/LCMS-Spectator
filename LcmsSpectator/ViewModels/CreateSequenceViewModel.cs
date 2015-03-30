@@ -18,19 +18,6 @@ namespace LcmsSpectator.ViewModels
 {
     public class CreateSequenceViewModel: ReactiveObject
     {
-        public ReactiveList<DataSetViewModel> DataSetViewModels { get; private set; }
-        public ReactiveList<Target> Targets { get; private set; } 
-        public ReactiveList<Modification> Modifications { get; private set; }
-        public Modification SelectedModification { get; set; }
-
-        #region Commands
-        public IReactiveCommand OpenTargetListCommand { get; private set; }
-        public IReactiveCommand CreatePrSmCommand { get; private set; }
-        public IReactiveCommand InsertModificationCommand { get; private set; }
-        public IReactiveCommand InsertStaticModificationsCommand { get; private set; }
-        public IReactiveCommand PasteCommand { get; private set; }
-        #endregion
-
         public CreateSequenceViewModel(ReactiveList<DataSetViewModel> dataSetViewModels, IDialogService dialogService)
         {
             DataSetViewModels = dataSetViewModels;
@@ -44,10 +31,6 @@ namespace LcmsSpectator.ViewModels
             var createPrSmCommand = ReactiveCommand.Create();
             createPrSmCommand.Subscribe(_ => CreatePrSm());
             CreatePrSmCommand = createPrSmCommand;
-
-            var insertModificationCommand = ReactiveCommand.Create();
-            insertModificationCommand.Subscribe(_ => InsertModification());
-            InsertModificationCommand = insertModificationCommand;
 
             var insertStaticModificationsCommand = ReactiveCommand.Create();
             insertStaticModificationsCommand.Subscribe(_ => InsertStaticModifications());
@@ -84,7 +67,17 @@ namespace LcmsSpectator.ViewModels
             Modifications = IcParameters.Instance.RegisteredModifications;
         }
 
-        #region Public Properties
+        public ReactiveList<DataSetViewModel> DataSetViewModels { get; private set; }
+        public ReactiveList<Target> Targets { get; private set; }
+        public ReactiveList<Modification> Modifications { get; private set; }
+        public Modification SelectedModification { get; set; }
+
+        // Commands
+        public IReactiveCommand OpenTargetListCommand { get; private set; }
+        public IReactiveCommand CreatePrSmCommand { get; private set; }
+        public IReactiveCommand InsertStaticModificationsCommand { get; private set; }
+        public IReactiveCommand PasteCommand { get; private set; }
+
         public int SequencePosition { get; set; }
 
         private PrSm _selectedPrSm;
@@ -128,9 +121,7 @@ namespace LcmsSpectator.ViewModels
             get { return _selectedTarget; }
             set { this.RaiseAndSetIfChanged(ref _selectedTarget, value); }
         }
-        #endregion
 
-        #region Public Methods
         public void OpenTargetList()
         {
             var targetFileName = _dialogService.OpenFile(".txt", @"Target Files (*.txt)|*.txt");
@@ -147,14 +138,6 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
             foreach (var target in targets) Targets.Add(target);
-        }
-        #endregion
-
-        #region Private methods
-        private void InsertModification()
-        {
-            var modStr = String.Format("[{0}]", SelectedModification.Name);
-            SequenceText = SequenceText.Insert(SequencePosition, modStr);
         }
 
         private void CreatePrSm()
@@ -291,10 +274,7 @@ namespace LcmsSpectator.ViewModels
             }
             foreach (var target in targets) Targets.Add(target);
         }
-        #endregion
 
-        #region Private Members
         private readonly IDialogService _dialogService;
-        #endregion
     }
 }

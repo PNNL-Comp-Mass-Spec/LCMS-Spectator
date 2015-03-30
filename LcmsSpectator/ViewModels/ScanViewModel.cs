@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Models;
 using LcmsSpectator.TaskServices;
@@ -158,6 +161,42 @@ namespace LcmsSpectator.ViewModels
                 SelectedPrSm = highestScoringPrsm;
             }
             _taskService.Enqueue(FilterData);
+        }
+
+        /// <summary>
+        /// Shows or hides instrument Precursor m/z and mass from the instrument
+        /// Reads data from LcMsRun if necessary
+        /// </summary>
+        /// <param name="value">Should the instrument data be shown?</param>
+        /// <param name="pbfLcmsRun"></param>
+        /// <returns>Awaitable task</returns>
+        public async Task ToggleShowInstrumentDataAsync(bool value, PbfLcMsRun pbfLcmsRun)
+        {
+                if (value)
+                {
+                    if (pbfLcmsRun != null)
+                    {
+                        var scans = Data;
+                        foreach (var scan in scans.Where(scan => scan.Sequence.Count == 0))
+                        {
+                            IsolationWindow isolationWindow = await Task.Run(() => pbfLcmsRun.GetIsolationWindow(scan.Scan));
+                            scan.PrecursorMz = isolationWindow.MonoisotopicMz ?? Double.NaN;
+                            scan.Charge = isolationWindow.Charge ?? 0;
+                            scan.Mass = isolationWindow.MonoisotopicMass ?? Double.NaN;
+                        }
+                    }
+                }
+                else
+                {
+                    var scans = Data;
+                    foreach (var scan in scans.Where(scan => scan.Sequence.Count == 0))
+                    {
+                        scan.PrecursorMz = Double.NaN;
+                        scan.Charge = 0;
+                        scan.Mass = Double.NaN;
+                    }
+                }
+                FilterData();
         }
 
         public void ClearIds()

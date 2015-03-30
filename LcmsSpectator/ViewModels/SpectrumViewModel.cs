@@ -52,7 +52,7 @@ namespace LcmsSpectator.ViewModels
             SwapSecondary2Command = swapSecondary2Command;
         }
 
-        #region Public Properties
+        // Commands
         public IReactiveCommand SwapSecondary1Command { get; private set; }
         public IReactiveCommand SwapSecondary2Command { get; private set; }
 
@@ -115,9 +115,7 @@ namespace LcmsSpectator.ViewModels
             get { return _secondary2ViewModel; }
             private set { this.RaiseAndSetIfChanged(ref _secondary2ViewModel, value); }
         }
-        #endregion
 
-        #region Public Methods
         public void UpdateSpectra(int scan, double precursorMz = 0)
         {
             if (scan == 0 || _lcms == null) return;
@@ -142,7 +140,7 @@ namespace LcmsSpectator.ViewModels
             else
             {
                 // The primary spectrum that we want to show is a MS1 spectrum
-                primary = FindNearestMs2Spectrum(scan, precursorMz, _lcms);
+                if (_lcms != null) primary = FindNearestMs2Spectrum(scan, precursorMz);
                 if (primary == null) return;
                 if (primary.ScanNum < scan)
                 {
@@ -205,9 +203,6 @@ namespace LcmsSpectator.ViewModels
             PrimarySpectrumViewModel = secondary;
             Secondary2ViewModel = primary;
         }
-        #endregion
-
-        #region Private Methods
 
         /// <summary>
         /// Set Shared XAxis for Ms1 spectra plots
@@ -233,11 +228,17 @@ namespace LcmsSpectator.ViewModels
             xAxis.Zoom(ms1MinMz, ms1MaxMz);
         }
 
-
-        private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, double precursorMz, ILcMsRun lcms)
+        /// <summary>
+        /// Attempt to find the nearest ms2 spectrum given an ms1 spectrum.
+        /// </summary>
+        /// <param name="ms1Scan">Ms1 scan number</param>
+        /// <param name="precursorMz">Precursor M/Z that should be in ms2's isolation window range.</param>
+        /// <returns>Product spectrum for the nearest Ms2 spectrum. Returns null if one cannot be found.</returns>
+        private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, double precursorMz)
         {
+            // Do not have a valid PrecursorMz, so we're not going to find an ms2 spectrum.
             if (precursorMz.Equals(0)) return null;
-
+            // down
             int highScan = ms1Scan;
             ProductSpectrum highSpec = null;
             bool found = false;
@@ -245,15 +246,15 @@ namespace LcmsSpectator.ViewModels
             while (!found)
             {
                 // look for spectrum in the lower part of the scan range
-                highScan = lcms.GetNextScanNum(highScan, 2);
-                if (highScan == lcms.MaxLcScan + 1)
+                highScan = _lcms.GetNextScanNum(highScan, 2);
+                if (highScan == _lcms.MaxLcScan + 1)
                 {
                     highDist = Double.PositiveInfinity;
                     break;
                 }
-                var spectrum = lcms.GetSpectrum(highScan);
+                var spectrum = _lcms.GetSpectrum(highScan);
                 var prodSpectrum = spectrum as ProductSpectrum;
-                if (prodSpectrum == null) break;
+                if (prodSpectrum == null) break; // Found another ms1, so stop looking
                 if (prodSpectrum.IsolationWindow.Contains(precursorMz))
                 {
                     highSpec = prodSpectrum;
@@ -261,7 +262,7 @@ namespace LcmsSpectator.ViewModels
                 }
                 highDist++;
             }
-
+            // up
             ProductSpectrum lowSpec = null;
             int lowScan = ms1Scan;
             found = false;
@@ -269,15 +270,15 @@ namespace LcmsSpectator.ViewModels
             while (!found)
             {
                 // look for spectrum in the higher part of the scan range
-                lowScan = lcms.GetPrevScanNum(lowScan, 2);
-                if (lowScan == lcms.MinLcScan - 1)
+                lowScan = _lcms.GetPrevScanNum(lowScan, 2);
+                if (lowScan == _lcms.MinLcScan - 1)
                 {
                     lowDist = Double.PositiveInfinity;
                     break;
                 }
-                var spectrum = lcms.GetSpectrum(lowScan);
+                var spectrum = _lcms.GetSpectrum(lowScan);
                 var prodSpectrum = spectrum as ProductSpectrum;
-                if (prodSpectrum == null) break;
+                if (prodSpectrum == null) break; // Found another ms1, so stop looking
                 if (prodSpectrum.IsolationWindow.Contains(precursorMz))
                 {
                     lowSpec = prodSpectrum;
@@ -289,10 +290,8 @@ namespace LcmsSpectator.ViewModels
             ProductSpectrum nextMs2;
             if (highDist <= lowDist && highSpec != null) nextMs2 = highSpec;
             else nextMs2 = lowSpec;
-
             return nextMs2;
         }
-        #endregion
 
         private readonly ILcMsRun _lcms;
         private bool _isAxisInternalChange;

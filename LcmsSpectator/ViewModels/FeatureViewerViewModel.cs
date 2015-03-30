@@ -2,33 +2,37 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.DialogServices;
 using LcmsSpectator.Models;
+using LcmsSpectator.Readers;
+using LcmsSpectator.Utils;
 using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using ReactiveUI;
+using Constants = InformedProteomics.Backend.Data.Biology.Constants;
 
 namespace LcmsSpectator.ViewModels
 {
     public class FeatureViewerViewModel: ReactiveObject
     {
-        public FeatureViewerViewModel()
+        public FeatureViewerViewModel(IDialogService dialogService, LcMsRun lcms)
         {
+            _dialogService = dialogService;
+            _lcms = lcms;
             var featureSelectedCommand = ReactiveCommand.Create();
             featureSelectedCommand.Subscribe(_ => FeatureSelected());
             FeatureSelectedCommand = featureSelectedCommand;
             IsotopicEnvelope = new IsotopicEnvelopePlotViewModel();
             FeatureMap = new PlotModel {Title = "Feature Map"};
-            _isotopicEnvelopeExpanded = false;
             FeatureMap.MouseDown += FeatureMap_MouseDown;
-            _pointsDisplayed = 5000;
-            //_viewDivisions = 9;
-            _showFoundIdMs2 = false;
-            _showFoundUnIdMs2 = false;
-            _showNotFoundMs2 = false;
+            IsotopicEnvelopeExpanded = false;
+            PointsDisplayed = 5000;
+            ShowFoundIdMs2 = false;
+            ShowFoundUnIdMs2 = false;
+            ShowNotFoundMs2 = false;
             _yAxis = new LinearAxis { Position = AxisPosition.Left, Title = "Monoisotopic Mass", StringFormat = "0.###" };
             _xAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time", StringFormat = "0.###", };
             const int numColors = 5000;
@@ -46,7 +50,7 @@ namespace LcmsSpectator.ViewModels
             {
                 Key = "ms2s",
                 Position = AxisPosition.None,
-                Palette = OxyPalettes.Rainbow(5000),
+                Palette = OxyPalettes.Rainbow(numColors),
                 Minimum = 1,
                 Maximum = 5000,
             };
@@ -128,9 +132,14 @@ namespace LcmsSpectator.ViewModels
             this.WhenAnyValue(x => x.AbundanceThreshold, x => x.PointsDisplayed)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
                 .Subscribe(x => BuildPlot(x.Item1, x.Item2));
+
+            var openFeatureFileCommand = ReactiveCommand.Create();
+            openFeatureFileCommand.Subscribe(_ => OpenFeatureFile());
+            OpenFeatureFileCommand = openFeatureFileCommand;
         }
 
-        #region Public Properties
+        public IReactiveCommand OpenFeatureFileCommand { get; private set; }
+
         /// <summary>
         /// Command activated when a feature is selected (double clicked) on the
         /// feature map plot.
@@ -281,21 +290,72 @@ namespace LcmsSpectator.ViewModels
             get { return _selectedFeature; }
             private set { this.RaiseAndSetIfChanged(ref _selectedFeature, value); }
         }
-        #endregion
 
-        #region Public methods
+        private bool _showSplash;
+        /// <summary>
+        /// Sets/Gets whether the splash screen is currently being shown.
+        /// </summary>
+        public bool ShowSplash
+        {
+            get { return _showSplash; }
+            set { this.RaiseAndSetIfChanged(ref _showSplash, value); }
+        }
+
+        /// <summary>
+        /// Read features and display feature map for this data set.
+        /// </summary>
+        /// <param name="filePath">Path of feature file.</param>
+        public void OpenFeatureFile(string filePath)
+        {
+            try
+            {
+                var features = FeatureReader.Read(filePath);
+                SetFeatures(features.ToList());
+                ShowSplash = false;
+            }
+            catch (InvalidCastException)
+            {
+                _dialogService.MessageBox("Cannot open features for this type of data set.");
+            }
+        }
+
+        /// <summary>
+        /// Display open file dialog to select feature file and then read and display features.
+        /// </summary>
+        public void OpenFeatureFile()
+        {
+            var tsvFileName = _dialogService.OpenFile(".ms1ft", FileConstants.FeatureFileFormatString);
+            if (!String.IsNullOrEmpty(tsvFileName))
+            {
+                ShowSplash = false;
+                var features = FeatureReader.Read(tsvFileName);
+                SetFeatures(features.ToList());
+            }
+        }
         /// <summary>
         /// Set data to be shown on feature map.
         /// </summary>
-        /// <param name="lcms">The LcMsRun dataset to be displayed.</param>
         /// <param name="features">Features to be displayed.</param>
-        /// <param name="ids">Identifications to be displayed.</param>
         /// <param name="updatePlot">Should the plot be updated after setting data?</param>
-        public void SetData(LcMsRun lcms, IEnumerable<Feature> features, IEnumerable<PrSm> ids, bool updatePlot=true)
+        public void SetFeatures(IEnumerable<Feature> features, bool updatePlot=true)
         {
-            _lcms = lcms;
             _features = features.ToList();
-            UpdateIds(ids, false);
+            _featuresByScan = new Dictionary<FeaturePoint, Feature>();
+            foreach (var feature in _features)
+            {
+                _featuresByScan.Add(feature.MinPoint, feature);
+                _featuresByScan.Add(feature.MaxPoint, feature);
+                feature.MinPoint.RetentionTime = _lcms.GetElutionTime(feature.MinPoint.Scan);
+                feature.MaxPoint.RetentionTime = _lcms.GetElutionTime(feature.MaxPoint.Scan);
+
+                for (int c = feature.MinPoint.Scan; c <= feature.MaxPoint.Scan; c++)
+                {
+                    var mz = (feature.MinPoint.Mass + c * Constants.Proton) / c;
+                    feature.AssociatedMs2.AddRange(_lcms.GetFragmentationSpectraScanNums(mz)
+                                           .Where(s => s >= feature.MinPoint.Scan && s <= feature.MaxPoint.Scan));
+                }
+            }
+
             MaximumAbundanceThreshold = Math.Log10(_features.Max(f => f.MinPoint.Abundance));
             MinimumAbundanceThreshold = Math.Log10(_features.Min(f => f.MinPoint.Abundance));
             AbundanceThreshold = Math.Max(_maximumAbundanceThreshold, _minimumAbundance);
@@ -303,7 +363,9 @@ namespace LcmsSpectator.ViewModels
             _yAxis.AbsoluteMaximum = _features.Max(f => f.MinPoint.Mass);
             _xAxis.AbsoluteMinimum = 0;
             _xAxis.AbsoluteMaximum = _lcms.MaxLcScan;
+
             if (updatePlot) BuildPlot(_abundanceThreshold, _pointsDisplayed);
+            ShowSplash = false;
         }
 
         /// <summary>
@@ -321,23 +383,8 @@ namespace LcmsSpectator.ViewModels
             var scanHash = new Dictionary<int, List<double>>();
             var accountedFor = new HashSet<int>();
             var sortedIds = _ids.Values.OrderBy(id => id.Scan).ToList();
-            _featuresByScan = new Dictionary<FeaturePoint, Feature>();
             foreach (var feature in _features)
             {
-                var mass = feature.MinPoint.Mass;
-                _featuresByScan.Add(feature.MinPoint, feature);
-                _featuresByScan.Add(feature.MaxPoint, feature);
-                var ms2Scans = new List<int>();
-                for (int c = feature.MinPoint.Scan; c <= feature.MaxPoint.Scan; c++)
-                {
-                    var mz = (mass + c * Constants.Proton) / c;
-                    ms2Scans.AddRange(_lcms.GetFragmentationSpectraScanNums(mz));
-                }
-                feature.MinPoint.RetentionTime = _lcms.GetElutionTime(feature.MinPoint.Scan);
-                feature.MaxPoint.RetentionTime = _lcms.GetElutionTime(feature.MaxPoint.Scan);
-                Feature feature1 = feature;
-                var featureMs2Scans = (ms2Scans.Where(s => s >= feature1.MinPoint.Scan && s <= feature1.MaxPoint.Scan));
-                feature.AssociatedMs2.AddRange(featureMs2Scans);
                 var minIndex = sortedIds.BinarySearch(new PrSm { Scan = feature.MinPoint.Scan }, new PrSmScanComparer());
                 if (minIndex < 0) minIndex *= -1;
                 minIndex = Math.Max(Math.Min(minIndex, sortedIds.Count), 0);
@@ -347,38 +394,25 @@ namespace LcmsSpectator.ViewModels
                 for (int i = minIndex; i < maxIndex; i++)
                 {
                     var id = sortedIds[i];
-                    if (accountedFor.Contains(id.Scan)) continue;
-                    if (id.Scan >= feature.MinPoint.Scan && id.Scan <= feature.MaxPoint.Scan &&
-                        Math.Abs(id.Mass - feature.MinPoint.Mass) < 2)
-                    {
-                        if (!feature.AssociatedMs2.Contains(id.Scan))
-                        {
-                            feature.AssociatedMs2.Add(id.Scan);
-                            accountedFor.Add(id.Scan);
-                        }
-                    }
+                    if (accountedFor.Contains(id.Scan) ||
+                        id.Scan < feature.MinPoint.Scan || id.Scan > feature.MaxPoint.Scan ||
+                        !(Math.Abs(id.Mass - feature.MinPoint.Mass) < 2) ||
+                        feature.AssociatedMs2.Contains(id.Scan)) continue;
+                    feature.AssociatedMs2.Add(id.Scan);
+                    accountedFor.Add(id.Scan);
                 }
                 foreach (var scan in feature.AssociatedMs2)
                 {
                     if (!_ids.ContainsKey(scan))
                         _ids.Add(scan, new PrSm { Scan = scan, Lcms = _lcms, Mass = feature.MinPoint.Mass });
                     if (!accountedFor.Contains(scan)) accountedFor.Add(scan);
-                    Insert(scanHash, scan, _ids[scan].Mass, massTolerance: 1);
+                    Insert(scanHash, scan, _ids[scan].Mass, 1);
                 }
             }
-            foreach (var id in _ids.Values)
-            {
-                //if (TryInsert(scanHash, id.Scan, id.Mass, 1) && id.Sequence.Count > 0)
-                if (!accountedFor.Contains(id.Scan))
-                {
-                    _notFoundMs2.Add(id);
-                }
-            }
+            foreach (var id in _ids.Values.Where(id => !accountedFor.Contains(id.Scan)))  _notFoundMs2.Add(id);
             if (updatePlot) BuildPlot(_abundanceThreshold, _pointsDisplayed);
         }
-        #endregion
 
-        #region Event Handlers
         /// <summary>
         /// Event handler for mouse click event to set SelectedDataPoint
         /// </summary>
@@ -429,9 +463,6 @@ namespace LcmsSpectator.ViewModels
                 _selectedPrSmPoint = result.Item as PrSm;
             }
         }
-#endregion
-
-        #region Private methods
 
         /// <summary>
         /// Build feature map plot.
@@ -641,7 +672,6 @@ namespace LcmsSpectator.ViewModels
                          .OrderByDescending(feature => feature.MinPoint.Abundance).ToList();
             var numDisplayed = Math.Min(pointsDisplayed, filteredFeatures.Count);
             var topNPoints = filteredFeatures.GetRange(0, numDisplayed);
-            //var topNPoints = Partition(filteredFeatures, numDisplayed);
             return topNPoints;
         }
 
@@ -665,9 +695,9 @@ namespace LcmsSpectator.ViewModels
                 }
             }
         }
-        #endregion
 
         #region Private Fields
+        private readonly IDialogService _dialogService;
         // Plot elements
         private readonly LinearAxis _xAxis;
         private readonly LinearAxis _yAxis;
@@ -679,7 +709,7 @@ namespace LcmsSpectator.ViewModels
         private readonly LinearColorAxis _featureColorAxis;
 
         // Data
-        private LcMsRun _lcms;
+        private readonly LcMsRun _lcms;
         private List<Feature> _features;
         private Dictionary<FeaturePoint, Feature> _featuresByScan;
         private Dictionary<int, PrSm> _ids;
@@ -695,9 +725,6 @@ namespace LcmsSpectator.ViewModels
         private const int IdColorScore = 3975;      // gold color
         // Color score for unidentified ms2s
         private const int UnidColorScore = 2925;    // greenish color
-
-//        private int _viewDivisions;
-
         #endregion
     }
 }

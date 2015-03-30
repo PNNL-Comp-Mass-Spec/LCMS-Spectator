@@ -65,7 +65,6 @@ namespace LcmsSpectator.ViewModels
                 .Subscribe(_ => SetActivationMethod(ActivationMethod));
         }
 
-        #region Public Properties
         private ReactiveList<IonType> _ionTypes;
         /// <summary>
         /// All ion types currently selected
@@ -124,7 +123,6 @@ namespace LcmsSpectator.ViewModels
             get { return _activationMethod; }
             set { this.RaiseAndSetIfChanged(ref _activationMethod, value); }
         }
-#endregion
 
         private void SetIonCharges()
         {

@@ -7,10 +7,6 @@ namespace LcmsSpectator.ViewModels
 {
     public class CustomModificationViewModel: ReactiveObject
     {
-        public bool Status { get; private set; }
-        public IReactiveCommand SaveCommand { get; private set; }
-        public IReactiveCommand CancelCommand { get; private set; }
-        public event EventHandler ReadyToClose;
         public CustomModificationViewModel(string modificationName, bool modificationNameReadOnly, IDialogService dialogService)
         {
             _dialogService = dialogService;
@@ -35,6 +31,11 @@ namespace LcmsSpectator.ViewModels
             cancelCommand.Subscribe(_ => Cancel());
             CancelCommand = cancelCommand;
         }
+
+        public bool Status { get; private set; }
+        public IReactiveCommand SaveCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; private set; }
+        public event EventHandler ReadyToClose;
 
         public CustomModificationViewModel(string modificationName, bool modificationNameEditable, Composition composition, IDialogService dialogService): this(modificationName, modificationNameEditable, dialogService)
         {
