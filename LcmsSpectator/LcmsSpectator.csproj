@@ -213,10 +213,12 @@
     <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="PlotModels\XicDataPoint.cs" />
     <Compile Include="PlotModels\XicPointSeries.cs" />
+    <Compile Include="Readers\DataSetReader.cs" />
     <Compile Include="Readers\DmsLookupUtility.cs" />
     <Compile Include="Readers\FeatureReader.cs" />
     <Compile Include="Readers\IcFileReader.cs" />
     <Compile Include="Readers\IcFileWriter.cs" />
+    <Compile Include="Readers\IDataSetReader.cs" />
     <Compile Include="Readers\IdFileReaderFactory.cs" />
     <Compile Include="Readers\IIdFileReader.cs" />
     <Compile Include="Readers\MsgfFileReader.cs" />

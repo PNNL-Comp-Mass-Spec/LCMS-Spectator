@@ -155,15 +155,12 @@ namespace LcmsSpectator.Utils
         public static double?[] GetIsotopePpmError(Peak[] peaks, Ion ion, double relativeIntensityThreshold)
         {
             var isotopes = ion.GetIsotopes(relativeIntensityThreshold).ToArray();
-            var ppmErrors = new double?[isotopes.Length];
-            for (int i = 0; i < isotopes.Length; i++)
+            var ppmErrors = new double?[isotopes.Max(i => i.Index)+1];
+            foreach (Isotope isotope in isotopes)
             {
-                if (peaks[i] == null)
-                {
-                    ppmErrors[i] = null;
-                    continue;
-                }
-                ppmErrors[i] = GetPeakPpmError(peaks[i], ion.GetIsotopeMz(isotopes[i].Index));
+                var isotopeIndex = isotope.Index;
+                if (peaks[isotopeIndex] == null) ppmErrors[isotopeIndex] = null;
+                else ppmErrors[isotopeIndex] = GetPeakPpmError(peaks[isotopeIndex], ion.GetIsotopeMz(isotopeIndex));
             }
             return ppmErrors;
         }
@@ -176,7 +173,7 @@ namespace LcmsSpectator.Utils
         /// <returns>The error in ppm.</returns>
         public static double GetPeakPpmError(Peak peak, double theoMz)
         {
-            // error = (observed - theo)/(observed*10e6)
+            // error = (observed - theo)/observed*10e6
             return (peak.Mz - theoMz) / peak.Mz * Math.Pow(10, 6);
         }
 
