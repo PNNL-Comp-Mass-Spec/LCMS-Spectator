@@ -270,8 +270,8 @@ namespace LcmsSpectator.ViewModels
                 if (SpectrumViewModel.Ms2SpectrumViewModel.Ions != null)
                     SpectrumViewModel.Ms2SpectrumViewModel.Ions.ChangeTrackingEnabled = false;
                 SpectrumViewModel.Ms2SpectrumViewModel.Ions = labels;
-                SpectrumViewModel.PrevMs1SpectrumViewModel.Ions = labels;
-                SpectrumViewModel.NextMs1SpectrumViewModel.Ions = labels;
+                SpectrumViewModel.PrevMs1SpectrumViewModel.Ions = x.Item2;
+                SpectrumViewModel.NextMs1SpectrumViewModel.Ions = x.Item2;
             });
 
             // When FragmentLabels or PrecursorLabels change, update XICs
