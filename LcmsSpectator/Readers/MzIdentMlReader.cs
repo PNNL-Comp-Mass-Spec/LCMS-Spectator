@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using InformedProteomics.Backend.MassSpecData;
+using System.Threading.Tasks;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers.SequenceReaders;
 using MTDBFramework.Algorithms;
@@ -56,6 +56,11 @@ namespace LcmsSpectator.Readers
                 }
             }
             return idTree;
+        }
+
+        public Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList)
+        {
+            return Task.Run(() => Read(modIgnoreList));
         }
 
         private readonly string _fileName;

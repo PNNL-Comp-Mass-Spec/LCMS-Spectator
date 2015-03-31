@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers.SequenceReaders;
 
 namespace LcmsSpectator.Readers
 {
-    using System.Threading;
-
     public class MsgfFileReader: IIdFileReader
     {
         public MsgfFileReader(string tsvFile)
@@ -18,10 +17,15 @@ namespace LcmsSpectator.Readers
 
         public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
         {
-            return ReadFromTsvFile();
+            return ReadFromTsvFile().Result;
         }
 
-        private IdentificationTree ReadFromTsvFile()
+        public async Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList = null)
+        {
+            return await ReadFromTsvFile();
+        }
+
+        private async Task<IdentificationTree> ReadFromTsvFile()
         {
             var idTree = new IdentificationTree(ToolType.MsgfPlus);
             var file = new StreamReader(File.Open(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -30,7 +34,7 @@ namespace LcmsSpectator.Readers
             var lineCount = 0;
             while (!file.EndOfStream)
             {
-                var line = file.ReadLine();
+                var line = await file.ReadLineAsync();
                 lineCount++;
                 if (lineCount == 1 && line != null) // first line
                 {

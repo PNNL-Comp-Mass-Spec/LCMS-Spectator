@@ -222,19 +222,27 @@ namespace LcmsSpectator.ViewModels
             InitWirings(); // Initialize the wirings for updating these view models
 
             // Create prsms for scan numbers (unidentified)
-            var scans = Lcms.GetScanNumbers(2);
-            var prsmScans = scans.Select(scan => new PrSm
-            {
-                Scan = scan,
-                RawFileName = RawFileName,
-                Lcms = Lcms,
-                QValue = 1.0,
-                Score = Double.NaN,
-            });
-            ScanViewModel.AddIds(prsmScans);
+            await LoadScans();
             await ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun) Lcms);
             SelectedPrSm.Lcms = Lcms; // For the selected PrSm, we should always use the LcMsRun for this dataset.
             LoadingScreenViewModel.IsLoading = false; // Hide animated loading screen
+        }
+
+        private Task LoadScans()
+        {
+            return Task.Run(() =>
+            {
+                var scans = Lcms.GetScanNumbers(2);
+                var prsmScans = scans.Select(scan => new PrSm
+                {
+                    Scan = scan,
+                    RawFileName = RawFileName,
+                    Lcms = Lcms,
+                    QValue = 1.0,
+                    Score = Double.NaN,
+                });
+                ScanViewModel.AddIds(prsmScans);
+            });
         }
 
         private void InitWirings()

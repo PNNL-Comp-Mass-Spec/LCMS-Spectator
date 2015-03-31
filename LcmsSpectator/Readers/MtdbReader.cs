@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectator.Config;
@@ -11,7 +12,7 @@ namespace LcmsSpectator.Readers
 {
 	public class MtdbReader : IIdFileReader
 	{
-		private string _fileName;
+		private readonly string _fileName;
 
 		public MtdbReader(string fileName)
 		{
@@ -77,6 +78,11 @@ namespace LcmsSpectator.Readers
 
 			return tree;
 		}
+
+	    public Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList = null)
+	    {
+	        return Task.Run(() => Read(modIgnoreList));
+	    }
 
 	}
 }

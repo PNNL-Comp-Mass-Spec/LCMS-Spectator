@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectator.Models;
 
@@ -17,16 +18,26 @@ namespace LcmsSpectator.Readers
 
         public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
         {
+            return ReadFile(modIgnoreList).Result;
+        }
+
+        public async Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList = null)
+        {
+            return await ReadFile(modIgnoreList);
+        }
+
+        private async Task<IdentificationTree> ReadFile(IEnumerable<string> modIgnoreList = null)
+        {
             var ext = Path.GetExtension(_fileName);
             IdentificationTree idTree;
             if (ext == ".tsv")
             {
                 var file = new StreamReader(File.Open(_fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                idTree = ReadTsv(file, modIgnoreList);
+                idTree = await ReadTsv(file, modIgnoreList);
             }
             else if (ext == ".zip")
             {
-                idTree = ReadZip(modIgnoreList);
+                idTree = await ReadZip(modIgnoreList);
             }
             else
             {
@@ -35,7 +46,7 @@ namespace LcmsSpectator.Readers
             return idTree;
         }
 
-        private IdentificationTree ReadTsv(StreamReader stream, IEnumerable<string> modIgnoreList = null)
+        private async Task<IdentificationTree> ReadTsv(StreamReader stream, IEnumerable<string> modIgnoreList = null)
         {
             //var file = File.ReadLines(_tsvFile);
             var idTree = new IdentificationTree(ToolType.MsPathFinder);
@@ -43,7 +54,7 @@ namespace LcmsSpectator.Readers
             var lineCount = 0;
             while (!stream.EndOfStream)
             {
-                var line = stream.ReadLine();
+                var line = await stream.ReadLineAsync();
                 lineCount++;
                 if (lineCount == 1 && line != null) // first line
                 {
@@ -61,7 +72,7 @@ namespace LcmsSpectator.Readers
             return idTree;
         }
 
-        private IdentificationTree ReadZip(IEnumerable<string> modIgnoreList = null)
+        private async Task<IdentificationTree> ReadZip(IEnumerable<string> modIgnoreList = null)
         {
             var zipFilePath = _fileName;
             var fileName = Path.GetFileNameWithoutExtension(zipFilePath);
@@ -74,7 +85,7 @@ namespace LcmsSpectator.Readers
             {
                 using (var fileStream = new StreamReader(entry.Open()))
                 {
-                    return ReadTsv(fileStream, modIgnoreList);
+                    return await ReadTsv(fileStream, modIgnoreList);
                 }
             }
             return new IdentificationTree();

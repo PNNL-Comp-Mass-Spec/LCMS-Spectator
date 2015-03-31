@@ -21,6 +21,22 @@ namespace LcmsSpectator.Utils
         }
 
         /// <summary>
+        /// Invoke action asynchonously on GUI thread
+        /// </summary>
+        /// <param name="action">Action to invoke</param>
+        public static void BeginInvoke(Action action)
+        {
+            if (System.Windows.Application.Current != null && System.Windows.Application.Current.Dispatcher != null)
+            {
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+
+        /// <summary>
         /// Invoke Action with a paramter on GUI thread
         /// </summary>
         /// <typeparam name="T">Datatype of parameter</typeparam>

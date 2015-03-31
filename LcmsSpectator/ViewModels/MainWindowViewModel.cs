@@ -122,7 +122,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="idFileName">Name of id file.</param>
         /// <param name="rawFileName">Name of raw file to associate with id file.</param>
         /// <param name="dsVm">Data Set View model to associate with id file.</param>
-        public void ReadIdFile(string idFileName, string rawFileName, DataSetViewModel dsVm)
+        public async Task ReadIdFile(string idFileName, string rawFileName, DataSetViewModel dsVm)
         {
             var ids = new IdentificationTree();
             bool attemptToReadFile = true;
@@ -141,7 +141,7 @@ namespace LcmsSpectator.ViewModels
                 try
                 {
                     var reader = IdFileReaderFactory.CreateReader(idFileName);
-                    ids = reader.Read(modIgnoreList);
+                    ids = await reader.ReadAsync(modIgnoreList);
                     ids.SetLcmsRun(dsVm.Lcms, dsVm.RawFileName);
                     attemptToReadFile = false;
                 }
@@ -192,25 +192,37 @@ namespace LcmsSpectator.ViewModels
             return dsVm;
         }
 
+        /// <summary>
+        /// Open new data set without an existing DataSetViewModel
+        /// </summary>
+        /// <param name="rawFilePath">Path to raw file to open</param>
+        /// <param name="idFilePath">Path to MS-GF+ or MS-PathFinder results file</param>
+        /// <param name="featureFilePath">Path to ProMex results file</param>
+        /// <param name="toolType">Type of ID tool used for this data set</param>
+        /// <returns></returns>
         public async Task<DataSetViewModel> OpenDataSet(string rawFilePath, string idFilePath="", string featureFilePath="", ToolType? toolType=null)
         {
             var dsVm = await ReadRawFile(rawFilePath);
-            OpenDataSet(dsVm, idFilePath, featureFilePath, toolType);
+            await OpenDataSet(dsVm, idFilePath, featureFilePath, toolType);
             return dsVm;
         }
 
         /// <summary>
-        /// Open data set given existing data set view model
+        /// Open data set given existing DataSetViewModel
         /// </summary>
         /// <param name="dsVm">Existing datasetview model to open data set for</param>
         /// <param name="idFilePath">Path to a MS-GF+ or MS-PathFinder results file</param>
-        /// <param name="featureFilePath">Path to ProMex results file.</param>
-        /// <param name="toolType">Type of the ID tool used for this data set.</param>
-        private void OpenDataSet(DataSetViewModel dsVm, string idFilePath = "", string featureFilePath = "", ToolType? toolType=null)
+        /// <param name="featureFilePath">Path to ProMex results file</param>
+        /// <param name="toolType">Type of the ID tool used for this data set</param>
+        private async Task OpenDataSet(DataSetViewModel dsVm, string idFilePath = "", string featureFilePath = "", ToolType? toolType=null)
         {
             if (toolType != null && toolType == ToolType.MsPathFinder) dsVm.XicViewModel.PrecursorViewMode = PrecursorViewMode.Charges;
-            if (!String.IsNullOrEmpty(idFilePath)) ReadIdFile(idFilePath, dsVm.RawFileName, dsVm);
-            if (!String.IsNullOrEmpty(featureFilePath)) dsVm.FeatureMapViewModel.OpenFeatureFile(featureFilePath);
+            if (!String.IsNullOrEmpty(idFilePath)) await ReadIdFile(idFilePath, dsVm.RawFileName, dsVm);
+            if (!String.IsNullOrEmpty(featureFilePath))
+            {
+                dsVm.FeatureMapViewModel.OpenFeatureFile(featureFilePath);
+                dsVm.FeatureMapViewModel.UpdateIds(dsVm.ScanViewModel.FilteredData);
+            }
         }
 
         /// <summary>
@@ -236,15 +248,21 @@ namespace LcmsSpectator.ViewModels
         /// Get raw files in a given directory.
         /// This method is not recursive.
         /// </summary>
-        /// <param name="directoryPath">Directory path to search for raw files in.</param>
+        /// <param name="filePath">
+        /// Path of file to search for raw files in the same directory.
+        /// This is the full path.
+        /// </param>
         /// <returns>IEnumerable of raw file names.</returns>
-        private static IEnumerable<string> GetRawFilesInDir(string directoryPath)
+        private static IEnumerable<string> GetRawFilesInDir(string filePath)
         {
             var rawFiles = new List<string>();
+            var directoryPath = Path.GetDirectoryName(filePath);
+            if (String.IsNullOrEmpty(directoryPath)) return rawFiles;
+            var path = String.Format(@"{0}\{1}", directoryPath, Path.GetFileNameWithoutExtension(filePath));
             var directory = Directory.GetFiles(directoryPath);
             foreach (var file in directory) // Raw file in same directory as tsv file?
             {
-                var lPath = directoryPath.ToLower();
+                var lPath = path.ToLower();
                 var lFile = file.ToLower();
                 if (lFile == lPath + ".raw") rawFiles.Add(lPath + ".raw");
                 else if (lFile == lPath + ".mzml") rawFiles.Add(lPath + ".mzml");
@@ -295,19 +313,16 @@ namespace LcmsSpectator.ViewModels
             {
                 var name = rawFileName;
                 string fileName = rawFileName;
-                await Task.Run(async () =>
+                try
                 {
-                    try
-                    {
-                        await ReadRawFile(name);
-                    }
-                    catch (Exception)
-                    {
-                        _dialogService.ExceptionAlert(new Exception(String.Format("Cannot read {0}.", fileName)));
-                        if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count - 1));
-                    }
-                    if (DataSets.Count > 0) ScanViewModel.HideUnidentifiedScans = false;
-                });
+                    await ReadRawFile(name);
+                }
+                catch (Exception)
+                {
+                    _dialogService.ExceptionAlert(new Exception(String.Format("Cannot read {0}.", fileName)));
+                    if (DataSets.Count > 0) GuiInvoker.Invoke(() => DataSets.RemoveAt(DataSets.Count - 1));
+                }
+                if (DataSets.Count > 0) ScanViewModel.HideUnidentifiedScans = false;
             }
         }
 
@@ -324,22 +339,18 @@ namespace LcmsSpectator.ViewModels
             DataSetViewModel dsVm = DataSets.FirstOrDefault(ds => ds.RawFileName == fileName);
             if (dsVm == null)  // Raw file not already open
             {
-                var directoryName = Path.GetDirectoryName(idFilePath);
-                if (directoryName != null)
-                {
-                    rawFileName = GetRawFilesInDir(directoryName).FirstOrDefault();
-                    if (rawFileName == "")  // Raw file was not in the same directory.
-                    {   // prompt user for raw file path
-                        var selectDataVm = new SelectDataSetViewModel(_dialogService, DataSets);
-                        if (_dialogService.OpenSelectDataWindow(selectDataVm))
+                rawFileName = GetRawFilesInDir(idFilePath).FirstOrDefault();
+                if (String.IsNullOrEmpty(rawFileName))  // Raw file was not in the same directory.
+                {   // prompt user for raw file path
+                    var selectDataVm = new SelectDataSetViewModel(_dialogService, DataSets);
+                    if (_dialogService.OpenSelectDataWindow(selectDataVm))
+                    {
+                        // manually find raw file
+                        rawFileName = selectDataVm.RawFilePath ?? "";
+                        if (String.IsNullOrEmpty(selectDataVm.RawFilePath))
                         {
-                            // manually find raw file
-                            rawFileName = selectDataVm.RawFilePath ?? "";
-                            if (!String.IsNullOrEmpty(selectDataVm.RawFilePath))
-                            {
-                                rawFileName = selectDataVm.SelectedDataSet.RawFileName;
-                                dsVm = selectDataVm.SelectedDataSet;
-                            }
+                            rawFileName = selectDataVm.SelectedDataSet.RawFileName;
+                            dsVm = selectDataVm.SelectedDataSet;
                         }
                     }
                 }
@@ -347,8 +358,10 @@ namespace LcmsSpectator.ViewModels
             if (!String.IsNullOrEmpty(rawFileName))
             {
                 ShowSplash = false;
-                if (dsVm == null) await OpenDataSet(rawFileName, fileName);
-                else OpenDataSet(dsVm, fileName);
+                LoadingScreenViewModel.IsLoading = true;
+                if (dsVm == null) await OpenDataSet(rawFileName, idFilePath);
+                else await OpenDataSet(dsVm, idFilePath);
+                LoadingScreenViewModel.IsLoading = false;
             }
             else _dialogService.MessageBox("Cannot open id file.");
         }
@@ -366,22 +379,18 @@ namespace LcmsSpectator.ViewModels
             DataSetViewModel dsVm = DataSets.FirstOrDefault(ds => ds.RawFileName == fileName);
             if (dsVm == null)  // Raw file not already open
             {
-                var directoryName = Path.GetDirectoryName(ftFilePath);
-                if (directoryName != null)
-                {
-                    rawFileName = GetRawFilesInDir(directoryName).FirstOrDefault();
-                    if (rawFileName == "")  // Raw file was not in the same directory.
-                    {   // prompt user for raw file path
-                        var selectDataVm = new SelectDataSetViewModel(_dialogService, DataSets);
-                        if (_dialogService.OpenSelectDataWindow(selectDataVm))
+                rawFileName = GetRawFilesInDir(ftFilePath).FirstOrDefault();
+                if (String.IsNullOrEmpty(rawFileName))  // Raw file was not in the same directory.
+                {   // prompt user for raw file path
+                    var selectDataVm = new SelectDataSetViewModel(_dialogService, DataSets);
+                    if (_dialogService.OpenSelectDataWindow(selectDataVm))
+                    {
+                        // manually find raw file
+                        rawFileName = selectDataVm.RawFilePath ?? "";
+                        if (String.IsNullOrEmpty(selectDataVm.RawFilePath))
                         {
-                            // manually find raw file
-                            rawFileName = selectDataVm.RawFilePath ?? "";
-                            if (!String.IsNullOrEmpty(selectDataVm.RawFilePath))
-                            {
-                                rawFileName = selectDataVm.SelectedDataSet.RawFileName;
-                                dsVm = selectDataVm.SelectedDataSet;
-                            }
+                            rawFileName = selectDataVm.SelectedDataSet.RawFileName;
+                            dsVm = selectDataVm.SelectedDataSet;
                         }
                     }
                 }
@@ -389,8 +398,10 @@ namespace LcmsSpectator.ViewModels
             if (!String.IsNullOrEmpty(rawFileName))
             {
                 ShowSplash = false;
-                if (dsVm == null) await OpenDataSet(rawFileName, featureFilePath: fileName);
-                else OpenDataSet(dsVm, featureFilePath: fileName);
+                LoadingScreenViewModel.IsLoading = true;
+                if (dsVm == null) await OpenDataSet(rawFileName, featureFilePath: ftFilePath);
+                else await OpenDataSet(dsVm, featureFilePath: ftFilePath);
+                LoadingScreenViewModel.IsLoading = false;   
             }
             else _dialogService.MessageBox("Cannot open feature file.");
         }
@@ -406,12 +417,11 @@ namespace LcmsSpectator.ViewModels
             if (data == null) return;
             try
             {
-                ShowSplash = false;
+                GuiInvoker.BeginInvoke(() => ShowSplash = false);
                 await OpenFromDms(dmsLookUp);
             }
             catch (Exception e)
             {
-                ShowSplash = true;
                 _dialogService.ExceptionAlert(e);
             }
         }
