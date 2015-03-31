@@ -208,11 +208,11 @@ namespace LcmsSpectator.Utils
 
             foreach (var mod in mods)
             {
-                if (mod.Equals(Modification.ArgToHeavyArg) && lastAa.Residue == 'R')
+                if (mod.Modification.Equals(Modification.ArgToHeavyArg) && lastAa.Residue == 'R')
                 {
                     lastAa = new ModifiedAminoAcid(lastAa, mod.Modification);
                 }
-                else if (mod.Equals(Modification.LysToHeavyLys) && lastAa.Residue == 'K')
+                else if (mod.Modification.Equals(Modification.LysToHeavyLys) && lastAa.Residue == 'K')
                 {
                     lastAa = new ModifiedAminoAcid(lastAa, mod.Modification);
                 }
