@@ -1,32 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Sequence;
-using InformedProteomics.Backend.Data.Spectrometry;
-using InformedProteomics.TopDown.Scoring;
-using LcmsSpectator.Config;
-using LcmsSpectator.DialogServices;
-using LcmsSpectator.PlotModels;
-using LcmsSpectator.Utils;
-using OxyPlot;
-using OxyPlot.Annotations;
-using OxyPlot.Axes;
-using OxyPlot.Series;
-using OxyPlot.Wpf;
-using ReactiveUI;
-using LinearAxis = OxyPlot.Axes.LinearAxis;
-using TextAnnotation = OxyPlot.Annotations.TextAnnotation;
-
-namespace LcmsSpectator.ViewModels
+﻿namespace LcmsSpectator.ViewModels
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reactive.Linq;
+    using System.Threading.Tasks;
+    using InformedProteomics.Backend.Data.Sequence;
+    using InformedProteomics.Backend.Data.Spectrometry;
+    using InformedProteomics.TopDown.Scoring;
+    using Config;
+    using DialogServices;
+    using PlotModels;
+    using Utils;
+    using OxyPlot;
+    using OxyPlot.Annotations;
+    using OxyPlot.Axes;
+    using OxyPlot.Series;
+    using OxyPlot.Wpf;
+    using ReactiveUI;
+    using LinearAxis = OxyPlot.Axes.LinearAxis;
+    using TextAnnotation = OxyPlot.Annotations.TextAnnotation;
+
     public class SpectrumPlotViewModel: ReactiveObject
     {
         /// <summary>
         /// Create view model that maintains a spectrum plot.
         /// </summary>
-        /// <param name="dialogService">Dialog service for mvvm-friendly dialogs.</param>
+        /// <param name="dialogService">Dialog service for opening dialogs from ViewModel.</param>
         /// <param name="multiplier">How much padding should be before the lowest peak and after the highest peak?</param>
         /// <param name="autoZoomXAxis">Should this view model automatically zoom the plot?</param>
         public SpectrumPlotViewModel(IMainDialogService dialogService, double multiplier, bool autoZoomXAxis=true)
@@ -72,7 +72,7 @@ namespace LcmsSpectator.ViewModels
 
             // Update plot when settings change
             IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold, x => x.ProductIonTolerancePpm,
-                        x => x.SpectrumFilterWindowSize, x => x.IonCorrelationThreshold)
+                        x => x.IonCorrelationThreshold)
                         .Where(_ => Ions != null)
                         .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
                         .SelectMany(async x => await Task.WhenAll(Ions.Select(ion => ion.GetPeaksAsync(GetSpectrum(), ShowDeconvolutedSpectrum, false))))
@@ -87,7 +87,7 @@ namespace LcmsSpectator.ViewModels
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
             var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => SaveAsImageImpl());
+            saveAsImageCommand.Subscribe(_ => SaveAsImageImplementation());
             SaveAsImageCommand = saveAsImageCommand;
 
             // Error map command opens a new error map window and passes it the most abundant isotope peak data points
@@ -99,7 +99,7 @@ namespace LcmsSpectator.ViewModels
 
         private AutoAdjustedYPlotModel _plotModel; 
         /// <summary>
-        /// The spectrum plot.
+        /// Gets the spectrum plot.
         /// </summary>
         public AutoAdjustedYPlotModel PlotModel
         {
@@ -109,7 +109,7 @@ namespace LcmsSpectator.ViewModels
 
         private string _title;
         /// <summary>
-        /// Title of spectrum plot.
+        /// Gets or Sets the title of spectrum plot.
         /// </summary>
         public string Title
         {
@@ -119,7 +119,7 @@ namespace LcmsSpectator.ViewModels
 
         private bool _showUnexplainedPeaks;
         /// <summary>
-        /// Toggle "Unexplained Peaks" (spectrum series)
+        /// Gets or Sets visibility of "Unexplained Peaks" (spectrum series)
         /// </summary>
         public bool ShowUnexplainedPeaks
         {
@@ -129,7 +129,7 @@ namespace LcmsSpectator.ViewModels
 
         private bool _showFilteredSpectrum;
         /// <summary>
-        /// Toggle whether or not the filtered spectrum is showed
+        /// Gets or Sets whether or not the filtered spectrum is showing.
         /// </summary>
         public bool ShowFilteredSpectrum
         {
@@ -139,7 +139,7 @@ namespace LcmsSpectator.ViewModels
 
         private bool _showDeconvolutedSpectrum;
         /// <summary>
-        /// Toggle whether or not deconvoluted spectrum is shown
+        /// Gets or sets whether or not deconvoluted spectrum is showing.
         /// </summary>
         public bool ShowDeconvolutedSpectrum
         {
@@ -149,7 +149,7 @@ namespace LcmsSpectator.ViewModels
 
         private LinearAxis _xAxis;
         /// <summary>
-        /// XAxis of Spectrum plot
+        /// Gets the XAxis of Spectrum plot.
         /// </summary>
         public LinearAxis XAxis
         {
@@ -159,7 +159,7 @@ namespace LcmsSpectator.ViewModels
 
         private Spectrum _spectrum;
         /// <summary>
-        /// Spectrum currently displayed on the spectrum plot
+        /// Gets the spectrum that is currently displayed on the spectrum plot.
         /// </summary>
         public Spectrum Spectrum
         {
@@ -169,7 +169,7 @@ namespace LcmsSpectator.ViewModels
 
         private Sequence _sequence;
         /// <summary>
-        /// Sequence currently displayed on the spectrum plot.
+        /// Gets or Sets the sequence currently displayed on the spectrum plot.
         /// </summary>
         public Sequence Sequence
         {
@@ -231,14 +231,14 @@ namespace LcmsSpectator.ViewModels
                 XAxis.Zoom(0, ms2MaxMz);
                 _spectrumDirty = false;
             }
-            if (String.IsNullOrEmpty(PlotModel.YAxis.Title)) PlotModel.GenerateYAxis("Intensity", "0e0");
+            if (string.IsNullOrEmpty(PlotModel.YAxis.Title)) PlotModel.GenerateYAxis("Intensity", "0e0");
 
             var maxCharge = peakDataPoints.Length > 0 ? Ions.Max(x => x.IonType.Charge) : 2;
             maxCharge = Math.Max(maxCharge, 2);
             var colors = new ColorDictionary(maxCharge);
             foreach (var points in peakDataPoints)
             {
-                if (points.Count == 0 || points[0].Error.Equals(Double.NaN)) continue;
+                if (points.Count == 0 || points[0].Error.Equals(double.NaN)) continue;
                 var firstPoint = points[0];
                 var color = firstPoint.IonType != null ? colors.GetColor(firstPoint.IonType.BaseIonType, firstPoint.IonType.Charge)
                                                            : colors.GetColor(firstPoint.Index);
@@ -284,23 +284,23 @@ namespace LcmsSpectator.ViewModels
         private void LabeledIonSelectedChanged(LabeledIonViewModel labeledIonVm)
         {
             var label = labeledIonVm.Label;
-            StemSeries selectedlineseries = null;
+            StemSeries selectedLineSeries = null;
             foreach (var series in PlotModel.Series)
             {
                 var lineseries = series as StemSeries;
                 if (lineseries != null && lineseries.Title == label)
                 {
                     lineseries.IsVisible = labeledIonVm.Selected;
-                    selectedlineseries = lineseries;
+                    selectedLineSeries = lineseries;
                     PlotModel.AdjustForZoom();
                 }
             }
             foreach (var annotation in PlotModel.Annotations)
             {
                 var textAnnotation = annotation as TextAnnotation;
-                if (textAnnotation != null && textAnnotation.Text == label && selectedlineseries != null)
+                if (textAnnotation != null && textAnnotation.Text == label && selectedLineSeries != null)
                 {
-                    textAnnotation.TextColor = labeledIonVm.Selected ? selectedlineseries.Color : OxyColors.Transparent;
+                    textAnnotation.TextColor = labeledIonVm.Selected ? selectedLineSeries.Color : OxyColors.Transparent;
                     textAnnotation.Background = labeledIonVm.Selected ? OxyColors.White : OxyColors.Transparent;
                     PlotModel.InvalidatePlot(true);
                 }
@@ -355,14 +355,14 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Prompt user for file path and save plot as image to that path.
         /// </summary>
-        private void SaveAsImageImpl()
+        private void SaveAsImageImplementation()
         {
             var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
                 if (fileName != "")
                 {
-                    PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
+                    DynamicResolutionPngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White, IcParameters.Instance.ExportImageDpi);
                 }
             }
             catch (Exception e)

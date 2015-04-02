@@ -479,10 +479,10 @@ namespace LcmsSpectator.ViewModels
                 switch (filter.Key)
                 {
                     case "Sequence":
-                        filtered = filtered.Where(datum => datum.SequenceText.StartsWith(filter.Value)).ToList();
+                        filtered = filtered.Where(datum => datum.SequenceText.Contains(filter.Value)).ToList();
                         break;
                     case "Protein":
-                        filtered = filtered.Where(datum => datum.ProteinName.StartsWith(filter.Value)).ToList();
+                        filtered = filtered.Where(datum => datum.ProteinName.Contains(filter.Value)).ToList();
                         break;
                     case "Mass":
                         filtered = filtered.Where(datum => datum.Mass >= Convert.ToDouble(filter.Value)).ToList();
@@ -502,7 +502,7 @@ namespace LcmsSpectator.ViewModels
                         filtered = filtered.Where(datum => datum.QValue <= Convert.ToDouble(filter.Value)).ToList();
                         break;
                     case "RawFile":
-                        filtered = filtered.Where(datum => datum.RawFileName.StartsWith(filter.Value)).ToList();
+                        filtered = filtered.Where(datum => datum.RawFileName.Contains(filter.Value)).ToList();
                         break;
                 }
             }

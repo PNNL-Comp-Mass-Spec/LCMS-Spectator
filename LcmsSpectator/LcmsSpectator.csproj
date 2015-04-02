@@ -233,6 +233,7 @@
     <Compile Include="TaskServices\ITaskService.cs" />
     <Compile Include="TaskServices\MockTaskService.cs" />
     <Compile Include="Utils\Constants.cs" />
+    <Compile Include="Utils\DynamicResolutionPngExporter.cs" />
     <Compile Include="Utils\IonUtils.cs" />
     <Compile Include="Utils\NotConverter.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />

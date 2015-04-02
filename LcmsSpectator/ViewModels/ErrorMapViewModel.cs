@@ -7,6 +7,7 @@ using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
+using LcmsSpectator.Utils;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Wpf;
@@ -245,7 +246,7 @@ namespace LcmsSpectator.ViewModels
             try
             {
                 if (!String.IsNullOrEmpty(fileName)) throw new FormatException(String.Format("Cannot save image due to invalid file name: {0}", fileName));
-                PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
+                DynamicResolutionPngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White, IcParameters.Instance.ExportImageDpi);
             }
             catch (Exception e)
             {

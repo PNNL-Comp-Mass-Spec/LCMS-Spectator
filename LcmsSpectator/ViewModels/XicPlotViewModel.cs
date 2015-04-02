@@ -8,6 +8,7 @@ using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
+using LcmsSpectator.Utils;
 using OxyPlot;
 using OxyPlot.Wpf;
 using ReactiveUI;
@@ -169,7 +170,7 @@ namespace LcmsSpectator.ViewModels
 
         private int _selectedScan;
         /// <summary>
-        /// The scan number selected on plot.
+        /// Gets or Sets the scan number selected on plot.
         /// </summary>
         public int SelectedScan
         {
@@ -179,7 +180,7 @@ namespace LcmsSpectator.ViewModels
 
         private double _area;
         /// <summary>
-        /// Area under curve of XIC
+        /// Gets or Sets the area under curve of XIC plot.
         /// </summary>
         public double Area
         {
@@ -189,7 +190,7 @@ namespace LcmsSpectator.ViewModels
 
         private string _plotTitle;
         /// <summary>
-        /// Title of plot, including area
+        /// Gets or sets the title of the XIC plot, including area.
         /// </summary>
         public string PlotTitle
         {
@@ -293,7 +294,7 @@ namespace LcmsSpectator.ViewModels
             var fileName = _dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
-                if (fileName != "") PngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White);
+                if (fileName != "") DynamicResolutionPngExporter.Export(PlotModel, fileName, (int)PlotModel.Width, (int)PlotModel.Height, OxyColors.White, IcParameters.Instance.ExportImageDpi);
             }
             catch (Exception e)
             {

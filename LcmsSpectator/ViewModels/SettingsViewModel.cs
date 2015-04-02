@@ -23,12 +23,12 @@ namespace LcmsSpectator.ViewModels
             ProductIonToleranceUnit = IcParameters.Instance.ProductIonTolerancePpm.GetUnit();
             IonCorrelationThreshold = IcParameters.Instance.IonCorrelationThreshold;
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
-            SpectrumFilterWindowSize = IcParameters.Instance.SpectrumFilterWindowSize;
             PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
             ShowInstrumentData = IcParameters.Instance.ShowInstrumentData;
             AutomaticallySelectIonTypes = IcParameters.Instance.AutomaticallySelectIonTypes;
             CidHcdIonTypes = IcParameters.Instance.GetCidHcdIonTypes();
             EtdIonTypes = IcParameters.Instance.GetEtdIonTypes();
+            ExportImageDpi = IcParameters.Instance.ExportImageDpi;
 
             Modifications = new ReactiveList<SelectModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
@@ -168,6 +168,8 @@ namespace LcmsSpectator.ViewModels
             get { return _automaticallySelectIonTypes; }
             set { this.RaiseAndSetIfChanged(ref _automaticallySelectIonTypes, value); }
         }
+
+        public int ExportImageDpi { get; set; }
         #endregion
 
         #region Private methods
@@ -195,16 +197,22 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
 
+            if (ExportImageDpi < 1)
+            {
+                _dialogService.MessageBox("Export Image DPI must be at least 1.");
+                return;
+            }
+
             IcParameters.Instance.PrecursorTolerancePpm = new Tolerance(PrecursorIonTolerance, PrecursorIonToleranceUnit);
             IcParameters.Instance.ProductIonTolerancePpm = new Tolerance(ProductIonTolerance, ProductIonToleranceUnit);
             IcParameters.Instance.IonCorrelationThreshold = IonCorrelationThreshold;
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
-            IcParameters.Instance.SpectrumFilterWindowSize = SpectrumFilterWindowSize;
             IcParameters.Instance.PrecursorRelativeIntensityThreshold = PrecursorRelativeIntensityThreshold;
             IcParameters.Instance.ShowInstrumentData = ShowInstrumentData;
             IcParameters.Instance.AutomaticallySelectIonTypes = AutomaticallySelectIonTypes;
             IcParameters.Instance.CidHcdIonTypes = IcParameters.IonTypeStringParse(CidHcdIonTypes);
             IcParameters.Instance.EtdIonTypes = IcParameters.IonTypeStringParse(EtdIonTypes);
+            IcParameters.Instance.ExportImageDpi = ExportImageDpi;
 
 
             var modificationList = Modifications.Select(searchModificationVm => searchModificationVm.SearchModification)
