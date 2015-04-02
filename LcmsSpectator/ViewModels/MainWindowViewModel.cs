@@ -77,7 +77,7 @@ namespace LcmsSpectator.ViewModels
                     foreach (var dataSet in DataSets) dataSet.SelectedPrSm = selectedPrSm;
                 });
 
-            // Warm up Informed Proteomics
+            // Warm up InformedProteomics
             Task.Run(() => Averagine.GetIsotopomerEnvelopeFromNominalMass(50000));
         }
 
@@ -297,7 +297,14 @@ namespace LcmsSpectator.ViewModels
         private async Task OpenDataSetImpl()
         {
             var openDataVm = new OpenDataWindowViewModel(_dialogService);
-            await OpenDataSet(openDataVm.RawFilePath, openDataVm.IdFilePath, openDataVm.FeatureFilePath);
+            if (_dialogService.OpenDataWindow(openDataVm))
+            {
+                ShowSplash = false;
+                LoadingScreenViewModel.IsLoading = true;
+                var dsVm = await OpenDataSet(openDataVm.RawFilePath, openDataVm.IdFilePath, openDataVm.FeatureFilePath);
+                LoadingScreenViewModel.IsLoading = false;
+                if (dsVm.Lcms == null) ShowSplash = true;   
+            }
         }
 
         /// <summary>
