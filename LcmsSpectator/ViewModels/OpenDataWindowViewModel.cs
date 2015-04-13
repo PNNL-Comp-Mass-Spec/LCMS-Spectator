@@ -1,102 +1,204 @@
-﻿using System;
-using System.Reactive.Linq;
-using LcmsSpectator.DialogServices;
-using ReactiveUI;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="OpenDataWindowViewModel.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   View model for selecting raw file path, feature file path, and ID file path.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.ViewModels
 {
-    public class OpenDataWindowViewModel: ReactiveObject
-    {
-        public IReactiveCommand BrowseRawFilesCommand { get; private set; }
-        public IReactiveCommand BrowseFeatureFilesCommand { get; private set; }
-        public IReactiveCommand BrowseIdFilesCommand { get; private set; }
-        public IReactiveCommand OkCommand { get; private set; }
-        public IReactiveCommand CancelCommand { get; private set; }
+    using System;
+    using System.Reactive.Linq;
+    using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Utils;
+    using ReactiveUI;
 
-        public bool Status { get; private set; }
-        public event EventHandler ReadyToClose;
+    /// <summary>
+    /// View model for selecting raw file path, feature file path, and ID file path.
+    /// </summary>
+    public class OpenDataWindowViewModel : ReactiveObject
+    {
+        /// <summary>
+        /// Dialog service for opening dialogs from view model.
+        /// </summary>
+        private readonly IDialogService dialogService;
+
+        /// <summary>
+        /// The selected raw file path.
+        /// </summary>
+        private string rawFilePath;
+
+        /// <summary>
+        /// The selected feature file path.
+        /// </summary>
+        private string featureFilePath;
+
+        /// <summary>
+        /// The selected ID file path.
+        /// </summary>
+        private string idFilePath;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenDataWindowViewModel"/> class.
+        /// </summary>
+        /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public OpenDataWindowViewModel(IDialogService dialogService)
         {
-            _dialogService = dialogService;
+            this.dialogService = dialogService;
             var browseRawFilesCommand = ReactiveCommand.Create();
-            browseRawFilesCommand.Subscribe(_ => BrowseRawFiles());
-            BrowseRawFilesCommand = browseRawFilesCommand;
+            browseRawFilesCommand.Subscribe(_ => this.BrowseRawFilesImplementation());
+            this.BrowseRawFilesCommand = browseRawFilesCommand;
 
             var browseFeatureFilesCommand = ReactiveCommand.Create();
-            browseFeatureFilesCommand.Subscribe(_ => BrowseFeatureFiles());
-            BrowseFeatureFilesCommand = browseFeatureFilesCommand;
+            browseFeatureFilesCommand.Subscribe(_ => this.BrowseFeatureFilesImplementation());
+            this.BrowseFeatureFilesCommand = browseFeatureFilesCommand;
 
             var browseIdFilesCommand = ReactiveCommand.Create();
-            browseIdFilesCommand.Subscribe(_ => BrowseIdFiles());
-            BrowseIdFilesCommand = browseIdFilesCommand;
+            browseIdFilesCommand.Subscribe(_ => this.BrowseIdFilesImplementation());
+            this.BrowseIdFilesCommand = browseIdFilesCommand;
 
             // Ok button should be enabled if RawFilePath isn't null or empty
             var okCommand =
             ReactiveCommand.Create(
-                    this.WhenAnyValue(x => x.RawFilePath).Select(rawFilePath => !String.IsNullOrEmpty(rawFilePath)));
-            okCommand.Subscribe(_ => Ok());
-            OkCommand = okCommand;
+                    this.WhenAnyValue(x => x.RawFilePath).Select(rawFilePath => !string.IsNullOrEmpty(rawFilePath)));
+            okCommand.Subscribe(_ => this.OkImplementation());
+            this.OkCommand = okCommand;
 
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => Cancel());
-            CancelCommand = cancelCommand;
+            cancelCommand.Subscribe(_ => this.CancelImplementation());
+            this.CancelCommand = cancelCommand;
 
-            Status = false;
+            this.Status = false;
         }
 
+        /// <summary>
+        /// Event that is triggered when the window is ready to be closed.
+        /// </summary>
+        public event EventHandler ReadyToClose;
+
+        /// <summary>
+        /// Gets a command that prompts the user for a raw file path.
+        /// </summary>
+        public IReactiveCommand BrowseRawFilesCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that prompts the user for a feature file path.
+        /// </summary>
+        public IReactiveCommand BrowseFeatureFilesCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that prompts the user for an ID file path.
+        /// </summary>
+        public IReactiveCommand BrowseIdFilesCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that validates the selected raw file path and trigger ReadyToClose.
+        /// </summary>
+        public IReactiveCommand OkCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that triggers ReadyToClose
+        /// </summary>
+        public IReactiveCommand CancelCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether a valid dataset or raw file path was selected.
+        /// </summary>
+        public bool Status { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the selected raw file path.
+        /// </summary>
         public string RawFilePath
         {
-            get { return _rawFilePath; }
-            set { this.RaiseAndSetIfChanged(ref _rawFilePath, value); }
+            get { return this.rawFilePath; }
+            set { this.RaiseAndSetIfChanged(ref this.rawFilePath, value); }
         }
 
+        /// <summary>
+        /// Gets or sets the selected feature file path.
+        /// </summary>
         public string FeatureFilePath
         {
-            get { return _featureFilePath; }
-            set { this.RaiseAndSetIfChanged(ref _featureFilePath, value); }
+            get { return this.featureFilePath; }
+            set { this.RaiseAndSetIfChanged(ref this.featureFilePath, value); }
         }
 
+        /// <summary>
+        /// Gets or sets the selected ID file path.
+        /// </summary>
         public string IdFilePath
         {
-            get { return _idFilePath; }
-            set { this.RaiseAndSetIfChanged(ref _idFilePath, value); }
+            get { return this.idFilePath; }
+            set { this.RaiseAndSetIfChanged(ref this.idFilePath, value); }
         }
 
-        private void BrowseRawFiles()
+        /// <summary>
+        /// Implementation for BrowseRawFilesCommand.
+        /// Prompts the user for a raw file path.
+        /// </summary>
+        private void BrowseRawFilesImplementation()
         {
-            var rawFilePath = _dialogService.OpenFile(".raw", @"Raw/MzML Files (*.raw; *.mzML)|*.raw;*.mzML;*.mzML.gz");
-            if (!String.IsNullOrEmpty(rawFilePath)) RawFilePath = rawFilePath;
+            var path = this.dialogService.OpenFile(".raw", FileConstants.RawFileFormatString);
+            if (!string.IsNullOrEmpty(path))
+            {
+                this.RawFilePath = path;
+            }
         }
 
-        private void BrowseFeatureFiles()
+        /// <summary>
+        /// Implementation for BrowseFeatureFilesCommand.
+        /// Prompts the user for a feature file path.
+        /// </summary>
+        private void BrowseFeatureFilesImplementation()
         {
-            const string formatStr = @"Ms1FT Files (*.ms1ft)|*.ms1ft";
-            var featureFilePath = _dialogService.OpenFile(".ms1ft", formatStr);
-            if (!String.IsNullOrEmpty(featureFilePath)) FeatureFilePath = featureFilePath;
+            var path = this.dialogService.OpenFile(".ms1ft", FileConstants.FeatureFileFormatString);
+            if (!string.IsNullOrEmpty(path))
+            {
+                this.FeatureFilePath = path;
+            }
         }
 
-        private void BrowseIdFiles()
+        /// <summary>
+        /// Implementation for BrowseIdFilesCommand.
+        /// Prompts the user for an ID file path.
+        /// </summary>
+        private void BrowseIdFilesImplementation()
         {
-            const string formatStr = @"Supported Files|*.txt;*.tsv;*.mzId;*.mzId.gz;*.mtdb|TSV Files (*.txt; *tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
-            var idFilePath = _dialogService.OpenFile(".txt", formatStr);
-            if (!String.IsNullOrEmpty(idFilePath)) IdFilePath = idFilePath;
+            var path = this.dialogService.OpenFile(".txt", FileConstants.IdFileFormatString);
+            if (!string.IsNullOrEmpty(path))
+            {
+                this.IdFilePath = path;
+            }
         }
 
-        private void Ok()
+        /// <summary>
+        /// Implementation for OkCommand.
+        /// Validates the selected raw file path and trigger ReadyToClose.
+        /// </summary>
+        private void OkImplementation()
         {
-            Status = true;
-            if (ReadyToClose != null) ReadyToClose(this, EventArgs.Empty);
+            this.Status = true;
+            if (this.ReadyToClose != null)
+            {
+                this.ReadyToClose(this, EventArgs.Empty);
+            }
         }
 
-        private void Cancel()
+        /// <summary>
+        /// Implementation for CancelCommand.
+        /// Triggers ReadyToClose
+        /// </summary>
+        private void CancelImplementation()
         {
-            Status = false;
-            if (ReadyToClose != null) ReadyToClose(this, EventArgs.Empty);
+            this.Status = false;
+            if (this.ReadyToClose != null)
+            {
+                this.ReadyToClose(this, EventArgs.Empty);
+            }
         }
-
-        private readonly IDialogService _dialogService;
-        private string _rawFilePath;
-        private string _featureFilePath;
-        private string _idFilePath;
     }
 }

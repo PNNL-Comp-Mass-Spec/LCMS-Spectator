@@ -1,26 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="DmsLookupView.xaml.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Interaction logic for DmsLookupView.xaml
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Views
 {
+    using System.Windows;
+    
     /// <summary>
     /// Interaction logic for DmsLookupView.xaml
     /// </summary>
     public partial class DmsLookupView : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DmsLookupView"/> class.
+        /// </summary>
         public DmsLookupView()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

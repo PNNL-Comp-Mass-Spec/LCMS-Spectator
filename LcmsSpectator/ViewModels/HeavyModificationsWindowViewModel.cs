@@ -1,47 +1,94 @@
-﻿using System;
-using LcmsSpectator.Config;
-using ReactiveUI;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="HeavyModificationsWindowViewModel.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   View model for a window for selecting heavy modifications for light and heavy peptides.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.ViewModels
 {
-    public class HeavyModificationsWindowViewModel: ReactiveObject
+    using System;
+    using LcmsSpectator.Config;
+    using ReactiveUI;
+
+    /// <summary>
+    /// View model for a window for selecting heavy modifications for light and heavy peptides.
+    /// </summary>
+    public class HeavyModificationsWindowViewModel : ReactiveObject
     {
-        public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
-        
-        public IReactiveCommand SaveCommand { get; private set; }
-        public IReactiveCommand CancelCommand { get; private set; }
-
-        public bool Status { get; private set; }
-
-        public event EventHandler ReadyToClose;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HeavyModificationsWindowViewModel"/> class.
+        /// </summary>
         public HeavyModificationsWindowViewModel()
         {
-            HeavyModificationsViewModel = new HeavyModificationsViewModel();
+            this.HeavyModificationsViewModel = new HeavyModificationsViewModel();
 
             var saveCommand = ReactiveCommand.Create();
-            saveCommand.Subscribe(_ => Save());
-            SaveCommand = saveCommand;
+            saveCommand.Subscribe(_ => this.SaveImplementation());
+            this.SaveCommand = saveCommand;
 
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => Cancel());
-            CancelCommand = cancelCommand;
+            cancelCommand.Subscribe(_ => this.CancelImplementation());
+            this.CancelCommand = cancelCommand;
 
-            Status = false;
+            this.Status = false;
         }
 
-        public void Save()
+        /// <summary>
+        /// Event that is triggered when save or cancel are executed.
+        /// </summary>
+        public event EventHandler ReadyToClose;
+
+        /// <summary>
+        /// Gets the HeavyModificationsViewModel for selecting heavy modifications.
+        /// </summary>
+        public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
+
+        /// <summary>
+        /// Gets a command that sets status to true, 
+        /// saves the selected heavy modifications, and triggers the ReadyToClose event.
+        /// </summary>
+        public IReactiveCommand SaveCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that sets status to false and triggers the ReadyToClose event.
+        /// </summary>
+        public IReactiveCommand CancelCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the modifications should be saved.
+        /// </summary>
+        public bool Status { get; private set; }
+
+        /// <summary>
+        /// Implementation of SaveCommand.
+        /// Sets status to true, saves the selected heavy modifications, and triggers the ReadyToClose event.
+        /// </summary>
+        public void SaveImplementation()
         {
             HeavyModificationsViewModel.Save();
-            Status = true;
+            this.Status = true;
             IcParameters.Instance.Update();
-            if (ReadyToClose != null) ReadyToClose(this, EventArgs.Empty);
+            if (this.ReadyToClose != null)
+            {
+                this.ReadyToClose(this, EventArgs.Empty);
+            }
         }
 
-        public void Cancel()
+        /// <summary>
+        /// Implementation of CancelCommand.
+        /// Sets status to false and triggers the ReadyToClose event.
+        /// </summary>
+        public void CancelImplementation()
         {
-            Status = false;
-            if (ReadyToClose != null) ReadyToClose(this, EventArgs.Empty);
+            this.Status = false;
+            if (this.ReadyToClose != null)
+            {
+                this.ReadyToClose(this, EventArgs.Empty);
+            }
         }
     }
 }

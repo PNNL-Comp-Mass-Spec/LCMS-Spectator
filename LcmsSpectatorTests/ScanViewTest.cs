@@ -129,7 +129,7 @@ namespace LcmsSpectatorTests
             var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
             ids.SetLcmsRun(null, Path.GetFileNameWithoutExtension(rawFile));
             var scans = lcms.GetScanNumbers(2);
-            foreach (var scan in scans) ids.Add(new PrSm { Scan = scan, Lcms = lcms, RawFileName = Path.GetFileNameWithoutExtension(rawFile), Score = Double.NaN});
+            foreach (var scan in scans) ids.Add(new PrSm { Scan = scan, LcMs = lcms, RawFileName = Path.GetFileNameWithoutExtension(rawFile), Score = Double.NaN});
             var prsms = ids.AllPrSms;
 
             // init scan vm

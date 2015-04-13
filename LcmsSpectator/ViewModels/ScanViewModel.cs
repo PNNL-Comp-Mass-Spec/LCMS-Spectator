@@ -1,29 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Spectrometry;
-using InformedProteomics.Backend.MassSpecData;
-using LcmsSpectator.DialogServices;
-using LcmsSpectator.Models;
-using LcmsSpectator.TaskServices;
-using ReactiveUI;
-
-namespace LcmsSpectator.ViewModels
+﻿namespace LcmsSpectator.ViewModels
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using InformedProteomics.Backend.Data.Spectrometry;
+    using InformedProteomics.Backend.MassSpecData;
+    using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Models;
+    using LcmsSpectator.TaskServices;
+    using ReactiveUI;
+    
     public class ScanViewModel: ReactiveObject
     {
-        public IReactiveCommand ClearFiltersCommand { get; private set; }
+        private readonly IMainDialogService _dialogService;
+        private readonly ITaskService _taskService;
+        private readonly Dictionary<string, string> _filters;
+        private readonly Dictionary<string, string> _previousFilters;
+        private bool _sequenceFilterChecked;
+        private bool _proteinFilterChecked;
+        private List<PrSm> _data;
+        private PrSm _selectedPrSm;
+        private List<PrSm> _filteredData;
+        private List<ProteinId> _filteredProteins;
+        private bool _massFilterChecked;
+        private bool _precursorMzFilterChecked;
+        private bool _chargeFilterChecked;
+        private bool _scoreFilterChecked;
+        private bool _qValueFilterChecked;
+        private bool _rawFileFilterChecked;
+        private bool _hideUnidentifiedScans;
+        private bool _actualIds;
+        private bool _firstActualIds;
+        private object _treeViewSelectedItem;
+
         public ScanViewModel(IMainDialogService dialogService, ITaskService taskService, List<PrSm> data)
         {
             var clearFiltersCommand = ReactiveCommand.Create();
-            clearFiltersCommand.Subscribe(_ => ClearFilters());
-            ClearFiltersCommand = clearFiltersCommand;
-            _taskService = taskService;
-            _dialogService = dialogService;
-            _filters = new Dictionary<string, string>();
-            _previousFilters = new Dictionary<string, string>
+            clearFiltersCommand.Subscribe(_ => this.ClearFilters());
+            this.ClearFiltersCommand = clearFiltersCommand;
+            this._taskService = taskService;
+            this._dialogService = dialogService;
+            this._filters = new Dictionary<string, string>();
+            this._previousFilters = new Dictionary<string, string>
             {
                 {"Sequence", ""},
                 {"Protein", ""},
@@ -34,19 +54,75 @@ namespace LcmsSpectator.ViewModels
                 {"QValue", "0.01"},
                 {"RawFile", ""}
             };
-            _actualIds = false;
-            _firstActualIds = false;
-            _data = data;
-            FilteredData = data;
-            _taskService.Enqueue(FilterData);
+            this._actualIds = false;
+            this._firstActualIds = false;
+            this._data = data;
+            this.FilteredData = data;
+            this._taskService.Enqueue(FilterData);
         }
+
+        public IReactiveCommand ClearFiltersCommand { get; private set; }
 
         public void AddFilter(string filterName, string value)
         {
-            if (!_filters.ContainsKey(filterName))
-                _filters.Add(filterName, value);
-            else _filters[filterName] = value;
-            _taskService.Enqueue(FilterData);
+            if (!this._filters.ContainsKey(filterName))
+                this._filters.Add(filterName, value);
+            else this._filters[filterName] = value;
+            this._taskService.Enqueue(this.FilterData);
+        }
+
+        public List<PrSm> Data
+        {
+            get { return new List<PrSm>(this._data); }
+        }
+
+        public List<PrSm> FilteredData
+        {
+            get { return _filteredData; }
+            private set { this.RaiseAndSetIfChanged(ref this._filteredData, value); }
+        }
+
+        public List<ProteinId> FilteredProteins
+        {
+            get { return this._filteredProteins; }
+            private set { this.RaiseAndSetIfChanged(ref this._filteredProteins, value); }
+        }
+
+        /// <summary>
+        /// Object selected in Treeview. Uses weak typing because each level TreeView is a different data type.
+        /// </summary>
+        public object TreeViewSelectedItem
+        {
+            get { return this._treeViewSelectedItem; }
+            set
+            {
+                if (value != null)
+                {
+                    this._treeViewSelectedItem = value;
+                    if (this._treeViewSelectedItem is PrSm)
+                    {
+                        var selectedPrSm = this._treeViewSelectedItem as PrSm;
+                        this.SelectedPrSm = selectedPrSm;
+                    }
+                    else
+                    {
+                        var selected = (IIdData)this._treeViewSelectedItem;
+                        if (selected == null) return;
+                        var highest = selected.GetHighestScoringPrSm();
+                        SelectedPrSm = highest;
+                    }
+                    this.RaisePropertyChanged();
+                }
+            }
+        }
+
+        public PrSm SelectedPrSm
+        {
+            get { return _selectedPrSm; }
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _selectedPrSm, value);
+            }
         }
 
         public void ClearFilters()
@@ -76,60 +152,6 @@ namespace LcmsSpectator.ViewModels
             SelectedPrSm = max;
             _data = newData;
             _taskService.Enqueue(FilterData);
-        }
-
-        public List<PrSm> Data
-        {
-            get { return new List<PrSm>(_data); }
-        }
-
-        public List<PrSm> FilteredData
-        {
-            get { return _filteredData; }
-            private set { this.RaiseAndSetIfChanged(ref _filteredData, value); }
-        }
-
-        public List<ProteinId> FilteredProteins
-        {
-            get { return _filteredProteins; }
-            private set { this.RaiseAndSetIfChanged(ref _filteredProteins, value); }
-        }
-
-        /// <summary>
-        /// Object selected in Treeview. Uses weak typing because each level TreeView is a different data type.
-        /// </summary>
-        public object TreeViewSelectedItem
-        {
-            get { return _treeViewSelectedItem; }
-            set
-            {
-                if (value != null)
-                {
-                    _treeViewSelectedItem = value;
-                    if (_treeViewSelectedItem is PrSm)
-                    {
-                        var selectedPrSm = _treeViewSelectedItem as PrSm;
-                        SelectedPrSm = selectedPrSm;
-                    }
-                    else
-                    {
-                        var selected = (IIdData)_treeViewSelectedItem;
-                        if (selected == null) return;
-                        var highest = selected.GetHighestScoringPrSm();
-                        SelectedPrSm = highest;
-                    }
-                    this.RaisePropertyChanged();
-                }
-            }
-        }
-
-        public PrSm SelectedPrSm
-        {
-            get { return _selectedPrSm; }
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _selectedPrSm, value);
-            }
         }
 
         public void AddIds(IEnumerable<PrSm> ids)
@@ -516,26 +538,5 @@ namespace LcmsSpectator.ViewModels
         {
             _actualIds = _data.Any(id => id.Sequence.Count > 0);
         }
-
-        private readonly IMainDialogService _dialogService;
-        private readonly ITaskService _taskService;
-        private readonly Dictionary<string, string> _filters;
-        private readonly Dictionary<string, string> _previousFilters; 
-        private bool _sequenceFilterChecked;
-        private bool _proteinFilterChecked;
-        private List<PrSm> _data;
-        private PrSm _selectedPrSm;
-        private List<PrSm> _filteredData;
-        private List<ProteinId> _filteredProteins;
-        private bool _massFilterChecked;
-        private bool _precursorMzFilterChecked;
-        private bool _chargeFilterChecked;
-        private bool _scoreFilterChecked;
-        private bool _qValueFilterChecked;
-        private bool _rawFileFilterChecked;
-        private bool _hideUnidentifiedScans;
-        private bool _actualIds;
-        private bool _firstActualIds;
-        private object _treeViewSelectedItem;
     }
 }

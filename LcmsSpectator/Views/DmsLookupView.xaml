@@ -86,7 +86,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <Border BorderBrush="Black" Grid.RowSpan="2" BorderThickness="1" Background="#80000000"
+                    <Border BorderBrush="Black" Grid.Row="0"  Grid.RowSpan="2" BorderThickness="1" Background="#80000000"
                 VerticalAlignment="Stretch" Visibility="{Binding IsNoResultsShown, Converter={StaticResource BoolToVis}}">
                         <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
                             <Grid.RowDefinitions>
@@ -106,7 +106,7 @@
             </Grid>
         </GroupBox>
         <StackPanel Orientation="Horizontal" 
-                    Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2"
+                    Grid.Row="2"
                     HorizontalAlignment="Right">
             <Button Width="70" Command="{Binding CloseCommand}">Cancel</Button>
             <Label Width="10" />

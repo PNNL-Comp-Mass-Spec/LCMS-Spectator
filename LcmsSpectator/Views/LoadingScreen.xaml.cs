@@ -1,28 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="LoadingScreen.xaml.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Interaction logic for LoadingScreen.xaml
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Views
 {
+    using System.Windows.Controls;
+    
     /// <summary>
     /// Interaction logic for LoadingScreen.xaml
     /// </summary>
     public partial class LoadingScreen : UserControl
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LoadingScreen"/> class.
+        /// </summary>
         public LoadingScreen()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

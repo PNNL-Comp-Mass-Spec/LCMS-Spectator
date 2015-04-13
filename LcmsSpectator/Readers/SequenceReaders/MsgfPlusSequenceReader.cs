@@ -1,21 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
-using InformedProteomics.Backend.Data.Sequence;
-using LcmsSpectator.Config;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MsgfPlusSequenceReader.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Reader for protein/peptide sequences in the MS-GF+ style.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Readers.SequenceReaders
 {
-    public class MsgfPlusSequenceReader: ISequenceReader
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using InformedProteomics.Backend.Data.Sequence;
+    using LcmsSpectator.Config;
+
+    /// <summary>
+    /// Reader for protein/peptide sequences in the MS-GF+ style.
+    /// </summary>
+    public class MsgfPlusSequenceReader : ISequenceReader
     {
+        /// <summary>
+        /// Standard amino acid set.
+        /// </summary>
+        private static readonly AminoAcidSet AminoAcidSet;
+
+        /// <summary>
+        /// Initializes static members of the <see cref="MsgfPlusSequenceReader"/> class.
+        /// </summary>
         static MsgfPlusSequenceReader()
         {
-            _aminoAcidSet = new AminoAcidSet();
+            AminoAcidSet = new AminoAcidSet();
         }
 
-        public Sequence Read(string msgfPlusPeptideStr, bool trim=false)
+        /// <summary>
+        /// Parse a protein/peptide sequence in the MS-GF+ style.
+        /// </summary>
+        /// <param name="msgfPlusPeptideStr">The sequence as a string..</param>
+        /// <param name="trim">A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.</param>
+        /// <returns>The parsed sequence.</returns>
+        public Sequence Read(string msgfPlusPeptideStr, bool trim = false)
         {
             if (trim)
             {
@@ -34,38 +61,52 @@ namespace LcmsSpectator.Readers.SequenceReaders
                 }   
             }
 
-            const string aminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
-            const string massRegex = @"[+-]?\d+\.\d+";
+            const string AminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
+            const string MassRegex = @"[+-]?\d+\.\d+";
 
-            if (String.IsNullOrEmpty(msgfPlusPeptideStr)) return new Sequence(new List<AminoAcid>());
+            if (string.IsNullOrEmpty(msgfPlusPeptideStr))
+            {
+                return new Sequence(new List<AminoAcid>());
+            }
 
-            if (!Regex.IsMatch(msgfPlusPeptideStr, "(" + aminoAcidRegex + "|" + massRegex + ")+")) return null;
+            if (!Regex.IsMatch(msgfPlusPeptideStr, "(" + AminoAcidRegex + "|" + MassRegex + ")+"))
+            {
+                return null;
+            }
 
-            var stdAaSet = _aminoAcidSet;
-            var aaList = new List<AminoAcid>();
+            var stdAaSet = AminoAcidSet;
+            var aminoAcidList = new List<AminoAcid>();
 
-            var matches = Regex.Matches(msgfPlusPeptideStr, "(" + aminoAcidRegex + "|" + massRegex + ")");
+            var matches = Regex.Matches(msgfPlusPeptideStr, "(" + AminoAcidRegex + "|" + MassRegex + ")");
             AminoAcid aa = null;
             var mods = new List<Modification>();
             foreach (Match match in matches)
             {
                 var element = match.Value;
-                if (element.Length == 0) continue;
-                if (element.Length == 1 && char.IsLetter(element[0]))   // amino acid
+                if (element.Length == 0)
                 {
+                    continue;
+                }
+
+                if (element.Length == 1 && char.IsLetter(element[0]))
+                { // amino acid
                     if (aa != null)
                     {
                         aa = mods.Aggregate(aa, (current, mod) => new ModifiedAminoAcid(current, mod));
-                        aaList.Add(aa);
+                        aminoAcidList.Add(aa);
                         mods = new List<Modification>();
                     }
+
                     aa = stdAaSet.GetAminoAcid(element[0]);
-                    if (aa == null) throw new Exception("Unrecognized amino acid character: " + element[0]);
-                    //                    Console.WriteLine("{0} {1} {2}", aa.Residue, aa.Composition, aa.GetMass());
+                    if (aa == null)
+                    {
+                        throw new Exception("Unrecognized amino acid character: " + element[0]);
+                    }
+                    ////                    Console.WriteLine("{0} {1} {2}", aa.Residue, aa.Composition, aa.GetMass());
                 }
                 else
                 {
-                    double dblMass = 0.0;
+                    double dblMass;
                     string mass;
                     try
                     {
@@ -74,33 +115,33 @@ namespace LcmsSpectator.Readers.SequenceReaders
                     }
                     catch (FormatException)
                     {
-                        throw new InvalidModificationNameException(String.Format("Found an unrecognized modification {0}", element), element);
+                        throw new IcFileReader.InvalidModificationNameException(string.Format("Found an unrecognized modification {0}", element), element);
                     }
                     catch (Exception)
                     {
-                        throw new InvalidModificationNameException(String.Format("Found an unrecognized modification {0}", element), element);
+                        throw new IcFileReader.InvalidModificationNameException(string.Format("Found an unrecognized modification {0}", element), element);
                     }
+
                     var modList = Modification.GetFromMass(mass);
                     if (modList == null || modList.Count == 1)
                     {
                         var regMod = IcParameters.Instance.RegisterModification(element, dblMass);
-                        modList = new List<Modification> {regMod};
+                        modList = new List<Modification> { regMod };
                     }
+
                     var mod = modList[0];
                     mods.Add(mod);
-                    //                    Console.WriteLine("{0} {1} {2}", mod.Name, mod.Composition, mod.Composition.AveragineMass);
+                    ////                    Console.WriteLine("{0} {1} {2}", mod.Name, mod.Composition, mod.Composition.AveragineMass);
                 }
             }
 
             if (aa != null)
             {
                 aa = mods.Aggregate(aa, (current, mod) => new ModifiedAminoAcid(current, mod));
-                aaList.Add(aa);
+                aminoAcidList.Add(aa);
             }
 
-            return new Sequence(aaList);
+            return new Sequence(aminoAcidList);
         }
-
-        private static AminoAcidSet _aminoAcidSet;
     }
 }

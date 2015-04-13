@@ -7,7 +7,7 @@ namespace LcmsSpectator.Readers
         public void Write(string fileName, IdentificationTree idTree)
         {
             var prsms = idTree.AllPrSms;
-            prsms.Sort(new PrSmScoreComparer());
+            prsms.Sort();
 
             foreach (var prsm in prsms)
             {

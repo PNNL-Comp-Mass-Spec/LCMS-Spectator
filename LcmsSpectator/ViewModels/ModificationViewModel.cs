@@ -1,28 +1,58 @@
-﻿using System;
-using InformedProteomics.Backend.Data.Sequence;
-using ReactiveUI;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ModificationViewModel.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   A view model representing a modification that can be selected or unselected.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.ViewModels
 {
-    public class ModificationViewModel: ReactiveObject
+    using InformedProteomics.Backend.Data.Sequence;
+    using ReactiveUI;
+    
+    /// <summary>
+    /// A view model representing a modification that can be selected or unselected.
+    /// </summary>
+    public class ModificationViewModel : ReactiveObject
     {
+        /// <summary>
+        /// The modification that this view model represents.
+        /// </summary>
+        private Modification modification;
+
+        /// <summary>
+        /// A value indicating whether this modification has been selected.
+        /// </summary>
+        private bool selected;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ModificationViewModel"/> class.
+        /// </summary>
+        /// <param name="modification">The modification that this view model represents.</param>
         public ModificationViewModel(Modification modification)
         {
             Modification = modification;
         }
 
-        private Modification _modification;
+        /// <summary>
+        /// Gets or sets the modification that this view model represents.
+        /// </summary>
         public Modification Modification
         {
-            get { return _modification; }
-            set { this.RaiseAndSetIfChanged(ref _modification, value); }
+            get { return this.modification; }
+            set { this.RaiseAndSetIfChanged(ref this.modification, value); }
         }
 
-        private bool _selected;
+        /// <summary>
+        /// Gets or sets a value indicating whether this modification has been selected.
+        /// </summary>
         public bool Selected
         {
-            get { return _selected; }
-            set { this.RaiseAndSetIfChanged(ref _selected, value); }
+            get { return this.selected; }
+            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
         }
     }
 }

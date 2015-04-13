@@ -1,14 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using InformedProteomics.Backend.Data.Sequence;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="LcmsSpectatorSequenceReader.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Reader for protein/peptide sequences in the LCMSSpectator style.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Readers.SequenceReaders
 {
-    public class LcmsSpectatorSequenceReader: ISequenceReader
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using InformedProteomics.Backend.Data.Sequence;
+
+    /// <summary>
+    /// Reader for protein/peptide sequences in the LCMSSpectator style.
+    /// </summary>
+    public class LcmsSpectatorSequenceReader : ISequenceReader
     {
-        public Sequence Read(string sequence, bool trim=false)
+        /// <summary>
+        /// Parse a protein/peptide sequence in the LCMSSpectator style.
+        /// </summary>
+        /// <param name="sequence">The sequence as a string.</param>
+        /// <param name="trim">A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.</param>
+        /// <returns>The parsed sequence.</returns>
+        public Sequence Read(string sequence, bool trim = false)
         {
             if (trim)
             {
@@ -27,52 +46,71 @@ namespace LcmsSpectator.Readers.SequenceReaders
                 }   
             }
 
-            const string aminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
-            //const string modRegex = @"\[([A-Z]|[a-z])+\]";
-            const string modRegex = @"\[([A-Z]|[a-z]|[0-9])+\]";
+            const string AminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
+            ////const string modRegex = @"\[([A-Z]|[a-z])+\]";
+            const string ModRegex = @"\[([A-Z]|[a-z]|[0-9])+\]";
 
-            if (String.IsNullOrEmpty(sequence)) return new Sequence(new List<AminoAcid>());
-            if (!Regex.IsMatch(sequence, "(" + aminoAcidRegex + "|" + modRegex + ")+")) return null;
+            if (string.IsNullOrEmpty(sequence))
+            {
+                return new Sequence(new List<AminoAcid>());
+            }
+
+            if (!Regex.IsMatch(sequence, "(" + AminoAcidRegex + "|" + ModRegex + ")+"))
+            {
+                return null;
+            }
 
             var stdAaSet = new AminoAcidSet();
-            var aaList = new List<AminoAcid>();
+            var aminoAcidList = new List<AminoAcid>();
 
-            var matches = Regex.Matches(sequence, "(" + aminoAcidRegex + "|" + modRegex + ")");
+            var matches = Regex.Matches(sequence, "(" + AminoAcidRegex + "|" + ModRegex + ")");
             AminoAcid aa = null;
             var mods = new List<Modification>();
             foreach (Match match in matches)
             {
                 var element = match.Value;
-                if (element.Length == 0) continue;
-                if (element.Length == 1 && char.IsLetter(element[0]))   // amino acid
+                if (element.Length == 0)
                 {
+                    continue;
+                }
+
+                if (element.Length == 1 && char.IsLetter(element[0]))
+                { // amino acid
                     if (aa != null)
                     {
                         aa = mods.Aggregate(aa, (current, mod) => new ModifiedAminoAcid(current, mod));
-                        aaList.Add(aa);
+                        aminoAcidList.Add(aa);
                         mods = new List<Modification>();
                     }
+
                     aa = stdAaSet.GetAminoAcid(element[0]);
-                    if (aa == null) throw new FormatException("Unrecognized amino acid character: " + element[0]);
-                    //                    Console.WriteLine("{0} {1} {2}", aa.Residue, aa.Composition, aa.GetMass());
+                    if (aa == null)
+                    {
+                        throw new FormatException("Unrecognized amino acid character: " + element[0]);
+                    }
+                    ////                    Console.WriteLine("{0} {1} {2}", aa.Residue, aa.Composition, aa.GetMass());
                 }
                 else
                 {
                     var modName = element.Substring(1, element.Length - 2);
                     var mod = Modification.Get(modName);
-                    if (mod == null) throw new FormatException("Unrecognized modification: " + modName);
+                    if (mod == null)
+                    {
+                        throw new FormatException("Unrecognized modification: " + modName);
+                    }
+
                     mods.Add(mod);
-                    //                    Console.WriteLine("{0} {1} {2}", mod.Name, mod.Composition, mod.Composition.AveragineMass);
+                    ////                    Console.WriteLine("{0} {1} {2}", mod.Name, mod.Composition, mod.Composition.AveragineMass);
                 }
             }
 
             if (aa != null)
             {
                 aa = mods.Aggregate(aa, (current, mod) => new ModifiedAminoAcid(current, mod));
-                aaList.Add(aa);
+                aminoAcidList.Add(aa);
             }
 
-            return new Sequence(aaList);
+            return new Sequence(aminoAcidList);
         }
     }
 }

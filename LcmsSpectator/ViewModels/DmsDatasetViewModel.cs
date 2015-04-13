@@ -1,103 +1,166 @@
-﻿using System;
-using LcmsSpectator.Readers;
-using ReactiveUI;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="DmsDatasetViewModel.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   This class is a view model for editing a DMS data set.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.ViewModels
 {
-    public class DmsDatasetViewModel: ReactiveObject
+    using System;
+    using LcmsSpectator.Readers;
+    using ReactiveUI;
+
+    /// <summary>
+    /// This class is a view model for editing a DMS data set.
+    /// </summary>
+    public class DmsDatasetViewModel : ReactiveObject
     {
+        /// <summary>
+        /// The id of the DMS data set.
+        /// </summary>
+        private int datasetId;
 
-        public DmsDatasetViewModel(DmsLookupUtility.UdtDatasetInfo datasetInfo)
+        /// <summary>
+        /// The name of the DMS data set.
+        /// </summary>
+        private string dataset;
+
+        /// <summary>
+        /// The name of the type of experiment.
+        /// </summary>
+        private string experiment;
+
+        /// <summary>
+        /// The name of the organism.
+        /// </summary>
+        private string organism;
+
+        /// <summary>
+        /// The type of instrument used.
+        /// </summary>
+        private string instrument;
+
+        /// <summary>
+        /// The date and time that this data set was created.
+        /// </summary>
+        private DateTime created;
+
+        /// <summary>
+        /// The path for the folder that this data set is in.
+        /// </summary>
+        private string datasetFolderPath;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DmsDatasetViewModel"/> class. 
+        /// </summary>
+        /// <param name="datasetInfo">
+        /// Existing data set to edit.
+        /// </param>
+        public DmsDatasetViewModel(DmsLookupUtility.UdtDatasetInfo? datasetInfo = null)
         {
-            DatasetId = datasetInfo.DatasetId;
-            Dataset = datasetInfo.Dataset;
-            Experiment = datasetInfo.Experiment;
-            Organism = datasetInfo.Organism;
-            Instrument = datasetInfo.Instrument;
-            Created = datasetInfo.Created;
-            DatasetFolderPath = datasetInfo.DatasetFolderPath;
+            if (datasetInfo != null)
+            {
+                this.UdtDatasetInfo = datasetInfo.Value;   
+            }
         }
 
-        public DmsDatasetViewModel()
-        {
-            
-        }
-
+        /// <summary>
+        /// Gets or sets the the DMS data set info to edit.
+        /// </summary>
         public DmsLookupUtility.UdtDatasetInfo UdtDatasetInfo
         {
             get
             {
                 DmsLookupUtility.UdtDatasetInfo udtDatasetInfo;
-                udtDatasetInfo.DatasetId = DatasetId;
-                udtDatasetInfo.Dataset = Dataset;
-                udtDatasetInfo.Experiment = Experiment;
-                udtDatasetInfo.Organism = Organism;
-                udtDatasetInfo.Instrument = Instrument;
-                udtDatasetInfo.Created = Created;
-                udtDatasetInfo.DatasetFolderPath = DatasetFolderPath;
+                udtDatasetInfo.DatasetId = this.DatasetId;
+                udtDatasetInfo.Dataset = this.Dataset;
+                udtDatasetInfo.Experiment = this.Experiment;
+                udtDatasetInfo.Organism = this.Organism;
+                udtDatasetInfo.Instrument = this.Instrument;
+                udtDatasetInfo.Created = this.Created;
+                udtDatasetInfo.DatasetFolderPath = this.DatasetFolderPath;
                 return udtDatasetInfo;
             }
+
             set
             {
                 DmsLookupUtility.UdtDatasetInfo datasetInfo = value;
-                DatasetId = datasetInfo.DatasetId;
-                Dataset = datasetInfo.Dataset;
-                Experiment = datasetInfo.Experiment;
-                Organism = datasetInfo.Organism;
-                Instrument = datasetInfo.Instrument;
-                Created = datasetInfo.Created;
-                DatasetFolderPath = datasetInfo.DatasetFolderPath;
+                this.DatasetId = datasetInfo.DatasetId;
+                this.Dataset = datasetInfo.Dataset;
+                this.Experiment = datasetInfo.Experiment;
+                this.Organism = datasetInfo.Organism;
+                this.Instrument = datasetInfo.Instrument;
+                this.Created = datasetInfo.Created;
+                this.DatasetFolderPath = datasetInfo.DatasetFolderPath;
                 this.RaisePropertyChanged();
             }
         }
 
-        private int _datasetId;
+        /// <summary>
+        /// Gets or sets the id of the DMS data set.
+        /// </summary>
         public int DatasetId
         {
-            get { return _datasetId; }
-            set { this.RaiseAndSetIfChanged(ref _datasetId, value); }
+            get { return this.datasetId; }
+            set { this.RaiseAndSetIfChanged(ref this.datasetId, value); }
         }
 
-        private string _dataset;
+        /// <summary>
+        /// Gets or sets the name of the DMS data set.
+        /// </summary>
         public string Dataset
         {
-            get { return _dataset; }
-            set { this.RaiseAndSetIfChanged(ref _dataset, value); }
+            get { return this.dataset; }
+            set { this.RaiseAndSetIfChanged(ref this.dataset, value); }
         }
 
-        private string _experiment;
+        /// <summary>
+        /// Gets or sets the name of the type of experiment.
+        /// </summary>
         public string Experiment
         {
-            get { return _experiment; }
-            set { this.RaiseAndSetIfChanged(ref _experiment, value); }
+            get { return this.experiment; }
+            set { this.RaiseAndSetIfChanged(ref this.experiment, value); }
         }
 
-        private string _organism;
+        /// <summary>
+        /// Gets or sets the name of the organism.
+        /// </summary>
         public string Organism
         {
-            get { return _organism; }
-            set { this.RaiseAndSetIfChanged(ref _organism, value); }
+            get { return this.organism; }
+            set { this.RaiseAndSetIfChanged(ref this.organism, value); }
         }
 
-        private string _instrument;
+        /// <summary>
+        /// Gets or sets the type of instrument used.
+        /// </summary>
         public string Instrument
         {
-            get { return _instrument; }
-            set { this.RaiseAndSetIfChanged(ref _instrument, value); }
+            get { return this.instrument; }
+            set { this.RaiseAndSetIfChanged(ref this.instrument, value); }
         }
 
-        private DateTime _created;
+        /// <summary>
+        /// Gets or sets the date and time that this data set was created.
+        /// </summary>
         public DateTime Created
         {
-            get { return _created; }
-            set { this.RaiseAndSetIfChanged(ref _created, value); }
+            get { return this.created; }
+            set { this.RaiseAndSetIfChanged(ref this.created, value); }
         }
 
-        private string _datasetFolderPath;
+        /// <summary>
+        /// Gets or sets the path for the folder that this data set is in.
+        /// </summary>
         public string DatasetFolderPath
         {
-            get { return _datasetFolderPath; }
-            set { this.RaiseAndSetIfChanged(ref _datasetFolderPath, value); }
+            get { return this.datasetFolderPath; }
+            set { this.RaiseAndSetIfChanged(ref this.datasetFolderPath, value); }
         }
     }
 }

@@ -1,123 +1,198 @@
-﻿using System;
-using LcmsSpectator.Readers;
-using ReactiveUI;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="DmsJobViewModel.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   This class is a view model for editing DMS job info.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.ViewModels
 {
-    public class DmsJobViewModel: ReactiveObject
+    using System;
+    using LcmsSpectator.Readers;
+    using ReactiveUI;
+
+    /// <summary>
+    /// This class is a view model for editing DMS job info.
+    /// </summary>
+    public class DmsJobViewModel : ReactiveObject
     {
+        /// <summary>
+        /// The ID of the DMS job.
+        /// </summary>
+        private int job;
 
-        public DmsJobViewModel(DmsLookupUtility.UdtJobInfo jobInfo)
+        /// <summary>
+        /// The ID of the data set that this job is associated with.
+        /// </summary>
+        private int datasetId;
+
+        /// <summary>
+        /// The name of the tool used for this job.
+        /// </summary>
+        private string tool;
+
+        /// <summary>
+        /// The date and time that this job was completed.
+        /// </summary>
+        private DateTime completed;
+
+        /// <summary>
+        /// The path for the folder that this job is in.
+        /// </summary>
+        private string jobFolderPath;
+
+        /// <summary>
+        /// The path for the parameter file for this job.
+        /// </summary>
+        private string parameterFile;
+
+        /// <summary>
+        /// The path for the settings file for this job.
+        /// </summary>
+        private string settingsFile;
+
+        /// <summary>
+        /// The protein collection for this job.
+        /// </summary>
+        private string proteinCollection;
+
+        /// <summary>
+        /// The name of the organism database used for this job.
+        /// </summary>
+        private string organismDb;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DmsJobViewModel"/> class. 
+        /// </summary>
+        /// <param name="jobInfo">
+        /// Existing job to edit.
+        /// </param>
+        public DmsJobViewModel(DmsLookupUtility.UdtJobInfo? jobInfo = null)
         {
-            Job = jobInfo.Job;
-            DatasetId = jobInfo.DatasetId;
-            Tool = jobInfo.Tool;
-            Completed = jobInfo.Completed;
-            JobFolderPath = jobInfo.JobFolderPath;
-            ParameterFile = jobInfo.ParameterFile;
-            SettingsFile = jobInfo.SettingsFile;
-            ProteinCollection = jobInfo.ProteinCollection;
-            OrganismDb = jobInfo.OrganismDb;
+            if (jobInfo != null)
+            {
+                this.UdtJobInfo = jobInfo.Value;   
+            }
         }
 
-        public DmsJobViewModel()
-        {
-            
-        }
-
+        /// <summary>
+        /// Gets or sets the the DMS job info to edit.
+        /// </summary>
         public DmsLookupUtility.UdtJobInfo UdtJobInfo
         {
             get
             {
                 DmsLookupUtility.UdtJobInfo jobInfo;
-                jobInfo.Job = Job;
-                jobInfo.DatasetId = DatasetId;
-                jobInfo.Tool = Tool;
-                jobInfo.Completed = Completed;
-                jobInfo.JobFolderPath = JobFolderPath;
-                jobInfo.ParameterFile = ParameterFile;
-                jobInfo.SettingsFile = SettingsFile;
-                jobInfo.ProteinCollection = ProteinCollection;
-                jobInfo.OrganismDb = OrganismDb;
+                jobInfo.Job = this.Job;
+                jobInfo.DatasetId = this.DatasetId;
+                jobInfo.Tool = this.Tool;
+                jobInfo.Completed = this.Completed;
+                jobInfo.JobFolderPath = this.JobFolderPath;
+                jobInfo.ParameterFile = this.ParameterFile;
+                jobInfo.SettingsFile = this.SettingsFile;
+                jobInfo.ProteinCollection = this.ProteinCollection;
+                jobInfo.OrganismDb = this.OrganismDb;
                 return jobInfo;
             }
+
             set
             {
                 DmsLookupUtility.UdtJobInfo jobInfo = value;
-                Job = jobInfo.Job;
-                DatasetId = jobInfo.DatasetId;
-                Tool = jobInfo.Tool;
-                Completed = jobInfo.Completed;
-                JobFolderPath = jobInfo.JobFolderPath;
-                ParameterFile = jobInfo.ParameterFile;
-                SettingsFile = jobInfo.SettingsFile;
-                ProteinCollection = jobInfo.ProteinCollection;
-                OrganismDb = jobInfo.OrganismDb;
+                this.Job = jobInfo.Job;
+                this.DatasetId = jobInfo.DatasetId;
+                this.Tool = jobInfo.Tool;
+                this.Completed = jobInfo.Completed;
+                this.JobFolderPath = jobInfo.JobFolderPath;
+                this.ParameterFile = jobInfo.ParameterFile;
+                this.SettingsFile = jobInfo.SettingsFile;
+                this.ProteinCollection = jobInfo.ProteinCollection;
+                this.OrganismDb = jobInfo.OrganismDb;
                 this.RaisePropertyChanged();
             }
         }
 
-        private int _job;
+        /// <summary>
+        /// Gets or sets the ID of the DMS job.
+        /// </summary>
         public int Job
         {
-            get { return _job; }
-            set { this.RaiseAndSetIfChanged(ref _job, value); }
+            get { return this.job; }
+            set { this.RaiseAndSetIfChanged(ref this.job, value); }
         }
 
-        private int _datasetId;
+        /// <summary>
+        /// Gets or sets the ID of the data set that this job is associated with.
+        /// </summary>
         public int DatasetId
         {
-            get { return _datasetId; }
-            set { this.RaiseAndSetIfChanged(ref _datasetId, value); }
+            get { return this.datasetId; }
+            set { this.RaiseAndSetIfChanged(ref this.datasetId, value); }
         }
 
-        private string _tool;
+        /// <summary>
+        /// Gets or sets the name of the tool used for this job.
+        /// </summary>
         public string Tool
         {
-            get { return _tool; }
-            set { this.RaiseAndSetIfChanged(ref _tool, value); }
+            get { return this.tool; }
+            set { this.RaiseAndSetIfChanged(ref this.tool, value); }
         }
 
-        private DateTime _completed;
+        /// <summary>
+        /// Gets or sets the date and time that this job was completed.
+        /// </summary>
         public DateTime Completed
         {
-            get { return _completed; }
-            set { this.RaiseAndSetIfChanged(ref _completed, value); }
+            get { return this.completed; }
+            set { this.RaiseAndSetIfChanged(ref this.completed, value); }
         }
 
-        private string _jobFolderPath;
+        /// <summary>
+        /// Gets or sets the path for the folder that this job is in.
+        /// </summary>
         public string JobFolderPath
         {
-            get { return _jobFolderPath; }
-            set { this.RaiseAndSetIfChanged(ref _jobFolderPath, value); }
+            get { return this.jobFolderPath; }
+            set { this.RaiseAndSetIfChanged(ref this.jobFolderPath, value); }
         }
 
-        private string _parameterFile;
+        /// <summary>
+        /// Gets or sets the path for the parameter file for this job.
+        /// </summary>
         public string ParameterFile
         {
-            get { return _parameterFile; }
-            set { this.RaiseAndSetIfChanged(ref _parameterFile, value); }
+            get { return this.parameterFile; }
+            set { this.RaiseAndSetIfChanged(ref this.parameterFile, value); }
         }
 
-        private string _settingsFile;
+        /// <summary>
+        /// Gets or sets the path for the settings file for this job.
+        /// </summary>
         public string SettingsFile
         {
-            get { return _settingsFile; }
-            set { this.RaiseAndSetIfChanged(ref _settingsFile, value); }
+            get { return this.settingsFile; }
+            set { this.RaiseAndSetIfChanged(ref this.settingsFile, value); }
         }
 
-        private string _proteinCollection;
+        /// <summary>
+        /// Gets or sets the protein collection for this job.
+        /// </summary>
         public string ProteinCollection
         {
-            get { return _proteinCollection; }
-            set { this.RaiseAndSetIfChanged(ref _proteinCollection, value); }
+            get { return this.proteinCollection; }
+            set { this.RaiseAndSetIfChanged(ref this.proteinCollection, value); }
         }
 
-        private string _organismDb;
+        /// <summary>
+        /// Gets or sets the name of the organism database used for this job.
+        /// </summary>
         public string OrganismDb
         {
-            get { return _organismDb; }
-            set { this.RaiseAndSetIfChanged(ref _organismDb, value); }
+            get { return this.organismDb; }
+            set { this.RaiseAndSetIfChanged(ref this.organismDb, value); }
         }
     }
 }

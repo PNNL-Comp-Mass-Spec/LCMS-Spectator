@@ -1,28 +1,53 @@
-﻿using System;
-using System.IO;
-using System.Windows;
-using Microsoft.Win32;
-using Xceed.Wpf.AvalonDock.Layout.Serialization;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MainWindow.xaml.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Interaction logic for MsPathViewer.xaml
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Views
 {
+    using System;
+    using System.IO;
+    using System.Windows;
+    using Microsoft.Win32;
+    using Xceed.Wpf.AvalonDock.Layout.Serialization;
+
     /// <summary>
     /// Interaction logic for MsPathViewer.xaml
     /// </summary>
     public partial class MainWindow: Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
+        /// <summary>
+        /// Event handler for when the DockingManager is unloaded.
+        /// Reads layout serialization file.
+        /// </summary>
+        /// <param name="sender">The sender DockingManager.</param>
+        /// <param name="e">The event arguments.</param>
         private void Window_OnLoaded(object sender, RoutedEventArgs e)
         {
             var fileName = "layout.xml";
-            if (File.Exists(fileName)) LoadLayout(fileName);
+            if (File.Exists(fileName))
+            {
+                this.LoadLayout(fileName);
+            }
             else
             {
-                var result = MessageBox.Show("Cannot find layout.xml. Would you like to search for it?", "", MessageBoxButton.YesNo,
+                var result = MessageBox.Show(
+                    "Cannot find layout.xml. Would you like to search for it?",
+                    string.Empty,
+                    MessageBoxButton.YesNo,
                     MessageBoxImage.Exclamation);
                 if (result == MessageBoxResult.Yes)
                 {
@@ -32,28 +57,38 @@ namespace LcmsSpectator.Views
                     if (openResult == true)
                     {
                         fileName = dialog.FileName;
-                        LoadLayout(fileName);
+                        this.LoadLayout(fileName);
                     }
                     else
                     {
-                        MessageBox.Show("Without layout file, LcMsSpectator may not display correctly.", "",
-    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        MessageBox.Show(
+                            "Without layout file, LcMsSpectator may not display correctly.",
+                            string.Empty,
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Exclamation);
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Without layout file, LcMsSpectator may not display correctly.", "",
-                        MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show(
+                        "Without layout file, LcMsSpectator may not display correctly.",
+                        string.Empty,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Exclamation);
                 }
             }
         }
 
-        private void LoadLayout(string layoutFile)
+        /// <summary>
+        /// Load layout from serialized layout string.
+        /// </summary>
+        /// <param name="layout">Serialized layout string.</param>
+        private void LoadLayout(string layout)
         {
             try
             {
                 var serializer = new XmlLayoutSerializer(AvDock);
-                using (var stream = new StreamReader(layoutFile))
+                using (var stream = new StreamReader(layout))
                 {
                     serializer.LayoutSerializationCallback += (s, args) =>
                     {
@@ -64,50 +99,23 @@ namespace LcmsSpectator.Views
             }
             catch (Exception)
             {
-                MessageBox.Show("Could not load layout file.", "", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Could not load layout file.", string.Empty, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
+        /// <summary>
+        /// Event handler for when the DockingManager is unloaded.
+        /// Writes layout serialization file.
+        /// </summary>
+        /// <param name="sender">The sender DockingManager.</param>
+        /// <param name="e">The event arguments.</param>
         private void DockingManager_OnUnloaded(object sender, RoutedEventArgs e)
         {
-            //using (var fs = new StreamWriter("layout1.xml"))
-            //{
-            //    var xmlLayout = new XmlLayoutSerializer(AvDock);
-            //    xmlLayout.Serialize(fs);
-            //}
+            ////using (var fs = new StreamWriter("layout1.xml"))
+            ////{
+            ////    var xmlLayout = new XmlLayoutSerializer(AvDock);
+            ////    xmlLayout.Serialize(fs);
+            ////}
         }
-
-        //private void LoadLayout_MenuItem_OnClick(object sender, RoutedEventArgs e)
-        //{
-        //    var dialogService = new DialogService();
-        //    var fileName = dialogService.OpenFile(".xml", @"XML Layout Files (*.xml)|*.xml");
-        //    if (!String.IsNullOrEmpty(fileName))
-        //    {
-        //        try
-        //        {
-        //            LoadLayout(fileName);
-        //        }
-        //        catch (Exception)
-        //        {
-        //            MessageBox.Show("Could not load layout.");
-        //            throw;
-        //        }
-        //    }
-        //}
-
-        //private void SaveLayout_MenuItem_OnClick(object sender, RoutedEventArgs e)
-        //{
-        //    var dialogService = new DialogService();
-        //    var fileName = dialogService.SaveFile(".xml", @"XML Layout Files (*.xml)|*.xml");
-        //    if (!String.IsNullOrEmpty(fileName))
-        //    {
-        //        using (var fs = new StreamWriter(fileName))
-        //        {
-        //            var xmlLayout = new XmlLayoutSerializer(AvDock);
-        //            xmlLayout.Serialize(fs);
-        //        }
-
-        //    }
-        //}
     }
 }

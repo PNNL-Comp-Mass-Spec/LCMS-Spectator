@@ -1,17 +1,29 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="XicView.xaml.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Interaction logic for XicView.xaml
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Views
 {
+    using System.Windows;
+    using System.Windows.Controls;
+    
     /// <summary>
     /// Interaction logic for XicView.xaml
     /// </summary>
     public partial class XicView : UserControl
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XicView"/> class.
+        /// </summary>
         public XicView()
         {
-            InitializeComponent();
+            this.InitializeComponent();
             FragmentIonXic.Loaded += (o, e) => { FragmentIonXic.ContextMenu.DataContext = FragmentIonXic.DataContext; };
             HeavyFragmentIonXic.Loaded += (o, e) => { HeavyFragmentIonXic.ContextMenu.DataContext = HeavyFragmentIonXic.DataContext; };
             PrecursorIonXic.Loaded += (o, e) => { PrecursorIonXic.ContextMenu.DataContext = PrecursorIonXic.DataContext; };
@@ -20,7 +32,10 @@ namespace LcmsSpectator.Views
             {
                 LightColumn.Width = new GridLength(50, GridUnitType.Star);
                 HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
-                if (ShowFragment.IsChecked == true) FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                if (ShowFragment.IsChecked == true)
+                {
+                    FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                }
             }
             else
             {
@@ -48,11 +63,12 @@ namespace LcmsSpectator.Views
             }
         }
 
-        private void FragmentIonXicOnLoaded(object sender, RoutedEventArgs routedEventArgs)
-        {
-
-        }
-
+        /// <summary>
+        /// Event handler for the ShowFragment checkbox.
+        /// Shows or hides fragment XICs based on checkbox value.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The e.</param>
         private void ShowFragment_OnChecked(object sender, RoutedEventArgs e)
         {
             FragmentPlotRow.Height = new GridLength(60, GridUnitType.Star);
@@ -67,6 +83,12 @@ namespace LcmsSpectator.Views
             }
         }
 
+        /// <summary>
+        /// Event handler for the ShowFragment checkbox.
+        /// Shows or hides fragment XICs based on checkbox value.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The e.</param>
         private void ShowFragment_OnUnChecked(object sender, RoutedEventArgs e)
         {
             FragmentPlotRow.Height = new GridLength(0, GridUnitType.Pixel);
@@ -75,6 +97,12 @@ namespace LcmsSpectator.Views
             FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
         }
 
+        /// <summary>
+        /// Event handler for the ShowHeavy checkbox.
+        /// Shows or hides heavy XICs based on checkbox value.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The e.</param>
         private void ShowHeavy_OnChecked(object sender, RoutedEventArgs e)
         {
             LightColumn.Width = new GridLength(50, GridUnitType.Star);
@@ -87,6 +115,12 @@ namespace LcmsSpectator.Views
             }
         }
 
+        /// <summary>
+        /// Event handler for the ShowHeavy checkbox.
+        /// Shows or hides heavy XICs based on checkbox value.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The e.</param>
         private void ShowHeavy_OnUnchecked(object sender, RoutedEventArgs e)
         {
             LightColumn.Width = new GridLength(100, GridUnitType.Star);

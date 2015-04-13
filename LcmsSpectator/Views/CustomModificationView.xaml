@@ -1,11 +1,7 @@
 ﻿<Window x:Class="LcmsSpectator.Views.CustomModificationView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:utils="clr-namespace:LcmsSpectator.Utils"
         Title="CustomModificationView" Height="260" Width="500">
-    <Window.Resources>
-        <utils:NotConverter x:Key="NotConverter" />
-    </Window.Resources>
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />

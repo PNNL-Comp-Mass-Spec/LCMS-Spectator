@@ -1,174 +1,300 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using InformedProteomics.Backend.Data.Spectrometry;
-using LcmsSpectator.Config;
-using LcmsSpectator.DialogServices;
-using LcmsSpectator.Utils;
-using ReactiveUI;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="IonTypeSelectorViewModel.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   A view model that builds a list of fragment ion types based on selected based ion types, neutral losses, and charge range.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.ViewModels
 {
-    public class IonTypeSelectorViewModel: ReactiveObject
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using InformedProteomics.Backend.Data.Spectrometry;
+    using LcmsSpectator.Config;
+    using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Utils;
+    using ReactiveUI;
+    
+    /// <summary>
+    /// A view model that builds a list of fragment ion types based on selected based ion types, neutral losses, and charge range.
+    /// </summary>
+    public class IonTypeSelectorViewModel : ReactiveObject
     {
-        public List<BaseIonType> BaseIonTypes { get; private set; }
-        public List<NeutralLoss> NeutralLosses { get; private set; }
-        public IReactiveCommand SetIonChargesCommand { get; private set; }
+        /// <summary>
+        /// Dialog service for opening dialogs from view model.
+        /// </summary>
+        private readonly IDialogService dialogService;
+
+        /// <summary>
+        /// Minimum of selected charge range.
+        /// </summary>
+        private int minSelectedCharge;
+
+        /// <summary>
+        /// Maximum of selected charge range.
+        /// </summary>
+        private int maxSelectedCharge;
+
+        /// <summary>
+        /// All ion types currently selected
+        /// </summary>
+        private ReactiveList<IonType> ionTypes;
+
+        /// <summary>
+        /// The base ion types that have been selected from the base ion type list.
+        /// </summary>
+        private IList selectedBaseIonTypes;
+
+        /// <summary>
+        /// The neutral losses selected from neutral loss list.
+        /// </summary>
+        private IList selectedNeutralLosses;
+
+        /// <summary>
+        /// The selected charge to adjust charge range around.
+        /// </summary>
+        private int selectedCharge;
+
+        /// <summary>
+        /// The charge value selected for minimum of charge range.
+        /// </summary>
+        private int minCharge;
+
+        /// <summary>
+        /// The charge value selected for maximum of charge range.
+        /// </summary>
+        private int maxCharge;
+
+        /// <summary>
+        /// The highest possible charge of the maximum charge value in the charge range.
+        /// </summary>
+        private int absoluteMaxCharge;
+
+        /// <summary>
+        /// The activation method used to automatically select ideal ion types.
+        /// </summary>
+        private ActivationMethod activationMethod;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IonTypeSelectorViewModel"/> class.
+        /// </summary>
+        /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public IonTypeSelectorViewModel(IDialogService dialogService)
         {
-            _dialogService = dialogService;
-            _minSelectedCharge = 1;
-            _minSelectedCharge = 2;
-            MinCharge = 2;
-            AbsoluteMaxCharge = 50;
+            this.dialogService = dialogService;
+            this.minSelectedCharge = 1;
+            this.minSelectedCharge = 2;
+            this.MinCharge = 2;
+            this.AbsoluteMaxCharge = 50;
             var setIonChargesCommand = ReactiveCommand.Create();
-            setIonChargesCommand.Subscribe(_ => SetIonCharges());
-            SetIonChargesCommand = setIonChargesCommand;
+            setIonChargesCommand.Subscribe(_ => this.SetIonChargesImplementation());
+            this.SetIonChargesCommand = setIonChargesCommand;
 
-            BaseIonTypes = new List<BaseIonType>
+            this.BaseIonTypes = new List<BaseIonType>
             {
                 BaseIonType.A, BaseIonType.B, BaseIonType.C,
                 BaseIonType.X, BaseIonType.Y, BaseIonType.Z
             };
 
-            _selectedBaseIonTypes = new List<BaseIonType>
+            this.selectedBaseIonTypes = new List<BaseIonType>
             {
                 BaseIonType.B,
                 BaseIonType.Y
             };
 
-            NeutralLosses = NeutralLoss.CommonNeutralLosses.ToList();
-            SelectedNeutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
+            this.NeutralLosses = NeutralLoss.CommonNeutralLosses.ToList();
+            this.SelectedNeutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
 
-            UpdateIonTypes();
+            this.UpdateIonTypes();
 
             this.WhenAnyValue(x => x.SelectedCharge)
                 .Subscribe(charge =>
                 {
                     MinCharge = 1;
-                    var maxCharge = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
-                    MaxCharge = maxCharge;
+                    var max = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
+                    MaxCharge = max;
                     UpdateIonTypes();
                 });
 
             this.WhenAnyValue(x => x.SelectedBaseIonTypes, x => x.SelectedNeutralLosses)
-                .Subscribe(_ => UpdateIonTypes());
+                .Subscribe(_ => this.UpdateIonTypes());
 
             this.WhenAnyValue(x => x.MinCharge, x => x.MaxCharge)
-                .Subscribe(_ => SetIonCharges());
+                .Subscribe(_ => this.SetIonChargesImplementation());
 
             this.WhenAnyValue(x => x.ActivationMethod)
-                .Subscribe(SetActivationMethod);
+                .Subscribe(this.SetActivationMethod);
 
             IcParameters.Instance.WhenAnyValue(x => x.CidHcdIonTypes, x => x.EtdIonTypes)
-                .Subscribe(_ => SetActivationMethod(ActivationMethod));
+                .Subscribe(_ => this.SetActivationMethod(ActivationMethod));
         }
 
-        private ReactiveList<IonType> _ionTypes;
         /// <summary>
-        /// All ion types currently selected
+        /// Gets a list of all possible base ion types (A,B,C,X,Y,Z)
+        /// </summary>
+        public List<BaseIonType> BaseIonTypes { get; private set; }
+
+        /// <summary>
+        /// Gets a list of all possible neutral losses (-H2O, -NH3, No Loss)
+        /// </summary>
+        public List<NeutralLoss> NeutralLosses { get; private set; }
+
+        /// <summary>
+        /// Gets a command that calculates new ion types when the charge range changes.
+        /// </summary>
+        public IReactiveCommand SetIonChargesCommand { get; private set; }
+
+        /// <summary>
+        /// Gets all ion types currently selected
         /// </summary>
         public ReactiveList<IonType> IonTypes
         {
-            get { return _ionTypes; }
-            private set { this.RaiseAndSetIfChanged(ref _ionTypes, value); }
+            get { return this.ionTypes; }
+            private set { this.RaiseAndSetIfChanged(ref this.ionTypes, value); }
         }
 
-        private IList _selectedBaseIonTypes;
+        /// <summary>
+        /// Gets or sets the base ion types that have been selected from the base ion type list.
+        /// </summary>
         public IList SelectedBaseIonTypes
         {
-            get { return _selectedBaseIonTypes; }
-            set { this.RaiseAndSetIfChanged(ref _selectedBaseIonTypes, value); }
+            get { return this.selectedBaseIonTypes; }
+            set { this.RaiseAndSetIfChanged(ref this.selectedBaseIonTypes, value); }
         }
 
-        private IList _selectedNeutralLosses;
+        /// <summary>
+        /// Gets or sets the neutral losses selected from neutral loss list.
+        /// </summary>
         public IList SelectedNeutralLosses
         {
-            get { return _selectedNeutralLosses; }
-            set { this.RaiseAndSetIfChanged(ref _selectedNeutralLosses, value); }
+            get { return this.selectedNeutralLosses; }
+            set { this.RaiseAndSetIfChanged(ref this.selectedNeutralLosses, value); }
         }
 
-        private int _selectedCharge;
+        /// <summary>
+        /// Gets or sets the selected charge to adjust charge range around.
+        /// </summary>
         public int SelectedCharge
         {
-            get { return _selectedCharge; }
-            set { this.RaiseAndSetIfChanged(ref _selectedCharge, value); }
+            get { return this.selectedCharge; }
+            set { this.RaiseAndSetIfChanged(ref this.selectedCharge, value); }
         }
 
-        private int _minCharge;
+        /// <summary>
+        /// Gets or sets the charge value selected for minimum of charge range.
+        /// </summary>
         public int MinCharge
         {
-            get { return _minCharge; }
-            set { this.RaiseAndSetIfChanged(ref _minCharge, value); }
+            get { return this.minCharge; }
+            set { this.RaiseAndSetIfChanged(ref this.minCharge, value); }
         }
 
-        private int _maxCharge;
+        /// <summary>
+        /// Gets or sets the charge value selected for maximum of charge range.
+        /// </summary>
         public int MaxCharge
         {
-            get { return _maxCharge; }
-            set { this.RaiseAndSetIfChanged(ref _maxCharge, value); }
+            get { return this.maxCharge; }
+            set { this.RaiseAndSetIfChanged(ref this.maxCharge, value); }
         }
 
-        private int _absoluteMaxCharge;
+        /// <summary>
+        /// Gets or sets the highest possible charge of the maximum charge value in the charge range.
+        /// </summary>
         public int AbsoluteMaxCharge
         {
-            get { return _absoluteMaxCharge; }
-            set { this.RaiseAndSetIfChanged(ref _absoluteMaxCharge, value); }
+            get { return this.absoluteMaxCharge; }
+            set { this.RaiseAndSetIfChanged(ref this.absoluteMaxCharge, value); }
         }
 
-        private ActivationMethod _activationMethod;
+        /// <summary>
+        /// Gets or sets the activation method used to automatically select ideal ion types.
+        /// </summary>
         public ActivationMethod ActivationMethod
         {
-            get { return _activationMethod; }
-            set { this.RaiseAndSetIfChanged(ref _activationMethod, value); }
+            get { return this.activationMethod; }
+            set { this.RaiseAndSetIfChanged(ref this.activationMethod, value); }
         }
 
-        private void SetIonCharges()
+        /// <summary>
+        /// Implementation for SetIonChargesCommand.
+        /// Calculates new ion types when the charge range changes.
+        /// </summary>
+        private void SetIonChargesImplementation()
         {
             try
             {
-                if (MinCharge < 1) throw new FormatException("Min charge must be greater than 1.");
-                if (MaxCharge > _absoluteMaxCharge) throw new FormatException(String.Format("Max charge must be {0} or less.", _absoluteMaxCharge));
-                if (MinCharge > MaxCharge) throw new FormatException("Max charge cannot be less than min charge.");
-                _minSelectedCharge = MinCharge;
-                _maxSelectedCharge = MaxCharge;
-                UpdateIonTypes();
+                if (this.MinCharge < 1)
+                {
+                    throw new FormatException("Min charge must be greater than 1.");
+                }
+
+                if (this.MaxCharge > this.absoluteMaxCharge)
+                {
+                    throw new FormatException(string.Format("Max charge must be {0} or less.", this.absoluteMaxCharge));
+                }
+
+                if (this.MinCharge > this.MaxCharge)
+                {
+                    throw new FormatException("Max charge cannot be less than min charge.");
+                }
+
+                this.minSelectedCharge = this.MinCharge;
+                this.maxSelectedCharge = this.MaxCharge;
+                this.UpdateIonTypes();
             }
             catch (FormatException f)
             {
-                _dialogService.ExceptionAlert(f);
-                MinCharge = _minSelectedCharge;
-                MaxCharge = _maxSelectedCharge;
+                this.dialogService.ExceptionAlert(f);
+                this.MinCharge = this.minSelectedCharge;
+                this.MaxCharge = this.maxSelectedCharge;
             }
         }
 
+        /// <summary>
+        /// Update ion types based on selected base ion types, selected neutral losses, and charge range.
+        /// </summary>
         private void UpdateIonTypes()
         {
             // set ion types
-            var selectedBaseIonTypes = SelectedBaseIonTypes.Cast<BaseIonType>().ToList();
-            var selectedNeutralLosses = SelectedNeutralLosses.Cast<NeutralLoss>().ToList();
-            IonTypes = new ReactiveList<IonType>(IonUtils.GetIonTypes(IcParameters.Instance.IonTypeFactory, selectedBaseIonTypes,
-                selectedNeutralLosses, MinCharge, MaxCharge));
+            var selectedBase = this.SelectedBaseIonTypes.Cast<BaseIonType>().ToList();
+            var selectedLosses = this.SelectedNeutralLosses.Cast<NeutralLoss>().ToList();
+            this.IonTypes =
+                new ReactiveList<IonType>(
+                    IonUtils.GetIonTypes(
+                        IcParameters.Instance.IonTypeFactory,
+                        selectedBase,
+                        selectedLosses, 
+                        this.MinCharge, 
+                        this.MaxCharge));
         }
 
-        private void SetActivationMethod(ActivationMethod activationMethod)
+        /// <summary>
+        /// Set ion types based on the selected activation method.
+        /// </summary>
+        /// <param name="selectedActivationMethod">The selected activation method.</param>
+        private void SetActivationMethod(ActivationMethod selectedActivationMethod)
         {
-            if (!IcParameters.Instance.AutomaticallySelectIonTypes) return;
-            if (activationMethod == ActivationMethod.ETD &&
-                !Equals(SelectedBaseIonTypes, IcParameters.Instance.EtdIonTypes))
+            if (!IcParameters.Instance.AutomaticallySelectIonTypes)
             {
-                SelectedBaseIonTypes = IcParameters.Instance.EtdIonTypes;
+                return;
             }
-            else if (activationMethod != ActivationMethod.ETD &&
-                     !Equals(SelectedBaseIonTypes, IcParameters.Instance.CidHcdIonTypes))
+
+            if (selectedActivationMethod == ActivationMethod.ETD
+                && !Equals(this.SelectedBaseIonTypes, IcParameters.Instance.EtdIonTypes))
             {
-                SelectedBaseIonTypes = IcParameters.Instance.CidHcdIonTypes;
+                this.SelectedBaseIonTypes = IcParameters.Instance.EtdIonTypes;
+            }
+            else if (selectedActivationMethod != ActivationMethod.ETD
+                     && !Equals(this.SelectedBaseIonTypes, IcParameters.Instance.CidHcdIonTypes))
+            {
+                this.SelectedBaseIonTypes = IcParameters.Instance.CidHcdIonTypes;
             }
         }
-
-        private readonly IDialogService _dialogService;
-        private int _minSelectedCharge;
-        private int _maxSelectedCharge;
     }
 }

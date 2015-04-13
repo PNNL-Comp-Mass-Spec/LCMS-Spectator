@@ -42,7 +42,7 @@
             <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
                 <xcad:DockingManager.LayoutItemContainerStyle>
                     <Style TargetType="{x:Type xcad:LayoutItem}">
-                        <Setter Property="Title" Value="{Binding Model.RawFileName}" />
+                        <Setter Property="Title" Value="{Binding Model.Title}" />
                         <Setter Property="CloseCommand" Value="{Binding Model.CloseCommand}" />
                     </Style>
                 </xcad:DockingManager.LayoutItemContainerStyle>

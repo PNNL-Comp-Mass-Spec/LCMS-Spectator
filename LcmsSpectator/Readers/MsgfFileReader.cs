@@ -1,56 +1,101 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using LcmsSpectator.Models;
-using LcmsSpectator.Readers.SequenceReaders;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MsgfFileReader.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Reader for MS-GF+ results file.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Readers
 {
-    public class MsgfFileReader: IIdFileReader
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using LcmsSpectator.Models;
+    using LcmsSpectator.Readers.SequenceReaders;
+
+    /// <summary>
+    /// Reader for MS-GF+ results file.
+    /// </summary>
+    public class MsgfFileReader : IIdFileReader
     {
-        public MsgfFileReader(string tsvFile)
+        /// <summary>
+        /// The path to the TSV file.
+        /// </summary>
+        private readonly string filePath;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MsgfFileReader"/> class.
+        /// </summary>
+        /// <param name="filePath">The path to the TSV file.</param>
+        public MsgfFileReader(string filePath)
         {
-            _filePath = tsvFile;
+            this.filePath = filePath;
         }
 
+        /// <summary>
+        /// Read a MS-GF+ results file.
+        /// </summary>
+        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <returns>Identification tree of MS-GF+ identifications.</returns>
         public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
         {
-            return ReadFromTsvFile().Result;
+            return this.ReadFromTsvFile().Result;
         }
 
+        /// <summary>
+        /// Read a MS-GF+ results file asynchronously.
+        /// </summary>
+        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <returns>Identification tree of MS-GF+ identifications.</returns>
         public async Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList = null)
         {
-            return await ReadFromTsvFile();
+            return await this.ReadFromTsvFile();
         }
 
+        /// <summary>
+        /// Read a MS-GF+ results from TSV file.
+        /// </summary>
+        /// <returns>Task that creates an identification tree of MSPathFinder identifications.</returns>
         private async Task<IdentificationTree> ReadFromTsvFile()
         {
             var idTree = new IdentificationTree(ToolType.MsgfPlus);
-            var file = new StreamReader(File.Open(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-//            var file = File.ReadLines(_filePath);
+            var file = new StreamReader(File.Open(this.filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
             while (!file.EndOfStream)
             {
                 var line = await file.ReadLineAsync();
                 lineCount++;
-                if (lineCount == 1 && line != null) // first line
-                {
+                if (lineCount == 1 && line != null)
+                { // first line
                     var parts = line.Split('\t');
                     for (int i = 0; i < parts.Length; i++)
                     {
                         headers.Add(parts[i], i);
                     }
+
                     continue;
                 }
-                var idData = CreatePrSms(line, headers);
+
+                var idData = this.CreatePrSms(line, headers);
                 idTree.Add(idData);
             }
+
             return idTree;
         }
 
+        /// <summary>
+        /// Create Protein-Spectrum-Matches identification from a line of the results file.
+        /// </summary>
+        /// <param name="line">Single line of the results file.</param>
+        /// <param name="headers">Headers of the TSV file.</param>
+        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <returns>List of Protein-Spectrum-Match identifications.</returns>
         private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers, IEnumerable<string> modIgnoreList = null)
         {
             var expectedHeaders = new List<string>
@@ -63,19 +108,31 @@ namespace LcmsSpectator.Readers
 
             foreach (var header in expectedHeaders.Where(header => !headers.ContainsKey(header)))
             {
-                throw new KeyNotFoundException(String.Format("Missing expected column header \"{0}\" in ID file.", header));
+                throw new KeyNotFoundException(string.Format("Missing expected column header \"{0}\" in ID file.", header));
             }
 
             var parts = line.Split('\t');
 
             int scoreIndex;
             double score = 0;
-            if (headers.TryGetValue("SpecEValue", out scoreIndex)) score = Convert.ToDouble(parts[scoreIndex]);
-            else if (headers.TryGetValue("MSGFDB_SpecEValue", out scoreIndex)) score = Convert.ToDouble(parts[scoreIndex]);
+            if (headers.TryGetValue("SpecEValue", out scoreIndex))
+            {
+                score = Convert.ToDouble(parts[scoreIndex]);
+            }
+            else if (headers.TryGetValue("MSGFDB_SpecEValue", out scoreIndex))
+            {
+                score = Convert.ToDouble(parts[scoreIndex]);
+            }
 
-            int scanIndex, scan=0;
-            if (headers.TryGetValue("ScanNum", out scanIndex)) scan = Convert.ToInt32(parts[scanIndex]);
-            else if (headers.TryGetValue("Scan", out scanIndex)) scan = Convert.ToInt32(parts[scanIndex]);
+            int scanIndex, scan = 0;
+            if (headers.TryGetValue("ScanNum", out scanIndex))
+            {
+                scan = Convert.ToInt32(parts[scanIndex]);
+            }
+            else if (headers.TryGetValue("Scan", out scanIndex))
+            {
+                scan = Convert.ToInt32(parts[scanIndex]);
+            }
 
             var proteinNames = parts[headers["Protein"]].Split(';');
             var prsms = new List<PrSm> { Capacity = proteinNames.Length };
@@ -84,17 +141,15 @@ namespace LcmsSpectator.Readers
 
             if (modIgnoreList != null)
             {
-                foreach (var mod in modIgnoreList)
+                if (modIgnoreList.Any(sequenceText.Contains))
                 {
-                    if (sequenceText.Contains(mod)) return null;
+                    return null;
                 }
             }
 
             var sequenceReader = new SequenceReader();
 
-            bool trim = false;
-
-            if (_filePath.Contains("_syn")) trim = true;
+            bool trim = this.filePath.Contains("_syn");
 
             foreach (var protein in proteinNames)
             {
@@ -106,16 +161,15 @@ namespace LcmsSpectator.Readers
                     Sequence = sequenceReader.Read(sequenceText, trim),
                     SequenceText = sequenceText,
                     ProteinName = protein,
-                    ProteinDesc = "",
+                    ProteinDesc = string.Empty,
                     Score = score,
                     UseGolfScoring = true,
                     QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),
                 };
                 prsms.Add(prsm);
             }
+
             return prsms;
         }
-
-        private readonly string _filePath;
     }
 }

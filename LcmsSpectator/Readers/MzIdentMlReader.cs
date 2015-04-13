@@ -1,29 +1,71 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using LcmsSpectator.Models;
-using LcmsSpectator.Readers.SequenceReaders;
-using MTDBFramework.Algorithms;
-using MTDBFramework.Data;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MzIdentMlReader.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Reader for MZID files.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Readers
 {
-    public class MzIdentMlReader: IIdFileReader
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using LcmsSpectator.Models;
+    using LcmsSpectator.Readers.SequenceReaders;
+    using MTDBFramework.Algorithms;
+    using MTDBFramework.Data;
+    
+    /// <summary>
+    /// Reader for MZID files.
+    /// </summary>
+    public class MzIdentMlReader : IIdFileReader
     {
-        public MzIdentMlReader(string fileName)
+        /// <summary>
+        /// Path for MZID file.
+        /// </summary>
+        private readonly string filePath;
+
+        /// <summary>
+        /// MTDB Creator MZID reader.
+        /// </summary>
+        private readonly MTDBFramework.IO.MzIdentMlReader mzIdentMlReader;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MzIdentMlReader"/> class.
+        /// </summary>
+        /// <param name="filePath">The path for the MZID file.</param>
+        public MzIdentMlReader(string filePath)
         {
-            _fileName = fileName;
+            this.filePath = filePath;
             var options = new Options
             {
                 MsgfQValue = 1.0,
                 MaxMsgfSpecProb = 1.0,
                 TargetFilterType = TargetWorkflowType.BOTTOM_UP
             };
-            _mzIdentMlReader = new MTDBFramework.IO.MzIdentMlReader(options);
+            this.mzIdentMlReader = new MTDBFramework.IO.MzIdentMlReader(options);
         }
 
+        /// <summary>
+        /// Read a MZID results file.
+        /// </summary>
+        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <returns>Identification tree of identifications.</returns>
         public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
         {
-            var dataSet = _mzIdentMlReader.Read(_fileName);
+            return this.ReadAsync(modIgnoreList).Result;
+        }
+
+        /// <summary>
+        /// Read a MZID results file asynchronously.
+        /// </summary>
+        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <returns>Identification tree of MZID identifications.</returns>
+        public async Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList)
+        {
+            var dataSet = await Task.Run(() => this.mzIdentMlReader.Read(this.filePath));
             var idTree = new IdentificationTree(ToolType.MsgfPlus);
 
             var evidences = dataSet.Evidences;
@@ -32,12 +74,17 @@ namespace LcmsSpectator.Readers
 
             foreach (var evidence in evidences)
             {
-                var msgfPlusEvidence = (MsgfPlusResult) evidence;
+                var msgfPlusEvidence = (MsgfPlusResult)evidence;
                 var sequenceText = evidence.SeqWithNumericMods;
                 var index = sequenceText.IndexOf('.');
                 var lastIndex = sequenceText.LastIndexOf('.');
-                if (index != lastIndex && index >= 0 && lastIndex >= 0 && sequenceText.Length > 1) // remove 
-                    sequenceText = sequenceText.Substring(index+1, sequenceText.Length - (sequenceText.Length - lastIndex) - (index+1));
+                if (index != lastIndex && index >= 0 && lastIndex >= 0 && sequenceText.Length > 1)
+                {
+                    sequenceText = sequenceText.Substring(
+                        index + 1,
+                        sequenceText.Length - (sequenceText.Length - lastIndex) - (index + 1));
+                }
+
                 foreach (var protein in evidence.Proteins)
                 {
                     var prsm = new PrSm
@@ -55,15 +102,8 @@ namespace LcmsSpectator.Readers
                     idTree.Add(prsm);
                 }
             }
+
             return idTree;
         }
-
-        public Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList)
-        {
-            return Task.Run(() => Read(modIgnoreList));
-        }
-
-        private readonly string _fileName;
-        private readonly MTDBFramework.IO.MzIdentMlReader _mzIdentMlReader;
     }
 }

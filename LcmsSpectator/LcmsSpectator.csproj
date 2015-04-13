@@ -194,12 +194,8 @@
     <Compile Include="DialogServices\MainDialogService.cs" />
     <Compile Include="Models\ChargeStateId.cs" />
     <Compile Include="Models\Feature.cs" />
-    <Compile Include="Models\IdData.cs" />
     <Compile Include="Models\IdentificationTree.cs" />
     <Compile Include="Models\IIdData.cs" />
-    <Compile Include="Models\LabeledIon.cs" />
-    <Compile Include="Models\LabeledIonPeaks.cs" />
-    <Compile Include="Models\LabeledXic.cs" />
     <Compile Include="Models\MsPfParameters.cs" />
     <Compile Include="Models\ProteinId.cs" />
     <Compile Include="Models\ProteoformId.cs" />
@@ -213,10 +209,11 @@
     <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="PlotModels\XicDataPoint.cs" />
     <Compile Include="PlotModels\XicPointSeries.cs" />
+    <Compile Include="Readers\DataReader.cs" />
     <Compile Include="Readers\DmsLookupUtility.cs" />
     <Compile Include="Readers\FeatureReader.cs" />
     <Compile Include="Readers\IcFileReader.cs" />
-    <Compile Include="Readers\IcFileWriter.cs" />
+    <Compile Include="Readers\IDataReader.cs" />
     <Compile Include="Readers\IdFileReaderFactory.cs" />
     <Compile Include="Readers\IIdFileReader.cs" />
     <Compile Include="Readers\MsgfFileReader.cs" />
@@ -227,19 +224,28 @@
     <Compile Include="Readers\SequenceReaders\MsgfPlusSequenceReader.cs" />
     <Compile Include="Readers\SequenceReaders\SequenceReader.cs" />
     <Compile Include="Readers\TargetFileReader.cs" />
-    <Compile Include="TaskServices\TaskServiceFactory.cs" />
-    <Compile Include="TaskServices\TimedTaskService.cs" />
+    <Compile Include="TaskServices\ITaskService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskServices\MockTaskService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskServices\TaskService.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskServices\TaskServiceFactory.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskServices\TimedTaskService.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utils\ChargeToStringConverter.cs" />
-    <Compile Include="TaskServices\ITaskService.cs" />
-    <Compile Include="TaskServices\MockTaskService.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DynamicResolutionPngExporter.cs" />
+    <Compile Include="Utils\FileConstants.cs" />
     <Compile Include="Utils\IonUtils.cs" />
-    <Compile Include="Utils\NotConverter.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />
-    <Compile Include="Utils\GuiInvoker.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
-    <Compile Include="TaskServices\TaskService.cs" />
     <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\CustomModificationViewModel.cs" />
     <Compile Include="ViewModels\DataSetViewModel.cs" />
@@ -312,6 +318,9 @@
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\ManageModificationsWindow.xaml.cs">
+      <DependentUpon>ManageModificationsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\OpenDataWindow.xaml.cs">
       <DependentUpon>OpenDataWindow.xaml</DependentUpon>
@@ -425,6 +434,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ManageModificationsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

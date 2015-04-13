@@ -1,34 +1,71 @@
-﻿using System;
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Series;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="SelectablePlotModel.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   This class is an AutoAdjustedYPlotModel that shows a stem marker at a given DataPoint X value.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.PlotModels
 {
-    public class SelectablePlotModel: AutoAdjustedYPlotModel
+    using System;
+    using OxyPlot;
+    using OxyPlot.Axes;
+    using OxyPlot.Series;
+    
+    /// <summary>
+    /// This class is an AutoAdjustedYPlotModel that shows a stem marker at a given DataPoint X value.
+    /// </summary>
+    public class SelectablePlotModel : AutoAdjustedYPlotModel
     {
-        public IDataPoint SelectedDataPoint { get; set; }
-        public bool UniqueHighlight { get; set; }
+        /// <summary>
+        /// Series containing the marker point.
+        /// </summary>
+        private readonly LineSeries pointMarkers;
 
-        public OxyColor UniqueColor { get; set; }
-        public OxyColor OrdinaryColor { get; set; }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SelectablePlotModel"/> class.
+        /// </summary>
+        /// <param name="xAxis">The X axis.</param>
+        /// <param name="multiplier">Multiplier that determines how much space to leave about tallest point.</param>
         public SelectablePlotModel(Axis xAxis, double multiplier) : base(xAxis, multiplier)
         {
-            MouseDown += SelectablePlotModel_MouseDown;
-            UniqueColor = OxyColors.Black;
-            OrdinaryColor = OxyColors.LightGray;
-            _pointMarkers = _pointMarkers = new StemSeries
+            this.MouseDown += this.SelectablePlotModelMouseDown;
+            this.UniqueColor = OxyColors.Black;
+            this.OrdinaryColor = OxyColors.LightGray;
+            this.pointMarkers = this.pointMarkers = new StemSeries
             {
-                Color = OrdinaryColor,
+                Color = this.OrdinaryColor,
                 StrokeThickness = 3,
                 LineStyle = LineStyle.Dash,
                 TrackerFormatString =
                         "{0}" + Environment.NewLine +
                         "{1}: {2}" + Environment.NewLine
             };
-            Series.Add(_pointMarkers);
+            Series.Add(this.pointMarkers);
         }
+
+        /// <summary>
+        /// Gets or sets the data point that is marked on the plot.
+        /// </summary>
+        public IDataPoint SelectedDataPoint { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the unique marker color should be used.
+        /// </summary>
+        public bool UniqueHighlight { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color for unique markings.
+        /// </summary>
+        public OxyColor UniqueColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color for ordinary markings.
+        /// </summary>
+        public OxyColor OrdinaryColor { get; set; }
 
         /// <summary>
         /// Set point marker highlighted with UniqueColor.
@@ -36,8 +73,8 @@ namespace LcmsSpectator.PlotModels
         /// <param name="x">x value to set marker at</param>
         public void SetUniquePointMarker(double x)
         {
-            UniqueHighlight = true;
-            SetPointMarker(x, GetMarkerColor());
+            this.UniqueHighlight = true;
+            this.SetPointMarker(x, this.GetMarkerColor());
         }
 
         /// <summary>
@@ -46,8 +83,8 @@ namespace LcmsSpectator.PlotModels
         /// <param name="x">x value to set marker at</param>
         public void SetOrdinaryPointMarker(double x)
         {
-            UniqueHighlight = false;
-            SetPointMarker(x, GetMarkerColor());
+            this.UniqueHighlight = false;
+            this.SetPointMarker(x, this.GetMarkerColor());
         }
 
         /// <summary>
@@ -56,17 +93,21 @@ namespace LcmsSpectator.PlotModels
         /// <param name="x">x value to set marker at</param>
         public void SetPointMarker(double x)
         {
-            SetPointMarker(x, GetMarkerColor());
+            this.SetPointMarker(x, this.GetMarkerColor());
         }
 
         /// <summary>
         /// Get point marker position.
         /// </summary>
+        /// <returns>The <see cref="DataPoint"/> containing marker position.</returns>
         public DataPoint GetPointMarker()
         {
             var point = new DataPoint();
-            if (_pointMarkers != null && _pointMarkers.Points.Count > 0)
-                point = _pointMarkers.Points[0];
+            if (this.pointMarkers != null && this.pointMarkers.Points.Count > 0)
+            {
+                point = this.pointMarkers.Points[0];   
+            }
+
             return point;
         }
         
@@ -77,13 +118,17 @@ namespace LcmsSpectator.PlotModels
         /// <param name="color">color of marker</param>
         public void SetPointMarker(double x, OxyColor color)
         {
-            //if (color == null) color = OxyColors.Black;
+            ////if (color == null) color = OxyColors.Black;
             var y = YAxis.Maximum;
-            _pointMarkers.Points.Clear();
-            if (x.Equals(0)) return;
-            _pointMarkers.Color = color;
-            _pointMarkers.Points.Add(new DataPoint(x, y));
-            InvalidatePlot(true);
+            this.pointMarkers.Points.Clear();
+            if (x.Equals(0))
+            {
+                return;
+            }
+
+            this.pointMarkers.Color = color;
+            this.pointMarkers.Points.Add(new DataPoint(x, y));
+            this.InvalidatePlot(true);
         }
 
         /// <summary>
@@ -93,49 +138,62 @@ namespace LcmsSpectator.PlotModels
         /// <param name="maxX">maximum x value</param>
         public override void SetBounds(double minX, double maxX)
         {
-            double xPoint = 0;
-            if (_pointMarkers.Points.Count != 0) // remove marker
-            {
-                var point = _pointMarkers.Points[0];
-                xPoint = point.X;
-                _pointMarkers.Points.Clear();
+            double x = 0;
+            if (this.pointMarkers.Points.Count != 0)
+            { // remove marker
+                var point = this.pointMarkers.Points[0];
+                x = point.X;
+                this.pointMarkers.Points.Clear();
             }
+
             base.SetBounds(minX, maxX);
-            SetPointMarker(xPoint, GetMarkerColor()); // add marker
+            this.SetPointMarker(x, this.GetMarkerColor()); // add marker
         }
 
+        /// <summary>
+        /// Clear all series from the plot without removing marker, thread-safe.
+        /// </summary>
         public override void ClearSeries()
         {
-            lock (_seriesLock)
+            lock (this.SeriesLock)
             {
                 while (Series.Count > 1)
                 {
-                    if (Series[0] != _pointMarkers) Series.RemoveAt(0);
-                }   
+                    if (this.Series[0] != this.pointMarkers)
+                    {
+                        this.Series.RemoveAt(0);
+                    }
+                }
             }
         }
 
         /// <summary>
         /// Event handler for mouse click event to set SelectedDataPoint
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        void SelectablePlotModel_MouseDown(object sender, OxyMouseEventArgs args)
+        /// <param name="sender">The sender PlotModel.</param>
+        /// <param name="args">The event arguments.</param>
+        private void SelectablePlotModelMouseDown(object sender, OxyMouseEventArgs args)
         {
             var series = GetSeriesFromPoint(args.Position, 10);
             if (series != null)
             {
                 var result = series.GetNearestPoint(args.Position, false);
-                if (result == null) return;
-                SelectedDataPoint = result.Item as IDataPoint;
+                if (result == null)
+                {
+                    return;
+                }
+
+                this.SelectedDataPoint = result.Item as IDataPoint;
             }
         }
 
+        /// <summary>
+        /// Determine which color to use for highlighting.
+        /// </summary>
+        /// <returns>The marker highlight color.</returns>
         private OxyColor GetMarkerColor()
         {
-            return UniqueHighlight ? UniqueColor : OrdinaryColor;
+            return this.UniqueHighlight ? this.UniqueColor : this.OrdinaryColor;
         }
-
-        private readonly LineSeries _pointMarkers;
     }
 }

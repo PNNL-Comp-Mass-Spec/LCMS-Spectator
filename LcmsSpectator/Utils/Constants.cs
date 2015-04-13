@@ -1,22 +1,43 @@
-﻿namespace LcmsSpectator.Utils
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Constants.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Contains constants used when creating precursor and fragment ions.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace LcmsSpectator.Utils
 {
+    /// <summary>
+    /// Contains constants used when creating precursor and fragment ions.
+    /// </summary>
     public class Constants
     {
+        /// <summary>
+        /// Minimum possible charge for product ions.
+        /// </summary>
         public const int MinCharge = 1;
+
+        /// <summary>
+        /// Maximum possible charge for product ions.
+        /// </summary>
         public const int MaxCharge = 15;
+
+        /// <summary>
+        /// Minimum possible charge for product ions.
+        /// </summary>
         public const int IsotopeOffsetTolerance = 2;
+
+        /// <summary>
+        /// Minimum possible isotope index.
+        /// </summary>
         public const int MinIsotopeIndex = -1;
+
+        /// <summary>
+        /// Maximum possible isotope index.
+        /// </summary>
         public const int MaxIsotopeIndex = 2;
-    }
-
-    public class FileConstants
-    {
-        public const string IdFileFormatString =
-            @"Supported Files|*.txt;*.tsv;*.mzId;*.mzId.gz;*.mtdb|TSV Files (*.txt; *.tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
-
-        public const string RawFileFormatString =
-            @"Supported Files|*.raw;*.mzML;*.mzML.gz|Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl[.gz])|*.mzMl;*.mzML.gz";
-
-        public const string FeatureFileFormatString = @"Ms1FT Files (*.ms1ft)|*.ms1ft";
     }
 }

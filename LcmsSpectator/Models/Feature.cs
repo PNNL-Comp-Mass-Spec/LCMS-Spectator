@@ -1,34 +1,111 @@
-﻿using System.Collections.Generic;
-using InformedProteomics.Backend.Data.Biology;
-using InformedProteomics.Backend.Data.Spectrometry;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Feature.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Represents a feature over a LC retention time and charge state range.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Models
 {
+    using System.Collections.Generic;
+    using InformedProteomics.Backend.Data.Biology;
+    using InformedProteomics.Backend.Data.Spectrometry;
+
+    /// <summary>
+    /// Represents a feature over a LC retention time and charge state range.
+    /// </summary>
     public class Feature
     {
-        public FeaturePoint MinPoint { get; set; }
-        public FeaturePoint MaxPoint { get; set; }
-        public int Id { get; set; }
-        public List<int> AssociatedMs2 { get; private set; }
-
-        public Feature(int minPoint=0, int maxPoint=0)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Feature"/> class.
+        /// </summary>
+        public Feature()
         {
-            AssociatedMs2 = new List<int>();
+            this.AssociatedMs2 = new List<int>();
         }
-    }
 
-    public class FeaturePoint
-    {
+        /// <summary>
+        /// Gets or sets the point for the lowest retention time of the feature.
+        /// </summary>
+        public FeaturePoint MinPoint { get; set; }
+
+        /// <summary>
+        /// Gets or sets the point for the highest retention time of the feature.
+        /// </summary>
+        public FeaturePoint MaxPoint { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the feature.
+        /// </summary>
         public int Id { get; set; }
-        public int Scan { get; set; }
-        public Ion Ion { get; set; }
-        public double RetentionTime { get; set; }
-        public double Mass { get; set; }
-        public double Mz { get; set; }
-        public int Charge { get; set; }
-        public double Abundance { get; set; }
-        public double Score { get; set; }
-        public Isotope[] Isotopes { get; set; }
-        public double Correlation { get; set; }
+
+        /// <summary>
+        /// Gets the list of MS/MS scan number associated with this feature.
+        /// </summary>
+        public List<int> AssociatedMs2 { get; private set; }
+        
+        /// <summary>
+        /// Represents a single LC retention time point for a MS1 feature.
+        /// </summary>
+        public class FeaturePoint
+        {
+            /// <summary>
+            /// Gets or sets the ID of the feature.
+            /// </summary>
+            public int Id { get; set; }
+
+            /// <summary>
+            /// Gets or sets the MS1 scan number.
+            /// </summary>
+            public int Scan { get; set; }
+
+            /// <summary>
+            /// Gets or sets the LC retention time.
+            /// </summary>
+            public double RetentionTime { get; set; }
+
+            /// <summary>
+            /// Gets or sets the ion associated with the feature point.
+            /// </summary>
+            public Ion Ion { get; set; }
+
+            /// <summary>
+            /// Gets or sets the mass of feature.
+            /// </summary>
+            public double Mass { get; set; }
+
+            /// <summary>
+            /// Gets or sets the charge of the feature point.
+            /// </summary>
+            public int Charge { get; set; }
+
+            /// <summary>
+            /// Gets or sets the mass-to-charge ratio of the feature point.
+            /// </summary>
+            public double Mz { get; set; }
+
+            /// <summary>
+            /// Gets or sets the abundance of the feature.
+            /// </summary>
+            public double Abundance { get; set; }
+
+            /// <summary>
+            /// Gets or sets the score of the feature.
+            /// </summary>
+            public double Score { get; set; }
+
+            /// <summary>
+            /// Gets or sets the actual isotopic profile for the feature.
+            /// </summary>
+            public Isotope[] Isotopes { get; set; }
+
+            /// <summary>
+            /// Gets or sets the Pearson correlation of the actual isotopic profile to the theoretical.
+            /// </summary>
+            public double Correlation { get; set; }
+        }
     }
 }

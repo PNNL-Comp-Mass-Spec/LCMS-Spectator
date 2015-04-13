@@ -1,63 +1,156 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using InformedProteomics.Backend.Data.Composition;
-using InformedProteomics.Backend.Data.Enum;
-using InformedProteomics.Backend.Data.Sequence;
-using InformedProteomics.Backend.Data.Spectrometry;
-using LcmsSpectator.Config;
-using ReactiveUI;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MsPfParameters.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   A class representing a parsed MSPathFinder parameter file.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.Models
 {
+    using System;
+    using System.IO;
+    using InformedProteomics.Backend.Data.Composition;
+    using InformedProteomics.Backend.Data.Enum;
+    using InformedProteomics.Backend.Data.Sequence;
+    using InformedProteomics.Backend.Data.Spectrometry;
+    using LcmsSpectator.Config;
+    using ReactiveUI;
+    
+    /// <summary>
+    /// A class representing a parsed MSPathFinder parameter file.
+    /// </summary>
     public class MsPfParameters
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MsPfParameters"/> class.
+        /// </summary>
         public MsPfParameters()
         {
-            Modifications = new ReactiveList<SearchModification>();
+            this.Modifications = new ReactiveList<SearchModification>();
         }
 
+        /// <summary>
+        /// Gets or sets the path for the PU Spec file.
+        /// </summary>
         public string PuSpecFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets the path for the FASTA file.
+        /// </summary>
         public string DatabaseFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets the path for the MS1 feature file.
+        /// </summary>
         public string FeatureFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets the MSPathFinder search mode.
+        /// </summary>
         public int SearchMode { get; set; }
+
+        /// <summary>
+        /// Gets or sets the TDA.
+        /// </summary>
         public string Tda { get; set; }
+
+        /// <summary>
+        /// Gets or sets the precursor ion tolerance in ppm.
+        /// </summary>
         public Tolerance PrecursorTolerancePpm { get; set; }
+
+        /// <summary>
+        /// Gets or sets the product ion tolerance in ppm.
+        /// </summary>
         public Tolerance ProductIonTolerancePpm { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum length of a sequence.
+        /// </summary>
         public int MinSequenceLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum length of a sequence.
+        /// </summary>
         public int MaxSequenceLength { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum possible precursor ion charge state.
+        /// </summary>
         public int MinPrecursorIonCharge { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum possible precursor ion charge state.
+        /// </summary>
         public int MaxPrecursorIonCharge { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum possible product ion charge state.
+        /// </summary>
         public int MinProductIonCharge { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum possible product ion charge state.
+        /// </summary>
         public int MaxProductIonCharge { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum possible sequence mass.
+        /// </summary>
         public double MinSequenceMass { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum possible sequence mass.
+        /// </summary>
         public double MaxSequenceMass { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum possible MS1 feature probability threshold.
+        /// </summary>
         public double MinFeatureProbablility { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum possible modification combinations per sequence.
+        /// </summary>
         public int MaxDynamicModificationsPerSequence { get; set; }
+
+        /// <summary>
+        /// Gets or sets a list containing the post-translational modifications used for database search.
+        /// </summary>
         public ReactiveList<SearchModification> Modifications { get; set; }
 
         /// <summary>
-        /// Looks for and opens a parameter file in the same directory as MS PathFinder
+        /// Looks for and opens a parameter file in the same directory as MSPathFinder
         /// results if it exists.
         /// </summary>
         /// <param name="idFilePath">Path to an MSPathFinder results file</param>
         /// <returns>
-        /// Parsed MsPathFinder parameters. Returns null if file does not exist.
+        /// Parsed MSPathFinder parameters. Returns null if file does not exist.
         /// Throws exception if file is not formatted correctly.
         /// </returns>
         public static MsPfParameters ReadFromIdFilePath(string idFilePath)
         {
             var path = Path.GetDirectoryName(idFilePath);
             var fileName = Path.GetFileNameWithoutExtension(idFilePath);
-            if (fileName == null) return null;
+            if (fileName == null)
+            {
+                return null;
+            }
+
             string dataSetName;
             if (fileName.EndsWith("_IcTsv") || fileName.EndsWith("_IcTda"))
             {
                 dataSetName = fileName.Substring(0, fileName.Length - 6);
             }
-            else return null;
+            else
+            {
+                return null;
+            }
 
-            var paramFilePath = String.Format(@"{0}\{1}.param", path, dataSetName);
+            var paramFilePath = string.Format(@"{0}\{1}.param", path, dataSetName);
             return ReadFromFile(paramFilePath);
         }
 
@@ -66,12 +159,16 @@ namespace LcmsSpectator.Models
         /// </summary>
         /// <param name="filePath">The path of the parameter file.</param>
         /// <returns>
-        /// Parsed MsPathFinder parameters. Returns null if file does not exist.
+        /// Parsed MSPathFinder parameters. Returns null if file does not exist.
         /// Throws exception if file is not formatted correctly.
         /// </returns>
         public static MsPfParameters ReadFromFile(string filePath)
         {
-            if (!File.Exists(filePath)) return null;
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+
             var file = File.ReadAllLines(filePath);
 
             var param = new MsPfParameters();
@@ -79,7 +176,11 @@ namespace LcmsSpectator.Models
             foreach (var line in file)
             {
                 var parts = line.Split('\t');
-                if (parts.Length < 2) continue;
+                if (parts.Length < 2)
+                {
+                    continue;
+                }
+
                 switch (parts[0])
                 {
                     case "puSpecFile":
@@ -142,19 +243,36 @@ namespace LcmsSpectator.Models
             return param;
         }
 
+        /// <summary>
+        /// The parse modification.
+        /// </summary>
+        /// <param name="modificationStr">The modification string.</param>
+        /// <returns>
+        /// The <see cref="SearchModification"/>.
+        /// </returns>
+        /// <exception cref="FormatException">
+        /// Throws exception if modification string is not in the format: composition,amino acid,fixed,location,name
+        /// </exception>
         private static SearchModification ParseModification(string modificationStr)
         {
             var parts = modificationStr.Split(',');
-            if (parts.Length < 5) throw new FormatException(String.Format("Modification is improperly formatted:\n{0}", modificationStr));
+            if (parts.Length < 5)
+            {
+                throw new FormatException(string.Format("Modification is improperly formatted:\n{0}", modificationStr));
+            }
 
             var composition = Composition.Parse(parts[0]);
 
-            if (String.IsNullOrEmpty(parts[1]) || parts[1].Length > 1) throw new FormatException(String.Format("Invalid amino acid found: {0}", parts[1]));
+            if (string.IsNullOrEmpty(parts[1]) || parts[1].Length > 1)
+            {
+                throw new FormatException(string.Format("Invalid amino acid found: {0}", parts[1]));
+            }
+
             var aminoAcid = parts[1][0];
 
             var isFixed = parts[2] == "opt";
 
-            var sequenceLocation = (SequenceLocation) Enum.Parse(typeof(SequenceLocation), parts[3]);
+            var sequenceLocation = (SequenceLocation)Enum.Parse(typeof(SequenceLocation), parts[3]);
 
             var name = parts[4];
 

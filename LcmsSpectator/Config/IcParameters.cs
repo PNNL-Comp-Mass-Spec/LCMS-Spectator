@@ -8,10 +8,10 @@
     using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using Utils;
-    using ViewModels;
+    using LcmsSpectator.Utils;
+    using LcmsSpectator.ViewModels;
     using ReactiveUI;
-    
+
     /// <summary>
     /// Represents the type of precursor ions displayed.
     /// </summary>
@@ -21,6 +21,7 @@
         /// Isotopes of the precursor ion are displayed.
         /// </summary>
         Isotopes,
+
         /// <summary>
         /// Neighboring charge states of the precursor ion are displayed.
         /// </summary>
@@ -49,7 +50,11 @@
         public IonType GetIonType(BaseIonType baseIonType, NeutralLoss neutralLoss, int charge)
         {
             var chargeStr = charge.ToString(CultureInfo.InvariantCulture);
-            if (charge == 1) chargeStr = "";
+            if (charge == 1)
+            {
+                chargeStr = string.Empty;
+            }
+
             var name = baseIonType.Symbol + chargeStr + neutralLoss.Name;
             return IonTypeFactory.GetIonType(name);
         }
@@ -68,7 +73,7 @@
         /// <returns>String containing ion type symbols separated by spaces.</returns>
         public string GetCidHcdIonTypes()
         {
-            return CidHcdIonTypes.Aggregate("", (current, ionType) => current + ionType.Symbol + " ");
+            return CidHcdIonTypes.Aggregate(string.Empty, (current, ionType) => current + ionType.Symbol + " ");
         }
 
         /// <summary>
@@ -77,7 +82,7 @@
         /// <returns>String containing ion type symbols separated by spaces.</returns>
         public string GetEtdIonTypes()
         {
-            return EtdIonTypes.Aggregate("", (current, ionType) => current + ionType.Symbol + " ");
+            return EtdIonTypes.Aggregate(string.Empty, (current, ionType) => current + ionType.Symbol + " ");
         }
 
         /// <summary>
@@ -270,7 +275,7 @@
         public Modification RegisterModification(string modName, Composition composition)
         {
             var mod = Modification.RegisterAndGetModification(modName, composition);
-            GuiInvoker.Invoke(() => RegisteredModifications.Add(mod));
+            this.RegisteredModifications.Add(mod);
             return mod;
         }
 
@@ -283,7 +288,7 @@
         public Modification RegisterModification(string modName, double mass)
         {
             var mod = Modification.RegisterAndGetModification(modName, mass);
-            GuiInvoker.Invoke(() => RegisteredModifications.Add(mod));
+            this.RegisteredModifications.Add(mod);
             return mod;
         }
 

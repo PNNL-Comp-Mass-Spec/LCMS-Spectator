@@ -1,10 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="HeavyModificationsWindow.xaml.cs" company="Pacific Northwest National Laboratory">
+// <copyright file="ManageModificationsWindow.xaml.cs" company="Pacific Northwest National Laboratory">
 //   2015 Pacific Northwest National Laboratory
 // </copyright>
 // <author>Christopher Wilkins</author>
 // <summary>
-//   Interaction logic for HeavyModificationsWindow.xaml
+//   Interaction logic for ManageModificationsWindow.xaml
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -13,14 +13,14 @@ namespace LcmsSpectator.Views
     using System.Windows;
     
     /// <summary>
-    /// Interaction logic for HeavyModificationsWindow.xaml
+    /// Interaction logic for ManageModificationsWindow.xaml
     /// </summary>
-    public partial class HeavyModificationsWindow : Window
+    public partial class ManageModificationsWindow : Window
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="HeavyModificationsWindow"/> class.
+        /// Initializes a new instance of the <see cref="ManageModificationsWindow"/> class.
         /// </summary>
-        public HeavyModificationsWindow()
+        public ManageModificationsWindow()
         {
             this.InitializeComponent();
         }
