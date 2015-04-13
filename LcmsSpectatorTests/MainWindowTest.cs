@@ -52,7 +52,7 @@ namespace LcmsSpectatorTests
             var numLines = file.Length - 1; // subtract one for TSV header
 
             // create MainWindowViewModel
-            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new MockTaskService(), new DataReader());
+            var mainVm = new MainWindowViewModel(new TestableMainDialogService(), new DataReader());
             //mainVm.ReadIdFile();
         }
 
