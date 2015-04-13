@@ -222,10 +222,15 @@ namespace LcmsSpectator.ViewModels
 
                 if (primary == null)
                 {
-                    return;
+                    // no ms2 spectrum found
+                    primary = this.lcms.GetSpectrum(scan);
+                    primaryTitle = "MS1 Spectrum";
+                    secondary1Title = string.Empty;
+                    secondary2Title = string.Empty;
+                    secondary1 = null;
+                    secondary2 = null;
                 }
-
-                if (primary.ScanNum < scan)
+                else if (primary.ScanNum < scan)
                 {
                     // The primary spectrum scan is above the ms/ms spectrum scan that we selected
                     primaryTitle = "Previous MS1 Spectrum";

@@ -321,7 +321,9 @@ namespace LcmsSpectator.ViewModels
         {
             return Task.Run(() =>
             {
-                var scans = LcMs.GetScanNumbers(2);
+                var scans = LcMs.GetScanNumbers(1).ToList();
+                scans.AddRange(LcMs.GetScanNumbers(2));
+                scans.Sort();
                 var prsmScans = scans.Select(scan => new PrSm
                 {
                     Scan = scan,
