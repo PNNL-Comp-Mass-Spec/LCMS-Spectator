@@ -98,6 +98,7 @@ namespace LcmsSpectator.Readers
         /// </summary>
         /// <param name="dataSetViewModel">DataSetViewModel to associate open dataset with</param>
         /// <param name="rawFilePath">Path to raw file to open</param>
+        /// <param name="idFilePath">Path to MS-GF+ or MS-PathFinder results file</param>
         /// <param name="featureFilePath">Path to feature list file</param>
         /// <param name="toolType">Type of ID tool used for this data set</param>
         /// <param name="modIgnoreList">Modifications to ignore if found in ID list.</param>
@@ -105,6 +106,7 @@ namespace LcmsSpectator.Readers
         public async Task OpenDataSet(
                                     DataSetViewModel dataSetViewModel,
                                     string rawFilePath,
+                                    string idFilePath = "", 
                                     string featureFilePath = "", 
                                     ToolType? toolType = ToolType.MsPathFinder,
                                     IEnumerable<string> modIgnoreList = null)
@@ -121,6 +123,14 @@ namespace LcmsSpectator.Readers
             if (toolType != null && toolType == ToolType.MsPathFinder)
             {
                 dataSetViewModel.XicViewModel.PrecursorViewMode = PrecursorViewMode.Charges;
+            }
+
+            // Open ID file
+            if (!string.IsNullOrEmpty(idFilePath))
+            {
+                this.ReadingIdFiles = true;
+                await this.ReadIdFile(dataSetViewModel, idFilePath, modIgnoreList);
+                this.ReadingIdFiles = false;
             }
 
             // Open feature file
