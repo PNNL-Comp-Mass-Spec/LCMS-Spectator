@@ -224,21 +224,6 @@
     <Compile Include="Readers\SequenceReaders\MsgfPlusSequenceReader.cs" />
     <Compile Include="Readers\SequenceReaders\SequenceReader.cs" />
     <Compile Include="Readers\TargetFileReader.cs" />
-    <Compile Include="TaskServices\ITaskService.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="TaskServices\MockTaskService.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="TaskServices\TaskService.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="TaskServices\TaskServiceFactory.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="TaskServices\TimedTaskService.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Utils\ChargeToStringConverter.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DynamicResolutionPngExporter.cs" />

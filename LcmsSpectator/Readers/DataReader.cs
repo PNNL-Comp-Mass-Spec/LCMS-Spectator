@@ -90,7 +90,7 @@ namespace LcmsSpectator.Readers
             var reader = IdFileReaderFactory.CreateReader(idFilePath);
             var ids = await reader.ReadAsync(modIgnoreList);
             ids.SetLcmsRun(dataSetViewModel.LcMs, dataSetViewModel.Title);
-            dataSetViewModel.ScanViewModel.AddIds(ids.AllPrSms);
+            dataSetViewModel.ScanViewModel.Data.AddRange(ids.AllPrSms);
         }
 
         /// <summary>

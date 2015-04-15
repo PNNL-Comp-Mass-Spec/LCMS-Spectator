@@ -22,7 +22,6 @@ namespace LcmsSpectator.ViewModels
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers;
-    using LcmsSpectator.TaskServices;
     using LcmsSpectator.Utils;
     using ReactiveUI;
 
@@ -58,10 +57,17 @@ namespace LcmsSpectator.ViewModels
             this.dataReader = dataReader;
 
             // Initialize child view models
-            ScanViewModel = new ScanViewModel(this.dialogService, new TaskService(), new List<PrSm>());
             this.DataSets = new ReactiveList<DataSetViewModel> { ChangeTrackingEnabled = true };
             CreateSequenceViewModel = new CreateSequenceViewModel(this.dialogService);
             LoadingScreenViewModel = new LoadingScreenViewModel();
+            ScanViewModel = new ScanViewModel(this.dialogService, new List<PrSm>());
+
+            // Remove filter by unidentified scans from ScanViewModel filters
+            var unidentifiedScansFilter = ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Hide Unidentified Scans");
+            if (unidentifiedScansFilter != null)
+            {
+                this.ScanViewModel.Filters.Remove(unidentifiedScansFilter);
+            }
 
             // Create commands for file operations
             this.OpenDataSetCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.OpenDataSetImplementation());
@@ -263,7 +269,7 @@ namespace LcmsSpectator.ViewModels
         /// <returns>Task that opens a feature file and associates it with a data set</returns>
         private async Task OpenFeatureFileImplementation()
         {
-            var featureFilePath = this.dialogService.OpenFile(FileConstants.FeatureFileExtensions[0], FileConstants.IdFileFormatString);
+            var featureFilePath = this.dialogService.OpenFile(FileConstants.FeatureFileExtensions[0], FileConstants.FeatureFileFormatString);
             if (string.IsNullOrEmpty(featureFilePath))
             {
                 return;
@@ -413,7 +419,7 @@ namespace LcmsSpectator.ViewModels
                 }
             }
             while (attemptToReadFile);
-            ScanViewModel.AddIds(dataSetViewModel.ScanViewModel.Data);
+            this.ScanViewModel.Data.AddRange(dataSetViewModel.ScanViewModel.Data);
         }
 
         /// <summary>

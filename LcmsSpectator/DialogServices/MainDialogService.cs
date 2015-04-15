@@ -114,6 +114,7 @@ namespace LcmsSpectator.DialogServices
         /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
         public bool FilterBox(FilterViewModel filterViewModel)
         {
+            filterViewModel.ResetStatus();
             var filterDialog = new FilterView
             {
                 DataContext = filterViewModel, 

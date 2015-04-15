@@ -26,34 +26,74 @@ namespace LcmsSpectator.ViewModels
         private readonly IDialogService dialogService;
 
         /// <summary>
+        /// The function that filters a set of data.
+        /// </summary>
+        private readonly FilterFunction filter;
+
+        /// <summary>
+        /// The function that determines if the filter value is valid.
+        /// </summary>
+        private readonly Validate validator;
+
+        /// <summary>
+        /// A value indicating whether this item is selected 
+        /// </summary>
+        private bool selected;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="FilterViewModel"/> class. 
         /// Initializes instance of the Filter
         /// </summary>
+        /// <param name="name">The name of the filter.</param>
         /// <param name="title">The title of the filter.</param>
         /// <param name="description">The description text for the filter.</param>
-        /// <param name="defaultValue">The default value to filter by.</param>
-        /// <param name="values">The default possible values to filter by.</param>
+        /// <param name="filter">The function that filters a set of data.</param>
         /// <param name="validator">Function that determines if the filter value is valid.</param>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
-        public FilterViewModel(string title, string description, string defaultValue, List<string> values, Validate validator, IDialogService dialogService)
+        /// <param name="values">The default possible values to filter by.</param>
+        /// <param name="defaultValue">The default value to filter by.</param>
+        public FilterViewModel(
+                               string name,
+                               string title,
+                               string description,
+                               FilterFunction filter,
+                               Validate validator,
+                               IDialogService dialogService,
+                               IEnumerable<string> values = null,
+                               string defaultValue = "")
         {
+            if (values == null)
+            {
+                values = new ReactiveList<string>();
+            }
+
+            this.Name = name;
             this.Title = title;
             this.Description = description;
-            this.Values = values;
-            this.Validator = validator;
+            this.DefaultValues = values;
+            this.filter = filter;
+            this.validator = validator;
             var filterCommand = ReactiveCommand.Create();
             filterCommand.Subscribe(_ => this.FilterImplementation());
             this.FilterCommand = filterCommand;
             var cancelCommand = ReactiveCommand.Create();
             cancelCommand.Subscribe(_ => this.CancelImplementation());
             this.CancelCommand = cancelCommand;
-            this.SelectedValue = defaultValue;
+            this.Value = defaultValue;
             this.dialogService = dialogService;
             this.Status = false;
         }
 
         /// <summary>
-        /// Delegate defining interface of function that validates a filter.
+        /// Delegate defining interface of function that filters a set of data.
+        /// </summary>
+        /// <param name="data">The data to filter.</param>
+        /// <param name="value">The value of the filter.</param>
+        /// <returns>The filtered data.</returns>
+        public delegate IEnumerable<object> FilterFunction(IEnumerable<object> data, string value); 
+
+        /// <summary>
+        /// Delegate defining interface of function that validates a filter value.
         /// </summary>
         /// <param name="value">Value of filter to validate.</param>
         /// <returns>A value indicating whether the filter is valid.</returns>
@@ -65,7 +105,12 @@ namespace LcmsSpectator.ViewModels
         public event EventHandler ReadyToClose;
 
         /// <summary>
-        /// Gets the title of the filter.
+        /// Gets the name of the filter.
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Gets the title text of the filter.
         /// </summary>
         public string Title { get; private set; }
 
@@ -75,14 +120,23 @@ namespace LcmsSpectator.ViewModels
         public string Description { get; private set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this item is selected 
+        /// </summary>
+        public bool Selected
+        {
+            get { return this.selected; }
+            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
+        }
+
+        /// <summary>
         /// Gets the default possible values to filter by.
         /// </summary>
-        public List<string> Values { get; private set; }
+        public IEnumerable<string> DefaultValues { get; private set; }
 
         /// <summary>
         /// Gets or sets the selected value for the filter.
         /// </summary>
-        public string SelectedValue { get; set; }
+        public string Value { get; set; }
 
         /// <summary>
         /// Gets a command that sets status to true if a valid filter has been selected
@@ -101,9 +155,22 @@ namespace LcmsSpectator.ViewModels
         public bool Status { get; private set; }
 
         /// <summary>
-        /// Gets the function that determines if the filter value is valid.
+        /// Filter a collection of data.
         /// </summary>
-        public Validate Validator { get; private set; }
+        /// <param name="data">The data to filter.</param>
+        /// <returns>The filtered data.</returns>
+        public IEnumerable<object> Filter(IEnumerable<object> data)
+        {
+            return this.filter(data, this.Value);
+        }
+
+        /// <summary>
+        /// Reset the status of this filter.
+        /// </summary>
+        public void ResetStatus()
+        {
+            this.Status = false;
+        }
 
         /// <summary>
         /// Implementation of FilterCommand.
@@ -112,7 +179,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void FilterImplementation()
         {
-            if (this.Validator(this.SelectedValue))
+            if (this.validator(this.Value))
             {
                 this.Status = true;
                 if (this.ReadyToClose != null)
@@ -133,6 +200,7 @@ namespace LcmsSpectator.ViewModels
         private void CancelImplementation()
         {
             this.Status = false;
+            this.Selected = false;
             if (this.ReadyToClose != null)
             {
                 this.ReadyToClose(this, EventArgs.Empty);

@@ -55,20 +55,19 @@
                                         <Grid x:Name="ProteinTree">
                                             <controls:MvvmTreeView DataContext="{Binding ScanViewModel}" ItemsSource="{Binding FilteredProteins}" SelectedItemTarget="{Binding TreeViewSelectedItem, Mode=TwoWay}">
                                                 <controls:MvvmTreeView.ContextMenu>
-                                                    <ContextMenu>
-                                                        <MenuItem Header="_Filter by">
-                                                            <MenuItem Header="_Sequence" IsCheckable="True" IsChecked="{Binding SequenceFilterChecked}" />
-                                                            <MenuItem Header="_Protein" IsCheckable="True" IsChecked="{Binding ProteinFilterChecked}" />
-                                                            <MenuItem Header="Precursor _M/Z" IsCheckable="True" IsChecked="{Binding PrecursorMzFilterChecked}" />
-                                                            <MenuItem Header="_Charge" IsCheckable="True" IsChecked="{Binding ChargeFilterChecked}" />
-                                                            <MenuItem Header="_Score" IsCheckable="True" IsChecked="{Binding ScoreFilterChecked}"/>
-                                                            <MenuItem Header="_Q Value" IsCheckable="True" IsChecked="{Binding QValueFilterChecked}"/>
-                                                            <MenuItem Header="_Raw File" IsCheckable="True" IsChecked="{Binding RawFileFilterChecked}"/>
-                                                            <Separator />
-                                                            <MenuItem Header="Clear Filters" Command="{Binding ClearFiltersCommand}" />
-                                                        </MenuItem>
-                                                    </ContextMenu>
-                                                </controls:MvvmTreeView.ContextMenu>
+                                                <ContextMenu>
+                                                    <MenuItem Header="_Filter" ItemsSource="{Binding Filters}">
+                                                        <MenuItem.ItemContainerStyle>
+                                                            <Style TargetType="MenuItem">
+                                                                <Setter Property="Header" Value="{Binding Name}" />
+                                                                <Setter Property="IsCheckable" Value="True" />
+                                                                <Setter Property="IsChecked" Value="{Binding Selected, Mode=TwoWay}" />
+                                                            </Style>
+                                                        </MenuItem.ItemContainerStyle>
+                                                    </MenuItem>
+                                                    <MenuItem Header="_Clear All Filters" Command="{Binding ClearFiltersCommand}" />
+                                                </ContextMenu>
+                                            </controls:MvvmTreeView.ContextMenu>
                                                 <controls:MvvmTreeView.Resources>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
                                                         <TextBlock Text="{Binding ProteinName}" />

@@ -86,18 +86,16 @@
                                               Grid.Row="0" Name="ScanDataGrid">
                                         <DataGrid.ContextMenu>
                                             <ContextMenu>
-                                                <MenuItem Header="_Filter by">
-                                                    <MenuItem Header="_Sequence" IsCheckable="True" IsChecked="{Binding SequenceFilterChecked}" />
-                                                    <MenuItem Header="_Protein" IsCheckable="True" IsChecked="{Binding ProteinFilterChecked}" />
-                                                    <MenuItem Header="Mass" IsCheckable="True" IsChecked="{Binding MassFilterChecked}" />
-                                                    <MenuItem Header="Most Abundant Isotope m/z" IsCheckable="True" IsChecked="{Binding PrecursorMzFilterChecked}" />
-                                                    <MenuItem Header="_Charge" IsCheckable="True" IsChecked="{Binding ChargeFilterChecked}" />
-                                                    <MenuItem Header="_Score" IsCheckable="True" IsChecked="{Binding ScoreFilterChecked}"/>
-                                                    <MenuItem Header="_Q Value" IsCheckable="True" IsChecked="{Binding QValueFilterChecked}"/>
-                                                    <MenuItem Header="Hide _Unidentified Scans" IsCheckable="True" IsChecked="{Binding HideUnidentifiedScans}" />
-                                                    <Separator />
-                                                    <MenuItem Header="Clear Filters" Command="{Binding ClearFiltersCommand}" />
+                                                <MenuItem Header="_Filter" ItemsSource="{Binding Filters}">
+                                                    <MenuItem.ItemContainerStyle>
+                                                        <Style TargetType="MenuItem">
+                                                            <Setter Property="Header" Value="{Binding Name}" />
+                                                            <Setter Property="IsCheckable" Value="True" />
+                                                            <Setter Property="IsChecked" Value="{Binding Selected, Mode=TwoWay}" />
+                                                        </Style>
+                                                    </MenuItem.ItemContainerStyle>
                                                 </MenuItem>
+                                                <MenuItem Header="_Clear All Filters" Command="{Binding ClearFiltersCommand}" />
                                             </ContextMenu>
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>

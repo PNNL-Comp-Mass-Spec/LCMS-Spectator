@@ -21,7 +21,6 @@ namespace LcmsSpectator.ViewModels
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
-    using LcmsSpectator.TaskServices;
     using LcmsSpectator.Utils;
 
     using ReactiveUI;
@@ -86,12 +85,19 @@ namespace LcmsSpectator.ViewModels
             this.ReadyToClose = false;
             this.LoadingScreenViewModel = new LoadingScreenViewModel();
             this.SelectedPrSm = new PrSm();
-            this.ScanViewModel = new ScanViewModel(dialogService, new TaskService(), new List<PrSm>());
+            this.ScanViewModel = new ScanViewModel(dialogService, new List<PrSm>());
             this.IonTypeSelectorViewModel = new IonTypeSelectorViewModel(dialogService);
             this.CreateSequenceViewModel = new CreateSequenceViewModel(dialogService)
             {
                 SelectedDataSetViewModel = this
             };
+
+            // Remove filter by raw file name from ScanViewModel filters
+            var rawFileFilter = ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Raw File Name");
+            if (rawFileFilter != null)
+            {
+                this.ScanViewModel.Filters.Remove(rawFileFilter);
+            }
 
             // When a PrSm is selected from the ScanViewModel, update the SelectedPrSm for this data set
             ScanViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(x => this.SelectedPrSm = x);
@@ -332,7 +338,7 @@ namespace LcmsSpectator.ViewModels
                     QValue = 1.0,
                     Score = double.NaN,
                 });
-                ScanViewModel.AddIds(prsmScans);
+                ScanViewModel.Data.AddRange(prsmScans);
             });
         }
 

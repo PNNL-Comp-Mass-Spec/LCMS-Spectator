@@ -10,8 +10,10 @@
 
 namespace LcmsSpectator.Views
 {
+    using System.Collections.Generic;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Data;
     using System.Windows.Input;
     
     /// <summary>
@@ -31,7 +33,20 @@ namespace LcmsSpectator.Views
                 var element = FindName("FilterValue");
                 var comboBox = element as ComboBox;
                 FocusManager.SetFocusedElement(this, comboBox);
+
+                var distinctItems = new HashSet<string>();
+                foreach (var item in FilterValue.ItemsSource)
+                {
+                    var filterValue = item as string;
+                    if (filterValue != null && !distinctItems.Contains(filterValue))
+                    {
+                        distinctItems.Add(filterValue);
+                    }
+                }
+
+                FilterValue.ItemsSource = distinctItems;
             };
+
             this.InitializeComponent();
         }
 
