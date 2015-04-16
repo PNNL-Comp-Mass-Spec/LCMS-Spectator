@@ -12,6 +12,7 @@ namespace LcmsSpectator.ViewModels
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
@@ -295,9 +296,9 @@ namespace LcmsSpectator.ViewModels
                     "Filter by Sequence", 
                     "Enter Sequence to filter by:", 
                     (d, v) => d.Where(datum => ((PrSm)datum).SequenceText.Contains(v)), 
-                    o => true, 
+                    o => true,
                     this.dialogService,
-                    this.Data.CreateDerivedCollection(x => x.SequenceText, x => x.SequenceText.Length > 0)));
+                    (from prsm in this.Data where prsm.SequenceText.Length > 0 select prsm.SequenceText).Distinct()));
 
             // Filter by protein name
             this.Filters.Add(new FilterViewModel(
@@ -307,7 +308,7 @@ namespace LcmsSpectator.ViewModels
                     (d, v) => d.Where(datum => ((PrSm)datum).ProteinName.Contains(v)), 
                     o => true, 
                     this.dialogService,
-                    this.Data.CreateDerivedCollection(x => x.ProteinName, x => x.ProteinName.Length > 0)));
+                    (from prsm in this.Data where prsm.ProteinName.Length > 0 select prsm.ProteinName).Distinct()));
 
             // Filter by mass
             this.Filters.Add(new FilterViewModel(
@@ -350,7 +351,7 @@ namespace LcmsSpectator.ViewModels
                             return int.TryParse(str, out conv);
                         }, 
                     this.dialogService,
-                    this.Data.CreateDerivedCollection(x => x.ToString(), x => x.Charge > 0)));
+                    (from prsm in this.Data where prsm.Charge > 0 select prsm.Charge.ToString(CultureInfo.InvariantCulture)).Distinct()));
 
             // Filter by score
             this.Filters.Add(new FilterViewModel(
