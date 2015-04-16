@@ -424,15 +424,6 @@ namespace LcmsSpectator.ViewModels
             }
             while (attemptToReadFile);
 
-            // Hide all filters by default in scan view model
-            if (this.ScanViewModel.Data.Count == 0)
-            {
-                foreach (var filter in ScanViewModel.Filters)
-                {
-                    filter.Selected = false;
-                }
-            }
-
             this.ScanViewModel.Data.AddRange(dataSetViewModel.ScanViewModel.Data);
         }
 
