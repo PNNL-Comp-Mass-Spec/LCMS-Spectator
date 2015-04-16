@@ -79,7 +79,7 @@ namespace LcmsSpectator.ViewModels
             // When a filter is selected/uselected, request a filter value if selected, then filter data
             this.Filters.ItemChanged.Where(x => x.PropertyName == "Selected")
                 .Select(x => x.Sender)
-                .Where(sender => !sender.Selected || sender.Name == "UnidentifiedScans" || this.dialogService.FilterBox(sender))
+                .Where(sender => !sender.Selected || sender.Name == "Hide Unidentified Scans" || this.dialogService.FilterBox(sender))
                 .SelectMany(async _ => await this.FilterDataAsync(this.Data))
                 .Subscribe(fd => this.FilteredData = fd);
 
