@@ -39,7 +39,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// The filtered data.
         /// </summary>
-        private List<PrSm> filteredData;
+        private PrSm[] filteredData;
 
         /// <summary>
         /// A list of IDs grouped by protein name.
@@ -68,7 +68,7 @@ namespace LcmsSpectator.ViewModels
             this.ClearFiltersCommand = clearFiltersCommand;
             this.dialogService = dialogService;
 
-            this.FilteredData = new List<PrSm>();
+            this.FilteredData = new PrSm[0];
 
             this.Filters = new ReactiveList<FilterViewModel> { ChangeTrackingEnabled = true };
 
@@ -94,13 +94,12 @@ namespace LcmsSpectator.ViewModels
 
             // When data is filtered, group it by protein name
             this.WhenAnyValue(x => x.FilteredData)
-                .Select(d => new IdentificationTree(d))
-                .Select(idTree => idTree.ProteinIds)
-                .Subscribe(proteins => this.FilteredProteins = proteins);
+                .Select(fd => new IdentificationTree(fd))
+                .Subscribe(idTree => this.FilteredProteins = idTree.ProteinIds);
 
             // When data is filtered and a PRSM has not been selected yet, select the first PRSM
             this.WhenAnyValue(x => x.FilteredData)
-                .Where(fd => fd.Count > 0)
+                .Where(fd => fd.Length > 0)
                 .Where(_ => this.SelectedPrSm == null)
                 .Subscribe(fd => this.SelectedPrSm = fd[0]);
 
@@ -139,7 +138,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets the filtered data.
         /// </summary>
-        public List<PrSm> FilteredData
+        public PrSm[] FilteredData
         {
             get { return this.filteredData; }
             private set { this.RaiseAndSetIfChanged(ref this.filteredData, value); }
@@ -248,7 +247,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         /// <param name="da">The data to filtered.</param>
         /// <returns>The filtered data.</returns>
-        private Task<List<PrSm>> FilterDataAsync(IEnumerable<PrSm> da)
+        private Task<PrSm[]> FilterDataAsync(IEnumerable<PrSm> da)
         {
             return Task.Run(() => this.FilterData(da));
         }
@@ -258,7 +257,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         /// <param name="da">The data to filtered.</param>
         /// <returns>The filtered data.</returns>
-        private List<PrSm> FilterData(IEnumerable<PrSm> da)
+        private PrSm[] FilterData(IEnumerable<PrSm> da)
         {
             IEnumerable<object> filtered = new List<PrSm>(da);
             var selectedFilters = this.Filters.Where(f => f.Selected);
@@ -280,8 +279,8 @@ namespace LcmsSpectator.ViewModels
                 }
             }
 
-            var uniqueFilteredPrSms = allPrSmsByScan.Values.ToList();
-            uniqueFilteredPrSms.Sort(new PrSm.PrSmScoreComparer());
+            var uniqueFilteredPrSms = allPrSmsByScan.Values.ToArray();
+            Array.Sort(uniqueFilteredPrSms, new PrSm.PrSmScoreComparer());
             return uniqueFilteredPrSms;
         }
 
