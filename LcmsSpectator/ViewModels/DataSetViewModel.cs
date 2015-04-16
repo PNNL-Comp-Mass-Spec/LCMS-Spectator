@@ -312,7 +312,7 @@ namespace LcmsSpectator.ViewModels
 
             // Create prsms for scan numbers (unidentified)
             await this.LoadScans();
-            await this.ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun)this.LcMs);
+            ////await this.ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun)this.LcMs);
             this.SelectedPrSm.LcMs = this.LcMs; // For the selected PrSm, we should always use the LcMsRun for this dataset.
             this.LoadingScreenViewModel.IsLoading = false; // Hide animated loading screen
         }

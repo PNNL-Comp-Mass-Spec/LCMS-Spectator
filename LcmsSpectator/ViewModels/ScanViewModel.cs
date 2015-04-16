@@ -85,13 +85,11 @@ namespace LcmsSpectator.ViewModels
                 .Subscribe(fd => this.FilteredData = fd);
 
             // Data changes when items are added or removed
-            var dataChanged = this.Data.BeforeItemsAdded.Merge(this.Data.BeforeItemsRemoved)
-                                  .Where(x => x != null)
-                                  .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
-                                  .SelectMany(async _ => await this.FilterDataAsync(this.Data));
+            this.Data.CountChanged
+                .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
+                .SelectMany(async _ => await this.FilterDataAsync(this.Data))
+                .Subscribe(fd => this.FilteredData = fd);
 
-            // When data changes, update filtered data
-            dataChanged.Subscribe(fd => this.FilteredData = fd);
 
             // When data is filtered, group it by protein name
             this.WhenAnyValue(x => x.FilteredData)
