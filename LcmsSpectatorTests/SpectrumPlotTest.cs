@@ -6,7 +6,6 @@ using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Config;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Readers;
-using LcmsSpectator.TaskServices;
 using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;
 using LcmsSpectatorTests.DialogServices;

@@ -8,7 +8,6 @@ using LcmsSpectator.Config;
 using LcmsSpectator.Models;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Readers;
-using LcmsSpectator.TaskServices;
 using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;
 using LcmsSpectatorTests.DialogServices;
