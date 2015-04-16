@@ -384,6 +384,24 @@ namespace LcmsSpectator.Models
         }
 
         /// <summary>
+        /// Compares two PRSM objects by Score value.
+        /// </summary>
+        public class PrSmScoreComparer : IComparer<PrSm>
+        {
+            /// <summary>
+            /// Compare two PRSM objects by maximum Score value.
+            /// </summary>
+            /// <param name="x">Left PRSM</param>
+            /// <param name="y">Right PRSM</param>
+            /// <returns>Integer indicating if the left PRSM is greater than the right PRSM.</returns>
+            public int Compare(PrSm x, PrSm y)
+            {
+                var comp = x.UseGolfScoring ? x.Score.CompareTo(y.Score) : y.Score.CompareTo(x.Score);
+                return comp;
+            }
+        }
+
+        /// <summary>
         /// Compares two PRSM objects by Scan number.
         /// </summary>
         public class PrSmScanComparer : IComparer<PrSm>

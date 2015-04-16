@@ -419,6 +419,7 @@ namespace LcmsSpectator.ViewModels
                 }
             }
             while (attemptToReadFile);
+
             this.ScanViewModel.Data.AddRange(dataSetViewModel.ScanViewModel.Data);
         }
 

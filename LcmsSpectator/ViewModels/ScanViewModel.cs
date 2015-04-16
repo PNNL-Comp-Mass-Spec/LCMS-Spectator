@@ -98,6 +98,12 @@ namespace LcmsSpectator.ViewModels
                 .Select(idTree => idTree.ProteinIds)
                 .Subscribe(proteins => this.FilteredProteins = proteins);
 
+            // When data is filtered and a PRSM has not been selected yet, select the first PRSM
+            this.WhenAnyValue(x => x.FilteredData)
+                .Where(fd => fd.Count > 0)
+                .Where(_ => this.SelectedPrSm == null)
+                .Subscribe(fd => this.SelectedPrSm = fd[0]);
+
             // When a tree object is selected and it is a PRSM, set the selected PRSM
             this.WhenAnyValue(x => x.TreeViewSelectedItem)
                 .Select(x => x as PrSm)
@@ -184,16 +190,11 @@ namespace LcmsSpectator.ViewModels
         public void RemovePrSmsFromRawFile(string rawFileName)
         {
             var newData = this.Data.Where(prsm => prsm.RawFileName != rawFileName).ToList();
-            var max = (newData.Count > 0) ? newData[0] : null;
-            foreach (var item in newData)
+            if (!newData.Contains(this.SelectedPrSm))
             {
-                if (item.CompareTo(max) > 0)
-                {
-                    max = item;
-                }
+                this.SelectedPrSm = null;
             }
 
-            this.SelectedPrSm = max;
             this.Data.Clear();
             this.Data.AddRange(newData);
         }
@@ -262,7 +263,9 @@ namespace LcmsSpectator.ViewModels
             IEnumerable<object> filtered = new List<PrSm>(da);
             var selectedFilters = this.Filters.Where(f => f.Selected);
             filtered = selectedFilters.Aggregate(filtered, (current, filter) => filter.Filter(current));
-            return filtered.Cast<PrSm>().ToList();
+            var filteredPrSms = filtered.Cast<PrSm>().ToList();
+            filteredPrSms.Sort(new PrSm.PrSmScoreComparer());
+            return filteredPrSms;
         }
 
         /// <summary>
