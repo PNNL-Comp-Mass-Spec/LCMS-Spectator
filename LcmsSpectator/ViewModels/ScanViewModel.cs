@@ -86,7 +86,7 @@ namespace LcmsSpectator.ViewModels
             // Data changes when items are added or removed
             var dataChanged = this.Data.BeforeItemsAdded.Merge(this.Data.BeforeItemsRemoved)
                                   .Where(x => x != null)
-                                  .Throttle(TimeSpan.FromMilliseconds(100), RxApp.TaskpoolScheduler)
+                                  .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
                                   .SelectMany(async _ => await this.FilterDataAsync(this.Data));
 
             // When data changes, update filtered data
@@ -263,9 +263,26 @@ namespace LcmsSpectator.ViewModels
             IEnumerable<object> filtered = new List<PrSm>(da);
             var selectedFilters = this.Filters.Where(f => f.Selected);
             filtered = selectedFilters.Aggregate(filtered, (current, filter) => filter.Filter(current));
-            var filteredPrSms = filtered.Cast<PrSm>().ToList();
-            filteredPrSms.Sort(new PrSm.PrSmScoreComparer());
-            return filteredPrSms;
+            var filteredPrSms = filtered.Cast<PrSm>();
+
+            var allPrSmsByScan = new Dictionary<int, PrSm>();
+
+            // ensure that all scan numbers for the data set are unique.
+            foreach (var prsm in filteredPrSms)
+            {
+                if (!allPrSmsByScan.ContainsKey(prsm.Scan))
+                {
+                    allPrSmsByScan.Add(prsm.Scan, prsm);
+                }
+                else if (allPrSmsByScan[prsm.Scan].Sequence.Count == 0)
+                {
+                    allPrSmsByScan[prsm.Scan] = prsm;
+                }
+            }
+
+            var uniqueFilteredPrSms = allPrSmsByScan.Values.ToList();
+            uniqueFilteredPrSms.Sort(new PrSm.PrSmScoreComparer());
+            return uniqueFilteredPrSms;
         }
 
         /// <summary>
