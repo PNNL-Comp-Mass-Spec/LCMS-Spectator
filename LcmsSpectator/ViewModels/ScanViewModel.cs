@@ -85,11 +85,9 @@ namespace LcmsSpectator.ViewModels
                 .Subscribe(fd => this.FilteredData = fd);
 
             // Data changes when items are added or removed
-            this.Data.CountChanged
-                .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
+            this.Data.CountChanged.Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
                 .SelectMany(async _ => await this.FilterDataAsync(this.Data))
                 .Subscribe(fd => this.FilteredData = fd);
-
 
             // When data is filtered, group it by protein name
             this.WhenAnyValue(x => x.FilteredData)
@@ -265,7 +263,7 @@ namespace LcmsSpectator.ViewModels
 
             var allPrSmsByScan = new Dictionary<int, PrSm>();
 
-            // ensure that all scan numbers for the data set are unique.
+            // Ensure that all scan numbers for the data set are unique.
             foreach (var prsm in filteredPrSms)
             {
                 if (!allPrSmsByScan.ContainsKey(prsm.Scan))
