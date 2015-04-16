@@ -424,7 +424,7 @@ namespace LcmsSpectator.ViewModels
             }
             while (attemptToReadFile);
 
-            this.ScanViewModel.Data.AddRange(dataSetViewModel.ScanViewModel.Data);
+            this.ScanViewModel.Data.AddRange(dataSetViewModel.ScanViewModel.Data.Where(p => p.Sequence.Count > 0));
         }
 
         /// <summary>
