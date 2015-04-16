@@ -348,6 +348,10 @@ namespace LcmsSpectator.ViewModels
                         }
                     }
                 }
+                else
+                {
+                    dataSetViewModel = await this.ReadRawFile(rawFilePath);
+                }
             }
             else
             {
