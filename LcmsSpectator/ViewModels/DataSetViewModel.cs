@@ -76,6 +76,11 @@ namespace LcmsSpectator.ViewModels
         private PrSm selectedPrSm;
 
         /// <summary>
+        /// A value indicating whether an ID file has been opened for this data set.
+        /// </summary>
+        private bool idFileOpen;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DataSetViewModel"/> class. 
         /// </summary>
         /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>
@@ -83,6 +88,7 @@ namespace LcmsSpectator.ViewModels
         {
             this.dialogService = dialogService;
             this.ReadyToClose = false;
+            this.IdFileOpen = false;
             this.LoadingScreenViewModel = new LoadingScreenViewModel();
             this.SelectedPrSm = new PrSm();
             this.ScanViewModel = new ScanViewModel(dialogService, new List<PrSm>());
@@ -93,11 +99,7 @@ namespace LcmsSpectator.ViewModels
             };
 
             // Remove filter by raw file name from ScanViewModel filters
-            var rawFileFilter = ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Raw File Name");
-            if (rawFileFilter != null)
-            {
-                this.ScanViewModel.Filters.Remove(rawFileFilter);
-            }
+            this.ScanViewModel.Filters.Remove(this.ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Raw File Name"));
 
             // When a PrSm is selected from the ScanViewModel, update the SelectedPrSm for this data set
             ScanViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(x => this.SelectedPrSm = x);
@@ -155,6 +157,13 @@ namespace LcmsSpectator.ViewModels
 
             // Toggle instrument data when ShowInstrumentData setting is changed.
             IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Select(async x => await ScanViewModel.ToggleShowInstrumentDataAsync(x, (PbfLcMsRun)this.LcMs)).Subscribe();
+
+            // When an ID file has been opened, turn on the unidentified scan filter
+            this.WhenAnyValue(x => x.IdFileOpen)
+                .Where(idFileOpen => idFileOpen)
+                .Select(_ => this.ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Hide Unidentified Scans"))
+                .Where(f => f != null)
+                .Subscribe(f => f.Selected = true);
 
             // Close command verifies that the user wants to close the dataset, then sets ReadyToClose to true if they are
             var closeCommand = ReactiveCommand.Create();
@@ -271,6 +280,15 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether an ID file has been opened for this data set.
+        /// </summary>
+        public bool IdFileOpen
+        {
+            get { return this.idFileOpen; }
+            set { this.RaiseAndSetIfChanged(ref this.idFileOpen, value); }
+        }
+
+        /// <summary>
         /// Set the MSPathFinder parameters given a path to a ID file.
         /// </summary>
         /// <param name="idFilePath">The id file path.</param>
@@ -335,7 +353,7 @@ namespace LcmsSpectator.ViewModels
                     Scan = scan,
                     RawFileName = Title,
                     LcMs = LcMs,
-                    QValue = 1.0,
+                    QValue = -1.0,
                     Score = double.NaN,
                 });
                 ScanViewModel.Data.AddRange(prsmScans);

@@ -145,7 +145,7 @@ namespace LcmsSpectator.Utils
                 {
                     formatted = "0";
                 }
-                else if (d.Equals(1.0))
+                else if (d.Equals(-1.0))
                 {
                     formatted = "N/A";
                 }

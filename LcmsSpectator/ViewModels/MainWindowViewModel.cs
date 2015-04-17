@@ -63,11 +63,7 @@ namespace LcmsSpectator.ViewModels
             ScanViewModel = new ScanViewModel(this.dialogService, new List<PrSm>());
 
             // Remove filter by unidentified scans from ScanViewModel filters
-            var unidentifiedScansFilter = ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Hide Unidentified Scans");
-            if (unidentifiedScansFilter != null)
-            {
-                this.ScanViewModel.Filters.Remove(unidentifiedScansFilter);
-            }
+            this.ScanViewModel.Filters.Remove(this.ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Hide Unidentified Scans"));
 
             // Create commands for file operations
             this.OpenDataSetCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.OpenDataSetImplementation());

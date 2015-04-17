@@ -113,6 +113,7 @@ namespace LcmsSpectator.Models
             this.scan = 0;
             this.Mass = double.NaN;
             this.PrecursorMz = double.NaN;
+            this.QValue = -1.0;
         }
 
         #region Public Properties

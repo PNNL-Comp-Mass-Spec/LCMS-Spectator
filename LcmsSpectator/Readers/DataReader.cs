@@ -91,6 +91,7 @@ namespace LcmsSpectator.Readers
             var ids = await reader.ReadAsync(modIgnoreList);
             ids.SetLcmsRun(dataSetViewModel.LcMs, dataSetViewModel.Title);
             dataSetViewModel.ScanViewModel.Data.AddRange(ids.AllPrSms);
+            dataSetViewModel.IdFileOpen = true;
         }
 
         /// <summary>
