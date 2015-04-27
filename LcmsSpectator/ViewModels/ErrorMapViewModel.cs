@@ -71,9 +71,9 @@ namespace LcmsSpectator.ViewModels
         public ErrorMapViewModel(IDialogService dialogService)
         {
             this.dialogService = dialogService;
-            PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
+            PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.White };
 
-            // Init error map axes
+            // Init x axis
             this.xAxis = new LinearAxis
             {
                 Title = "Amino Acid",
@@ -89,6 +89,7 @@ namespace LcmsSpectator.ViewModels
             };
             PlotModel.Axes.Add(this.xAxis);
 
+            // Init Y axis
             this.yAxis = new LinearAxis
             {
                 Title = "Ion Type",
@@ -104,15 +105,20 @@ namespace LcmsSpectator.ViewModels
             };
             PlotModel.Axes.Add(this.yAxis);
 
+            // Init Color axis
+            var minColor = OxyColors.Navy;
+            var medColor = OxyColor.FromRgb(127, 255, 0);
+            var maxColor = OxyColor.FromRgb(255, 0, 0);
             this.colorAxis = new LinearColorAxis
             {
                 Title = "Error",
                 Position = AxisPosition.Right,
                 AbsoluteMinimum = 0,
+                Palette = OxyPalette.Interpolate(1000, minColor, medColor, maxColor),
                 Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
                 Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
                 AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
-                LowColor = OxyColors.Navy,
+                LowColor = OxyColors.White,
             };
             PlotModel.Axes.Add(this.colorAxis);
 
@@ -181,13 +187,10 @@ namespace LcmsSpectator.ViewModels
         private void BuildPlotModel(IReadOnlyList<AminoAcid> sequence, double[,] data)
         {
             // initialize color axis
-            var minColor = OxyColor.FromRgb(127, 255, 0);
-            var maxColor = OxyColor.FromRgb(255, 0, 0);
-            this.colorAxis.Palette = OxyPalette.Interpolate(1000, minColor, maxColor);
+            ////var minColor = OxyColor.FromRgb(127, 255, 0);
             this.colorAxis.Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue();
             this.colorAxis.Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
             this.colorAxis.AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
-            this.colorAxis.LowColor = OxyColors.Navy;
 
             PlotModel.Series.Clear();
 
@@ -327,7 +330,7 @@ namespace LcmsSpectator.ViewModels
             var fileName = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
-                if (!string.IsNullOrEmpty(fileName))
+                if (string.IsNullOrEmpty(fileName))
                 {
                     throw new FormatException(
                         string.Format("Cannot save image due to invalid file name: {0}", fileName));
