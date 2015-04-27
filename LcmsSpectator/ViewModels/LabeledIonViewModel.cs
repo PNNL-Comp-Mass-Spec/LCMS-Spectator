@@ -214,7 +214,7 @@ namespace LcmsSpectator.ViewModels
         /// <param name="deconvoluted">A value indicating whether the peaks come from a deconvoluted spectrum.</param>
         /// <param name="useCache">A value indicating whether the cache should be used if possible.</param>
         /// <returns>A task that creates and returns the peaks for the ion.</returns>
-        public Task<IList<PeakDataPoint>> GetPeaksAsync(Spectrum spectrum, bool deconvoluted, bool useCache=true)
+        public Task<IList<PeakDataPoint>> GetPeaksAsync(Spectrum spectrum, bool deconvoluted, bool useCache = true)
         {
             return Task.Run(() => this.GetPeaks(spectrum, deconvoluted, useCache));
         }
@@ -291,7 +291,7 @@ namespace LcmsSpectator.ViewModels
             var tolerance = this.IsFragmentIon
                             ? IcParameters.Instance.ProductIonTolerancePpm
                             : IcParameters.Instance.PrecursorTolerancePpm;
-            var noPeaks = new List<PeakDataPoint> { new PeakDataPoint(double.NaN, double.NaN, double.NaN, double.NaN, this.Label) { IonType = IonType, Index = this.Index } };
+            var noPeaks = new List<PeakDataPoint> { new PeakDataPoint(double.NaN, double.NaN, double.NaN, double.NaN, this.Label) { IonType = this.IonType, Index = this.Index } };
             var peakDataPoints = new List<PeakDataPoint>();
             IonType ionType = null;
             if (this.IsFragmentIon)
@@ -303,7 +303,7 @@ namespace LcmsSpectator.ViewModels
             Ion ion;
             if (deconvoluted)
             {
-                if (IonType.Charge > 1)
+                if (!this.IsFragmentIon || this.IonType.Charge > 1)
                 {
                     return peakDataPoints; // Deconvoluted spectrum means decharged (only charge 1 ions shown)
                 }
