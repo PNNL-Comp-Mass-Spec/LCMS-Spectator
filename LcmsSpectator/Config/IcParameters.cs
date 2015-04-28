@@ -293,6 +293,57 @@
         }
 
         /// <summary>
+        /// Update or register a modification.
+        /// </summary>
+        /// <param name="modName">The name of the modification.</param>
+        /// <param name="composition">The composition of the modification.</param>
+        /// <returns>The registered modification.</returns>
+        public Modification UpdateOrRegisterModification(string modName, Composition composition)
+        {
+            var mod = Modification.UpdateAndGetModification(modName, composition);
+            var regMod = this.RegisteredModifications.FirstOrDefault(m => m.Name == modName);
+            if (regMod != null)
+            {
+                this.RegisteredModifications.Remove(regMod);
+            }
+
+            this.RegisteredModifications.Add(mod);
+            return mod;
+        }
+
+        /// <summary>
+        /// Update or register a modification.
+        /// </summary>
+        /// <param name="modName">The name of the modification.</param>
+        /// <param name="mass">The mass of the modification.</param>
+        /// <returns>The registered modification.</returns>
+        public Modification UpdateOrRegisterModification(string modName, double mass)
+        {
+            var mod = Modification.UpdateAndGetModification(modName, mass);
+            var regMod = this.RegisteredModifications.FirstOrDefault(m => m.Name == modName);
+            if (regMod != null)
+            {
+                this.RegisteredModifications.Remove(regMod);
+            }
+
+            this.RegisteredModifications.Add(mod);
+            return mod;
+        }
+
+        /// <summary>
+        /// Unregister a modification.
+        /// </summary>
+        /// <param name="modification">The modification to unregister.</param>
+        public void UnregisterModification(Modification modification)
+        {
+            Modification.UnregisterModification(modification);
+            if (this.RegisteredModifications.Contains(modification))
+            {
+                this.RegisteredModifications.Remove(modification);
+            }
+        }
+
+        /// <summary>
         /// Instantiate default values of LcMsSpectator application settings.
         /// </summary>
         private IcParameters()
