@@ -82,10 +82,10 @@ namespace LcmsSpectator.ViewModels
             openAboutBoxCommand.Subscribe(_ => this.dialogService.OpenAboutBox());
             this.OpenAboutBoxCommand = openAboutBoxCommand;
 
-            // Create command to open new modification registration box
-            var openRegisterModificationCommand = ReactiveCommand.Create();
-            openRegisterModificationCommand.Subscribe(_ => this.RegisterNewModification(string.Empty, false));
-            this.OpenRegisterModificationCommand = openRegisterModificationCommand;
+            // Create command to open new modification management window
+            var openManageModificationsCommand = ReactiveCommand.Create();
+            openManageModificationsCommand.Subscribe(_ => this.ManageModificationsImplementation());
+            this.OpenManageModificationsCommand = openManageModificationsCommand;
 
             this.ShowSplash = true;
 
@@ -160,9 +160,9 @@ namespace LcmsSpectator.ViewModels
         public IReactiveCommand OpenAboutBoxCommand { get; private set; }
         
         /// <summary>
-        /// Gets command that opens modification registration box.
+        /// Gets command that opens a window for managing registered modifications.
         /// </summary>
-        public IReactiveCommand OpenRegisterModificationCommand { get; private set; }
+        public IReactiveCommand OpenManageModificationsCommand { get; private set; }
 
         /// <summary>
         /// Gets view model for list of scans and identifications.
@@ -307,6 +307,23 @@ namespace LcmsSpectator.ViewModels
             catch (Exception e)
             {
                 this.dialogService.ExceptionAlert(e);
+            }
+        }
+
+        /// <summary>
+        /// Implementation for ManageModificationsCommand.
+        /// Opens a window for editing the registered modifications.
+        /// </summary>
+        private void ManageModificationsImplementation()
+        {
+            var manageModificationsViewModel = new ManageModificationsViewModel(this.dialogService);
+            manageModificationsViewModel.Modifications.AddRange(IcParameters.Instance.RegisteredModifications);
+            this.dialogService.OpenManageModifications(manageModificationsViewModel);
+
+            // Update all sequences with new modifications.
+            foreach (var prsm in this.ScanViewModel.Data)
+            {
+                prsm.UpdateModifications();
             }
         }
 

@@ -11,6 +11,8 @@
 namespace LcmsSpectator.ViewModels
 {
     using System;
+    using System.Globalization;
+
     using InformedProteomics.Backend.Data.Composition;
     using LcmsSpectator.DialogServices;
     using ReactiveUI;
@@ -109,6 +111,8 @@ namespace LcmsSpectator.ViewModels
             var cancelCommand = ReactiveCommand.Create();
             cancelCommand.Subscribe(_ => this.CancelImplementation());
             this.CancelCommand = cancelCommand;
+
+            this.WhenAnyValue(x => x.Mass).Subscribe(mass => this.MassStr = mass.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>

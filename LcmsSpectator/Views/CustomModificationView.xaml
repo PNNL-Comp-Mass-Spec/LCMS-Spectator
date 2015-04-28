@@ -14,10 +14,11 @@
             <ColumnDefinition Width="40*" />
         </Grid.ColumnDefinitions>
         <TextBlock FontWeight="Bold">Modification Name</TextBlock>
-        <TextBox Grid.Column="1" Grid.Row="0" Height="25" VerticalAlignment="Top" Text="{Binding ModificationName, Mode=TwoWay}" IsReadOnly="{Binding ModificationNameReadOnly}" />
+        <TextBox Grid.Column="1" Grid.Row="0" Height="25" VerticalAlignment="Top" Text="{Binding ModificationName, Mode=TwoWay}" 
+                 IsReadOnly="{Binding ModificationNameReadOnly}" />
 
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-            <RadioButton x:Name="FormulaCheck" IsChecked="{Binding FromFormulaChecked, Mode=TwoWay}">
+            <RadioButton x:Name="FormulaCheck" IsChecked="{Binding FromFormulaChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <GroupBox>
                     <GroupBox.Header>
                         <TextBlock Grid.Row="0" TextAlignment="Center" FontWeight="Bold">From Formula</TextBlock>
@@ -38,7 +39,7 @@
                     </StackPanel>
                 </GroupBox>
             </RadioButton>
-            <RadioButton x:Name="MassCheck" IsChecked="{Binding FromMassChecked, Mode=TwoWay}">
+            <RadioButton x:Name="MassCheck" IsChecked="{Binding FromMassChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <GroupBox IsEnabled="{Binding IsChecked, ElementName=MassCheck, Mode=OneWay}">
                     <GroupBox.Header>
                         <TextBlock Grid.Row="0" TextAlignment="Center" FontWeight="Bold">From Mass</TextBlock>
@@ -49,27 +50,7 @@
                     </StackPanel>
                 </GroupBox>
             </RadioButton>
-        </StackPanel>        
-        
-<!--        <GroupBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-            <GroupBox.Header>
-                <TextBlock Grid.Row="0" TextAlignment="Center" FontWeight="Bold">Formula</TextBlock>
-            </GroupBox.Header>
-            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" Grid.Row="1">
-                <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">C</TextBlock>
-                <TextBox Width="40" Height="25" Text="{Binding C, Mode=TwoWay}" Name="C" />
-                <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">H</TextBlock>
-                <TextBox Width="40" Height="25" Text="{Binding H, Mode=TwoWay}" Name="H"></TextBox>
-                <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">N</TextBlock>
-                <TextBox Width="40" Height="25" Text="{Binding N, Mode=TwoWay}" Name="N"></TextBox>
-                <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">O</TextBlock>
-                <TextBox Width="40" Height="25" Text="{Binding O, Mode=TwoWay}" Name="O"></TextBox>
-                <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">S</TextBlock>
-                <TextBox Width="40" Height="25" Text="{Binding S, Mode=TwoWay}" Name="S"></TextBox>
-                <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="10">P</TextBlock>
-                <TextBox Width="40" Height="25" Text="{Binding P, Mode=TwoWay}" Name="P"></TextBox>
-            </StackPanel>
-        </GroupBox> -->
+        </StackPanel>
         <Grid Grid.Row="3" Grid.Column="1" Margin="100,0,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50*" />

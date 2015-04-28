@@ -11,6 +11,10 @@
 namespace LcmsSpectator.ViewModels
 {
     using System;
+    using System.Linq;
+    using System.Reactive.Linq;
+
+    using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
@@ -44,11 +48,11 @@ namespace LcmsSpectator.ViewModels
             addCommand.Subscribe(_ => this.AddImplementation());
             this.AddCommand = addCommand;
 
-            var editCommand = ReactiveCommand.Create();
+            var editCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedModification).Select(m => m != null));
             editCommand.Subscribe(_ => this.EditImplementation());
             this.EditCommand = editCommand;
 
-            var removeCommand = ReactiveCommand.Create();
+            var removeCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedModification).Select(m => m != null));
             removeCommand.Subscribe(_ => this.RemoveImplementation());
             this.RemoveCommand = removeCommand;
         }
@@ -125,15 +129,17 @@ namespace LcmsSpectator.ViewModels
 
             // Set the composition or mass for the modification editor
             var customModVm = new CustomModificationViewModel(this.SelectedModification.Name, true, this.dialogService);
-            if (this.SelectedModification.Composition != null)
-            {
-                customModVm.FromFormulaChecked = true;
-                customModVm.Composition = this.SelectedModification.Composition;
-            }
-            else
-            {
+            if (this.SelectedModification.Composition is CompositionWithDeltaMass)
+            {   // Modification with mass shift
+                customModVm.FromFormulaChecked = false;
                 customModVm.FromMassChecked = true;
                 customModVm.Mass = this.SelectedModification.Mass;
+            }
+            else
+            {   // Modification with formula
+                customModVm.FromMassChecked = false;
+                customModVm.FromFormulaChecked = true;
+                customModVm.Composition = this.SelectedModification.Composition;
             }
 
             if (this.dialogService.OpenCustomModification(customModVm))
@@ -177,6 +183,7 @@ namespace LcmsSpectator.ViewModels
             {
                 IcParameters.Instance.UnregisterModification(this.SelectedModification);
                 this.Modifications.Remove(this.SelectedModification);
+                this.SelectedModification = this.Modifications.FirstOrDefault();
             }
         }
     }

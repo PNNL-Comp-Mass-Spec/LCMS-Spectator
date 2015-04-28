@@ -30,7 +30,7 @@
             </MenuItem>
             <MenuItem Header="_Config">
                 <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
-                <MenuItem Header="_Register Modification" Command="{Binding OpenRegisterModificationCommand}" />
+                <MenuItem Header="_Manage Modifications" Command="{Binding OpenManageModificationsCommand}" />
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Command="{Binding OpenAboutBoxCommand}" />
