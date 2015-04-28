@@ -325,7 +325,7 @@ namespace LcmsSpectator.Models
                     {
                         this.Mass = this.sequence.Mass + Composition.H2O.Mass;
                         var ion = new Ion(this.sequence.Composition + Composition.H2O, this.Charge);
-                        this.PrecursorMz = ion.GetMostAbundantIsotopeMz();   
+                        this.PrecursorMz = ion.GetMostAbundantIsotopeMz();
                     }
                 }
 
@@ -353,6 +353,28 @@ namespace LcmsSpectator.Models
             set { this.RaiseAndSetIfChanged(ref this.precursorMz, value); }
         }
         #endregion
+
+        /// <summary>
+        /// Update all modifications in the sequence.
+        /// </summary>
+        public void UpdateModifications()
+        {
+            var aminoAcidSet = new AminoAcidSet();
+            for (int i = 0; i < this.Sequence.Count; i++)
+            {
+                var modAminoAcid = this.Sequence[i] as ModifiedAminoAcid;
+                if (modAminoAcid != null)
+                {
+                    var modification = Modification.Get(modAminoAcid.Modification.Name);
+                    if (modification != null)
+                    {
+                        this.Sequence[i] = new ModifiedAminoAcid(aminoAcidSet.GetAminoAcid(modAminoAcid.Residue), modification);
+                    }
+                }
+            }
+
+            this.Sequence = new Sequence(this.Sequence);
+        }
 
         /// <summary>
         /// Compares this to another PRSM object by Score.
