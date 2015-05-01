@@ -289,11 +289,11 @@ namespace LcmsSpectator.ViewModels
         private void InitializeDefaultFilters()
         {
             // Filter by subsequence
-            this.Filters.Add(new FilterViewModel(
+            this.Filters.Add(new MultiValueFilterViewModel(
                     "Sequence", 
                     "Filter by Sequence", 
-                    "Enter Sequence to filter by:", 
-                    (d, v) => d.Where(datum => ((PrSm)datum).SequenceText.Contains(v)), 
+                    "Enter Sequence to filter by:",
+                    (d, v) => d.Where(p => v.Any(val => ((PrSm)p).SequenceText.Contains(val))), 
                     o => true,
                     this.dialogService,
                     (from prsm in this.Data where prsm.SequenceText.Length > 0 select prsm.SequenceText).Distinct()));
@@ -337,11 +337,11 @@ namespace LcmsSpectator.ViewModels
                     this.dialogService));
 
             // Filter by charge state
-            this.Filters.Add(new FilterViewModel(
+            this.Filters.Add(new MultiValueFilterViewModel(
                     "Charge", 
                     "Filter by Charge", 
                     "Enter Charge to filter by:", 
-                    (d, v) => d.Where(datum => ((PrSm)datum).Charge == Convert.ToInt32(v)), 
+                    (d, v) => d.Where(p => v.Any(val => ((PrSm)p).Charge == Convert.ToInt32(val))),
                     o =>
                         {
                             int conv;
