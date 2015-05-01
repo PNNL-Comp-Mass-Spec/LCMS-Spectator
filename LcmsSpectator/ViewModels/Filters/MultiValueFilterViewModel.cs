@@ -232,7 +232,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         private void FilterImplementation()
         {
-            if (this.Values.Any(value => !this.validator(value)))
+            if (this.Values.Any(v => !this.validator(v)))
             {
                 this.dialogService.MessageBox("Invalid filter value.");
             }
