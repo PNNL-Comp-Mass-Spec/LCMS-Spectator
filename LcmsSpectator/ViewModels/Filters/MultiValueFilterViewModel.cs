@@ -95,7 +95,7 @@ namespace LcmsSpectator.ViewModels.Filters
             cancelCommand.Subscribe(_ => this.CancelImplementation());
             this.CancelCommand = cancelCommand;
 
-            var selectValueCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.Value).Select(v => !string.IsNullOrWhiteSpace(v)));
+            var selectValueCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.Value).Select(v => !string.IsNullOrWhiteSpace(v) && this.validator(v)));
             selectValueCommand.Subscribe(_ => this.SelectValueImplementation());
             this.SelectValueCommand = selectValueCommand;
 
