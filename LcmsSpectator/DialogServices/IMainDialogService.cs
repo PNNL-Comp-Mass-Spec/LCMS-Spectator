@@ -12,7 +12,8 @@ namespace LcmsSpectator.DialogServices
 {
     using System;
     using LcmsSpectator.ViewModels;
-    
+    using LcmsSpectator.ViewModels.Filters;
+
     /// <summary>
     /// Interface for dialog services for opening LCMSSpectator dialog boxes from a view model.
     /// </summary>
@@ -71,7 +72,7 @@ namespace LcmsSpectator.DialogServices
         /// </summary>
         /// <param name="filterViewModel">The view model for the dialog.</param>
         /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
-        bool FilterBox(FilterViewModel filterViewModel);
+        bool FilterBox(IFilter filterViewModel);
 
         /// <summary>
         /// Open an About Box dialog.

@@ -12,8 +12,10 @@ namespace LcmsSpectator.DialogServices
 {
     using System;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Filters;
     using LcmsSpectator.Views;
-    
+    using LcmsSpectator.Views.Filters;
+
     /// <summary>
     /// Dialog services for opening LCMSSpectator dialog boxes from a view model.
     /// </summary>
@@ -122,16 +124,31 @@ namespace LcmsSpectator.DialogServices
         /// </summary>
         /// <param name="filterViewModel">The view model for the dialog.</param>
         /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
-        public bool FilterBox(FilterViewModel filterViewModel)
+        public bool FilterBox(IFilter filterViewModel)
         {
             filterViewModel.ResetStatus();
-            var filterDialog = new FilterView
+
+            if (filterViewModel is FilterViewModel)
             {
-                DataContext = filterViewModel, 
-                Title = filterViewModel.Title
-            };
-            filterViewModel.ReadyToClose += (o, e) => filterDialog.Close();
-            filterDialog.ShowDialog();
+                var filterDialog = new FilterView
+                {
+                    DataContext = filterViewModel,
+                    Title = filterViewModel.Title
+                };
+                filterViewModel.ReadyToClose += (o, e) => filterDialog.Close();
+                filterDialog.ShowDialog();
+            }
+            else if (filterViewModel is MultiValueFilterViewModel)
+            {
+                var filterDialog = new MultiValueFilterView
+                {
+                    DataContext = filterViewModel,
+                    Title = filterViewModel.Title
+                };
+                filterViewModel.ReadyToClose += (o, e) => filterDialog.Close();
+                filterDialog.ShowDialog();
+            }
+
             return filterViewModel.Status;
         }
 

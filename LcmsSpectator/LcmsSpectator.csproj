@@ -239,7 +239,9 @@
     <Compile Include="ViewModels\DmsLookupViewModel.cs" />
     <Compile Include="ViewModels\ErrorMapViewModel.cs" />
     <Compile Include="ViewModels\FeatureViewerViewModel.cs" />
-    <Compile Include="ViewModels\FilterViewModel.cs" />
+    <Compile Include="ViewModels\Filters\FilterViewModel.cs" />
+    <Compile Include="ViewModels\Filters\MultiValueFilterViewModel.cs" />
+    <Compile Include="ViewModels\Filters\IFilter.cs" />
     <Compile Include="ViewModels\HeavyModificationsViewModel.cs" />
     <Compile Include="ViewModels\HeavyModificationsWindowViewModel.cs" />
     <Compile Include="ViewModels\IonListViewModel.cs" />
@@ -283,8 +285,11 @@
     <Compile Include="Views\FeatureViewerView.xaml.cs">
       <DependentUpon>FeatureViewerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\FilterView.xaml.cs">
+    <Compile Include="Views\Filters\FilterView.xaml.cs">
       <DependentUpon>FilterView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Filters\MultiValueFilterView.xaml.cs">
+      <DependentUpon>MultiValueFilterView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\HeavyModificationsView.xaml.cs">
       <DependentUpon>HeavyModificationsView.xaml</DependentUpon>
@@ -395,7 +400,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\FilterView.xaml">
+    <Page Include="Views\Filters\FilterView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Filters\MultiValueFilterView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -496,6 +505,7 @@
   <ItemGroup>
     <None Include="PNNL_Logo.jpg" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.94.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.94.0\build\net40\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

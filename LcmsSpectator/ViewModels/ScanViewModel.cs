@@ -20,6 +20,8 @@ namespace LcmsSpectator.ViewModels
     using InformedProteomics.Backend.MassSpecData;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
+    using LcmsSpectator.ViewModels.Filters;
+
     using ReactiveUI;
     
     /// <summary>
@@ -71,7 +73,7 @@ namespace LcmsSpectator.ViewModels
 
             this.FilteredData = new PrSm[0];
 
-            this.Filters = new ReactiveList<FilterViewModel> { ChangeTrackingEnabled = true };
+            this.Filters = new ReactiveList<IFilter> { ChangeTrackingEnabled = true };
 
             this.Data = new ReactiveList<PrSm> { ChangeTrackingEnabled = true };
             this.InitializeDefaultFilters();
@@ -121,7 +123,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets the list of possible filters.
         /// </summary>
-        public ReactiveList<FilterViewModel> Filters { get; private set; } 
+        public ReactiveList<IFilter> Filters { get; private set; } 
 
         /// <summary>
         /// Gets all unfiltered data.
@@ -297,11 +299,11 @@ namespace LcmsSpectator.ViewModels
                     (from prsm in this.Data where prsm.SequenceText.Length > 0 select prsm.SequenceText).Distinct()));
 
             // Filter by protein name
-            this.Filters.Add(new FilterViewModel(
+            this.Filters.Add(new MultiValueFilterViewModel(
                     "Protein Name", 
                     "Filter by Protein Name", 
                     "Enter protein name to filter by:", 
-                    (d, v) => d.Where(datum => ((PrSm)datum).ProteinName.Contains(v)), 
+                    (d, v) => d.Where(p => v.Any(val => ((PrSm)p).ProteinName.Contains(val))), 
                     o => true, 
                     this.dialogService,
                     (from prsm in this.Data where prsm.ProteinName.Length > 0 select prsm.ProteinName).Distinct()));
