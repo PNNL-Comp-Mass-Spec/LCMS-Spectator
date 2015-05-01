@@ -159,5 +159,11 @@ namespace LcmsSpectatorTests.DialogServices
         {
             throw new NotImplementedException();
         }
+
+
+        public void OpenManageModifications(ManageModificationsViewModel manageModificationsViewModel)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
