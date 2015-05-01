@@ -179,7 +179,12 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void RemoveImplementation()
         {
-            if (this.SelectedModification != null && this.Modifications.Contains(this.SelectedModification))
+            if (this.Modifications.Contains(this.SelectedModification) &&
+                this.dialogService.ConfirmationBox(
+                                    string.Format(
+                                        "Are you sure you would like to delete {0}?",
+                                        this.SelectedModification.Name),
+                                        "Delete Modification"))
             {
                 IcParameters.Instance.UnregisterModification(this.SelectedModification);
                 this.Modifications.Remove(this.SelectedModification);

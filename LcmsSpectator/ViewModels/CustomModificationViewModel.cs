@@ -282,6 +282,12 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void SaveImplementation()
         {
+            if (string.IsNullOrWhiteSpace(this.ModificationName))
+            {
+                this.dialogService.MessageBox("Modification must have a name.");
+                return;
+            }
+
             double massShift = 0.0;
             if (this.FromMassChecked && (string.IsNullOrEmpty(this.massStr) || !double.TryParse(this.massStr, out massShift)))
             {
