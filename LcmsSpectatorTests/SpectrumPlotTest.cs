@@ -16,6 +16,9 @@ using ReactiveUI;
 
 namespace LcmsSpectatorTests
 {
+    using LcmsSpectator.ViewModels.Data;
+    using LcmsSpectator.ViewModels.Plots;
+
     [TestFixture]
     public class SpectrumPlotTest
     {

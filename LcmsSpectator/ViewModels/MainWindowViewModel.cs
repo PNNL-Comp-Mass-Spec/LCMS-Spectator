@@ -23,6 +23,11 @@ namespace LcmsSpectator.ViewModels
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers;
     using LcmsSpectator.Utils;
+    using LcmsSpectator.ViewModels.Data;
+    using LcmsSpectator.ViewModels.Dms;
+    using LcmsSpectator.ViewModels.FileSelectors;
+    using LcmsSpectator.ViewModels.Modifications;
+
     using ReactiveUI;
 
     /// <summary>

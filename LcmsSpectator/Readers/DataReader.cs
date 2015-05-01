@@ -19,6 +19,8 @@ namespace LcmsSpectator.Readers
     using LcmsSpectator.Models;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Data;
+
     using ReactiveUI;
 
     /// <summary>

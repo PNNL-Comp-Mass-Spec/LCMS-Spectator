@@ -5,6 +5,12 @@ using LcmsSpectator.ViewModels;
 
 namespace LcmsSpectatorTests.DialogServices
 {
+    using LcmsSpectator.ViewModels.Dms;
+    using LcmsSpectator.ViewModels.FileSelectors;
+    using LcmsSpectator.ViewModels.Filters;
+    using LcmsSpectator.ViewModels.Modifications;
+    using LcmsSpectator.ViewModels.Plots;
+
     /// <summary>
     /// The purpose of this class is to private a testable dialog service that does not actually
     /// open any dialogs or even touch the WPF framework. Each method in this class simply sets
@@ -128,7 +134,7 @@ namespace LcmsSpectatorTests.DialogServices
         }
 
         public bool FilterOpened { get; private set; }
-        public bool FilterBox(FilterViewModel filterViewModel)
+        public bool FilterBox(IFilter filterViewModel)
         {
             FilterOpened = true;
             return true;

@@ -7,11 +7,12 @@
         xmlns:utils="clr-namespace:LcmsSpectator.Utils"
         xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
         xmlns:models1="clr-namespace:LcmsSpectator.Models"
+        xmlns:data="clr-namespace:LcmsSpectator.ViewModels.Data"
         Title="LcMsSpectator" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:ChargeToStringConverter x:Key="ChargeFormatter" />
-        <DataTemplate DataType="{x:Type viewModels:DataSetViewModel}">
+        <DataTemplate DataType="{x:Type data:DataSetViewModel}">
             <views1:DataSetView />
             
         </DataTemplate>

@@ -10,6 +10,8 @@
     using InformedProteomics.Backend.Data.Spectrometry;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Modifications;
+
     using ReactiveUI;
 
     /// <summary>

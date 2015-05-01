@@ -11,6 +11,8 @@ namespace LcmsSpectatorTests
 {
     using System.Linq;
 
+    using LcmsSpectator.ViewModels.Data;
+
     [TestFixture]
     public class ScanViewTest
     {

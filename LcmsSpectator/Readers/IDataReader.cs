@@ -14,6 +14,7 @@ namespace LcmsSpectator.Readers
     using System.Threading.Tasks;
     using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Data;
 
     /// <summary>
     /// The DataReader is an interface for reading raw files, ID files, and feature files.

@@ -231,58 +231,58 @@
     <Compile Include="Utils\IonUtils.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
-    <Compile Include="ViewModels\CreateSequenceViewModel.cs" />
-    <Compile Include="ViewModels\CustomModificationViewModel.cs" />
-    <Compile Include="ViewModels\DataSetViewModel.cs" />
-    <Compile Include="ViewModels\DmsDatasetViewModel.cs" />
-    <Compile Include="ViewModels\DmsJobViewModel.cs" />
-    <Compile Include="ViewModels\DmsLookupViewModel.cs" />
-    <Compile Include="ViewModels\ErrorMapViewModel.cs" />
-    <Compile Include="ViewModels\FeatureViewerViewModel.cs" />
+    <Compile Include="ViewModels\Data\CreateSequenceViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\CustomModificationViewModel.cs" />
+    <Compile Include="ViewModels\Data\DataSetViewModel.cs" />
+    <Compile Include="ViewModels\Dms\DmsDatasetViewModel.cs" />
+    <Compile Include="ViewModels\Dms\DmsJobViewModel.cs" />
+    <Compile Include="ViewModels\Dms\DmsLookupViewModel.cs" />
+    <Compile Include="ViewModels\Plots\ErrorMapViewModel.cs" />
+    <Compile Include="ViewModels\Plots\FeatureViewerViewModel.cs" />
     <Compile Include="ViewModels\Filters\FilterViewModel.cs" />
     <Compile Include="ViewModels\Filters\MultiValueFilterViewModel.cs" />
     <Compile Include="ViewModels\Filters\IFilter.cs" />
-    <Compile Include="ViewModels\HeavyModificationsViewModel.cs" />
-    <Compile Include="ViewModels\HeavyModificationsWindowViewModel.cs" />
-    <Compile Include="ViewModels\IonListViewModel.cs" />
-    <Compile Include="ViewModels\IonTypeSelectorViewModel.cs" />
-    <Compile Include="ViewModels\IsotopicEnvelopePlotViewModel.cs" />
-    <Compile Include="ViewModels\LabeledIonViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\HeavyModificationsViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\HeavyModificationsWindowViewModel.cs" />
+    <Compile Include="ViewModels\Data\IonListViewModel.cs" />
+    <Compile Include="ViewModels\Data\IonTypeSelectorViewModel.cs" />
+    <Compile Include="ViewModels\Plots\IsotopicEnvelopePlotViewModel.cs" />
+    <Compile Include="ViewModels\Data\LabeledIonViewModel.cs" />
     <Compile Include="ViewModels\LoadingScreenViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
-    <Compile Include="ViewModels\ManageModificationsViewModel.cs" />
-    <Compile Include="ViewModels\ModificationViewModel.cs" />
-    <Compile Include="ViewModels\SelectModificationViewModel.cs" />
-    <Compile Include="ViewModels\OpenDataWindowViewModel.cs" />
-    <Compile Include="ViewModels\ScanViewModel.cs" />
-    <Compile Include="ViewModels\SelectDataSetViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\ManageModificationsViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\ModificationViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\SelectModificationViewModel.cs" />
+    <Compile Include="ViewModels\FileSelectors\OpenDataWindowViewModel.cs" />
+    <Compile Include="ViewModels\Data\ScanViewModel.cs" />
+    <Compile Include="ViewModels\FileSelectors\SelectDataSetViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
-    <Compile Include="ViewModels\SpectrumPlotViewModel.cs" />
-    <Compile Include="ViewModels\SpectrumViewModel.cs" />
-    <Compile Include="ViewModels\XicPlotViewModel.cs" />
-    <Compile Include="ViewModels\XicViewModel.cs" />
+    <Compile Include="ViewModels\Plots\SpectrumPlotViewModel.cs" />
+    <Compile Include="ViewModels\Plots\SpectrumViewModel.cs" />
+    <Compile Include="ViewModels\Plots\XicPlotViewModel.cs" />
+    <Compile Include="ViewModels\Plots\XicViewModel.cs" />
     <Compile Include="Views\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\CreateSequenceView.xaml.cs">
+    <Compile Include="Views\Data\CreateSequenceView.xaml.cs">
       <DependentUpon>CreateSequenceView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\CustomModificationView.xaml.cs">
+    <Compile Include="Views\Modifications\CustomModificationView.xaml.cs">
       <DependentUpon>CustomModificationView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\DataSetView.xaml.cs">
+    <Compile Include="Views\Data\DataSetView.xaml.cs">
       <DependentUpon>DataSetView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\DmsLookupView.xaml.cs">
       <DependentUpon>DmsLookupView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ErrorMap.xaml.cs">
+    <Compile Include="Views\Plots\ErrorMap.xaml.cs">
       <DependentUpon>ErrorMap.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ErrorMapWindow.xaml.cs">
+    <Compile Include="Views\Plots\ErrorMapWindow.xaml.cs">
       <DependentUpon>ErrorMapWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\FeatureViewerView.xaml.cs">
+    <Compile Include="Views\Plots\FeatureViewerView.xaml.cs">
       <DependentUpon>FeatureViewerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Filters\FilterView.xaml.cs">
@@ -291,16 +291,16 @@
     <Compile Include="Views\Filters\MultiValueFilterView.xaml.cs">
       <DependentUpon>MultiValueFilterView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\HeavyModificationsView.xaml.cs">
+    <Compile Include="Views\Modifications\HeavyModificationsView.xaml.cs">
       <DependentUpon>HeavyModificationsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\HeavyModificationsWindow.xaml.cs">
+    <Compile Include="Views\Modifications\HeavyModificationsWindow.xaml.cs">
       <DependentUpon>HeavyModificationsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\IonListView.xaml.cs">
+    <Compile Include="Views\Data\IonListView.xaml.cs">
       <DependentUpon>IonListView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\IonTypeSelector.xaml.cs">
+    <Compile Include="Views\Data\IonTypeSelector.xaml.cs">
       <DependentUpon>IonTypeSelector.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\LoadingScreen.xaml.cs">
@@ -310,26 +310,26 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Views\ManageModificationsWindow.xaml.cs">
+    <Compile Include="Views\Modifications\ManageModificationsWindow.xaml.cs">
       <DependentUpon>ManageModificationsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\OpenDataWindow.xaml.cs">
+    <Compile Include="Views\FileSelectors\OpenDataWindow.xaml.cs">
       <DependentUpon>OpenDataWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\PrSmView.xaml.cs">
+    <Compile Include="Views\Data\PrSmView.xaml.cs">
       <DependentUpon>PrSmView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SelectDataSetView.xaml.cs">
+    <Compile Include="Views\FileSelectors\SelectDataSetView.xaml.cs">
       <DependentUpon>SelectDataSetView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SpectrumView.xaml.cs">
+    <Compile Include="Views\Plots\SpectrumView.xaml.cs">
       <DependentUpon>SpectrumView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Views\XicView.xaml.cs">
+    <Compile Include="Views\Plots\XicView.xaml.cs">
       <DependentUpon>XicView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
@@ -372,15 +372,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\CreateSequenceView.xaml">
+    <Page Include="Views\Data\CreateSequenceView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\CustomModificationView.xaml">
+    <Page Include="Views\Modifications\CustomModificationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\DataSetView.xaml">
+    <Page Include="Views\Data\DataSetView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -388,15 +388,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ErrorMap.xaml">
+    <Page Include="Views\Plots\ErrorMap.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ErrorMapWindow.xaml">
+    <Page Include="Views\Plots\ErrorMapWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\FeatureViewerView.xaml">
+    <Page Include="Views\Plots\FeatureViewerView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -408,19 +408,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\HeavyModificationsView.xaml">
+    <Page Include="Views\Modifications\HeavyModificationsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\HeavyModificationsWindow.xaml">
+    <Page Include="Views\Modifications\HeavyModificationsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\IonListView.xaml">
+    <Page Include="Views\Data\IonListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\IonTypeSelector.xaml">
+    <Page Include="Views\Data\IonTypeSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -432,19 +432,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ManageModificationsWindow.xaml">
+    <Page Include="Views\Modifications\ManageModificationsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\OpenDataWindow.xaml">
+    <Page Include="Views\FileSelectors\OpenDataWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\PrSmView.xaml">
+    <Page Include="Views\Data\PrSmView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SelectDataSetView.xaml">
+    <Page Include="Views\FileSelectors\SelectDataSetView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -452,11 +452,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\SpectrumView.xaml">
+    <Page Include="Views\Plots\SpectrumView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\XicView.xaml">
+    <Page Include="Views\Plots\XicView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -501,9 +501,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\PNNL_Logo.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="PNNL_Logo.jpg" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

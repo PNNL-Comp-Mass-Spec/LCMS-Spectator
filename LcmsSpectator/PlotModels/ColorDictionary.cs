@@ -14,6 +14,8 @@ namespace LcmsSpectator.PlotModels
     using System.Collections.Generic;
     using InformedProteomics.Backend.Data.Spectrometry;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Data;
+
     using OxyPlot;
     
     /// <summary>

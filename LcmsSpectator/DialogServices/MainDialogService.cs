@@ -12,9 +12,16 @@ namespace LcmsSpectator.DialogServices
 {
     using System;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Dms;
+    using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Filters;
+    using LcmsSpectator.ViewModels.Modifications;
+    using LcmsSpectator.ViewModels.Plots;
     using LcmsSpectator.Views;
+    using LcmsSpectator.Views.FileSelectors;
     using LcmsSpectator.Views.Filters;
+    using LcmsSpectator.Views.Modifications;
+    using LcmsSpectator.Views.Plots;
 
     /// <summary>
     /// Dialog services for opening LCMSSpectator dialog boxes from a view model.

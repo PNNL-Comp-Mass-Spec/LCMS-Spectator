@@ -15,6 +15,9 @@ using OxyPlot.Axes;
 
 namespace LcmsSpectatorTests
 {
+    using LcmsSpectator.ViewModels.Data;
+    using LcmsSpectator.ViewModels.Plots;
+
     [TestFixture]
     public class SpectrumViewTest
     {

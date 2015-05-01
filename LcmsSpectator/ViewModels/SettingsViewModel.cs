@@ -15,6 +15,8 @@ namespace LcmsSpectator.ViewModels
     using InformedProteomics.Backend.Data.Spectrometry;
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
+    using LcmsSpectator.ViewModels.Modifications;
+
     using ReactiveUI;
     
     /// <summary>
