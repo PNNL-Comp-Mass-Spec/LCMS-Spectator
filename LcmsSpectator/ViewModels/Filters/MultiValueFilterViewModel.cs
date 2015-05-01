@@ -156,7 +156,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <summary>
         /// Gets the default possible values to filter by.
         /// </summary>
-        public IEnumerable<string> DefaultValues { get; private set; }
+        public IEnumerable<object> DefaultValues { get; private set; }
 
         /// <summary>
         /// Gets or sets the selected value for the filter.

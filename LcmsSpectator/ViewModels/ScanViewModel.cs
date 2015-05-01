@@ -405,7 +405,7 @@ namespace LcmsSpectator.ViewModels
                     "Raw File Name", 
                     "Filter by data set name", 
                     "Enter data set to filter by:", 
-                    (d, v) => d.Where(datum => ((PrSm)datum).RawFileName.Contains(v)), 
+                    (d, v) => d.Where(datum => ((PrSm)datum).RawFileName.Contains((string)v)), 
                     o => true, 
                     this.dialogService,
                     (from prsm in this.Data where prsm.RawFileName.Length > 0 select prsm.RawFileName).Distinct()));

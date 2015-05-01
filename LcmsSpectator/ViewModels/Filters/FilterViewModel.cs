@@ -12,7 +12,6 @@ namespace LcmsSpectator.ViewModels.Filters
 {
     using System;
     using System.Collections.Generic;
-    using System.Windows.Input;
     using LcmsSpectator.DialogServices;
     using ReactiveUI;
 
@@ -91,7 +90,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <param name="data">The data to filter.</param>
         /// <param name="value">The value of the filter.</param>
         /// <returns>The filtered data.</returns>
-        public delegate IEnumerable<object> FilterFunction(IEnumerable<object> data, string value);
+        public delegate IEnumerable<object> FilterFunction(IEnumerable<object> data, object value);
 
         /// <summary>
         /// Delegate defining interface of function that validates a filter value.
@@ -132,12 +131,12 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <summary>
         /// Gets the default possible values to filter by.
         /// </summary>
-        public IEnumerable<string> DefaultValues { get; private set; }
+        public IEnumerable<object> DefaultValues { get; private set; }
 
         /// <summary>
         /// Gets or sets the selected value for the filter.
         /// </summary>
-        public string Value { get; set; }
+        public object Value { get; set; }
 
         /// <summary>
         /// Gets a command that sets status to true if a valid filter has been selected
