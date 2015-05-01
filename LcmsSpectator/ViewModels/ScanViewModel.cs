@@ -2,7 +2,7 @@
 // <copyright file="ScanViewModel.cs" company="Pacific Northwest National Laboratory">
 //   2015 Pacific Northwest National Laboratory
 // </copyright>
-// <author>Christopher Wilkins</author>>
+// <author>Christopher Wilkins</author>
 // <summary>
 //   This class maintains a filterable list of Protein-Spectrum-Match identifications.
 // </summary>

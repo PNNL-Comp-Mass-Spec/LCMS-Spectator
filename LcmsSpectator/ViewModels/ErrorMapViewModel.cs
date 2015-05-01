@@ -218,7 +218,7 @@ namespace LcmsSpectator.ViewModels
             {
                 if (y.Equals(0))
                 {
-                    return " ";
+                    return string.Empty;
                 }
 
                 var ionType = ionTypes[Math.Min((int)y - 1, ionTypes.Length - 1)];
