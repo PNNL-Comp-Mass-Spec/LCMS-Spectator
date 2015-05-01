@@ -106,8 +106,8 @@ namespace LcmsSpectator.ViewModels
             PlotModel.Axes.Add(this.yAxis);
 
             // Init Color axis
-            var minColor = OxyColors.Navy;
-            var medColor = OxyColor.FromRgb(127, 255, 0);
+            var minColor = OxyColor.FromRgb(127, 255, 0);
+            var medColor = OxyColors.Navy;
             var maxColor = OxyColor.FromRgb(255, 0, 0);
             this.colorAxis = new LinearColorAxis
             {
