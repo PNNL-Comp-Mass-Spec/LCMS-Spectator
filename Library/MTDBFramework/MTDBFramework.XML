@@ -2525,6 +2525,36 @@
             <param name="results">Object to populate with the results of the Mapping</param>
             <param name="path">Path to MZIdentML file</param>
         </member>
+        <member name="T:MTDBFramework.IO.MzIdentMlReader.NativeIdConversion">
+            <summary>
+            Provides functionality to interpret a NativeID as a integer scan number
+            Code is ported from MSData.cpp in ProteoWizard
+            </summary>
+        </member>
+        <member name="M:MTDBFramework.IO.MzIdentMlReader.NativeIdConversion.TryGetScanNumberLong(System.String,System.Int64@)">
+            <summary>
+            Performs a "long.TryParse" on the interpreted scan number (single shot function)
+            </summary>
+            <param name="nativeId"></param>
+            <param name="num"></param>
+            <returns></returns>
+        </member>
+        <member name="M:MTDBFramework.IO.MzIdentMlReader.NativeIdConversion.TryGetScanNumberInt(System.String,System.Int32@)">
+            <summary>
+            Performs a "int.TryParse" on the interpreted scan number (single shot function)
+            </summary>
+            <param name="nativeId"></param>
+            <param name="num"></param>
+            <returns></returns>
+        </member>
+        <member name="M:MTDBFramework.IO.MzIdentMlReader.NativeIdConversion.GetScanNumber(System.String)">
+            <summary>
+            Returns the integer-only portion of the nativeID that can be used for a scan number
+            If the nativeID cannot be interpreted, the original value is returned.
+            </summary>
+            <param name="nativeId"></param>
+            <returns></returns>
+        </member>
         <member name="T:MTDBFramework.IO.SequestPhrpReader">
             <summary>
             Summary Description for SequestPHRP Reader

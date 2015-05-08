@@ -806,7 +806,7 @@ PHRPReader
  </summary>
 	<param name="strData"></param>
 	<returns>True if a number, otherwise false</returns>
-</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnIndex(System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32}@)">
+</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnIndex(System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32})">
 	<summary>
  Returns the index of the indicated column, as tracked by objColumnHeaders
  </summary>
@@ -814,31 +814,31 @@ PHRPReader
 	<param name="objColumnHeaders"></param>
 	<returns></returns>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[]@,System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32}@)">
+</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[],System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32})">
 	<summary>
  Returns the string stored in the given named column (using objColumnHeaders to dereference column name with column index)
  </summary>
 	<returns>The text in the specified column; an empty string if the specific column name is not recognized</returns>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[]@,System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32}@,System.String)">
+</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[],System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32},System.String)">
 	<summary>
  Returns the string stored in the given named column (using objColumnHeaders to dereference column name with column index)
  </summary>
 	<returns>The text in the specified column; strValueIfMissing if the specific column name is not recognized</returns>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[]@,System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32}@,System.Int32)">
+</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[],System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32},System.Int32)">
 	<summary>
  Returns the value stored in the given named column (using objColumnHeaders to dereference column name with column index)
  </summary>
 	<returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[]@,System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32}@,System.Double)">
+</member><member name="M:PHRPReader.clsPHRPReader.LookupColumnValue(System.String[],System.String,System.Collections.Generic.SortedDictionary{System.String,System.Int32},System.Double)">
 	<summary>
  Returns the value stored in the given named column (using objColumnHeaders to dereference column name with column index)
  </summary>
 	<returns>The number in the specified column; 0 if the specific column name is not recognized or the column does not contain a number</returns>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.ParseColumnHeaders(System.String[],System.Collections.Generic.SortedDictionary{System.String,System.Int32}@)">
+</member><member name="M:PHRPReader.clsPHRPReader.ParseColumnHeaders(System.String[],System.Collections.Generic.SortedDictionary{System.String,System.Int32})">
 	<summary>
  Updates the column name to column index mapping in objColumnHeaders
  </summary>
@@ -857,7 +857,7 @@ PHRPReader
  is a peptide of interest, you call this function to finalize any processing steps that were skipped
  </summary>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPReader.ReadModSummaryFile(System.String,System.Collections.Generic.SortedDictionary{System.Char,PHRPReader.clsModificationDefinition}@,System.Collections.Generic.SortedDictionary{System.String,System.Collections.Generic.List{PHRPReader.clsModificationDefinition}}@)">
+</member><member name="M:PHRPReader.clsPHRPReader.ReadModSummaryFile(System.String,System.Collections.Generic.SortedDictionary{System.Char,PHRPReader.clsModificationDefinition},System.Collections.Generic.SortedDictionary{System.String,System.Collections.Generic.List{PHRPReader.clsModificationDefinition}})">
 	<summary>
  Reads the data in strModSummaryFilePath.  Populates objDynamicMods and objStaticMods with the modification definitions
  </summary>
@@ -963,7 +963,7 @@ PHRPReader
 	<param name="strInputFilePath">Input file path</param>
 	<param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPParserXTandem.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters@,System.Double@)">
+</member><member name="M:PHRPReader.clsPHRPParserXTandem.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters,System.Double@)">
 	<summary>
  Determines the precursor mass tolerance
  </summary>
@@ -1013,7 +1013,7 @@ PHRPReader
 	<param name="strInputFilePath">Input file path</param>
 	<param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPParserSequest.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters@,System.Double@)">
+</member><member name="M:PHRPReader.clsPHRPParserSequest.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters,System.Double@)">
 	<summary>
  Determines the precursor mass tolerance
  </summary>
@@ -1251,7 +1251,7 @@ PHRPReader
 	<param name="DigitsOfPrecision"></param>
 	<returns></returns>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPParser.ParseColumnHeaders(System.String[]@)">
+</member><member name="M:PHRPReader.clsPHRPParser.ParseColumnHeaders(System.String[])">
 	<summary>
  Parse the column names in strSplitLine and update the local column header mapping
  </summary>
@@ -1274,7 +1274,7 @@ PHRPReader
 	<param name="strCommentChar">If defined, then looks for this character in the value portion of the setting and removes that character plus any text after it</param>
 	<returns>KeyValuePair with key and value from strText; key and value will be empty if chDelimiter was not found</returns>
 	<remarks>Automatically trims whitespace</remarks>
-</member><member name="M:PHRPReader.clsPHRPParser.UpdatePSMUsingSeqInfo(PHRPReader.clsPSM@)">
+</member><member name="M:PHRPReader.clsPHRPParser.UpdatePSMUsingSeqInfo(PHRPReader.clsPSM)">
 	<summary>
  Updates the theoretical (computed) monoisotopic mass of objPSM using mResultToSeqMap and mSeqInfo
  Also updates the modification info
@@ -1306,7 +1306,7 @@ PHRPReader
 	<param name="strInputFilePath">Input file path</param>
 	<param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPParserInspect.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters@,System.Double@)">
+</member><member name="M:PHRPReader.clsPHRPParserInspect.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters,System.Double@)">
 	<summary>
  Determines the precursor mass tolerance
  </summary>
@@ -1355,7 +1355,7 @@ PHRPReader
 	<param name="strInputFilePath">Input file path</param>
 	<param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPParserMSGFDB.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters@,System.Double@)">
+</member><member name="M:PHRPReader.clsPHRPParserMSGFDB.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters,System.Double@)">
 	<summary>
  Determines the precursor mass tolerance
  </summary>
@@ -1409,7 +1409,7 @@ PHRPReader
 	<param name="strInputFilePath">Input file path</param>
 	<param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPParserMODa.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters@,System.Double@)">
+</member><member name="M:PHRPReader.clsPHRPParserMODa.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters,System.Double@)">
 	<summary>
  Determines the precursor mass tolerance
  </summary>
@@ -1458,7 +1458,7 @@ PHRPReader
 	<param name="strInputFilePath">Input file path</param>
 	<param name="startupOptions">Startup Options, in particular LoadModsAndSeqInfo and mMaxProteinsPerPSM</param>
 	<remarks></remarks>
-</member><member name="M:PHRPReader.clsPHRPParserMSAlign.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters@,System.Double@)">
+</member><member name="M:PHRPReader.clsPHRPParserMSAlign.DeterminePrecursorMassTolerance(PHRPReader.clsSearchEngineParameters,System.Double@)">
 	<summary>
  Determines the precursor mass tolerance
  </summary>
@@ -1613,6 +1613,27 @@ PHRPReader
  </summary>
 	<param name="strInputFilePath">Input file path</param>
 	<returns>A Dictionary where keys are ScanNumber and values are clsScanStatsInfo objects</returns>
+</member><member name="P:PHRPReader.clsAminoAcidModInfo.AmbiguousMod">
+	<summary>
+ True if the location of the modification is ambiguous
+ </summary>
+	<value></value>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="P:PHRPReader.clsAminoAcidModInfo.EndResidueLocInPeptide">
+	<summary>
+ For ambiguous mods, indicates the last residue on which the mod could appear.  For non-ambiguous mods, whill be the same as ResidueLocInPeptide
+ </summary>
+	<value></value>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="P:PHRPReader.clsAminoAcidModInfo.ResidueLocInPeptide">
+	<summary>
+ Indicates the residue number modified; the first residue is at position 1
+ </summary>
+	<value></value>
+	<returns></returns>
+	<remarks>For ambiguous mods, indicates the first residue on which the mod could appear</remarks>
 </member><member name="M:PHRPReader.clsModificationDefinition.CanAffectPeptideOrProteinTerminus">
 	<summary>
  Returns True if this modification can affect the peptide or protein terminus
