@@ -73,7 +73,7 @@ namespace LcmsSpectator.ViewModels.Plots
         public ErrorMapViewModel(IDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.White };
+            this.PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
 
             // Init x axis
             this.xAxis = new LinearAxis
@@ -109,18 +109,17 @@ namespace LcmsSpectator.ViewModels.Plots
 
             // Init Color axis
             var minColor = OxyColor.FromRgb(127, 255, 0);
-            var medColor = OxyColors.Navy;
             var maxColor = OxyColor.FromRgb(255, 0, 0);
             this.colorAxis = new LinearColorAxis
             {
                 Title = "Error",
                 Position = AxisPosition.Right,
                 AbsoluteMinimum = 0,
-                Palette = OxyPalette.Interpolate(1000, minColor, medColor, maxColor),
+                Palette = OxyPalette.Interpolate(1000, minColor, maxColor),
                 Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
                 Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
                 AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
-                LowColor = OxyColors.White,
+                LowColor = OxyColors.Navy,
             };
             this.PlotModel.Axes.Add(this.colorAxis);
 
