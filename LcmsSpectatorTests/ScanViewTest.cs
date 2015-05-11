@@ -12,6 +12,7 @@ namespace LcmsSpectatorTests
     using System.Linq;
 
     using LcmsSpectator.ViewModels.Data;
+    using LcmsSpectator.ViewModels.Filters;
 
     [TestFixture]
     public class ScanViewTest
@@ -38,14 +39,15 @@ namespace LcmsSpectatorTests
 
             // add filters
             ////scanVm.AddFilter("Sequence", "EAQ");
-            var sequenceFilter = scanVm.Filters.FirstOrDefault(x => x.Name == "Sequence");
+            var sequenceFilter = scanVm.Filters.FirstOrDefault(x => x.Name == "Sequence") as MultiValueFilterViewModel;
             Assert.NotNull(sequenceFilter);
-            sequenceFilter.Value = "EAQ";
+            sequenceFilter.Values.Add("EAQ");
            
             /////scanVm.AddFilter("Protein", "YLR");
-            var proteinFilter = scanVm.Filters.FirstOrDefault(x => x.Name == "Protein Name");
+            var proteinFilter =
+                scanVm.Filters.FirstOrDefault(x => x.Name == "Protein Name") as MultiValueFilterViewModel;
             Assert.NotNull(proteinFilter);
-            sequenceFilter.Value = "YLR";
+            sequenceFilter.Values.Add("YLR");
 
             // Sanity check: there should be fewer PrSms than before
             Assert.True(scanVm.FilteredData.Length < prsms.Count);
