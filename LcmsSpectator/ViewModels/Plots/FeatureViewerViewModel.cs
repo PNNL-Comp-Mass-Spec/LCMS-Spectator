@@ -44,7 +44,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// The total number of distinct colors for the MS/MS scans.
         /// </summary>
-        private const int DistinctMsMsColors = 12;
+        private const int DistinctMsMsColors = 11;
 
         /// <summary>
         /// Dialog service for opening dialogs from the view model.
@@ -127,9 +127,34 @@ namespace LcmsSpectator.ViewModels.Plots
         private PrSm selectedPrSmPoint;
 
         /// <summary>
+        /// A value indicating whether the manual adjustment text boxes should be displayed.
+        /// </summary>
+        private bool showManualAdjustment;
+
+        /// <summary>
         /// The Plot model for the feature map.
         /// </summary>
         private PlotModel featureMap;
+
+        /// <summary>
+        /// The minimum for the X axis of the feature map.
+        /// </summary>
+        private double featurePlotXMinimum;
+
+        /// <summary>
+        /// The maximum for the X axis of the feature map.
+        /// </summary>
+        private double featurePlotXMaximum;
+
+        /// <summary>
+        /// The minimum for the X axis of the feature map.
+        /// </summary>
+        private double featurePlotYMinimum;
+
+        /// <summary>
+        /// The maximum for the Y axis of the feature map.
+        /// </summary>
+        private double featurePlotYMaximum;
 
         /// <summary>
         /// The view model for the isotopic envelope spectrum.
@@ -249,7 +274,6 @@ namespace LcmsSpectator.ViewModels.Plots
                 Palette = OxyPalette.Interpolate(
                                                  NumColors,
                                                  OxyColors.Purple,
-                                                 OxyColors.Black,
                                                  OxyColors.Green,
                                                  OxyColors.Yellow,
                                                  OxyColors.Blue,
@@ -272,6 +296,8 @@ namespace LcmsSpectator.ViewModels.Plots
             bool isInternalChange = false;
             this.xAxis.AxisChanged += (o, e) =>
             {
+                this.FeaturePlotXMinimum = Math.Round(this.xAxis.ActualMinimum, 3);
+                this.FeaturePlotXMaximum = Math.Round(this.xAxis.ActualMaximum, 3);
                 if (!isInternalChange && this.highlight != null &&
                     this.highlight.TextPosition.X >= this.xAxis.ActualMinimum && this.highlight.TextPosition.X <= this.xAxis.ActualMaximum &&
                    this.highlight.TextPosition.Y >= this.yAxis.ActualMinimum && this.highlight.TextPosition.Y <= this.yAxis.ActualMaximum)
@@ -286,6 +312,8 @@ namespace LcmsSpectator.ViewModels.Plots
             };
             this.yAxis.AxisChanged += (o, e) =>
             {
+                this.FeaturePlotYMinimum = Math.Round(this.yAxis.ActualMinimum, 3);
+                this.FeaturePlotYMaximum = Math.Round(this.yAxis.ActualMaximum, 3);
                 if (!isInternalChange && this.highlight != null &&
                     this.highlight.TextPosition.X >= this.xAxis.ActualMinimum && this.highlight.TextPosition.X <= this.xAxis.ActualMaximum &&
                     this.highlight.TextPosition.Y >= this.yAxis.ActualMinimum && this.highlight.TextPosition.Y <= this.yAxis.ActualMaximum)
@@ -350,12 +378,32 @@ namespace LcmsSpectator.ViewModels.Plots
                     this.SetHighlight(selectedPrSm);
                     this.FeatureMap.InvalidatePlot(true);
                     this.SelectedPrSm.WhenAnyValue(x => x.Scan)
-                                .Subscribe(scan =>
-                                {
-                                    this.SetHighlight(selectedPrSm);
-                                    this.FeatureMap.InvalidatePlot(true);
-                                });
+                        .Subscribe(scan =>
+                        {
+                            this.SetHighlight(selectedPrSm);
+                            this.FeatureMap.InvalidatePlot(true);
+                        });
                 });
+
+            // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
+            this.WhenAnyValue(x => x.FeaturePlotXMinimum, x => x.FeaturePlotXMaximum)
+                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
+                .Where(x => !this.xAxis.ActualMinimum.Equals(x.Item1) || !this.xAxis.ActualMaximum.Equals(x.Item2))
+                .Subscribe(
+                    x =>
+                        {
+                            this.xAxis.Zoom(x.Item1, x.Item2);
+                            this.FeatureMap.InvalidatePlot(false);
+                        });
+            this.WhenAnyValue(y => y.FeaturePlotYMinimum, x => x.FeaturePlotYMaximum)
+                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
+                .Where(y => !this.yAxis.ActualMinimum.Equals(y.Item1) || !this.yAxis.ActualMaximum.Equals(y.Item2))
+                .Subscribe(
+                    y =>
+                        {
+                            this.yAxis.Zoom(y.Item1, y.Item2);
+                            this.FeatureMap.InvalidatePlot(false);
+                        });
 
             // Update plot if score threshold, abundance threshold, or points displayed changes
             this.WhenAnyValue(x => x.AbundanceThreshold, x => x.PointsDisplayed)
@@ -389,6 +437,42 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.featureMap; }
             private set { this.RaiseAndSetIfChanged(ref this.featureMap, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum for the X axis of the feature map.
+        /// </summary>
+        public double FeaturePlotXMinimum
+        {
+            get { return this.featurePlotXMinimum; }
+            set { this.RaiseAndSetIfChanged(ref this.featurePlotXMinimum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum for the X axis of the feature map.
+        /// </summary>
+        public double FeaturePlotXMaximum
+        {
+            get { return this.featurePlotXMaximum; }
+            set { this.RaiseAndSetIfChanged(ref this.featurePlotXMaximum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum for the Y axis of the feature map.
+        /// </summary>
+        public double FeaturePlotYMinimum
+        {
+            get { return this.featurePlotYMinimum; }
+            set { this.RaiseAndSetIfChanged(ref this.featurePlotYMinimum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum for the Y axis of the feature map.
+        /// </summary>
+        public double FeaturePlotYMaximum
+        {
+            get { return this.featurePlotYMaximum; }
+            set { this.RaiseAndSetIfChanged(ref this.featurePlotYMaximum, value); }
         }
 
         /// <summary>
@@ -502,6 +586,15 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.selectedPrSm; }
             set { this.RaiseAndSetIfChanged(ref this.selectedPrSm, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the manual adjustment text boxes should be displayed.
+        /// </summary>
+        public bool ShowManualAdjustment
+        {
+            get { return this.showManualAdjustment; }
+            set { this.RaiseAndSetIfChanged(ref this.showManualAdjustment, value); }
         }
 
         /// <summary>

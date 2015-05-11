@@ -21,18 +21,44 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" MaxWidth="560" Name="IsotopeColumn" />
         </Grid.ColumnDefinitions>
-        <wpf:PlotView Grid.Column="0" Name="FeatureMap" Model="{Binding FeatureMap}" Margin="0,0,10,0">
-            <wpf:PlotView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundIdMs2}" Header="Show Identified ms2s with features"/>
-                    <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundUnIdMs2}" Header="Show Unidentified ms2s with features"/>
-                    <!--<MenuItem IsCheckable="True" IsChecked="{Binding ShowNotFoundMs2}" Header="Show ids with no features"/> -->
-                </ContextMenu>
-            </wpf:PlotView.ContextMenu>
-            <wpf:PlotView.InputBindings>
-                <MouseBinding Command="{Binding FeatureSelectedCommand}" MouseAction="LeftDoubleClick" />
-            </wpf:PlotView.InputBindings>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="25" Name="AdjustXRow" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="25" Name="AdjustYColumn" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left" Name="XMin" Text="{Binding FeaturePlotXMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Right" Name="XMax"  Text="{Binding FeaturePlotXMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBox Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Bottom" Name="YMin" Text="{Binding FeaturePlotYMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </TextBox.LayoutTransform>
+            </TextBox>
+            <TextBox Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Top" Name="YMax" Text="{Binding FeaturePlotYMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </TextBox.LayoutTransform>
+            </TextBox>
+
+            <wpf:PlotView Grid.Row="0" Grid.Column="1" Name="FeatureMap" Model="{Binding FeatureMap}" Margin="0,0,10,0">
+                <wpf:PlotView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundIdMs2}" Header="Show _Identified ms2s with features"/>
+                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundUnIdMs2}" Header="Show _Unidentified ms2s with features"/>
+                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustment" />
+                        <!--<MenuItem IsCheckable="True" IsChecked="{Binding ShowNotFoundMs2}" Header="Show ids with no features"/> -->
+                    </ContextMenu>
+                </wpf:PlotView.ContextMenu>
+                <wpf:PlotView.InputBindings>
+                    <MouseBinding Command="{Binding FeatureSelectedCommand}" MouseAction="LeftDoubleClick" />
+                </wpf:PlotView.InputBindings>
             </wpf:PlotView>
+        </Grid>
         <Expander Grid.Row="0" Grid.Column="1" ExpandDirection="Right" MaxWidth="540" IsExpanded="{Binding IsotopicEnvelopeExpanded}"
                   Background="White">
             <Expander.Header>

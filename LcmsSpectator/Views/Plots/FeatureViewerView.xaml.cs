@@ -12,6 +12,7 @@ namespace LcmsSpectator.Views.Plots
 {
     using System;
     using System.Globalization;
+    using System.Windows;
     using System.Windows.Controls;
 
     /// <summary>
@@ -25,6 +26,44 @@ namespace LcmsSpectator.Views.Plots
         public FeatureViewerView()
         {
             this.InitializeComponent();
+
+            this.AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
+            this.AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
+            this.XMin.Visibility = Visibility.Collapsed;
+            this.XMax.Visibility = Visibility.Collapsed;
+            this.YMin.Visibility = Visibility.Collapsed;
+            this.YMax.Visibility = Visibility.Collapsed;
+            this.ManualAdjustment.Checked += this.ManualAdjustmentChecked;
+            this.ManualAdjustment.Unchecked += this.ManualAdjustmentChecked;
+        }
+
+        /// <summary>
+        /// Event handler for checkbox on Manual Adjustment context menu item.
+        /// </summary>
+        /// <param name="sender">The menu item that was checked.</param>
+        /// <param name="args">The event arguments.</param>
+        public void ManualAdjustmentChecked(object sender, EventArgs args)
+        {
+            if (this.ManualAdjustment.IsChecked)
+            {
+                this.AdjustXRow.Height = new GridLength(25, GridUnitType.Pixel);
+                this.AdjustYColumn.Width = new GridLength(25, GridUnitType.Pixel);
+                this.XMin.Visibility = Visibility.Visible;
+                this.XMax.Visibility = Visibility.Visible;
+                this.YMin.Visibility = Visibility.Visible;
+                this.YMax.Visibility = Visibility.Visible;
+                this.InvalidateVisual();
+            }
+            else
+            {
+                this.AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
+                this.AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
+                this.XMin.Visibility = Visibility.Collapsed;
+                this.XMax.Visibility = Visibility.Collapsed;
+                this.YMin.Visibility = Visibility.Collapsed;
+                this.YMax.Visibility = Visibility.Collapsed;
+                this.InvalidateVisual();
+            }
         }
 
         /// <summary>
