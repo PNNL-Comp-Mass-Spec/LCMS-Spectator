@@ -29,6 +29,11 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         private readonly IDialogService dialogService;
 
         /// <summary>
+        /// The selectedMSPF parameter file path.
+        /// </summary>
+        private string paramFilePath;
+
+        /// <summary>
         /// The selected raw file path.
         /// </summary>
         private string rawFilePath;
@@ -44,12 +49,32 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         private string idFilePath;
 
         /// <summary>
+        /// The selected FASTA file path.
+        /// </summary>
+        private string fastaFilePath;
+
+        /// <summary>
+        /// A value indicating whether a parameter file has been selected.
+        /// </summary>
+        private bool paramFileSelected;
+
+        /// <summary>
+        /// A value indicating whether a dataset has been selected to be opened.
+        /// </summary>
+        private bool datasetSelected;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OpenDataWindowViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public OpenDataWindowViewModel(IDialogService dialogService)
         {
             this.dialogService = dialogService;
+
+            var browseParamFilesCommand = ReactiveCommand.Create();
+            browseParamFilesCommand.Subscribe(_ => this.BrowseParamFilesImplementation());
+            this.BrowseParamFilesCommand = browseParamFilesCommand;
+
             var browseRawFilesCommand = ReactiveCommand.Create();
             browseRawFilesCommand.Subscribe(_ => this.BrowseRawFilesImplementation());
             this.BrowseRawFilesCommand = browseRawFilesCommand;
@@ -62,10 +87,18 @@ namespace LcmsSpectator.ViewModels.FileSelectors
             browseIdFilesCommand.Subscribe(_ => this.BrowseIdFilesImplementation());
             this.BrowseIdFilesCommand = browseIdFilesCommand;
 
+            var browseFastaFilesCommand = ReactiveCommand.Create();
+            browseFastaFilesCommand.Subscribe(_ => this.BrowseFastaFilesImplementation());
+            this.BrowseFastaFilesCommand = browseIdFilesCommand;
+
+            this.ParamFileSelected = true;
+            this.DatasetSelected = false;
+
             // Ok button should be enabled if RawFilePath isn't null or empty
             var okCommand =
             ReactiveCommand.Create(
-                    this.WhenAnyValue(x => x.RawFilePath).Select(rawFilePath => !string.IsNullOrEmpty(rawFilePath)));
+                    this.WhenAnyValue(x => x.ParamFileSelected, x => x.ParamFilePath, x => x.DatasetSelected, x => x.RawFilePath)
+                        .Select(x => (x.Item1 && !string.IsNullOrWhiteSpace(x.Item2)) || (x.Item3 && !string.IsNullOrWhiteSpace(x.Item4))));
             okCommand.Subscribe(_ => this.OkImplementation());
             this.OkCommand = okCommand;
 
@@ -80,6 +113,11 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// Event that is triggered when the window is ready to be closed.
         /// </summary>
         public event EventHandler ReadyToClose;
+
+        /// <summary>
+        /// Gets a command that prompts the user for a MSPF parameter file path.
+        /// </summary>
+        public IReactiveCommand BrowseParamFilesCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
@@ -97,6 +135,11 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         public IReactiveCommand BrowseIdFilesCommand { get; private set; }
 
         /// <summary>
+        /// Gets a command that prompts the user for a FASTA file path.
+        /// </summary>
+        public IReactiveCommand BrowseFastaFilesCommand { get; private set; }
+        
+        /// <summary>
         /// Gets a command that validates the selected raw file path and trigger ReadyToClose.
         /// </summary>
         public IReactiveCommand OkCommand { get; private set; }
@@ -110,6 +153,15 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// Gets a value indicating whether a valid dataset or raw file path was selected.
         /// </summary>
         public bool Status { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the selected MSPF parameter file path.
+        /// </summary>
+        public string ParamFilePath
+        {
+            get { return this.paramFilePath; }
+            set { this.RaiseAndSetIfChanged(ref this.paramFilePath, value); }
+        }
 
         /// <summary>
         /// Gets or sets the selected raw file path.
@@ -139,41 +191,94 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         }
 
         /// <summary>
-        /// Implementation for BrowseRawFilesCommand.
+        /// Gets or sets the selected FASTA file path.
+        /// </summary>
+        public string FastaFilePath
+        {
+            get { return this.fastaFilePath; }
+            set { this.RaiseAndSetIfChanged(ref this.fastaFilePath, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a parameter file has been selected to be opened.
+        /// </summary>
+        public bool ParamFileSelected
+        {
+            get { return this.paramFileSelected; }
+            set { this.RaiseAndSetIfChanged(ref this.paramFileSelected, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a dataset has been selected to be opened.
+        /// </summary>
+        public bool DatasetSelected
+        {
+            get { return this.datasetSelected; }
+            set { this.RaiseAndSetIfChanged(ref this.datasetSelected, value); }
+        }
+
+        /// <summary>
+        /// Implementation for <see cref="BrowseParamFilesCommand"/>.
+        /// A command that prompts the user for a MSPF parameter file path.
+        /// </summary>
+        private void BrowseParamFilesImplementation()
+        {
+            var path = this.dialogService.OpenFile(".param", FileConstants.ParamFileFormatString);
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                this.ParamFilePath = path;
+            }
+        }
+
+        /// <summary>
+        /// Implementation for <see cref="BrowseRawFilesCommand"/>.
         /// Prompts the user for a raw file path.
         /// </summary>
         private void BrowseRawFilesImplementation()
         {
             var path = this.dialogService.OpenFile(".raw", FileConstants.RawFileFormatString);
-            if (!string.IsNullOrEmpty(path))
+            if (!string.IsNullOrWhiteSpace(path))
             {
                 this.RawFilePath = path;
             }
         }
 
         /// <summary>
-        /// Implementation for BrowseFeatureFilesCommand.
+        /// Implementation for <see cref="BrowseFeatureFilesCommand"/>.
         /// Prompts the user for a feature file path.
         /// </summary>
         private void BrowseFeatureFilesImplementation()
         {
             var path = this.dialogService.OpenFile(".ms1ft", FileConstants.FeatureFileFormatString);
-            if (!string.IsNullOrEmpty(path))
+            if (!string.IsNullOrWhiteSpace(path))
             {
                 this.FeatureFilePath = path;
             }
         }
 
         /// <summary>
-        /// Implementation for BrowseIdFilesCommand.
+        /// Implementation for <see cref="BrowseIdFilesCommand"/>.
         /// Prompts the user for an ID file path.
         /// </summary>
         private void BrowseIdFilesImplementation()
         {
             var path = this.dialogService.OpenFile(".txt", FileConstants.IdFileFormatString);
-            if (!string.IsNullOrEmpty(path))
+            if (!string.IsNullOrWhiteSpace(path))
             {
                 this.IdFilePath = path;
+            }
+        }
+
+        /// <summary>
+        /// Implementation for <see cref="BrowseFastaFilesCommand"/>.
+        /// Prompts the user for a FASTA file path.
+        /// </summary>
+        private void BrowseFastaFilesImplementation()
+        {
+            var path = this.dialogService.OpenFile(".fasta", FileConstants.FastaFileFormatString);
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                this.FastaFilePath = path;
             }
         }
 

@@ -16,10 +16,20 @@ namespace LcmsSpectator.Utils
     public class FileConstants
     {
         /// <summary>
+        /// Format string for selecting MSPF parameter files from open file dialogs.
+        /// </summary>
+        public const string ParamFileFormatString = @"MSPF Parameter Files (*.param)|*.param";
+
+        /// <summary>
         /// Format string for selecting ID/database search result files from open file dialogs.
         /// </summary>
         public const string IdFileFormatString =
             @"Supported Files|*.txt;*.tsv;*.mzId;*.mzId.gz;*.mtdb|TSV Files (*.txt; *.tsv)|*.txt;*.tsv|MzId Files (*.mzId[.gz])|*.mzId;*.mzId.gz|MTDB Files (*.mtdb)|*.mtdb";
+
+        /// <summary>
+        /// Format string for selecting FASTA database files from open file dialogs.
+        /// </summary>
+        public const string FastaFileFormatString = @"Fasta DB Files (*.fasta)|*.fasta";
 
         /// <summary>
         /// Format string for selecting raw and MZML files from open file dialogs.
