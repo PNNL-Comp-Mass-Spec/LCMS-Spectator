@@ -42,14 +42,9 @@ namespace LcmsSpectator.ViewModels.Plots
         private const double HighlightSize = 0.008;
 
         /// <summary>
-        ///  Color score for identified MS/MS scans (gold)
+        /// The total number of distinct colors for the MS/MS scans.
         /// </summary>
-        private const int IdColorScore = 3975;
-        
-        /// <summary>
-        /// Color score for unidentified MS/MS scans (green)
-        /// </summary>
-        private const int UnidColorScore = 2925;
+        private const int DistinctMsMsColors = 12;
 
         /// <summary>
         /// Dialog service for opening dialogs from the view model.
@@ -212,6 +207,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showSplash;
 
         /// <summary>
+        /// Dictionary associating unique protein to color index.
+        /// </summary>
+        private Dictionary<string, int> colorDictionary; 
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="FeatureViewerViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">The dialog service for opening dialogs from the view model.</param>
@@ -246,7 +246,20 @@ namespace LcmsSpectator.ViewModels.Plots
             {
                 Key = "ms2s",
                 Position = AxisPosition.None,
-                Palette = OxyPalettes.Rainbow(NumColors),
+                Palette = OxyPalette.Interpolate(
+                                                 NumColors,
+                                                 OxyColors.Purple,
+                                                 OxyColors.Black,
+                                                 OxyColors.Green,
+                                                 OxyColors.Yellow,
+                                                 OxyColors.Blue,
+                                                 OxyColors.Turquoise,
+                                                 OxyColors.Orange,
+                                                 OxyColors.Olive,
+                                                 OxyColors.Brown,
+                                                 OxyColors.Cyan,
+                                                 OxyColors.Gray,
+                                                 OxyColors.Beige),
                 Minimum = 1,
                 Maximum = 5000,
             };
@@ -603,6 +616,8 @@ namespace LcmsSpectator.ViewModels.Plots
                 return;
             }
 
+            this.GetProteinColorDictionary(this.ids.Values, this.ms2ColorAxis.Palette);
+
             this.notFoundMs2 = new List<PrSm>();
             var scanHash = new Dictionary<int, List<double>>();
             var accountedFor = new HashSet<int>();
@@ -784,9 +799,9 @@ namespace LcmsSpectator.ViewModels.Plots
                     var feature1 = feature;
                     var idPrSms = prsms.Where(prsm => prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature1.MinPoint.Mass) < 1);
                     var notIdentifiedPrSms = prsms.Where(prsm => prsm.Sequence.Count == 0 || Math.Abs(prsm.Mass - feature1.MinPoint.Mass) >= 1);
-                    var ms2IdSeries = this.CreateMs2ScatterSeries(idPrSms, feature, this.ms2ColorAxis, "Identified Ms2s", size, IdColorScore, this.showFoundIdMs2);
+                    var ms2IdSeries = this.CreateMs2ScatterSeries(idPrSms, feature, this.ms2ColorAxis, "Identified Ms2s", size, this.showFoundIdMs2);
                     this.foundIdMs2S.Add(ms2IdSeries);
-                    var ms2UnIdSeries = this.CreateMs2ScatterSeries(notIdentifiedPrSms, feature, this.ms2ColorAxis, "Unidentified Ms2s", size, UnidColorScore, this.showFoundUnIdMs2);
+                    var ms2UnIdSeries = this.CreateMs2ScatterSeries(notIdentifiedPrSms, feature, this.ms2ColorAxis, "Unidentified Ms2s", size, this.showFoundUnIdMs2);
                     this.foundUnIdMs2S.Add(ms2UnIdSeries);
                     this.FeatureMap.Series.Add(ms2IdSeries);
                     this.FeatureMap.Series.Add(ms2UnIdSeries);
@@ -797,8 +812,8 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             // Add identified Ms2s with no associated features
-            this.notFoundMs2S = this.CreateMs2ScatterSeries(this.notFoundMs2, null, this.ms2ColorAxis, "Identified Ms2 (No Feature)", 0, 1000, this.showNotFoundMs2);
-            this.FeatureMap.Series.Add(this.notFoundMs2S);
+            ////this.notFoundMs2S = this.CreateMs2ScatterSeries(this.notFoundMs2, null, this.ms2ColorAxis, "Identified Ms2 (No Feature)", 0, this.showNotFoundMs2);
+            ////this.FeatureMap.Series.Add(this.notFoundMs2S);
             
             // Highlight selected identification.
             this.SetHighlight(this.SelectedPrSm);
@@ -817,6 +832,37 @@ namespace LcmsSpectator.ViewModels.Plots
             this.MaximumAbundance = 0.0;
             this.FeatureMap.Series.Clear();
             this.FeatureMap.InvalidatePlot(true);
+        }
+
+        /// <summary>
+        /// Select random colors from the palette and assign one to each unique protein.
+        /// </summary>
+        /// <param name="data">The identifications.</param>
+        /// <param name="palette">The palette to select colors from.</param>
+        private void GetProteinColorDictionary(IEnumerable<PrSm> data, OxyPalette palette)
+        {
+            if (this.colorDictionary == null)
+            {
+                this.colorDictionary = new Dictionary<string, int> { { string.Empty, 0 } };
+            }
+
+            var uniqueProteins = data.Select(d => d.ProteinName).Distinct();
+            var rand = new Random();
+            foreach (var protein in uniqueProteins)
+            {
+                if (!this.colorDictionary.ContainsKey(protein))
+                {
+                    int colorIndex;
+                    do
+                    {   // do not select the same color as unid color.
+                        var r = rand.Next(0, DistinctMsMsColors);
+                        colorIndex = Math.Min(r * (palette.Colors.Count / DistinctMsMsColors), palette.Colors.Count - 1);
+                    }
+                    while (colorIndex == 0);
+
+                    this.colorDictionary.Add(protein, colorIndex);
+                }
+            }
         }
 
         /// <summary>
@@ -872,10 +918,9 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="colorAxis">The color axis to use to color the scatter points</param>
         /// <param name="title">The title of the scatter series</param>
         /// <param name="size">The size of the scatter points</param>
-        /// <param name="colorScore">Index of color to use in color axis.</param>
         /// <param name="visible">Is this MS/MS series visible?</param>
         /// <returns>The scatter series for the MS/MS scans</returns>
-        private ScatterSeries CreateMs2ScatterSeries(IEnumerable<PrSm> prsms, Feature feature, LinearColorAxis colorAxis, string title, double size, double colorScore, bool visible)
+        private ScatterSeries CreateMs2ScatterSeries(IEnumerable<PrSm> prsms, Feature feature, LinearColorAxis colorAxis, string title, double size, bool visible)
         {
             return new ScatterSeries
             {
@@ -883,7 +928,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 Mapping = p =>
                 {
                     var prsm = (PrSm)p;
-                    return new ScatterPoint(prsm.RetentionTime, feature == null ? prsm.Mass : feature.MinPoint.Mass, Math.Max(size * 0.8, 3.0), colorScore);
+                    return new ScatterPoint(prsm.RetentionTime, feature == null ? prsm.Mass : feature.MinPoint.Mass, Math.Max(size * 0.8, 3.0), this.colorDictionary[prsm.ProteinName]);
                 },
                 Title = title,
                 MarkerType = MarkerType.Cross,
