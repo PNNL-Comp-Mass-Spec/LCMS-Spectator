@@ -50,6 +50,7 @@ namespace LcmsSpectator.PlotModels
             Axes.Add(xAxis);
             this.XAxis = xAxis;
             this.YAxis = new LinearAxis();
+            this.AutoAdjustYAxis = true;
             Axes.Add(this.YAxis);
             if (xAxis != null)
             {
@@ -66,6 +67,12 @@ namespace LcmsSpectator.PlotModels
         /// Gets or sets the X Axis for the plot model.
         /// </summary>
         public Axis XAxis { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this plot should automatically
+        /// adjust the Y Axis depending on the range selected on the X axis.
+        /// </summary>
+        public bool AutoAdjustYAxis { get; set; }
 
         /// <summary>
         /// Generate Y axis. Set Max Y axis to highest point in current visible x range.
@@ -157,7 +164,10 @@ namespace LcmsSpectator.PlotModels
         /// <param name="e">The event arguments</param>
         private void XAxisChanged(object sender, AxisChangedEventArgs e)
         {
-            this.AdjustForZoom();
+            if (this.AutoAdjustYAxis)
+            {
+                this.AdjustForZoom();   
+            }
         }
     }
 }

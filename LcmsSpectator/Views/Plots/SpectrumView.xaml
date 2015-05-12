@@ -11,17 +11,44 @@
             <ColumnDefinition Width="75*" />
             <ColumnDefinition Width="Auto" MaxWidth="500" />
         </Grid.ColumnDefinitions>
-        <wpf:PlotView Name="Ms2Spectrum" DataContext="{Binding PrimarySpectrumViewModel}" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="0">
-            <wpf:PlotView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
-                    <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
-                    <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
-                    <MenuItem Header="Open _Error Map" Command="{Binding OpenErrorMapCommand}" />
-                    <MenuItem Header="Save As _Image" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
-                </ContextMenu>
-            </wpf:PlotView.ContextMenu>
-        </wpf:PlotView>
+        <Grid Grid.Column="0" DataContext="{Binding PrimarySpectrumViewModel}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="25" Name="AdjustXRow" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="25" Name="AdjustYColumn" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left" Name="XMin" Text="{Binding XMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Right" Name="XMax"  Text="{Binding XMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Bottom" Name="YMin" Text="{Binding YMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </TextBox.LayoutTransform>
+            </TextBox>
+            <TextBox Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Top" Name="YMax" Text="{Binding YMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <TextBox.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </TextBox.LayoutTransform>
+            </TextBox>
+
+            <wpf:PlotView Name="Ms2Spectrum" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="1">
+                <wpf:PlotView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+                        <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
+                        <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                        <MenuItem Header="Open _Error Map" Command="{Binding OpenErrorMapCommand}" />
+                        <Separator />
+                        <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" Name="AutoAdjustYCheck" />
+                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustmentCheck" />
+                        <MenuItem Header="Save As _Image" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
+                    </ContextMenu>
+                </wpf:PlotView.ContextMenu>
+            </wpf:PlotView>
+        </Grid>
         <Expander Grid.Row="0" Grid.Column="1" ExpandDirection="Right" IsExpanded="True" BorderThickness="0">
             <Expander.Header>
                 <TextBlock Text="Secondary Spectra">
@@ -47,6 +74,8 @@
                             <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                             <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                             <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                            <Separator />
+                            <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" />
                             <MenuItem Header="Save As _Image" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
                         </ContextMenu>
                     </wpf:PlotView.ContextMenu>
@@ -57,6 +86,8 @@
                             <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                             <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                             <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                            <Separator />
+                            <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" />
                             <MenuItem Header="Save As _Image" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
                         </ContextMenu>
                     </wpf:PlotView.ContextMenu>

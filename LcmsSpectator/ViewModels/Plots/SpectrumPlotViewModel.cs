@@ -15,6 +15,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
+    using System.Windows.Documents;
 
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
@@ -111,6 +112,37 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showFilteredSpectrum;
 
         /// <summary>
+        /// The minimum for the X axis of the spectrum plot.
+        /// </summary>
+        private double xMinimum;
+
+        /// <summary>
+        /// The maximum for the X axis of the spectrum plot.
+        /// </summary>
+        private double xMaximum;
+
+        /// <summary>
+        /// The minimum for the X axis of the spectrum plot.
+        /// </summary>
+        private double yMinimum;
+
+        /// <summary>
+        /// The maximum for the Y axis of the spectrum plot.
+        /// </summary>
+        private double yMaximum;
+
+        /// <summary>
+        /// A value indicating whether this plot should automatically
+        /// adjust the Y Axis depending on the range selected on the X axis.
+        /// </summary>
+        private bool autoAdjustYAxis;
+
+        /// <summary>
+        /// A value indicating whether the manual adjustment text boxes should be displayed.
+        /// </summary>
+        private bool showManualAdjustment;
+
+        /// <summary>
         /// A value indicating whether the "Unexplained Peaks" (spectrum series)
         /// of the spectrum plot is visible.
         /// </summary>
@@ -135,6 +167,7 @@ namespace LcmsSpectator.ViewModels.Plots
             this.ShowUnexplainedPeaks = true;
             this.ShowFilteredSpectrum = false;
             this.ShowDeconvolutedSpectrum = false;
+            this.AutoAdjustYAxis = true;
             this.Title = string.Empty;
             this.XAxis = new LinearAxis
             {
@@ -184,6 +217,50 @@ namespace LcmsSpectator.ViewModels.Plots
                 .Subscribe(ions => ions.ItemChanged.Where(x => x.PropertyName == "Selected")
                 .Select(x => x.Sender)
                 .Subscribe(this.LabeledIonSelectedChanged));
+
+            // When AutoAdjustYAxis changes, update value in plot model.
+            this.WhenAnyValue(x => x.AutoAdjustYAxis)
+                .Subscribe(
+                    autoAdjust =>
+                        {
+                            this.PlotModel.AutoAdjustYAxis = autoAdjust;
+                            this.PlotModel.YAxis.IsZoomEnabled = !autoAdjust;
+                            this.PlotModel.YAxis.IsPanEnabled = !autoAdjust;
+                        });
+            
+            // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
+            this.WhenAnyValue(x => x.XMinimum, x => x.XMaximum)
+                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
+                .Where(x => !this.xAxis.ActualMinimum.Equals(x.Item1) || !this.xAxis.ActualMaximum.Equals(x.Item2))
+                .Subscribe(
+                    x =>
+                    {
+                        this.xAxis.Zoom(x.Item1, x.Item2);
+                        this.PlotModel.InvalidatePlot(false);
+                    });
+            this.WhenAnyValue(y => y.YMinimum, y => y.YMaximum)
+                .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
+                .Where(y => !this.PlotModel.YAxis.ActualMinimum.Equals(y.Item1) || !this.PlotModel.YAxis.ActualMaximum.Equals(y.Item2))
+                .Subscribe(
+                    y =>
+                    {
+                        this.PlotModel.YAxis.Zoom(y.Item1, y.Item2);
+                        this.PlotModel.InvalidatePlot(false);
+                    });
+
+            // Update X min and max properties when x axis is panned or zoomed
+            this.xAxis.AxisChanged += (o, e) =>
+            {
+                this.XMinimum = Math.Round(this.xAxis.ActualMinimum, 3);
+                this.XMaximum = Math.Round(this.xAxis.ActualMaximum, 3);
+            };
+
+            // Update Y min and max properties when Y axis is panned or zoomed
+            this.PlotModel.YAxis.AxisChanged += (o, e) =>
+            {
+                this.YMinimum = Math.Round(this.PlotModel.YAxis.ActualMinimum, 3);
+                this.YMaximum = Math.Round(this.PlotModel.YAxis.ActualMaximum, 3);
+            };
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
             var saveAsImageCommand = ReactiveCommand.Create();
@@ -241,6 +318,61 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.showDeconvolutedSpectrum; }
             set { this.RaiseAndSetIfChanged(ref this.showDeconvolutedSpectrum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum for the X axis of the spectrum plot.
+        /// </summary>
+        public double XMinimum
+        {
+            get { return this.xMinimum; }
+            set { this.RaiseAndSetIfChanged(ref this.xMinimum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum for the X axis of the spectrum plot.
+        /// </summary>
+        public double XMaximum
+        {
+            get { return this.xMaximum; }
+            set { this.RaiseAndSetIfChanged(ref this.xMaximum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum for the Y axis of the spectrum plot.
+        /// </summary>
+        public double YMinimum
+        {
+            get { return this.yMinimum; }
+            set { this.RaiseAndSetIfChanged(ref this.yMinimum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum for the Y axis of the spectrum plot.
+        /// </summary>
+        public double YMaximum
+        {
+            get { return this.yMaximum; }
+            set { this.RaiseAndSetIfChanged(ref this.yMaximum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this plot should automatically
+        /// adjust the Y Axis depending on the range selected on the X axis.
+        /// </summary>
+        public bool AutoAdjustYAxis
+        {
+            get { return this.autoAdjustYAxis; }
+            set { this.RaiseAndSetIfChanged(ref this.autoAdjustYAxis, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the manual adjustment text boxes should be displayed.
+        /// </summary>
+        public bool ShowManualAdjustment
+        {
+            get { return this.showManualAdjustment; }
+            set { this.RaiseAndSetIfChanged(ref this.showManualAdjustment, value); }
         }
 
         /// <summary>
