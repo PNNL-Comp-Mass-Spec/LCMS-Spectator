@@ -183,7 +183,7 @@ namespace LcmsSpectator.Models
 
                 switch (parts[0])
                 {
-                    case "puSpecFile":
+                    case "SpecFile":
                         param.PuSpecFile = parts[1];
                         break;
                     case "DatabaseFile":

@@ -219,7 +219,7 @@ namespace LcmsSpectator.ViewModels
             {
                 var dataSetViewModel = await this.ReadRawFile(openDataViewModel.RawFilePath);
                 await this.ReadIdFile(openDataViewModel.IdFilePath, dataSetViewModel);
-                await this.dataReader.OpenDataSet(dataSetViewModel, openDataViewModel.RawFilePath, featureFilePath: openDataViewModel.FeatureFilePath);
+                await this.dataReader.OpenDataSet(dataSetViewModel, openDataViewModel.RawFilePath, featureFilePath: openDataViewModel.FeatureFilePath);   
             }
         }
 

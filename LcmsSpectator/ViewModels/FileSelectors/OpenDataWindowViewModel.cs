@@ -11,9 +11,11 @@
 namespace LcmsSpectator.ViewModels.FileSelectors
 {
     using System;
+    using System.IO;
     using System.Reactive.Linq;
 
     using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Models;
     using LcmsSpectator.Utils;
 
     using ReactiveUI;
@@ -71,6 +73,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         {
             this.dialogService = dialogService;
 
+            this.WhenAnyValue(x => x.ParamFilePath).Subscribe(this.ReadParamFile);
+
             var browseParamFilesCommand = ReactiveCommand.Create();
             browseParamFilesCommand.Subscribe(_ => this.BrowseParamFilesImplementation());
             this.BrowseParamFilesCommand = browseParamFilesCommand;
@@ -96,9 +100,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
 
             // Ok button should be enabled if RawFilePath isn't null or empty
             var okCommand =
-            ReactiveCommand.Create(
-                    this.WhenAnyValue(x => x.ParamFileSelected, x => x.ParamFilePath, x => x.DatasetSelected, x => x.RawFilePath)
-                        .Select(x => (x.Item1 && !string.IsNullOrWhiteSpace(x.Item2)) || (x.Item3 && !string.IsNullOrWhiteSpace(x.Item4))));
+            ReactiveCommand.Create(this.WhenAnyValue(x => x.RawFilePath).Select(x => !string.IsNullOrWhiteSpace(x)));
             okCommand.Subscribe(_ => this.OkImplementation());
             this.OkCommand = okCommand;
 
@@ -215,6 +217,37 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         {
             get { return this.datasetSelected; }
             set { this.RaiseAndSetIfChanged(ref this.datasetSelected, value); }
+        }
+
+        /// <summary>
+        /// Read a MSPF parameter file and populate raw file and feature file.
+        /// </summary>
+        /// <param name="filePath">The path to the parameter file.</param>
+        private void ReadParamFile(string filePath)
+        {
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                var mspfParams = MsPfParameters.ReadFromFile(filePath);
+                var dirPath = Path.GetDirectoryName(filePath);
+
+                var raw = string.Format("{0}\\{1}", dirPath, mspfParams.PuSpecFile);
+                if (!string.IsNullOrWhiteSpace(mspfParams.PuSpecFile) && File.Exists(raw))
+                {
+                    this.RawFilePath = raw;   
+                }
+
+                var feature = string.Format("{0}\\{1}", dirPath, mspfParams.FeatureFile);
+                if (!string.IsNullOrWhiteSpace(mspfParams.FeatureFile) && File.Exists(feature))
+                {
+                    this.FeatureFilePath = feature;
+                }
+
+                var fasta = string.Format("{0}\\{1}", dirPath, mspfParams.DatabaseFile);
+                if (!string.IsNullOrWhiteSpace(mspfParams.DatabaseFile) && File.Exists(fasta))
+                {
+                    this.FastaFilePath = fasta;
+                }
+            }
         }
 
         /// <summary>
