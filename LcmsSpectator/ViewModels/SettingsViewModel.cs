@@ -56,10 +56,10 @@ namespace LcmsSpectator.ViewModels
             this.EtdIonTypes = IcParameters.Instance.GetEtdIonTypes();
             this.ExportImageDpi = IcParameters.Instance.ExportImageDpi;
 
-            this.Modifications = new ReactiveList<SelectModificationViewModel>();
+            this.Modifications = new ReactiveList<SearchModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
             {
-                var modificationVm = new SelectModificationViewModel(searchModification);
+                var modificationVm = new SearchModificationViewModel(searchModification);
                 modificationVm.RemoveModificationCommand.Subscribe(_ => this.RemoveModification(modificationVm));
                 this.Modifications.Add(modificationVm);
             }
@@ -179,7 +179,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets the modifications displayed in the application.
         /// </summary>
-        public ReactiveList<SelectModificationViewModel> Modifications { get; private set; }
+        public ReactiveList<SearchModificationViewModel> Modifications { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the settings should be saved.
@@ -219,7 +219,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void AddModificationImplementation()
         {
-            var modVm = new SelectModificationViewModel();
+            var modVm = new SearchModificationViewModel();
             modVm.RemoveModificationCommand.Subscribe(_ => this.RemoveModification(modVm));
             this.Modifications.Add(modVm);
         }
@@ -297,7 +297,7 @@ namespace LcmsSpectator.ViewModels
         /// Removes a modification from the list of modifications.
         /// </summary>
         /// <param name="modVm">The modification to remove.</param>
-        private void RemoveModification(SelectModificationViewModel modVm)
+        private void RemoveModification(SearchModificationViewModel modVm)
         {
             if (modVm != null)
             {

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SelectModificationViewModel.cs" company="Pacific Northwest National Laboratory">
+// <copyright file="SearchModificationViewModel.cs" company="Pacific Northwest National Laboratory">
 //   2015 Pacific Northwest National Laboratory
 // </copyright>
 // <author>Christopher Wilkins</author>
@@ -20,12 +20,12 @@ namespace LcmsSpectator.ViewModels.Modifications
     /// <summary>
     /// View model for editing a SearchModification object.
     /// </summary>
-    public class SelectModificationViewModel : ReactiveObject
+    public class SearchModificationViewModel : ReactiveObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SelectModificationViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="SearchModificationViewModel"/> class. 
         /// </summary>
-        public SelectModificationViewModel()
+        public SearchModificationViewModel()
         {
             this.Modifications = new ReactiveList<Modification>(Modification.CommonModifications);
             this.AminoAcidResidues = new ReactiveList<char>(AminoAcid.StandardAminoAcidCharacters) { '*' };
@@ -41,11 +41,11 @@ namespace LcmsSpectator.ViewModels.Modifications
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SelectModificationViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="SearchModificationViewModel"/> class. 
         /// Create new ModificationViewModel from searchModification
         /// </summary>
         /// <param name="searchModification">Search modification to create the SelectModificationViewModel from.</param>
-        public SelectModificationViewModel(SearchModification searchModification)
+        public SearchModificationViewModel(SearchModification searchModification)
             : this()
         {
             this.SearchModification = searchModification;
