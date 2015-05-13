@@ -27,7 +27,6 @@ namespace LcmsSpectator.ViewModels
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Modifications;
-
     using ReactiveUI;
 
     /// <summary>
@@ -218,7 +217,7 @@ namespace LcmsSpectator.ViewModels
         }
         
         /// <summary>
-        /// Implementation for OpenDataSetCommand.
+        /// Implementation for <see cref="OpenDataSetCommand" />.
         /// Prompts the user for a raw file path, id file path, and feature file path and opens them.
         /// </summary>
         /// <returns>Task that creates and opens a data set view model.</returns>
@@ -234,7 +233,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Implementation for OpenRawFileCommand.
+        /// Implementation for <see cref="OpenRawFileCommand" />.
         /// Prompts the user for raw files and opens them.
         /// </summary>
         /// <returns>
@@ -255,7 +254,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Implementation of OpenIdFileCommand.
+        /// Implementation of <see cref="OpenTsvFileCommand" />.
         /// Prompts the user for a path for an ID file and opens it.
         /// </summary>
         /// <returns>Task that opens an ID file and associates it with a raw file.</returns>
@@ -274,7 +273,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Implementation for OpenFeatureFileCommand.
+        /// Implementation for <see cref="OpenFeatureFileCommand" />.
         /// Prompts the user for a path for a feature list file and opens it.
         /// </summary>
         /// <returns>Task that opens a feature file and associates it with a data set</returns>
@@ -293,7 +292,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Implementation for OpenFromDMSCommand.
+        /// Implementation for <see cref="OpenFromDmsCommand" />.
         /// Prompts the user for a dataset and job name from the PNNL DMS system.
         /// </summary>
         /// <returns>Task that opens a data set from DMS and adds it to the data set list.</returns>
@@ -326,7 +325,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Implementation for ManageModificationsCommand.
+        /// Implementation for <see cref="OpenManageModificationsCommand" />.
         /// Opens a window for editing the registered modifications.
         /// </summary>
         private void ManageModificationsImplementation()
@@ -343,7 +342,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Implementation for RunMsPathFinderSearchCommand.
+        /// Implementation for <see cref="RunMsPathFinderSearchCommand" />.
         /// Runs an MSPathFinder database search.
         /// </summary>
         private void RunMsPathFinderSearchImplementation()
