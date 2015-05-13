@@ -252,7 +252,7 @@
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\Modifications\ManageModificationsViewModel.cs" />
     <Compile Include="ViewModels\Modifications\ModificationViewModel.cs" />
-    <Compile Include="ViewModels\Modifications\SelectModificationViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\SearchModificationViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\OpenDataWindowViewModel.cs" />
     <Compile Include="ViewModels\Data\ScanViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\SelectDataSetViewModel.cs" />
