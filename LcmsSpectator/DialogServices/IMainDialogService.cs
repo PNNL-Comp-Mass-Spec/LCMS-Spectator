@@ -88,5 +88,12 @@ namespace LcmsSpectator.DialogServices
         /// </summary>
         /// <param name="errorMapViewModel">The view model for the dialog.</param>
         void OpenErrorMapWindow(ErrorMapViewModel errorMapViewModel);
+
+        /// <summary>
+        /// Open the MSPathFinder Search Settings Window.
+        /// </summary>
+        /// <param name="searchSettingsViewModel">The view model for the dialog.</param>
+        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
+        bool SearchSettingsWindow(SearchSettingsViewModel searchSettingsViewModel);
     }
 }

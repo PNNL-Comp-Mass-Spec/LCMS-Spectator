@@ -256,6 +256,7 @@
     <Compile Include="ViewModels\FileSelectors\OpenDataWindowViewModel.cs" />
     <Compile Include="ViewModels\Data\ScanViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\SelectDataSetViewModel.cs" />
+    <Compile Include="ViewModels\SearchSettingsViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\Plots\SpectrumPlotViewModel.cs" />
     <Compile Include="ViewModels\Plots\SpectrumViewModel.cs" />
@@ -321,6 +322,9 @@
     </Compile>
     <Compile Include="Views\FileSelectors\SelectDataSetView.xaml.cs">
       <DependentUpon>SelectDataSetView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SearchSettingsWindow.xaml.cs">
+      <DependentUpon>SearchSettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
@@ -445,6 +449,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\FileSelectors\SelectDataSetView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SearchSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

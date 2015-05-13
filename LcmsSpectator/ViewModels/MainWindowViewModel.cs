@@ -92,6 +92,11 @@ namespace LcmsSpectator.ViewModels
             openManageModificationsCommand.Subscribe(_ => this.ManageModificationsImplementation());
             this.OpenManageModificationsCommand = openManageModificationsCommand;
 
+            // Create command to open MSPathFinder database search settings window
+            var runMsPathFinderSearchCommand = ReactiveCommand.Create();
+            runMsPathFinderSearchCommand.Subscribe(_ => this.RunMsPathFinderSearchImplementation());
+            this.RunMsPathFinderSearchCommand = runMsPathFinderSearchCommand;
+
             this.ShowSplash = true;
 
             // When a data set sets its ReadyToClose property to true, remove it from dataset list
@@ -168,6 +173,11 @@ namespace LcmsSpectator.ViewModels
         /// Gets command that opens a window for managing registered modifications.
         /// </summary>
         public IReactiveCommand OpenManageModificationsCommand { get; private set; }
+
+        /// <summary>
+        /// Gets command that runs an MSPathFinder database search.
+        /// </summary>
+        public IReactiveCommand RunMsPathFinderSearchCommand { get; private set; }
 
         /// <summary>
         /// Gets view model for list of scans and identifications.
@@ -330,6 +340,16 @@ namespace LcmsSpectator.ViewModels
             {
                 prsm.UpdateModifications();
             }
+        }
+
+        /// <summary>
+        /// Implementation for RunMsPathFinderSearchCommand.
+        /// Runs an MSPathFinder database search.
+        /// </summary>
+        private void RunMsPathFinderSearchImplementation()
+        {
+            var searchSettings = new SearchSettingsViewModel(this.dialogService);
+            this.dialogService.SearchSettingsWindow(searchSettings);
         }
 
         /// <summary>

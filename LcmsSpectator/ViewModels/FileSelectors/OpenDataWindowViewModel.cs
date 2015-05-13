@@ -233,7 +233,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
                 var raw = string.Format("{0}\\{1}", dirPath, mspfParams.PuSpecFile);
                 if (!string.IsNullOrWhiteSpace(mspfParams.PuSpecFile) && File.Exists(raw))
                 {
-                    this.RawFilePath = raw;   
+                    this.RawFilePath = raw; 
                 }
 
                 var feature = string.Format("{0}\\{1}", dirPath, mspfParams.FeatureFile);
