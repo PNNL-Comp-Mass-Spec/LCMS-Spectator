@@ -30,7 +30,7 @@
             <RowDefinition Height="10" /> <!-- Spacer -->
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
-        <TabControl Grid.Row="0" TabStripPlacement="Left">
+        <TabControl Grid.Row="0" TabStripPlacement="Top">
             <TabItem Header="Data">
                 <Grid>
                     <Grid.RowDefinitions>
