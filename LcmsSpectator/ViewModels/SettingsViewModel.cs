@@ -59,8 +59,8 @@ namespace LcmsSpectator.ViewModels
             this.Modifications = new ReactiveList<SearchModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
             {
-                var modificationVm = new SearchModificationViewModel(searchModification);
-                modificationVm.RemoveModificationCommand.Subscribe(_ => this.RemoveModification(modificationVm));
+                var modificationVm = new SearchModificationViewModel(searchModification, this.dialogService);
+                ////modificationVm.RemoveModificationCommand.Subscribe(_ => this.RemoveModification(modificationVm));
                 this.Modifications.Add(modificationVm);
             }
 
@@ -219,8 +219,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void AddModificationImplementation()
         {
-            var modVm = new SearchModificationViewModel();
-            modVm.RemoveModificationCommand.Subscribe(_ => this.RemoveModification(modVm));
+            var modVm = new SearchModificationViewModel(this.dialogService);
+            ////modVm.RemoveModificationCommand.Subscribe(_ => this.RemoveModification(modVm));
             this.Modifications.Add(modVm);
         }
 

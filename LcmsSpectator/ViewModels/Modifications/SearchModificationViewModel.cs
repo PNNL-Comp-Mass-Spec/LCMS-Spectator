@@ -10,10 +10,14 @@
 
 namespace LcmsSpectator.ViewModels.Modifications
 {
+    using System;
     using System.Globalization;
+    using System.Reactive.Linq;
 
     using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
+    using LcmsSpectator.Config;
+    using LcmsSpectator.DialogServices;
 
     using ReactiveUI;
 
@@ -23,10 +27,27 @@ namespace LcmsSpectator.ViewModels.Modifications
     public class SearchModificationViewModel : ReactiveObject
     {
         /// <summary>
+        /// Dialog service for opening dialogs from view model.
+        /// </summary>
+        private readonly IDialogService dialogService;
+
+        /// <summary>
+        /// List of all registered modifications.
+        /// </summary>
+        private ReactiveList<Modification> modifications;
+
+        /// <summary>
+        /// A value indicating whether this modification should be removed.
+        /// </summary>
+        private bool remove;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SearchModificationViewModel"/> class. 
         /// </summary>
-        public SearchModificationViewModel()
+        /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
+        public SearchModificationViewModel(IDialogService dialogService)
         {
+            this.dialogService = dialogService;
             this.Modifications = new ReactiveList<Modification>(Modification.CommonModifications);
             this.AminoAcidResidues = new ReactiveList<char>(AminoAcid.StandardAminoAcidCharacters) { '*' };
             this.SequenceLocations = new ReactiveList<SequenceLocation>
@@ -37,7 +58,23 @@ namespace LcmsSpectator.ViewModels.Modifications
             this.IsFixed = new ReactiveList<string> { "Fixed", "Optional" };
             this.FixedSelection = "Fixed";
 
-            this.RemoveModificationCommand = ReactiveCommand.Create();
+            this.Modifications = IcParameters.Instance.RegisteredModifications;
+
+            this.SelectedModification = this.Modifications[0];
+            this.SelectedResidue = this.AminoAcidResidues[0];
+
+            this.Remove = false;
+
+            var removeModificationCommand = ReactiveCommand.Create();
+            removeModificationCommand
+                .Where(_ => this.dialogService.ConfirmationBox(
+                    string.Format(
+                        "Are you sure you would like to remove {0}[{1}]?",
+                        this.SelectedResidue,
+                        this.SelectedModification.Name),
+                    "Remove Search Modification"))
+                .Subscribe(_ => this.Remove = true);
+            this.RemoveModificationCommand = removeModificationCommand;
         }
 
         /// <summary>
@@ -45,16 +82,21 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// Create new ModificationViewModel from searchModification
         /// </summary>
         /// <param name="searchModification">Search modification to create the SelectModificationViewModel from.</param>
-        public SearchModificationViewModel(SearchModification searchModification)
-            : this()
+        /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
+        public SearchModificationViewModel(SearchModification searchModification, IDialogService dialogService)
+            : this(dialogService)
         {
             this.SearchModification = searchModification;
         }
 
         /// <summary>
-        /// Gets a list of all registered modifications.
+        /// Gets or sets a list of all registered modifications.
         /// </summary>
-        public ReactiveList<Modification> Modifications { get; private set; }
+        public ReactiveList<Modification> Modifications
+        {
+            get { return this.modifications; }
+            set { this.RaiseAndSetIfChanged(ref this.modifications, value); }
+        }
 
         /// <summary>
         /// Gets a list of all possible amino acid residues.
@@ -94,7 +136,16 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Gets a command that removes this modification from the list.
         /// </summary>
-        public ReactiveCommand<object> RemoveModificationCommand { get; private set; }
+        public IReactiveCommand RemoveModificationCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this modification should be removed.
+        /// </summary>
+        public bool Remove
+        {
+            get { return this.remove; }
+            private set { this.RaiseAndSetIfChanged(ref this.remove, value); }
+        }
 
         /// <summary>
         /// Gets or sets a search modification edited with this view model.

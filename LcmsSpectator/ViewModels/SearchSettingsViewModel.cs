@@ -11,6 +11,7 @@
 namespace LcmsSpectator.ViewModels
 {
     using System;
+    using System.Reactive.Linq;
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.ViewModels.Modifications;
@@ -22,6 +23,15 @@ namespace LcmsSpectator.ViewModels
     public class SearchSettingsViewModel : ReactiveObject
     {
         /// <summary>
+        /// The descriptions for the three search modes.
+        /// </summary>
+        private readonly string[] searchModeDescriptions =
+        {
+            "Multiple internal cleavages", "Single internal cleavage",
+            "No internal cleavage"
+        }; 
+
+        /// <summary>
         /// Dialog service for opening dialogs from view model.
         /// </summary>
         private readonly IMainDialogService dialogService;
@@ -30,6 +40,16 @@ namespace LcmsSpectator.ViewModels
         /// A value indicating whether application modifications were updated.
         /// </summary>
         private bool modificationsUpdated;
+
+        /// <summary>
+        /// The search mode selected from <see cref="SearchModes" />.
+        /// </summary>
+        private int selectedSearchMode;
+
+        /// <summary>
+        /// The description for the selected search mode.
+        /// </summary>
+        private string searchModeDescription;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SearchSettingsViewModel"/> class. 
@@ -43,6 +63,10 @@ namespace LcmsSpectator.ViewModels
             manageModificationsCommand.Subscribe(_ => this.ManageModificationsImplementation());
             this.ManageModificationsCommand = manageModificationsCommand;
 
+            var addModificationCommand = ReactiveCommand.Create();
+            addModificationCommand.Subscribe(_ => this.AddModificationImplementation());
+            this.AddModificationCommand = addModificationCommand;
+
             var runCommand = ReactiveCommand.Create();
             runCommand.Subscribe(_ => this.RunImplementation());
             this.RunCommand = runCommand;
@@ -50,6 +74,19 @@ namespace LcmsSpectator.ViewModels
             var cancelCommand = ReactiveCommand.Create();
             cancelCommand.Subscribe(_ => this.CancelImplementation());
             this.CancelCommand = cancelCommand;
+
+            this.SearchModes = new[] { 0, 1, 2 };
+            this.SelectedSearchMode = 2;
+
+            this.WhenAnyValue(x => x.SelectedSearchMode)
+                .Subscribe(searchMode => this.SearchModeDescription = this.searchModeDescriptions[searchMode]);
+
+            this.SearchModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
+
+            // Remove search modification when its Remove property is set to true.
+            this.SearchModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
+                .Select(x => x.Sender).Where(sender => sender.Remove)
+                .Subscribe(searchMod => this.SearchModifications.Remove(searchMod));
 
             this.ModificationsUpdated = false;
         }
@@ -70,6 +107,11 @@ namespace LcmsSpectator.ViewModels
         public IReactiveCommand ManageModificationsCommand { get; private set; }
 
         /// <summary>
+        /// Gets a command that adds a search modification.
+        /// </summary>
+        public IReactiveCommand AddModificationCommand { get; private set; }
+
+        /// <summary>
         /// Gets a command that validates search settings and closes the window.
         /// </summary>
         public IReactiveCommand RunCommand { get; private set; }
@@ -78,6 +120,34 @@ namespace LcmsSpectator.ViewModels
         /// Gets a command that closes the window.
         /// </summary>
         public IReactiveCommand CancelCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the list of possible MSPathFinder search modes.
+        /// </summary>
+        public int[] SearchModes { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the search mode selected from <see cref="SearchModes" />.
+        /// </summary>
+        public int SelectedSearchMode
+        {
+            get { return this.selectedSearchMode; }
+            set { this.RaiseAndSetIfChanged(ref this.selectedSearchMode, value); }
+        }
+
+        /// <summary>
+        /// Gets the description for the selected search mode.
+        /// </summary>
+        public string SearchModeDescription
+        {
+            get { return this.searchModeDescription; }
+            private set { this.RaiseAndSetIfChanged(ref this.searchModeDescription, value); }
+        }
+
+        /// <summary>
+        /// Gets the list of modifications to use in the search.
+        /// </summary>
+        public ReactiveList<SearchModificationViewModel> SearchModifications { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether application modifications were updated.
@@ -89,7 +159,16 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Implementation for ManageModificationsCommand.
+        /// Implementation for <see cref="AddModificationCommand"/>.
+        /// Adds a search modification.
+        /// </summary>
+        private void AddModificationImplementation()
+        {
+            this.SearchModifications.Add(new SearchModificationViewModel(this.dialogService));
+        }
+
+        /// <summary>
+        /// Implementation for <see cref="ManageModificationsCommand"/>.
         /// Gets or sets a command that manages the modification registered with the application.
         /// </summary>
         private void ManageModificationsImplementation()

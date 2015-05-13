@@ -1,12 +1,29 @@
 ﻿<Window x:Class="LcmsSpectator.Views.SearchSettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Search Settings" Height="400" Width="500">
+        Title="Search Settings" Height="475" Width="500" ResizeMode="NoResize">
+    <Window.Resources>
+        <DataTemplate x:Key="ModItemTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="25" />
+                    <ColumnDefinition Width="25*" />
+                    <ColumnDefinition Width="25*" />
+                    <ColumnDefinition Width="25*" />
+                    <ColumnDefinition Width="25*" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Command="{Binding RemoveModificationCommand}" FontWeight="Bold" ToolTip="Remove Modification">-</Button>
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Modifications}" SelectedItem="{Binding SelectedModification}" IsEditable="True" />
+                <ComboBox Grid.Column="2" ItemsSource="{Binding AminoAcidResidues}" SelectedItem="{Binding SelectedResidue}" IsEditable="True" />
+                <ComboBox Grid.Column="3" ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation}" />
+                <ComboBox Grid.Column="4" ItemsSource="{Binding IsFixed}" SelectedItem="{Binding FixedSelection}" />
+            </Grid>
+        </DataTemplate>
+    </Window.Resources>
     <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="33*" />
-            <RowDefinition Height="33*" />
-            <RowDefinition Height="33*" />
+            <RowDefinition Height="155" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="10" />
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
@@ -14,33 +31,96 @@
             <GroupBox.Header>
                 Search Settings
             </GroupBox.Header>
-        </GroupBox>
-        <GroupBox Grid.Row="1" Grid.RowSpan="2">
-            <GroupBox.Header>
-                Modifications
-            </GroupBox.Header>
-            <Grid Margin="5">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="35" />
-                </Grid.RowDefinitions>
+            <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50*" />
-                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="20*" />
                     <ColumnDefinition Width="50*" />
                 </Grid.ColumnDefinitions>
+                
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" Height="25">Dataset</TextBlock>
+                <ComboBox Grid.Row="0" Grid.Column="1" Height="25" Width="265" HorizontalAlignment="Left" />
+                <Button Grid.Row="0" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50">New</Button>
 
-                <ListBox Grid.Row="0" Grid.Column="0" />
-                <Button Grid.Row="0" Grid.Column="1" Height="25" Width="25">-&gt;</Button>
-                <ListBox Grid.Row="0" Grid.Column="2" />
-                <Button Grid.Row="1" Grid.Column="0" Height="25" Command="{Binding ManageModificationsCommand}">Manage Modifications</Button>
+                <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" Height="25">DB File Path</TextBlock>
+                <TextBox Grid.Row="1" Grid.Column="1" Height="25" HorizontalAlignment="Left" Width="265" />
+                <Button Grid.Row="1" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50">Browse</Button>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" Height="25">Spectrum File Path</TextBlock>
+                <TextBox Grid.Row="2" Grid.Column="1" Height="25" IsEnabled="False" />
+                
+                <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" Height="25">Search Mode</TextBlock>
+                <ComboBox Grid.Row="3" Grid.Column="1" Height="25" HorizontalAlignment="Left" Width="50" 
+                          ItemsSource="{Binding SearchModes}" SelectedItem="{Binding SelectedSearchMode, Mode=TwoWay}" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="250" Text="{Binding SearchModeDescription}" />
             </Grid>
-            
+        </GroupBox>
+        <GroupBox Grid.Row="1">
+            <GroupBox.Header>
+                Search Modifications
+            </GroupBox.Header>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="25" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="25" />
+                    <ColumnDefinition Width="25*" />
+                    <ColumnDefinition Width="25*" />
+                    <ColumnDefinition Width="25*" />
+                    <ColumnDefinition Width="25*" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Row="0" Grid.Column="0" Width="25" HorizontalAlignment="Left" FontSize="13" FontWeight="Bold" 
+                        Command="{Binding AddModificationCommand}" Height="25" ToolTip="Add Modification">+</Button>
+                <Button Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2"
+                        Command="{Binding ManageModificationsCommand}" HorizontalAlignment="Right"
+                        Height="25">Manage Modifications</Button>
+                <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Modification</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Amino Acid</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="3" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Location</TextBlock>
+                <TextBlock Grid.Row="1" Grid.Column="4" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Fixed?</TextBlock>
+
+                <!-- TODO: Use datagrid instead of list box -->
+                <!--<DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" ItemsSource="{Binding SearchModifications}" AutoGenerateColumns="False"
+                          RowHeaderWidth="0" CanUserAddRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Width="25">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding RemoveModificationCommand}" FontWeight="Bold" ToolTip="Remove Modification">-</Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridComboBoxColumn Header="Residue" Width="25*" ItemsSource="{Binding AminoAcidResidues}" SelectedItemBinding="{Binding SelectedResidue}" />
+                        <DataGridComboBoxColumn Header="Modification" Width="25*" ItemsSource="{Binding Modifications}" SelectedItemBinding="{Binding SelectedModification}" />
+                        <DataGridComboBoxColumn Header="Location" Width="25*" ItemsSource="{Binding SequenceLocations}" SelectedItemBinding="{Binding SelectedSequenceLocation}" />
+                        <DataGridComboBoxColumn Header="Fixed?" Width="25*" ItemsSource="{Binding IsFixed}" SelectedItemBinding="{Binding FixedSelection}" />
+                    </DataGrid.Columns>
+                </DataGrid>-->
+                
+                <ListBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5"
+                            ItemsSource="{Binding Path=SearchModifications}"
+                            ItemTemplate="{StaticResource ResourceKey=ModItemTemplate}">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Grid>
         </GroupBox>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right">
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right">
             <Button Width="60" Margin="0,0,10,0" Command="{Binding CancelCommand}">Cancel</Button>
-            <Button Width="60" Command="{Binding OkCommand}">Open</Button>
+            <Button Width="60" Command="{Binding OkCommand}">Run</Button>
         </StackPanel>
     </Grid>
 </Window>
