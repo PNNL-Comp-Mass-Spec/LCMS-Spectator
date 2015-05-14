@@ -43,6 +43,12 @@ namespace LcmsSpectator.DialogServices
         string SaveFile(string defaultExt, string filter);
 
         /// <summary>
+        /// Open a dialog for selecting a folder path to save to.
+        /// </summary>
+        /// <returns>The path for the selected folder.</returns>
+        string OpenFolder();
+
+        /// <summary>
         /// Open a confirmation box.
         /// </summary>
         /// <param name="message">Message to display on confirmation box.</param>

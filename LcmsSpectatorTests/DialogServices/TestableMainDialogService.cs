@@ -177,5 +177,11 @@ namespace LcmsSpectatorTests.DialogServices
         {
             throw new NotImplementedException();
         }
+
+
+        public string OpenFolder()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

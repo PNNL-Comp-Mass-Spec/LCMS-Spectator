@@ -13,7 +13,10 @@ namespace LcmsSpectator.DialogServices
     using System;
     using System.Collections.Generic;
     using System.Windows;
-    using Microsoft.Win32;
+    using System.Windows.Forms;
+
+    using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+    using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 
     /// <summary>
     /// Service for opening dialogs from a view model.
@@ -101,6 +104,16 @@ namespace LcmsSpectator.DialogServices
             }
 
             return fileName;
+        }
+
+        /// <summary>
+        /// Open a dialog for selecting a folder path to save to.
+        /// </summary>
+        /// <returns>The path for the selected folder.</returns>
+        public virtual string OpenFolder()
+        {
+            var dialog = new FolderBrowserDialog();
+            return dialog.SelectedPath;
         }
 
         /// <summary>
