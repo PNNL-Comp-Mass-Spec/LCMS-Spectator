@@ -23,7 +23,7 @@ namespace LcmsSpectator.Utils
         /// <summary>
         /// Maximum possible charge for product ions.
         /// </summary>
-        public const int MaxCharge = 15;
+        public const int MaxCharge = 50;
 
         /// <summary>
         /// Minimum possible charge for product ions.

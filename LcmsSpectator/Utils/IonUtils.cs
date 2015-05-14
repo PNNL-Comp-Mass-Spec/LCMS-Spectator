@@ -289,6 +289,27 @@ namespace LcmsSpectator.Utils
         }
 
         /// <summary>
+        /// Get the score for a protein or peptide sequence.
+        /// </summary>
+        /// <param name="scorer">The scorer.</param>
+        /// <param name="sequence">The sequence.</param>
+        /// <returns>The score calculated from the sequence.</returns>
+        public static double ScoreSequence(IScorer scorer, Sequence sequence)
+        {
+            var prefixCompositions = GetCompositions(sequence, true);
+            var suffixCompositions = GetCompositions(sequence, false);
+            suffixCompositions.Reverse();
+
+            double score = 0.0;
+            for (int i = 0; i < prefixCompositions.Count; i++)
+            {
+                score += scorer.GetFragmentScore(prefixCompositions[i], suffixCompositions[i]);
+            }
+
+            return score;
+        }
+
+        /// <summary>
         /// Get a smoothed XIC.
         /// </summary>
         /// <param name="smoother">Smoother to smooth XIC.</param>

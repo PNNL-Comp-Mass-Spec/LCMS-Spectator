@@ -161,6 +161,13 @@ namespace LcmsSpectator.ViewModels.Data
             // Toggle instrument data when ShowInstrumentData setting is changed.
             IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Select(async x => await this.ScanViewModel.ToggleShowInstrumentDataAsync(x, (PbfLcMsRun)this.LcMs)).Subscribe();
 
+            // When product ion tolerance or ion correlation threshold change, update scorer factory
+            IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
+                .Subscribe(
+                    x =>
+                    this.CreateSequenceViewModel.ScorerFactory =
+                    new ScorerFactory(x.Item1, Constants.MinCharge, Constants.MaxCharge, x.Item2));
+
             // When an ID file has been opened, turn on the unidentified scan filter
             this.WhenAnyValue(x => x.IdFileOpen)
                 .Where(idFileOpen => idFileOpen)

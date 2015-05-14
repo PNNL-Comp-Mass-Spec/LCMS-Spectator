@@ -18,12 +18,14 @@ namespace LcmsSpectator.ViewModels.Data
 
     using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
+    using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
 
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers.SequenceReaders;
+    using LcmsSpectator.Utils;
 
     using ReactiveUI;
 
@@ -170,6 +172,11 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
+        /// Gets or sets the scorer factory used to score PRSMs on-the-fly.
+        /// </summary>
+        public ScorerFactory ScorerFactory { get; set; }
+
+        /// <summary>
         /// Implementation of the CreatePRSM command.
         /// Creates a new protein-spectrum match for the selected sequence,
         /// charge, and scan number.
@@ -212,6 +219,18 @@ namespace LcmsSpectator.ViewModels.Data
             }
 
             ILcMsRun lcms = this.SelectedDataSetViewModel.LcMs;
+            
+            double score = -1.0;
+            if (lcms != null && this.SelectedScan > 0 && this.ScorerFactory != null && sequence.Count > 0)
+            {
+                var spectrum = lcms.GetSpectrum(this.SelectedScan) as ProductSpectrum;
+                if (spectrum != null)
+                {
+                    var scorer = this.ScorerFactory.GetScorer(spectrum);
+                    score = IonUtils.ScoreSequence(scorer, sequence);
+                }
+            }
+
             string rawFileName = this.SelectedDataSetViewModel.Title;
             var prsm = new PrSm
             {
@@ -224,7 +243,7 @@ namespace LcmsSpectator.ViewModels.Data
                 Charge = this.SelectedCharge,
                 Sequence = sequence,
                 SequenceText = this.SequenceText,
-                Score = -1.0,
+                Score = score,
             };
             this.SelectedPrSm = prsm;
         }
