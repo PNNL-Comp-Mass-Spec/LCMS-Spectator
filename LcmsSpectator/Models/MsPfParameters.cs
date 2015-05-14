@@ -123,46 +123,32 @@ namespace LcmsSpectator.Models
         public ReactiveList<SearchModification> Modifications { get; set; }
 
         /// <summary>
-        /// Looks for and opens a parameter file in the same directory as MSPathFinder
-        /// results if it exists.
+        /// Opens parameter file.
         /// </summary>
-        /// <param name="idFilePath">Path to an MSPathFinder results file</param>
+        /// <param name="filePath">The path of the parameter file or ID file.</param>
         /// <returns>
         /// Parsed MSPathFinder parameters. Returns null if file does not exist.
         /// Throws exception if file is not formatted correctly.
         /// </returns>
-        public static MsPfParameters ReadFromIdFilePath(string idFilePath)
+        public static MsPfParameters ReadFromFile(string filePath)
         {
-            var path = Path.GetDirectoryName(idFilePath);
-            var fileName = Path.GetFileNameWithoutExtension(idFilePath);
-            if (fileName == null)
+            if (filePath.Contains("_IcTsv") || filePath.Contains("IcTda"))
             {
-                return null;
+                return ReadFromIdFilePath(filePath);
             }
 
-            string dataSetName;
-            if (fileName.EndsWith("_IcTsv") || fileName.EndsWith("_IcTda"))
-            {
-                dataSetName = fileName.Substring(0, fileName.Length - 6);
-            }
-            else
-            {
-                return null;
-            }
-
-            var paramFilePath = string.Format(@"{0}\{1}.param", path, dataSetName);
-            return ReadFromFile(paramFilePath);
+            return ReadFromParameterFile(filePath);
         }
 
         /// <summary>
-        /// Opens parameter file.
+        /// Opens parameter file from .PARAM file..
         /// </summary>
         /// <param name="filePath">The path of the parameter file.</param>
         /// <returns>
         /// Parsed MSPathFinder parameters. Returns null if file does not exist.
         /// Throws exception if file is not formatted correctly.
         /// </returns>
-        public static MsPfParameters ReadFromFile(string filePath)
+        private static MsPfParameters ReadFromParameterFile(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -241,6 +227,38 @@ namespace LcmsSpectator.Models
             }
 
             return param;
+        }
+
+        /// <summary>
+        /// Looks for and opens a parameter file in the same directory as MSPathFinder
+        /// results if it exists.
+        /// </summary>
+        /// <param name="idFilePath">Path to an MSPathFinder results file</param>
+        /// <returns>
+        /// Parsed MSPathFinder parameters. Returns null if file does not exist.
+        /// Throws exception if file is not formatted correctly.
+        /// </returns>
+        private static MsPfParameters ReadFromIdFilePath(string idFilePath)
+        {
+            var path = Path.GetDirectoryName(idFilePath);
+            var fileName = Path.GetFileNameWithoutExtension(idFilePath);
+            if (fileName == null)
+            {
+                return null;
+            }
+
+            string dataSetName;
+            if (fileName.EndsWith("_IcTsv") || fileName.EndsWith("_IcTda"))
+            {
+                dataSetName = fileName.Substring(0, fileName.Length - 6);
+            }
+            else
+            {
+                return null;
+            }
+
+            var paramFilePath = string.Format(@"{0}\{1}.param", path, dataSetName);
+            return ReadFromParameterFile(paramFilePath);
         }
 
         /// <summary>

@@ -423,7 +423,6 @@ namespace LcmsSpectator.ViewModels
         {
             bool attemptToReadFile = true;
             var modIgnoreList = new List<string>();
-            dataSetViewModel.SetMsPfParameters(idFilePath);
             do
             {
                 try

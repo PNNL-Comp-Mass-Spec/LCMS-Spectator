@@ -18,9 +18,7 @@ namespace LcmsSpectator.Readers
     using LcmsSpectator.Config;
     using LcmsSpectator.Models;
     using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels;
     using LcmsSpectator.ViewModels.Data;
-
     using ReactiveUI;
 
     /// <summary>
@@ -103,6 +101,7 @@ namespace LcmsSpectator.Readers
         /// <param name="rawFilePath">Path to raw file to open</param>
         /// <param name="idFilePath">Path to MS-GF+ or MS-PathFinder results file</param>
         /// <param name="featureFilePath">Path to feature list file</param>
+        /// <param name="paramFilePath">Path to MSPathFinder parameter file.</param>
         /// <param name="toolType">Type of ID tool used for this data set</param>
         /// <param name="modIgnoreList">Modifications to ignore if found in ID list.</param>
         /// <returns>Task that opens the data set.</returns>
@@ -111,6 +110,7 @@ namespace LcmsSpectator.Readers
                                     string rawFilePath,
                                     string idFilePath = "", 
                                     string featureFilePath = "", 
+                                    string paramFilePath = "",
                                     ToolType? toolType = ToolType.MsPathFinder,
                                     IEnumerable<string> modIgnoreList = null)
         {
@@ -132,6 +132,12 @@ namespace LcmsSpectator.Readers
             if (!string.IsNullOrEmpty(idFilePath))
             {
                 this.ReadingIdFiles = true;
+
+                if (dataSetViewModel.MsPfParameters == null)
+                {
+                    dataSetViewModel.SetMsPfParameters(paramFilePath ?? idFilePath);   
+                }
+
                 await this.ReadIdFile(dataSetViewModel, idFilePath, modIgnoreList);
                 this.ReadingIdFiles = false;
             }

@@ -306,7 +306,7 @@ namespace LcmsSpectator.ViewModels.Data
         {
             try
             {
-                this.MsPfParameters = MsPfParameters.ReadFromIdFilePath(idFilePath);
+                this.MsPfParameters = MsPfParameters.ReadFromFile(idFilePath);
             }
             catch (FormatException)
             {

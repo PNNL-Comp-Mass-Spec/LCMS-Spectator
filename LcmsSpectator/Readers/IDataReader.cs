@@ -48,11 +48,12 @@ namespace LcmsSpectator.Readers
         /// <summary>
         /// Open a data set given raw file, id file, and feature file.
         /// </summary>
-        /// <param name="dataSetViewModel">DataSetViewModel to associate open dataset with</param>
-        /// <param name="rawFilePath">Path to raw file to open</param>
-        /// <param name="idFilePath">Path to MS-GF+ or MS-PathFinder results file</param>
-        /// <param name="featureFilePath">Path to feature list file</param>
-        /// <param name="toolType">Type of ID tool used for this data set</param>
+        /// <param name="dataSetViewModel">DataSetViewModel to associate open dataset with.</param>
+        /// <param name="rawFilePath">Path to raw file to open.</param>
+        /// <param name="idFilePath">Path to MS-GF+ or MS-PathFinder results file.</param>
+        /// <param name="featureFilePath">Path to feature list file.</param>
+        /// <param name="paramFilePath">Path to MSPathFinder parameter file.</param>
+        /// <param name="toolType">Type of ID tool used for this data set.</param>
         /// <param name="modIgnoreList">Modifications to ignore if found in ID list.</param>
         /// <returns>Task that opens the data set.</returns>
         Task OpenDataSet(
@@ -60,6 +61,7 @@ namespace LcmsSpectator.Readers
                         string rawFilePath,
                         string idFilePath = "",
                         string featureFilePath = "",
+                        string paramFilePath = "",
                         ToolType? toolType = ToolType.MsPathFinder,
                         IEnumerable<string> modIgnoreList = null);
 
