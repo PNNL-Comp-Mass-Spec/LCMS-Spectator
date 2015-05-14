@@ -5,24 +5,6 @@
         xmlns:modifications="clr-namespace:LcmsSpectator.ViewModels.Modifications"
         xmlns:views="clr-namespace:LcmsSpectator.Views"
         Title="Search Settings" Height="475" Width="500" ResizeMode="NoResize">
-    <Window.Resources>
-        <DataTemplate x:Key="ModItemTemplate">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="25" />
-                    <ColumnDefinition Width="25*" />
-                    <ColumnDefinition Width="25*" />
-                    <ColumnDefinition Width="25*" />
-                    <ColumnDefinition Width="25*" />
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Command="{Binding RemoveModificationCommand}" FontWeight="Bold" ToolTip="Remove Modification">-</Button>
-                <ComboBox Grid.Column="1" ItemsSource="{Binding Modifications}" SelectedItem="{Binding SelectedModification}" IsEditable="True" />
-                <ComboBox Grid.Column="2" ItemsSource="{Binding AminoAcidResidues}" SelectedItem="{Binding SelectedResidue}" IsEditable="True" />
-                <ComboBox Grid.Column="3" ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation}" />
-                <ComboBox Grid.Column="4" ItemsSource="{Binding IsFixed}" SelectedItem="{Binding FixedSelection}" />
-            </Grid>
-        </DataTemplate>
-    </Window.Resources>
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="155" />
@@ -95,7 +77,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Residue" Width="25*">
+                        <DataGridTemplateColumn Header="Residue" Width="12*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                    <ComboBox ItemsSource="{Binding Path=AminoAcidResidues}" SelectedItem="{Binding Path=SelectedResidue}" IsEditable="True" />
