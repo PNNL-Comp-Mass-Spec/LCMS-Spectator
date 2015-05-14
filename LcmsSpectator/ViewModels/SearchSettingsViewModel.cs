@@ -12,6 +12,9 @@ namespace LcmsSpectator.ViewModels
 {
     using System;
     using System.Reactive.Linq;
+
+    using InformedProteomics.TopDown.Execution;
+
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.ViewModels.Modifications;
@@ -157,6 +160,14 @@ namespace LcmsSpectator.ViewModels
             get { return this.modificationsUpdated; }
             set { this.RaiseAndSetIfChanged(ref this.modificationsUpdated, value); }
         }
+
+        ////public IcTopDownLauncher IcTopDownLauncher
+        ////{
+        ////    get
+        ////    {
+        ////        return new IcTopDownLauncher();
+        ////    }
+        ////}
 
         /// <summary>
         /// Implementation for <see cref="AddModificationCommand"/>.
