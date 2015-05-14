@@ -10,6 +10,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:DoubleToStringConverter x:Key="MassFormatter" />
         <utils:DoubleToStringConverterSci x:Key="ScoreFormatter" />
+        <utils:QValueToStringConverter x:Key="QValueFormatter" />
     </UserControl.Resources>
     <ScrollViewer VerticalAlignment="Top"
                               VerticalScrollBarVisibility="Auto"
@@ -37,7 +38,7 @@
                 <TextBox Text="{Binding Path=Score, Converter={StaticResource ScoreFormatter}, Mode=OneWay}" FontWeight="Bold" Width="75"
                                  Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"/>
                 <TextBlock Text="QValue: " FontWeight="Bold" />
-                <TextBox Text="{Binding Path=QValue, Mode=OneWay}" FontWeight="Bold" Width="75"
+                <TextBox Text="{Binding Path=QValue, Converter={StaticResource QValueFormatter}, Mode=OneWay}" FontWeight="Bold" Width="75"
                                  Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"/>
             </StackPanel>
         </StackPanel>
