@@ -14,6 +14,10 @@ using System.Windows.Shapes;
 
 namespace LcmsSpectator.Views
 {
+    using LcmsSpectator.ViewModels;
+
+    using ReactiveUI;
+
     /// <summary>
     /// Interaction logic for SearchSettingsWindow.xaml
     /// </summary>

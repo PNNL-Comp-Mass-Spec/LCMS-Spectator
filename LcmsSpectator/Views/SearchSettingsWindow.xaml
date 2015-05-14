@@ -1,6 +1,9 @@
 ﻿<Window x:Class="LcmsSpectator.Views.SearchSettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
+        xmlns:modifications="clr-namespace:LcmsSpectator.ViewModels.Modifications"
+        xmlns:views="clr-namespace:LcmsSpectator.Views"
         Title="Search Settings" Height="475" Width="500" ResizeMode="NoResize">
     <Window.Resources>
         <DataTemplate x:Key="ModItemTemplate">
@@ -68,7 +71,6 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30" />
-                    <RowDefinition Height="25" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -83,14 +85,8 @@
                 <Button Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2"
                         Command="{Binding ManageModificationsCommand}" HorizontalAlignment="Right"
                         Height="25">Manage Modifications</Button>
-                <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Modification</TextBlock>
-                <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Amino Acid</TextBlock>
-                <TextBlock Grid.Row="1" Grid.Column="3" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Location</TextBlock>
-                <TextBlock Grid.Row="1" Grid.Column="4" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Fixed?</TextBlock>
-
-                <!-- TODO: Use datagrid instead of list box -->
-                <!--<DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" ItemsSource="{Binding SearchModifications}" AutoGenerateColumns="False"
-                          RowHeaderWidth="0" CanUserAddRows="False">
+                <DataGrid x:Name="SearchModificationsDataGrid" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" AutoGenerateColumns="False"
+                          RowHeaderWidth="0" CanUserAddRows="False" ItemsSource="{Binding SearchModifications}">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Width="25">
                             <DataGridTemplateColumn.CellTemplate>
@@ -99,22 +95,36 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridComboBoxColumn Header="Residue" Width="25*" ItemsSource="{Binding AminoAcidResidues}" SelectedItemBinding="{Binding SelectedResidue}" />
-                        <DataGridComboBoxColumn Header="Modification" Width="25*" ItemsSource="{Binding Modifications}" SelectedItemBinding="{Binding SelectedModification}" />
-                        <DataGridComboBoxColumn Header="Location" Width="25*" ItemsSource="{Binding SequenceLocations}" SelectedItemBinding="{Binding SelectedSequenceLocation}" />
-                        <DataGridComboBoxColumn Header="Fixed?" Width="25*" ItemsSource="{Binding IsFixed}" SelectedItemBinding="{Binding FixedSelection}" />
+                        <DataGridTemplateColumn Header="Residue" Width="25*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                   <ComboBox ItemsSource="{Binding Path=AminoAcidResidues}" SelectedItem="{Binding Path=SelectedResidue}" IsEditable="True" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Modification" Width="25*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding Modifications}" SelectedItem="{Binding SelectedModification}" IsEditable="True" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Location" Width="25*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="Location" Width="25*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding IsFixed}" SelectedItem="{Binding FixedSelection}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
-                </DataGrid>-->
-                
-                <ListBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5"
-                            ItemsSource="{Binding Path=SearchModifications}"
-                            ItemTemplate="{StaticResource ResourceKey=ModItemTemplate}">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                </ListBox>
+                </DataGrid>
             </Grid>
         </GroupBox>
 
