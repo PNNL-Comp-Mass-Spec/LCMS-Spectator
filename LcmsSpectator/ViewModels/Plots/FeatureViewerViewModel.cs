@@ -94,7 +94,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// MS/MS scans that are identified, but not associated with a feature.
         /// </summary>
-        private Series notFoundMs2S;
+        ////private Series notFoundMs2S;
 
         /// <summary>
         /// The feature data displayed on the feature map.
@@ -336,13 +336,13 @@ namespace LcmsSpectator.ViewModels.Plots
             this.FeatureMap.Axes.Add(this.yAxis);
 
             // When ShowNoutFoundMs2 changes, update the NoutFoundMs2 series
-            this.WhenAnyValue(x => x.ShowNotFoundMs2)
-                .Where(_ => this.notFoundMs2S != null && this.FeatureMap != null)
-                .Subscribe(showNotFoundMs2 =>
-                {
-                    this.notFoundMs2S.IsVisible = showNotFoundMs2;
-                    this.FeatureMap.InvalidatePlot(true);
-                });
+            ////this.WhenAnyValue(x => x.ShowNotFoundMs2)
+            ////    .Where(_ => this.notFoundMs2S != null && this.FeatureMap != null)
+            ////    .Subscribe(showNotFoundMs2 =>
+            ////    {
+            ////        this.notFoundMs2S.IsVisible = showNotFoundMs2;
+            ////        this.FeatureMap.InvalidatePlot(true);
+            ////    });
 
             // When ShowFoundIdMs2 changes, update all ms2 series
             this.WhenAnyValue(x => x.ShowFoundIdMs2)
