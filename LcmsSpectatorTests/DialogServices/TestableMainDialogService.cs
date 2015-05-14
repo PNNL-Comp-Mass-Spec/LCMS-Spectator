@@ -16,7 +16,7 @@ namespace LcmsSpectatorTests.DialogServices
     /// open any dialogs or even touch the WPF framework. Each method in this class simply sets
     /// a boolean flag when it is called and records its arguments.
     /// </summary>
-    public class TestableMainDialogService: IMainDialogService
+    public class TestableMainDialogService : IMainDialogService
     {
         /// <summary>
         /// This creates a new TestableMainDialogService.
@@ -168,6 +168,12 @@ namespace LcmsSpectatorTests.DialogServices
 
 
         public void OpenManageModifications(ManageModificationsViewModel manageModificationsViewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public bool SearchSettingsWindow(SearchSettingsViewModel searchSettingsViewModel)
         {
             throw new NotImplementedException();
         }
