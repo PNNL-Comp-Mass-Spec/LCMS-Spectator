@@ -226,6 +226,12 @@ namespace LcmsSpectator.ViewModels.Plots
                             this.PlotModel.AutoAdjustYAxis = autoAdjust;
                             this.PlotModel.YAxis.IsZoomEnabled = !autoAdjust;
                             this.PlotModel.YAxis.IsPanEnabled = !autoAdjust;
+
+                            if (autoAdjust)
+                            {
+                                this.PlotModel.XAxis.Reset();
+                                this.PlotModel.YAxis.Reset();
+                            }
                         });
             
             // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
