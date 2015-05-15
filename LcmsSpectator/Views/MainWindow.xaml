@@ -33,9 +33,9 @@
                 <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
                 <MenuItem Header="_Manage Modifications" Command="{Binding OpenManageModificationsCommand}" />
             </MenuItem>
-            <!--<MenuItem Header="_Search">
+            <MenuItem Header="_Search">
                 <MenuItem Header="_Run MSPathFinder" Command="{Binding RunMsPathFinderSearchCommand}" />
-            </MenuItem>-->
+            </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Command="{Binding OpenAboutBoxCommand}" />
             </MenuItem>

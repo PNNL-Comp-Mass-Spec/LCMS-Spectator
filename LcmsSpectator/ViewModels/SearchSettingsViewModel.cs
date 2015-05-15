@@ -11,6 +11,7 @@
 namespace LcmsSpectator.ViewModels
 {
     using System;
+    using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading;
@@ -48,7 +49,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// A cancellation token for cancelling the <see cref="runSearchTask" />.
         /// </summary>
-        private readonly CancellationToken runSearchCancellationToken;
+        private readonly CancellationTokenSource runSearchCancellationToken;
 
         /// <summary>
         /// The path for the spectrum file.
@@ -168,7 +169,7 @@ namespace LcmsSpectator.ViewModels
         {
             this.dialogService = dialogService;
 
-            this.runSearchCancellationToken = new CancellationToken();
+            this.runSearchCancellationToken = new CancellationTokenSource();
 
             this.LoadingScreenViewModel = new LoadingScreenViewModel();
 
@@ -202,8 +203,16 @@ namespace LcmsSpectator.ViewModels
             addModificationCommand.Subscribe(_ => this.AddModificationImplementation());
             this.AddModificationCommand = addModificationCommand;
 
-            // Run Command
-            this.RunCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.RunImplementation());
+            // Run Command - Disabled when there is no SpectrumFilePath, FastaDbFilePath, or OutputFilePath selected
+            this.RunCommand = ReactiveCommand.CreateAsyncTask(
+                                                              this.WhenAnyValue(
+                                                                                x => x.SpectrumFilePath,
+                                                                                x => x.FastaDbFilePath,
+                                                                                x => x.OutputFilePath)
+                                                                  .Select(x => !string.IsNullOrWhiteSpace(x.Item1) && 
+                                                                               !string.IsNullOrWhiteSpace(x.Item2) &&
+                                                                               !string.IsNullOrWhiteSpace(x.Item3)),
+                                                              async _ => await this.RunImplementation());
 
             // Cancel Command
             var cancelCommand = ReactiveCommand.Create();
@@ -233,6 +242,13 @@ namespace LcmsSpectator.ViewModels
             // When search mode is selected, display correct search mode description
             this.WhenAnyValue(x => x.SelectedSearchMode)
                 .Subscribe(searchMode => this.SearchModeDescription = this.searchModeDescriptions[searchMode]);
+
+            // When Spectrum file path is selected, use its directory for the output path by default if a output path
+            // has not already been selected.
+            this.WhenAnyValue(x => x.SpectrumFilePath)
+                .Where(_ => string.IsNullOrWhiteSpace(this.OutputFilePath))
+                .Select(Path.GetDirectoryName)
+                .Subscribe(specDir => this.OutputFilePath = specDir);
 
             this.SearchModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
 
@@ -522,9 +538,9 @@ namespace LcmsSpectator.ViewModels
                                              1,
                                              0,
                                              this.MinPrecursorIonCharge,
-                                             this.MinPrecursorIonCharge,
+                                             this.MaxPrecursorIonCharge,
                                              this.MinProductIonCharge,
-                                             this.MinProductIonCharge,
+                                             this.MaxProductIonCharge,
                                              this.MinSequenceMass,
                                              this.MaxSequenceMass,
                                              this.PrecursorIonToleranceValue,
@@ -617,12 +633,16 @@ namespace LcmsSpectator.ViewModels
         /// <returns>The <see cref="Task"/>.</returns>
         private async Task RunImplementation()
         {
-            this.Status = true;
+            var topDownLauncher = this.IcTopDownLauncher;
+            LoadingScreenViewModel.IsLoading = true;
+            this.runSearchTask = Task.Run(() => topDownLauncher.RunSearch(IcParameters.Instance.IonCorrelationThreshold, this.runSearchCancellationToken.Token), this.runSearchCancellationToken.Token);
+            await this.runSearchTask;
+            LoadingScreenViewModel.IsLoading = false;
+            this.dialogService.MessageBox("Search completed!");
+
             if (this.ReadyToClose != null)
             {
-                var topDownLauncher = this.IcTopDownLauncher;
-                this.runSearchTask = Task.Run(() => topDownLauncher.RunSearch(), this.runSearchCancellationToken);
-                await this.runSearchTask;
+                this.Status = true;
                 this.ReadyToClose(this, EventArgs.Empty);
             }
         }
@@ -633,6 +653,13 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void CancelImplementation()
         {
+            if (this.LoadingScreenViewModel.IsLoading)
+            {
+                this.runSearchCancellationToken.Cancel();
+                this.LoadingScreenViewModel.IsLoading = false;
+                return;
+            }
+
             this.Status = false;
             if (this.ReadyToClose != null)
             {
