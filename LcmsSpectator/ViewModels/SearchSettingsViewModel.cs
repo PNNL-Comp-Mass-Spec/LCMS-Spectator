@@ -19,6 +19,7 @@ namespace LcmsSpectator.ViewModels
 
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
+    using InformedProteomics.Backend.Database;
     using InformedProteomics.TopDown.Execution;
 
     using LcmsSpectator.Config;
@@ -223,6 +224,8 @@ namespace LcmsSpectator.ViewModels
 
             this.ToleranceUnits = new[] { ToleranceUnit.Ppm, ToleranceUnit.Th };
 
+            this.Proteins = new ReactiveList<string>();
+
             // Default values
             this.SelectedSearchMode = 2;
             this.MinSequenceLength = 21;
@@ -251,6 +254,8 @@ namespace LcmsSpectator.ViewModels
                 .Subscribe(specDir => this.OutputFilePath = specDir);
 
             this.SearchModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
+
+            ////this.WhenAnyValue(x => x.FastaDbFilePath).Subscribe(_ => this.LoadFastaFile());
 
             // Remove search modification when its Remove property is set to true.
             this.SearchModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
@@ -355,6 +360,11 @@ namespace LcmsSpectator.ViewModels
         /// Gets the list of possible MSPathFinder search modes.
         /// </summary>
         public int[] SearchModes { get; private set; }
+
+        /// <summary>
+        /// Gets the list of Protein names in the FASTA file.
+        /// </summary>
+        public ReactiveList<string> Proteins { get; private set; }
 
         /// <summary>
         /// Gets the list of possible tolerance units.
@@ -550,6 +560,23 @@ namespace LcmsSpectator.ViewModels
                                              this.FeatureFilePath,
                                              this.minFeatureProbability);
             }
+        }
+
+        /// <summary>
+        /// Reads the proteins from the FASTA file.
+        /// </summary>
+        private void LoadFastaFile()
+        {
+            ////this.Proteins.Clear();
+
+            ////if (!string.IsNullOrEmpty(this.FastaDbFilePath) && File.Exists(this.FastaDbFilePath))
+            ////{
+            ////    var proteinDb = new FastaDatabase(this.FastaDbFilePath);
+            ////    this.Proteins.AddRange(proteinDb.GetProteinNames());
+
+            ////    this.dialogService.MessageBox(proteinDb.GetProteinName(1));
+            ////    this.dialogService.MessageBox(proteinDb.GetProteinName(2));
+            ////}
         }
 
         /// <summary>
