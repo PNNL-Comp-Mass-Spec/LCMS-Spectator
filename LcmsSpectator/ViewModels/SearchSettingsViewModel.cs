@@ -655,8 +655,14 @@ namespace LcmsSpectator.ViewModels
         {
             if (this.LoadingScreenViewModel.IsLoading)
             {
-                this.runSearchCancellationToken.Cancel();
-                this.LoadingScreenViewModel.IsLoading = false;
+                if (this.dialogService.ConfirmationBox(
+                    "Are you sure you would like to cancel the search?",
+                    "Cancel Search"))
+                {
+                    this.runSearchCancellationToken.Cancel();
+                    this.LoadingScreenViewModel.IsLoading = false;   
+                }
+
                 return;
             }
 
