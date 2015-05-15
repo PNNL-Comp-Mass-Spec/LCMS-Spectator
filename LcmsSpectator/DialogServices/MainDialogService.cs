@@ -182,13 +182,11 @@ namespace LcmsSpectator.DialogServices
         /// Open the MSPathFinder Search Settings Window.
         /// </summary>
         /// <param name="searchSettingsViewModel">The view model for the dialog.</param>
-        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
-        public bool SearchSettingsWindow(SearchSettingsViewModel searchSettingsViewModel)
+        public void SearchSettingsWindow(SearchSettingsViewModel searchSettingsViewModel)
         {
             var searchSettingsDialog = new SearchSettingsWindow { DataContext = searchSettingsViewModel };
             searchSettingsViewModel.ReadyToClose += (o, e) => searchSettingsDialog.Close();
-            searchSettingsDialog.ShowDialog();
-            return searchSettingsViewModel.Status;
+            searchSettingsDialog.Show();
         }
     }
 }

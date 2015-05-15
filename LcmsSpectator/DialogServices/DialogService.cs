@@ -109,10 +109,12 @@ namespace LcmsSpectator.DialogServices
         /// <summary>
         /// Open a dialog for selecting a folder path to save to.
         /// </summary>
+        /// <param name="description">The descriptive text displayed above the Tree View in the dialog box.</param>
         /// <returns>The path for the selected folder.</returns>
-        public virtual string OpenFolder()
+        public virtual string OpenFolder(string description = "")
         {
-            var dialog = new FolderBrowserDialog();
+            var dialog = new FolderBrowserDialog { ShowNewFolderButton = true, Description = description};
+            dialog.ShowDialog();
             return dialog.SelectedPath;
         }
 

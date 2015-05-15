@@ -31,19 +31,23 @@
 
                 <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" Height="25">Spectrum File Path</TextBlock>
                 <TextBox Grid.Row="0" Grid.Column="1" Height="25" Width="240" HorizontalAlignment="Left" />
-                <Button Grid.Row="0" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50">Browse</Button>
+                <Button Grid.Row="0" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50"
+                        Command="{Binding BrowseSpectrumFilesCommand}">Browse</Button>
 
                 <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" Height="25">Fasta DB File Path</TextBlock>
                 <TextBox Grid.Row="1" Grid.Column="1" Height="25" Width="240" HorizontalAlignment="Left" />
-                <Button Grid.Row="1" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50">Browse</Button>
+                <Button Grid.Row="1" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50"
+                        Command="{Binding BrowseFastaDbFilesCommand}">Browse</Button>
 
                 <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" Height="25">Feature File Path</TextBlock>
                 <TextBox Grid.Row="2" Grid.Column="1" Height="25" Width="240" HorizontalAlignment="Left" />
-                <Button Grid.Row="2" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50">Browse</Button>
+                <Button Grid.Row="2" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50"
+                        Command="{Binding BrowseFeatureFilesCommand}">Browse</Button>
 
                 <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" Height="25">Output Directory</TextBlock>
                 <TextBox Grid.Row="3" Grid.Column="1" Height="25" Width="240" HorizontalAlignment="Left" />
-                <Button Grid.Row="3" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50">Browse</Button>
+                <Button Grid.Row="3" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="50"
+                        Command="{Binding BrowseOutputDirectoriesCommand}">Browse</Button>
             </Grid>
         </GroupBox>
 
@@ -64,6 +68,8 @@
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
+                        <RowDefinition Height="60" />
+                        <RowDefinition Height="60" />
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
@@ -77,37 +83,57 @@
                           ItemsSource="{Binding SearchModes}" SelectedItem="{Binding SelectedSearchMode, Mode=TwoWay}" />
                     <TextBlock Grid.Row="0" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="220" Text="{Binding SearchModeDescription}" />
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" Height="25">Precursor Tolerance</TextBlock>
-                    <TextBox Grid.Row="1" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left"/>
-                    <ComboBox Grid.Row="1" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" Height="25">Precursor Ion Tolerance</TextBlock>
+                    <TextBox Grid.Row="1" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left" Text="{Binding PrecursorIonToleranceValue}"
+                             TextAlignment="Right" />
+                    <ComboBox Grid.Row="1" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right" 
+                              ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding PrecursorIonToleranceUnit}" IsEnabled="False" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" Height="25">Product Tolerance</TextBlock>
-                    <TextBox Grid.Row="2" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left"/>
-                    <ComboBox Grid.Row="2" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" Height="25">Product Ion Tolerance</TextBlock>
+                    <TextBox Grid.Row="2" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left" Text="{Binding ProductIonToleranceValue}"
+                             TextAlignment="Right" />
+                    <ComboBox Grid.Row="2" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right"
+                              ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding ProductIonToleranceUnit}" IsEnabled="False"/>
 
                     <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Length</TextBlock>
-                    <TextBox Grid.Row="3" Grid.Column="1" Height="25" />
+                    <TextBox Grid.Row="3" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MinSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                     <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Length</TextBlock>
-                    <TextBox Grid.Row="4" Grid.Column="1" Height="25" />
+                    <TextBox Grid.Row="4" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MaxSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" Height="25">Min Product Charge</TextBlock>
-                    <TextBox Grid.Row="5" Grid.Column="1" Height="25" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Min Precursor Ion Charge</TextBlock>
+                    <TextBox Grid.Row="5" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MinPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" Height="25">Max Product Charge</TextBlock>
-                    <TextBox Grid.Row="6" Grid.Column="1" Height="25" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Max Precursor Ion Charge</TextBlock>
+                    <TextBox Grid.Row="6" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MaxPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="7" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Mass</TextBlock>
-                    <TextBox Grid.Row="7" Grid.Column="1" Height="25" />
+                    <TextBlock Grid.Row="7" Grid.Column="0" FontWeight="Bold" Height="25">Min Product Ion Charge</TextBlock>
+                    <TextBox Grid.Row="7" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MinProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="8" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Mass</TextBlock>
-                    <TextBox Grid.Row="8" Grid.Column="1" Height="25" />
+                    <TextBlock Grid.Row="8" Grid.Column="0" FontWeight="Bold" Height="25">Max Product Ion Charge</TextBlock>
+                    <TextBox Grid.Row="8" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MaxProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="9" Grid.Column="0" FontWeight="Bold" Height="25">Min Feature Probability</TextBlock>
-                    <TextBox Grid.Row="9" Grid.Column="1" Height="25" />
+                    <TextBlock Grid.Row="9" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Mass</TextBlock>
+                    <TextBox Grid.Row="9" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MinSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="10" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="Wrap">Max Dynamic Modifications Per Sequence</TextBlock>
-                    <TextBox Grid.Row="10" Grid.Column="1" Height="25" />
+                    <TextBlock Grid.Row="10" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Mass</TextBlock>
+                    <TextBox Grid.Row="10" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MaxSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Grid.Row="11" Grid.Column="0" FontWeight="Bold" Height="25">Min Feature Probability</TextBlock>
+                    <TextBox Grid.Row="11" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MinFeatureProbability, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Grid.Row="12" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="Wrap">Max Dynamic Modifications Per Sequence</TextBlock>
+                    <TextBox Grid.Row="12" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MaxDynamicModificationsPerSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
             </ScrollViewer>
         </GroupBox>
@@ -177,7 +203,7 @@
 
         <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right">
             <Button Width="60" Margin="0,0,10,0" Command="{Binding CancelCommand}">Cancel</Button>
-            <Button Width="60" Command="{Binding OkCommand}">Run</Button>
+            <Button Width="60" Command="{Binding RunCommand}">Run</Button>
         </StackPanel>
     </Grid>
 </Window>

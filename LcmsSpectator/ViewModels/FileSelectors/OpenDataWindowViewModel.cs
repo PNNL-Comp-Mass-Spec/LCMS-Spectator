@@ -93,7 +93,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
 
             var browseFastaFilesCommand = ReactiveCommand.Create();
             browseFastaFilesCommand.Subscribe(_ => this.BrowseFastaFilesImplementation());
-            this.BrowseFastaFilesCommand = browseIdFilesCommand;
+            this.BrowseFastaFilesCommand = browseFastaFilesCommand;
 
             this.ParamFileSelected = true;
             this.DatasetSelected = false;
