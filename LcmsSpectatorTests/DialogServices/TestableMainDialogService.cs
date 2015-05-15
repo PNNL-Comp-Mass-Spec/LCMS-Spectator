@@ -183,5 +183,17 @@ namespace LcmsSpectatorTests.DialogServices
         {
             throw new NotImplementedException();
         }
+
+
+        void IMainDialogService.SearchSettingsWindow(SearchSettingsViewModel searchSettingsViewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public string OpenFolder(string description = "")
+        {
+            throw new NotImplementedException();
+        }
     }
 }
