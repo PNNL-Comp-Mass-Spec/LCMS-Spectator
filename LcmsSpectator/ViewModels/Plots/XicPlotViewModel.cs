@@ -49,7 +49,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// The XAxis of XIC PlotModel plot.
         /// </summary>
-        private readonly LinearAxis xAxis;
+        private readonly LinearAxis xaxis;
 
         /// <summary>
         /// The plot model for the extracted ion chromatogram plot.
@@ -102,17 +102,25 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="dialogService">Dialog service </param>
         /// <param name="lcms">LCMS run data set for this XIC plot. </param>
         /// <param name="title">Title of XIC plot </param>
-        /// <param name="xAxis">XAxis for XIC plot. </param>
+        /// <param name="xaxis">XAxis for XIC plot. </param>
         /// <param name="showLegend">Should a legend be shown on the plot by default? </param>
-        public XicPlotViewModel(IDialogService dialogService, ILcMsRun lcms, string title, LinearAxis xAxis, bool showLegend = true)
+        public XicPlotViewModel(IDialogService dialogService, ILcMsRun lcms, string title, LinearAxis xaxis, bool showLegend = true)
         {
             this.dialogService = dialogService;
             this.lcms = lcms;
             this.showLegend = showLegend;
-            this.xAxis = xAxis;
+            this.xaxis = xaxis;
             this.pointsToSmooth = IcParameters.Instance.PointsToSmooth;
             this.PlotTitle = title;
-            this.PlotModel = new SelectablePlotModel(xAxis, 1.05);
+            this.PlotModel = new SelectablePlotModel(xaxis, 1.05)
+            {
+                YAxis =
+                {
+                    Title = "Intensity",
+                    StringFormat = "0e0"
+                }
+            };
+
             this.ions = new ReactiveList<LabeledIonViewModel>();
 
             var retentionTimeSelectedCommand = ReactiveCommand.Create();
@@ -141,7 +149,7 @@ namespace LcmsSpectator.ViewModels.Plots
             });
 
             // Update area when x Axis is zoomed/panned
-            this.xAxis.AxisChanged += async (o, e) =>
+            this.xaxis.AxisChanged += async (o, e) =>
             {
                 this.Area = await this.GetCurrentAreaAsync();
             };
@@ -294,7 +302,7 @@ namespace LcmsSpectator.ViewModels.Plots
         public double GetCurrentArea()
         {
             return this.PlotModel.Series.OfType<XicPointSeries>().Where(xicPointSeries => xicPointSeries.IsVisible && xicPointSeries.Index >= 0)
-                .Sum(xicPointSeries => xicPointSeries.GetArea(this.xAxis.ActualMinimum, this.xAxis.ActualMaximum));
+                .Sum(xicPointSeries => xicPointSeries.GetArea(this.xaxis.ActualMinimum, this.xaxis.ActualMaximum));
         }
 
         /// <summary>
@@ -359,11 +367,6 @@ namespace LcmsSpectator.ViewModels.Plots
                 };
                 seriesstore[xic[0].Title] = new Tuple<LineSeries, IList<XicDataPoint>>(series, xic);
                 this.PlotModel.Series.Insert(0, series);
-            }
-
-            if (string.IsNullOrEmpty(this.PlotModel.YAxis.Title))
-            {
-                this.PlotModel.GenerateYAxis("Intensity", "0e0");
             }
 
             this.PlotModel.IsLegendVisible = this.showLegend;

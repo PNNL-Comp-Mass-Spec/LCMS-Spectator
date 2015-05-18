@@ -42,12 +42,12 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Horizontal axis of the error map plot (ion types)
         /// </summary>
-        private readonly LinearAxis xAxis;
+        private readonly LinearAxis xaxis;
 
         /// <summary>
         /// Vertical axis of error map plot (sequence residue)
         /// </summary>
-        private readonly LinearAxis yAxis;
+        private readonly LinearAxis yaxis;
 
         /// <summary>
         /// Color axis of the error map plot (peak error)
@@ -76,7 +76,7 @@ namespace LcmsSpectator.ViewModels.Plots
             this.PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
 
             // Init x axis
-            this.xAxis = new LinearAxis
+            this.xaxis = new LinearAxis
             {
                 Title = "Amino Acid",
                 Position = AxisPosition.Top,
@@ -89,10 +89,10 @@ namespace LcmsSpectator.ViewModels.Plots
                 MaximumPadding = 0,
                 FontSize = 10
             };
-            this.PlotModel.Axes.Add(this.xAxis);
+            this.PlotModel.Axes.Add(this.xaxis);
 
             // Init Y axis
-            this.yAxis = new LinearAxis
+            this.yaxis = new LinearAxis
             {
                 Title = "Ion Type",
                 Position = AxisPosition.Left,
@@ -105,7 +105,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 MaximumPadding = 0,
                 FontSize = 10
             };
-            this.PlotModel.Axes.Add(this.yAxis);
+            this.PlotModel.Axes.Add(this.yaxis);
 
             // Init Color axis
             var minColor = OxyColor.FromRgb(127, 255, 0);
@@ -211,11 +211,11 @@ namespace LcmsSpectator.ViewModels.Plots
             };
             this.PlotModel.Series.Add(heatMapSeries);
 
-            this.xAxis.AbsoluteMaximum = sequence.Count;
-            this.yAxis.AbsoluteMaximum = this.ionTypes.Length;
+            this.xaxis.AbsoluteMaximum = sequence.Count;
+            this.yaxis.AbsoluteMaximum = this.ionTypes.Length;
 
             // Set yAxis double -> string label converter function
-            this.yAxis.LabelFormatter = y =>
+            this.yaxis.LabelFormatter = y =>
             {
                 if (y.Equals(0))
                 {
@@ -227,7 +227,7 @@ namespace LcmsSpectator.ViewModels.Plots
             };
 
             // Set xAxis double -> string label converter function
-            this.xAxis.LabelFormatter = x =>
+            this.xaxis.LabelFormatter = x =>
             {
                 if (x.Equals(0))
                 {

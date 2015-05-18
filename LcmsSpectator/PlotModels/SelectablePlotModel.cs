@@ -33,9 +33,9 @@ namespace LcmsSpectator.PlotModels
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectablePlotModel"/> class.
         /// </summary>
-        /// <param name="xAxis">The X axis.</param>
+        /// <param name="xaxis">The X axis.</param>
         /// <param name="multiplier">Multiplier that determines how much space to leave about tallest point.</param>
-        public SelectablePlotModel(Axis xAxis, double multiplier) : base(xAxis, multiplier)
+        public SelectablePlotModel(Axis xaxis, double multiplier) : base(xaxis, multiplier)
         {
             this.MouseDown += this.SelectablePlotModelMouseDown;
             this.PrimaryColor = OxyColors.Black;

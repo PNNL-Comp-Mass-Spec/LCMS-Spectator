@@ -300,10 +300,10 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Set minimum and maximum values for shared XAxis for MS1 spectra plots
         /// </summary>
-        /// <param name="xAxis">X Axis to set min and max values for.</param>
+        /// <param name="xaxis">X Axis to set min and max values for.</param>
         /// <param name="ms2">MS/MS spectrum to get isolation window bounds from.</param>
         /// <param name="ms1">The MS1 that the plot for this axis displays</param>
-        private void SetMs1XAxis(Axis xAxis, Spectrum ms2, Spectrum ms1)
+        private void SetMs1XAxis(Axis xaxis, Spectrum ms2, Spectrum ms1)
         {
             var ms2Prod = ms2 as ProductSpectrum;
             if (ms2Prod == null || ms1 == null)
@@ -317,11 +317,11 @@ namespace LcmsSpectator.ViewModels.Plots
             var diff = ms1Max - ms1Min;
             var ms1MinMz = ms2Prod.IsolationWindow.MinMz - (0.25 * diff);
             var ms1MaxMz = ms2Prod.IsolationWindow.MaxMz + (0.25 * diff);
-            xAxis.Minimum = ms1MinMz;
-            xAxis.Maximum = ms1MaxMz;
-            xAxis.AbsoluteMinimum = 0;
-            xAxis.AbsoluteMaximum = ms1AbsMax;
-            xAxis.Zoom(ms1MinMz, ms1MaxMz);
+            xaxis.Minimum = ms1MinMz;
+            xaxis.Maximum = ms1MaxMz;
+            xaxis.AbsoluteMinimum = 0;
+            xaxis.AbsoluteMaximum = ms1AbsMax;
+            xaxis.Zoom(ms1MinMz, ms1MaxMz);
         }
 
         /// <summary>

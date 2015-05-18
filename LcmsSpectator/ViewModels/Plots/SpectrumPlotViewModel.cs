@@ -15,23 +15,18 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
-    using System.Windows.Documents;
-
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.TopDown.Scoring;
-
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.PlotModels;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Data;
-
     using OxyPlot;
     using OxyPlot.Annotations;
     using OxyPlot.Axes;
     using OxyPlot.Series;
-
     using ReactiveUI;
 
     /// <summary>
@@ -72,12 +67,12 @@ namespace LcmsSpectator.ViewModels.Plots
         private Spectrum filteredSpectrum;
 
         /// <summary>
-        /// Stores the deconvoluted version of the spectrum for fast access
+        /// Stores the de-convoluted version of the spectrum for fast access
         /// </summary>
         private Spectrum deconvolutedSpectrum;
 
         /// <summary>
-        /// Stores the filtered and deconvoluted version of the spectrum for fast access
+        /// Stores the filtered and de-convoluted version of the spectrum for fast access
         /// </summary>
         private Spectrum filteredDeconvolutedSpectrum;
 
@@ -99,10 +94,10 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// The XAxis of spectrum PlotModel plot.
         /// </summary>
-        private LinearAxis xAxis;
+        private LinearAxis xaxis;
 
         /// <summary>
-        /// A value indicating whether or not deconvoluted spectrum is showing.
+        /// A value indicating whether or not de-convoluted spectrum is showing.
         /// </summary>
         private bool showDeconvolutedSpectrum;
 
@@ -114,22 +109,22 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// The minimum for the X axis of the spectrum plot.
         /// </summary>
-        private double xMinimum;
+        private double xminimum;
 
         /// <summary>
         /// The maximum for the X axis of the spectrum plot.
         /// </summary>
-        private double xMaximum;
+        private double xmaximum;
 
         /// <summary>
         /// The minimum for the X axis of the spectrum plot.
         /// </summary>
-        private double yMinimum;
+        private double yminimum;
 
         /// <summary>
         /// The maximum for the Y axis of the spectrum plot.
         /// </summary>
-        private double yMaximum;
+        private double ymaximum;
 
         /// <summary>
         /// A value indicating whether this plot should automatically
@@ -175,7 +170,16 @@ namespace LcmsSpectator.ViewModels.Plots
                 StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
             };
-            this.PlotModel = new AutoAdjustedYPlotModel(this.XAxis, multiplier) { IsLegendVisible = false };
+            this.PlotModel = new AutoAdjustedYPlotModel(this.XAxis, multiplier)
+            {
+                IsLegendVisible = false,
+                YAxis =
+                {
+                    Title = "Intensity",
+                    StringFormat = "0e0"
+                }
+            };
+
             this.ions = new ReactiveList<LabeledIonViewModel>();
 
             // When Spectrum updates, clear the filtered spectrum, deconvoluted spectrum, and filtered+deconvoluted spectrum
@@ -237,11 +241,11 @@ namespace LcmsSpectator.ViewModels.Plots
             // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
             this.WhenAnyValue(x => x.XMinimum, x => x.XMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Where(x => !this.xAxis.ActualMinimum.Equals(x.Item1) || !this.xAxis.ActualMaximum.Equals(x.Item2))
+                .Where(x => !this.xaxis.ActualMinimum.Equals(x.Item1) || !this.xaxis.ActualMaximum.Equals(x.Item2))
                 .Subscribe(
                     x =>
                     {
-                        this.xAxis.Zoom(x.Item1, x.Item2);
+                        this.xaxis.Zoom(x.Item1, x.Item2);
                         this.PlotModel.InvalidatePlot(false);
                     });
             this.WhenAnyValue(y => y.YMinimum, y => y.YMaximum)
@@ -255,10 +259,10 @@ namespace LcmsSpectator.ViewModels.Plots
                     });
 
             // Update X min and max properties when x axis is panned or zoomed
-            this.xAxis.AxisChanged += (o, e) =>
+            this.xaxis.AxisChanged += (o, e) =>
             {
-                this.XMinimum = Math.Round(this.xAxis.ActualMinimum, 3);
-                this.XMaximum = Math.Round(this.xAxis.ActualMaximum, 3);
+                this.XMinimum = Math.Round(this.xaxis.ActualMinimum, 3);
+                this.XMaximum = Math.Round(this.xaxis.ActualMaximum, 3);
             };
 
             // Update Y min and max properties when Y axis is panned or zoomed
@@ -318,7 +322,7 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether or not deconvoluted spectrum is showing.
+        /// Gets or sets a value indicating whether or not de-convoluted spectrum is showing.
         /// </summary>
         public bool ShowDeconvolutedSpectrum
         {
@@ -331,8 +335,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double XMinimum
         {
-            get { return this.xMinimum; }
-            set { this.RaiseAndSetIfChanged(ref this.xMinimum, value); }
+            get { return this.xminimum; }
+            set { this.RaiseAndSetIfChanged(ref this.xminimum, value); }
         }
 
         /// <summary>
@@ -340,8 +344,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double XMaximum
         {
-            get { return this.xMaximum; }
-            set { this.RaiseAndSetIfChanged(ref this.xMaximum, value); }
+            get { return this.xmaximum; }
+            set { this.RaiseAndSetIfChanged(ref this.xmaximum, value); }
         }
 
         /// <summary>
@@ -349,8 +353,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double YMinimum
         {
-            get { return this.yMinimum; }
-            set { this.RaiseAndSetIfChanged(ref this.yMinimum, value); }
+            get { return this.yminimum; }
+            set { this.RaiseAndSetIfChanged(ref this.yminimum, value); }
         }
 
         /// <summary>
@@ -358,8 +362,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double YMaximum
         {
-            get { return this.yMaximum; }
-            set { this.RaiseAndSetIfChanged(ref this.yMaximum, value); }
+            get { return this.ymaximum; }
+            set { this.RaiseAndSetIfChanged(ref this.ymaximum, value); }
         }
 
         /// <summary>
@@ -386,8 +390,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public LinearAxis XAxis
         {
-            get { return this.xAxis; }
-            private set { this.RaiseAndSetIfChanged(ref this.xAxis, value); }
+            get { return this.xaxis; }
+            private set { this.RaiseAndSetIfChanged(ref this.xaxis, value); }
         }
 
         /// <summary>
@@ -474,11 +478,6 @@ namespace LcmsSpectator.ViewModels.Plots
                 this.spectrumDirty = false;
             }
 
-            if (string.IsNullOrEmpty(this.PlotModel.YAxis.Title))
-            {
-                this.PlotModel.GenerateYAxis("Intensity", "0e0");
-            }
-
             var maxCharge = peakDataPoints.Length > 0 ? this.Ions.Max(x => x.IonType.Charge) : 2;
             maxCharge = Math.Max(maxCharge, 2);
             var colors = new ColorDictionary(maxCharge);
@@ -561,9 +560,9 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Get correctly filtered and/or deconvoluted spectrum
+        /// Get correctly filtered and/or de-convoluted spectrum
         /// </summary>
-        /// <returns>Filtered and/or deconvoluted spectrum</returns>
+        /// <returns>Filtered and/or de-convoluted spectrum</returns>
         private Spectrum GetSpectrum()
         {
             // Filtered/Deconvoluted Spectrum?

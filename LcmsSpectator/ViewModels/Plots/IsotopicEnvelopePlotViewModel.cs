@@ -33,19 +33,23 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// The XAxis of spectrum PlotModel plot.
         /// </summary>
-        private readonly LinearAxis xAxis;
+        private readonly LinearAxis xaxis;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IsotopicEnvelopePlotViewModel"/> class. 
         /// </summary>
         public IsotopicEnvelopePlotViewModel()
         {
-            this.xAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Mass", StringFormat = "0.###" };
-            this.PlotModel = new AutoAdjustedYPlotModel(this.xAxis, 1.05)
+            this.xaxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Mass", StringFormat = "0.###" };
+            this.PlotModel = new AutoAdjustedYPlotModel(this.xaxis, 1.05)
             {
-                Title = "Isotopic Envelope"
+                Title = "Isotopic Envelope",
+                YAxis =
+                {
+                    Title = "Relative Intensity",
+                    StringFormat = "0e0"
+                }
             };
-            this.PlotModel.GenerateYAxis("Relative Intensity", "0e0");
         }
 
         /// <summary>
@@ -117,11 +121,11 @@ namespace LcmsSpectator.ViewModels.Plots
             var absMin = Math.Max(0, min - 10);
             max += (max - min) / 3;
             var absMax = max + 10;
-            this.xAxis.Minimum = min;
-            this.xAxis.AbsoluteMinimum = absMin;
-            this.xAxis.Maximum = max;
-            this.xAxis.AbsoluteMaximum = absMax;
-            this.xAxis.Zoom(min, max);
+            this.xaxis.Minimum = min;
+            this.xaxis.AbsoluteMinimum = absMin;
+            this.xaxis.Maximum = max;
+            this.xaxis.AbsoluteMaximum = absMax;
+            this.xaxis.Zoom(min, max);
 
             this.PlotModel.IsLegendVisible = true;
             this.PlotModel.InvalidatePlot(true);

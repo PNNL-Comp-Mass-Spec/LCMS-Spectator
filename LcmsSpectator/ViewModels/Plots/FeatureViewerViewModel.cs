@@ -59,12 +59,12 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// The X Axis of the feature map.
         /// </summary>
-        private readonly LinearAxis xAxis;
+        private readonly LinearAxis xaxis;
 
         /// <summary>
         /// The Y Axis of the feature map.
         /// </summary>
-        private readonly LinearAxis yAxis;
+        private readonly LinearAxis yaxis;
 
         /// <summary>
         /// Color axis for MS/MS scan points.
@@ -289,39 +289,39 @@ namespace LcmsSpectator.ViewModels.Plots
             };
 
             // Initialize x and y axes.
-            this.yAxis = new LinearAxis { Position = AxisPosition.Left, Title = "Monoisotopic Mass", StringFormat = "0.###" };
-            this.xAxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time", StringFormat = "0.###", };
+            this.yaxis = new LinearAxis { Position = AxisPosition.Left, Title = "Monoisotopic Mass", StringFormat = "0.###" };
+            this.xaxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time", StringFormat = "0.###", };
 
             // Change size of scan highlight annotation when feature map x and y axes are zoomed or panned.
             bool isInternalChange = false;
-            this.xAxis.AxisChanged += (o, e) =>
+            this.xaxis.AxisChanged += (o, e) =>
             {
-                this.FeaturePlotXMinimum = Math.Round(this.xAxis.ActualMinimum, 3);
-                this.FeaturePlotXMaximum = Math.Round(this.xAxis.ActualMaximum, 3);
+                this.FeaturePlotXMinimum = Math.Round(this.xaxis.ActualMinimum, 3);
+                this.FeaturePlotXMaximum = Math.Round(this.xaxis.ActualMaximum, 3);
                 if (!isInternalChange && this.highlight != null &&
-                    this.highlight.TextPosition.X >= this.xAxis.ActualMinimum && this.highlight.TextPosition.X <= this.xAxis.ActualMaximum &&
-                   this.highlight.TextPosition.Y >= this.yAxis.ActualMinimum && this.highlight.TextPosition.Y <= this.yAxis.ActualMaximum)
+                    this.highlight.TextPosition.X >= this.xaxis.ActualMinimum && this.highlight.TextPosition.X <= this.xaxis.ActualMaximum &&
+                   this.highlight.TextPosition.Y >= this.yaxis.ActualMinimum && this.highlight.TextPosition.Y <= this.yaxis.ActualMaximum)
                 {
                     var x = this.highlight.TextPosition.X;
                     isInternalChange = true;
-                    this.highlight.MinimumX = x - ((this.xAxis.ActualMaximum - this.xAxis.ActualMinimum) * HighlightSize * 0.5);
-                    this.highlight.MaximumX = x + ((this.xAxis.ActualMaximum - this.xAxis.ActualMinimum) * HighlightSize * 0.5);
+                    this.highlight.MinimumX = x - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5);
+                    this.highlight.MaximumX = x + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5);
                 }
 
                 isInternalChange = false;
             };
-            this.yAxis.AxisChanged += (o, e) =>
+            this.yaxis.AxisChanged += (o, e) =>
             {
-                this.FeaturePlotYMinimum = Math.Round(this.yAxis.ActualMinimum, 3);
-                this.FeaturePlotYMaximum = Math.Round(this.yAxis.ActualMaximum, 3);
+                this.FeaturePlotYMinimum = Math.Round(this.yaxis.ActualMinimum, 3);
+                this.FeaturePlotYMaximum = Math.Round(this.yaxis.ActualMaximum, 3);
                 if (!isInternalChange && this.highlight != null &&
-                    this.highlight.TextPosition.X >= this.xAxis.ActualMinimum && this.highlight.TextPosition.X <= this.xAxis.ActualMaximum &&
-                    this.highlight.TextPosition.Y >= this.yAxis.ActualMinimum && this.highlight.TextPosition.Y <= this.yAxis.ActualMaximum)
+                    this.highlight.TextPosition.X >= this.xaxis.ActualMinimum && this.highlight.TextPosition.X <= this.xaxis.ActualMaximum &&
+                    this.highlight.TextPosition.Y >= this.yaxis.ActualMinimum && this.highlight.TextPosition.Y <= this.yaxis.ActualMaximum)
                 {
                     var y = this.highlight.TextPosition.Y;
                     isInternalChange = true;
-                    this.highlight.MinimumY = y - ((this.yAxis.ActualMaximum - this.yAxis.ActualMinimum) * HighlightSize);
-                    this.highlight.MaximumY = y + ((this.yAxis.ActualMaximum - this.yAxis.ActualMinimum) * HighlightSize);
+                    this.highlight.MinimumY = y - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize);
+                    this.highlight.MaximumY = y + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize);
                 }
 
                 isInternalChange = false;
@@ -332,8 +332,8 @@ namespace LcmsSpectator.ViewModels.Plots
             this.FeatureMap.MouseDown += this.FeatureMapMouseDown;
             this.FeatureMap.Axes.Add(this.featureColorAxis);
             this.FeatureMap.Axes.Add(this.ms2ColorAxis);
-            this.FeatureMap.Axes.Add(this.xAxis);
-            this.FeatureMap.Axes.Add(this.yAxis);
+            this.FeatureMap.Axes.Add(this.xaxis);
+            this.FeatureMap.Axes.Add(this.yaxis);
 
             // When ShowNoutFoundMs2 changes, update the NoutFoundMs2 series
             ////this.WhenAnyValue(x => x.ShowNotFoundMs2)
@@ -388,20 +388,20 @@ namespace LcmsSpectator.ViewModels.Plots
             // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
             this.WhenAnyValue(x => x.FeaturePlotXMinimum, x => x.FeaturePlotXMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Where(x => !this.xAxis.ActualMinimum.Equals(x.Item1) || !this.xAxis.ActualMaximum.Equals(x.Item2))
+                .Where(x => !this.xaxis.ActualMinimum.Equals(x.Item1) || !this.xaxis.ActualMaximum.Equals(x.Item2))
                 .Subscribe(
                     x =>
                         {
-                            this.xAxis.Zoom(x.Item1, x.Item2);
+                            this.xaxis.Zoom(x.Item1, x.Item2);
                             this.FeatureMap.InvalidatePlot(false);
                         });
             this.WhenAnyValue(y => y.FeaturePlotYMinimum, x => x.FeaturePlotYMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Where(y => !this.yAxis.ActualMinimum.Equals(y.Item1) || !this.yAxis.ActualMaximum.Equals(y.Item2))
+                .Where(y => !this.yaxis.ActualMinimum.Equals(y.Item1) || !this.yaxis.ActualMaximum.Equals(y.Item2))
                 .Subscribe(
                     y =>
                         {
-                            this.yAxis.Zoom(y.Item1, y.Item2);
+                            this.yaxis.Zoom(y.Item1, y.Item2);
                             this.FeatureMap.InvalidatePlot(false);
                         });
 
@@ -674,10 +674,10 @@ namespace LcmsSpectator.ViewModels.Plots
             this.MaximumAbundanceThreshold = Math.Log10(this.features.Max(f => f.MinPoint.Abundance));
             this.MinimumAbundanceThreshold = Math.Log10(this.features.Min(f => f.MinPoint.Abundance));
             this.AbundanceThreshold = Math.Max(this.maximumAbundanceThreshold, this.minimumAbundance);
-            this.yAxis.AbsoluteMinimum = 0;
-            this.yAxis.AbsoluteMaximum = this.features.Max(f => f.MinPoint.Mass);
-            this.xAxis.AbsoluteMinimum = 0;
-            this.xAxis.AbsoluteMaximum = this.lcms.MaxLcScan;
+            this.yaxis.AbsoluteMinimum = 0;
+            this.yaxis.AbsoluteMaximum = this.features.Max(f => f.MinPoint.Mass);
+            this.xaxis.AbsoluteMinimum = 0;
+            this.xaxis.AbsoluteMaximum = this.lcms.MaxLcScan;
 
             if (updatePlot)
             {
@@ -818,7 +818,7 @@ namespace LcmsSpectator.ViewModels.Plots
                                 continue;
                             }
 
-                            var sp = this.xAxis.Transform(prsm.RetentionTime, featurePoint.Mass, this.yAxis);
+                            var sp = this.xaxis.Transform(prsm.RetentionTime, featurePoint.Mass, this.yaxis);
                             var distSq = sp.DistanceToSquared(args.Position);
                             if (closestPrSm == null || distSq < minDist)
                             {
@@ -1075,10 +1075,10 @@ namespace LcmsSpectator.ViewModels.Plots
                     Fill = OxyColor.FromArgb(100, 255, 255, 0), 
                     Stroke = OxyColor.FromRgb(0, 255, 0), 
                     StrokeThickness = 2, 
-                    MinimumX = rt - ((this.xAxis.ActualMaximum - this.xAxis.ActualMinimum) * HighlightSize * 0.5), 
-                    MaximumX = rt + ((this.xAxis.ActualMaximum - this.xAxis.ActualMinimum) * HighlightSize * 0.5), 
-                    MinimumY = mass - ((this.yAxis.ActualMaximum - this.yAxis.ActualMinimum) * HighlightSize), 
-                    MaximumY = mass + ((this.yAxis.ActualMaximum - this.yAxis.ActualMinimum) * HighlightSize), 
+                    MinimumX = rt - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5), 
+                    MaximumX = rt + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5), 
+                    MinimumY = mass - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize), 
+                    MaximumY = mass + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize), 
                 };
 
                 this.FeatureMap.Annotations.Add(this.highlight);
@@ -1086,10 +1086,10 @@ namespace LcmsSpectator.ViewModels.Plots
             else
             {
                 this.highlight.TextPosition = new DataPoint(rt, mass);
-                this.highlight.MinimumX = rt - ((this.xAxis.ActualMaximum - this.xAxis.ActualMinimum) * HighlightSize * 0.5);
-                this.highlight.MaximumX = rt + ((this.xAxis.ActualMaximum - this.xAxis.ActualMinimum) * HighlightSize * 0.5);
-                this.highlight.MinimumY = mass - ((this.yAxis.ActualMaximum - this.yAxis.ActualMinimum) * HighlightSize);
-                this.highlight.MaximumY = mass + ((this.yAxis.ActualMaximum - this.yAxis.ActualMinimum) * HighlightSize);
+                this.highlight.MinimumX = rt - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5);
+                this.highlight.MaximumX = rt + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5);
+                this.highlight.MinimumY = mass - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize);
+                this.highlight.MaximumY = mass + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize);
             }
         }
 

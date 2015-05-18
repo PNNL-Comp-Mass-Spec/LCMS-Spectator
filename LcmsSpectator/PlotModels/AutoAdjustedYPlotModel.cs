@@ -28,20 +28,27 @@ namespace LcmsSpectator.PlotModels
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoAdjustedYPlotModel"/> class.
         /// </summary>
-        /// <param name="xAxis">The X Axis of the plot</param>
+        /// <param name="xaxis">The X Axis of the plot</param>
         /// <param name="multiplier">Multiplier that determines how much space to leave about tallest point.</param>
-        public AutoAdjustedYPlotModel(Axis xAxis, double multiplier)
+        public AutoAdjustedYPlotModel(Axis xaxis, double multiplier)
         {
             this.seriesLock = new object();
             this.Multiplier = multiplier;
-            Axes.Add(xAxis);
-            this.XAxis = xAxis;
-            this.YAxis = new LinearAxis();
+            Axes.Add(xaxis);
+            this.XAxis = xaxis;
+            this.YAxis = new LinearAxis
+            {
+                IsZoomEnabled = false,
+                IsPanEnabled = false,
+                Position = AxisPosition.Left,
+                Minimum = 0,
+                AbsoluteMinimum = 0
+            };
             this.AutoAdjustYAxis = true;
             Axes.Add(this.YAxis);
-            if (xAxis != null)
+            if (xaxis != null)
             {
-                xAxis.AxisChanged += this.XAxisChanged;
+                xaxis.AxisChanged += this.XAxisChanged;
             }
         }
 
@@ -65,26 +72,6 @@ namespace LcmsSpectator.PlotModels
         /// Gets a multiplier that determines how much space to leave about tallest point.
         /// </summary>
         protected double Multiplier { get; private set; }
-
-        /// <summary>
-        /// Generate Y axis. Set Max Y axis to highest point in current visible x range.
-        /// </summary>
-        /// <param name="title">Title of the axis</param>
-        /// <param name="format">String format of axis</param>
-        public void GenerateYAxis(string title, string format)
-        {
-            var maxY = this.GetMaxYInRange(this.XAxis.ActualMinimum, this.XAxis.ActualMaximum);
-            var absoluteMaxY = this.GetMaxYInRange(0, this.XAxis.AbsoluteMaximum);
-            this.YAxis.Position = AxisPosition.Left;
-            this.YAxis.Title = title;
-            this.YAxis.AbsoluteMinimum = 0;
-            this.YAxis.AbsoluteMaximum = (absoluteMaxY * this.Multiplier) + 1;
-            this.YAxis.Maximum = maxY * this.Multiplier;
-            this.YAxis.Minimum = 0;
-            this.YAxis.StringFormat = format;
-            this.YAxis.IsZoomEnabled = false;
-            this.YAxis.IsPanEnabled = false;
-        }
 
         /// <summary>
         /// Update Y axis for current x axis.
@@ -166,8 +153,8 @@ namespace LcmsSpectator.PlotModels
         private void XAxisChanged(object sender, AxisChangedEventArgs e)
         {
             if (this.AutoAdjustYAxis)
-            {
-                this.AdjustForZoom();   
+            {   // Y axis is zoomed based on the the maximum visible point in the range selected by the X axis.
+                this.AdjustForZoom();
             }
         }
     }
