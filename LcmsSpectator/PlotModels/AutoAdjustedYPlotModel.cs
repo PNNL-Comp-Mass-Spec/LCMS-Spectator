@@ -11,8 +11,6 @@
 
 namespace LcmsSpectator.PlotModels
 {
-    using System;
-    using System.Collections.Concurrent;
     using OxyPlot;
     using OxyPlot.Axes;
     
@@ -23,19 +21,9 @@ namespace LcmsSpectator.PlotModels
     public class AutoAdjustedYPlotModel : PlotModel
     {
         /// <summary>
-        /// Thread-safe collection of all data points on the plot.
+        /// A lock for thread-safe access to Series on the plot.
         /// </summary>
-        protected ConcurrentBag<IDataPoint> DataPoints;
-
-        /// <summary>
-        /// Multiplier that determines how much space to leave about tallest point.
-        /// </summary>
-        protected double Multiplier;
-
-        /// <summary>
-        /// Lock for thread-safe access to Series on the plot.
-        /// </summary>
-        protected Object SeriesLock;
+        private readonly object seriesLock;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoAdjustedYPlotModel"/> class.
@@ -44,8 +32,7 @@ namespace LcmsSpectator.PlotModels
         /// <param name="multiplier">Multiplier that determines how much space to leave about tallest point.</param>
         public AutoAdjustedYPlotModel(Axis xAxis, double multiplier)
         {
-            this.SeriesLock = new object();
-            this.DataPoints = new ConcurrentBag<IDataPoint>();
+            this.seriesLock = new object();
             this.Multiplier = multiplier;
             Axes.Add(xAxis);
             this.XAxis = xAxis;
@@ -75,11 +62,16 @@ namespace LcmsSpectator.PlotModels
         public bool AutoAdjustYAxis { get; set; }
 
         /// <summary>
+        /// Gets a multiplier that determines how much space to leave about tallest point.
+        /// </summary>
+        protected double Multiplier { get; private set; }
+
+        /// <summary>
         /// Generate Y axis. Set Max Y axis to highest point in current visible x range.
         /// </summary>
         /// <param name="title">Title of the axis</param>
         /// <param name="format">String format of axis</param>
-        public virtual void GenerateYAxis(string title, string format)
+        public void GenerateYAxis(string title, string format)
         {
             var maxY = this.GetMaxYInRange(this.XAxis.ActualMinimum, this.XAxis.ActualMaximum);
             var absoluteMaxY = this.GetMaxYInRange(0, this.XAxis.AbsoluteMaximum);
@@ -97,7 +89,7 @@ namespace LcmsSpectator.PlotModels
         /// <summary>
         /// Update Y axis for current x axis.
         /// </summary>
-        public virtual void AdjustForZoom()
+        public void AdjustForZoom()
         {
             var minX = this.XAxis.ActualMinimum;
             var maxX = this.XAxis.ActualMaximum;
@@ -107,20 +99,21 @@ namespace LcmsSpectator.PlotModels
         /// <summary>
         /// Clear all series on plot (thread-safe)
         /// </summary>
-        public virtual void ClearSeries()
+        public void ClearSeries()
         {
-            lock (this.SeriesLock)
+            lock (this.seriesLock)
             {
-                Series.Clear();
+                this.ClearAllSeries();
             }
         }
 
         /// <summary>
-        /// Set min visible x and y bounds and update y axis max by highest point in that range.
+        /// Set min visible x and y bounds and update y axis max by highest
+        /// IDataPointSeries point in that range.
         /// </summary>
         /// <param name="minX">Min visible x</param>
         /// <param name="maxX">Max visible x</param>
-        public virtual void SetBounds(double minX, double maxX)
+        public void SetBounds(double minX, double maxX)
         {
             var maxY = this.GetMaxYInRange(minX, maxX);
             var yaxis = DefaultYAxis ?? this.YAxis;
@@ -129,14 +122,22 @@ namespace LcmsSpectator.PlotModels
         }
 
         /// <summary>
-        /// Get maximum y point in a given x range.
+        /// Overridable clear all series on plot.
+        /// </summary>
+        protected virtual void ClearAllSeries()
+        {
+            Series.Clear();
+        }
+
+        /// <summary>
+        /// Get maximum y IDataPointSeries point in a given x range.
         /// </summary>
         /// <param name="minX">Min x of range</param>
         /// <param name="maxX">Max x of range</param>
         /// <returns>The value of the tallest point in the range.</returns>
-        protected double GetMaxYInRange(double minX, double maxX)
+        protected virtual double GetMaxYInRange(double minX, double maxX)
         {
-            lock (this.SeriesLock)
+            lock (this.seriesLock)
             {
                 double maxY = 0.0;
                 foreach (var series in this.Series)

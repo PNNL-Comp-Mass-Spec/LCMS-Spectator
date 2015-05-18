@@ -150,7 +150,7 @@ namespace LcmsSpectator.ViewModels.Plots
             this.WhenAnyValue(x => x.SelectedScan, x => x.IsPlotUpdating)
                 .Where(x => x.Item2)
                 .Throttle(TimeSpan.FromMilliseconds(50), RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PlotModel.SetUniquePointMarker(this.lcms.GetElutionTime(x.Item1)));
+                .Subscribe(x => this.PlotModel.SetPrimaryPointMarker(this.lcms.GetElutionTime(x.Item1)));
 
             // Update plot when ions change, or plot visibility changes
             this.WhenAnyValue(x => x.Ions, x => x.IsPlotUpdating, x => x.PointsToSmooth)
@@ -369,7 +369,7 @@ namespace LcmsSpectator.ViewModels.Plots
             this.PlotModel.IsLegendVisible = this.showLegend;
             this.PlotModel.InvalidatePlot(true);
             this.PlotModel.AdjustForZoom();
-            this.PlotModel.SetUniquePointMarker(this.lcms.GetElutionTime(this.SelectedScan));
+            this.PlotModel.SetPrimaryPointMarker(this.lcms.GetElutionTime(this.SelectedScan));
             this.Area = this.GetCurrentArea();
         }
 

@@ -26,6 +26,11 @@ namespace LcmsSpectator.PlotModels
         private readonly LineSeries pointMarkers;
 
         /// <summary>
+        /// A value indicating whether the primary marker color should be used.
+        /// </summary>
+        private bool primaryHighlight;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SelectablePlotModel"/> class.
         /// </summary>
         /// <param name="xAxis">The X axis.</param>
@@ -33,11 +38,11 @@ namespace LcmsSpectator.PlotModels
         public SelectablePlotModel(Axis xAxis, double multiplier) : base(xAxis, multiplier)
         {
             this.MouseDown += this.SelectablePlotModelMouseDown;
-            this.UniqueColor = OxyColors.Black;
-            this.OrdinaryColor = OxyColors.LightGray;
+            this.PrimaryColor = OxyColors.Black;
+            this.SecondaryColor = OxyColors.LightGray;
             this.pointMarkers = this.pointMarkers = new StemSeries
             {
-                Color = this.OrdinaryColor,
+                Color = this.SecondaryColor,
                 StrokeThickness = 3,
                 LineStyle = LineStyle.Dash,
                 TrackerFormatString =
@@ -53,46 +58,32 @@ namespace LcmsSpectator.PlotModels
         public IDataPoint SelectedDataPoint { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the unique marker color should be used.
-        /// </summary>
-        public bool UniqueHighlight { get; set; }
-
-        /// <summary>
         /// Gets or sets the color for unique markings.
         /// </summary>
-        public OxyColor UniqueColor { get; set; }
+        public OxyColor PrimaryColor { get; set; }
 
         /// <summary>
         /// Gets or sets the color for ordinary markings.
         /// </summary>
-        public OxyColor OrdinaryColor { get; set; }
+        public OxyColor SecondaryColor { get; set; }
 
         /// <summary>
-        /// Set point marker highlighted with UniqueColor.
+        /// Set point marker highlighted with PrimaryColor.
         /// </summary>
         /// <param name="x">x value to set marker at</param>
-        public void SetUniquePointMarker(double x)
+        public void SetPrimaryPointMarker(double x)
         {
-            this.UniqueHighlight = true;
+            this.primaryHighlight = true;
             this.SetPointMarker(x, this.GetMarkerColor());
         }
 
         /// <summary>
-        /// Set point marker highlighted with OrdinaryColor.
+        /// Set point marker highlighted with SecondaryColor.
         /// </summary>
         /// <param name="x">x value to set marker at</param>
-        public void SetOrdinaryPointMarker(double x)
+        public void SetSecondaryPointMarker(double x)
         {
-            this.UniqueHighlight = false;
-            this.SetPointMarker(x, this.GetMarkerColor());
-        }
-
-        /// <summary>
-        /// Set point marker highlighted with current color.
-        /// </summary>
-        /// <param name="x">x value to set marker at</param>
-        public void SetPointMarker(double x)
-        {
+            this.primaryHighlight = false;
             this.SetPointMarker(x, this.GetMarkerColor());
         }
 
@@ -112,11 +103,25 @@ namespace LcmsSpectator.PlotModels
         }
         
         /// <summary>
+        /// Clear all series from the plot without removing marker, thread-safe.
+        /// </summary>
+        protected override void ClearAllSeries()
+        {
+            while (Series.Count > 1)
+            {
+                if (this.Series[0] != this.pointMarkers)
+                {
+                    this.Series.RemoveAt(0);
+                }
+            }
+        }
+
+        /// <summary>
         /// Set point marker highlighted with a particular color.
         /// </summary>
         /// <param name="x">x value to set marker at</param>
         /// <param name="color">color of marker</param>
-        public void SetPointMarker(double x, OxyColor color)
+        private void SetPointMarker(double x, OxyColor color)
         {
             ////if (color == null) color = OxyColors.Black;
             var y = YAxis.Maximum;
@@ -129,42 +134,6 @@ namespace LcmsSpectator.PlotModels
             this.pointMarkers.Color = color;
             this.pointMarkers.Points.Add(new DataPoint(x, y));
             this.InvalidatePlot(true);
-        }
-
-        /// <summary>
-        /// Override SetBounds to height of marker isn't included in maxY calculation.
-        /// </summary>
-        /// <param name="minX">minimum x value</param>
-        /// <param name="maxX">maximum x value</param>
-        public override void SetBounds(double minX, double maxX)
-        {
-            double x = 0;
-            if (this.pointMarkers.Points.Count != 0)
-            { // remove marker
-                var point = this.pointMarkers.Points[0];
-                x = point.X;
-                this.pointMarkers.Points.Clear();
-            }
-
-            base.SetBounds(minX, maxX);
-            this.SetPointMarker(x, this.GetMarkerColor()); // add marker
-        }
-
-        /// <summary>
-        /// Clear all series from the plot without removing marker, thread-safe.
-        /// </summary>
-        public override void ClearSeries()
-        {
-            lock (this.SeriesLock)
-            {
-                while (Series.Count > 1)
-                {
-                    if (this.Series[0] != this.pointMarkers)
-                    {
-                        this.Series.RemoveAt(0);
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -193,7 +162,7 @@ namespace LcmsSpectator.PlotModels
         /// <returns>The marker highlight color.</returns>
         private OxyColor GetMarkerColor()
         {
-            return this.UniqueHighlight ? this.UniqueColor : this.OrdinaryColor;
+            return this.primaryHighlight ? this.PrimaryColor : this.SecondaryColor;
         }
     }
 }
