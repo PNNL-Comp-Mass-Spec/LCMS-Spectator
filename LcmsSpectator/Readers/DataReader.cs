@@ -135,7 +135,7 @@ namespace LcmsSpectator.Readers
 
                 if (dataSetViewModel.MsPfParameters == null)
                 {
-                    dataSetViewModel.SetMsPfParameters(paramFilePath ?? idFilePath);   
+                    dataSetViewModel.SetMsPfParameters(string.IsNullOrWhiteSpace(paramFilePath) ? idFilePath : paramFilePath);   
                 }
 
                 await this.ReadIdFile(dataSetViewModel, idFilePath, modIgnoreList);
