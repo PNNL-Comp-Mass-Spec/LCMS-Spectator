@@ -300,7 +300,7 @@ namespace LcmsSpectator.ViewModels
         {
             var dmsLookUp = new DmsLookupViewModel(this.dialogService);
             this.dialogService.OpenDmsLookup(dmsLookUp);
-            if (!dmsLookUp.ValidateDataSet())
+            if (!dmsLookUp.ValidateDataSet() || !dmsLookUp.Status)
             {
                 return; // data set was not chosen
             }
