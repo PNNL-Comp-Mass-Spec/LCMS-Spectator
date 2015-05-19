@@ -91,7 +91,7 @@ namespace LcmsSpectator.ViewModels
             openManageModificationsCommand.Subscribe(_ => this.ManageModificationsImplementation());
             this.OpenManageModificationsCommand = openManageModificationsCommand;
 
-            // Create command to open MSPathFinder database search settings window
+            // Create MSPathFinder search command
             var runMsPathFinderSearchCommand = ReactiveCommand.Create();
             runMsPathFinderSearchCommand.Subscribe(_ => this.RunMsPathFinderSearchImplementation());
             this.RunMsPathFinderSearchCommand = runMsPathFinderSearchCommand;
@@ -342,12 +342,23 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Implementation for <see cref="RunMsPathFinderSearchCommand" />.
+        /// Implementation for <see cref="RunMsPathFinderSearchCommand"/>.
         /// Runs an MSPathFinder database search.
         /// </summary>
         private void RunMsPathFinderSearchImplementation()
         {
             var searchSettings = new SearchSettingsViewModel(this.dialogService);
+
+            searchSettings.ReadyToClose += async (o, e) =>
+            {
+                var dataSetViewModel = await this.ReadRawFile(searchSettings.SpectrumFilePath);
+                await this.ReadIdFile(searchSettings.GetIdFilePath(), dataSetViewModel);
+                await this.dataReader.OpenDataSet(
+                        dataSetViewModel,
+                        searchSettings.SpectrumFilePath,
+                        featureFilePath: searchSettings.GetFeatureFilePath());
+            };
+
             this.dialogService.SearchSettingsWindow(searchSettings);
         }
 

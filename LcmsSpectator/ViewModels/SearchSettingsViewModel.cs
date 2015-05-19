@@ -563,6 +563,29 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Get final path to feature file.
+        /// </summary>
+        /// <returns>Path to feature file as a string.</returns>
+        public string GetFeatureFilePath()
+        {
+            var dataSetName = Path.GetFileNameWithoutExtension(this.SpectrumFilePath);
+            return !string.IsNullOrWhiteSpace(this.FeatureFilePath) ? 
+                   string.Format("{0}\\{1}.ms1ft", this.OutputFilePath, dataSetName) : 
+                   this.FeatureFilePath;
+
+        }
+
+        /// <summary>
+        /// Get final path to ID file.
+        /// </summary>
+        /// <returns>Path to ID file as a string.</returns>
+        public string GetIdFilePath()
+        {
+            var dataSetName = Path.GetFileNameWithoutExtension(this.SpectrumFilePath);
+            return string.Format("{0}\\{1}_IcTda.tsv", this.OutputFilePath, dataSetName);
+        }
+
+        /// <summary>
         /// Reads the proteins from the FASTA file.
         /// </summary>
         private void LoadFastaFile()
@@ -662,14 +685,17 @@ namespace LcmsSpectator.ViewModels
         {
             var topDownLauncher = this.IcTopDownLauncher;
             LoadingScreenViewModel.IsLoading = true;
-            this.runSearchTask = Task.Run(() => topDownLauncher.RunSearch(IcParameters.Instance.IonCorrelationThreshold, this.runSearchCancellationToken.Token), this.runSearchCancellationToken.Token);
+            this.runSearchTask = Task.Run(
+                                          () => topDownLauncher.RunSearch(
+                                                                          IcParameters.Instance.IonCorrelationThreshold,
+                                                                          this.runSearchCancellationToken.Token), 
+                                          this.runSearchCancellationToken.Token);
             await this.runSearchTask;
             LoadingScreenViewModel.IsLoading = false;
-            this.dialogService.MessageBox("Search completed!");
+            this.Status = true;
 
             if (this.ReadyToClose != null)
             {
-                this.Status = true;
                 this.ReadyToClose(this, EventArgs.Empty);
             }
         }

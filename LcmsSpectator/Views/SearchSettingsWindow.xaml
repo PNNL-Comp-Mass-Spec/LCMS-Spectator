@@ -181,28 +181,28 @@
                         <DataGridTemplateColumn Header="Residue" Width="12*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                   <ComboBox ItemsSource="{Binding Path=AminoAcidResidues}" SelectedItem="{Binding Path=SelectedResidue}" IsEditable="True" />
+                                   <ComboBox ItemsSource="{Binding Path=AminoAcidResidues}" SelectedItem="{Binding Path=SelectedResidue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="Modification" Width="25*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding Modifications}" SelectedItem="{Binding SelectedModification}" IsEditable="True" />
+                                    <ComboBox ItemsSource="{Binding Modifications}" SelectedItem="{Binding SelectedModification, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="Location" Width="25*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation}" />
+                                    <ComboBox ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
                         <DataGridTemplateColumn Header="Fixed?" Width="25*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding IsFixed}" SelectedItem="{Binding FixedSelection}" />
+                                    <ComboBox ItemsSource="{Binding IsFixed}" SelectedItem="{Binding FixedSelection, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
