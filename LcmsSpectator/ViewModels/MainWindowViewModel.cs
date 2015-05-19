@@ -352,12 +352,15 @@ namespace LcmsSpectator.ViewModels
             // TODO: change this so it doesn't use an event and isn't void async
             searchSettings.ReadyToClose += async (o, e) =>
             {
-                var dataSetViewModel = await this.ReadRawFile(searchSettings.SpectrumFilePath);
-                await this.ReadIdFile(searchSettings.GetIdFilePath(), dataSetViewModel);
-                await this.dataReader.OpenDataSet(
-                        dataSetViewModel,
-                        searchSettings.SpectrumFilePath,
-                        featureFilePath: searchSettings.GetFeatureFilePath());
+                if (searchSettings.Status)
+                {
+                    var dataSetViewModel = await this.ReadRawFile(searchSettings.SpectrumFilePath);
+                    await this.ReadIdFile(searchSettings.GetIdFilePath(), dataSetViewModel);
+                    await this.dataReader.OpenDataSet(
+                            dataSetViewModel,
+                            searchSettings.SpectrumFilePath,
+                            featureFilePath: searchSettings.GetFeatureFilePath());   
+                }
             };
 
             this.dialogService.SearchSettingsWindow(searchSettings);

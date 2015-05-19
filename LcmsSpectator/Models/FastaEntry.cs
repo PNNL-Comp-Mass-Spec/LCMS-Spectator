@@ -10,6 +10,8 @@
 
 namespace LcmsSpectator.Models
 {
+    using System;
+    using System.Text;
     using ReactiveUI;
 
     /// <summary>
@@ -17,6 +19,11 @@ namespace LcmsSpectator.Models
     /// </summary>
     public class FastaEntry : ReactiveObject
     {
+        /// <summary>
+        /// Maximum possible line length of a FASTA sequence entry.
+        /// </summary>
+        private const int MaxLineLength = 70;
+
         /// <summary>
         /// The protein name.
         /// </summary>
@@ -32,16 +39,35 @@ namespace LcmsSpectator.Models
         /// </summary>
         private string proteinSequenceText;
 
-        /////// <summary>
-        /////// Initializes a new instance of the <see cref="FastaEntry"/> class. 
-        /////// </summary>
-        ////public FastaEntry()
-        ////{
-        ////    ////// When ProteinSequenceText changes, update ProteinSequence.
-        ////    ////this.WhenAnyValue(x => x.ProteinSequenceText)
-        ////    ////    .Select(Sequence.GetSequenceFromMsGfPlusPeptideStr)
-        ////    ////    .Subscribe(sequence => this.ProteinSequence = sequence);
-        ////}
+        /// <summary>
+        /// The stored formatted entry for fast access.
+        /// </summary>
+        private string formattedEntry;
+
+        /// <summary>
+        /// A value indicating whether this entry has been selected.
+        /// </summary>
+        private bool selected;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FastaEntry"/> class. 
+        /// </summary>
+        public FastaEntry()
+        {
+            ////// When ProteinSequenceText changes, update ProteinSequence.
+            ////this.WhenAnyValue(x => x.ProteinSequenceText)
+            ////    .Select(Sequence.GetSequenceFromMsGfPlusPeptideStr)
+            ////    .Subscribe(sequence => this.ProteinSequence = sequence);
+
+            this.ProteinName = string.Empty;
+            this.ProteinSequenceText = string.Empty;
+            this.proteinDescription = string.Empty;
+            this.Selected = true;
+            this.formattedEntry = null;
+
+            this.WhenAnyValue(x => x.ProteinName, x => x.ProteinDescription, x => x.ProteinSequenceText)
+                .Subscribe(_ => this.formattedEntry = null);
+        }
 
         /////// <summary>
         /////// The protein sequence as an InformedProteomics sequence.
@@ -75,6 +101,15 @@ namespace LcmsSpectator.Models
             set { this.RaiseAndSetIfChanged(ref this.proteinSequenceText, value); }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this entry has been selected.
+        /// </summary>
+        public bool Selected
+        {
+            get { return this.selected; }
+            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
+        }
+
         /////// <summary>
         /////// Gets or sets the protein sequence as an InformedProteomics sequence.
         /////// </summary>
@@ -85,12 +120,44 @@ namespace LcmsSpectator.Models
         ////}
 
         /// <summary>
-        /// Get entry formatted as it should be in a FASTA database file.
+        /// Gets an entry formatted as it should be in a FASTA database file.
         /// </summary>
-        /// <returns>The formatted entry as a string.</returns>
-        public string GetFormattedEntry()
+        public string FormattedEntry 
         {
-            return string.Format(">{0} {1}\n{2}", this.ProteinName, this.ProteinDescription, this.ProteinSequenceText);
+            get
+            {
+                if (this.formattedEntry != null)
+                {
+                    return this.formattedEntry;
+                }
+
+                var startIndex = 0;
+                var endIndex = Math.Min(MaxLineLength, this.ProteinSequenceText.Length - startIndex);
+                var strbuilder =
+                    new StringBuilder(
+                        this.ProteinSequenceText.Length + (this.ProteinSequenceText.Length / MaxLineLength));
+
+                while (endIndex <= this.ProteinSequenceText.Length)
+                {
+                    var length = endIndex - startIndex;
+                    strbuilder.Append(this.ProteinSequenceText.Substring(startIndex, length));
+                    strbuilder.Append('\n');
+                    startIndex += MaxLineLength;
+                    if (endIndex == this.ProteinSequenceText.Length)
+                    {
+                        break;
+                    }
+
+                    endIndex = Math.Min(endIndex + MaxLineLength, this.ProteinSequenceText.Length);
+                }
+
+                this.formattedEntry = string.Format(
+                    ">{0} {1}\n{2}",
+                    this.ProteinName,
+                    this.ProteinDescription,
+                    strbuilder);
+                return this.formattedEntry;
+            }
         }
     }
 }

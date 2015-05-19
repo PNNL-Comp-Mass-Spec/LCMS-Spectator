@@ -16,14 +16,15 @@ namespace LcmsSpectator.ViewModels
     using System.Reactive.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Windows.Forms.VisualStyles;
 
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.Database;
     using InformedProteomics.TopDown.Execution;
-
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Models;
+    using LcmsSpectator.Readers;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Modifications;
     using ReactiveUI;
@@ -61,6 +62,11 @@ namespace LcmsSpectator.ViewModels
         /// The path for the FASTA database file.
         /// </summary>
         private string fastaDbFilePath;
+
+        /// <summary>
+        /// The path to the truncated FASTA database file.
+        /// </summary>
+        private string truncatedFastaDbFilePath;
 
         /// <summary>
         /// The path for the PROMEX feature file.
@@ -169,10 +175,11 @@ namespace LcmsSpectator.ViewModels
         public SearchSettingsViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService;
-
             this.runSearchCancellationToken = new CancellationTokenSource();
-
             this.LoadingScreenViewModel = new LoadingScreenViewModel();
+            this.SearchModes = new[] { 0, 1, 2 };
+            this.ToleranceUnits = new[] { ToleranceUnit.Ppm, ToleranceUnit.Th };
+            this.FastaEntries = new ReactiveList<FastaEntry>();
 
             // Browse Spectrum Files Command
             var browseRawFilesCommand = ReactiveCommand.Create();
@@ -193,6 +200,16 @@ namespace LcmsSpectator.ViewModels
             var browseOutputDirectoriesCommand = ReactiveCommand.Create();
             browseOutputDirectoriesCommand.Subscribe(_ => this.BrowseOutputDirectoriesImplementation());
             this.BrowseOutputDirectoriesCommand = browseOutputDirectoriesCommand;
+
+            // Select All Proteins Command
+            var selectAllProteinsCommand = ReactiveCommand.Create(this.FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
+            selectAllProteinsCommand.Subscribe(_ => this.SelectProteinsImplementation(true));
+            this.SelectAllProteinsCommand = selectAllProteinsCommand;
+
+            // Select No Proteins Command
+            var selectNoProteins = ReactiveCommand.Create(this.FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
+            selectNoProteins.Subscribe(_ => this.SelectProteinsImplementation(false));
+            this.SelectNoProteinsCommand = selectNoProteins;
 
             // Manage Modifications Command
             var manageModificationsCommand = ReactiveCommand.Create();
@@ -219,12 +236,6 @@ namespace LcmsSpectator.ViewModels
             var cancelCommand = ReactiveCommand.Create();
             cancelCommand.Subscribe(_ => this.CancelImplementation());
             this.CancelCommand = cancelCommand;
-
-            this.SearchModes = new[] { 0, 1, 2 };
-
-            this.ToleranceUnits = new[] { ToleranceUnit.Ppm, ToleranceUnit.Th };
-
-            this.Proteins = new ReactiveList<string>();
 
             // Default values
             this.SelectedSearchMode = 2;
@@ -255,7 +266,7 @@ namespace LcmsSpectator.ViewModels
 
             this.SearchModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
 
-            ////this.WhenAnyValue(x => x.FastaDbFilePath).Subscribe(_ => this.LoadFastaFile());
+            this.WhenAnyValue(x => x.FastaDbFilePath).Subscribe(_ => this.LoadFastaFile());
 
             // Remove search modification when its Remove property is set to true.
             this.SearchModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
@@ -299,6 +310,16 @@ namespace LcmsSpectator.ViewModels
         /// Gets a command that prompts user for an output directory.
         /// </summary>
         public IReactiveCommand BrowseOutputDirectoriesCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that selects all proteins in the <see cref="FastaEntries" /> list.
+        /// </summary>
+        public IReactiveCommand SelectAllProteinsCommand { get; private set; }
+        
+        /// <summary>
+        /// Gets a command that de-selects all proteins in the <see cref="FastaEntries" /> list.
+        /// </summary>
+        public IReactiveCommand SelectNoProteinsCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that manages the modification registered with the application.
@@ -362,9 +383,9 @@ namespace LcmsSpectator.ViewModels
         public int[] SearchModes { get; private set; }
 
         /// <summary>
-        /// Gets the list of Protein names in the FASTA file.
+        /// Gets the list of entries in the FASTA file.
         /// </summary>
-        public ReactiveList<string> Proteins { get; private set; }
+        public ReactiveList<FastaEntry> FastaEntries { get; private set; }
 
         /// <summary>
         /// Gets the list of possible tolerance units.
@@ -540,7 +561,7 @@ namespace LcmsSpectator.ViewModels
                 var aminoAcidSet = new AminoAcidSet(searchModifications, this.maxDynamicModificationsPerSequence);
                 return new IcTopDownLauncher(
                                              this.SpectrumFilePath,
-                                             this.FastaDbFilePath,
+                                             this.truncatedFastaDbFilePath,
                                              this.OutputFilePath,
                                              aminoAcidSet,
                                              this.MinSequenceLength,
@@ -572,7 +593,6 @@ namespace LcmsSpectator.ViewModels
             return !string.IsNullOrWhiteSpace(this.FeatureFilePath) ? 
                    string.Format("{0}\\{1}.ms1ft", this.OutputFilePath, dataSetName) : 
                    this.FeatureFilePath;
-
         }
 
         /// <summary>
@@ -590,16 +610,20 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void LoadFastaFile()
         {
-            ////this.Proteins.Clear();
+            this.FastaEntries.Clear();
 
-            ////if (!string.IsNullOrEmpty(this.FastaDbFilePath) && File.Exists(this.FastaDbFilePath))
-            ////{
-            ////    var proteinDb = new FastaDatabase(this.FastaDbFilePath);
-            ////    this.Proteins.AddRange(proteinDb.GetProteinNames());
-
-            ////    this.dialogService.MessageBox(proteinDb.GetProteinName(1));
-            ////    this.dialogService.MessageBox(proteinDb.GetProteinName(2));
-            ////}
+            if (!string.IsNullOrEmpty(this.FastaDbFilePath) && File.Exists(this.FastaDbFilePath))
+            {
+                try
+                {
+                    this.FastaEntries.AddRange(FastaReaderWriter.ReadFastaFile(this.FastaDbFilePath));
+                }
+                catch (FormatException e)
+                {
+                    this.dialogService.ExceptionAlert(e);
+                    this.FastaEntries.Clear();
+                }
+            }
         }
 
         /// <summary>
@@ -664,6 +688,22 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Implementation for <see cref="SelectAllProteinsCommand" /> and
+        /// <see cref="SelectNoProteinsCommand" />.
+        /// Selects all or none of the proteins in the <see cref="FastaEntries" /> list.
+        /// </summary>
+        /// <param name="selected">
+        /// A value indicating whether the proteins should be selected or de-selected.
+        /// </param>
+        private void SelectProteinsImplementation(bool selected)
+        {
+            foreach (var entry in this.FastaEntries)
+            {
+                entry.Selected = selected;
+            }
+        }
+
+        /// <summary>
         /// Implementation for <see cref="ManageModificationsCommand"/>.
         /// Gets or sets a command that manages the modification registered with the application.
         /// </summary>
@@ -683,8 +723,9 @@ namespace LcmsSpectator.ViewModels
         /// <returns>The <see cref="Task"/>.</returns>
         private async Task RunImplementation()
         {
-            var topDownLauncher = this.IcTopDownLauncher;
             LoadingScreenViewModel.IsLoading = true;
+            this.truncatedFastaDbFilePath = this.CreateTruncatedFastaFile();
+            var topDownLauncher = this.IcTopDownLauncher;
             this.runSearchTask = Task.Run(
                                           () => topDownLauncher.RunSearch(
                                                                           IcParameters.Instance.IonCorrelationThreshold,
@@ -724,6 +765,20 @@ namespace LcmsSpectator.ViewModels
             {
                 this.ReadyToClose(this, EventArgs.Empty);
             }
+        }
+
+        /// <summary>
+        /// Create a truncated FASTA file based on selected proteins.
+        /// </summary>
+        /// <returns>The path to the truncated FASTA database file.</returns>
+        private string CreateTruncatedFastaFile()
+        {
+            var fastaFileName = Path.GetFileNameWithoutExtension(this.FastaDbFilePath);
+            var fastaDirPath = Path.GetDirectoryName(this.FastaDbFilePath);
+            var filePath = string.Format("{0}\\{1}_truncated.fasta", fastaDirPath, fastaFileName);
+            Console.WriteLine(@"Creating truncated fasta file at: {0}", filePath);
+            FastaReaderWriter.Write(this.FastaEntries.Where(entry => entry.Selected), filePath);
+            return filePath;
         }
     }
 }
