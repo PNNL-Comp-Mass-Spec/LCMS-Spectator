@@ -349,6 +349,7 @@ namespace LcmsSpectator.ViewModels
         {
             var searchSettings = new SearchSettingsViewModel(this.dialogService);
 
+            // TODO: change this so it doesn't use an event and isn't void async
             searchSettings.ReadyToClose += async (o, e) =>
             {
                 var dataSetViewModel = await this.ReadRawFile(searchSettings.SpectrumFilePath);
