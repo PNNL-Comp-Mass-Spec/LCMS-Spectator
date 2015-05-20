@@ -43,8 +43,8 @@ namespace LcmsSpectator.Readers
         /// Read a MTDB Creator results file.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <returns>Identification tree of MTDB Creator identifications.</returns>
-        public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
+        /// <returns>The Protein-Spectrum-Match identifications.</returns>
+        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null)
         {
             return this.ReadAsync().Result;
         }
@@ -53,14 +53,14 @@ namespace LcmsSpectator.Readers
         /// Read a MTDB Creator results file asynchronously.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <returns>Identification tree of MZID identifications.</returns>
-        public async Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList = null)
+        /// <returns>The Protein-Spectrum-Match identifications.</returns>
+        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null)
         {
-            IdentificationTree tree = new IdentificationTree();
+            var prsms = new List<PrSm>();
 
             if (!File.Exists(this.filePath))
             {
-                return tree;
+                return prsms;
             }
 
             TargetDatabase database = await Task.Run(() => MtdbCreator.LoadDB(this.filePath));
@@ -106,12 +106,12 @@ namespace LcmsSpectator.Readers
                         entry.SequenceText = strippedSequence;
                         entry.Charge = id.Charge;
                         entry.Scan = id.Scan;
-                        tree.Add(entry);
+                        prsms.Add(entry);
                     }
                 }
             }
 
-            return tree;
+            return prsms;
         }
     }
 }

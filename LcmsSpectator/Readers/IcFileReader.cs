@@ -42,8 +42,8 @@ namespace LcmsSpectator.Readers
         /// Read a MSPathFinder results file.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <returns>Identification tree of MSPathFinder identifications.</returns>
-        public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
+        /// <returns><returns>The Protein-Spectrum-Match identifications.</returns></returns>
+        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null)
         {
             var modIgnore = modIgnoreList == null ? new List<string>() : new List<string>(modIgnoreList);
             return this.ReadFile(modIgnore).Result;
@@ -54,7 +54,7 @@ namespace LcmsSpectator.Readers
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <returns>Identification tree of MSPathFinder identifications.</returns>
-        public async Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList = null)
+        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null)
         {
             var modIgnore = modIgnoreList == null ? new List<string>() : new List<string>(modIgnoreList);
             return await this.ReadFile(modIgnore);
@@ -97,26 +97,26 @@ namespace LcmsSpectator.Readers
         /// Read a MSPathFinder results file.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <returns>Task that creates an identification tree of MSPathFinder identifications.</returns>
-        private async Task<IdentificationTree> ReadFile(List<string> modIgnoreList = null)
+        /// <returns>The Protein-Spectrum-Match identifications.</returns>
+        private async Task<IEnumerable<PrSm>> ReadFile(List<string> modIgnoreList = null)
         {
             var ext = Path.GetExtension(this.filePath);
-            IdentificationTree idTree;
+            IEnumerable<PrSm> prsms;
             if (ext == ".tsv")
             {
                 var file = new StreamReader(File.Open(this.filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                idTree = await this.ReadTsv(file, modIgnoreList);
+                prsms = await this.ReadTsv(file, modIgnoreList);
             }
             else if (ext == ".zip")
             {
-                idTree = await this.ReadZip(modIgnoreList);
+                prsms = await this.ReadZip(modIgnoreList);
             }
             else
             {
                 throw new ArgumentException(string.Format("Cannot read file with extension \"{0}\"", ext));
             }
 
-            return idTree;
+            return prsms;
         }
 
         /// <summary>
@@ -124,11 +124,11 @@ namespace LcmsSpectator.Readers
         /// </summary>
         /// <param name="stream">The stream for an open TSV file.</param>
         /// <param name="modIgnoreList">Ignores modifications contained in this list. </param>
-        /// <returns>Task that creates an identification tree of MSPathFinder identifications.</returns>
-        private async Task<IdentificationTree> ReadTsv(StreamReader stream, List<string> modIgnoreList)
+        /// <returns>The Protein-Spectrum-Match identifications.</returns>
+        private async Task<IEnumerable<PrSm>> ReadTsv(StreamReader stream, List<string> modIgnoreList)
         {
             ////var file = File.ReadLines(_tsvFile);
-            var idTree = new IdentificationTree(ToolType.MsPathFinder);
+            var prsms = new List<PrSm>();
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
             while (!stream.EndOfStream)
@@ -149,12 +149,12 @@ namespace LcmsSpectator.Readers
                 var idData = this.CreatePrSms(line, headers, modIgnoreList);
                 if (idData != null)
                 {
-                    idTree.Add(idData);
+                    prsms.AddRange(idData);
                 }
             }
 
             stream.Close();
-            return idTree;
+            return prsms;
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace LcmsSpectator.Readers
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <returns>Task that creates an identification tree of MSPathFinder identifications.</returns>
-        private async Task<IdentificationTree> ReadZip(List<string> modIgnoreList)
+        private async Task<IEnumerable<PrSm>> ReadZip(List<string> modIgnoreList)
         {
             var zipFilePath = this.filePath;
             var fileName = Path.GetFileNameWithoutExtension(zipFilePath);
@@ -183,7 +183,7 @@ namespace LcmsSpectator.Readers
                 }
             }
 
-            return new IdentificationTree();
+            return new List<PrSm>();
         }
 
         /// <summary>

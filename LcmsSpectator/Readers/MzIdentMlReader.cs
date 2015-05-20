@@ -53,7 +53,7 @@ namespace LcmsSpectator.Readers
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <returns>Identification tree of identifications.</returns>
-        public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
+        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null)
         {
             return this.ReadAsync(modIgnoreList).Result;
         }
@@ -63,10 +63,10 @@ namespace LcmsSpectator.Readers
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <returns>Identification tree of MZID identifications.</returns>
-        public async Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList)
+        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList)
         {
             var dataSet = await Task.Run(() => this.mzIdentMlReader.Read(this.filePath));
-            var idTree = new IdentificationTree(ToolType.MsgfPlus);
+            var prsms = new List<PrSm>();
 
             var evidences = dataSet.Evidences;
 
@@ -99,11 +99,11 @@ namespace LcmsSpectator.Readers
                         UseGolfScoring = true,
                         QValue = msgfPlusEvidence.QValue,
                     };
-                    idTree.Add(prsm);
+                    prsms.Add(prsm);
                 }
             }
 
-            return idTree;
+            return prsms;
         }
     }
 }

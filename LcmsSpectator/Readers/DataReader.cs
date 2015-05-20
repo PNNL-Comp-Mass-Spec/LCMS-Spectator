@@ -89,8 +89,14 @@ namespace LcmsSpectator.Readers
         {
             var reader = IdFileReaderFactory.CreateReader(idFilePath);
             var ids = await reader.ReadAsync(modIgnoreList);
-            ids.SetLcmsRun(dataSetViewModel.LcMs, dataSetViewModel.Title);
-            dataSetViewModel.ScanViewModel.Data.AddRange(ids.AllPrSms);
+            var idList = ids.ToList();
+            foreach (var id in idList)
+            {
+                id.RawFileName = dataSetViewModel.Title;
+                id.LcMs = dataSetViewModel.LcMs;
+            }
+
+            dataSetViewModel.ScanViewModel.Data.AddRange(idList);
             dataSetViewModel.IdFileOpen = true;
         }
 

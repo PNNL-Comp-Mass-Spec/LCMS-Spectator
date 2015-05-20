@@ -23,14 +23,14 @@ namespace LcmsSpectator.Readers
         /// Read a search results file.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <returns>Identification tree of search identifications.</returns>
-        IdentificationTree Read(IEnumerable<string> modIgnoreList = null);
+        /// <returns>The Protein-Spectrum-Match identifications.</returns>
+        IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null);
 
         /// <summary>
         /// Read a search results file asynchronously.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <returns>Identification tree of search identifications.</returns>
-        Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList = null);
+        /// <returns>The Protein-Spectrum-Match identifications.</returns>
+        Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null);
     }
 }

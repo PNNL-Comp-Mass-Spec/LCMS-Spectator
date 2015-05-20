@@ -29,9 +29,14 @@ namespace LcmsSpectatorTests
             // init test data
             var idFileReader = IdFileReaderFactory.CreateReader(idFile);
             var ids = idFileReader.Read();
-            ids.SetLcmsRun(null, Path.GetFileNameWithoutExtension(rawFile));
+            var idList = ids.ToList();
+            foreach (var id in idList)
+            {
+                id.LcMs = null;
+                id.RawFileName = Path.GetFileNameWithoutExtension(rawFile);
+            }
 
-            var prsms = ids.AllPrSms;
+            var prsms = idList;
 
             // init scan vm
             var scanVm = new ScanViewModel(new TestableMainDialogService(), prsms);
@@ -65,15 +70,22 @@ namespace LcmsSpectatorTests
             // init test data
             var idFileReader = IdFileReaderFactory.CreateReader(idFile);
             var ids = idFileReader.Read();
+
+            var idList = ids.ToList();
             var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
-            ids.SetLcmsRun(null, Path.GetFileNameWithoutExtension(rawFile));
+            foreach (var id in idList)
+            {
+                id.LcMs = lcms;
+                id.RawFileName = Path.GetFileNameWithoutExtension(rawFile);
+            }
+
             var scans = lcms.GetScanNumbers(2);
             foreach (var scan in scans)
             {
-                ids.Add(new PrSm { Scan = scan, LcMs = lcms, RawFileName = Path.GetFileNameWithoutExtension(rawFile), Score = double.NaN});
+                idList.Add(new PrSm { Scan = scan, LcMs = lcms, RawFileName = Path.GetFileNameWithoutExtension(rawFile), Score = double.NaN});
             }
 
-            var prsms = ids.AllPrSms;
+            var prsms = idList;
 
             // init scan vm
             var scanVm = new ScanViewModel(new TestableMainDialogService(), prsms);

@@ -15,6 +15,7 @@ using OxyPlot.Axes;
 
 namespace LcmsSpectatorTests
 {
+    using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Plots;
 
@@ -29,8 +30,15 @@ namespace LcmsSpectatorTests
             var idFileReader = IdFileReaderFactory.CreateReader(idFile);
             var ids = idFileReader.Read();
             var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
-            ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
-            var id = ids.GetHighestScoringPrSm();
+            var idList = ids.ToList();
+            foreach (var id in idList)
+            {
+                id.LcMs = lcms;
+                id.RawFileName = Path.GetFileNameWithoutExtension(rawFile);
+            }
+            idList.Sort(new PrSm.PrSmScoreComparer());
+
+            var prsm = idList[0];
 
             // init XicPlotViewModel
             var dialogService = new TestableMainDialogService();
@@ -43,7 +51,7 @@ namespace LcmsSpectatorTests
             const int minCharge = 1, maxCharge = 2;
             var ionTypeFactory = new IonTypeFactory(maxCharge);
             var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
-            var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
+            var ions = IonUtils.GetFragmentIonLabels(prsm.Sequence, charge, ionTypes);
             var ionVms = ions.Select(label => new LabeledIonViewModel(label.Composition, label.IonType, label.IsFragmentIon, lcms, label.PrecursorIon, label.IsChargeState, label.Index)).ToList();
 
         }

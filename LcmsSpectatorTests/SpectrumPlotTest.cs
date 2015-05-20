@@ -16,6 +16,7 @@ using ReactiveUI;
 
 namespace LcmsSpectatorTests
 {
+    using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Plots;
 
@@ -30,18 +31,24 @@ namespace LcmsSpectatorTests
             var idFileReader = IdFileReaderFactory.CreateReader(tsvFile);
             var ids = idFileReader.Read();
             var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
-            ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
+            var idList = ids.ToList();
+            foreach (var id in idList)
+            {
+                id.LcMs = lcms;
+                id.RawFileName = Path.GetFileNameWithoutExtension(rawFile);
+            }
 
             // init SpectrumPlotViewModel
             var dialogService = new TestableMainDialogService();
             var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, 1.05, false);
 
             // init test data
-            var id = ids.GetHighestScoringPrSm();
+            idList.Sort(new PrSm.PrSmScoreComparer());
+            var prsm = idList[0];
 
             // init test ions
             var ions = new ReactiveList<LabeledIonViewModel>();
-            spectrumPlotViewModel.Spectrum = id.Ms2Spectrum;
+            spectrumPlotViewModel.Spectrum = prsm.Ms2Spectrum;
             spectrumPlotViewModel.Ions = ions;
 
             // plot should not be null

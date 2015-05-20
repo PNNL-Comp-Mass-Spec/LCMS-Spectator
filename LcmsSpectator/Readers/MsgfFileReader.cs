@@ -41,8 +41,8 @@ namespace LcmsSpectator.Readers
         /// Read a MS-GF+ results file.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <returns>Identification tree of MS-GF+ identifications.</returns>
-        public IdentificationTree Read(IEnumerable<string> modIgnoreList = null)
+        /// <returns>The Protein-Spectrum-Match identifications.</returns>
+        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null)
         {
             return this.ReadFromTsvFile().Result;
         }
@@ -51,8 +51,8 @@ namespace LcmsSpectator.Readers
         /// Read a MS-GF+ results file asynchronously.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <returns>Identification tree of MS-GF+ identifications.</returns>
-        public async Task<IdentificationTree> ReadAsync(IEnumerable<string> modIgnoreList = null)
+        /// <returns>The Protein-Spectrum-Match identifications.</returns>
+        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null)
         {
             return await this.ReadFromTsvFile();
         }
@@ -60,10 +60,10 @@ namespace LcmsSpectator.Readers
         /// <summary>
         /// Read a MS-GF+ results from TSV file.
         /// </summary>
-        /// <returns>Task that creates an identification tree of MSPathFinder identifications.</returns>
-        private async Task<IdentificationTree> ReadFromTsvFile()
+        /// <returns>The Protein-Spectrum-Match identifications.</returns>
+        private async Task<IEnumerable<PrSm>> ReadFromTsvFile()
         {
-            var idTree = new IdentificationTree(ToolType.MsgfPlus);
+            var prsms = new List<PrSm>();
             var file = new StreamReader(File.Open(this.filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
@@ -83,10 +83,10 @@ namespace LcmsSpectator.Readers
                 }
 
                 var idData = this.CreatePrSms(line, headers);
-                idTree.Add(idData);
+                prsms.AddRange(idData);
             }
 
-            return idTree;
+            return prsms;
         }
 
         /// <summary>

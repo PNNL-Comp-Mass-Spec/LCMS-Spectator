@@ -37,9 +37,14 @@ namespace LcmsSpectatorTests
             var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
             var lcms = PbfLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
             var ids = idFileReader.Read();
-            ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFilePath));
+            var idList = ids.ToList();
+            foreach (var id in idList)
+            {
+                id.LcMs = lcms;
+                id.RawFileName = Path.GetFileNameWithoutExtension(rawFilePath);
+            }
 
-            var prsms = ids.IdentifiedPrSms;
+            var prsms = idList.Where(prsm => prsm.Sequence.Count > 0);
 
             const double relIntThres = 0.1;
             var tolerance = new Tolerance(10, ToleranceUnit.Ppm);
