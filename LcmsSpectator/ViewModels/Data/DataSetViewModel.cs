@@ -23,6 +23,7 @@ namespace LcmsSpectator.ViewModels.Data
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
+    using LcmsSpectator.Readers;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Plots;
 
@@ -67,6 +68,11 @@ namespace LcmsSpectator.ViewModels.Data
         /// The title of this data set
         /// </summary>
         private string title;
+
+        /// <summary>
+        /// The path to the raw file for this data set
+        /// </summary>
+        private string rawFilePath;
 
         /// <summary>
         /// A value indicating whether or not this data set is ready to be closed?
@@ -327,19 +333,20 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Initialize this data set by reading the raw file asynchronously and initializing child view models
         /// </summary>
-        /// <param name="rawFilePath">The raw File Path.</param>
+        /// <param name="filePath">The raw File Path.</param>
         /// <returns>
         /// The <see cref="Task"/>.
         /// </returns>
-        public async Task InitializeAsync(string rawFilePath)
+        public async Task InitializeAsync(string filePath)
         {
             this.LoadingScreenViewModel.IsLoading = true; // Show animated loading screen
-            this.Title = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(rawFilePath));
+            this.Title = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(filePath));
+            this.rawFilePath = filePath;
 
             // load raw file
-            var massSpecDataType = rawFilePath.EndsWith(FileConstants.RawFileExtensions[0], true, CultureInfo.InvariantCulture) ? 
+            var massSpecDataType = filePath.EndsWith(FileConstants.RawFileExtensions[0], true, CultureInfo.InvariantCulture) ? 
                                                         MassSpecDataType.XCaliburRun : MassSpecDataType.MzMLFile;
-            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(rawFilePath, massSpecDataType, 0, 0));
+            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, massSpecDataType, 0, 0));
 
             // Now that we have an LcMsRun, initialize viewmodels that require it
             this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs);
@@ -433,7 +440,10 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void StartMsPfSearchImplementation()
         {
-            var searchSettings = new SearchSettingsViewModel(this.dialogService);
+            var searchSettings = new SearchSettingsViewModel(this.dialogService)
+            {
+                SpectrumFilePath = this.rawFilePath
+            };
 
             if (this.SpectrumViewModel.Ms2SpectrumViewModel.Spectrum != null)
             {
@@ -447,6 +457,8 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 if (searchSettings.Status)
                 {
+                    var idFileReader = IdFileReaderFactory.CreateReader(searchSettings.GetIdFilePath());
+                    var prsms = idFileReader.Read();
                 }
             };
 
