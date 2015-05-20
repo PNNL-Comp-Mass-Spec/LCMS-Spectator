@@ -175,6 +175,11 @@ namespace LcmsSpectator.ViewModels.Data
                 .Where(f => f != null)
                 .Subscribe(f => f.Selected = true);
 
+            // Start MsPf Search Command
+            var startMsPfSearchCommand = ReactiveCommand.Create();
+            startMsPfSearchCommand.Subscribe(_ => this.StartMsPfSearchImplementation());
+            this.StartMsPfSearchCommand = startMsPfSearchCommand;
+
             // Close command verifies that the user wants to close the dataset, then sets ReadyToClose to true if they are
             var closeCommand = ReactiveCommand.Create();
             closeCommand.Subscribe(_ =>
@@ -205,6 +210,11 @@ namespace LcmsSpectator.ViewModels.Data
         /// Gets the loading screen view model.
         /// </summary>
         public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
+
+        /// <summary>
+        /// Gets a command that starts an MSPathFinder with this data set.
+        /// </summary>
+        public IReactiveCommand StartMsPfSearchCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that is activated when the close button is clicked on a dataset.
@@ -415,6 +425,32 @@ namespace LcmsSpectator.ViewModels.Data
 
             // When an ID is selected on FeatureMap, update selectedPrSm
             this.FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => this.SelectedPrSm = prsm);
+        }
+
+        /// <summary>
+        /// Implementation for <see cref="StartMsPfSearchCommand" />.
+        /// Gets a command that starts an MSPathFinder with this data set.
+        /// </summary>
+        private void StartMsPfSearchImplementation()
+        {
+            var searchSettings = new SearchSettingsViewModel(this.dialogService);
+
+            if (this.SpectrumViewModel.Ms2SpectrumViewModel.Spectrum != null)
+            {
+                var scanNum = this.SpectrumViewModel.Ms2SpectrumViewModel.Spectrum.ScanNum;
+                searchSettings.MinScanNumber = scanNum;
+                searchSettings.MaxScanNumber = scanNum;
+            }
+
+            // TODO: change this so it doesn't use an event and isn't void async
+            searchSettings.ReadyToClose += (o, e) =>
+            {
+                if (searchSettings.Status)
+                {
+                }
+            };
+
+            this.dialogService.SearchSettingsWindow(searchSettings);
         }
     }
 }
