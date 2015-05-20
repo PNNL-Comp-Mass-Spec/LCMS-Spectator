@@ -11,15 +11,16 @@
 namespace LcmsSpectator.ViewModels
 {
     using System;
+    using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Windows.Forms.VisualStyles;
-
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
+    using InformedProteomics.Backend.MassSpecData;
     using InformedProteomics.TopDown.Execution;
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
@@ -159,6 +160,16 @@ namespace LcmsSpectator.ViewModels
         private int maxDynamicModificationsPerSequence;
 
         /// <summary>
+        /// The minimum MS/MS scan number to restrict the search to.
+        /// </summary>
+        private int minScanNumber;
+
+        /// <summary>
+        /// The maximum MS/MS scan number to restrict the search to.
+        /// </summary>
+        private int maxScanNumber;
+
+        /// <summary>
         /// A value indicating whether application modifications were updated.
         /// </summary>
         private bool modificationsUpdated;
@@ -252,6 +263,9 @@ namespace LcmsSpectator.ViewModels
             this.ProductIonToleranceValue = 10;
             this.PrecursorIonToleranceUnit = ToleranceUnit.Ppm;
             this.MinFeatureProbability = 0.15;
+            this.minScanNumber = 0;
+            this.maxScanNumber = 0;
+            this.maxDynamicModificationsPerSequence = 0;
 
             // When search mode is selected, display correct search mode description
             this.WhenAnyValue(x => x.SelectedSearchMode)
@@ -537,6 +551,24 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Gets or sets the minimum MS/MS scan number to restrict the search to.
+        /// </summary>
+        public int MinScanNumber
+        {
+            get { return this.minScanNumber; }
+            set { this.RaiseAndSetIfChanged(ref this.minScanNumber, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum MS/MS scan number to restrict the search to.
+        /// </summary>
+        public int MaxScanNumber
+        {
+            get { return this.maxScanNumber; }
+            set { this.RaiseAndSetIfChanged(ref this.maxScanNumber, value); }
+        }
+
+        /// <summary>
         /// Gets the list of modifications to use in the search.
         /// </summary>
         public ReactiveList<SearchModificationViewModel> SearchModifications { get; private set; }
@@ -550,37 +582,35 @@ namespace LcmsSpectator.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.modificationsUpdated, value); }
         }
 
-        /// <summary>
-        /// Gets an <see cref="IcTopDownLauncher" /> based on the selected search settings.
-        /// </summary>
-        public IcTopDownLauncher IcTopDownLauncher
+        /// <summary>Get a launcher for TopDown MSPathFinder searches.</summary>
+        /// <param name="ms2ScanNums">The MS/MS scan numbers to restrict search to.</param>
+        /// <returns>The <see cref="IcTopDownLauncher"/>.</returns>
+        public IcTopDownLauncher GetTopDownLauncher(IEnumerable<int> ms2ScanNums = null)
         {
-            get
-            {
-                var searchModifications = this.SearchModifications.Select(searchModification => searchModification.SearchModification).ToList();
-                var aminoAcidSet = new AminoAcidSet(searchModifications, this.maxDynamicModificationsPerSequence);
-                return new IcTopDownLauncher(
-                                             this.SpectrumFilePath,
-                                             this.truncatedFastaDbFilePath,
-                                             this.OutputFilePath,
-                                             aminoAcidSet,
-                                             this.MinSequenceLength,
-                                             this.MaxSequenceLength,
-                                             1,
-                                             0,
-                                             this.MinPrecursorIonCharge,
-                                             this.MaxPrecursorIonCharge,
-                                             this.MinProductIonCharge,
-                                             this.MaxProductIonCharge,
-                                             this.MinSequenceMass,
-                                             this.MaxSequenceMass,
-                                             this.PrecursorIonToleranceValue,
-                                             this.ProductIonToleranceValue,
-                                             true,
-                                             this.SelectedSearchMode,
-                                             this.FeatureFilePath,
-                                             this.minFeatureProbability);
-            }
+            var searchModifications = this.SearchModifications.Select(searchModification => searchModification.SearchModification).ToList();
+            var aminoAcidSet = new AminoAcidSet(searchModifications, this.maxDynamicModificationsPerSequence);
+            return new IcTopDownLauncher(
+                                         this.SpectrumFilePath,
+                                         this.truncatedFastaDbFilePath,
+                                         this.OutputFilePath,
+                                         aminoAcidSet,
+                                         this.MinSequenceLength,
+                                         this.MaxSequenceLength,
+                                         1,
+                                         0,
+                                         this.MinPrecursorIonCharge,
+                                         this.MaxPrecursorIonCharge,
+                                         this.MinProductIonCharge,
+                                         this.MaxProductIonCharge,
+                                         this.MinSequenceMass,
+                                         this.MaxSequenceMass,
+                                         this.PrecursorIonToleranceValue,
+                                         this.ProductIonToleranceValue,
+                                         true,
+                                         this.SelectedSearchMode,
+                                         this.FeatureFilePath,
+                                         this.minFeatureProbability,
+                                         ms2ScanNums);
         }
 
         /// <summary>
@@ -724,8 +754,25 @@ namespace LcmsSpectator.ViewModels
         private async Task RunImplementation()
         {
             LoadingScreenViewModel.IsLoading = true;
+
+            // Read spectrum file
+            var massSpecDataType = this.SpectrumFilePath.EndsWith(FileConstants.RawFileExtensions[0], true, CultureInfo.InvariantCulture) ?
+                                                        MassSpecDataType.XCaliburRun : MassSpecDataType.MzMLFile;
+            var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(this.SpectrumFilePath, massSpecDataType, 0, 0));
+            
+            // Get MS/MS scan numbers
+            IEnumerable<int> ms2Scans = null;
+            if (this.MaxScanNumber > 0 && (this.MaxScanNumber - this.MinScanNumber) >= 0)
+            {
+                var allMs2Scans = lcms.GetScanNumbers(2);
+                ms2Scans = allMs2Scans.Where(scan => scan >= this.MinScanNumber && scan <= this.MaxScanNumber);   
+            }
+            
+            // Create truncated FASTA
             this.truncatedFastaDbFilePath = this.CreateTruncatedFastaFile();
-            var topDownLauncher = this.IcTopDownLauncher;
+            
+            // Run Search
+            var topDownLauncher = this.GetTopDownLauncher(ms2Scans);
             this.runSearchTask = Task.Run(
                                           () => topDownLauncher.RunSearch(
                                                                           IcParameters.Instance.IonCorrelationThreshold,
@@ -733,8 +780,9 @@ namespace LcmsSpectator.ViewModels
                                           this.runSearchCancellationToken.Token);
             await this.runSearchTask;
             LoadingScreenViewModel.IsLoading = false;
-            this.Status = true;
 
+            // Results delivered on close
+            this.Status = true;
             if (this.ReadyToClose != null)
             {
                 this.ReadyToClose(this, EventArgs.Empty);
