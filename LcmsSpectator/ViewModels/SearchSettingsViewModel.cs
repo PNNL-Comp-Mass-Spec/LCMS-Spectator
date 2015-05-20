@@ -50,11 +50,6 @@ namespace LcmsSpectator.ViewModels
         private readonly IMainDialogService dialogService;
 
         /// <summary>
-        /// A cancellation token for cancelling the <see cref="runSearchTask" />.
-        /// </summary>
-        private readonly CancellationTokenSource runSearchCancellationToken;
-
-        /// <summary>
         /// The path for the spectrum file.
         /// </summary>
         private string spectrumFilePath;
@@ -180,13 +175,17 @@ namespace LcmsSpectator.ViewModels
         private Task runSearchTask;
 
         /// <summary>
+        /// A cancellation token for cancelling the <see cref="runSearchTask" />.
+        /// </summary>
+        private CancellationTokenSource runSearchCancellationToken;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SearchSettingsViewModel"/> class. 
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public SearchSettingsViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.runSearchCancellationToken = new CancellationTokenSource();
             this.LoadingScreenViewModel = new LoadingScreenViewModel();
             this.SearchModes = new[] { 0, 1, 2 };
             this.ToleranceUnits = new[] { ToleranceUnit.Ppm, ToleranceUnit.Th };
@@ -755,10 +754,12 @@ namespace LcmsSpectator.ViewModels
         {
             LoadingScreenViewModel.IsLoading = true;
 
+            this.runSearchCancellationToken = new CancellationTokenSource();
+
             // Read spectrum file
             var massSpecDataType = this.SpectrumFilePath.EndsWith(FileConstants.RawFileExtensions[0], true, CultureInfo.InvariantCulture) ?
                                                         MassSpecDataType.XCaliburRun : MassSpecDataType.MzMLFile;
-            var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(this.SpectrumFilePath, massSpecDataType, 0, 0));
+            var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(this.SpectrumFilePath, massSpecDataType, 0, 0), this.runSearchCancellationToken.Token);
             
             // Get MS/MS scan numbers
             IEnumerable<int> ms2Scans = null;
@@ -781,6 +782,8 @@ namespace LcmsSpectator.ViewModels
             await this.runSearchTask;
             LoadingScreenViewModel.IsLoading = false;
 
+            this.runSearchCancellationToken = null;
+
             // Results delivered on close
             this.Status = true;
             if (this.ReadyToClose != null)
@@ -801,7 +804,11 @@ namespace LcmsSpectator.ViewModels
                     "Are you sure you would like to cancel the search?",
                     "Cancel Search"))
                 {
-                    this.runSearchCancellationToken.Cancel();
+                    if (this.runSearchCancellationToken != null)
+                    {
+                        this.runSearchCancellationToken.Cancel();
+                    }
+
                     this.LoadingScreenViewModel.IsLoading = false;   
                 }
 
