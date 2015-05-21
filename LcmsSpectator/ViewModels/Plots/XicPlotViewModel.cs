@@ -13,6 +13,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
@@ -381,24 +382,28 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public void SaveAsImage()
         {
-            if (this.PlotModel == null)
+            var filePath = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
             }
 
-            var fileName = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             try
             {
-                if (fileName != string.Empty)
+                var directory = Path.GetDirectoryName(filePath);
+                if (directory == null || !Directory.Exists(directory))
                 {
-                    DynamicResolutionPngExporter.Export(
-                        this.PlotModel,
-                        fileName,
-                        (int)this.PlotModel.Width,
-                        (int)this.PlotModel.Height,
-                        OxyColors.White,
-                        IcParameters.Instance.ExportImageDpi);
+                    throw new FormatException(
+                        string.Format("Cannot save image due to invalid file name: {0}", filePath));
                 }
+
+                DynamicResolutionPngExporter.Export(
+                    this.PlotModel,
+                    filePath,
+                    (int)this.PlotModel.Width,
+                    (int)this.PlotModel.Height,
+                    OxyColors.White,
+                    IcParameters.Instance.ExportImageDpi);
             }
             catch (Exception e)
             {

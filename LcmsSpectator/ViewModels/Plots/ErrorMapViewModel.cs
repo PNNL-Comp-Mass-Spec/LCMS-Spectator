@@ -13,6 +13,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
 
     using InformedProteomics.Backend.Data.Sequence;
@@ -328,18 +329,24 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveAsImageImpl()
         {
-            var fileName = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            var filePath = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
             try
             {
-                if (string.IsNullOrEmpty(fileName))
+                var directory = Path.GetDirectoryName(filePath);
+                if (directory == null || !Directory.Exists(directory))
                 {
                     throw new FormatException(
-                        string.Format("Cannot save image due to invalid file name: {0}", fileName));
+                        string.Format("Cannot save image due to invalid file name: {0}", filePath));
                 }
 
                 DynamicResolutionPngExporter.Export(
                     this.PlotModel,
-                    fileName,
+                    filePath,
                     (int)this.PlotModel.Width,
                     (int)this.PlotModel.Height,
                     OxyColors.White,
