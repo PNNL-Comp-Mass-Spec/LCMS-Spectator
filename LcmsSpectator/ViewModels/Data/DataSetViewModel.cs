@@ -134,6 +134,9 @@ namespace LcmsSpectator.ViewModels.Data
                           .Subscribe(ms2 => this.IonTypeSelectorViewModel.ActivationMethod = ms2.ActivationMethod);
             prsmObservable.Subscribe(prsm => this.IonTypeSelectorViewModel.SelectedCharge = prsm.Charge);
 
+            // When the prsm changes, update the Scan View Model.
+            prsmObservable.Subscribe(prsm => this.ScanViewModel.SelectedPrSm = prsm);
+
             // When the prsm updates, update the prsm in the sequence creator
             prsmObservable.Subscribe(prsm => this.CreateSequenceViewModel.SelectedPrSm = prsm);
 

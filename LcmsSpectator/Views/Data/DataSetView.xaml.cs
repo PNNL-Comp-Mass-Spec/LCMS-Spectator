@@ -38,14 +38,10 @@ namespace LcmsSpectator.Views
 
             ScanDataGrid.SelectionChanged += (o, e) =>
             {
-                object item;
+                object item = ScanDataGrid.SelectedItem;
                 if (ScanDataGrid.SelectedItem == null && selectedItem != null)
                 {
                     item = selectedItem;
-                }
-                else
-                {
-                    return;
                 }
 
                 selectedItem = item;
