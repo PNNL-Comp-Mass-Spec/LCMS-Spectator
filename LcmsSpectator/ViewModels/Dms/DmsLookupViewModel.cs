@@ -28,6 +28,11 @@ namespace LcmsSpectator.ViewModels.Dms
     public class DmsLookupViewModel : ReactiveObject
     {
         /// <summary>
+        /// The path for the FASTA files on DMS.
+        /// </summary>
+        public const string FastaFilePath = @"\\gigasax\DMS_FASTA_File_Archive\static\forward";
+
+        /// <summary>
         /// The name of the the previous results file
         /// </summary>
         private const string PreviousResultsFile = "dmsSearches.txt";

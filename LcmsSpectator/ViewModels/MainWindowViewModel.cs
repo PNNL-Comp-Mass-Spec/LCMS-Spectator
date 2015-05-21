@@ -227,6 +227,7 @@ namespace LcmsSpectator.ViewModels
             if (this.dialogService.OpenDataWindow(openDataViewModel))
             {
                 var dataSetViewModel = await this.ReadRawFile(openDataViewModel.RawFilePath);
+                dataSetViewModel.FastaDbFilePath = openDataViewModel.FastaFilePath;
                 await this.ReadIdFile(openDataViewModel.IdFilePath, dataSetViewModel);
                 await this.dataReader.OpenDataSet(dataSetViewModel, openDataViewModel.RawFilePath, featureFilePath: openDataViewModel.FeatureFilePath);   
             }
@@ -316,6 +317,15 @@ namespace LcmsSpectator.ViewModels
                     var dataSetViewModel = await this.ReadRawFile(file);
                     await this.ReadIdFile(idFilePath, dataSetViewModel);
                     await this.dataReader.OpenDataSet(dataSetViewModel, file, featureFilePath: featureFilePath);
+
+                    // Set the dataset's FASTA file path
+                    if (dataSetViewModel.MsPfParameters != null)
+                    {
+                        dataSetViewModel.FastaDbFilePath = string.Format(
+                            "{0}\\{1}",
+                            DmsLookupViewModel.FastaFilePath,
+                            dataSetViewModel.MsPfParameters.DatabaseFile);
+                    }
                 }
             }
             catch (Exception e)

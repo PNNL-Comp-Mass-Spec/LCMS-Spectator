@@ -15,6 +15,7 @@ namespace LcmsSpectator.ViewModels.Data
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Net.Mime;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
 
@@ -25,6 +26,7 @@ namespace LcmsSpectator.ViewModels.Data
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers;
     using LcmsSpectator.Utils;
+    using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
 
     using ReactiveUI;
@@ -255,6 +257,11 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
+        /// Gets or sets the path to the FASTA database file associated with this data set. 
+        /// </summary>
+        public string FastaDbFilePath { get; set; }
+
+        /// <summary>
         /// Gets view model for extracted ion chromatogram
         /// </summary>
         public XicViewModel XicViewModel
@@ -445,23 +452,80 @@ namespace LcmsSpectator.ViewModels.Data
         {
             var searchSettings = new SearchSettingsViewModel(this.dialogService)
             {
-                SpectrumFilePath = this.rawFilePath
+                SpectrumFilePath = this.rawFilePath,
+                SelectedSearchMode = 0,
+                FastaDbFilePath = this.FastaDbFilePath,
+                OutputFilePath = string.Format("{0}\\{1}", Directory.GetCurrentDirectory(), this.Title)
             };
 
+            // Set feature file path.
+            if (this.FeatureMapViewModel != null)
+            {
+                searchSettings.FeatureFilePath = this.FeatureMapViewModel.FeatureFilePath;
+            }
+
+            // Select the correct protein
+            if (searchSettings.FastaEntries.Count > 0)
+            {
+                searchSettings.SelectNoProteinsCommand.Execute(null);
+                var fastaEntry = searchSettings.FastaEntries.FirstOrDefault(entry => entry.ProteinName == this.SelectedPrSm.ProteinName);
+
+                if (fastaEntry != null)
+                {
+                    fastaEntry.Selected = true;
+                }
+            }
+
+            // Set scan number of selected spectrum
+            var scanNum = 0;
             if (this.SpectrumViewModel.Ms2SpectrumViewModel.Spectrum != null)
             {
-                var scanNum = this.SpectrumViewModel.Ms2SpectrumViewModel.Spectrum.ScanNum;
+                scanNum = this.SpectrumViewModel.Ms2SpectrumViewModel.Spectrum.ScanNum;
                 searchSettings.MinScanNumber = scanNum;
                 searchSettings.MaxScanNumber = scanNum;
             }
 
+            // Set search modifications
+            if (this.MsPfParameters != null)
+            {
+                searchSettings.SearchModifications.AddRange(
+                               this.MsPfParameters.Modifications.Select(
+                                    searchMod => new SearchModificationViewModel(this.dialogService) { SearchModification = searchMod }));
+                searchSettings.MinSequenceLength = this.MsPfParameters.MinSequenceLength;
+                searchSettings.MaxSequenceLength = this.MsPfParameters.MaxSequenceLength;
+                searchSettings.MinSequenceMass = this.MsPfParameters.MinSequenceMass;
+                searchSettings.MaxSequenceMass = this.MsPfParameters.MaxSequenceMass;
+                searchSettings.MinPrecursorIonCharge = this.MsPfParameters.MinPrecursorIonCharge;
+                searchSettings.MaxPrecursorIonCharge = this.MsPfParameters.MaxPrecursorIonCharge;
+                searchSettings.MinProductIonCharge = this.MsPfParameters.MinProductIonCharge;
+                searchSettings.MaxProductIonCharge = this.MsPfParameters.MaxPrecursorIonCharge;
+                searchSettings.PrecursorIonToleranceValue = this.MsPfParameters.PrecursorTolerancePpm.GetValue();
+                searchSettings.ProductIonToleranceValue = this.MsPfParameters.ProductIonTolerancePpm.GetValue();
+                searchSettings.MinFeatureProbability = this.MsPfParameters.MinFeatureProbablility;
+                searchSettings.MaxDynamicModificationsPerSequence =
+                    this.MsPfParameters.MaxDynamicModificationsPerSequence;
+            }
+
             // TODO: change this so it doesn't use an event and isn't void async
-            searchSettings.ReadyToClose += (o, e) =>
+            searchSettings.ReadyToClose += async (o, e) =>
             {
                 if (searchSettings.Status)
                 {
                     var idFileReader = IdFileReaderFactory.CreateReader(searchSettings.GetIdFilePath());
-                    var prsms = idFileReader.Read();
+                    var prsms = await idFileReader.ReadAsync();
+                    var prsmList = prsms.ToList();
+                    prsmList.Sort(new PrSm.PrSmScoreComparer());
+                    this.ScanViewModel.Data.AddRange(prsmList);
+
+                    var scanPrsms = prsmList.Where(prsm => prsm.Scan == scanNum).ToList();
+                    if (scanNum > 0 && scanPrsms.Count > 0)
+                    {
+                        this.SelectedPrSm = scanPrsms[0];
+                    }
+                    else if (prsmList.Count > 0)
+                    {
+                        this.SelectedPrSm = prsmList[0];
+                    }
                 }
             };
 

@@ -41,6 +41,7 @@
                         <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                         <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                         <MenuItem Header="Open _Error Map" Command="{Binding OpenErrorMapCommand}" />
+                        <MenuItem Header="Run MsPf Search" Command="{Binding StartMsPfSearchCommand}" Name="StartMsPfSearch" />
                         <Separator />
                         <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" Name="AutoAdjustYCheck" />
                         <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustmentCheck" />

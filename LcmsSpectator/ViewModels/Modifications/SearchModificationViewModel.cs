@@ -52,7 +52,8 @@ namespace LcmsSpectator.ViewModels.Modifications
             this.AminoAcidResidues = new ReactiveList<char>(AminoAcid.StandardAminoAcidCharacters) { '*' };
             this.SequenceLocations = new ReactiveList<SequenceLocation>
             {
-                SequenceLocation.Everywhere, SequenceLocation.PeptideNTerm, SequenceLocation.PeptideCTerm
+                SequenceLocation.Everywhere, SequenceLocation.PeptideNTerm, SequenceLocation.PeptideCTerm,
+                SequenceLocation.ProteinNTerm, SequenceLocation.ProteinCTerm
             };
             this.SelectedSequenceLocation = SequenceLocation.Everywhere;
             this.IsFixed = new ReactiveList<string> { "Fixed", "Optional" };
@@ -161,7 +162,7 @@ namespace LcmsSpectator.ViewModels.Modifications
 
                 if (
                     !AminoAcid.StandardAminoAcidCharacters.Contains(
-                        this.SelectedResidue.ToString(CultureInfo.InvariantCulture)))
+                        this.SelectedResidue.ToString(CultureInfo.InvariantCulture)) && this.SelectedResidue != '*')
                 {
                     return null;
                 }

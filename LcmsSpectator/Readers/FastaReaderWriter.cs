@@ -64,6 +64,18 @@
         /// <param name="filePath">The path of the file to write the entries to.</param>
         public static void Write(IEnumerable<FastaEntry> entries, string filePath)
         {
+            var directory = Path.GetDirectoryName(filePath);
+
+            if (directory == null)
+            {
+                throw new ArgumentException("Invalid file path.");
+            }
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
             using (var writer = new StreamWriter(filePath))
             {
                 foreach (var entry in entries)

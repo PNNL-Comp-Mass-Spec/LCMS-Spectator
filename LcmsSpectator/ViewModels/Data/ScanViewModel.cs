@@ -265,22 +265,26 @@ namespace LcmsSpectator.ViewModels.Data
             filtered = selectedFilters.Aggregate(filtered, (current, filter) => filter.Filter(current));
             var filteredPrSms = filtered.Cast<PrSm>();
 
-            var allPrSmsByScan = new Dictionary<int, PrSm>();
+            var allPrSmsByScan = new Dictionary<int, List<PrSm>>();
 
             // Ensure that all scan numbers for the data set are unique.
             foreach (var prsm in filteredPrSms)
             {
                 if (!allPrSmsByScan.ContainsKey(prsm.Scan))
                 {
-                    allPrSmsByScan.Add(prsm.Scan, prsm);
+                    allPrSmsByScan.Add(prsm.Scan, new List<PrSm> { prsm });
                 }
-                else if (allPrSmsByScan[prsm.Scan].Sequence.Count == 0)
+                else if (allPrSmsByScan[prsm.Scan][0].Sequence.Count == 0)
                 {
-                    allPrSmsByScan[prsm.Scan] = prsm;
+                    allPrSmsByScan[prsm.Scan] = new List<PrSm> { prsm };
+                }
+                else
+                {
+                    allPrSmsByScan[prsm.Scan].Add(prsm);
                 }
             }
 
-            var uniqueFilteredPrSms = allPrSmsByScan.Values.ToArray();
+            var uniqueFilteredPrSms = allPrSmsByScan.Values.SelectMany(prsm => prsm).ToArray();
             Array.Sort(uniqueFilteredPrSms, new PrSm.PrSmScoreComparer());
             return uniqueFilteredPrSms;
         }

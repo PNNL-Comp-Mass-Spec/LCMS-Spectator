@@ -616,6 +616,11 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// Gets or sets the path to the feature file that this view model visualizes.
+        /// </summary>
+        public string FeatureFilePath { get; set; }
+
+        /// <summary>
         /// Read features and display feature map for this data set.
         /// </summary>
         /// <param name="filePath">Path of feature file.</param>
@@ -625,6 +630,7 @@ namespace LcmsSpectator.ViewModels.Plots
             {
                 var featureList = FeatureReader.Read(filePath);
                 this.SetFeatures(featureList.ToList());
+                this.FeatureFilePath = filePath;
                 this.ShowSplash = false;
             }
             catch (InvalidCastException)
@@ -698,7 +704,7 @@ namespace LcmsSpectator.ViewModels.Plots
             this.ids = new Dictionary<int, PrSm>();
             foreach (var id in idList)
             {
-                if (id.Sequence.Count > 0)
+                if (id.Sequence.Count > 0 && !this.ids.ContainsKey(id.Scan))
                 {
                     this.ids.Add(id.Scan, id);
                 }

@@ -48,6 +48,12 @@ namespace LcmsSpectator.Views
                 ScanDataGrid.ScrollIntoView(item);
                 ScanDataGrid.UpdateLayout();
             };
+
+            this.DataContextChanged += (o, e) =>
+            {
+                this.SpectrumView.StartMsPfSearch.DataContext = this.DataContext;
+                    
+            };
         }
 
         /// <summary>

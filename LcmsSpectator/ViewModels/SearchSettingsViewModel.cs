@@ -87,7 +87,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// The tolerance value for precursor ions.
         /// </summary>
-        private int precursorIonToleranceValue;
+        private double precursorIonToleranceValue;
 
         /// <summary>
         /// The tolerance unit for precursor ions.
@@ -97,7 +97,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// The tolerance value for product ions.
         /// </summary>
-        private int productIonToleranceValue;
+        private double productIonToleranceValue;
 
         /// <summary>
         /// The tolerance unit for product ions.
@@ -426,7 +426,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets or sets the tolerance value for precursor ions.
         /// </summary>
-        public int PrecursorIonToleranceValue
+        public double PrecursorIonToleranceValue
         {
             get { return this.precursorIonToleranceValue; }
             set { this.RaiseAndSetIfChanged(ref this.precursorIonToleranceValue, value); }
@@ -444,7 +444,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets or sets the tolerance value for product ions.
         /// </summary>
-        public int ProductIonToleranceValue
+        public double ProductIonToleranceValue
         {
             get { return this.productIonToleranceValue; }
             set { this.RaiseAndSetIfChanged(ref this.productIonToleranceValue, value); }
@@ -777,9 +777,10 @@ namespace LcmsSpectator.ViewModels
             this.runSearchTask = Task.Run(
                                           () => topDownLauncher.RunSearch(
                                                                           IcParameters.Instance.IonCorrelationThreshold,
-                                                                          this.runSearchCancellationToken.Token), 
+                                                                          this.runSearchCancellationToken.Token),
                                           this.runSearchCancellationToken.Token);
             await this.runSearchTask;
+            ////topDownLauncher.RunSearch(IcParameters.Instance.IonCorrelationThreshold);
             LoadingScreenViewModel.IsLoading = false;
 
             this.runSearchCancellationToken = null;
@@ -829,8 +830,7 @@ namespace LcmsSpectator.ViewModels
         private string CreateTruncatedFastaFile()
         {
             var fastaFileName = Path.GetFileNameWithoutExtension(this.FastaDbFilePath);
-            var fastaDirPath = Path.GetDirectoryName(this.FastaDbFilePath);
-            var filePath = string.Format("{0}\\{1}_truncated.fasta", fastaDirPath, fastaFileName);
+            var filePath = string.Format("{0}\\{1}_truncated.fasta", this.OutputFilePath, fastaFileName);
             Console.WriteLine(@"Creating truncated fasta file at: {0}", filePath);
             FastaReaderWriter.Write(this.FastaEntries.Where(entry => entry.Selected), filePath);
             return filePath;

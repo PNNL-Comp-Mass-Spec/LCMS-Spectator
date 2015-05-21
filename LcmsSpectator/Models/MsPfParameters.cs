@@ -187,7 +187,7 @@ namespace LcmsSpectator.Models
                     case "PrecursorIonTolerancePpm":
                         param.PrecursorTolerancePpm = new Tolerance(Convert.ToDouble(parts[1]), ToleranceUnit.Ppm);
                         break;
-                    case "ProductIonTolerance":
+                    case "ProductIonTolerancePpm":
                         param.ProductIonTolerancePpm = new Tolerance(Convert.ToDouble(parts[1]), ToleranceUnit.Ppm);
                         break;
                     case "MinSequenceLength":
@@ -224,6 +224,16 @@ namespace LcmsSpectator.Models
                         param.Modifications.Add(ParseModification(parts[1]));
                         break;
                 }
+            }
+
+            if (param.PrecursorTolerancePpm == null && param.ProductIonTolerancePpm != null)
+            {
+                param.PrecursorTolerancePpm = param.ProductIonTolerancePpm;
+            }
+
+            if (param.PrecursorTolerancePpm != null && param.ProductIonTolerancePpm == null)
+            {
+                param.ProductIonTolerancePpm = param.PrecursorTolerancePpm;
             }
 
             return param;
@@ -288,7 +298,7 @@ namespace LcmsSpectator.Models
 
             var aminoAcid = parts[1][0];
 
-            var isFixed = parts[2] == "opt";
+            var isFixed = parts[2] != "opt";
 
             var sequenceLocation = (SequenceLocation)Enum.Parse(typeof(SequenceLocation), parts[3]);
 
