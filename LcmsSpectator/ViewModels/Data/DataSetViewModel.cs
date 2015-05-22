@@ -467,12 +467,9 @@ namespace LcmsSpectator.ViewModels.Data
             // Select the correct protein
             if (searchSettings.FastaEntries.Count > 0)
             {
-                searchSettings.SelectNoProteinsCommand.Execute(null);
-                var fastaEntry = searchSettings.FastaEntries.FirstOrDefault(entry => entry.ProteinName == this.SelectedPrSm.ProteinName);
-
-                if (fastaEntry != null)
+                foreach (var entry in searchSettings.FastaEntries)
                 {
-                    fastaEntry.Selected = true;
+                    entry.Selected = entry.ProteinName == this.SelectedPrSm.ProteinName;
                 }
             }
 
