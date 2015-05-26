@@ -100,7 +100,7 @@ namespace LcmsSpectator.PlotModels
         /// </summary>
         /// <param name="minX">Min visible x</param>
         /// <param name="maxX">Max visible x</param>
-        public void SetBounds(double minX, double maxX)
+        protected virtual void SetBounds(double minX, double maxX)
         {
             var maxY = this.GetMaxYInRange(minX, maxX);
             var yaxis = DefaultYAxis ?? this.YAxis;

@@ -101,6 +101,26 @@ namespace LcmsSpectator.PlotModels
 
             return point;
         }
+
+        /// <summary>
+        /// Set min visible x and y bounds and update y axis max by highest
+        /// IDataPointSeries point in that range.
+        /// </summary>
+        /// <param name="minX">Min visible x</param>
+        /// <param name="maxX">Max visible x</param>
+        protected override void SetBounds(double minX, double maxX)
+        {
+            var maxY = this.GetMaxYInRange(minX, maxX);
+            var yaxis = DefaultYAxis ?? this.YAxis;
+            yaxis.Maximum = maxY * this.Multiplier;
+
+            if (this.pointMarkers.Points.Count > 0)
+            {
+                this.SetPointMarker(this.pointMarkers.Points[0].X, this.GetMarkerColor());
+            }
+
+            this.InvalidatePlot(true);
+        }
         
         /// <summary>
         /// Clear all series from the plot without removing marker, thread-safe.
