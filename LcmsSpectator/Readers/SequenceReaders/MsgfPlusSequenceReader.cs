@@ -29,6 +29,11 @@ namespace LcmsSpectator.Readers.SequenceReaders
         private static readonly AminoAcidSet AminoAcidSet;
 
         /// <summary>
+        /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
+        /// </summary>
+        private readonly bool trimAnnotations;
+
+        /// <summary>
         /// Initializes static members of the <see cref="MsgfPlusSequenceReader"/> class.
         /// </summary>
         static MsgfPlusSequenceReader()
@@ -37,14 +42,24 @@ namespace LcmsSpectator.Readers.SequenceReaders
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="MsgfPlusSequenceReader"/> class.
+        /// </summary>
+        /// <param name="trimAnnotations">
+        /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
+        /// </param>
+        public MsgfPlusSequenceReader(bool trimAnnotations = false)
+        {
+            this.trimAnnotations = trimAnnotations;
+        }
+
+        /// <summary>
         /// Parse a protein/peptide sequence in the MS-GF+ style.
         /// </summary>
         /// <param name="msgfPlusPeptideStr">The sequence as a string..</param>
-        /// <param name="trim">A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.</param>
         /// <returns>The parsed sequence.</returns>
-        public Sequence Read(string msgfPlusPeptideStr, bool trim = false)
+        public Sequence Read(string msgfPlusPeptideStr)
         {
-            if (trim)
+            if (this.trimAnnotations)
             {
                 var firstIndex = msgfPlusPeptideStr.IndexOf('.');
                 if (firstIndex >= 0)

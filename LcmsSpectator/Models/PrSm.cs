@@ -12,12 +12,14 @@ namespace LcmsSpectator.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Reactive.Linq;
     using System.Text;
     using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
+    using LcmsSpectator.Readers.SequenceReaders;
     using ReactiveUI;
     
     /// <summary>
@@ -25,6 +27,11 @@ namespace LcmsSpectator.Models
     /// </summary>
     public class PrSm : ReactiveObject, IComparable<PrSm>
     {
+        /// <summary>
+        /// Sequence reader for parsing sequences for the dataset this PRSM belongs to.
+        /// </summary>
+        private readonly ISequenceReader sequenceReader;
+
         /// <summary>
         /// The name of the raw file or data set that this is associated with.
         /// </summary>
@@ -51,6 +58,11 @@ namespace LcmsSpectator.Models
         private string sequenceText;
 
         /// <summary>
+        /// Most recent valid sequence.
+        /// </summary>
+        private string validSequenceText;
+
+        /// <summary>
         /// The name of identified protein.
         /// </summary>
         private string proteinName;
@@ -73,7 +85,7 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// The QValue of identification.
         /// </summary>
-        private double qValue;
+        private double qvalue;
 
         /// <summary>
         /// A value indicating whether the identification sequence has a heavy label?
@@ -100,8 +112,12 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="PrSm"/> class.
         /// </summary>
-        public PrSm()
+        /// <param name="sequenceReader">
+        /// Sequence reader for parsing sequences for the dataset this PRSM belongs to.
+        /// </param>
+        public PrSm(ISequenceReader sequenceReader = null)
         {
+            this.sequenceReader = sequenceReader ?? new SequenceReader();
             this.RawFileName = string.Empty;
             this.SequenceText = string.Empty;
             this.Sequence = new Sequence(new List<AminoAcid>());
@@ -114,6 +130,22 @@ namespace LcmsSpectator.Models
             this.Mass = double.NaN;
             this.PrecursorMz = double.NaN;
             this.QValue = -1.0;
+
+            this.WhenAnyValue(x => x.SequenceText)
+                .Where(sequenceText => sequenceText.Length > 0)
+                .Select(this.ParseSequence)
+                .Where(sequence => sequence != null)
+                .Subscribe(sequence => this.Sequence = sequence);
+
+            this.WhenAnyValue(x => x.Sequence)
+                .Where(sequence => sequence.Count > 0)
+                .Select(sequence => sequence.Mass + Composition.H2O.Mass)
+                .Subscribe(mass => this.Mass = mass);
+
+            this.WhenAnyValue(x => x.Sequence, x => x.Charge)
+                .Where(x => x.Item1.Count > 0 && x.Item2 != 0)
+                .Select(x => new Ion(x.Item1.Composition + Composition.H2O, x.Item2))
+                .Subscribe(ion => this.PrecursorMz = ion.GetMostAbundantIsotopeMz());
         }
 
         #region Public Properties
@@ -292,8 +324,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public double QValue
         {
-            get { return this.qValue; }
-            set { this.RaiseAndSetIfChanged(ref this.qValue, value); }
+            get { return this.qvalue; }
+            set { this.RaiseAndSetIfChanged(ref this.qvalue, value); }
         }
 
         /// <summary>
@@ -318,18 +350,20 @@ namespace LcmsSpectator.Models
 
             set
             {
-                if (value != null && !value.Equals(this.sequence))
-                {
-                    this.sequence = value;
-                    if (this.sequence.Count > 0)
-                    {
-                        this.Mass = this.sequence.Mass + Composition.H2O.Mass;
-                        var ion = new Ion(this.sequence.Composition + Composition.H2O, this.Charge);
-                        this.PrecursorMz = ion.GetMostAbundantIsotopeMz();
-                    }
-                }
+                ////if (value != null && !value.Equals(this.sequence))
+                ////{
+                ////    this.sequence = value;
+                ////    if (this.sequence.Count > 0)
+                ////    {
+                ////        this.Mass = this.sequence.Mass + Composition.H2O.Mass;
+                ////        var ion = new Ion(this.sequence.Composition + Composition.H2O, this.Charge);
+                ////        this.PrecursorMz = ion.GetMostAbundantIsotopeMz();
+                ////    }
+                ////}
 
-                this.RaisePropertyChanged();
+                ////this.RaisePropertyChanged();
+
+                this.RaiseAndSetIfChanged(ref this.sequence, value);
             }
         }
 
@@ -404,6 +438,26 @@ namespace LcmsSpectator.Models
             }
 
             return modificationLocations.ToString();
+        }
+
+        /// <summary>
+        /// Parse sequence string into a InformedProteomics sequence.
+        /// </summary>
+        /// <param name="sequenceStr">The sequence string</param>
+        /// <returns>InformedProteomics sequence object.</returns>
+        private Sequence ParseSequence(string sequenceStr)
+        {
+            try
+            {
+                var seq = this.sequenceReader.Read(sequenceStr);
+                this.validSequenceText = sequenceStr;
+                return seq;
+            }
+            catch (Exception)
+            {
+                this.SequenceText = this.validSequenceText;
+                return null;
+            }
         }
 
         /// <summary>

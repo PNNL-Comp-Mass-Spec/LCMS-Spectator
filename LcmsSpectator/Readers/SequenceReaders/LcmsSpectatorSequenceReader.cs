@@ -22,14 +22,29 @@ namespace LcmsSpectator.Readers.SequenceReaders
     public class LcmsSpectatorSequenceReader : ISequenceReader
     {
         /// <summary>
+        /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
+        /// </summary>
+        private readonly bool trimAnnotations;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LcmsSpectatorSequenceReader"/> class.
+        /// </summary>
+        /// <param name="trimAnnotations">
+        /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
+        /// </param>
+        public LcmsSpectatorSequenceReader(bool trimAnnotations = false)
+        {
+            this.trimAnnotations = trimAnnotations;
+        }
+
+        /// <summary>
         /// Parse a protein/peptide sequence in the LCMSSpectator style.
         /// </summary>
         /// <param name="sequence">The sequence as a string.</param>
-        /// <param name="trim">A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.</param>
         /// <returns>The parsed sequence.</returns>
-        public Sequence Read(string sequence, bool trim = false)
+        public Sequence Read(string sequence)
         {
-            if (trim)
+            if (this.trimAnnotations)
             {
                 var firstIndex = sequence.IndexOf('.');
                 if (firstIndex >= 0)

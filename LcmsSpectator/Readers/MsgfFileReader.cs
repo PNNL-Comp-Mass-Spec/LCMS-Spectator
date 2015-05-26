@@ -147,18 +147,16 @@ namespace LcmsSpectator.Readers
                 }
             }
 
-            var sequenceReader = new SequenceReader();
-
-            bool trim = this.filePath.Contains("_syn");
+            var sequenceReader = new SequenceReader(this.filePath.Contains("_syn"));
 
             foreach (var protein in proteinNames)
             {
-                var prsm = new PrSm
+                var prsm = new PrSm(sequenceReader)
                 {
                     Heavy = false,
                     Scan = scan,
                     Charge = Convert.ToInt32(parts[headers["Charge"]]),
-                    Sequence = sequenceReader.Read(sequenceText, trim),
+                    ////Sequence = sequenceReader.Read(sequenceText, trim),
                     SequenceText = sequenceText,
                     ProteinName = protein,
                     ProteinDesc = string.Empty,

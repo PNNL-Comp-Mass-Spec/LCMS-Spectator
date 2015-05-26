@@ -10,6 +10,7 @@
 
 namespace LcmsSpectator.Readers
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using LcmsSpectator.Models;
@@ -74,7 +75,7 @@ namespace LcmsSpectator.Readers
 
             foreach (var evidence in evidences)
             {
-                var msgfPlusEvidence = (MsgfPlusResult)evidence;
+                var msgfPlusEvidence = evidence as MsgfPlusResult;
                 var sequenceText = evidence.SeqWithNumericMods;
                 var index = sequenceText.IndexOf('.');
                 var lastIndex = sequenceText.LastIndexOf('.');
@@ -85,19 +86,28 @@ namespace LcmsSpectator.Readers
                         sequenceText.Length - (sequenceText.Length - lastIndex) - (index + 1));
                 }
 
+                double qvalue = -1;
+                double score = double.NaN;
+
+                if (msgfPlusEvidence != null)
+                {
+                    score = msgfPlusEvidence.SpecEValue;
+                    qvalue = msgfPlusEvidence.QValue;
+                }
+
                 foreach (var protein in evidence.Proteins)
                 {
-                    var prsm = new PrSm
+                    var prsm = new PrSm(sequenceReader)
                     {
                         Heavy = false,
                         Scan = evidence.Scan,
                         Charge = evidence.Charge,
-                        Sequence = sequenceReader.Read(sequenceText),
+                        ////Sequence = sequenceReader.Read(sequenceText),
                         SequenceText = sequenceText,
                         ProteinName = protein.ProteinName,
-                        Score = evidence.SpecProb,
+                        Score = score,
                         UseGolfScoring = true,
-                        QValue = msgfPlusEvidence.QValue,
+                        QValue = qvalue,
                     };
                     prsms.Add(prsm);
                 }

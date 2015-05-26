@@ -18,7 +18,8 @@ namespace LcmsSpectator.Readers
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Sequence;
     using LcmsSpectator.Models;
-    
+    using LcmsSpectator.Readers.SequenceReaders;
+
     /// <summary>
     /// Reader for MSPathFinder results file.
     /// </summary>
@@ -66,10 +67,10 @@ namespace LcmsSpectator.Readers
         /// <param name="cleanSequence">Clean sequence string with no modifications.</param>
         /// <param name="modifications">Modifications (name and position) to insert into the sequence.</param>
         /// <returns>Tuple containing sequence object and sequence text.</returns>
-        public Tuple<Sequence, string> SetModifications(string cleanSequence, string modifications)
+        public string SetModifications(string cleanSequence, string modifications)
         {
             // Build Sequence AminoAcid list
-            var sequence = new Sequence(cleanSequence, new AminoAcidSet());
+            ////var sequence = new Sequence(cleanSequence, new AminoAcidSet());
             var sequenceText = cleanSequence;
             var parsedModifications = this.ParseModifications(modifications);
 
@@ -85,12 +86,14 @@ namespace LcmsSpectator.Readers
 
                 var modLabel = string.Format("[{0}]", mod.Item2.Name);
                 sequenceText = sequenceText.Insert(mod.Item1, modLabel);
-                var aa = sequence[pos];
-                var modaa = new ModifiedAminoAcid(aa, mod.Item2);
-                sequence[pos] = modaa;
+                ////var aa = sequence[pos];
+                ////var modaa = new ModifiedAminoAcid(aa, mod.Item2);
+                ////sequence[pos] = modaa;
             }
 
-            return new Tuple<Sequence, string>(new Sequence(sequence), sequenceText);
+            return sequenceText;
+
+            ////return new Tuple<Sequence, string>(new Sequence(sequence), sequenceText);
         }
 
         /// <summary>
@@ -232,16 +235,18 @@ namespace LcmsSpectator.Readers
                 }
             }
 
+            var sequenceReader = new SequenceReader();
+
             foreach (var protein in proteinNames)
             {
                 var sequenceData = this.SetModifications(parts[headers["Sequence"]], parts[headers["Modifications"]]);
-                var prsm = new PrSm
+                var prsm = new PrSm(sequenceReader)
                 {
                     Heavy = false,
                     Scan = Convert.ToInt32(parts[headers["Scan"]]),
                     Charge = Convert.ToInt32(parts[headers["Charge"]]),
-                    Sequence = sequenceData.Item1,
-                    SequenceText = sequenceData.Item2,
+                    ////Sequence = sequenceData.Item1,
+                    SequenceText = sequenceData,
                     ProteinName = protein,
                     ProteinDesc = parts[headers["ProteinDesc"]].Split(';').FirstOrDefault(),
                     Score = Math.Round(score, 3),
