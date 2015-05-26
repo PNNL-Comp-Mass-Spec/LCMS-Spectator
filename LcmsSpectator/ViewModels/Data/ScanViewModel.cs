@@ -22,6 +22,7 @@ namespace LcmsSpectator.ViewModels.Data
 
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
+    using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Filters;
 
     using ReactiveUI;
@@ -115,6 +116,12 @@ namespace LcmsSpectator.ViewModels.Data
                 .Select(x => x as IIdData)
                 .Where(p => p != null)
                 .Subscribe(p => this.SelectedPrSm = p.GetHighestScoringPrSm());
+
+            // When a PrSm's sequence changes, update its score.
+            this.Data.ItemChanged.Where(x => x.PropertyName == "Sequence")
+                .Select(x => x.Sender)
+                .Where(sender => sender.Sequence.Count > 0)
+                .Subscribe(this.UpdatePrSmScore);
         }
 
         /// <summary>
@@ -171,6 +178,11 @@ namespace LcmsSpectator.ViewModels.Data
             get { return this.treeViewSelectedItem; }
             set { this.RaiseAndSetIfChanged(ref this.treeViewSelectedItem, value); }
         }
+
+        /// <summary>
+        /// Gets or sets the scorer factory used to score PRSMs on-the-fly.
+        /// </summary>
+        public ScorerFactory ScorerFactory { get; set; }
 
         /// <summary>
         /// Clear all filters and filter the data.
@@ -415,6 +427,27 @@ namespace LcmsSpectator.ViewModels.Data
                     o => true, 
                     this.dialogService,
                     (from prsm in this.Data where prsm.RawFileName.Length > 0 select prsm.RawFileName).Distinct()));
+        }
+
+        /// <summary>
+        /// Score a <see cref="PrSm" /> based on its sequence and MS/MS spectrum.
+        /// </summary>
+        /// <param name="prsm">The <see cref="PrSm" /> to score.</param>
+        private void UpdatePrSmScore(PrSm prsm)
+        {
+            if (this.ScorerFactory == null)
+            {
+                return;
+            }
+
+            var ms2Spectrum = prsm.Ms2Spectrum;
+            if (ms2Spectrum == null)
+            {
+                return;
+            }
+
+            var scorer = this.ScorerFactory.GetScorer(prsm.Ms2Spectrum);
+            prsm.Score = IonUtils.ScoreSequence(scorer, prsm.Sequence);
         }
     }
 }

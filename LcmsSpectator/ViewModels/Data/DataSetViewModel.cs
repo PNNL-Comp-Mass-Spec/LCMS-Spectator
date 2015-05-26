@@ -15,7 +15,6 @@ namespace LcmsSpectator.ViewModels.Data
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Net.Mime;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
 
@@ -175,9 +174,12 @@ namespace LcmsSpectator.ViewModels.Data
             // When product ion tolerance or ion correlation threshold change, update scorer factory
             IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
                 .Subscribe(
-                    x =>
-                    this.CreateSequenceViewModel.ScorerFactory =
-                    new ScorerFactory(x.Item1, Constants.MinCharge, Constants.MaxCharge, x.Item2));
+                x =>
+                {
+                    var scorer = new ScorerFactory(x.Item1, Constants.MinCharge, Constants.MaxCharge, x.Item2);
+                    this.CreateSequenceViewModel.ScorerFactory = scorer;
+                    this.ScanViewModel.ScorerFactory = scorer;
+                });
 
             // When an ID file has been opened, turn on the unidentified scan filter
             this.WhenAnyValue(x => x.IdFileOpen)
