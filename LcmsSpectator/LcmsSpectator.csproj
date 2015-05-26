@@ -205,6 +205,7 @@
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
     <Compile Include="ViewModels\Data\CreateSequenceViewModel.cs" />
+    <Compile Include="ViewModels\FileSelectors\ExportDatasetViewModel.cs" />
     <Compile Include="ViewModels\Modifications\CustomModificationViewModel.cs" />
     <Compile Include="ViewModels\Data\DataSetViewModel.cs" />
     <Compile Include="ViewModels\Dms\DmsDatasetViewModel.cs" />
@@ -240,6 +241,9 @@
     </Compile>
     <Compile Include="Views\Data\CreateSequenceView.xaml.cs">
       <DependentUpon>CreateSequenceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FileSelectors\ExportDatasetWindow.xaml.cs">
+      <DependentUpon>ExportDatasetWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Modifications\CustomModificationView.xaml.cs">
       <DependentUpon>CustomModificationView.xaml</DependentUpon>
@@ -310,6 +314,8 @@
       <DependentUpon>XicView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Writers\IcFileWriter.cs" />
+    <Compile Include="Writers\IIdWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PlotModels\AutoAdjustedYPlotModel.cs" />
@@ -350,6 +356,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Data\CreateSequenceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FileSelectors\ExportDatasetWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

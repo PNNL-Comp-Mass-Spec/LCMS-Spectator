@@ -28,6 +28,8 @@
                 <MenuItem Header="Open _Target List" DataContext="{Binding CreateSequenceViewModel}" Command="{Binding OpenTargetListCommand}" />
                 <MenuItem Header="Search _DMS" Command="{Binding OpenFromDmsCommand}"
                           Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}" />
+                <Separator />
+                <MenuItem Header="_Export Results" Command="{Binding ExportResultsCommand}" />
             </MenuItem>
             <MenuItem Header="_Config">
                 <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />

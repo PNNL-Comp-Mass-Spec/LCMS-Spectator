@@ -27,6 +27,8 @@ namespace LcmsSpectator.ViewModels
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Modifications;
+    using LcmsSpectator.Writers;
+
     using ReactiveUI;
 
     /// <summary>
@@ -95,6 +97,11 @@ namespace LcmsSpectator.ViewModels
             var runMsPathFinderSearchCommand = ReactiveCommand.Create();
             runMsPathFinderSearchCommand.Subscribe(_ => this.RunMsPathFinderSearchImplementation());
             this.RunMsPathFinderSearchCommand = runMsPathFinderSearchCommand;
+
+            // Create export command
+            var exportResultsCommand = ReactiveCommand.Create(this.DataSets.WhenAnyValue(x => x.Count).Select(count => count > 0));
+            exportResultsCommand.Subscribe(_ => this.ExportResultsImplementation());
+            this.ExportResultsCommand = exportResultsCommand;
 
             this.ShowSplash = true;
 
@@ -177,6 +184,11 @@ namespace LcmsSpectator.ViewModels
         /// Gets command that runs an MSPathFinder database search.
         /// </summary>
         public IReactiveCommand RunMsPathFinderSearchCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that exports results of a data set to a file.
+        /// </summary>
+        public IReactiveCommand ExportResultsCommand { get; private set; }
 
         /// <summary>
         /// Gets view model for list of scans and identifications.
@@ -374,6 +386,21 @@ namespace LcmsSpectator.ViewModels
             };
 
             this.dialogService.SearchSettingsWindow(searchSettings);
+        }
+
+        /// <summary>
+        /// Implementation for <see cref="ExportResultsCommand" />.
+        /// Exports results of a data set to a file.
+        /// </summary>
+        private void ExportResultsImplementation()
+        {
+            var exportDatasetViewModel = new ExportDatasetViewModel(this.dialogService, this.DataSets);
+
+            if (this.dialogService.ExportDatasetWindow(exportDatasetViewModel))
+            {
+                var writer = new IcFileWriter(exportDatasetViewModel.OutputFilePath);
+                writer.Write(exportDatasetViewModel.SelectedDataset.ScanViewModel.Data.Where(prsm => prsm.Sequence.Count > 0));
+            }
         }
 
         /// <summary>

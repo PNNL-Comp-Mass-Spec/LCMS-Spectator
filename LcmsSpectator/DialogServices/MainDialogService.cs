@@ -188,5 +188,17 @@ namespace LcmsSpectator.DialogServices
             searchSettingsViewModel.ReadyToClose += (o, e) => searchSettingsDialog.Close();
             searchSettingsDialog.Show();
         }
+
+        /// <summary>
+        /// Open a window for selecting a dataset to export to file.
+        /// </summary>
+        /// <param name="exportDatasetViewModel">The view model for the dialog.</param>
+        public bool ExportDatasetWindow(ExportDatasetViewModel exportDatasetViewModel)
+        {
+            var exportDatasetDialog = new ExportDatasetWindow { DataContext = exportDatasetViewModel };
+            exportDatasetViewModel.ReadyToClose += (o, e) => exportDatasetDialog.Close();
+            exportDatasetDialog.ShowDialog();
+            return exportDatasetViewModel.Status;
+        }
     }
 }

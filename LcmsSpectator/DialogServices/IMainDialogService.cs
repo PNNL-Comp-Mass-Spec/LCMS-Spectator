@@ -94,5 +94,11 @@ namespace LcmsSpectator.DialogServices
         /// </summary>
         /// <param name="searchSettingsViewModel">The view model for the dialog.</param>
         void SearchSettingsWindow(SearchSettingsViewModel searchSettingsViewModel);
+
+        /// <summary>
+        /// Open a window for selecting a dataset to export to file.
+        /// </summary>
+        /// <param name="exportDatasetViewModel">The view model for the dialog.</param>
+        bool ExportDatasetWindow(ExportDatasetViewModel exportDatasetViewModel);
     }
 }

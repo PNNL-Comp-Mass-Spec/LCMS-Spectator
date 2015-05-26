@@ -139,6 +139,8 @@
                 <ColumnDefinition Width="60" />
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="80" />
             </Grid.ColumnDefinitions>
             <TextBlock Text="Sequence" FontWeight="Bold" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" ToolTip="Sequence"/>
             <TextBox Text="{Binding SequenceText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Grid.Row="0" Name="Sequence"
@@ -168,6 +170,9 @@
             </TextBox>
             <Button Command="{Binding CreatePrSmCommand}" Grid.Row="0" Grid.Column="12" Height="25" VerticalAlignment="Center"
                     ToolTip="Display XIC and spectra for this sequence">View Target</Button>
+
+            <Button Command="{Binding CreateAndAddPrSmCommand}" Grid.Row="0" Grid.Column="14" Height="25" VerticalAlignment="Center"
+                    ToolTip="Display XIC and spectra for this sequence and add it to Scan View List">Add Target</Button>
         </Grid>
         <views:LoadingScreen DataContext="{Binding LoadingScreenViewModel}"
                              Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" />

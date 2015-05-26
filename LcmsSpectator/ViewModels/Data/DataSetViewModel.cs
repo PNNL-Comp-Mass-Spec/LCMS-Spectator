@@ -108,6 +108,9 @@ namespace LcmsSpectator.ViewModels.Data
                 SelectedDataSetViewModel = this
             };
 
+            this.CreateSequenceViewModel.CreateAndAddPrSmCommand.Subscribe(
+                _ => this.ScanViewModel.Data.Add(this.CreateSequenceViewModel.SelectedPrSm));
+
             // Remove filter by raw file name from ScanViewModel filters
             this.ScanViewModel.Filters.Remove(this.ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Raw File Name"));
 

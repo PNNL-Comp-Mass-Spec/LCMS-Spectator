@@ -178,6 +178,10 @@ namespace LcmsSpectatorTests.DialogServices
             throw new NotImplementedException();
         }
 
+        public bool ExportDatasetWindow(ExportDatasetViewModel exportDatasetViewModel)
+        {
+            throw new NotImplementedException();
+        }
 
         public string OpenFolder()
         {

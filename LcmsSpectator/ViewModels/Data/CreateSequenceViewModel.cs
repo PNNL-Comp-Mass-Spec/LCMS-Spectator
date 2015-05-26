@@ -79,6 +79,9 @@ namespace LcmsSpectator.ViewModels.Data
             createPrSmCommand.Subscribe(_ => this.CreatePrSmImplementation());
             this.CreatePrSmCommand = createPrSmCommand;
 
+            this.CreateAndAddPrSmCommand = ReactiveCommand.Create();
+            this.CreateAndAddPrSmCommand.Subscribe(_ => this.CreatePrSmImplementation());
+
             var insertStaticModificationsCommand = ReactiveCommand.Create();
             insertStaticModificationsCommand.Subscribe(_ => this.InsertStaticModifications());
             this.InsertStaticModificationsCommand = insertStaticModificationsCommand;
@@ -119,6 +122,13 @@ namespace LcmsSpectator.ViewModels.Data
         /// selected sequence, charge, scan number, and data set.
         /// </summary>
         public IReactiveCommand CreatePrSmCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that when executed creates a new protein-spectrum match from the 
+        /// selected sequence, charge, scan number, and data set. It also signals the parent
+        /// data set that it should be added to the Scan View.
+        /// </summary>
+        public ReactiveCommand<object> CreateAndAddPrSmCommand { get; private set; } 
 
         /// <summary>
         /// Gets a command that when executed inserts the modifications into the sequence
