@@ -12,7 +12,6 @@ namespace LcmsSpectator.Models
 {
     using System;
     using System.Collections.Generic;
-    using System.Reactive.Linq;
     using System.Text;
     using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.Data.Composition;
@@ -56,11 +55,6 @@ namespace LcmsSpectator.Models
         /// The string representing the sequence of the identification.
         /// </summary>
         private string sequenceText;
-
-        /// <summary>
-        /// Most recent valid sequence.
-        /// </summary>
-        private string validSequenceText;
 
         /// <summary>
         /// The name of identified protein.
@@ -130,22 +124,6 @@ namespace LcmsSpectator.Models
             this.Mass = double.NaN;
             this.PrecursorMz = double.NaN;
             this.QValue = -1.0;
-
-            this.WhenAnyValue(x => x.SequenceText)
-                .Where(sequenceText => sequenceText.Length > 0)
-                .Select(this.ParseSequence)
-                .Where(sequence => sequence != null)
-                .Subscribe(sequence => this.Sequence = sequence);
-
-            this.WhenAnyValue(x => x.Sequence)
-                .Where(sequence => sequence.Count > 0)
-                .Select(sequence => sequence.Mass + Composition.H2O.Mass)
-                .Subscribe(mass => this.Mass = mass);
-
-            this.WhenAnyValue(x => x.Sequence, x => x.Charge)
-                .Where(x => x.Item1.Count > 0 && x.Item2 != 0)
-                .Select(x => new Ion(x.Item1.Composition + Composition.H2O, x.Item2))
-                .Subscribe(ion => this.PrecursorMz = ion.GetMostAbundantIsotopeMz());
         }
 
         #region Public Properties
@@ -260,8 +238,25 @@ namespace LcmsSpectator.Models
         /// </summary>
         public string SequenceText
         {
-            get { return this.sequenceText; }
-            set { this.RaiseAndSetIfChanged(ref this.sequenceText, value); }
+            get
+            {
+                return this.sequenceText;
+            }
+            
+            set
+            {
+                if (this.sequenceText != value)
+                {
+                    var parsedSequence = this.ParseSequence(value);
+                    if (parsedSequence != null)
+                    {
+                        this.sequenceText = value;
+                        this.Sequence = parsedSequence;
+
+                        this.RaisePropertyChanged();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -350,20 +345,18 @@ namespace LcmsSpectator.Models
 
             set
             {
-                ////if (value != null && !value.Equals(this.sequence))
-                ////{
-                ////    this.sequence = value;
-                ////    if (this.sequence.Count > 0)
-                ////    {
-                ////        this.Mass = this.sequence.Mass + Composition.H2O.Mass;
-                ////        var ion = new Ion(this.sequence.Composition + Composition.H2O, this.Charge);
-                ////        this.PrecursorMz = ion.GetMostAbundantIsotopeMz();
-                ////    }
-                ////}
+                if (value != null && !value.Equals(this.sequence))
+                {
+                    this.sequence = value;
+                    if (this.sequence.Count > 0)
+                    {
+                        this.Mass = this.sequence.Mass + Composition.H2O.Mass;
+                        var ion = new Ion(this.sequence.Composition + Composition.H2O, this.Charge);
+                        this.PrecursorMz = ion.GetMostAbundantIsotopeMz();
+                    }
+                }
 
-                ////this.RaisePropertyChanged();
-
-                this.RaiseAndSetIfChanged(ref this.sequence, value);
+                this.RaisePropertyChanged();
             }
         }
 
@@ -450,12 +443,10 @@ namespace LcmsSpectator.Models
             try
             {
                 var seq = this.sequenceReader.Read(sequenceStr);
-                this.validSequenceText = sequenceStr;
                 return seq;
             }
             catch (Exception)
             {
-                this.SequenceText = this.validSequenceText;
                 return null;
             }
         }
