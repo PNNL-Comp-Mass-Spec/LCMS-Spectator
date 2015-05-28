@@ -15,7 +15,11 @@
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
     <TabControl SelectedIndex="{Binding TabIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-        <TabItem Name="DatasetInfoExisting">
+            <TabControl.InputBindings>
+                <KeyBinding Command="{Binding PrevTabCommand}" Key="Left" />
+                <KeyBinding Command="{Binding NextTabCommand}" Key="Right" />
+            </TabControl.InputBindings>
+            <TabItem Name="DatasetInfoExisting">
             <TabItem.Header>
                 Dataset Info
             </TabItem.Header>
