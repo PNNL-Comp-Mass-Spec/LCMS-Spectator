@@ -73,6 +73,7 @@ namespace LcmsSpectator.Views.Plots
         {
             this.FragmentPlotRow.Height = new GridLength(60, GridUnitType.Star);
             this.FragmentTitleRow.Height = new GridLength(4, GridUnitType.Star);
+            this.FragmentIonXic.Visibility = Visibility.Visible;
             this.FragmentIonXic.UpdateLayout();
             this.PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
             if (this.ShowHeavy.IsChecked == true)
@@ -95,6 +96,11 @@ namespace LcmsSpectator.Views.Plots
             this.FragmentTitleRow.Height = new GridLength(0, GridUnitType.Pixel);
             this.PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
             this.FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
+
+            this.FragmentIonXic.Visibility = Visibility.Collapsed;
+            this.FragmentIonXic.UpdateLayout();
+            this.HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
+            this.HeavyFragmentIonXic.UpdateLayout();
         }
 
         /// <summary>
@@ -107,9 +113,11 @@ namespace LcmsSpectator.Views.Plots
         {
             this.LightColumn.Width = new GridLength(50, GridUnitType.Star);
             this.HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
-            this.HeavyPrecursorIonXic.UpdateLayout();
+            this.PrecursorIonXic.Visibility = Visibility.Visible;
+            this.PrecursorIonXic.UpdateLayout();
             if (this.ShowFragment.IsChecked == true)
             {
+                this.HeavyFragmentIonXic.Visibility = Visibility.Visible;
                 this.HeavyFragmentIonXic.UpdateLayout();
                 this.FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
             }
@@ -126,6 +134,9 @@ namespace LcmsSpectator.Views.Plots
             this.LightColumn.Width = new GridLength(100, GridUnitType.Star);
             this.HeavyColumn.Width = new GridLength(0, GridUnitType.Star);
             this.FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
+
+            this.HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
+            this.HeavyFragmentIonXic.UpdateLayout();
         }
     }
 }
