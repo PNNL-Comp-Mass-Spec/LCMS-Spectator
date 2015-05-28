@@ -78,7 +78,7 @@
 
             using (var writer = new StreamWriter(filePath))
             {
-                foreach (var entry in entries)
+                foreach (var entry in entries.Where(entry => entry != null))
                 {
                     writer.Write(entry.FormattedEntry);   
                 }

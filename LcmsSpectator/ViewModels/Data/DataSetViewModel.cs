@@ -460,7 +460,8 @@ namespace LcmsSpectator.ViewModels.Data
                 SpectrumFilePath = this.rawFilePath,
                 SelectedSearchMode = 0,
                 FastaDbFilePath = this.FastaDbFilePath,
-                OutputFilePath = string.Format("{0}\\{1}", Directory.GetCurrentDirectory(), this.Title)
+                OutputFilePath = string.Format("{0}\\{1}", Directory.GetCurrentDirectory(), this.Title),
+                SelectedSequence = this.SelectedPrSm.Sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue)
             };
 
             // Set feature file path.

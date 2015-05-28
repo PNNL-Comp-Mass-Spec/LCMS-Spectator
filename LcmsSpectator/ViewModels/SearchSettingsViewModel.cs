@@ -18,6 +18,8 @@ namespace LcmsSpectator.ViewModels
     using System.Reactive.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Windows.Documents;
+
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
@@ -36,6 +38,11 @@ namespace LcmsSpectator.ViewModels
     public class SearchSettingsViewModel : ReactiveObject
     {
         /// <summary>
+        /// The maximum possible tab index for the tab control.
+        /// </summary>
+        private const int MaxTabIndex = 3;
+
+        /// <summary>
         /// The descriptions for the three search modes.
         /// </summary>
         private readonly string[] searchModeDescriptions =
@@ -48,6 +55,11 @@ namespace LcmsSpectator.ViewModels
         /// Dialog service for opening dialogs from view model.
         /// </summary>
         private readonly IMainDialogService dialogService;
+
+        /// <summary>
+        /// The tab index for the tab control.
+        /// </summary>
+        private int tabIndex;
 
         /// <summary>
         /// The path for the spectrum file.
@@ -170,6 +182,38 @@ namespace LcmsSpectator.ViewModels
         private bool modificationsUpdated;
 
         /// <summary>
+        /// The search sequence.
+        /// </summary>
+        private string selectedSequence;
+
+        /// <summary>
+        /// A list of proteins containing the selected search sequence.
+        /// </summary>
+        private FastaEntry[] sequenceProteins;
+
+        /// <summary>
+        /// A value indicating whether the NTerminus of this sequence should be fixed,
+        /// or if the suffix from the FASTA entry should be used.
+        /// </summary>
+        private bool fixedNTerm;
+
+        /// <summary>
+        /// A value indicating whether the CTerminus of this sequence should be fixed,
+        /// or if the suffix from the FASTA entry should be used.
+        /// </summary>
+        private bool fixedCTerm;
+
+        /// <summary>
+        /// A value indicating whether this search should use a FASTA entry.
+        /// </summary>
+        private bool fromFastaEntry;
+
+        /// <summary>
+        /// A value indicating whether this search should use a specific search sequence.
+        /// </summary>
+        private bool fromSequence;
+
+        /// <summary>
         /// A task for running an MSPathFinder database search;
         /// </summary>
         private Task runSearchTask;
@@ -189,7 +233,12 @@ namespace LcmsSpectator.ViewModels
             this.LoadingScreenViewModel = new LoadingScreenViewModel();
             this.SearchModes = new[] { 0, 1, 2 };
             this.ToleranceUnits = new[] { ToleranceUnit.Ppm, ToleranceUnit.Th };
+            this.SelectedSequence = string.Empty;
             this.FastaEntries = new ReactiveList<FastaEntry>();
+            this.SequenceProteins = new FastaEntry[0];
+
+            this.FromFastaEntry = true;
+            this.FromSequence = false;
 
             // Browse Spectrum Files Command
             var browseRawFilesCommand = ReactiveCommand.Create();
@@ -231,6 +280,16 @@ namespace LcmsSpectator.ViewModels
             addModificationCommand.Subscribe(_ => this.AddModificationImplementation());
             this.AddModificationCommand = addModificationCommand;
 
+            // Prev tab command
+            var prevTabCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex > 0));
+            prevTabCommand.Subscribe(_ => this.TabIndex--);
+            this.PrevTabCommand = prevTabCommand;
+
+            // Next tab command
+            var nextTabCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex < MaxTabIndex));
+            nextTabCommand.Subscribe(_ => this.TabIndex++);
+            this.NextTabCommand = nextTabCommand;
+
             // Run Command - Disabled when there is no SpectrumFilePath, FastaDbFilePath, or OutputFilePath selected
             this.RunCommand = ReactiveCommand.CreateAsyncTask(
                                                               this.WhenAnyValue(
@@ -265,6 +324,8 @@ namespace LcmsSpectator.ViewModels
             this.minScanNumber = 0;
             this.maxScanNumber = 0;
             this.maxDynamicModificationsPerSequence = 0;
+            this.FixedNTerm = true;
+            this.FixedCTerm = true;
 
             // When search mode is selected, display correct search mode description
             this.WhenAnyValue(x => x.SelectedSearchMode)
@@ -280,6 +341,10 @@ namespace LcmsSpectator.ViewModels
             this.SearchModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
 
             this.WhenAnyValue(x => x.FastaDbFilePath).Subscribe(_ => this.LoadFastaFile());
+
+            this.WhenAnyValue(x => x.FastaEntries.Count, x => x.SelectedSequence)
+                .Select(x => this.FastaEntries.Where(entry => entry.ProteinSequenceText.Contains(x.Item2)).ToArray())
+                .Subscribe(entries => this.SequenceProteins = entries);
 
             // Remove search modification when its Remove property is set to true.
             this.SearchModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
@@ -303,6 +368,16 @@ namespace LcmsSpectator.ViewModels
         /// Gets a view model for displaying animated loading screen text.
         /// </summary>
         public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
+
+        /// <summary>
+        /// Gets a command that decrements the tab index.
+        /// </summary>
+        public IReactiveCommand PrevTabCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that increments the tab index.
+        /// </summary>
+        public IReactiveCommand NextTabCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
@@ -353,6 +428,15 @@ namespace LcmsSpectator.ViewModels
         /// Gets a command that closes the window.
         /// </summary>
         public IReactiveCommand CancelCommand { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the tab index for the tab control.
+        /// </summary>
+        public int TabIndex
+        {
+            get { return this.tabIndex; }
+            set { this.RaiseAndSetIfChanged(ref this.tabIndex, value); }
+        }
 
         /// <summary>
         /// Gets or sets the path for the spectrum file.
@@ -579,6 +663,62 @@ namespace LcmsSpectator.ViewModels
         {
             get { return this.modificationsUpdated; }
             set { this.RaiseAndSetIfChanged(ref this.modificationsUpdated, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the search sequence.
+        /// </summary>
+        public string SelectedSequence
+        {
+            get { return this.selectedSequence; }
+            set { this.RaiseAndSetIfChanged(ref this.selectedSequence, value); }
+        }
+
+        /// <summary>
+        /// Gets a list of proteins containing the selected search sequence.
+        /// </summary>
+        public FastaEntry[] SequenceProteins
+        {
+            get { return this.sequenceProteins; }
+            private set { this.RaiseAndSetIfChanged(ref this.sequenceProteins, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the NTerminus of this sequence should be fixed,
+        /// or if the suffix from the FASTA entry should be used.
+        /// </summary>
+        public bool FixedNTerm
+        {
+            get { return this.fixedNTerm; }
+            set { this.RaiseAndSetIfChanged(ref this.fixedNTerm, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the CTerminus of this sequence should be fixed,
+        /// or if the suffix from the FASTA entry should be used.
+        /// </summary>
+        public bool FixedCTerm
+        {
+            get { return this.fixedCTerm; }
+            set { this.RaiseAndSetIfChanged(ref this.fixedCTerm, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this search should use a FASTA entry.
+        /// </summary>
+        public bool FromFastaEntry
+        {
+            get { return this.fromFastaEntry; }
+            set { this.RaiseAndSetIfChanged(ref this.fromFastaEntry, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this search should use a specific search sequence.
+        /// </summary>
+        public bool FromSequence
+        {
+            get { return this.fromSequence; }
+            set { this.RaiseAndSetIfChanged(ref this.fromSequence, value); }
         }
 
         /// <summary>Get a launcher for TopDown MSPathFinder searches.</summary>
@@ -831,8 +971,63 @@ namespace LcmsSpectator.ViewModels
         {
             var fastaFileName = Path.GetFileNameWithoutExtension(this.FastaDbFilePath);
             var filePath = string.Format("{0}\\{1}_truncated.fasta", this.OutputFilePath, fastaFileName);
+
+            IEnumerable<FastaEntry> entries = new FastaEntry[0];
+
+            if (this.FromFastaEntry)
+            {
+                entries = this.FastaEntries.Where(entry => entry.Selected);
+            }
+            else if (this.FromSequence)
+            {
+                var selectedEntries = this.SequenceProteins.Where(entry => entry.Selected).ToArray();
+                if (this.FixedNTerm && this.FixedCTerm)
+                {   // Just use the selected sequence for every protein.
+                    entries = selectedEntries.Select(
+                                entry =>
+                                new FastaEntry
+                                    {
+                                        ProteinName = entry.ProteinName,
+                                        ProteinDescription = entry.ProteinDescription,
+                                        ProteinSequenceText = this.SelectedSequence,
+                                        Selected = true
+                                    });
+                    entries = new List<FastaEntry> { entries.FirstOrDefault() };
+                }
+                else if (this.FixedNTerm)
+                {
+                    entries = from entry in selectedEntries 
+                              let startIndex = entry.ProteinSequenceText.IndexOf(this.SelectedSequence, StringComparison.Ordinal) 
+                              where startIndex > -1 
+                              let sequence = entry.ProteinSequenceText.Substring(startIndex) 
+                              select new FastaEntry
+                                  {
+                                      ProteinName = entry.ProteinName,
+                                      ProteinDescription = entry.ProteinDescription,
+                                      ProteinSequenceText = sequence
+                                  };
+                }
+                else if (this.FixedCTerm)
+                {
+                    entries = from entry in selectedEntries
+                              let startIndex = entry.ProteinSequenceText.IndexOf(this.SelectedSequence, StringComparison.Ordinal)
+                              where startIndex > -1
+                              let sequence = entry.ProteinSequenceText.Substring(0, startIndex + this.SelectedSequence.Length)
+                              select new FastaEntry
+                              {
+                                  ProteinName = entry.ProteinName,
+                                  ProteinDescription = entry.ProteinDescription,
+                                  ProteinSequenceText = sequence
+                              };
+                }
+                else
+                {
+                    entries = selectedEntries;
+                }
+            }
+
             Console.WriteLine(@"Creating truncated fasta file at: {0}", filePath);
-            FastaReaderWriter.Write(this.FastaEntries.Where(entry => entry.Selected), filePath);
+            FastaReaderWriter.Write(entries, filePath);
             return filePath;
         }
     }
