@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:LcmsSpectator.Views"
-        Title="Search Settings" Height="525" Width="500" ResizeMode="NoResize">
+        Title="Search Settings" Height="550" Width="500" ResizeMode="NoResize">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -62,7 +62,6 @@
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
                         <RowDefinition Height="60" />
                         <RowDefinition Height="60" />
                         <RowDefinition Height="30" />
@@ -74,65 +73,60 @@
                         <RowDefinition Height="30" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" Height="25">Search Mode</TextBlock>
-                    <ComboBox Grid.Row="0" Grid.Column="1" Height="25" HorizontalAlignment="Left" Width="50" 
-                          ItemsSource="{Binding SearchModes}" SelectedItem="{Binding SelectedSearchMode, Mode=TwoWay}" />
-                    <TextBlock Grid.Row="0" Grid.Column="1" Height="25" HorizontalAlignment="Right" Width="220" Text="{Binding SearchModeDescription}" />
-
-                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" Height="25">Precursor Ion Tolerance</TextBlock>
-                    <TextBox Grid.Row="1" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left" Text="{Binding PrecursorIonToleranceValue}"
+                    <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" Height="25">Precursor Ion Tolerance</TextBlock>
+                    <TextBox Grid.Row="0" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left" Text="{Binding PrecursorIonToleranceValue}"
                              TextAlignment="Right" />
-                    <ComboBox Grid.Row="1" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right" 
+                    <ComboBox Grid.Row="0" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right" 
                               ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding PrecursorIonToleranceUnit}" IsEnabled="False" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" Height="25">Product Ion Tolerance</TextBlock>
-                    <TextBox Grid.Row="2" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left" Text="{Binding ProductIonToleranceValue}"
+                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" Height="25">Product Ion Tolerance</TextBlock>
+                    <TextBox Grid.Row="1" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left" Text="{Binding ProductIonToleranceValue}"
                              TextAlignment="Right" />
-                    <ComboBox Grid.Row="2" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right"
+                    <ComboBox Grid.Row="1" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right"
                               ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding ProductIonToleranceUnit}" IsEnabled="False"/>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Length</TextBlock>
-                    <TextBox Grid.Row="3" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Length</TextBlock>
+                    <TextBox Grid.Row="2" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MinSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Length</TextBlock>
-                    <TextBox Grid.Row="4" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Length</TextBlock>
+                    <TextBox Grid.Row="3" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MaxSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Min Precursor Ion Charge</TextBlock>
-                    <TextBox Grid.Row="5" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Min Precursor Ion Charge</TextBlock>
+                    <TextBox Grid.Row="4" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MinPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Max Precursor Ion Charge</TextBlock>
-                    <TextBox Grid.Row="6" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Max Precursor Ion Charge</TextBlock>
+                    <TextBox Grid.Row="5" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MaxPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="7" Grid.Column="0" FontWeight="Bold" Height="25">Min Product Ion Charge</TextBlock>
-                    <TextBox Grid.Row="7" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" Height="25">Min Product Ion Charge</TextBlock>
+                    <TextBox Grid.Row="6" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MinProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="8" Grid.Column="0" FontWeight="Bold" Height="25">Max Product Ion Charge</TextBlock>
-                    <TextBox Grid.Row="8" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="7" Grid.Column="0" FontWeight="Bold" Height="25">Max Product Ion Charge</TextBlock>
+                    <TextBox Grid.Row="7" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MaxProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="9" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Mass</TextBlock>
-                    <TextBox Grid.Row="9" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="8" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Mass</TextBlock>
+                    <TextBox Grid.Row="8" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MinSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="10" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Mass</TextBlock>
-                    <TextBox Grid.Row="10" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="9" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Mass</TextBlock>
+                    <TextBox Grid.Row="9" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MaxSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="11" Grid.Column="0" FontWeight="Bold" Height="25">Min Feature Probability</TextBlock>
-                    <TextBox Grid.Row="11" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="10" Grid.Column="0" FontWeight="Bold" Height="25">Min Feature Probability</TextBlock>
+                    <TextBox Grid.Row="10" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MinFeatureProbability, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="12" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="Wrap">Max Dynamic Modifications Per Sequence</TextBlock>
-                    <TextBox Grid.Row="12" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <TextBlock Grid.Row="11" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="Wrap">Max Dynamic Modifications Per Sequence</TextBlock>
+                    <TextBox Grid.Row="11" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MaxDynamicModificationsPerSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBlock Grid.Row="13" Grid.Column="0" FontWeight="Bold" Height="25">MS/MS Scan Range</TextBlock>
-                    <Grid Grid.Row="13" Grid.Column="1" Height="25">
+                    <TextBlock Grid.Row="12" Grid.Column="0" FontWeight="Bold" Height="25">MS/MS Scan Range</TextBlock>
+                    <Grid Grid.Row="12" Grid.Column="1" Height="25">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="10" />
@@ -150,8 +144,26 @@
         </TabItem>
         
         <TabItem Header="Sequence">
-                <StackPanel Margin="10">
-                    <RadioButton IsChecked="{Binding FromFastaEntry, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <Grid Margin="10">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
+                        <ColumnDefinition Width="33*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" Height="25" Margin="20,0,0,0">Search Mode</TextBlock>
+                    <ComboBox Grid.Row="0" Grid.Column="1" Height="25" Width="60" HorizontalAlignment="Left"
+                          ItemsSource="{Binding SearchModes}" SelectedItem="{Binding SelectedSearchMode, Mode=TwoWay}" />
+                    <TextBlock Grid.Row="0" Grid.Column="2" Height="25" Text="{Binding SearchModeDescription}" />
+
+                    <RadioButton Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" IsChecked="{Binding FromFastaEntry, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <GroupBox IsEnabled="{Binding FromFastaEntry}">
                             <GroupBox.Header>
                                 <TextBlock FontWeight="Bold">By FASTA Entry</TextBlock>
@@ -182,9 +194,7 @@
                         </GroupBox>
                     </RadioButton>
 
-                    <Separator Margin="0,7,0,7" />
-
-                    <RadioButton IsChecked="{Binding FromSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <RadioButton Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"  IsChecked="{Binding FromSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <GroupBox IsEnabled="{Binding FromSequence, UpdateSourceTrigger=PropertyChanged}">
                             <GroupBox.Header>
                                 <TextBlock FontWeight="Bold">By Sequence</TextBlock>
@@ -217,8 +227,7 @@
                             </Grid>
                         </GroupBox>
                     </RadioButton>
-
-                </StackPanel>
+                </Grid>
         </TabItem>
         
         <TabItem>
@@ -284,8 +293,6 @@
                 </DataGrid>
             </Grid>
         </TabItem>
-        
-        <!-- <views:LoadingScreen Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" DataContext="{Binding LoadingScreenViewModel}" /> -->
     </TabControl>
         
     <views:LoadingScreen Grid.Row="0" Grid.Column="0" DataContext="{Binding LoadingScreenViewModel}" />

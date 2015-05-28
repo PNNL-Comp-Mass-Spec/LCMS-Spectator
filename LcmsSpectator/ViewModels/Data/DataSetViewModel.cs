@@ -458,7 +458,7 @@ namespace LcmsSpectator.ViewModels.Data
             var searchSettings = new SearchSettingsViewModel(this.dialogService)
             {
                 SpectrumFilePath = this.rawFilePath,
-                SelectedSearchMode = 0,
+                SelectedSearchMode = 1,
                 FastaDbFilePath = this.FastaDbFilePath,
                 OutputFilePath = string.Format("{0}\\{1}", Directory.GetCurrentDirectory(), this.Title),
                 SelectedSequence = this.SelectedPrSm.Sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue)

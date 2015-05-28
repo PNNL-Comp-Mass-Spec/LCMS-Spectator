@@ -307,7 +307,7 @@ namespace LcmsSpectator.ViewModels
             this.CancelCommand = cancelCommand;
 
             // Default values
-            this.SelectedSearchMode = 2;
+            this.SelectedSearchMode = 1;
             this.MinSequenceLength = 21;
             this.MaxSequenceLength = 300;
             this.MinPrecursorIonCharge = 2;
