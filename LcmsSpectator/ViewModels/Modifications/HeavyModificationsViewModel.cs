@@ -10,11 +10,14 @@
 
 namespace LcmsSpectator.ViewModels.Modifications
 {
-    using System.Collections;
+    using System;
+    using System.Linq;
+    using System.Reactive.Linq;
 
     using InformedProteomics.Backend.Data.Sequence;
 
     using LcmsSpectator.Config;
+    using LcmsSpectator.DialogServices;
 
     using ReactiveUI;
 
@@ -26,40 +29,72 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Initializes a new instance of the <see cref="HeavyModificationsViewModel"/> class.
         /// </summary>
-        public HeavyModificationsViewModel()
+        /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
+        public HeavyModificationsViewModel(IDialogService dialogService)
         {
-            this.Modifications = new ReactiveList<Modification>
-            {
-                Modification.LysToHeavyLys,
-                Modification.ArgToHeavyArg
-            };
+            this.LightModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
+            this.HeavyModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
 
-            this.SelectedLightModifications = IcParameters.Instance.LightModifications;
-            this.SelectedHeavyModifications = IcParameters.Instance.HeavyModifications;
+            this.LightModifications.AddRange(IcParameters.Instance.LightModifications.Select(mod => new SearchModificationViewModel(dialogService)
+            {
+                SelectedResidue = mod.TargetResidue,
+                SelectedModification = mod.Modification,
+                SelectedSequenceLocation = mod.Location,
+                FixedSelection = "Fixed"
+            }));
+
+            this.HeavyModifications.AddRange(IcParameters.Instance.HeavyModifications.Select(mod => new SearchModificationViewModel(dialogService)
+            {
+                SelectedResidue = mod.TargetResidue,
+                SelectedModification = mod.Modification,
+                SelectedSequenceLocation = mod.Location,
+                FixedSelection = "Fixed"
+            }));
+
+            var addLightModificationCommand = ReactiveCommand.Create();
+            addLightModificationCommand.Subscribe(_ => this.LightModifications.Add(new SearchModificationViewModel(dialogService)));
+            this.AddLightModificationCommand = addLightModificationCommand;
+
+            var addHeavyModificationCommand = ReactiveCommand.Create();
+            addHeavyModificationCommand.Subscribe(_ => this.HeavyModifications.Add(new SearchModificationViewModel(dialogService)));
+            this.AddHeavyModificationCommand = addHeavyModificationCommand;
+
+            this.LightModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
+                .Select(x => x.Sender).Where(sender => sender.Remove)
+                .Subscribe(searchMod => this.LightModifications.Remove(searchMod));
+
+            this.HeavyModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
+                .Select(x => x.Sender).Where(sender => sender.Remove)
+                .Subscribe(searchMod => this.HeavyModifications.Remove(searchMod));
         }
 
         /// <summary>
-        /// Gets a list of possible heavy modifications.
+        /// Gets a list of light modifications.
         /// </summary>
-        public ReactiveList<Modification> Modifications { get; private set; }
+        public ReactiveList<SearchModificationViewModel> LightModifications { get; private set; }
 
         /// <summary>
-        /// Gets or sets the list of heavy modifications that are selected for light peptides.
+        /// Gets a list of heavy modifications.
         /// </summary>
-        public IList SelectedLightModifications { get; set; }
+        public ReactiveList<SearchModificationViewModel> HeavyModifications { get; private set; }
 
         /// <summary>
-        /// Gets or sets the list of heavy modifications that are selected for heavy peptides.
+        /// Gets a command that adds a new modification to the light modifications list.
         /// </summary>
-        public IList SelectedHeavyModifications { get; set; }
+        public IReactiveCommand AddLightModificationCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that adds a new modification to the heavy modifications list.
+        /// </summary>
+        public IReactiveCommand AddHeavyModificationCommand { get; private set; }
 
         /// <summary>
         /// Save the selected heavy and light modifications to the settings.
         /// </summary>
         public void Save()
         {
-            ////IcParameters.Instance.LightModifications = new ReactiveList<ModificationViewModel>(SelectedLightModifications.Cast<ModificationViewModel>().ToList());
-            ////IcParameters.Instance.HeavyModifications = new ReactiveList<ModificationViewModel>(SelectedHeavyModifications.Cast<ModificationViewModel>().ToList());
+            IcParameters.Instance.LightModifications = new ReactiveList<SearchModification>(this.LightModifications.Select(searchModVm => searchModVm.SearchModification));
+            IcParameters.Instance.HeavyModifications = new ReactiveList<SearchModification>(this.HeavyModifications.Select(searchModVm => searchModVm.SearchModification));
         }
     }
 }

@@ -80,7 +80,7 @@ namespace LcmsSpectator.ViewModels
             cancelCommand.Subscribe(_ => this.CancelImplementation());
             this.CancelCommand = cancelCommand;
 
-            HeavyModificationsViewModel = new HeavyModificationsViewModel();
+            HeavyModificationsViewModel = new HeavyModificationsViewModel(dialogService);
 
             this.Status = false;
         }

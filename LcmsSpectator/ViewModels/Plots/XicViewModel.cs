@@ -339,7 +339,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void OpenHeavyModificationsImplentation()
         {
-            var heavyModificationsWindowVm = new HeavyModificationsWindowViewModel();
+            var heavyModificationsWindowVm = new HeavyModificationsWindowViewModel(this.dialogService);
             this.dialogService.OpenHeavyModifications(heavyModificationsWindowVm);
         }
 

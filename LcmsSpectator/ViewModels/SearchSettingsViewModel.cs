@@ -18,8 +18,6 @@ namespace LcmsSpectator.ViewModels
     using System.Reactive.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Windows.Documents;
-
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;

@@ -3,30 +3,103 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:controls="clr-namespace:LcmsSpectator.Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="500">
+             d:DesignHeight="300" d:DesignWidth="600">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20" />
+            <RowDefinition Height="30" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30" />
             <ColumnDefinition Width="50*" />
             <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="25" />
             <ColumnDefinition Width="50*" />
         </Grid.ColumnDefinitions>
-        
-        <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" TextAlignment="Center">Light</TextBlock>
-        <TextBlock Grid.Row="0" Grid.Column="2" FontWeight="Bold" TextAlignment="Center">Heavy</TextBlock>
 
-        <DataGrid Grid.Column="0" Grid.Row="1" SelectionMode="Extended" IsReadOnly="False" CanUserAddRows="False" ItemsSource="{Binding LightModifications}">
+        <Button Grid.Row="0" Grid.Column="0" Width="25" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="13" FontWeight="Bold" 
+                        Command="{Binding AddLightModificationCommand}" Height="25" ToolTip="Add Light Modification">+</Button>
+        <TextBlock Grid.Row="0" Grid.Column="1" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center">Light</TextBlock>
+        <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" AutoGenerateColumns="False"
+                          RowHeaderWidth="0" CanUserAddRows="False" ItemsSource="{Binding LightModifications}">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="25">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding RemoveModificationCommand}" FontWeight="Bold" ToolTip="Remove Modification">-</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Residue" Width="12*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding Path=AminoAcidResidues}" SelectedItem="{Binding Path=SelectedResidue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Modification" Width="25*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding Modifications}" SelectedItem="{Binding SelectedModification, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Location" Width="25*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Button Grid.Row="0" Grid.Column="3" Width="25" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="13" FontWeight="Bold" 
+                        Command="{Binding AddHeavyModificationCommand}" Height="25" ToolTip="Add Heavy Modification">+</Button>
+        <TextBlock Grid.Row="0" Grid.Column="4" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Center">Heavy</TextBlock>
+        <DataGrid  Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2"  AutoGenerateColumns="False"
+                          RowHeaderWidth="0" CanUserAddRows="False" ItemsSource="{Binding HeavyModifications}">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Width="25">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding RemoveModificationCommand}" FontWeight="Bold" ToolTip="Remove Modification">-</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Residue" Width="12*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding Path=AminoAcidResidues}" SelectedItem="{Binding Path=SelectedResidue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Modification" Width="25*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding Modifications}" SelectedItem="{Binding SelectedModification, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Location" Width="25*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!--<DataGrid Grid.Column="0" Grid.Row="1" SelectionMode="Extended" IsReadOnly="False" CanUserAddRows="False" ItemsSource="{Binding LightModifications}">
             <DataGridCheckBoxColumn Width="5" Binding="{Binding Selected}" IsReadOnly="False" />
             <DataGridTextColumn Header="Light" Width="5*" Binding="{Binding Modification}" IsReadOnly="True" />
         </DataGrid>
+        
         <DataGrid Grid.Column="2" Grid.Row="1" SelectionMode="Extended" IsReadOnly="False" CanUserAddRows="False" ItemsSource="{Binding HeavyModifications}">
             <DataGridCheckBoxColumn Width="5" Binding="{Binding Selected}" IsReadOnly="False" />
             <DataGridTextColumn Header="Light" Width="5*" Binding="{Binding Modification}" IsReadOnly="True" />
-        </DataGrid>
+        </DataGrid>-->
     </Grid>
 </UserControl>

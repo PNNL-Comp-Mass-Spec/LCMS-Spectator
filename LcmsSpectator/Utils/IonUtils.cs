@@ -16,6 +16,7 @@ namespace LcmsSpectator.Utils
     using System.Linq;
     using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.Data.Composition;
+    using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Utils;
@@ -348,30 +349,37 @@ namespace LcmsSpectator.Utils
         /// <param name="sequence">The sequence to convert to heavy sequence.</param>
         /// <param name="mods">The heavy peptide modifications.</param>
         /// <returns>Sequence with heavy peptide modifications.</returns>
-        public static Sequence GetHeavySequence(Sequence sequence, ReactiveList<ModificationViewModel> mods)
+        public static Sequence GetHeavySequence(Sequence sequence, ReactiveList<SearchModification> mods)
         {
+            sequence = new Sequence(sequence);
             if (sequence.Count == 0)
             {
                 return sequence;
             }
 
-            var lastAa = sequence[sequence.Count - 1];
-
             foreach (var mod in mods)
             {
-                if (mod.Modification.Equals(Modification.ArgToHeavyArg) && lastAa.Residue == 'R')
+                if (mod.Location == SequenceLocation.PeptideNTerm || mod.Location == SequenceLocation.ProteinNTerm)
                 {
-                    lastAa = new ModifiedAminoAcid(lastAa, mod.Modification);
+                    sequence[0] = new ModifiedAminoAcid(sequence[0], mod.Modification);
                 }
-                else if (mod.Modification.Equals(Modification.LysToHeavyLys) && lastAa.Residue == 'K')
+                else if (mod.Location == SequenceLocation.PeptideCTerm || mod.Location == SequenceLocation.ProteinCTerm)
                 {
-                    lastAa = new ModifiedAminoAcid(lastAa, mod.Modification);
+                    sequence[sequence.Count - 1] = new ModifiedAminoAcid(sequence[sequence.Count - 1], mod.Modification);
+                }
+                else
+                {
+                    for (int i = 0; i < sequence.Count; i++)
+                    {
+                        if (sequence[i].Residue == mod.TargetResidue)
+                        {
+                            sequence[i] = new ModifiedAminoAcid(sequence[i], mod.Modification);
+                        }
+                    }
                 }
             }
 
-            var tempSequence = sequence.ToList();
-            tempSequence[tempSequence.Count - 1] = lastAa;
-            return new Sequence(tempSequence);   
+            return sequence;
         }
 
         /// <summary>

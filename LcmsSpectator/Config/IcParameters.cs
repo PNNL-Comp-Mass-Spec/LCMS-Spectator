@@ -20,6 +20,7 @@ namespace LcmsSpectator.Config
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Utils;
 
+    using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels.Modifications;
 
@@ -94,12 +95,12 @@ namespace LcmsSpectator.Config
         /// <summary>
         /// The modifications that are applied to the light sequence when ShowHeavy is selected.
         /// </summary>
-        private ReactiveList<ModificationViewModel> lightModifications;
+        private ReactiveList<SearchModification> lightModifications;
 
         /// <summary>
         /// The modifications that are applied to the heavy sequence when ShowHeavy is selected.
         /// </summary>
-        private ReactiveList<ModificationViewModel> heavyModifications;
+        private ReactiveList<SearchModification> heavyModifications;
 
         /// <summary>
         /// The factory for generating flyweight <see cref="IonType" />s.
@@ -146,15 +147,12 @@ namespace LcmsSpectator.Config
             {
                 new SearchModification(Modification.Carbamidomethylation, 'C', SequenceLocation.Everywhere, true)
             };
-            this.LightModifications = new ReactiveList<ModificationViewModel>
+
+            this.LightModifications = new ReactiveList<SearchModification>();
+            this.HeavyModifications = new ReactiveList<SearchModification>
             {
-                new ModificationViewModel(Modification.LysToHeavyLys) { Selected = false }, 
-                new ModificationViewModel(Modification.ArgToHeavyArg) { Selected = false }
-            };
-            this.HeavyModifications = new ReactiveList<ModificationViewModel>
-            {
-                new ModificationViewModel(Modification.LysToHeavyLys), 
-                new ModificationViewModel(Modification.ArgToHeavyArg)
+                new SearchModification(Modification.LysToHeavyLys, 'K', SequenceLocation.PeptideCTerm, true), 
+                new SearchModification(Modification.ArgToHeavyArg, 'R', SequenceLocation.PeptideCTerm, true)
             };
             IonTypeFactory = new IonTypeFactory(100);
             this.DeconvolutedIonTypeFactory = IonTypeFactory.GetDeconvolutedIonTypeFactory(
@@ -164,7 +162,11 @@ namespace LcmsSpectator.Config
             this.CidHcdIonTypes = new List<BaseIonType> { BaseIonType.B, BaseIonType.Y };
             this.EtdIonTypes = new List<BaseIonType> { BaseIonType.C, BaseIonType.Z };
 
-            this.RegisteredModifications = new ReactiveList<Modification>(Modification.CommonModifications);
+            this.RegisteredModifications = new ReactiveList<Modification>(Modification.CommonModifications)
+            {
+                Modification.LysToHeavyLys,
+                Modification.ArgToHeavyArg
+            };
 
             this.ExportImageDpi = 96;
         }
@@ -257,19 +259,19 @@ namespace LcmsSpectator.Config
         /// <summary>
         /// Gets the modifications that are applied to the light sequence when ShowHeavy is selected.
         /// </summary>
-        public ReactiveList<ModificationViewModel> LightModifications
+        public ReactiveList<SearchModification> LightModifications
         {
             get { return this.lightModifications; }
-            private set { this.RaiseAndSetIfChanged(ref this.lightModifications, value); }
+            set { this.RaiseAndSetIfChanged(ref this.lightModifications, value); }
         }
 
         /// <summary>
         /// Gets the modifications that are applied to the heavy sequence when ShowHeavy is selected.
         /// </summary>
-        public ReactiveList<ModificationViewModel> HeavyModifications
+        public ReactiveList<SearchModification> HeavyModifications
         {
             get { return this.heavyModifications; }
-            private set { this.RaiseAndSetIfChanged(ref this.heavyModifications, value); }
+            set { this.RaiseAndSetIfChanged(ref this.heavyModifications, value); }
         }
         
         /// <summary>

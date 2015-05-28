@@ -25,7 +25,6 @@ namespace LcmsSpectator.ViewModels.Data
     using LcmsSpectator.Config;
     using LcmsSpectator.Models;
     using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels.Modifications;
 
     using ReactiveUI;
 
@@ -306,7 +305,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A task that returns a list of fragment labeled ions on completion.</returns>
-        private Task<ReactiveList<LabeledIonViewModel>> GenerateFragmentLabelsAsync(ReactiveList<ModificationViewModel> labelModifications = null)
+        private Task<ReactiveList<LabeledIonViewModel>> GenerateFragmentLabelsAsync(ReactiveList<SearchModification> labelModifications = null)
         {
             return Task.Run(() => this.GenerateFragmentLabels(labelModifications));
         }
@@ -317,7 +316,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A task that returns a list of precursor labeled ions on completion.</returns>
         private Task<ReactiveList<LabeledIonViewModel>> GenerateIsotopeLabelsAsync(
-            ReactiveList<ModificationViewModel> labelModifications = null)
+            ReactiveList<SearchModification> labelModifications = null)
         {
             return Task.Run(() => this.GenerateIsotopePrecursorLabels(labelModifications));
         }
@@ -328,7 +327,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A task that returns a list of precursor labeled ions on completion.</returns>
         private Task<ReactiveList<LabeledIonViewModel>> GenerateChargeLabelsAsync(
-            ReactiveList<ModificationViewModel> labelModifications = null)
+            ReactiveList<SearchModification> labelModifications = null)
         {
             return Task.Run(() => this.GenerateChargePrecursorLabels(labelModifications));
         }
@@ -338,7 +337,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A list of fragment labeled ions.</returns>
-        private ReactiveList<LabeledIonViewModel> GenerateFragmentLabels(ReactiveList<ModificationViewModel> labelModifications = null)
+        private ReactiveList<LabeledIonViewModel> GenerateFragmentLabels(ReactiveList<SearchModification> labelModifications = null)
         {
             var fragmentLabelList = new ReactiveList<LabeledIonViewModel> { ChangeTrackingEnabled = true };
             if (this.SelectedPrSm.Sequence.Count < 1)
@@ -404,7 +403,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A list of precursor labeled ions.</returns>
-        private ReactiveList<LabeledIonViewModel> GenerateIsotopePrecursorLabels(ReactiveList<ModificationViewModel> labelModifications = null)
+        private ReactiveList<LabeledIonViewModel> GenerateIsotopePrecursorLabels(ReactiveList<SearchModification> labelModifications = null)
         {
             var ions = new ReactiveList<LabeledIonViewModel> { ChangeTrackingEnabled = true };
             if (this.SelectedPrSm.Sequence.Count == 0)
@@ -442,7 +441,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A list of neighboring charge state labeled ions.</returns>
-        private ReactiveList<LabeledIonViewModel> GenerateChargePrecursorLabels(ReactiveList<ModificationViewModel> labelModifications = null)
+        private ReactiveList<LabeledIonViewModel> GenerateChargePrecursorLabels(ReactiveList<SearchModification> labelModifications = null)
         {
             var ions = new ReactiveList<LabeledIonViewModel> { ChangeTrackingEnabled = true };
             var numChargeStates = IonUtils.GetNumNeighboringChargeStates(this.SelectedPrSm.Charge);
