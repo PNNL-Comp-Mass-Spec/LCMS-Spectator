@@ -199,5 +199,11 @@ namespace LcmsSpectatorTests.DialogServices
         {
             throw new NotImplementedException();
         }
+
+
+        public bool ExportImageWindow(ExportImageViewModel exportImageViewModel)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

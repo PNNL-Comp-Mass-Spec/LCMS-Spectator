@@ -193,12 +193,26 @@ namespace LcmsSpectator.DialogServices
         /// Open a window for selecting a dataset to export to file.
         /// </summary>
         /// <param name="exportDatasetViewModel">The view model for the dialog.</param>
+        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
         public bool ExportDatasetWindow(ExportDatasetViewModel exportDatasetViewModel)
         {
             var exportDatasetDialog = new ExportDatasetWindow { DataContext = exportDatasetViewModel };
             exportDatasetViewModel.ReadyToClose += (o, e) => exportDatasetDialog.Close();
             exportDatasetDialog.ShowDialog();
             return exportDatasetViewModel.Status;
+        }
+
+        /// <summary>
+        /// Open a window for exporting a PlotModel to an image.
+        /// </summary>
+        /// <param name="exportImageViewModel">The view model for the dialog.</param>
+        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
+        public bool ExportImageWindow(ExportImageViewModel exportImageViewModel)
+        {
+            var exportImageDialog = new ExportImageWindow { DataContext = exportImageViewModel };
+            exportImageViewModel.ReadyToClose += (o, e) => exportImageDialog.Close();
+            exportImageDialog.ShowDialog();
+            return exportImageViewModel.Status;
         }
     }
 }
