@@ -212,6 +212,11 @@ namespace LcmsSpectator.ViewModels
         private bool fromSequence;
 
         /// <summary>
+        /// The maximum number of Protein-Spectrum matches found per spectrum.
+        /// </summary>
+        private int numMatchesPerSpectrum;
+
+        /// <summary>
         /// A task for running an MSPathFinder database search;
         /// </summary>
         private Task runSearchTask;
@@ -324,6 +329,7 @@ namespace LcmsSpectator.ViewModels
             this.maxDynamicModificationsPerSequence = 0;
             this.FixedNTerm = true;
             this.FixedCTerm = true;
+            this.NumMatchesPerSpectrum = 1;
 
             // When search mode is selected, display correct search mode description
             this.WhenAnyValue(x => x.SelectedSearchMode)
@@ -719,6 +725,15 @@ namespace LcmsSpectator.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.fromSequence, value); }
         }
 
+        /// <summary>
+        /// Gets or sets the maximum number of Protein-Spectrum matches found per spectrum.
+        /// </summary>
+        public int NumMatchesPerSpectrum
+        {
+            get { return this.numMatchesPerSpectrum; }
+            set { this.RaiseAndSetIfChanged(ref this.numMatchesPerSpectrum, value); }
+        }
+
         /// <summary>Get a launcher for TopDown MSPathFinder searches.</summary>
         /// <param name="ms2ScanNums">The MS/MS scan numbers to restrict search to.</param>
         /// <returns>The <see cref="IcTopDownLauncher"/>.</returns>
@@ -747,7 +762,8 @@ namespace LcmsSpectator.ViewModels
                                          this.SelectedSearchMode,
                                          this.FeatureFilePath,
                                          this.minFeatureProbability,
-                                         ms2ScanNums);
+                                         ms2ScanNums,
+                                         this.NumMatchesPerSpectrum);
         }
 
         /// <summary>
