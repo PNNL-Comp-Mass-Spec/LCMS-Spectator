@@ -12,11 +12,13 @@ namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
 
     using InformedProteomics.Backend.MassSpecData;
 
+    using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers;
@@ -417,12 +419,22 @@ namespace LcmsSpectator.ViewModels.Plots
             var openFeatureFileCommand = ReactiveCommand.Create();
             openFeatureFileCommand.Subscribe(_ => this.OpenFeatureFileImplementation());
             this.OpenFeatureFileCommand = openFeatureFileCommand;
+
+            // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
+            var saveAsImageCommand = ReactiveCommand.Create();
+            saveAsImageCommand.Subscribe(_ => this.SaveAsImageImplementation());
+            this.SaveAsImageCommand = saveAsImageCommand;
         }
 
         /// <summary>
         /// Gets a command that displays open file dialog to select feature file and then read and display features.
         /// </summary>
         public IReactiveCommand OpenFeatureFileCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that saves the feature map as a PNG image.
+        /// </summary>
+        public IReactiveCommand SaveAsImageCommand { get; private set; }
 
         /// <summary>
         /// Gets a command activated when a feature is selected (double clicked) on the
@@ -887,7 +899,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             foreach (var feature in filteredFeatures)
             {
-                var size = Math.Min(feature.MinPoint.Abundance / (2 * medianAbundance), 7.0);
+                const int Size = 1; ////Math.Min(feature.MinPoint.Abundance / (2 * medianAbundance), 7.0);
                 
                 // Add ms2s associated with features
                 var prsms = feature.AssociatedMs2.Where(scan => this.ids.ContainsKey(scan)).Select(scan => this.ids[scan]).ToList();
@@ -898,16 +910,16 @@ namespace LcmsSpectator.ViewModels.Plots
                     var feature1 = feature;
                     var idPrSms = prsms.Where(prsm => prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature1.MinPoint.Mass) < 1);
                     var notIdentifiedPrSms = prsms.Where(prsm => prsm.Sequence.Count == 0 || Math.Abs(prsm.Mass - feature1.MinPoint.Mass) >= 1);
-                    var ms2IdSeries = this.CreateMs2ScatterSeries(idPrSms, feature, this.ms2ColorAxis, "Identified Ms2s", size, this.showFoundIdMs2);
+                    var ms2IdSeries = this.CreateMs2ScatterSeries(idPrSms, feature, this.ms2ColorAxis, "Identified Ms2s", Size, this.showFoundIdMs2);
                     this.foundIdMs2S.Add(ms2IdSeries);
-                    var ms2UnIdSeries = this.CreateMs2ScatterSeries(notIdentifiedPrSms, feature, this.ms2ColorAxis, "Unidentified Ms2s", size, this.showFoundUnIdMs2);
+                    var ms2UnIdSeries = this.CreateMs2ScatterSeries(notIdentifiedPrSms, feature, this.ms2ColorAxis, "Unidentified Ms2s", Size, this.showFoundUnIdMs2);
                     this.foundUnIdMs2S.Add(ms2UnIdSeries);
                     this.FeatureMap.Series.Add(ms2IdSeries);
                     this.FeatureMap.Series.Add(ms2UnIdSeries);
                 }
 
                 // Create and add feature
-                this.FeatureMap.Series.Add(this.CreateFeatureSeries(feature, this.featureColorAxis.Palette.Colors, size, minAbundance, maxAbundance));
+                this.FeatureMap.Series.Add(this.CreateFeatureSeries(feature, this.featureColorAxis.Palette.Colors, Size, minAbundance, maxAbundance));
             }
 
             // Add identified Ms2s with no associated features
@@ -1169,6 +1181,41 @@ namespace LcmsSpectator.ViewModels.Plots
                     masses.Insert(highIndex, mass);
                 }
             }
+        }
+
+        /// <summary>
+        /// Implementation for <see cref="SaveAsImageCommand" />.
+        /// Gets a command that saves the feature map as a PNG image.
+        /// </summary>
+        private void SaveAsImageImplementation()
+        {
+            var filePath = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            try
+            {
+                var directory = Path.GetDirectoryName(filePath);
+                if (directory == null || !Directory.Exists(directory))
+                {
+                    throw new FormatException(
+                        string.Format("Cannot save image due to invalid file name: {0}", filePath));
+                }
+
+                DynamicResolutionPngExporter.Export(
+                    this.FeatureMap,
+                    filePath,
+                    (int)this.FeatureMap.Width,
+                    (int)this.FeatureMap.Height,
+                    OxyColors.White,
+                    IcParameters.Instance.ExportImageDpi);
+            }
+            catch (Exception e)
+            {
+                this.dialogService.ExceptionAlert(e);
+            }   
         }
     }
 }
