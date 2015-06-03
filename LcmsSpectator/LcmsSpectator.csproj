@@ -218,6 +218,7 @@
     <Compile Include="ViewModels\Dms\DmsJobViewModel.cs" />
     <Compile Include="ViewModels\Dms\DmsLookupViewModel.cs" />
     <Compile Include="ViewModels\Plots\ErrorMapViewModel.cs" />
+    <Compile Include="ViewModels\Plots\FeatureMapViewModel.cs" />
     <Compile Include="ViewModels\Plots\FeatureViewerViewModel.cs" />
     <Compile Include="ViewModels\Filters\FilterViewModel.cs" />
     <Compile Include="ViewModels\Filters\MultiValueFilterViewModel.cs" />
@@ -249,6 +250,7 @@
     <Compile Include="Views\Data\CreateSequenceView.xaml.cs">
       <DependentUpon>CreateSequenceView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\ProMexModel.cs" />
     <Compile Include="Views\FileSelectors\ExportDatasetWindow.xaml.cs">
       <DependentUpon>ExportDatasetWindow.xaml</DependentUpon>
     </Compile>
