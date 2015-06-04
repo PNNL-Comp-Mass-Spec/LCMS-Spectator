@@ -23,6 +23,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.PlotModels;
+    using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Data;
 
@@ -334,7 +335,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     ion => null);
             var maxCharge = (this.ions.Count > 0) ? this.ions.Max(ion => ion.IonType.Charge) : 2;
             maxCharge = Math.Max(maxCharge, 2);
-            var colors = new ColorDictionary(maxCharge);
+            var colors = new IonColorDictionary(maxCharge);
             foreach (var xic in xicPoints)
             {
                 if (xic == null || xic.Count == 0)

@@ -179,6 +179,7 @@
     <Compile Include="Models\ScorerFactory.cs" />
     <Compile Include="Models\Target.cs" />
     <Compile Include="Models\ToolType.cs" />
+    <Compile Include="PlotModels\ColorDicionaries\ProteinColorDictionary.cs" />
     <Compile Include="PlotModels\IDataPoint.cs" />
     <Compile Include="PlotModels\IDataPointSeries.cs" />
     <Compile Include="PlotModels\PeakDataPoint.cs" />
@@ -331,7 +332,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PlotModels\AutoAdjustedYPlotModel.cs" />
-    <Compile Include="PlotModels\ColorDictionary.cs" />
+    <Compile Include="PlotModels\ColorDicionaries\IonColorDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
