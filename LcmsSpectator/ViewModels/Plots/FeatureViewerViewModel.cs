@@ -15,22 +15,18 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
-
     using InformedProteomics.Backend.MassSpecData;
-
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
+    using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.Readers;
     using LcmsSpectator.Utils;
-
     using OxyPlot;
     using OxyPlot.Annotations;
     using OxyPlot.Axes;
     using OxyPlot.Series;
-
     using ReactiveUI;
-
     using Constants = InformedProteomics.Backend.Data.Biology.Constants;
 
     /// <summary>
@@ -42,11 +38,6 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Default size of highlight annotation.
         /// </summary>
         private const double HighlightSize = 0.008;
-
-        /// <summary>
-        /// The total number of distinct colors for the MS/MS scans.
-        /// </summary>
-        private const int DistinctMsMsColors = 11;
 
         /// <summary>
         /// Dialog service for opening dialogs from the view model.
@@ -77,6 +68,16 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Color axis for features.
         /// </summary>
         private readonly LinearColorAxis featureColorAxis;
+
+        /// <summary>
+        /// Dictionary associating unique protein to MS/MS series
+        /// </summary>
+        private readonly Dictionary<string, ScatterSeries> ms2SeriesDictionary;
+
+        /// <summary>
+        /// Dictionary associating unique protein to color index.
+        /// </summary>
+        private readonly ProteinColorDictionary colorDictionary;
 
         /// <summary>
         /// MS/MS scan highlight annotation.
@@ -229,14 +230,24 @@ namespace LcmsSpectator.ViewModels.Plots
         private Feature.FeaturePoint selectedFeature;
 
         /// <summary>
+        /// A value indicating whether a linear or logarithmic axis should be used for abundance.
+        /// </summary>
+        private bool isLinearAbundanceAxis;
+
+        /// <summary>
+        /// A value indicating whether a linear or logarithmic axis should be used for abundance.
+        /// </summary>
+        private bool isLogarithmicAbundanceAxis;
+
+        /// <summary>
+        /// The size (height) of each feature.
+        /// </summary>
+        private double featureSize;
+
+        /// <summary>
         /// A value indicating whether the splash screen is currently being shown.
         /// </summary>
         private bool showSplash;
-
-        /// <summary>
-        /// Dictionary associating unique protein to color index.
-        /// </summary>
-        private Dictionary<string, int> colorDictionary; 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FeatureViewerViewModel"/> class.
@@ -248,9 +259,15 @@ namespace LcmsSpectator.ViewModels.Plots
             this.dialogService = dialogService;
             this.lcms = lcms;
 
+            this.ms2SeriesDictionary = new Dictionary<string, ScatterSeries>();
+
             this.ShowFoundIdMs2 = false;
             this.ShowFoundUnIdMs2 = false;
             this.ShowNotFoundMs2 = false;
+
+            this.IsLinearAbundanceAxis = false;
+            this.IsLogarithmicAbundanceAxis = true;
+            this.FeatureSize = 0.1;
 
             // Initialize isotopic envelope plot.
             this.IsotopicEnvelope = new IsotopicEnvelopePlotViewModel();
@@ -259,35 +276,28 @@ namespace LcmsSpectator.ViewModels.Plots
 
             // Initialize color axes.
             const int NumColors = 5000;
-            var minColor = OxyColor.FromRgb(255, 160, 160);
-            var midColor = OxyColor.FromRgb(255, 0, 0);
-            var maxColor = OxyColor.FromRgb(150, 0, 0);
+            ////var minColor = OxyColor.FromRgb(255, 160, 160);
+            ////var midColor = OxyColor.FromRgb(255, 0, 0);
+            ////var maxColor = OxyColor.FromRgb(150, 0, 0);
+            var minColor = OxyColors.Black;
+            var lowMidColor = OxyColors.Blue;
+            var highMidColor = OxyColors.Orange;
+            var maxColor = OxyColors.Red;
             this.featureColorAxis = new LinearColorAxis     // Color axis for features
             {
                 Title = "Abundance",
                 Position = AxisPosition.Right,
-                Palette = OxyPalette.Interpolate(NumColors, minColor, midColor, maxColor),
-                StringFormat = "0.###E0"
+                Palette = OxyPalette.Interpolate(NumColors, minColor, lowMidColor, highMidColor, maxColor),
             };
+
+            this.colorDictionary = new ProteinColorDictionary();
             this.ms2ColorAxis = new LinearColorAxis      // Color axis for ms2s
             {
                 Key = "ms2s",
                 Position = AxisPosition.None,
-                Palette = OxyPalette.Interpolate(
-                                                 NumColors,
-                                                 OxyColors.Purple,
-                                                 OxyColors.Green,
-                                                 OxyColors.Yellow,
-                                                 OxyColors.Blue,
-                                                 OxyColors.Turquoise,
-                                                 OxyColors.Orange,
-                                                 OxyColors.Olive,
-                                                 OxyColors.Brown,
-                                                 OxyColors.Cyan,
-                                                 OxyColors.Gray,
-                                                 OxyColors.Beige),
+                Palette = this.colorDictionary.OxyPalette,
                 Minimum = 1,
-                Maximum = 5000,
+                Maximum = this.colorDictionary.OxyPalette.Colors.Count,
             };
 
             // Initialize x and y axes.
@@ -351,9 +361,9 @@ namespace LcmsSpectator.ViewModels.Plots
                 .Where(_ => this.foundIdMs2S != null && this.FeatureMap != null)
                 .Subscribe(showFoundMs2 =>
                     {
-                        foreach (var ms2 in this.foundIdMs2S)
+                        foreach (var ms2 in this.ms2SeriesDictionary)
                         {
-                            ms2.IsVisible = showFoundMs2;
+                            ms2.Value.IsVisible = showFoundMs2;
                         }
 
                         this.FeatureMap.InvalidatePlot(true);
@@ -407,8 +417,17 @@ namespace LcmsSpectator.ViewModels.Plots
                             this.FeatureMap.InvalidatePlot(false);
                         });
 
+            this.WhenAnyValue(x => x.IsLinearAbundanceAxis)
+                .Subscribe(isLinearAbundanceAxis => this.IsLogarithmicAbundanceAxis = !isLinearAbundanceAxis);
+
+            this.WhenAnyValue(x => x.IsLogarithmicAbundanceAxis)
+                .Subscribe(isLogarithmicAbundanceAxis => this.IsLinearAbundanceAxis = !isLogarithmicAbundanceAxis);
+
+            this.WhenAnyValue(x => x.IsLinearAbundanceAxis)
+                .Subscribe(_ => this.BuildPlot(this.AbundanceThreshold, this.PointsDisplayed));
+
             // Update plot if score threshold, abundance threshold, or points displayed changes
-            this.WhenAnyValue(x => x.AbundanceThreshold, x => x.PointsDisplayed)
+            this.WhenAnyValue(x => x.AbundanceThreshold, x => x.PointsDisplayed, x => x.FeatureSize)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.BuildPlot(x.Item1, x.Item2));
 
@@ -619,6 +638,33 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether a linear or logarithmic axis should be used for abundance.
+        /// </summary>
+        public bool IsLinearAbundanceAxis
+        {
+            get { return this.isLinearAbundanceAxis; }
+            set { this.RaiseAndSetIfChanged(ref this.isLinearAbundanceAxis, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a linear or logarithmic axis should be used for abundance.
+        /// </summary>
+        public bool IsLogarithmicAbundanceAxis
+        {
+            get { return this.isLogarithmicAbundanceAxis; }
+            set { this.RaiseAndSetIfChanged(ref this.isLogarithmicAbundanceAxis, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the size (height) of each feature.
+        /// </summary>
+        public double FeatureSize
+        {
+            get { return this.featureSize; }
+            set { this.RaiseAndSetIfChanged(ref this.featureSize, value); }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the splash screen is currently being shown.
         /// </summary>
         public bool ShowSplash
@@ -681,7 +727,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 feature.MinPoint.RetentionTime = this.lcms.GetElutionTime(feature.MinPoint.Scan);
                 feature.MaxPoint.RetentionTime = this.lcms.GetElutionTime(feature.MaxPoint.Scan);
 
-                for (int c = feature.MinPoint.Scan; c <= feature.MaxPoint.Scan; c++)
+                for (int c = feature.MinPoint.Charge; c <= feature.MaxPoint.Charge; c++)
                 {
                     var mz = (feature.MinPoint.Mass + (c * Constants.Proton)) / c;
                     feature.AssociatedMs2.AddRange(this.lcms.GetFragmentationSpectraScanNums(mz)
@@ -726,8 +772,6 @@ namespace LcmsSpectator.ViewModels.Plots
             {
                 return;
             }
-
-            this.GetProteinColorDictionary(this.ids.Values, this.ms2ColorAxis.Palette);
 
             this.notFoundMs2 = new List<PrSm>();
             var scanHash = new Dictionary<int, List<double>>();
@@ -886,21 +930,27 @@ namespace LcmsSpectator.ViewModels.Plots
             this.MinimumAbundance = Math.Round(filteredFeatures[filteredFeatures.Count - 1].MinPoint.Abundance, 3);
             this.MaximumAbundance = Math.Round(filteredFeatures[0].MinPoint.Abundance, 3);
 
-            int medianAbundanceIndex = filteredFeatures.Count / 2;
-            var medianAbundance = filteredFeatures[medianAbundanceIndex].MinPoint.Abundance;
             var minAbundance = filteredFeatures.Min(f => f.MinPoint.Abundance);
-            var maxAbundance = filteredFeatures.Max(f => f.MaxPoint.Abundance);
+            var maxAbundance = filteredFeatures.Max(f => f.MaxPoint.Abundance);   
+
+            if (!this.IsLinearAbundanceAxis)
+            {
+                minAbundance = Math.Log10(minAbundance);
+                maxAbundance = Math.Log10(maxAbundance);
+            }
+
+            this.featureColorAxis.StringFormat = this.IsLinearAbundanceAxis ? "0.###E0" : "0.#";
             
             // Set bounds for color axis for features
             this.featureColorAxis.AbsoluteMinimum = minAbundance;
             this.featureColorAxis.Minimum = minAbundance;
             this.featureColorAxis.Maximum = maxAbundance;
-            this.featureColorAxis.AbsoluteMaximum = maxAbundance;
+            this.featureColorAxis.AbsoluteMaximum = maxAbundance;   
+
+            var idPrSms = new List<PrSm>();
 
             foreach (var feature in filteredFeatures)
             {
-                const int Size = 1; ////Math.Min(feature.MinPoint.Abundance / (2 * medianAbundance), 7.0);
-                
                 // Add ms2s associated with features
                 var prsms = feature.AssociatedMs2.Where(scan => this.ids.ContainsKey(scan)).Select(scan => this.ids[scan]).ToList();
                 
@@ -908,18 +958,22 @@ namespace LcmsSpectator.ViewModels.Plots
                 if (prsms.Count > 0)
                 {
                     var feature1 = feature;
-                    var idPrSms = prsms.Where(prsm => prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature1.MinPoint.Mass) < 1);
+                    idPrSms.AddRange(prsms.Where(prsm => prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature1.MinPoint.Mass) < 1));
                     var notIdentifiedPrSms = prsms.Where(prsm => prsm.Sequence.Count == 0 || Math.Abs(prsm.Mass - feature1.MinPoint.Mass) >= 1);
-                    var ms2IdSeries = this.CreateMs2ScatterSeries(idPrSms, feature, this.ms2ColorAxis, "Identified Ms2s", Size, this.showFoundIdMs2);
-                    this.foundIdMs2S.Add(ms2IdSeries);
-                    var ms2UnIdSeries = this.CreateMs2ScatterSeries(notIdentifiedPrSms, feature, this.ms2ColorAxis, "Unidentified Ms2s", Size, this.showFoundUnIdMs2);
+                    ////this.CreateMs2ScatterSeries(idPrSms, feature, this.ms2ColorAxis, "Identified Ms2s", Size, this.showFoundIdMs2);
+                    var ms2UnIdSeries = this.CreateMs2ScatterSeries(notIdentifiedPrSms, feature, this.ms2ColorAxis, "Unidentified Ms2s", this.FeatureSize, this.showFoundUnIdMs2);
                     this.foundUnIdMs2S.Add(ms2UnIdSeries);
-                    this.FeatureMap.Series.Add(ms2IdSeries);
                     this.FeatureMap.Series.Add(ms2UnIdSeries);
                 }
 
                 // Create and add feature
-                this.FeatureMap.Series.Add(this.CreateFeatureSeries(feature, this.featureColorAxis.Palette.Colors, Size, minAbundance, maxAbundance));
+                this.FeatureMap.Series.Add(this.CreateFeatureSeries(feature, this.featureColorAxis.Palette.Colors, this.FeatureSize, minAbundance, maxAbundance));
+            }
+
+            this.AddMs2IdPoints(idPrSms, this.ms2ColorAxis, this.ShowFoundIdMs2);
+            foreach (var series in this.ms2SeriesDictionary)
+            {
+                this.FeatureMap.Series.Add(series.Value);
             }
 
             // Add identified Ms2s with no associated features
@@ -946,37 +1000,6 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Select random colors from the palette and assign one to each unique protein.
-        /// </summary>
-        /// <param name="data">The identifications.</param>
-        /// <param name="palette">The palette to select colors from.</param>
-        private void GetProteinColorDictionary(IEnumerable<PrSm> data, OxyPalette palette)
-        {
-            if (this.colorDictionary == null)
-            {
-                this.colorDictionary = new Dictionary<string, int> { { string.Empty, 0 } };
-            }
-
-            var uniqueProteins = data.Select(d => d.ProteinName).Distinct();
-            var rand = new Random();
-            foreach (var protein in uniqueProteins)
-            {
-                if (!this.colorDictionary.ContainsKey(protein))
-                {
-                    int colorIndex;
-                    do
-                    {   // do not select the same color as unid color.
-                        var r = rand.Next(0, DistinctMsMsColors);
-                        colorIndex = Math.Min(r * (palette.Colors.Count / DistinctMsMsColors), palette.Colors.Count - 1);
-                    }
-                    while (colorIndex == 0);
-
-                    this.colorDictionary.Add(protein, colorIndex);
-                }
-            }
-        }
-
-        /// <summary>
         /// Create a line series for a feature containing a min point and max point.
         /// </summary>
         /// <param name="feature">Feature to create series for.</param>
@@ -987,19 +1010,17 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <returns>Line series for feature.</returns>
         private LineSeries CreateFeatureSeries(Feature feature, IList<OxyColor> colors, double size, double minAbundance, double maxAbundance)
         {
-            var colorIndex = 1
-                             + (int)
-                               ((feature.MinPoint.Abundance - minAbundance) / (maxAbundance - minAbundance)
-                                * colors.Count);
-            if (colorIndex < 1)
+            var abundance = feature.MinPoint.Abundance;
+            if (!this.IsLinearAbundanceAxis)
             {
-                colorIndex = 1;
+                abundance = Math.Log10(abundance);
             }
 
-            if (colorIndex >= colors.Count)
-            {
-                colorIndex = colors.Count - 1;
-            }
+            var colorIndex = 1
+                             + (int)
+                               ((abundance - minAbundance) / (maxAbundance - minAbundance)
+                                * colors.Count);
+            colorIndex = Math.Max(1, Math.Min(colorIndex, colors.Count - 1));
 
             var c = colors[colorIndex];
             string trackerString = "{0} (ID: {Id:0})" + Environment.NewLine +
@@ -1017,8 +1038,54 @@ namespace LcmsSpectator.ViewModels.Plots
                 Color = c,
                 LineStyle = LineStyle.Solid,
                 StrokeThickness = size,
-                TrackerFormatString = trackerString
+                TrackerFormatString = trackerString,
             };
+        }
+
+        /// <summary>
+        /// Groups MS/MS ID points in series by protein name.
+        /// </summary>
+        /// <param name="prsms">The IDs.</param>
+        /// <param name="colorAxis">The color axis to select colors from.</param>
+        /// <param name="visible">Should the series be visible?</param>
+        private void AddMs2IdPoints(IEnumerable<PrSm> prsms, LinearColorAxis colorAxis, bool visible)
+        {   
+            this.ms2SeriesDictionary.Clear();
+            var prsmByProtein = new Dictionary<string, List<PrSm>>();
+
+            foreach (var prsm in prsms)
+            {
+                if (!prsmByProtein.ContainsKey(prsm.ProteinName))
+                {
+                    prsmByProtein.Add(prsm.ProteinName, new List<PrSm>());
+                }
+
+                prsmByProtein[prsm.ProteinName].Add(prsm);
+            }
+
+            foreach (var proteinName in prsmByProtein.Keys)
+            {
+                string name = proteinName;
+                var scatterSeries = new ScatterSeries
+                {
+                    ItemsSource = prsmByProtein[proteinName],
+                    Mapping = p =>
+                    {
+                        var prsm = (PrSm)p;
+                        return new ScatterPoint(prsm.RetentionTime, prsm.Mass, 2.0, this.colorDictionary.GetColorCode(name));
+                    },
+                    Title = proteinName,
+                    MarkerType = MarkerType.Cross,
+                    ColorAxisKey = colorAxis.Key,
+                    TrackerFormatString =
+                        "{0}" + Environment.NewLine +
+                        "{1}: {2:0.###}" + Environment.NewLine +
+                        "{2}: {4:0.###E0}",
+                    IsVisible = visible,
+                };
+
+                this.ms2SeriesDictionary.Add(proteinName, scatterSeries);
+            }
         }
 
         /// <summary>
@@ -1039,7 +1106,11 @@ namespace LcmsSpectator.ViewModels.Plots
                 Mapping = p =>
                 {
                     var prsm = (PrSm)p;
-                    return new ScatterPoint(prsm.RetentionTime, feature == null ? prsm.Mass : feature.MinPoint.Mass, Math.Max(size * 0.8, 3.0), this.colorDictionary[prsm.ProteinName]);
+                    return new ScatterPoint(
+                        prsm.RetentionTime,
+                        feature == null ? prsm.Mass : feature.MinPoint.Mass,
+                        Math.Max(size * 0.8, 3.0),
+                        this.colorDictionary.GetColorCode(prsm.ProteinName));
                 },
                 Title = title,
                 MarkerType = MarkerType.Cross,

@@ -52,6 +52,11 @@
                         <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundUnIdMs2}" Header="Show _Unidentified ms2s with features"/>
                         <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustment" />
                         <Separator />
+                        <MenuItem Header="Abundance Axis">
+                            <MenuItem IsCheckable="True" IsChecked="{Binding IsLinearAbundanceAxis}" Header="Linear" />
+                            <MenuItem IsCheckable="True" IsChecked="{Binding IsLogarithmicAbundanceAxis}" Header="Logarithmic" />
+                        </MenuItem>
+                        <Separator />
                         <MenuItem Command="{Binding SaveAsImageCommand}" Header="_Save As Image" />
                         <!--<MenuItem IsCheckable="True" IsChecked="{Binding ShowNotFoundMs2}" Header="Show ids with no features"/> -->
                     </ContextMenu>
@@ -123,46 +128,41 @@
         <Expander Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Header="Filters" ExpandDirection="Down" IsExpanded="False">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="20" />
-                    <RowDefinition Height="55" />
+                    <RowDefinition Height="70*" />
+                    <RowDefinition Height="30*" />
                 </Grid.RowDefinitions>
-                <StackPanel Margin="5,0,0,0" Grid.Row="0" Grid.Column="0"  Orientation="Horizontal">
-                    <TextBlock Width="125" FontWeight="Bold">Abundance Range:</TextBlock>
-                    <TextBlock Width="55"  Text="{Binding MinimumAbundance, Converter={StaticResource ScoreFormatter}}" />
-                    <TextBlock Width="10"  Text="-" />
-                    <TextBlock Width="55"  Text="{Binding MaximumAbundance, Converter={StaticResource ScoreFormatter}}" />
-                </StackPanel>
-                <Grid Margin="5" Grid.Row="1" Grid.Column="0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="70*" />
-                        <RowDefinition Height="30*" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="33*" />
-                        <ColumnDefinition Width="33*" />
-                        <ColumnDefinition Width="33*" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
-                        <TextBlock Width="150" FontWeight="Bold" VerticalAlignment="Center"># Features Displayed</TextBlock>
-                        <TextBox Width="100" Text="{Binding PointsDisplayed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Name="PointsDisplayedTextBox" />
-                        <StackPanel Orientation="vertical">
-                            <RepeatButton Content="˄" Name="Up"   Height="15.5" Width="20" FontSize="10" Click="UpClicked" />
-                            <RepeatButton Content="˅" Name="Down" Height="15.5" Width="20" FontSize="10" Click="DownClicked" />
-                        </StackPanel>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="33*" />
+                    <ColumnDefinition Width="33*" />
+                    <ColumnDefinition Width="33*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
+                    <TextBlock Width="150" FontWeight="Bold" VerticalAlignment="Center"># Features Displayed</TextBlock>
+                    <TextBox Width="100" Text="{Binding PointsDisplayed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Name="PointsDisplayedTextBox" />
+                    <StackPanel Orientation="vertical">
+                        <RepeatButton Content="˄" Name="Up"   Height="15.5" Width="20" FontSize="10" Click="UpClicked" />
+                        <RepeatButton Content="˅" Name="Down" Height="15.5" Width="20" FontSize="10" Click="DownClicked" />
                     </StackPanel>
-                    <Slider Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2"  Margin="0,0,5,0"
-                Value="{Binding AbundanceThreshold, Mode=TwoWay}" Orientation="Horizontal"
-                Maximum="{Binding MaximumAbundanceThreshold, Mode=TwoWay}" Minimum="{Binding MinimumAbundanceThreshold, Mode=TwoWay}"
-                TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft" ToolTip="Abundance Threshold (Log10)"
-                TickFrequency="0.5" IsSnapToTickEnabled="True" />
-                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2"  Grid.Column="1"  TextAlignment="Center" FontSize="10" VerticalAlignment="Top">Maximum Abundance (Log10)</TextBlock>
-                    <!--<Slider Grid.Column="2" Grid.Row="0" Margin="5,0,0,0"
-            Value="{Binding ScoreThreshold, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="1"
-                IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
-                Ticks="0, 0.5, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0"
-                ToolTip="Score Threshold"/>
-                    <TextBlock Grid.Row="1" Grid.Column="2" TextAlignment="Center" FontSize="10" VerticalAlignment="Top">Score Threshold</TextBlock> -->
-                </Grid>
+                </StackPanel>
+                <Slider Grid.Column="1" Grid.Row="0" Margin="0,0,5,0"
+            Value="{Binding AbundanceThreshold, Mode=TwoWay}" Orientation="Horizontal"
+            Maximum="{Binding MaximumAbundanceThreshold, Mode=TwoWay}" Minimum="{Binding MinimumAbundanceThreshold, Mode=TwoWay}"
+            TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft" ToolTip="Abundance Threshold (Log10)"
+            TickFrequency="0.5" IsSnapToTickEnabled="True" />
+                    
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock TextAlignment="Center" FontSize="10" VerticalAlignment="Top" Width="150">Maximum Abundance (Log10)</TextBlock>
+                    <TextBlock>[</TextBlock>
+                    <TextBlock Width="50" FontSize="10" Text="{Binding MinimumAbundance, Converter={StaticResource ScoreFormatter}}" />
+                    <TextBlock Width="10" FontSize="10" Text="-" />
+                    <TextBlock Width="50" FontSize="10" Text="{Binding MaximumAbundance, Converter={StaticResource ScoreFormatter}}" />
+                    <TextBlock>]</TextBlock>
+                </StackPanel>
+                
+                <Slider Grid.Row="0" Grid.Column="2" IsSnapToTickEnabled="False" TickPlacement="TopLeft"  AutoToolTipPlacement="TopLeft" ToolTip="Feature Size" Minimum="0.1" Maximum="2"
+                        TickFrequency="0.1"
+                        Value="{Binding FeatureSize, Mode=TwoWay}" />
+                <TextBlock Grid.Row="1" Grid.Column="2" FontSize="10" HorizontalAlignment="Center">Feature Size</TextBlock>
             </Grid>
         </Expander>
     </Grid>
