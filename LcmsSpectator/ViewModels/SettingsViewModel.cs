@@ -12,6 +12,8 @@ namespace LcmsSpectator.ViewModels
 {
     using System;
     using System.Linq;
+    using System.Windows.Media;
+
     using InformedProteomics.Backend.Data.Spectrometry;
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
@@ -55,6 +57,15 @@ namespace LcmsSpectator.ViewModels
             this.CidHcdIonTypes = IcParameters.Instance.GetCidHcdIonTypes();
             this.EtdIonTypes = IcParameters.Instance.GetEtdIonTypes();
             this.ExportImageDpi = IcParameters.Instance.ExportImageDpi;
+
+            this.FeatureColors = new ColorListViewModel();
+            this.IdColors = new ColorListViewModel();
+            this.Ms2ScanColors = new ColorListViewModel();
+
+            foreach (var color in IcParameters.Instance.FeatureColors)
+            {
+                this.FeatureColors.ColorViewModels.Add(new ColorViewModel { SelectedColor = new Color { A = color.A, R = color.R, B = color.B, G = color.G } });
+            }
 
             this.Modifications = new ReactiveList<SearchModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
@@ -214,6 +225,21 @@ namespace LcmsSpectator.ViewModels
         public int ExportImageDpi { get; set; }
 
         /// <summary>
+        /// Gets the view model for the feature color list.
+        /// </summary>
+        public ColorListViewModel FeatureColors { get; private set; }
+        
+        /// <summary>
+        /// Gets the view model for the id color list.
+        /// </summary>
+        public ColorListViewModel IdColors { get; private set; }
+        
+        /// <summary>
+        /// Gets the view model for the MS/MS scan color list.
+        /// </summary>
+        public ColorListViewModel Ms2ScanColors { get; private set; }
+
+        /// <summary>
         /// Implementation for the AddModificationCommand.
         /// Adds a search modification to the modification selector list.
         /// </summary>
@@ -265,6 +291,10 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.CidHcdIonTypes = IcParameters.IonTypeStringParse(this.CidHcdIonTypes);
             IcParameters.Instance.EtdIonTypes = IcParameters.IonTypeStringParse(this.EtdIonTypes);
             IcParameters.Instance.ExportImageDpi = this.ExportImageDpi;
+
+            IcParameters.Instance.FeatureColors = this.FeatureColors.GetOxyColors();
+            IcParameters.Instance.IdColors = this.IdColors.GetOxyColors();
+            IcParameters.Instance.Ms2ScanColors = this.Ms2ScanColors.GetOxyColors();
 
             var modificationList = this.Modifications.Select(searchModificationVm => searchModificationVm.SearchModification)
                                                 .Where(searchModification => searchModification != null).ToList();

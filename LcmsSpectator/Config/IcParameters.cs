@@ -14,15 +14,16 @@ namespace LcmsSpectator.Config
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Windows.Media;
+
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Utils;
-
-    using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
-    using LcmsSpectator.ViewModels.Modifications;
+
+    using OxyPlot;
 
     using ReactiveUI;
 
@@ -131,6 +132,21 @@ namespace LcmsSpectator.Config
         private List<BaseIonType> etdIonTypes;
 
         /// <summary>
+        /// The colors for the feature on the feature map.
+        /// </summary>
+        private OxyColor[] featureColors;
+
+        /// <summary>
+        /// The colors for the ID points on the feature map.
+        /// </summary>
+        private OxyColor[] idColors;
+
+        /// <summary>
+        /// The colors for the MS/MS scan points on the feature map.
+        /// </summary>
+        private OxyColor[] ms2ScanColors;
+
+        /// <summary>
         /// Prevents a default instance of the <see cref="IcParameters"/> class from being created. 
         /// Instantiate default values of LCMSSpectator application settings.
         /// </summary>
@@ -169,6 +185,8 @@ namespace LcmsSpectator.Config
             };
 
             this.ExportImageDpi = 96;
+
+            this.FeatureColors = new[] { OxyColors.Black, OxyColors.Blue, OxyColors.Orange, OxyColors.Red };
         }
 
         /// <summary>
@@ -257,7 +275,7 @@ namespace LcmsSpectator.Config
         }
 
         /// <summary>
-        /// Gets the modifications that are applied to the light sequence when ShowHeavy is selected.
+        /// Gets or sets the modifications that are applied to the light sequence when ShowHeavy is selected.
         /// </summary>
         public ReactiveList<SearchModification> LightModifications
         {
@@ -266,7 +284,7 @@ namespace LcmsSpectator.Config
         }
 
         /// <summary>
-        /// Gets the modifications that are applied to the heavy sequence when ShowHeavy is selected.
+        /// Gets or sets the modifications that are applied to the heavy sequence when ShowHeavy is selected.
         /// </summary>
         public ReactiveList<SearchModification> HeavyModifications
         {
@@ -326,6 +344,33 @@ namespace LcmsSpectator.Config
         /// Gets or sets the dots-per-inch for exported images.
         /// </summary>
         public int ExportImageDpi { get; set; }
+
+        /// <summary>
+        /// Gets or sets the colors for the features on the feature map.
+        /// </summary>
+        public OxyColor[] FeatureColors
+        {
+            get { return this.featureColors; }
+            set { this.RaiseAndSetIfChanged(ref this.featureColors, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the colors for the ID points on the feature map.
+        /// </summary>
+        public OxyColor[] IdColors
+        {
+            get { return this.idColors; }
+            set { this.RaiseAndSetIfChanged(ref this.idColors, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the colors for the MS/MS scan points on the feature map.
+        /// </summary>
+        public OxyColor[] Ms2ScanColors
+        {
+            get { return this.ms2ScanColors; }
+            set { this.RaiseAndSetIfChanged(ref this.ms2ScanColors, value); }
+        }
 
         /// <summary>
         /// Gets the modifications that are registered with LCMSSpectator.
