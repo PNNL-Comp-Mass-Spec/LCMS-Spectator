@@ -283,26 +283,39 @@ namespace LcmsSpectator.ViewModels
             addModificationCommand.Subscribe(_ => this.AddModificationImplementation());
             this.AddModificationCommand = addModificationCommand;
 
-            // Prev tab command
-            var prevTabCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex > 0));
-            prevTabCommand.Subscribe(_ => this.TabIndex--);
-            this.PrevTabCommand = prevTabCommand;
-
-            // Next tab command
-            var nextTabCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex < MaxTabIndex));
-            nextTabCommand.Subscribe(_ => this.TabIndex++);
-            this.NextTabCommand = nextTabCommand;
-
             // Run Command - Disabled when there is no SpectrumFilePath, FastaDbFilePath, or OutputFilePath selected
             this.RunCommand = ReactiveCommand.CreateAsyncTask(
                                                               this.WhenAnyValue(
                                                                                 x => x.SpectrumFilePath,
                                                                                 x => x.FastaDbFilePath,
                                                                                 x => x.OutputFilePath)
-                                                                  .Select(x => !string.IsNullOrWhiteSpace(x.Item1) && 
+                                                                  .Select(x => !string.IsNullOrWhiteSpace(x.Item1) &&
                                                                                !string.IsNullOrWhiteSpace(x.Item2) &&
                                                                                !string.IsNullOrWhiteSpace(x.Item3)),
                                                               async _ => await this.RunImplementation());
+
+            // Prev tab command
+            var prevTabCommand = ReactiveCommand.Create(                    
+                Observable.Merge(
+                        new[]
+                            {
+                                this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex > 0),
+                                this.RunCommand.IsExecuting.Select(exec => !exec)
+                            }));
+            prevTabCommand.Subscribe(_ => this.TabIndex--);
+            this.PrevTabCommand = prevTabCommand;
+
+            // Next tab command
+            var nextTabCommand =
+                ReactiveCommand.Create(
+                    Observable.Merge(
+                        new[]
+                            {
+                                this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex < MaxTabIndex),
+                                this.RunCommand.IsExecuting.Select(exec => !exec)
+                            }));
+            nextTabCommand.Subscribe(_ => this.TabIndex++);
+            this.NextTabCommand = nextTabCommand;
 
             // Cancel Command
             var cancelCommand = ReactiveCommand.Create();
