@@ -113,10 +113,10 @@ namespace LcmsSpectator.Models
             var maxPrSm = new PrSm();
             foreach (var feature in this.Features.Where(feature => feature.AssociatedMs2.Count > 0))
             {   // Associate IDs with features
-                feature.AssociatedPrSms.Clear();
                 minPrSm.Scan = feature.AssociatedMs2[0];
                 maxPrSm.Scan = feature.AssociatedMs2[feature.AssociatedMs2.Count - 1];
 
+                // Find IDs in the scan range of the feature.
                 var minIdIndex = idList.BinarySearch(minPrSm, prsmScanComp);
                 var maxIdIndex = idList.BinarySearch(maxPrSm, prsmScanComp);
                 minIdIndex = minIdIndex < 0 ? minIdIndex * -1 : minIdIndex;
@@ -124,21 +124,29 @@ namespace LcmsSpectator.Models
                 minIdIndex = Math.Min(Math.Max(minIdIndex - 1, 0), idList.Count - 1);
                 maxIdIndex = Math.Min(Math.Max(maxIdIndex, 0) + 1, idList.Count - 1);
 
+                // Find identified MS/MS scans associated with the feature
+                var explainedMs2Scans = new HashSet<int>();
+                feature.AssociatedPrSms.Clear();
                 for (int i = minIdIndex; i < maxIdIndex; i++)
                 {
                     if (Math.Abs(idList[i].Mass - feature.MinPoint.Mass) < massTolerance)
                     {
                         feature.AssociatedPrSms.Add(idList[i]);
+                        if (!explainedMs2Scans.Contains(idList[i].Scan))
+                        {
+                            explainedMs2Scans.Add(idList[i].Scan);
+                        }
                     }
                 }
-                
-                ////Feature feature1 = feature;
-                ////var prsms =
-                ////    idList.Where(
-                ////        prsm =>
-                ////        feature1.AssociatedMs2.Contains(prsm.Scan)
-                ////        && Math.Abs(prsm.Mass - feature1.MinPoint.Mass) < massTolerance);
-                ////feature.AssociatedPrSms.AddRange(prsms);
+
+                // Find unidentified MS/MS scans associated with the feature
+                foreach (var scan in feature.AssociatedMs2)
+                {
+                    if (!explainedMs2Scans.Contains(scan))
+                    {
+                        feature.AssociatedPrSms.Add(new PrSm { LcMs = this.lcms, Scan = scan, Mass = feature.MinPoint.Mass });
+                    }
+                }
             }
         }
 

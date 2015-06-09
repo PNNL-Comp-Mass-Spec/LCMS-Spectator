@@ -150,11 +150,11 @@
                 </Grid>
             </TabItem>
             
-            <TabItem Header="Feature Map">
+            <TabItem Header="Feature Map Colors">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
+                        <RowDefinition Height="60" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -165,12 +165,12 @@
                         <views:ColorList DataContext="{Binding FeatureColors}" />
                     </GroupBox>
 
-                    <GroupBox Header="Id Colors" Grid.Row="0" Grid.Column="1">
+                    <GroupBox Header="Identification Point Colors" Grid.Row="0" Grid.Column="1">
                         <views:ColorList DataContext="{Binding IdColors}" />
                     </GroupBox>
 
-                    <GroupBox Header="MS2 Scan Colors" Grid.Row="1" Grid.Column="1">
-                        <views:ColorList DataContext="{Binding Ms2ScanColors}" />
+                    <GroupBox Header="Unidentified MS/MS Scan Point Color" Grid.Row="1" Grid.Column="1">
+                        <xctk:ColorPicker Height="25" SelectedColor="{Binding Ms2ScanColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayColorAndName="True" />
                     </GroupBox>
                 </Grid>
             </TabItem>

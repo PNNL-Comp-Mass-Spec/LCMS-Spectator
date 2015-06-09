@@ -48,8 +48,8 @@
             <wpf:PlotView Grid.Row="0" Grid.Column="1" Name="FeatureMap" DataContext="{Binding FeatureMapViewModel}" Model="{Binding FeatureMap}" Margin="0,0,10,0">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundIdMs2}" Header="Show _Identified ms2s with features" />
-                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundUnIdMs2}" Header="Show _Unidentified ms2s with features" />
+                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundIdMs2}" Header="Show _Identified MS/MS scans" />
+                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundUnIdMs2}" Header="Show _Unidentified MS/MS scans" />
                         <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustment" />
                         <Separator />
                         <MenuItem Header="Abundance Axis">

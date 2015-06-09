@@ -19,6 +19,8 @@ namespace LcmsSpectator.ViewModels
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.ViewModels.Modifications;
 
+    using OxyPlot.Wpf;
+
     using ReactiveUI;
     
     /// <summary>
@@ -60,11 +62,18 @@ namespace LcmsSpectator.ViewModels
 
             this.FeatureColors = new ColorListViewModel();
             this.IdColors = new ColorListViewModel();
-            this.Ms2ScanColors = new ColorListViewModel();
+
+            var oxyScanCol = IcParameters.Instance.Ms2ScanColor;
+            this.Ms2ScanColor = new Color { A = oxyScanCol.A, R = oxyScanCol.R, G = oxyScanCol.G, B = oxyScanCol.B };
 
             foreach (var color in IcParameters.Instance.FeatureColors)
             {
                 this.FeatureColors.ColorViewModels.Add(new ColorViewModel { SelectedColor = new Color { A = color.A, R = color.R, B = color.B, G = color.G } });
+            }
+
+            foreach (var color in IcParameters.Instance.IdColors)
+            {
+                this.IdColors.ColorViewModels.Add(new ColorViewModel { SelectedColor = new Color { A = color.A, R = color.R, B = color.B, G = color.G } });
             }
 
             this.Modifications = new ReactiveList<SearchModificationViewModel>();
@@ -235,9 +244,9 @@ namespace LcmsSpectator.ViewModels
         public ColorListViewModel IdColors { get; private set; }
         
         /// <summary>
-        /// Gets the view model for the MS/MS scan color list.
+        /// Gets or sets the color for the MS/MS scans on the feature map.
         /// </summary>
-        public ColorListViewModel Ms2ScanColors { get; private set; }
+        public Color Ms2ScanColor { get; set; }
 
         /// <summary>
         /// Implementation for the AddModificationCommand.
@@ -294,7 +303,7 @@ namespace LcmsSpectator.ViewModels
 
             IcParameters.Instance.FeatureColors = this.FeatureColors.GetOxyColors();
             IcParameters.Instance.IdColors = this.IdColors.GetOxyColors();
-            IcParameters.Instance.Ms2ScanColors = this.Ms2ScanColors.GetOxyColors();
+            IcParameters.Instance.Ms2ScanColor = this.Ms2ScanColor.ToOxyColor();
 
             var modificationList = this.Modifications.Select(searchModificationVm => searchModificationVm.SearchModification)
                                                 .Where(searchModification => searchModification != null).ToList();

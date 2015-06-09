@@ -5,6 +5,8 @@
     using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
+    using System.Threading.Tasks;
+
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
@@ -19,9 +21,9 @@
     public class FeatureMapViewModel : ReactiveObject
     {
         /// <summary>
-        /// Default size of highlight annotation.
+        /// Scale of the highlight.
         /// </summary>
-        private const double HighlightSize = 0.008;
+        private const double HighlightScale = 0.008;
 
         /// <summary>
         /// Dialog service for opening dialogs from the view model.
@@ -69,11 +71,6 @@
         private RectangleAnnotation highlight;
 
         /// <summary>
-        /// The Plot model for the feature map.
-        /// </summary>
-        private PlotModel featureMap;
-
-        /// <summary>
         /// The minimum for the X axis of the feature map.
         /// </summary>
         private double xminimum;
@@ -106,11 +103,6 @@
         private bool showFoundUnIdMs2;
 
         /// <summary>
-        /// MS/MS scans that are not identified.
-        /// </summary>
-        ////private List<Series> foundUnIdMs2S;
-
-        /// <summary>
         /// MS/MS scans that are identified, but not associated with a feature.
         /// </summary>
         ////private Series notFoundMs2S;
@@ -124,12 +116,6 @@
         /// The identification selected by the user.
         /// </summary>
         private PrSm selectedPrSmPoint;
-
-        /// <summary>
-        /// A value indicating whether the MS/MS points not associated with features are being shown
-        /// on the feature map plot.
-        /// </summary>
-        private bool showNotFoundMs2;
 
         /// <summary>
         /// A value indicating whether a linear or logarithmic axis should be used for abundance.
@@ -179,22 +165,27 @@
 
             this.ShowFoundIdMs2 = false;
             this.ShowFoundUnIdMs2 = false;
-            this.ShowNotFoundMs2 = false;
 
             this.IsLinearAbundanceAxis = false;
             this.IsLogarithmicAbundanceAxis = true;
             this.FeatureSize = 0.1;
 
+            var featureSelectedCommand = ReactiveCommand.Create();
+            featureSelectedCommand.Subscribe(_ => this.FeatureSelectedImplementation());
+            this.FeatureSelectedCommand = featureSelectedCommand;
+
+            // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
+            var saveAsImageCommand = ReactiveCommand.Create();
+            saveAsImageCommand.Subscribe(_ => this.SaveAsImageImplementation());
+            this.SaveAsImageCommand = saveAsImageCommand;
+
+            var buildPlotCommand = ReactiveCommand.Create();
+            buildPlotCommand.Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
+                .Subscribe(_ => this.BuildPlot());
+            this.BuildPlotCommand = buildPlotCommand;
+
             // Initialize color axes.
             const int NumColors = 5000;
-            ////var minColor = OxyColor.FromRgb(255, 160, 160);
-            ////var midColor = OxyColor.FromRgb(255, 0, 0);
-            ////var maxColor = OxyColor.FromRgb(150, 0, 0);
-            ////var minColor = OxyColors.Black;
-            ////var lowMidColor = OxyColors.Blue;
-            ////var highMidColor = OxyColors.Orange;
-            ////var maxColor = OxyColors.Red;
-            ////var colors = IcParameters.Instance.FeatureColors;
             this.featureColorAxis = new LinearColorAxis     // Color axis for features
             {
                 Title = "Abundance",
@@ -228,8 +219,8 @@
                 {
                     var x = this.highlight.TextPosition.X;
                     isInternalChange = true;
-                    this.highlight.MinimumX = x - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5);
-                    this.highlight.MaximumX = x + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5);
+                    this.highlight.MinimumX = x - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5);
+                    this.highlight.MaximumX = x + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5);
                 }
 
                 isInternalChange = false;
@@ -244,8 +235,8 @@
                 {
                     var y = this.highlight.TextPosition.Y;
                     isInternalChange = true;
-                    this.highlight.MinimumY = y - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize);
-                    this.highlight.MaximumY = y + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize);
+                    this.highlight.MinimumY = y - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale);
+                    this.highlight.MaximumY = y + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale);
                 }
 
                 isInternalChange = false;
@@ -259,40 +250,27 @@
             this.FeatureMap.Axes.Add(this.xaxis);
             this.FeatureMap.Axes.Add(this.yaxis);
 
-            // When ShowNoutFoundMs2 changes, update the NoutFoundMs2 series
-            ////this.WhenAnyValue(x => x.ShowNotFoundMs2)
-            ////    .Where(_ => this.notFoundMs2S != null && this.FeatureMap != null)
-            ////    .Subscribe(showNotFoundMs2 =>
-            ////    {
-            ////        this.notFoundMs2S.IsVisible = showNotFoundMs2;
-            ////        this.FeatureMap.InvalidatePlot(true);
-            ////    });
+            // When ShowNotFoundMs2 changes, update the NotFoundMs2 series
+            this.WhenAnyValue(x => x.ShowFoundUnIdMs2)
+                .Where(_ => this.FeatureMap != null && this.ms2SeriesDictionary.ContainsKey(string.Empty))
+                .Subscribe(showFoundUnIdMs2 =>
+                {
+                    this.ms2SeriesDictionary[string.Empty].IsVisible = showFoundUnIdMs2;
+                    this.FeatureMap.InvalidatePlot(true);
+                });
 
             // When ShowFoundIdMs2 changes, update all ms2 series
             this.WhenAnyValue(x => x.ShowFoundIdMs2)
                 .Where(_ => this.FeatureMap != null)
                 .Subscribe(showFoundMs2 =>
                 {
-                    foreach (var ms2 in this.ms2SeriesDictionary)
+                    foreach (var protein in this.ms2SeriesDictionary.Keys.Where(key => !string.IsNullOrWhiteSpace(key)))
                     {
-                        ms2.Value.IsVisible = showFoundMs2;
+                        this.ms2SeriesDictionary[protein].IsVisible = showFoundMs2;
                     }
 
                     this.FeatureMap.InvalidatePlot(true);
                 });
-
-            // When ShowFoundUnIdMs2 changes, update all ms2 series
-            ////this.WhenAnyValue(x => x.ShowFoundUnIdMs2)
-            ////    .Where(_ => this.foundUnIdMs2S != null && this.FeatureMap != null)
-            ////    .Subscribe(showFoundMs2 =>
-            ////    {
-            ////        foreach (var ms2 in this.foundUnIdMs2S)
-            ////        {
-            ////            ms2.IsVisible = showFoundMs2;
-            ////        }
-
-            ////        this.FeatureMap.InvalidatePlot(true);
-            ////    });
 
             this.WhenAnyValue(x => x.IsLinearAbundanceAxis)
                 .Subscribe(isLinearAbundanceAxis => this.IsLogarithmicAbundanceAxis = !isLinearAbundanceAxis);
@@ -305,11 +283,13 @@
                     isLinear =>
                         {
                             this.featureColorAxis.Title = isLinear ? "Abundance" : "Abundance (Log10)";
-                            this.BuildPlot();
+                            this.BuildPlotCommand.Execute(null);
                         });
 
-            this.WhenAnyValue(x => x.FeatureSize).Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
-                .Subscribe(_ => this.BuildPlot());
+            this.WhenAnyValue(x => x.FeatureSize)
+                .Subscribe(_ => this.BuildPlotCommand.Execute(null));
+
+            this.WhenAnyValue(x => x.Features).Subscribe(_ => this.BuildPlotCommand.Execute(null));
 
             // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
             this.WhenAnyValue(x => x.XMinimum, x => x.XMaximum)
@@ -347,22 +327,23 @@
                 });
 
             IcParameters.Instance.WhenAnyValue(x => x.FeatureColors)
-                        .Select(colors => OxyPalette.Interpolate(5000, colors))
-                        .Subscribe(
-                            palette =>
+                        .Select(colors => OxyPalette.Interpolate(NumColors, colors))
+                        .Subscribe(palette =>
                             {
                                 this.featureColorAxis.Palette = palette;
-                                this.BuildPlot();
+                                this.BuildPlotCommand.Execute(null);
                             });
-
-            var featureSelectedCommand = ReactiveCommand.Create();
-            featureSelectedCommand.Subscribe(_ => this.FeatureSelectedImplementation());
-            this.FeatureSelectedCommand = featureSelectedCommand;
-
-            // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
-            var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => this.SaveAsImageImplementation());
-            this.SaveAsImageCommand = saveAsImageCommand;
+            IcParameters.Instance.WhenAnyValue(x => x.IdColors, x => x.Ms2ScanColor)
+                ////.Throttle(TimeSpan.FromMilliseconds(200), RxApp.TaskpoolScheduler)
+                .Subscribe(x =>
+                    {
+                        var colorList = new List<OxyColor> { Capacity = x.Item1.Length + 1 };
+                        colorList.Add(x.Item2);
+                        colorList.AddRange(x.Item1);
+                        this.colorDictionary.SetColors(colorList);
+                        this.ms2ColorAxis.Palette = this.colorDictionary.OxyPalette;
+                        this.BuildPlotCommand.Execute(null);
+                    });
         }
 
         /// <summary>
@@ -375,15 +356,16 @@
         /// feature map plot.
         /// </summary>
         public IReactiveCommand FeatureSelectedCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command for building the feature map plot.
+        /// </summary>
+        public IReactiveCommand BuildPlotCommand { get; private set; }
         
         /// <summary>
         /// Gets the Plot model for the feature map.
         /// </summary>
-        public PlotModel FeatureMap
-        {
-            get { return this.featureMap; }
-            private set { this.RaiseAndSetIfChanged(ref this.featureMap, value); }
-        }
+        public PlotModel FeatureMap { get; private set; }
 
         /// <summary>
         /// Gets or sets the minimum for the X axis of the feature map.
@@ -469,16 +451,6 @@
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the MS/MS points not associated with features are being shown
-        /// on the feature map plot.
-        /// </summary>
-        public bool ShowNotFoundMs2
-        {
-            get { return this.showNotFoundMs2; }
-            set { this.RaiseAndSetIfChanged(ref this.showNotFoundMs2, value); }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the manual adjustment text boxes should be displayed.
         /// </summary>
         public bool ShowManualAdjustment
@@ -507,28 +479,26 @@
         }
 
         /// <summary>
+        /// Gets or sets the list of features displayed on the feature plot.
+        /// </summary>
+        public List<Feature> Features
+        {
+            get { return this.features; }
+            set { this.RaiseAndSetIfChanged(ref this.features, value); }
+        }
+
+        /// <summary>
         /// Build feature map plot.
         /// </summary>
-        /// <param name="filteredFeatures">The features.</param>
-        public void BuildPlot(IEnumerable<Feature> filteredFeatures = null)
+        public void BuildPlot()
         {
             this.ResetFeaturePlot(); // clear existing plot
-            // Filter features based on score threshold, abundance threshold, points to display
-            ////var filteredFeatures = this.FilterData(this.features, abundance, points);
-
-            if (filteredFeatures != null)
-            {
-                this.features = filteredFeatures.ToList();
-            }
 
             // Calculate min/max abundance and min/max score
             if (this.features == null || this.features.Count == 0)
             {
                 return;
             }
-
-            ////this.MinimumAbundance = Math.Round(filteredFeatures[filteredFeatures.Count - 1].MinPoint.Abundance, 3);
-            ////this.MaximumAbundance = Math.Round(filteredFeatures[0].MinPoint.Abundance, 3);
 
             var minAbundance = this.features.Min(f => f.MinPoint.Abundance);
             var maxAbundance = this.features.Max(f => f.MaxPoint.Abundance);
@@ -551,27 +521,14 @@
 
             foreach (var feature in this.features)
             {
-                // Add ms2s associated with features
-                ////var prsms = feature.AssociatedMs2.Where(scan => this.ids.ContainsKey(scan)).Select(scan => this.ids[scan]).ToList();
-
-                // identified ms2s
+                // Identified MS/MS scans associated with feature
                 idPrSms.AddRange(feature.AssociatedPrSms);
-                ////if (feature.AssociatedPrSms.Count > 0)
-                ////{
-                ////    ////idPrSms.AddRange(prsms.Where(prsm => prsm.Sequence.Count > 0 && Math.Abs(prsm.Mass - feature1.MinPoint.Mass) < 1));
-                ////    ////var notIdentifiedPrSms = prsms.Where(prsm => prsm.Sequence.Count == 0 || Math.Abs(prsm.Mass - feature1.MinPoint.Mass) >= 1);
-                ////    ////////this.CreateMs2ScatterSeries(idPrSms, feature, this.ms2ColorAxis, "Identified Ms2s", Size, this.showFoundIdMs2);
-                ////    ////this.FeatureMap.Series.Add(ms2UnIdSeries);
-                ////}
-
-                ////var ms2UnIdSeries = this.CreateMs2ScatterSeries(notIdentifiedPrSms, feature, this.ms2ColorAxis, "Unidentified Ms2s", this.FeatureSize, this.showFoundUnIdMs2);
-                ////this.foundUnIdMs2S.Add(ms2UnIdSeries);
 
                 // Create and add feature
                 this.FeatureMap.Series.Add(this.CreateFeatureSeries(feature, this.featureColorAxis.Palette.Colors, this.FeatureSize, minAbundance, maxAbundance));
             }
 
-            this.AddMs2IdPoints(idPrSms, this.ms2ColorAxis, this.ShowFoundIdMs2);
+            this.AddIdentificationPoints(idPrSms);
             foreach (var series in this.ms2SeriesDictionary)
             {
                 this.FeatureMap.Series.Add(series.Value);
@@ -646,9 +603,7 @@
         /// Groups MS/MS ID points in series by protein name.
         /// </summary>
         /// <param name="prsms">The IDs.</param>
-        /// <param name="colorAxis">The color axis to select colors from.</param>
-        /// <param name="visible">Should the series be visible?</param>
-        private void AddMs2IdPoints(IEnumerable<PrSm> prsms, LinearColorAxis colorAxis, bool visible)
+        private void AddIdentificationPoints(IEnumerable<PrSm> prsms)
         {
             this.ms2SeriesDictionary.Clear();
             var prsmByProtein = new Dictionary<string, List<PrSm>>();
@@ -672,56 +627,22 @@
                     Mapping = p =>
                     {
                         var prsm = (PrSm)p;
-                        return new ScatterPoint(prsm.RetentionTime, prsm.Mass, 2.0, this.colorDictionary.GetColorCode(name));
+                        var size = prsm.Sequence.Count > 0 ? Math.Min((this.featureSize * 4) + 2, 4) : Math.Min(this.featureSize * 2, 4);
+                        return new ScatterPoint(prsm.RetentionTime, prsm.Mass, size, this.colorDictionary.GetColorCode(name));
                     },
                     Title = proteinName,
                     MarkerType = MarkerType.Cross,
-                    ColorAxisKey = colorAxis.Key,
+                    ColorAxisKey = this.ms2ColorAxis.Key,
                     TrackerFormatString =
                         "{0}" + Environment.NewLine +
                         "{1}: {2:0.###}" + Environment.NewLine +
                         "{2}: {4:0.###E0}",
-                    IsVisible = visible,
+                    IsVisible = proteinName == string.Empty ? this.showFoundUnIdMs2 : this.showFoundIdMs2,
                 };
 
                 this.ms2SeriesDictionary.Add(proteinName, scatterSeries);
             }
         }
-
-        /////// <summary>
-        /////// Create scatter series for MS/MS points.
-        /////// </summary>
-        /////// <param name="prsms">List of identifications containing MS/MS scans to create scatter points for.</param>
-        /////// <param name="feature">The feature that the MS/MS scans are associated with (can be null)</param>
-        /////// <param name="colorAxis">The color axis to use to color the scatter points</param>
-        /////// <param name="title">The title of the scatter series</param>
-        /////// <param name="size">The size of the scatter points</param>
-        /////// <param name="visible">Is this MS/MS series visible?</param>
-        /////// <returns>The scatter series for the MS/MS scans</returns>
-        ////private ScatterSeries CreateMs2ScatterSeries(IEnumerable<PrSm> prsms, Feature feature, LinearColorAxis colorAxis, string title, double size, bool visible)
-        ////{
-        ////    return new ScatterSeries
-        ////    {
-        ////        ItemsSource = prsms,
-        ////        Mapping = p =>
-        ////        {
-        ////            var prsm = (PrSm)p;
-        ////            return new ScatterPoint(
-        ////                prsm.RetentionTime,
-        ////                feature == null ? prsm.Mass : feature.MinPoint.Mass,
-        ////                Math.Max(size * 0.8, 3.0),
-        ////                this.colorDictionary.GetColorCode(prsm.ProteinName));
-        ////        },
-        ////        Title = title,
-        ////        MarkerType = MarkerType.Cross,
-        ////        ColorAxisKey = colorAxis.Key,
-        ////        TrackerFormatString =
-        ////            "{0}" + Environment.NewLine +
-        ////            "{1}: {2:0.###}" + Environment.NewLine +
-        ////            "{2}: {4:0.###E0}",
-        ////        IsVisible = visible,
-        ////    };
-        ////}
 
         /// <summary>
         /// Event handler for mouse click event to set SelectedDataPoint
@@ -811,10 +732,10 @@
                     Fill = OxyColor.FromArgb(100, 255, 255, 0),
                     Stroke = OxyColor.FromRgb(0, 255, 0),
                     StrokeThickness = 2,
-                    MinimumX = rt - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5),
-                    MaximumX = rt + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5),
-                    MinimumY = mass - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize),
-                    MaximumY = mass + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize),
+                    MinimumX = rt - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5),
+                    MaximumX = rt + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5),
+                    MinimumY = mass - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale),
+                    MaximumY = mass + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale),
                 };
 
                 this.FeatureMap.Annotations.Add(this.highlight);
@@ -822,10 +743,10 @@
             else
             {
                 this.highlight.TextPosition = new DataPoint(rt, mass);
-                this.highlight.MinimumX = rt - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5);
-                this.highlight.MaximumX = rt + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightSize * 0.5);
-                this.highlight.MinimumY = mass - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize);
-                this.highlight.MaximumY = mass + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightSize);
+                this.highlight.MinimumX = rt - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5);
+                this.highlight.MaximumX = rt + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5);
+                this.highlight.MinimumY = mass - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale);
+                this.highlight.MaximumY = mass + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale);
             }
         }
 

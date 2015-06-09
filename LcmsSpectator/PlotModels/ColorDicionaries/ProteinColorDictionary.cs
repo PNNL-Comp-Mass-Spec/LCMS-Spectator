@@ -12,6 +12,8 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+
     using OxyPlot;
 
     /// <summary>
@@ -19,11 +21,6 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
     /// </summary>
     public class ProteinColorDictionary
     {
-        /// <summary>
-        /// The maximum number of colors in this color dictionary.
-        /// </summary>
-        public const int MaxColors = 10;
-
         /// <summary>
         /// The dictionary mapping protein names to color indices.
         /// </summary>
@@ -47,32 +44,34 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
         /// <summary>
         /// Initializes a new instance of the <see cref="ProteinColorDictionary"/> class.
         /// </summary>
-        /// <param name="numColors">The maximum number of colors for OxyPalette.</param>
-        public ProteinColorDictionary(int numColors = 5000)
+        /// <param name="numInterpolatedColors">The maximum number of colors for OxyPalette.</param>
+        public ProteinColorDictionary(int numInterpolatedColors = 5000)
         {
             this.colorDictionary = new Dictionary<string, int> { { string.Empty, 0 } };
-            this.protIndex = 0;
+            this.protIndex = 1;
             this.offset = 0;
             this.multiplier = 2;
 
-            this.OxyPalette = OxyPalette.Interpolate(
-                                numColors,
-                                OxyColors.LightGreen,
-                                OxyColors.LightBlue,
-                                OxyColors.Turquoise,
-                                OxyColors.Olive,
-                                OxyColors.Brown,
-                                OxyColors.Cyan,
-                                OxyColors.Gray,
-                                OxyColors.Pink,
-                                OxyColors.LightSeaGreen,
-                                OxyColors.Beige);
+            var colors = new[]
+                             {
+                                 OxyColors.LightGreen, OxyColors.LightBlue, OxyColors.Turquoise, OxyColors.Olive,
+                                 OxyColors.Brown, OxyColors.Cyan, OxyColors.Gray, OxyColors.Pink, OxyColors.LightSeaGreen,
+                                 OxyColors.Beige
+                             };
+
+            this.OxyPalette = OxyPalette.Interpolate(numInterpolatedColors, colors);
+            this.MaxColors = colors.Length;
         }
 
         /// <summary>
         /// Gets the palette of OxyColors used to get colors from.
         /// </summary>
         public OxyPalette OxyPalette { get; private set; }
+
+        /// <summary>
+        /// Gets the maximum number of colors in this color dictionary.
+        /// </summary>
+        public int MaxColors { get; private set; }
 
         /// <summary>
         /// Get an OxyColor from the palette for a specific protein.
@@ -96,22 +95,39 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
                 int colorIndex;
                 do
                 {   // do not select the same color as unid color.
-                    var r = this.protIndex++ % MaxColors;
-                    colorIndex = Math.Min((r * (this.OxyPalette.Colors.Count / MaxColors)) + this.offset, this.OxyPalette.Colors.Count - 1);
+                    var r = this.protIndex++ % this.MaxColors;
+                    colorIndex = Math.Min((r * (this.OxyPalette.Colors.Count / this.MaxColors)) + this.offset, this.OxyPalette.Colors.Count - 1);
                 }
                 while (colorIndex == 0);
 
                 this.colorDictionary.Add(proteinName, colorIndex);
 
-                if (this.protIndex >= MaxColors)
+                if (this.protIndex >= this.MaxColors)
                 {
                     // When we've used up all the primary colors, use the colors midway in between
-                    this.offset = OxyPalette.Colors.Count / (this.multiplier * MaxColors);
+                    this.offset = OxyPalette.Colors.Count / (this.multiplier * this.MaxColors);
                     this.multiplier *= 2;
                 }
             }
 
             return this.colorDictionary[proteinName];
+        }
+
+        /// <summary>
+        /// Set new OxyColors for OxyColor palette.
+        /// </summary>
+        /// <param name="colors">The colors to create palette from.</param>
+        /// <param name="numInterpolatedColors">The maximum number of colors for OxyPalette.</param>
+        public void SetColors(IEnumerable<OxyColor> colors, int numInterpolatedColors = 5000)
+        {
+            var colorArr = colors.ToArray();
+            this.colorDictionary.Clear();
+            this.colorDictionary.Add(string.Empty, 0);
+            this.protIndex = 1;
+            this.offset = 0;
+            this.multiplier = 2;
+            this.OxyPalette = OxyPalette.Interpolate(numInterpolatedColors, colorArr);
+            this.MaxColors = colorArr.Length;
         }
     }
 }

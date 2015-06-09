@@ -83,11 +83,6 @@ namespace LcmsSpectator.Models
         public List<PrSm> AssociatedPrSms { get; private set; }
 
         /// <summary>
-        /// Gets a list of PRSMs for the unidentified MS/MS scans.
-        /// </summary>
-        public List<PrSm> UnidentifiedPrSms { get; set; } 
-
-        /// <summary>
         /// Gets the list of MS/MS scan number associated with this feature.
         /// </summary>
         public List<int> AssociatedMs2 { get; private set; }

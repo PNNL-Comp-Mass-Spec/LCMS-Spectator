@@ -11,7 +11,7 @@
 namespace LcmsSpectator.ViewModels
 {
     using System;
-    using System.Runtime.InteropServices;
+    using System.Collections.Generic;
     using System.Windows.Media;
     using ReactiveUI;
 
@@ -33,8 +33,16 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Initializes a new instance of the <see cref="ColorPaletteViewModel"/> class.
         /// </summary>
-        public ColorPaletteViewModel()
+        /// <param name="colors">The colors to initialize the palette with.</param>
+        public ColorPaletteViewModel(IEnumerable<Color> colors = null)
         {
+            this.Colors = new ReactiveList<Color>();
+
+            if (colors != null)
+            {
+                this.Colors.AddRange(colors);
+            }
+
             var paletteSelectedCommand = ReactiveCommand.Create();
             paletteSelectedCommand.Subscribe(_ => this.IsSelected = true);
             this.PaletteSelectedCommand = paletteSelectedCommand;
@@ -59,9 +67,9 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Gets or sets the colors for the palette.
+        /// Gets the colors for the palette.
         /// </summary>
-        public Color[] Colors { get; set; }
+        public ReactiveList<Color> Colors { get; private set; }
 
         /// <summary>
         /// Gets a command that marks the palette as selected.

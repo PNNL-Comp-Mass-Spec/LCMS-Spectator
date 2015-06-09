@@ -16,6 +16,8 @@ namespace LcmsSpectator.ViewModels
     using System.Reactive.Linq;
     using System.Windows.Media;
     using OxyPlot;
+    using OxyPlot.Wpf;
+
     using ReactiveUI;
 
     /// <summary>
@@ -32,51 +34,31 @@ namespace LcmsSpectator.ViewModels
             this.Colors = this.ColorViewModels.CreateDerivedCollection(colorViewModel => colorViewModel.SelectedColor);
             this.ColorPalettes = new ReactiveList<ColorPaletteViewModel> { ChangeTrackingEnabled = true };
 
-            this.ColorPalettes.Add(new ColorPaletteViewModel
-            {
-                Title = "Standard",
-                Colors = new[]
+            this.ColorPalettes.Add(new ColorPaletteViewModel(new[]
                 {
                     System.Windows.Media.Colors.Black, System.Windows.Media.Colors.Blue,
                     System.Windows.Media.Colors.Orange, System.Windows.Media.Colors.Red
-                }
-            });
-            this.ColorPalettes.Add(new ColorPaletteViewModel
-            {
-                Title = "Blue-Red",
-                Colors = new[]
+                }) { Title = "Standard" });
+            this.ColorPalettes.Add(new ColorPaletteViewModel(new[]
                 {
                     System.Windows.Media.Colors.Blue,
                     System.Windows.Media.Colors.Red
-                }
-            });
-            this.ColorPalettes.Add(new ColorPaletteViewModel
-            {
-                Title = "Single Color (Red)",
-                Colors = new[]
+                }) { Title = "Blue-Red" });
+            this.ColorPalettes.Add(new ColorPaletteViewModel(new[]
                 {
                     new Color { A = 255, R = 255, G = 200, B = 200 }, 
                     System.Windows.Media.Colors.Red
-                }
-            });
-            this.ColorPalettes.Add(new ColorPaletteViewModel
-            {
-                Title = "Single Color (Green)",
-                Colors = new[]
-                                            {
-                                                new Color { A = 255, R = 200, G = 255, B = 200 }, 
-                                                System.Windows.Media.Colors.Green
-                                            }
-            });
-            this.ColorPalettes.Add(new ColorPaletteViewModel
-            {
-                Title = "Single Color (Blue)",
-                Colors = new[]
-                                            {
-                                                new Color { A = 255, R = 200, G = 200, B = 255 }, 
-                                                System.Windows.Media.Colors.Blue
-                                            }
-            });
+                }) { Title = "Reds" });
+            this.ColorPalettes.Add(new ColorPaletteViewModel(new[]
+                {
+                    new Color { A = 255, R = 200, G = 255, B = 200 }, 
+                    System.Windows.Media.Colors.Green
+                }) { Title = "Greens" });
+            this.ColorPalettes.Add(new ColorPaletteViewModel(new[]
+                {
+                    new Color { A = 255, R = 200, G = 200, B = 255 }, 
+                    System.Windows.Media.Colors.Blue
+                }) { Title = "Blues" });
 
             this.ColorViewModels.ItemChanged.Where(x => x.PropertyName == "IsRemoveRequested")
                 .Select(x => x.Sender)
@@ -124,7 +106,7 @@ namespace LcmsSpectator.ViewModels
         /// <returns>Array of OxyColors.</returns>
         public OxyColor[] GetOxyColors()
         {
-            return this.ColorViewModels.Select(colorViewModel => colorViewModel.SelectedOxyColor).ToArray();
+            return this.ColorViewModels.Select(colorViewModel => colorViewModel.SelectedColor.ToOxyColor()).ToArray();
         }
 
         /// <summary>

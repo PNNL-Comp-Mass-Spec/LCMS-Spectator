@@ -12,8 +12,6 @@ namespace LcmsSpectator.ViewModels
 {
     using System;
     using System.Windows.Media;
-    using LcmsSpectator.DialogServices;
-    using OxyPlot;
     using ReactiveUI;
 
     /// <summary>
@@ -50,21 +48,6 @@ namespace LcmsSpectator.ViewModels
         {
             get { return this.selectedColor; }
             set { this.RaiseAndSetIfChanged(ref this.selectedColor, value); }
-        }
-
-        /// <summary>
-        /// Gets the selected color as an OxyColor.
-        /// </summary>
-        public OxyColor SelectedOxyColor
-        {
-            get
-            {
-                return OxyColor.FromArgb(
-                            this.SelectedColor.A,
-                            this.SelectedColor.R,
-                            this.SelectedColor.G,
-                            this.SelectedColor.B);
-            }
         }
 
         /// <summary>

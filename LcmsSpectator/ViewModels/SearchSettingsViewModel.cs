@@ -295,7 +295,7 @@ namespace LcmsSpectator.ViewModels
                                                               async _ => await this.RunImplementation());
 
             // Prev tab command
-            var prevTabCommand = ReactiveCommand.Create(                    
+            var prevTabCommand = ReactiveCommand.Create(
                 Observable.Merge(
                         new[]
                             {
@@ -306,8 +306,7 @@ namespace LcmsSpectator.ViewModels
             this.PrevTabCommand = prevTabCommand;
 
             // Next tab command
-            var nextTabCommand =
-                ReactiveCommand.Create(
+            var nextTabCommand = ReactiveCommand.Create(
                     Observable.Merge(
                         new[]
                             {

@@ -144,7 +144,7 @@ namespace LcmsSpectator.Config
         /// <summary>
         /// The colors for the MS/MS scan points on the feature map.
         /// </summary>
-        private OxyColor[] ms2ScanColors;
+        private OxyColor ms2ScanColor;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="IcParameters"/> class from being created. 
@@ -187,6 +187,14 @@ namespace LcmsSpectator.Config
             this.ExportImageDpi = 96;
 
             this.FeatureColors = new[] { OxyColors.Black, OxyColors.Blue, OxyColors.Orange, OxyColors.Red };
+            this.IdColors = new[]
+            {
+                OxyColors.LightGreen, OxyColors.LightBlue, OxyColors.Turquoise, OxyColors.Olive,
+                OxyColors.Brown, OxyColors.Cyan, OxyColors.Gray, OxyColors.Pink, OxyColors.LightSeaGreen,
+                OxyColors.Beige
+            };
+
+            this.Ms2ScanColor = OxyColors.OliveDrab;
         }
 
         /// <summary>
@@ -364,12 +372,12 @@ namespace LcmsSpectator.Config
         }
 
         /// <summary>
-        /// Gets or sets the colors for the MS/MS scan points on the feature map.
+        /// Gets or sets the color for the MS/MS scan points on the feature map.
         /// </summary>
-        public OxyColor[] Ms2ScanColors
+        public OxyColor Ms2ScanColor
         {
-            get { return this.ms2ScanColors; }
-            set { this.RaiseAndSetIfChanged(ref this.ms2ScanColors, value); }
+            get { return this.ms2ScanColor; }
+            set { this.RaiseAndSetIfChanged(ref this.ms2ScanColor, value); }
         }
 
         /// <summary>

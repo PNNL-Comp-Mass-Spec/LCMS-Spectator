@@ -110,12 +110,11 @@ namespace LcmsSpectator.ViewModels.Plots
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
                 .Select(x => this.proMexModel.GetFilteredFeatures(x.Item1, x.Item2))
                 .Where(filteredFeatures => filteredFeatures.Count > 0)
-                .Subscribe(
-                    filteredFeatures =>
+                .Subscribe(filteredFeatures =>
                         {
                             this.MinimumAbundance = filteredFeatures.Min(feature => feature.MinPoint.Abundance);
                             this.MaximumAbundance = filteredFeatures.Max(feature => feature.MinPoint.Abundance);
-                            this.FeatureMapViewModel.BuildPlot(filteredFeatures);
+                            this.FeatureMapViewModel.Features = filteredFeatures.ToList();
                         });
 
             var openFeatureFileCommand = ReactiveCommand.Create();
@@ -235,7 +234,9 @@ namespace LcmsSpectator.ViewModels.Plots
                 this.MaximumAbundanceThreshold = Math.Log10(this.proMexModel.AbsoluteAbundanceMaximum);
                 this.MinimumAbundanceThreshold = Math.Log10(this.proMexModel.AbsoluteAbundanceMinimum);
                 this.AbundanceThreshold = Math.Max(this.maximumAbundanceThreshold, this.minimumAbundance);
-                this.FeatureMapViewModel.BuildPlot(this.proMexModel.GetFilteredFeatures(this.AbundanceThreshold, this.PointsDisplayed));
+                this.FeatureMapViewModel.Features = this.proMexModel.GetFilteredFeatures(
+                    this.AbundanceThreshold,
+                    this.PointsDisplayed).ToList();
                 ////this.yaxis.AbsoluteMinimum = 0;
                 ////this.yaxis.AbsoluteMaximum = this.features.Max(f => f.MinPoint.Mass);
                 ////this.xaxis.AbsoluteMinimum = 0;
