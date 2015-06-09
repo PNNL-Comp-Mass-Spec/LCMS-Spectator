@@ -145,7 +145,7 @@ namespace LcmsSpectator.ViewModels.Data
             prsmObservable.Subscribe(prsm => this.CreateSequenceViewModel.SelectedPrSm = prsm);
 
             // When the prsm updates, update the feature map
-            prsmObservable.Where(_ => this.FeatureMapViewModel != null).Subscribe(prsm => this.FeatureMapViewModel.SelectedPrSm = prsm);
+            prsmObservable.Where(_ => this.FeatureMapViewModel != null).Subscribe(prsm => this.FeatureMapViewModel.FeatureMapViewModel.SelectedPrSm = prsm);
 
             // When prsm updates, update sequence in spectrum plot view model
             prsmObservable.Where(prsm => prsm.Sequence != null && this.SpectrumViewModel != null)
@@ -367,7 +367,7 @@ namespace LcmsSpectator.ViewModels.Data
             this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs);
             this.SpectrumViewModel = new SpectrumViewModel(this.dialogService, this.LcMs);
             this.IonListViewModel = new IonListViewModel(this.LcMs);
-            this.FeatureMapViewModel = new FeatureViewerViewModel(this.dialogService, (LcMsRun)this.LcMs);
+            this.FeatureMapViewModel = new FeatureViewerViewModel((LcMsRun)this.LcMs, this.dialogService);
             this.InitializeWirings(); // Initialize the wirings for updating these view models
 
             // Create prsms for scan numbers (unidentified)
@@ -446,7 +446,7 @@ namespace LcmsSpectator.ViewModels.Data
             .Subscribe(labels => this.XicViewModel.HeavyPrecursorPlotViewModel.Ions = labels);
 
             // When an ID is selected on FeatureMap, update selectedPrSm
-            this.FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => this.SelectedPrSm = prsm);
+            this.FeatureMapViewModel.FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => this.SelectedPrSm = prsm);
         }
 
         /// <summary>

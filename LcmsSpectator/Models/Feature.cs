@@ -20,27 +20,72 @@ namespace LcmsSpectator.Models
     public class Feature
     {
         /// <summary>
+        /// The point for the lowest retention time of the feature.
+        /// </summary>
+        private FeaturePoint minPoint;
+
+        /// <summary>
+        /// The point for the highest retention time of the feature.
+        /// </summary>
+        private FeaturePoint maxPoint;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Feature"/> class.
         /// </summary>
         public Feature()
         {
+            this.AssociatedPrSms = new List<PrSm>();
             this.AssociatedMs2 = new List<int>();
         }
 
         /// <summary>
         /// Gets or sets the point for the lowest retention time of the feature.
         /// </summary>
-        public FeaturePoint MinPoint { get; set; }
+        public FeaturePoint MinPoint
+        {
+            get
+            {
+                return this.minPoint;
+            }
+
+            set
+            {
+                this.minPoint = value;
+                this.minPoint.Feature = this;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the point for the highest retention time of the feature.
         /// </summary>
-        public FeaturePoint MaxPoint { get; set; }
+        public FeaturePoint MaxPoint
+        {
+            get
+            {
+                return this.maxPoint;
+            }
+
+            set
+            {
+                this.maxPoint = value;
+                this.maxPoint.Feature = this;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the ID of the feature.
         /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// Gets the list of MS/MS IDs associated with this feature.
+        /// </summary>
+        public List<PrSm> AssociatedPrSms { get; private set; }
+
+        /// <summary>
+        /// Gets a list of PRSMs for the unidentified MS/MS scans.
+        /// </summary>
+        public List<PrSm> UnidentifiedPrSms { get; set; } 
 
         /// <summary>
         /// Gets the list of MS/MS scan number associated with this feature.
@@ -56,6 +101,11 @@ namespace LcmsSpectator.Models
             /// Gets or sets the ID of the feature.
             /// </summary>
             public int Id { get; set; }
+
+            /// <summary>
+            /// Gets or sets the feature that this point belongs to.
+            /// </summary>
+            public Feature Feature { get; set; }
 
             /// <summary>
             /// Gets or sets the MS1 scan number.
