@@ -131,7 +131,7 @@ namespace LcmsSpectator.Readers
             // Show neighboring charge state XICs by default for MSPathFinder results
             if (toolType != null && toolType == ToolType.MsPathFinder)
             {
-                dataSetViewModel.XicViewModel.PrecursorViewMode = PrecursorViewMode.Charges;
+                dataSetViewModel.XicViewModel.PrecursorPlotViewModel.PrecursorViewMode = PrecursorViewMode.Charges;
             }
 
             // Open ID file

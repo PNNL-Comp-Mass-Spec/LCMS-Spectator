@@ -19,6 +19,8 @@ namespace LcmsSpectator.ViewModels.Plots
 
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Models;
+    using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Modifications;
 
     using OxyPlot.Axes;
@@ -82,12 +84,6 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showHeavy;
 
         /// <summary>
-        /// The type of XICs shown 
-        /// (isotopes of the precursor ion or neighboring charge states of the precursor ion)
-        /// </summary>
-        private PrecursorViewMode precursorViewMode;
-
-        /// <summary>
         /// A value indicating whether or not the change to an axis was caused
         /// by synchronizing axes.
         /// </summary>
@@ -110,7 +106,13 @@ namespace LcmsSpectator.ViewModels.Plots
                 AbsoluteMaximum = lcms.MaxLcScan + 1
             };
             this.fragmentXAxis.AxisChanged += this.XAxisChanged;
-            this.FragmentPlotViewModel = new XicPlotViewModel(this.dialogService, lcms, "Fragment XIC", this.fragmentXAxis, false);
+            this.FragmentPlotViewModel = new XicPlotViewModel(
+                                        this.dialogService,
+                                        new FragmentationSequenceViewModel(),
+                                        lcms,
+                                        "Fragment XIC",
+                                        this.fragmentXAxis,
+                                        false);
             this.heavyFragmentXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
@@ -120,7 +122,13 @@ namespace LcmsSpectator.ViewModels.Plots
                 AbsoluteMaximum = lcms.MaxLcScan + 1
             };
             this.heavyFragmentXAxis.AxisChanged += this.XAxisChanged;
-            this.HeavyFragmentPlotViewModel = new XicPlotViewModel(this.dialogService, lcms, "Heavy Fragment XIC", this.heavyFragmentXAxis, false);
+            this.HeavyFragmentPlotViewModel = new XicPlotViewModel(
+                this.dialogService,
+                new FragmentationSequenceViewModel(),
+                lcms,
+                "Heavy Fragment XIC",
+                this.heavyFragmentXAxis,
+                false);
             this.precursorXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
@@ -130,7 +138,11 @@ namespace LcmsSpectator.ViewModels.Plots
                 AbsoluteMaximum = lcms.MaxLcScan + 1
             };
             this.precursorXAxis.AxisChanged += this.XAxisChanged;
-            this.PrecursorPlotViewModel = new XicPlotViewModel(this.dialogService, lcms, "Precursor XIC", this.precursorXAxis) { IsPlotUpdating = true };
+            this.PrecursorPlotViewModel = new XicPlotViewModel(this.dialogService, new PrecursorSequenceIonViewModel(), lcms, "Precursor XIC", this.precursorXAxis)
+            {
+                IsPlotUpdating = true,
+            };
+
             this.heavyPrecursorXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
@@ -140,15 +152,18 @@ namespace LcmsSpectator.ViewModels.Plots
                 AbsoluteMaximum = lcms.MaxLcScan + 1
             };
             this.heavyPrecursorXAxis.AxisChanged += this.XAxisChanged;
-            this.HeavyPrecursorPlotViewModel = new XicPlotViewModel(this.dialogService, lcms, "Heavy Precursor XIC", this.heavyPrecursorXAxis);
+            this.HeavyPrecursorPlotViewModel = new XicPlotViewModel(
+                this.dialogService,
+                new PrecursorSequenceIonViewModel(),
+                lcms,
+                "Heavy Precursor XIC",
+                this.heavyPrecursorXAxis);
 
             this.showHeavy = false;
             this.showFragmentXic = false;
             var openHeavyModificationsCommand = ReactiveCommand.Create();
             openHeavyModificationsCommand.Subscribe(_ => this.OpenHeavyModificationsImplentation());
             this.OpenHeavyModificationsCommand = openHeavyModificationsCommand;
-
-            this.PrecursorViewModes = new ReactiveList<PrecursorViewMode>(Enum.GetValues(typeof(PrecursorViewMode)).Cast<PrecursorViewMode>());
 
             // Update area ratios when the area of any of the plots changes
             this.WhenAny(x => x.FragmentPlotViewModel.Area, x => x.HeavyFragmentPlotViewModel.Area, (x, y) => x.Value / y.Value)
@@ -163,6 +178,15 @@ namespace LcmsSpectator.ViewModels.Plots
                     this.FragmentPlotViewModel.IsPlotUpdating = x.Item1;
                     this.HeavyFragmentPlotViewModel.IsPlotUpdating = x.Item1 && x.Item2;
                     this.HeavyPrecursorPlotViewModel.IsPlotUpdating = x.Item2;
+                });
+            this.WhenAnyValue(x => x.FragmentationSequence)
+                .Where(fragSeq => fragSeq != null)
+                .Subscribe(fragSeq =>
+                {
+                    this.FragmentPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                    this.HeavyFragmentPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                    this.PrecursorPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                    this.HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
                 });
         }
 
@@ -190,11 +214,6 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Gets command that opens window for selecting heavy modifications for light and heavy peptides.
         /// </summary>
         public IReactiveCommand OpenHeavyModificationsCommand { get; private set; }
-
-        /// <summary>
-        /// Gets a list of possible precursor view modes (isotopes or charges)
-        /// </summary>
-        public ReactiveList<PrecursorViewMode> PrecursorViewModes { get; private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the fragment XICs are shown.
@@ -231,14 +250,12 @@ namespace LcmsSpectator.ViewModels.Plots
             get { return this.precursorAreaRatioLabel.Value; }
         }
 
-        /// <summary>
-        /// Gets or sets the type of XICs shown 
-        /// (isotopes of the precursor ion or neighboring charge states of the precursor ion)
-        /// </summary>
-        public PrecursorViewMode PrecursorViewMode
+        private FragmentationSequence fragmentationSequence;
+
+        public FragmentationSequence FragmentationSequence
         {
-            get { return this.precursorViewMode; }
-            set { this.RaiseAndSetIfChanged(ref this.precursorViewMode, value); }
+            get { return this.fragmentationSequence; }
+            set { this.RaiseAndSetIfChanged(ref this.fragmentationSequence, value); }
         }
 
         /// <summary>

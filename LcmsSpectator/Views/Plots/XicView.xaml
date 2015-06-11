@@ -83,6 +83,12 @@
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowPointMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
+                        <Separator />
+                        <MenuItem Header="Mode" DataContext="{Binding FragmentationSequenceViewModel}">
+                            <MenuItem Header="Isotopes" IsCheckable="True" IsChecked="{Binding IsotopeViewMode, Mode=TwoWay}" />
+                            <MenuItem Header="Neighboring Charges" IsCheckable="True" IsChecked="{Binding ChargeViewMode, Mode=TwoWay}" />
+                        </MenuItem>
+                        <Separator />
                         <MenuItem Header="Save as _Image" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
@@ -136,7 +142,7 @@
             </Grid.ColumnDefinitions>
             <CheckBox Grid.Column="0" IsChecked="{Binding ShowFragmentXic}" Checked="ShowFragment_OnChecked" Unchecked="ShowFragment_OnUnChecked" Name="ShowFragment" >Show Fragment XIC</CheckBox>
             <CheckBox Grid.Column="1" IsChecked="{Binding ShowHeavy}" Checked="ShowHeavy_OnChecked" Unchecked="ShowHeavy_OnUnchecked" Name="ShowHeavy">Show Heavy</CheckBox>
-            <ComboBox Grid.Column="2" ItemsSource="{Binding PrecursorViewModes}" SelectedItem="{Binding PrecursorViewMode}" Width="100" HorizontalAlignment="Right" Margin="0,0,5,0" />
+            <!--<ComboBox Grid.Column="2" ItemsSource="{Binding PrecursorViewModes}" SelectedItem="{Binding PrecursorViewMode}" Width="100" HorizontalAlignment="Right" Margin="0,0,5,0" />-->
         </Grid>
     </Grid>
 </UserControl>

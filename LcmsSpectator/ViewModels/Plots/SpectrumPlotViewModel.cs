@@ -16,7 +16,6 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
-    using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.TopDown.Scoring;
     using LcmsSpectator.Config;
@@ -28,7 +27,6 @@ namespace LcmsSpectator.ViewModels.Plots
     using OxyPlot;
     using OxyPlot.Annotations;
     using OxyPlot.Axes;
-    using OxyPlot.Series;
     using ReactiveUI;
 
     /// <summary>
@@ -81,12 +79,12 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// List of ions that are highlighted on the spectrum plot.
         /// </summary>
-        private ReactiveList<LabeledIonViewModel> ions;
+        private LabeledIonViewModel[] ions;
 
         /// <summary>
-        /// The sequence of the ions currently displayed on the spectrum plot.
+        /// The view model for the fragmentation sequence (fragment ion generator)
         /// </summary>
-        private Sequence sequence;
+        private IFragmentationSequenceViewModel fragmentationSequenceViewModel;
 
         /// <summary>
         /// The spectrum that is currently displayed on the spectrum plot.
@@ -154,11 +152,13 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Initializes a new instance of the SpectrumPlotViewModel class. 
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from ViewModel.</param>
+        /// <param name="fragSeqVm">Gets or sets the view model for the fragmentation sequence (fragment ion generator)</param>
         /// <param name="multiplier">How much padding should be before the lowest peak and after the highest peak?</param>
         /// <param name="autoZoomXAxis">Should this view model automatically zoom the plot?</param>
-        public SpectrumPlotViewModel(IMainDialogService dialogService, double multiplier, bool autoZoomXAxis = true)
+        public SpectrumPlotViewModel(IMainDialogService dialogService, IFragmentationSequenceViewModel fragSeqVm, double multiplier, bool autoZoomXAxis = true)
         {
             this.dialogService = dialogService;
+            this.FragmentationSequenceViewModel = fragSeqVm;
             this.autoZoomXAxis = autoZoomXAxis;
             this.errorMapViewModel = new ErrorMapViewModel(dialogService);
             this.ShowUnexplainedPeaks = true;
@@ -182,7 +182,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
             };
 
-            this.ions = new ReactiveList<LabeledIonViewModel>();
+            this.ions = new LabeledIonViewModel[0];
 
             // When Spectrum updates, clear the filtered spectrum, deconvoluted spectrum, and filtered+deconvoluted spectrum
             this.WhenAnyValue(x => x.Spectrum)
@@ -201,55 +201,59 @@ namespace LcmsSpectator.ViewModels.Plots
             // When Spectrum or ions change, or deconvoluted or filtered spectrum are selected, update spectrum plot
             this.WhenAnyValue(
                               x => x.Spectrum,
-                              x => x.Ions,
+                              x => x.FragmentationSequenceViewModel.LabeledIonViewModels,
                               x => x.ShowDeconvolutedSpectrum,
                               x => x.ShowFilteredSpectrum,
                               x => x.ShowUnexplainedPeaks)
                 .Where(x => x.Item1 != null && x.Item2 != null)
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
                 .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum))))
-                .Subscribe(this.UpdatePlotModel);       // Update plot when data changes
+                .Subscribe(peakDataPoints =>
+                {
+                    this.ions = this.FragmentationSequenceViewModel.LabeledIonViewModels;
+                    this.UpdatePlotModel(peakDataPoints);
+                });       // Update plot when data changes
+
+            // Update ions when relative intensity threshold changes.
+            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
+            {
+                var precFragVm = this.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
+                if (precFragVm != null)
+                {
+                    precFragVm.RelativeIntensityThreshold = precRelInt;
+                }
+            });
 
             // Update plot when settings change
-            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold, x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
-                        .Where(_ => this.Ions != null)
+            IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
                         .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                        .SelectMany(async x => await Task.WhenAll(this.Ions.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum, false))))
+                        .SelectMany(async x => await Task.WhenAll(this.ions.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum, false))))
                         .Subscribe(this.UpdatePlotModel);
-
-            // Show/hide series when ion is selected/unselected
-            this.WhenAnyValue(x => x.Ions)
-                .Where(ions => ions != null)
-                .Subscribe(ions => ions.ItemChanged.Where(x => x.PropertyName == "Selected")
-                .Select(x => x.Sender)
-                .Subscribe(this.LabeledIonSelectedChanged));
 
             // When AutoAdjustYAxis changes, update value in plot model.
             this.WhenAnyValue(x => x.AutoAdjustYAxis)
-                .Subscribe(
-                    autoAdjust =>
-                        {
-                            this.PlotModel.AutoAdjustYAxis = autoAdjust;
-                            this.PlotModel.YAxis.IsZoomEnabled = !autoAdjust;
-                            this.PlotModel.YAxis.IsPanEnabled = !autoAdjust;
+                .Subscribe(autoAdjust =>
+                {
+                    this.PlotModel.AutoAdjustYAxis = autoAdjust;
+                    this.PlotModel.YAxis.IsZoomEnabled = !autoAdjust;
+                    this.PlotModel.YAxis.IsPanEnabled = !autoAdjust;
 
-                            if (autoAdjust)
-                            {
-                                this.PlotModel.XAxis.Reset();
-                                this.PlotModel.YAxis.Reset();
-                            }
-                        });
+                    if (autoAdjust)
+                    {
+                        this.PlotModel.XAxis.Reset();
+                        this.PlotModel.YAxis.Reset();
+                    }
+                });
             
             // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
             this.WhenAnyValue(x => x.XMinimum, x => x.XMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Where(x => !this.xaxis.ActualMinimum.Equals(x.Item1) || !this.xaxis.ActualMaximum.Equals(x.Item2))
-                .Subscribe(
-                    x =>
-                    {
-                        this.xaxis.Zoom(x.Item1, x.Item2);
-                        this.PlotModel.InvalidatePlot(false);
-                    });
+                .Subscribe(x =>
+                {
+                    this.xaxis.Zoom(x.Item1, x.Item2);
+                    this.PlotModel.InvalidatePlot(false);
+                });
             this.WhenAnyValue(y => y.YMinimum, y => y.YMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Where(y => !this.PlotModel.YAxis.ActualMinimum.Equals(y.Item1) || !this.PlotModel.YAxis.ActualMaximum.Equals(y.Item2))
@@ -406,21 +410,12 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Gets or sets the sequence currently displayed on the spectrum plot.
+        /// Gets the view model for the fragmentation sequence (fragment ion generator)
         /// </summary>
-        public Sequence Sequence
+        public IFragmentationSequenceViewModel FragmentationSequenceViewModel
         {
-            get { return this.sequence; }
-            set { this.RaiseAndSetIfChanged(ref this.sequence, value); }
-        }
-
-        /// <summary>
-        /// Gets or sets a list of ions that are highlighted on the spectrum plot.
-        /// </summary>
-        public ReactiveList<LabeledIonViewModel> Ions
-        {
-            get { return this.ions; }
-            set { this.RaiseAndSetIfChanged(ref this.ions, value); }
+            get { return this.fragmentationSequenceViewModel; }
+            private set { this.RaiseAndSetIfChanged(ref this.fragmentationSequenceViewModel, value); }
         }
 
         /// <summary>
@@ -444,7 +439,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 return;
             }
 
-            this.errorMapViewModel.SetData(this.Sequence, peakDataPoints);
+            this.errorMapViewModel.SetData(this.FragmentationSequenceViewModel.FragmentationSequence.Sequence, peakDataPoints);
             this.PlotModel.Series.Clear();
             this.PlotModel.Annotations.Clear();
             var currentSpectrum = this.GetSpectrum();
@@ -480,7 +475,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 this.spectrumDirty = false;
             }
 
-            var maxCharge = peakDataPoints.Length > 0 ? this.Ions.Max(x => x.IonType.Charge) : 2;
+            var maxCharge = peakDataPoints.Length > 0 ? this.ions.Max(x => x.IonType.Charge) : 2;
             maxCharge = Math.Max(maxCharge, 2);
             var colors = new IonColorDictionary(maxCharge);
             foreach (var points in peakDataPoints)
@@ -527,38 +522,6 @@ namespace LcmsSpectator.ViewModels.Plots
             this.PlotModel.Title = this.Title;
             this.PlotModel.InvalidatePlot(true);
             this.PlotModel.AdjustForZoom();
-        }
-
-        /// <summary>
-        /// An ion has been selected or deselected. Find the ion peaks and annotation on the map
-        /// and toggle their visibility.
-        /// </summary>
-        /// <param name="labeledIonVm">Ion that has been selected or deselected.</param>
-        private void LabeledIonSelectedChanged(LabeledIonViewModel labeledIonVm)
-        {
-            var label = labeledIonVm.Label;
-            StemSeries selectedLineSeries = null;
-            foreach (var series in this.PlotModel.Series)
-            {
-                var lineseries = series as StemSeries;
-                if (lineseries != null && lineseries.Title == label)
-                {
-                    lineseries.IsVisible = labeledIonVm.Selected;
-                    selectedLineSeries = lineseries;
-                    this.PlotModel.AdjustForZoom();
-                }
-            }
-
-            foreach (var annotation in this.PlotModel.Annotations)
-            {
-                var textAnnotation = annotation as TextAnnotation;
-                if (textAnnotation != null && textAnnotation.Text == label && selectedLineSeries != null)
-                {
-                    textAnnotation.TextColor = labeledIonVm.Selected ? selectedLineSeries.Color : OxyColors.Transparent;
-                    textAnnotation.Background = labeledIonVm.Selected ? OxyColors.White : OxyColors.Transparent;
-                    this.PlotModel.InvalidatePlot(true);
-                }
-            }
         }
 
         /// <summary>

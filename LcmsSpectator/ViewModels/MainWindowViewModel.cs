@@ -28,7 +28,6 @@ namespace LcmsSpectator.ViewModels
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.Writers;
-
     using ReactiveUI;
 
     /// <summary>

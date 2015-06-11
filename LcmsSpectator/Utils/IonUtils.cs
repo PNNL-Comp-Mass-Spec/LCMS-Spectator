@@ -349,7 +349,7 @@ namespace LcmsSpectator.Utils
         /// <param name="sequence">The sequence to convert to heavy sequence.</param>
         /// <param name="mods">The heavy peptide modifications.</param>
         /// <returns>Sequence with heavy peptide modifications.</returns>
-        public static Sequence GetHeavySequence(Sequence sequence, ReactiveList<SearchModification> mods)
+        public static Sequence GetHeavySequence(Sequence sequence, SearchModification[] mods)
         {
             sequence = new Sequence(sequence);
             if (sequence.Count == 0)

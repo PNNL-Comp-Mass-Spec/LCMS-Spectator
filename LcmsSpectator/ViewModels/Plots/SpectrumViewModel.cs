@@ -12,11 +12,15 @@ namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
     using System.Linq;
+    using System.Reactive.Linq;
 
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
 
+    using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Models;
+    using LcmsSpectator.ViewModels.Data;
 
     using OxyPlot.Axes;
 
@@ -76,9 +80,17 @@ namespace LcmsSpectator.ViewModels.Plots
         public SpectrumViewModel(IMainDialogService dialogService, ILcMsRun lcms)
         {
             this.lcms = lcms;
-            this.Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.05);
-            this.PrevMs1SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
-            this.NextMs1SpectrumViewModel = new SpectrumPlotViewModel(dialogService, 1.1, false);
+            this.Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, new FragmentationSequenceViewModel(), 1.05);
+            this.PrevMs1SpectrumViewModel = new SpectrumPlotViewModel(
+                dialogService,
+                new PrecursorSequenceIonViewModel { PrecursorViewMode = PrecursorViewMode.Charges },
+                1.1,
+                false);
+            this.NextMs1SpectrumViewModel = new SpectrumPlotViewModel(
+                dialogService,
+                new PrecursorSequenceIonViewModel { PrecursorViewMode = PrecursorViewMode.Charges },
+                1.1,
+                false);
 
             // When prev ms1 spectrum plot is zoomed/panned, next ms1 spectrum plot should zoom/pan
             this.isAxisInternalChange = false;
@@ -106,6 +118,15 @@ namespace LcmsSpectator.ViewModels.Plots
                     this.PrevMs1SpectrumViewModel.XAxis.Zoom(this.NextMs1SpectrumViewModel.XAxis.ActualMinimum, this.NextMs1SpectrumViewModel.XAxis.ActualMaximum);
                 this.isAxisInternalChange = false;
             };
+
+            this.WhenAnyValue(x => x.FragmentationSequence)
+                .Where(fragSeq => fragSeq != null)
+                .Subscribe(fragSeq =>
+                {
+                    this.Ms2SpectrumViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                    this.PrevMs1SpectrumViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                    this.NextMs1SpectrumViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                });
 
             // By default, MS2 Spectrum is shown in the primary view
             this.PrimarySpectrumViewModel = this.Ms2SpectrumViewModel;
@@ -184,6 +205,14 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.secondary2ViewModel; }
             private set { this.RaiseAndSetIfChanged(ref this.secondary2ViewModel, value); }
+        }
+
+        private FragmentationSequence fragmentationSequence;
+
+        public FragmentationSequence FragmentationSequence
+        {
+            get { return this.fragmentationSequence; }
+            set { this.RaiseAndSetIfChanged(ref this.fragmentationSequence, value); }
         }
 
         /// <summary>

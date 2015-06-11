@@ -5,7 +5,6 @@
     using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
-    using System.Threading.Tasks;
 
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
@@ -334,7 +333,6 @@
                                 this.BuildPlotCommand.Execute(null);
                             });
             IcParameters.Instance.WhenAnyValue(x => x.IdColors, x => x.Ms2ScanColor)
-                ////.Throttle(TimeSpan.FromMilliseconds(200), RxApp.TaskpoolScheduler)
                 .Subscribe(x =>
                     {
                         var colorList = new List<OxyColor> { Capacity = x.Item1.Length + 1 };

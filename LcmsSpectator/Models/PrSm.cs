@@ -415,6 +415,20 @@ namespace LcmsSpectator.Models
         }
 
         /// <summary>
+        /// Gets the fragmentation sequence for the PRSM.
+        /// </summary>
+        /// <returns>The FragmentationSequence.</returns>
+        public FragmentationSequence GetFragmentationSequence()
+        {
+            if (this.lcms == null)
+            {
+                return null;
+            }
+
+            return new FragmentationSequence(this.sequence, this.charge, this.lcms, this.Ms2Spectrum.ActivationMethod);
+        }
+
+        /// <summary>
         /// Get location of modifications in sequence.
         /// </summary>
         /// <returns>String containing modifications in the form: ResidueIndex[Modification]</returns>

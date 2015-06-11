@@ -4,8 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:wpf="http://oxyplot.org/wpf"
+             xmlns:utils="clr-namespace:LcmsSpectator.Utils"
              mc:Ignorable="d" Background="White"
              d:DesignHeight="300" d:DesignWidth="900">
+    <UserControl.Resources>
+        <utils:NeutralLossToStringConverter x:Key="NeutralLossToString" />
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="75*" />
@@ -42,6 +46,27 @@
                         <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                         <MenuItem Header="Open _Error Map" Command="{Binding OpenErrorMapCommand}" />
                         <MenuItem Header="Run MsPf Search" Command="{Binding StartMsPfSearchCommand}" Name="StartMsPfSearch" />
+                        <Separator />
+                        <MenuItem Header="Ion Types" ItemsSource="{Binding BaseIonTypes}" DataContext="{Binding FragmentationSequenceViewModel}">
+                            <MenuItem.ItemContainerStyle>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="{Binding BaseIonType.Symbol}" />
+                                    <Setter Property="IsCheckable" Value="True" />
+                                    <Setter Property="IsChecked" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
+                        <MenuItem Header="Neutral Losses" ItemsSource="{Binding NeutralLosses}" DataContext="{Binding FragmentationSequenceViewModel}">
+                            <MenuItem.ItemContainerStyle>
+                                <Style TargetType="MenuItem">
+                                    <Setter Property="Header" Value="{Binding NeutralLoss, Converter={StaticResource NeutralLossToString}}" />
+                                    <Setter Property="IsCheckable" Value="True" />
+                                    <Setter Property="IsChecked" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                </Style>
+                            </MenuItem.ItemContainerStyle>
+                        </MenuItem>
+                        <MenuItem Header="Select Fragment Ions" Command="{Binding SelectFragmentIonsCommand}" />
+                        <MenuItem Header="Show Precursor Ions" IsCheckable="True" IsChecked="{Binding AddPrecursorIons, Mode=TwoWay}" DataContext="{Binding FragmentationSequenceViewModel}" />
                         <Separator />
                         <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" Name="AutoAdjustYCheck" />
                         <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustmentCheck" />

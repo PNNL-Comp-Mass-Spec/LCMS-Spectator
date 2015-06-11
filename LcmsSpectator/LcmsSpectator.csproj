@@ -185,6 +185,7 @@
     <Compile Include="Models\ChargeStateId.cs" />
     <Compile Include="Models\FastaEntry.cs" />
     <Compile Include="Models\Feature.cs" />
+    <Compile Include="Models\FragmentationSequence.cs" />
     <Compile Include="Models\IdentificationTree.cs" />
     <Compile Include="Models\IIdData.cs" />
     <Compile Include="Models\MsPfParameters.cs" />
@@ -228,9 +229,13 @@
     <Compile Include="ViewModels\ColorListViewModel.cs" />
     <Compile Include="ViewModels\ColorPaletteViewModel.cs" />
     <Compile Include="ViewModels\ColorViewModel.cs" />
+    <Compile Include="ViewModels\Data\BaseIonTypeViewModel.cs" />
     <Compile Include="ViewModels\Data\CreateSequenceViewModel.cs" />
+    <Compile Include="ViewModels\Data\FragmentationSequenceViewModel.cs" />
+    <Compile Include="ViewModels\Data\NeutralLossViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\ExportDatasetViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\ExportImageViewModel.cs" />
+    <Compile Include="ViewModels\Data\IFragmentationSequenceViewModel.cs" />
     <Compile Include="ViewModels\Modifications\CustomModificationViewModel.cs" />
     <Compile Include="ViewModels\Data\DataSetViewModel.cs" />
     <Compile Include="ViewModels\Dms\DmsDatasetViewModel.cs" />
@@ -256,6 +261,7 @@
     <Compile Include="ViewModels\FileSelectors\OpenDataWindowViewModel.cs" />
     <Compile Include="ViewModels\Data\ScanViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\SelectDataSetViewModel.cs" />
+    <Compile Include="ViewModels\PrecursorSequenceIonViewModel.cs" />
     <Compile Include="ViewModels\SearchSettingsViewModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Compile Include="ViewModels\Plots\SpectrumPlotViewModel.cs" />

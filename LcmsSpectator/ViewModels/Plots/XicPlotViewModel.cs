@@ -17,20 +17,16 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
-
     using InformedProteomics.Backend.MassSpecData;
-
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.PlotModels;
     using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Data;
-
     using OxyPlot;
     using OxyPlot.Axes;
     using OxyPlot.Series;
-
     using ReactiveUI;
 
     /// <summary>
@@ -74,9 +70,14 @@ namespace LcmsSpectator.ViewModels.Plots
         private int pointsToSmooth;
 
         /// <summary>
+        /// The view model for the fragmentation sequence (fragment ion generator)
+        /// </summary>
+        private IFragmentationSequenceViewModel fragmentationSequenceViewModel;
+
+        /// <summary>
         /// Ions to generate XICs from
         /// </summary>
-        private ReactiveList<LabeledIonViewModel> ions;
+        private LabeledIonViewModel[] ions;
 
         /// <summary>
         /// The scan number selected on plot.
@@ -99,16 +100,24 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showPointMarkers;
 
         /// <summary>
+        /// The type of XICs shown 
+        /// (isotopes of the precursor ion or neighboring charge states of the precursor ion)
+        /// </summary>
+        private PrecursorViewMode precursorViewMode;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="XicPlotViewModel"/> class. 
         /// </summary>
         /// <param name="dialogService">Dialog service </param>
+        /// <param name="fragSeqVm">The view model for the fragmentation sequence (fragment ion generator)</param>
         /// <param name="lcms">LCMS run data set for this XIC plot. </param>
         /// <param name="title">Title of XIC plot </param>
         /// <param name="xaxis">XAxis for XIC plot. </param>
         /// <param name="showLegend">Should a legend be shown on the plot by default? </param>
-        public XicPlotViewModel(IDialogService dialogService, ILcMsRun lcms, string title, LinearAxis xaxis, bool showLegend = true)
+        public XicPlotViewModel(IDialogService dialogService, IFragmentationSequenceViewModel fragSeqVm, ILcMsRun lcms, string title, LinearAxis xaxis, bool showLegend = true)
         {
             this.dialogService = dialogService;
+            this.FragmentationSequenceViewModel = fragSeqVm;
             this.lcms = lcms;
             this.showLegend = showLegend;
             this.xaxis = xaxis;
@@ -123,7 +132,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
             };
 
-            this.ions = new ReactiveList<LabeledIonViewModel>();
+            this.ions = new LabeledIonViewModel[0];
 
             var retentionTimeSelectedCommand = ReactiveCommand.Create();
             retentionTimeSelectedCommand
@@ -162,20 +171,6 @@ namespace LcmsSpectator.ViewModels.Plots
                 .Throttle(TimeSpan.FromMilliseconds(50), RxApp.TaskpoolScheduler)
                 .Subscribe(x => this.PlotModel.SetPrimaryPointMarker(this.lcms.GetElutionTime(x.Item1)));
 
-            // Update plot when ions change, or plot visibility changes
-            this.WhenAnyValue(x => x.Ions, x => x.IsPlotUpdating, x => x.PointsToSmooth)
-                .Where(x => x.Item1 != null && x.Item2)    // Do not do anything if plot isn't visible
-                .Throttle(TimeSpan.FromMilliseconds(250), RxApp.TaskpoolScheduler)
-                .SelectMany(async x => await this.GetXicDataPointsAsync(x.Item1, x.Item3))
-                .Subscribe(this.UpdatePlotModel);       // Update plot when data changes
-
-            // Show/hide series when ion is selected/unselected
-            this.WhenAnyValue(x => x.Ions)
-                .Where(ions => ions != null)
-                .Subscribe(ions => ions.ItemChanged.Where(x => x.PropertyName == "Selected")
-                .Select(x => x.Sender)
-                .Subscribe(this.LabeledIonSelectedChanged));
-
             // When point markers are toggled, change the marker type on each series
             this.WhenAnyValue(x => x.ShowPointMarkers)
                 .Select(showPointMarkers => showPointMarkers ? MarkerType.Circle : MarkerType.None)
@@ -190,11 +185,30 @@ namespace LcmsSpectator.ViewModels.Plots
                             this.PlotModel.InvalidatePlot(true);
                         });
 
+            this.WhenAnyValue(x => x.FragmentationSequenceViewModel.LabeledIonViewModels, x => x.PointsToSmooth, x => x.IsPlotUpdating, x => x.PrecursorViewMode)
+                .Where(x => x.Item3 && x.Item1 != null)
+                .SelectMany(async x => await this.GetXicDataPointsAsync(x.Item1, this.PointsToSmooth))
+                .Subscribe(xicPoints =>
+                {
+                    this.ions = this.FragmentationSequenceViewModel.LabeledIonViewModels;
+                    this.UpdatePlotModel(xicPoints);
+                });
+
+            // Update ions when relative intensity threshold changes.
+            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
+            {
+                var precFragVm = this.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
+                if (precFragVm != null)
+                {
+                    precFragVm.RelativeIntensityThreshold = precRelInt;
+                }
+            });
+
             // Update plot when settings change
-            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold, x => x.ProductIonTolerancePpm)
-                .Where(_ => this.Ions != null)
+            IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm)
+                .Where(_ => this.ions != null)
                 .Throttle(TimeSpan.FromMilliseconds(250), RxApp.TaskpoolScheduler)
-                .SelectMany(async x => await this.GetXicDataPointsAsync(this.Ions, this.PointsToSmooth, false))
+                .SelectMany(async x => await this.GetXicDataPointsAsync(this.ions, this.PointsToSmooth, false))
                 .Subscribe(this.UpdatePlotModel);
         }
 
@@ -245,12 +259,12 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Gets or sets ions to generate XICs from
+        /// Gets the view model for the fragmentation sequence (fragment ion generator)
         /// </summary>
-        public ReactiveList<LabeledIonViewModel> Ions
+        public IFragmentationSequenceViewModel FragmentationSequenceViewModel
         {
-            get { return this.ions; }
-            set { this.RaiseAndSetIfChanged(ref this.ions, value); }
+            get { return this.fragmentationSequenceViewModel; }
+            private set { this.RaiseAndSetIfChanged(ref this.fragmentationSequenceViewModel, value); }
         }
 
         /// <summary>
@@ -287,6 +301,16 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.showPointMarkers; }
             set { this.RaiseAndSetIfChanged(ref this.showPointMarkers, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the type of XICs shown 
+        /// (isotopes of the precursor ion or neighboring charge states of the precursor ion)
+        /// </summary>
+        public PrecursorViewMode PrecursorViewMode
+        {
+            get { return this.precursorViewMode; }
+            set { this.RaiseAndSetIfChanged(ref this.precursorViewMode, value); }
         }
 
         /// <summary>
@@ -330,10 +354,10 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             var seriesstore =
-                this.Ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, IList<XicDataPoint>>>(
+                this.ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, IList<XicDataPoint>>>(
                     ion => ion.Label,
                     ion => null);
-            var maxCharge = (this.ions.Count > 0) ? this.ions.Max(ion => ion.IonType.Charge) : 2;
+            var maxCharge = (this.ions.Length > 0) ? this.ions.Max(ion => ion.IonType.Charge) : 2;
             maxCharge = Math.Max(maxCharge, 2);
             var colors = new IonColorDictionary(maxCharge);
             foreach (var xic in xicPoints)
@@ -410,28 +434,6 @@ namespace LcmsSpectator.ViewModels.Plots
             {
                 this.dialogService.ExceptionAlert(e);
             }
-        }
-
-        /// <summary>
-        /// Finds series associated with labeledIonViewModel and shows/hides it depending on
-        /// labeledIonViewModel selected property.
-        /// </summary>
-        /// <param name="labeledIonViewModel">View model for ion to hide series for.</param>
-        private void LabeledIonSelectedChanged(LabeledIonViewModel labeledIonViewModel)
-        {
-            foreach (var series in this.PlotModel.Series)
-            {
-                var lineSeries = series as LineSeries;
-                if (lineSeries != null && lineSeries.Title == labeledIonViewModel.Label)
-                {
-                    lineSeries.IsVisible = labeledIonViewModel.Selected;
-                    this.PlotModel.AdjustForZoom();
-                    this.Area = this.GetCurrentArea();
-                }
-            }
-
-            this.Area = this.GetCurrentArea();
-            this.PlotModel.AdjustForZoom();
         }
 
         /// <summary>Calculate XICs for ions.</summary>

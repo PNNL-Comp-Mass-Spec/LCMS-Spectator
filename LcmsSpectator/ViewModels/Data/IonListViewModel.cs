@@ -348,7 +348,7 @@ namespace LcmsSpectator.ViewModels.Data
             var sequence = this.SelectedPrSm.Sequence;
             if (labelModifications != null)
             {
-                sequence = IonUtils.GetHeavySequence(sequence, labelModifications);
+                sequence = IonUtils.GetHeavySequence(sequence, labelModifications.ToArray());
             }
 
             var precursorIon = IonUtils.GetPrecursorIon(sequence, this.SelectedPrSm.Charge);
@@ -414,7 +414,7 @@ namespace LcmsSpectator.ViewModels.Data
             var sequence = this.SelectedPrSm.Sequence;
             if (labelModifications != null)
             {
-                sequence = IonUtils.GetHeavySequence(sequence, labelModifications);
+                sequence = IonUtils.GetHeavySequence(sequence, labelModifications.ToArray());
             }
 
             #pragma warning disable 0618
@@ -453,7 +453,7 @@ namespace LcmsSpectator.ViewModels.Data
             var sequence = this.SelectedPrSm.Sequence;
             if (labelModifications != null)
             {
-                sequence = IonUtils.GetHeavySequence(sequence, labelModifications);
+                sequence = IonUtils.GetHeavySequence(sequence, labelModifications.ToArray());
             }
 
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);

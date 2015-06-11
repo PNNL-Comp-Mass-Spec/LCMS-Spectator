@@ -26,24 +26,24 @@
         </Grid.RowDefinitions>
         <views:PrSmView DataContext="{Binding SelectedPrSm}" Grid.Row="0" />
         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ShowsPreview="True" Background="Transparent"/>
-        <!--<xcad:DockingManager Grid.Row="2" Name="AvDock" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded"> -->
-        <xcad:DockingManager Grid.Row="2" Name="AvDock" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
+        <!--<xcad:DockingManager Grid.Row="2" Name="AvDock" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">-->
+        <xcad:DockingManager Grid.Row="2" Name="AvDock" Loaded="Window_OnLoaded"  Unloaded="DockingManager_OnUnloaded">
             <!-- <xcad:DockingManager.Theme>
                 <xcad:Office2007SilverTheme />
             </xcad:DockingManager.Theme> -->
             <xcad:LayoutRoot>
-                <xcad:LayoutRoot.LeftSide>
+                <!--<xcad:LayoutRoot.LeftSide>
                     <xcad:LayoutAnchorSide>
                         <xcad:LayoutAnchorGroup>
-                            <xcad:LayoutAnchorable Title="Ion Types" CanClose="False" CanHide="False">
+                            <xcad:LayoutAnchorable Title="Ion Types" CanClose="True" CanHide="True">
                                 <data:IonTypeSelector DataContext="{Binding IonTypeSelectorViewModel}" x:Name="IonTypeSelector"/>
                             </xcad:LayoutAnchorable>
-                            <xcad:LayoutAnchorable Title="Ion List" CanClose="False" CanHide="False">
+                            <xcad:LayoutAnchorable Title="Ion List" CanClose="True" CanHide="True">
                                 <data:IonListView DataContext="{Binding IonListViewModel}" x:Name="IonList" />
                             </xcad:LayoutAnchorable>
                         </xcad:LayoutAnchorGroup>
                     </xcad:LayoutAnchorSide>
-                </xcad:LayoutRoot.LeftSide>
+                </xcad:LayoutRoot.LeftSide>-->
                 <xcad:LayoutPanel>
                     <xcad:LayoutDocumentPane DockWidth="*">
                         <xcad:LayoutDocument Title="XIC View" CanClose="False">

@@ -40,7 +40,7 @@ namespace LcmsSpectatorTests
 
             // init SpectrumPlotViewModel
             var dialogService = new TestableMainDialogService();
-            var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, 1.05, false);
+            var spectrumPlotViewModel = new SpectrumPlotViewModel(dialogService, new FragmentationSequenceViewModel(), 1.05, false);
 
             // init test data
             idList.Sort(new PrSm.PrSmScoreComparer());
@@ -49,7 +49,7 @@ namespace LcmsSpectatorTests
             // init test ions
             var ions = new ReactiveList<LabeledIonViewModel>();
             spectrumPlotViewModel.Spectrum = prsm.Ms2Spectrum;
-            spectrumPlotViewModel.Ions = ions;
+            ////spectrumPlotViewModel.Ions = ions;
 
             // plot should not be null
             Assert.True(spectrumPlotViewModel.PlotModel != null);
@@ -121,7 +121,7 @@ namespace LcmsSpectatorTests
             var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
             var scans = lcms.GetScanNumbers(2);
 
-            var specPlotVm = new SpectrumPlotViewModel(new TestableMainDialogService(), 1.05, false);
+            var specPlotVm = new SpectrumPlotViewModel(new TestableMainDialogService(), new FragmentationSequenceViewModel(), 1.05, false);
 
             foreach (var scan in scans)
             {
