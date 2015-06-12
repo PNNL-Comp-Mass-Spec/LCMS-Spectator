@@ -73,6 +73,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool isAxisInternalChange;
 
         /// <summary>
+        /// The fragmentation sequence (fragment/precursor ion generator)
+        /// </summary>
+        private FragmentationSequence fragmentationSequence;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SpectrumViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
@@ -207,8 +212,9 @@ namespace LcmsSpectator.ViewModels.Plots
             private set { this.RaiseAndSetIfChanged(ref this.secondary2ViewModel, value); }
         }
 
-        private FragmentationSequence fragmentationSequence;
-
+        /// <summary>
+        /// Gets or sets the fragmentation sequence (fragment/precursor ion generator)
+        /// </summary>
         public FragmentationSequence FragmentationSequence
         {
             get { return this.fragmentationSequence; }

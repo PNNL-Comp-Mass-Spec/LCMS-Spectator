@@ -12,19 +12,13 @@ namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
     using System.Globalization;
-    using System.Linq;
     using System.Reactive.Linq;
-
     using InformedProteomics.Backend.MassSpecData;
-
-    using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Modifications;
-
     using OxyPlot.Axes;
-
     using ReactiveUI;
 
     /// <summary>
@@ -90,6 +84,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool axisInternalChange;
 
         /// <summary>
+        /// The fragmentation sequence (fragment/precursor ion generator)
+        /// </summary>
+        private FragmentationSequence fragmentationSequence;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="XicViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>
@@ -108,7 +107,7 @@ namespace LcmsSpectator.ViewModels.Plots
             this.fragmentXAxis.AxisChanged += this.XAxisChanged;
             this.FragmentPlotViewModel = new XicPlotViewModel(
                                         this.dialogService,
-                                        new FragmentationSequenceViewModel(),
+                                        new FragmentationSequenceViewModel { AddPrecursorIons = false },
                                         lcms,
                                         "Fragment XIC",
                                         this.fragmentXAxis,
@@ -124,7 +123,7 @@ namespace LcmsSpectator.ViewModels.Plots
             this.heavyFragmentXAxis.AxisChanged += this.XAxisChanged;
             this.HeavyFragmentPlotViewModel = new XicPlotViewModel(
                 this.dialogService,
-                new FragmentationSequenceViewModel(),
+                new FragmentationSequenceViewModel { AddPrecursorIons = false },
                 lcms,
                 "Heavy Fragment XIC",
                 this.heavyFragmentXAxis,
@@ -250,8 +249,9 @@ namespace LcmsSpectator.ViewModels.Plots
             get { return this.precursorAreaRatioLabel.Value; }
         }
 
-        private FragmentationSequence fragmentationSequence;
-
+        /// <summary>
+        /// Gets or sets the fragmentation sequence (fragment/precursor ion generator)
+        /// </summary>
         public FragmentationSequence FragmentationSequence
         {
             get { return this.fragmentationSequence; }

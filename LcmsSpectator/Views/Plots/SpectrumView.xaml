@@ -67,6 +67,7 @@
                         </MenuItem>
                         <MenuItem Header="Select Fragment Ions" Command="{Binding SelectFragmentIonsCommand}" />
                         <MenuItem Header="Show Precursor Ions" IsCheckable="True" IsChecked="{Binding AddPrecursorIons, Mode=TwoWay}" DataContext="{Binding FragmentationSequenceViewModel}" />
+                        <MenuItem Header="Hide All Ions" Command="{Binding HideAllIonsCommand}" DataContext="{Binding FragmentationSequenceViewModel}"  />
                         <Separator />
                         <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" Name="AutoAdjustYCheck" />
                         <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustmentCheck" />

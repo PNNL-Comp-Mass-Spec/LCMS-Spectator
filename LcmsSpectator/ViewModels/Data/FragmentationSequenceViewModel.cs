@@ -79,6 +79,23 @@
 
             this.AddPrecursorIons = true;
 
+            // HideAllIonsCommand deselects all ion types and neutral losses.
+            var hideAllIonsCommand = ReactiveCommand.Create();
+            hideAllIonsCommand.Subscribe(_ =>
+            {
+                this.AddPrecursorIons = false;
+                foreach (var baseIonType in BaseIonTypes)
+                {
+                    baseIonType.IsSelected = false;
+                }
+
+                foreach (var neutralLoss in NeutralLosses)
+                {
+                    neutralLoss.IsSelected = false;
+                }
+            });
+            this.HideAllIonsCommand = hideAllIonsCommand;
+
             // When Base Ion Types are selected/deselected, update ion types.
             this.BaseIonTypes.ItemChanged.Where(x => x.PropertyName == "IsSelected")
                 .Subscribe(_ => this.UpdateIonTypes());
@@ -106,6 +123,11 @@
             get { return this.fragmentationSequence; }
             set { this.RaiseAndSetIfChanged(ref this.fragmentationSequence, value); }
         }
+
+        /// <summary>
+        /// Gets a command that deselects all ion types.
+        /// </summary>
+        public IReactiveCommand HideAllIonsCommand { get; private set; }
 
         /// <summary>
         /// Gets the list of possible base ion types.

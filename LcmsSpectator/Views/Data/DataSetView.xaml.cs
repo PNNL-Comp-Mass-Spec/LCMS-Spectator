@@ -51,8 +51,7 @@ namespace LcmsSpectator.Views
 
             this.DataContextChanged += (o, e) =>
             {
-                this.SpectrumView.StartMsPfSearch.DataContext = this.DataContext;
-                    
+                this.SpectrumView.StartMsPfSearch.DataContext = this.DataContext;    
             };
         }
 
