@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:wpf="http://oxyplot.org/wpf"
              xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="1100" Background="White">
     <UserControl.Resources>
@@ -138,11 +139,12 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
                     <TextBlock Width="150" FontWeight="Bold" VerticalAlignment="Center"># Features Displayed</TextBlock>
-                    <TextBox Width="100" Text="{Binding PointsDisplayed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Name="PointsDisplayedTextBox" />
+                    <xctk:IntegerUpDown Width="100" Value="{Binding PointsDisplayed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Increment="100" Minimum="0" />
+                    <!--<TextBox Width="100" Text="{Binding PointsDisplayed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Name="PointsDisplayedTextBox" />
                     <StackPanel Orientation="vertical">
                         <RepeatButton Content="˄" Name="Up"   Height="15.5" Width="20" FontSize="10" Click="UpClicked" />
                         <RepeatButton Content="˅" Name="Down" Height="15.5" Width="20" FontSize="10" Click="DownClicked" />
-                    </StackPanel>
+                    </StackPanel>-->
                 </StackPanel>
                 <Slider Grid.Column="1" Grid.Row="0" Margin="0,0,5,0"
             Value="{Binding AbundanceThreshold, Mode=TwoWay}" Orientation="Horizontal"

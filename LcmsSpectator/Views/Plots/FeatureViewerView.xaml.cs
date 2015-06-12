@@ -66,39 +66,39 @@ namespace LcmsSpectator.Views.Plots
             }
         }
 
-        /// <summary>
-        /// Event handler for up button click.
-        /// Increments the value in the PointsDisplayedTextBox.
-        /// </summary>
-        /// <param name="sender">The sender Button</param>
-        /// <param name="args">The event arguments.</param>
-        public void UpClicked(object sender, EventArgs args)
-        {
-            int num;
-            if (!int.TryParse(this.PointsDisplayedTextBox.Text, out num))
-            {
-                return;
-            }
+        ////// <summary>
+        ////// Event handler for up button click.
+        ////// Increments the value in the PointsDisplayedTextBox.
+        ////// </summary>
+        ////// <param name="sender">The sender Button</param>
+        ////// <param name="args">The event arguments.</param>
+        //////public void UpClicked(object sender, EventArgs args)
+        //////{
+        //////    int num;
+        //////    if (!int.TryParse(this.PointsDisplayedTextBox.Text, out num))
+        //////    {
+        //////        return;
+        //////    }
 
-            this.PointsDisplayedTextBox.Text = (num + 100).ToString(CultureInfo.InvariantCulture);
-        }
+        //////    this.PointsDisplayedTextBox.Text = (num + 100).ToString(CultureInfo.InvariantCulture);
+        //////}
 
-        /// <summary>
-        /// Event handler for down button click.
-        /// Decrements the value in the PointsDisplayedTextBox.
-        /// </summary>
-        /// <param name="sender">The sender Button</param>
-        /// <param name="args">The event arguments.</param>
-        public void DownClicked(object sender, EventArgs args)
-        {
-            int num;
-            if (!int.TryParse(this.PointsDisplayedTextBox.Text, out num))
-            {
-                return;
-            }
+        ////// <summary>
+        ////// Event handler for down button click.
+        ////// Decrements the value in the PointsDisplayedTextBox.
+        ////// </summary>
+        ////// <param name="sender">The sender Button</param>
+        ////// <param name="args">The event arguments.</param>
+        //////public void DownClicked(object sender, EventArgs args)
+        //////{
+        //////    int num;
+        //////    if (!int.TryParse(this.PointsDisplayedTextBox.Text, out num))
+        //////    {
+        //////        return;
+        //////    }
 
-            var newValue = Math.Max(num - 100, 0);
-            this.PointsDisplayedTextBox.Text = newValue.ToString(CultureInfo.InvariantCulture);
-        }
+        //////    var newValue = Math.Max(num - 100, 0);
+        //////    this.PointsDisplayedTextBox.Text = newValue.ToString(CultureInfo.InvariantCulture);
+        //////}
     }
 }
