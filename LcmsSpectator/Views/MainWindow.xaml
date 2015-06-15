@@ -145,15 +145,15 @@
                                                                         <TextBlock Text="{Binding PrecursorMz, Converter={StaticResource MassFormatter}}" />
                                                                     </StackPanel>
                                                                     <StackPanel Orientation="Horizontal">
-                                                                        <TextBlock FontWeight="Bold" Width="90">Charge State:</TextBlock>
+                                                                        <TextBlock FontWeight="Bold" Width="140">Charge State:</TextBlock>
                                                                         <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
                                                                     </StackPanel>
                                                                     <StackPanel Orientation="Horizontal">
-                                                                        <TextBlock FontWeight="Bold" Width="90">Data Set:</TextBlock>
+                                                                        <TextBlock FontWeight="Bold" Width="140">Data Set:</TextBlock>
                                                                         <TextBlock Text="{Binding RawFileName}" />
                                                                     </StackPanel>
                                                                     <StackPanel Orientation="Horizontal">
-                                                                        <TextBlock FontWeight="Bold" Width="90">Scan #:</TextBlock>
+                                                                        <TextBlock FontWeight="Bold" Width="140">Scan #:</TextBlock>
                                                                         <TextBlock Text="{Binding Scan}" />
                                                                     </StackPanel>
                                                                     <StackPanel Orientation="Horizontal">
