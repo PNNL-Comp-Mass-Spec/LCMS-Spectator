@@ -56,7 +56,7 @@ namespace LcmsSpectator.ViewModels.Dms
         /// A value indicating whether or not the No Results alert should be shown.
         /// Set to true when a search has been performed that yielded 0 results.
         /// </summary>
-        private readonly ObservableAsPropertyHelper<bool> isNoResultsShown;
+        private bool isNoResultsShown;
         
         /// <summary>
         /// The selected DMS dataset.
@@ -153,9 +153,9 @@ namespace LcmsSpectator.ViewModels.Dms
                 });
 
             // When a null data set is selected and a search has ocurred, show no results screen
-            this.WhenAnyValue(x => x.SelectedDataset, x => x.IsFirstSearch)
-                .Select(x => ((x.Item1 == null || string.IsNullOrEmpty(x.Item1.DatasetFolderPath)) && !x.Item2))
-                .ToProperty(this, x => x.IsNoResultsShown, out this.isNoResultsShown);
+            this.WhenAnyValue(x => x.Datasets.Count, x => x.IsFirstSearch)
+                .Select(x => x.Item1 == 0 && !x.Item2)
+                .Subscribe(noResults => this.IsNoResultsShown = noResults);
 
             // When the dataset filter changes, find the number of weeks previously selected for the filter
             this.WhenAnyValue(x => x.DatasetFilter)
@@ -226,7 +226,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public bool IsNoResultsShown
         {
-            get { return this.isNoResultsShown.Value; }
+            get { return this.isNoResultsShown; }
+            private set { this.RaiseAndSetIfChanged(ref this.isNoResultsShown, value); }
         }
 
         /// <summary>
@@ -381,6 +382,7 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         private void Lookup()
         {
+            this.Datasets.Clear();
             if (this.NumberOfWeeks < 1)
             {
                 this.dialogService.MessageBox("Number of weeks must be greater than 0.");
@@ -395,7 +397,6 @@ namespace LcmsSpectator.ViewModels.Dms
 
             this.IsFirstSearch = false;
 
-            this.Datasets.Clear();
             var dataSets = this.dmsLookupUtility.GetDatasets(this.NumberOfWeeks, this.DatasetFilter.Trim());
             foreach (var dataset in dataSets)
             {
