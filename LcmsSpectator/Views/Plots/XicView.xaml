@@ -24,10 +24,11 @@
         </Viewbox>
         <Grid Grid.Row="1" Grid.Column="0" DataContext="{Binding FragmentPlotViewModel}">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="12" />
                 <ColumnDefinition Width="30" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <wpf:PlotView Grid.Column="1" Name="FragmentIonXic" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
+            <wpf:PlotView Grid.Column="2" Name="FragmentIonXic" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowPointMarkers, Mode=TwoWay}" />
@@ -39,7 +40,12 @@
                     <MouseBinding Command="{Binding RetentionTimeSelectedCommand}" MouseAction="LeftDoubleClick" />
                 </wpf:PlotView.InputBindings>
             </wpf:PlotView>
-            <Slider Grid.Column="0" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
+            <TextBlock FontSize="8" Grid.Column="0" Text="Smoothing" VerticalAlignment="Center">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </TextBlock.LayoutTransform>
+            </TextBlock>
+            <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
                     IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
                     ToolTip="Smoothing Window Points" />
@@ -51,6 +57,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="12" />
             </Grid.ColumnDefinitions>
             <wpf:PlotView Grid.Column="0" Name="HeavyFragmentIonXic" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
@@ -64,6 +71,11 @@
                     <MouseBinding Command="{Binding RetentionTimeSelectedCommand}" MouseAction="LeftDoubleClick" />
                 </wpf:PlotView.InputBindings>
             </wpf:PlotView>
+            <TextBlock FontSize="8" Grid.Column="2" Text="Smoothing" VerticalAlignment="Center">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="90" />
+                </TextBlock.LayoutTransform>
+            </TextBlock>
             <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
                     IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
@@ -75,10 +87,11 @@
         </Viewbox>
         <Grid Grid.Row="4" Grid.Column="0" DataContext="{Binding PrecursorPlotViewModel}">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="12" />
                 <ColumnDefinition Width="30" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <wpf:PlotView Name="PrecursorIonXic" Grid.Column="1" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
+            <wpf:PlotView Name="PrecursorIonXic" Grid.Column="2" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowPointMarkers, Mode=TwoWay}" />
@@ -96,7 +109,12 @@
                     <MouseBinding Command="{Binding RetentionTimeSelectedCommand}" MouseAction="LeftDoubleClick" />
                 </wpf:PlotView.InputBindings>
             </wpf:PlotView>
-            <Slider Grid.Column="0" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
+            <TextBlock FontSize="8" Grid.Column="0" Text="Smoothing" VerticalAlignment="Center">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="-90" />
+                </TextBlock.LayoutTransform>
+            </TextBlock>
+            <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
                     IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
                     ToolTip="Smoothing Window Points"/>
@@ -108,6 +126,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="30" />
+                <ColumnDefinition Width="12" />
             </Grid.ColumnDefinitions>
             <wpf:PlotView Name="HeavyPrecursorIonXic" Grid.Column="0" Model="{Binding Path=PlotModel, UpdateSourceTrigger=PropertyChanged}">
                 <wpf:PlotView.ContextMenu>
@@ -121,6 +140,11 @@
                     <MouseBinding Command="{Binding RetentionTimeSelectedCommand}" MouseAction="LeftDoubleClick" />
                 </wpf:PlotView.InputBindings>
             </wpf:PlotView>
+            <TextBlock FontSize="8" Grid.Column="2" Text="Smoothing" VerticalAlignment="Center">
+                <TextBlock.LayoutTransform>
+                    <RotateTransform Angle="90" />
+                </TextBlock.LayoutTransform>
+            </TextBlock>
             <Slider Grid.Column="1" Value="{Binding PointsToSmooth, Mode=TwoWay}" Orientation="Vertical" Maximum="31" Minimum="1"
                     Ticks="0, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29,31"
                     IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
