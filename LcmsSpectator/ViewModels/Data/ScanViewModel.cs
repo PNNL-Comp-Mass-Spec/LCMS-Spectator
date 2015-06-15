@@ -104,10 +104,10 @@ namespace LcmsSpectator.ViewModels.Data
 
             // When data is filtered, group it by protein name
             this.WhenAnyValue(x => x.FilteredData).ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(filteredData =>
+                .Subscribe(async filteredData =>
             {
                 this.IdTree.ClearIds();
-                this.IdTree.Add(filteredData);
+                await this.IdTree.BuildIdTree(filteredData);
                 this.FilteredProteins.Clear();
                 foreach (var protein in this.IdTree.ProteinIds)
                 {

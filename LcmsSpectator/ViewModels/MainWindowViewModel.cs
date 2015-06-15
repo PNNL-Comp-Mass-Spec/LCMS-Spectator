@@ -242,7 +242,7 @@ namespace LcmsSpectator.ViewModels
 
                 if (!string.IsNullOrWhiteSpace(openDataViewModel.FastaFilePath) && File.Exists(openDataViewModel.FastaFilePath))
                 {
-                    this.ScanViewModel.IdTree.AddFastaEntries(await this.dataReader.ReadFastaFile(openDataViewModel.FastaFilePath));   
+                    await this.ScanViewModel.IdTree.AddFastaEntriesAsync(await this.dataReader.ReadFastaFile(openDataViewModel.FastaFilePath));   
                 }
 
                 await this.ReadIdFile(openDataViewModel.IdFilePath, dataSetViewModel);
@@ -350,7 +350,7 @@ namespace LcmsSpectator.ViewModels
                     if (!string.IsNullOrWhiteSpace(dataSetViewModel.FastaDbFilePath) && File.Exists(dataSetViewModel.FastaDbFilePath))
                     {
                         this.LoadingScreenViewModel.IsLoading = true;
-                        this.ScanViewModel.IdTree.AddFastaEntries(await this.dataReader.ReadFastaFile(dataSetViewModel.FastaDbFilePath));
+                        await this.ScanViewModel.IdTree.AddFastaEntriesAsync(await this.dataReader.ReadFastaFile(dataSetViewModel.FastaDbFilePath));
                         this.LoadingScreenViewModel.IsLoading = false;
                     }
 

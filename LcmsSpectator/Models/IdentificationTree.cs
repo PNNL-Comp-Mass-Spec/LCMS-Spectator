@@ -14,6 +14,8 @@ namespace LcmsSpectator.Models
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
+
     using InformedProteomics.Backend.MassSpecData;
     
     /// <summary>
@@ -138,6 +140,16 @@ namespace LcmsSpectator.Models
         }
 
         /// <summary>
+        /// Build IdentificationTree from set of PRSMs asynchronously.
+        /// </summary>
+        /// <param name="prsms">The PRSMs to build the ID tree.</param>
+        /// <returns>The task to build tree.</returns>
+        public Task BuildIdTree(IEnumerable<PrSm> prsms)
+        {
+            return Task.Run(() => this.Add(prsms));
+        }
+
+        /// <summary>
         /// Add a new ProteinID from a FASTA Entry.
         /// </summary>
         /// <param name="fastaEntry">The FASTA entry to add.</param>
@@ -159,6 +171,16 @@ namespace LcmsSpectator.Models
             {
                 this.AddFastaEntry(entry);
             }
+        }
+
+        /// <summary>
+        /// Asynchronously add FASTA Entries
+        /// </summary>
+        /// <param name="fastaEntries">The FASTA entries to add.</param>
+        /// <returns>The task.</returns>
+        public Task AddFastaEntriesAsync(IEnumerable<FastaEntry> fastaEntries)
+        {
+            return Task.Run(() => this.AddFastaEntries(fastaEntries));
         }
 
         /// <summary>
