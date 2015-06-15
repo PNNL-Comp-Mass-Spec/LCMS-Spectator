@@ -19,7 +19,7 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="8*" />
+            <RowDefinition Height="10*" />
             <RowDefinition Height="4" />
             <RowDefinition Height="93*" />
             <RowDefinition Height="25" />
@@ -32,18 +32,6 @@
                 <xcad:Office2007SilverTheme />
             </xcad:DockingManager.Theme> -->
             <xcad:LayoutRoot>
-                <!--<xcad:LayoutRoot.LeftSide>
-                    <xcad:LayoutAnchorSide>
-                        <xcad:LayoutAnchorGroup>
-                            <xcad:LayoutAnchorable Title="Ion Types" CanClose="True" CanHide="True">
-                                <data:IonTypeSelector DataContext="{Binding IonTypeSelectorViewModel}" x:Name="IonTypeSelector"/>
-                            </xcad:LayoutAnchorable>
-                            <xcad:LayoutAnchorable Title="Ion List" CanClose="True" CanHide="True">
-                                <data:IonListView DataContext="{Binding IonListViewModel}" x:Name="IonList" />
-                            </xcad:LayoutAnchorable>
-                        </xcad:LayoutAnchorGroup>
-                    </xcad:LayoutAnchorSide>
-                </xcad:LayoutRoot.LeftSide>-->
                 <xcad:LayoutPanel>
                     <xcad:LayoutDocumentPane DockWidth="*">
                         <xcad:LayoutDocument Title="XIC View" CanClose="False">
