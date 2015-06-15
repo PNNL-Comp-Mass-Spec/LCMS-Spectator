@@ -36,9 +36,9 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public LoadingScreenViewModel()
         {
-            this.WhenAnyValue(x => x.IsLoading)
-                .Where(isLoading => isLoading)
-                .Subscribe(_ => this.StartLoading());
+            ////this.WhenAnyValue(x => x.IsLoading)
+            ////    .Where(isLoading => isLoading)
+            ////    .Subscribe(_ => this.StartLoading());
         }
 
         /// <summary>
@@ -62,26 +62,26 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Starts and runs the thread that animates the loading screen text.
         /// </summary>
-        private void StartLoading()
-        {
-            string[] loadingStrings =
-            {
-                "Loading\nPlease Wait",
-                "Loading.\nPlease Wait",
-                "Loading..\nPlease Wait",
-                "Loading...\nPlease Wait"
-            };
+        ////private void StartLoading()
+        ////{
+        ////    string[] loadingStrings =
+        ////    {
+        ////        "Loading\nPlease Wait",
+        ////        "Loading.\nPlease Wait",
+        ////        "Loading..\nPlease Wait",
+        ////        "Loading...\nPlease Wait"
+        ////    };
 
-            Task.Run(() =>
-            {
-                int index = 0;
-                while (IsLoading)
-                {
-                    Thread.Sleep(750);
-                    Text = loadingStrings[index % 4];
-                    index++;
-                }
-            });
-        }
+        ////    Task.Run(() =>
+        ////    {
+        ////        int index = 0;
+        ////        while (IsLoading)
+        ////        {
+        ////            Thread.Sleep(750);
+        ////            Text = loadingStrings[index % 4];
+        ////            index++;
+        ////        }
+        ////    });
+        ////}
     }
 }
