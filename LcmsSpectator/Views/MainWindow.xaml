@@ -16,6 +16,7 @@
             <views1:DataSetView />
             
         </DataTemplate>
+        <utils:DoubleToStringConverter x:Key="MassFormatter" />
         <utils:SequenceToStringConverter x:Key="SequenceToStringConverter" />
     </Window.Resources>
     <Grid>
@@ -80,7 +81,7 @@
                                                         <TextBlock Text="{Binding ProteinName}">
                                                             <TextBlock.ToolTip>
                                                                 <StackPanel>
-                                                                    <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" />
+                                                                    <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14" />
                                                                     <TextBlock Text="{Binding ProteinDescription}" />
                                                                     <TextBlock Text="{Binding Sequence, Converter={StaticResource SequenceToStringConverter}}" />
                                                                 </StackPanel>
@@ -90,20 +91,79 @@
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
                                                         <TextBlock Text="{Binding Annotation}">
                                                             <TextBlock.ToolTip>
-                                                                <TextBlock>
-                                                                    <Run Text="{Binding PreSequence, Mode=OneWay}" />
-                                                                    <Run Text="{Binding SequenceText, Mode=OneWay}" FontWeight="Bold" />
-                                                                    <Run Text="{Binding PostSequence, Mode=OneWay}" />
-                                                                </TextBlock>
+                                                                <StackPanel>
+                                                                    <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14"/>
+                                                                    <TextBlock Text="{Binding ProteinDesc}" />
+                                                                    <TextBlock>
+                                                                        <Run Text="{Binding PreSequence, Mode=OneWay}" />
+                                                                        <Run Text="{Binding SequenceText, Mode=OneWay}" FontWeight="Bold" />
+                                                                        <Run Text="{Binding PostSequence, Mode=OneWay}" />
+                                                                    </TextBlock>
+                                                                    <Separator Visibility="Hidden" />
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock FontWeight="Bold" Width="60">Mass:</TextBlock>
+                                                                        <TextBlock Text="{Binding Mass, Converter={StaticResource MassFormatter}}" />
+                                                                    </StackPanel>
+                                                            </StackPanel>
                                                             </TextBlock.ToolTip>
                                                         </TextBlock>
                                                     </HierarchicalDataTemplate>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
-                                                        <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" ToolTip="y" />
-                                                    </HierarchicalDataTemplate>
+                                                    <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}">
+                                                        <TextBlock.ToolTip>
+                                                            <StackPanel>
+                                                                <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14" />
+                                                                <TextBlock Text="{Binding ProteinDesc}" />
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Width="60">Mass:</TextBlock>
+                                                                    <TextBlock Text="{Binding Mass, Converter={StaticResource MassFormatter}}" />
+                                                                </StackPanel>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Width="175">Most Abundant Isotope m/z:</TextBlock>
+                                                                    <TextBlock Text="{Binding Mz, Converter={StaticResource MassFormatter}}" />
+                                                                </StackPanel>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Width="90">Charge State: </TextBlock>
+                                                                    <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
+                                                                </StackPanel>
+                                                            </StackPanel>
+                                                        </TextBlock.ToolTip>
+                                                    </TextBlock>
+                                                </HierarchicalDataTemplate>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:PrSm}">
-                                                        <TextBlock Text="{Binding ScanText}" ToolTip="" />
-                                                    </HierarchicalDataTemplate>
+                                                        <TextBlock Text="{Binding ScanText}">
+                                                            <TextBlock.ToolTip>
+                                                                <StackPanel>
+                                                                    <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14" />
+                                                                    <TextBlock Text="{Binding ProteinDesc}" />
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock FontWeight="Bold" Width="60">Mass:</TextBlock>
+                                                                        <TextBlock Text="{Binding Mass, Converter={StaticResource MassFormatter}}" />
+                                                                    </StackPanel>
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock FontWeight="Bold" Width="175">Most Abundant Isotope m/z:</TextBlock>
+                                                                        <TextBlock Text="{Binding PrecursorMz, Converter={StaticResource MassFormatter}}" />
+                                                                    </StackPanel>
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock FontWeight="Bold" Width="90">Charge State:</TextBlock>
+                                                                        <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
+                                                                    </StackPanel>
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock FontWeight="Bold" Width="90">Data Set:</TextBlock>
+                                                                        <TextBlock Text="{Binding RawFileName}" />
+                                                                    </StackPanel>
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock FontWeight="Bold" Width="90">Scan #:</TextBlock>
+                                                                        <TextBlock Text="{Binding Scan}" />
+                                                                    </StackPanel>
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock FontWeight="Bold" Width="140">Retention Time:</TextBlock>
+                                                                        <TextBlock Text="{Binding RetentionTime}" />
+                                                                    </StackPanel>
+                                                            </StackPanel>
+                                                            </TextBlock.ToolTip>
+                                                        </TextBlock>
+                                                </HierarchicalDataTemplate>
                                                 </controls:MvvmTreeView.Resources>
                                             </controls:MvvmTreeView>
                                             <views1:LoadingScreen DataContext="{Binding LoadingScreenViewModel}" />

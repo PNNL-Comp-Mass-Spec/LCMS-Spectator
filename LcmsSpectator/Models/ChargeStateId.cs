@@ -30,6 +30,24 @@ namespace LcmsSpectator.Models
             this.PrSms = new Dictionary<Tuple<int, string>, PrSm>();
         }
 
+        public ChargeStateId(PrSm prsm)
+        {
+            this.Charge = prsm.Charge;
+            this.ProteinName = prsm.ProteinName;
+            this.ProteinDesc = prsm.ProteinDesc;
+            this.Mass = prsm.Mass;
+            this.Mz = prsm.PrecursorMz;
+            this.PrSms = new Dictionary<Tuple<int, string>, PrSm>();
+        }
+
+        public string ProteinName { get; private set; }
+
+        public string ProteinDesc { get; private set; }
+
+        public double Mass { get; private set; }
+
+        public double Mz { get; private set; }
+
         /// <summary>
         /// Gets the charge for this charge state.
         /// </summary>

@@ -50,6 +50,9 @@ namespace LcmsSpectator.Models
         /// <param name="proteinSequence">The sequence of the protein that this Proteoform is associated with.</param>
         public ProteoformId(PrSm prsm, Sequence proteinSequence)
         {
+            this.ProteinName = prsm.ProteinName;
+            this.ProteinDesc = prsm.ProteinDesc;
+            this.Mass = prsm.Mass;
             this.Sequence = prsm.Sequence;
             this.SequenceText = prsm.SequenceText;
             this.PreSequence = string.Empty;
@@ -58,6 +61,12 @@ namespace LcmsSpectator.Models
             this.GenerateAnnotation(prsm.Sequence, proteinSequence, prsm.ModificationLocations);
             this.FormatSequences();
         }
+
+        public string ProteinName { get; private set; }
+
+        public string ProteinDesc { get; private set; }
+
+        public double Mass { get; private set; }
 
         public string PreSequence { get; private set; }
 
@@ -88,7 +97,7 @@ namespace LcmsSpectator.Models
         {
             if (!this.ChargeStates.ContainsKey(id.Charge))
             {
-                this.ChargeStates.Add(id.Charge, new ChargeStateId(id.Charge));
+                this.ChargeStates.Add(id.Charge, new ChargeStateId(id));
             }
 
             var chargeState = this.ChargeStates[id.Charge];
