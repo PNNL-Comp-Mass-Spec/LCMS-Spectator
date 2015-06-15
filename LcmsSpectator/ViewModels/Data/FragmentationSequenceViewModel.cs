@@ -8,6 +8,7 @@
 
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
+    using InformedProteomics.Backend.MassFeature;
 
     using LcmsSpectator.Config;
     using LcmsSpectator.Models;
@@ -98,11 +99,13 @@
 
             // When Base Ion Types are selected/deselected, update ion types.
             this.BaseIonTypes.ItemChanged.Where(x => x.PropertyName == "IsSelected")
-                .Subscribe(_ => this.UpdateIonTypes());
+                .Select(_ => this.GetIonTypes())
+                .Subscribe(ionTypes => this.SelectedIonTypes = ionTypes);
 
             // When Neutral Losses are selected/deselected, update ion types
             this.NeutralLosses.ItemChanged.Where(x => x.PropertyName == "IsSelected")
-                .Subscribe(_ => this.UpdateIonTypes());
+                .Select(_ => this.GetIonTypes())
+                .Subscribe(ionTypes => this.SelectedIonTypes = ionTypes);
 
             // When FragmentationSequence is set, select IonTypes for ActivationMethod.
             this.WhenAnyValue(x => x.FragmentationSequence)
@@ -181,13 +184,14 @@
         /// <returns>Task that returns the labeled ion view models for the sequence.</returns>
         private async Task<LabeledIonViewModel[]> GetLabeledIonViewModels()
         {
-            if (this.SelectedIonTypes == null)
+            var ionTypes = this.SelectedIonTypes;
+            if (this.SelectedIonTypes == null || this.SelectedIonTypes.Length == 0)
             {
-                return new LabeledIonViewModel[0];
+                ionTypes = this.GetIonTypes();
             }
 
             var fragmentIons =
-                await this.fragmentationSequence.GetFragmentLabelsAsync(this.SelectedIonTypes, this.HeavyModifications);
+                await this.fragmentationSequence.GetFragmentLabelsAsync(ionTypes, this.HeavyModifications);
 
             if (this.AddPrecursorIons)
             {
@@ -220,11 +224,12 @@
         }
 
         /// <summary>
-        /// Update SelectedIonTypes based on the selected BaseIonTypes and NeutralLosses.
+        /// Gets selected ion types based on the selected BaseIonTypes and NeutralLosses.
         /// </summary>
-        private void UpdateIonTypes()
+        /// <returns>Array of IonTypes.</returns>
+        private IonType[] GetIonTypes()
         {
-            this.SelectedIonTypes = IonUtils.GetIonTypes(
+            return IonUtils.GetIonTypes(
                 IcParameters.Instance.IonTypeFactory,
                 this.BaseIonTypes.Where(bit => bit.IsSelected).Select(bit => bit.BaseIonType).ToList(),
                 this.NeutralLosses.Where(nl => nl.IsSelected).Select(nl => nl.NeutralLoss).ToList(),
