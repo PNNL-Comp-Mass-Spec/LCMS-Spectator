@@ -100,12 +100,6 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showPointMarkers;
 
         /// <summary>
-        /// The type of XICs shown 
-        /// (isotopes of the precursor ion or neighboring charge states of the precursor ion)
-        /// </summary>
-        private PrecursorViewMode precursorViewMode;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="XicPlotViewModel"/> class. 
         /// </summary>
         /// <param name="dialogService">Dialog service </param>
@@ -185,7 +179,10 @@ namespace LcmsSpectator.ViewModels.Plots
                             this.PlotModel.InvalidatePlot(true);
                         });
 
-            this.WhenAnyValue(x => x.FragmentationSequenceViewModel.LabeledIonViewModels, x => x.PointsToSmooth, x => x.IsPlotUpdating, x => x.PrecursorViewMode)
+            this.WhenAnyValue(
+                    x => x.FragmentationSequenceViewModel.LabeledIonViewModels,
+                    x => x.PointsToSmooth,
+                    x => x.IsPlotUpdating)
                 .Where(x => x.Item3 && x.Item1 != null)
                 .SelectMany(async x => await this.GetXicDataPointsAsync(x.Item1, this.PointsToSmooth))
                 .Subscribe(xicPoints =>
@@ -301,16 +298,6 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.showPointMarkers; }
             set { this.RaiseAndSetIfChanged(ref this.showPointMarkers, value); }
-        }
-
-        /// <summary>
-        /// Gets or sets the type of XICs shown 
-        /// (isotopes of the precursor ion or neighboring charge states of the precursor ion)
-        /// </summary>
-        public PrecursorViewMode PrecursorViewMode
-        {
-            get { return this.precursorViewMode; }
-            set { this.RaiseAndSetIfChanged(ref this.precursorViewMode, value); }
         }
 
         /// <summary>
