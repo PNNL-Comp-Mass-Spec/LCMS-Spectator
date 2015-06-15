@@ -23,6 +23,11 @@ namespace LcmsSpectator.Models
     public class IdentificationTree : IIdData
     {
         /// <summary>
+        /// All possible proteins in the list.
+        /// </summary>
+        private readonly Dictionary<string, ProteinId> allProteins; 
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="IdentificationTree"/> class.
         /// </summary>
         /// <param name="tool">The type of tool used for the identifications.</param>
@@ -30,6 +35,7 @@ namespace LcmsSpectator.Models
         {
             this.Tool = tool;
             this.Proteins = new Dictionary<string, ProteinId>();
+            this.allProteins = new Dictionary<string, ProteinId>();
         }
 
         /// <summary>
@@ -103,9 +109,16 @@ namespace LcmsSpectator.Models
         public void Add(PrSm id)
         {
             this.RemoveUnidentifiedScan(id);
+
+            if (!this.allProteins.ContainsKey(id.ProteinName))
+            {
+                return;
+                ////this.allProteins.Add(id.ProteinName, new ProteinId(id.Sequence, id.ProteinName));
+            }
+
             if (!this.Proteins.ContainsKey(id.ProteinName))
             {
-                this.Proteins.Add(id.ProteinName, new ProteinId(id.Sequence, id.SequenceText, id.ProteinName));
+                this.Proteins.Add(id.ProteinName, this.allProteins[id.ProteinName]);
             }
 
             var protein = this.Proteins[id.ProteinName];
@@ -121,6 +134,30 @@ namespace LcmsSpectator.Models
             foreach (var prsm in prsms)
             {
                 this.Add(prsm);
+            }
+        }
+
+        /// <summary>
+        /// Add a new ProteinID from a FASTA Entry.
+        /// </summary>
+        /// <param name="fastaEntry">The FASTA entry to add.</param>
+        public void AddFastaEntry(FastaEntry fastaEntry)
+        {
+            if (!this.allProteins.ContainsKey(fastaEntry.ProteinName))
+            {
+                this.allProteins.Add(fastaEntry.ProteinName, new ProteinId(fastaEntry));
+            }
+        }
+
+        /// <summary>
+        /// Add a collection of FASTA Entries.
+        /// </summary>
+        /// <param name="fastaEntry">Collection of FASTA entries.</param>
+        public void AddFastaEntries(IEnumerable<FastaEntry> fastaEntry)
+        {
+            foreach (var entry in fastaEntry)
+            {
+                this.AddFastaEntry(entry);
             }
         }
 
@@ -172,6 +209,17 @@ namespace LcmsSpectator.Models
                 && proteoform.ChargeStates.TryGetValue(0, out chargeState))
             {
                 chargeState.Remove(data);
+            }
+        }
+
+        /// <summary>
+        /// Clear all PRSMs.
+        /// </summary>
+        public void ClearIds()
+        {
+            foreach (var proteinId in this.allProteins)
+            {
+                proteinId.Value.ClearIds();
             }
         }
 
@@ -265,10 +313,10 @@ namespace LcmsSpectator.Models
         }
 
         /// <summary>
-        /// Get PrSms with the same Protein Name, Sequence, Charge, and Scan number
+        /// Get PRSMs with the same Protein Name, Sequence, Charge, and Scan number
         /// </summary>
         /// <param name="id">PRSM object to search for</param>
-        /// <returns>PrSm found in tree with parameters specified by data</returns>
+        /// <returns>PRSM found in tree with parameters specified by data</returns>
         public PrSm GetPrSm(PrSm id)
         {
             var chargeState = this.GetChargeState(id);

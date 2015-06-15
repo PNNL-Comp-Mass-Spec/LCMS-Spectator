@@ -239,8 +239,14 @@ namespace LcmsSpectator.ViewModels
             {
                 var dataSetViewModel = await this.ReadRawFile(openDataViewModel.RawFilePath);
                 dataSetViewModel.FastaDbFilePath = openDataViewModel.FastaFilePath;
+
+                if (!string.IsNullOrWhiteSpace(openDataViewModel.FastaFilePath) && File.Exists(openDataViewModel.FastaFilePath))
+                {
+                    this.ScanViewModel.IdTree.AddFastaEntries(await this.dataReader.ReadFastaFile(openDataViewModel.FastaFilePath));   
+                }
+
                 await this.ReadIdFile(openDataViewModel.IdFilePath, dataSetViewModel);
-                await this.dataReader.OpenDataSet(dataSetViewModel, openDataViewModel.RawFilePath, featureFilePath: openDataViewModel.FeatureFilePath);   
+                await this.dataReader.OpenDataSet(dataSetViewModel, openDataViewModel.RawFilePath, featureFilePath: openDataViewModel.FeatureFilePath);
             }
         }
 
@@ -326,8 +332,11 @@ namespace LcmsSpectator.ViewModels
                 foreach (var file in rawFilePaths)
                 {
                     var dataSetViewModel = await this.ReadRawFile(file);
-                    await this.ReadIdFile(idFilePath, dataSetViewModel);
-                    await this.dataReader.OpenDataSet(dataSetViewModel, file, featureFilePath: featureFilePath);
+
+                    if (dataSetViewModel.MsPfParameters == null)
+                    {
+                        dataSetViewModel.SetMsPfParameters(idFilePath);
+                    }
 
                     // Set the dataset's FASTA file path
                     if (dataSetViewModel.MsPfParameters != null)
@@ -337,6 +346,16 @@ namespace LcmsSpectator.ViewModels
                             DmsLookupViewModel.FastaFilePath,
                             dataSetViewModel.MsPfParameters.DatabaseFile);
                     }
+
+                    if (!string.IsNullOrWhiteSpace(dataSetViewModel.FastaDbFilePath) && File.Exists(dataSetViewModel.FastaDbFilePath))
+                    {
+                        this.LoadingScreenViewModel.IsLoading = true;
+                        this.ScanViewModel.IdTree.AddFastaEntries(await this.dataReader.ReadFastaFile(dataSetViewModel.FastaDbFilePath));
+                        this.LoadingScreenViewModel.IsLoading = false;
+                    }
+
+                    await this.ReadIdFile(idFilePath, dataSetViewModel);
+                    await this.dataReader.OpenDataSet(dataSetViewModel, file, featureFilePath: featureFilePath);
                 }
             }
             catch (Exception e)

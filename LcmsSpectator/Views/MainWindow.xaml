@@ -16,6 +16,7 @@
             <views1:DataSetView />
             
         </DataTemplate>
+        <utils:SequenceToStringConverter x:Key="SequenceToStringConverter" />
     </Window.Resources>
     <Grid>
         <!-- Menu -->
@@ -76,16 +77,32 @@
                                             </controls:MvvmTreeView.ContextMenu>
                                                 <controls:MvvmTreeView.Resources>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
-                                                        <TextBlock Text="{Binding ProteinName}" />
+                                                        <TextBlock Text="{Binding ProteinName}">
+                                                            <TextBlock.ToolTip>
+                                                                <StackPanel>
+                                                                    <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" />
+                                                                    <TextBlock Text="{Binding ProteinDescription}" />
+                                                                    <TextBlock Text="{Binding Sequence, Converter={StaticResource SequenceToStringConverter}}" />
+                                                                </StackPanel>
+                                                            </TextBlock.ToolTip>
+                                                        </TextBlock>
                                                     </HierarchicalDataTemplate>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
-                                                        <TextBlock Text="{Binding SequenceText}" />
+                                                        <TextBlock Text="{Binding Annotation}">
+                                                            <TextBlock.ToolTip>
+                                                                <TextBlock>
+                                                                    <Run Text="{Binding PreSequence, Mode=OneWay}" />
+                                                                    <Run Text="{Binding SequenceText, Mode=OneWay}" FontWeight="Bold" />
+                                                                    <Run Text="{Binding PostSequence, Mode=OneWay}" />
+                                                                </TextBlock>
+                                                            </TextBlock.ToolTip>
+                                                        </TextBlock>
                                                     </HierarchicalDataTemplate>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
-                                                        <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
+                                                        <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" ToolTip="y" />
                                                     </HierarchicalDataTemplate>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:PrSm}">
-                                                        <TextBlock Text="{Binding ScanText}" />
+                                                        <TextBlock Text="{Binding ScanText}" ToolTip="" />
                                                     </HierarchicalDataTemplate>
                                                 </controls:MvvmTreeView.Resources>
                                             </controls:MvvmTreeView>

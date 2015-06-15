@@ -13,6 +13,10 @@ namespace LcmsSpectator.Models
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
+
+    using InformedProteomics.Backend.Data.Sequence;
+    using InformedProteomics.Backend.MassFeature;
     using InformedProteomics.Backend.MassSpecData;
 
     /// <summary>
@@ -23,17 +27,53 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="ProteoformId"/> class.
         /// </summary>
-        /// <param name="sequenceText">The proteoform's sequence text.</param>
-        public ProteoformId(string sequenceText)
+        /// <param name="sequence">The proteoform's sequence text.</param>
+        /// <param name="sequenceText">The string representation of the sequence.</param>
+        /// <param name="modLocations">Location string of modifications in the sequence.</param>
+        /// <param name="proteinSequence">The protein sequence.</param>
+        public ProteoformId(Sequence sequence, string sequenceText, string modLocations, Sequence proteinSequence)
         {
+            this.Sequence = sequence;
             this.SequenceText = sequenceText;
+            this.PreSequence = string.Empty;
+            this.PostSequence = string.Empty;
             this.ChargeStates = new Dictionary<int, ChargeStateId>();
+            this.GenerateAnnotation(sequence, proteinSequence, modLocations);
+            this.FormatSequences();
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProteoformId"/> class.
+        /// This creates the proteform from a PRSM object.
+        /// </summary>
+        /// <param name="prsm">The PRSM to generate the ProteoformID from.</param>
+        /// <param name="proteinSequence">The sequence of the protein that this Proteoform is associated with.</param>
+        public ProteoformId(PrSm prsm, Sequence proteinSequence)
+        {
+            this.Sequence = prsm.Sequence;
+            this.SequenceText = prsm.SequenceText;
+            this.PreSequence = string.Empty;
+            this.PostSequence = string.Empty;
+            this.ChargeStates = new Dictionary<int, ChargeStateId>();
+            this.GenerateAnnotation(prsm.Sequence, proteinSequence, prsm.ModificationLocations);
+            this.FormatSequences();
+        }
+
+        public string PreSequence { get; private set; }
+
+        public Sequence Sequence { get; private set; }
 
         /// <summary>
         /// Gets the proteoform's sequence text.
         /// </summary>
         public string SequenceText { get; private set; }
+
+        /// <summary>
+        /// Gets the annotation of the proteoform in the protein sequence.
+        /// </summary>
+        public string Annotation { get; private set; }
+
+        public string PostSequence { get; private set; }
 
         /// <summary>
         /// Gets a dictionary that maps a charge state to a ChargeStateID.
@@ -126,6 +166,91 @@ namespace LcmsSpectator.Models
             }
 
             this.ChargeStates = newChargeStates;
+        }
+
+        private void GenerateAnnotation(Sequence sequence, Sequence proteinSequence, string modLocations)
+        {
+            var cleanSequenceStr = sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue);
+            var proteinSequenceStr = proteinSequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue);
+
+            int prevResidueIndex = -1;
+            int nextResidueIndex = sequence.Count;
+
+            var index = proteinSequenceStr.IndexOf(cleanSequenceStr, StringComparison.Ordinal);
+
+            if (index >= 0)
+            {
+                if (index > 0)
+                {
+                    prevResidueIndex = index - 1;
+                }
+
+                if (index < proteinSequenceStr.Length - 1)
+                {
+                    nextResidueIndex = index + cleanSequenceStr.Length + 1;
+                }
+            }
+
+            var labelBuilder = new StringBuilder();
+            if (prevResidueIndex >= 0)
+            {
+                labelBuilder.AppendFormat("{0}{1}.", proteinSequenceStr[prevResidueIndex], prevResidueIndex);
+                this.PreSequence = proteinSequenceStr.Substring(0, prevResidueIndex + 1);
+            }
+
+            labelBuilder.AppendFormat("({0})", modLocations.Length == 0 ? (cleanSequenceStr.Length < 30 ? cleanSequenceStr : "...") : modLocations);
+
+            if (nextResidueIndex < proteinSequenceStr.Length)
+            {
+                labelBuilder.AppendFormat(".{0}{1}", proteinSequenceStr[nextResidueIndex], nextResidueIndex);
+                this.PreSequence = proteinSequenceStr.Substring(nextResidueIndex);
+            }
+
+            this.Annotation = labelBuilder.ToString();
+        }
+
+        private void FormatSequences()
+        {
+            int pos = 0;
+            const int MaxLineLength = 60;
+
+            this.PreSequence = this.FormatSequenceText(this.PreSequence, ref pos, MaxLineLength);
+            this.SequenceText = this.FormatSequenceText(this.SequenceText, ref pos, MaxLineLength);
+            this.PostSequence = this.FormatSequenceText(this.PostSequence, ref pos, MaxLineLength);
+        }
+
+        private string FormatSequenceText(string sequenceText, ref int pos, int maxLineLength)
+        {
+            var seqBuilder = new StringBuilder();
+            bool inMod = false;
+            foreach (var a in sequenceText)
+            {
+                if (a == '[')
+                {
+                    inMod = true;
+                }
+
+                if (a == ']')
+                {
+                    inMod = false;
+                }
+
+                seqBuilder.Append(a);
+
+                if (inMod)
+                {
+                    continue;
+                }
+
+                if (pos > 0 && pos % maxLineLength == 0)
+                {
+                    seqBuilder.Append('\n');
+                }
+
+                pos++;
+            }
+
+            return seqBuilder.ToString();
         }
 
         /// <summary>

@@ -25,20 +25,26 @@ namespace LcmsSpectator.Models
         /// Initializes a new instance of the <see cref="ProteinId"/> class.
         /// </summary>
         /// <param name="sequence">The unmodified complete protein sequence.</param>
-        /// <param name="sequenceText">The unmodified complete protein sequence text.</param>
         /// <param name="proteinName">The protein name.</param>
-        public ProteinId(Sequence sequence, string sequenceText, string proteinName)
+        public ProteinId(Sequence sequence, string proteinName)
         {
-            this.SequenceText = sequenceText;
             Sequence = sequence;
             this.ProteinName = proteinName;
             this.Proteoforms = new Dictionary<string, ProteoformId>();
         }
 
         /// <summary>
-        /// Gets the unmodified complete protein sequence text.
+        /// Initializes a new instance of the <see cref="ProteinId"/> class. 
+        /// Constructor for creating a ProteinId from a FASTA Entry.
         /// </summary>
-        public string SequenceText { get; private set; }
+        /// <param name="fastaEntry">The FASTA Entry.</param>
+        public ProteinId(FastaEntry fastaEntry)
+        {
+            this.Proteoforms = new Dictionary<string, ProteoformId>();
+            this.Sequence = new Sequence(fastaEntry.ProteinSequenceText, new AminoAcidSet());
+            this.ProteinName = fastaEntry.ProteinName;
+            this.ProteinDescription = fastaEntry.ProteinDescription;
+        }
 
         /// <summary>
         /// Gets the unmodified complete protein sequence.
@@ -51,6 +57,11 @@ namespace LcmsSpectator.Models
         public string ProteinName { get; private set; }
 
         /// <summary>
+        /// Gets the description of the protein.
+        /// </summary>
+        public string ProteinDescription { get; private set; }
+
+        /// <summary>
         /// Gets a dictionary that maps a protein name to a ProteinID.
         /// </summary>
         public Dictionary<string, ProteoformId> Proteoforms { get; private set; }
@@ -58,12 +69,12 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Add a Protein-Spectrum-Match identification.
         /// </summary>
-        /// <param name="id">Protein-Spectrum-Math to add</param>
+        /// <param name="id">Protein-Spectrum-Match to add</param>
         public void Add(PrSm id)
         {
             if (!this.Proteoforms.ContainsKey(id.SequenceText))
             {
-                this.Proteoforms.Add(id.SequenceText, new ProteoformId(id.SequenceText));
+                this.Proteoforms.Add(id.SequenceText, new ProteoformId(id, this.Sequence));
             }
 
             var proteoform = this.Proteoforms[id.SequenceText];
@@ -80,6 +91,11 @@ namespace LcmsSpectator.Models
             {
                 this.Proteoforms[id.SequenceText].Remove(id);
             }
+        }
+
+        public void ClearIds()
+        {
+            this.Proteoforms.Clear();
         }
 
         /// <summary>

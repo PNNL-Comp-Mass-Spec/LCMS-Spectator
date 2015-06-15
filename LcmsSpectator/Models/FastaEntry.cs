@@ -40,11 +40,6 @@ namespace LcmsSpectator.Models
         private string proteinSequenceText;
 
         /// <summary>
-        /// The stored formatted entry for fast access.
-        /// </summary>
-        private string formattedEntry;
-
-        /// <summary>
         /// A value indicating whether this entry has been selected.
         /// </summary>
         private bool selected;
@@ -63,16 +58,7 @@ namespace LcmsSpectator.Models
             this.ProteinSequenceText = string.Empty;
             this.proteinDescription = string.Empty;
             this.Selected = true;
-            this.formattedEntry = null;
-
-            this.WhenAnyValue(x => x.ProteinName, x => x.ProteinDescription, x => x.ProteinSequenceText)
-                .Subscribe(_ => this.formattedEntry = null);
         }
-
-        /////// <summary>
-        /////// The protein sequence as an InformedProteomics sequence.
-        /////// </summary>
-        ////private Sequence proteinSequence;
 
         /// <summary>
         /// Gets or sets the protein name.
@@ -126,11 +112,6 @@ namespace LcmsSpectator.Models
         {
             get
             {
-                if (this.formattedEntry != null)
-                {
-                    return this.formattedEntry;
-                }
-
                 var startIndex = 0;
                 var endIndex = Math.Min(MaxLineLength, this.ProteinSequenceText.Length - startIndex);
                 var strbuilder =
@@ -151,12 +132,11 @@ namespace LcmsSpectator.Models
                     endIndex = Math.Min(endIndex + MaxLineLength, this.ProteinSequenceText.Length);
                 }
 
-                this.formattedEntry = string.Format(
+                return string.Format(
                     ">{0} {1}\n{2}",
                     this.ProteinName,
                     this.ProteinDescription,
                     strbuilder);
-                return this.formattedEntry;
             }
         }
     }

@@ -226,6 +226,7 @@
     <Compile Include="Utils\IonUtils.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
+    <Compile Include="Utils\SequenceToStringConverter.cs" />
     <Compile Include="ViewModels\ColorListViewModel.cs" />
     <Compile Include="ViewModels\ColorPaletteViewModel.cs" />
     <Compile Include="ViewModels\ColorViewModel.cs" />

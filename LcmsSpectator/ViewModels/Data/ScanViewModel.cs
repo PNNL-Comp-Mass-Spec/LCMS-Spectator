@@ -50,7 +50,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// A list of IDs grouped by protein name.
         /// </summary>
-        private IEnumerable<ProteinId> filteredProteins;
+        private ReactiveList<ProteinId> filteredProteins;
 
         /// <summary>
         /// The selected Protein-Spectrum-Match identification.
@@ -61,6 +61,11 @@ namespace LcmsSpectator.ViewModels.Data
         /// Gets or sets the object selected in TreeView. Uses weak typing because each level TreeView is a different data type.
         /// </summary>
         private object treeViewSelectedItem;
+
+        /// <summary>
+        /// The hierarchical tree of identifications.
+        /// </summary>
+        private IdentificationTree idTree;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScanViewModel"/> class.
@@ -75,12 +80,15 @@ namespace LcmsSpectator.ViewModels.Data
             this.dialogService = dialogService;
 
             this.FilteredData = new PrSm[0];
+            this.FilteredProteins = new ReactiveList<ProteinId>();
 
             this.Filters = new ReactiveList<IFilter> { ChangeTrackingEnabled = true };
 
             this.Data = new ReactiveList<PrSm> { ChangeTrackingEnabled = true };
             this.InitializeDefaultFilters();
             this.Data.AddRange(ids);
+
+            this.IdTree = new IdentificationTree();
 
             // When a filter is selected/uselected, request a filter value if selected, then filter data
             this.Filters.ItemChanged.Where(x => x.PropertyName == "Selected")
@@ -95,9 +103,17 @@ namespace LcmsSpectator.ViewModels.Data
                 .Subscribe(fd => this.FilteredData = fd);
 
             // When data is filtered, group it by protein name
-            this.WhenAnyValue(x => x.FilteredData)
-                .Select(fd => new IdentificationTree(fd))
-                .Subscribe(idTree => this.FilteredProteins = idTree.ProteinIds);
+            this.WhenAnyValue(x => x.FilteredData).ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(filteredData =>
+            {
+                this.IdTree.ClearIds();
+                this.IdTree.Add(filteredData);
+                this.FilteredProteins.Clear();
+                foreach (var protein in this.IdTree.ProteinIds)
+                {
+                    this.FilteredProteins.Add(protein);
+                }
+            });
 
             // When data is filtered and a PRSM has not been selected yet, select the first PRSM
             this.WhenAnyValue(x => x.FilteredData)
@@ -155,10 +171,19 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Gets a list of IDs grouped by protein name.
         /// </summary>
-        public IEnumerable<ProteinId> FilteredProteins
+        public ReactiveList<ProteinId> FilteredProteins
         {
             get { return this.filteredProteins; }
             private set { this.RaiseAndSetIfChanged(ref this.filteredProteins, value); }
+        }
+
+        /// <summary>
+        /// Gets the hierarchical tree of identifications.
+        /// </summary>
+        public IdentificationTree IdTree
+        {
+            get { return this.idTree; }
+            private set { this.RaiseAndSetIfChanged(ref this.idTree, value); }
         }
 
         /// <summary>

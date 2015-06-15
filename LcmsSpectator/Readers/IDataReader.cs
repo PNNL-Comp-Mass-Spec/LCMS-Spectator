@@ -76,5 +76,12 @@ namespace LcmsSpectator.Readers
         /// </param>
         /// <returns>IEnumerable of raw file names.</returns>
         List<string> GetRawFilesByDataSetName(string directoryPath, string datasetName);
+
+        /// <summary>
+        /// Reads a FASTA database file.
+        /// </summary>
+        /// <param name="filePath">The path to the FASTA database file.</param>
+        /// <returns>Task that returns IEnumerable of FASTA entries.</returns>
+        Task<IEnumerable<FastaEntry>> ReadFastaFile(string filePath);
     }
 }

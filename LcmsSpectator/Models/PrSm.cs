@@ -444,6 +444,11 @@ namespace LcmsSpectator.Models
                 }
             }
 
+            if (modificationLocations.Length > 0)
+            {
+                modificationLocations.Remove(modificationLocations.Length - 1, 1);
+            }
+
             return modificationLocations.ToString();
         }
 
