@@ -1,6 +1,7 @@
 ﻿<Window x:Class="LcmsSpectator.Views.DmsLookupView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="Search DMS" Height="375" Width="1100">
     
     <Window.Resources>
@@ -37,27 +38,29 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="3" />
                     <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="3" />
                     <ColumnDefinition Width="70" />
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" TextAlignment="Center">Weeks</TextBlock>
-                <TextBlock Grid.Row="0" Grid.Column="1" FontWeight="Bold" TextAlignment="Center">Dataset Filter</TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="2" FontWeight="Bold" TextAlignment="Center">Dataset Filter</TextBlock>
 
-                <TextBox Grid.Row="1" Grid.Column="0" Height="25" Text="{Binding NumberOfWeeks, UpdateSourceTrigger=PropertyChanged}">
-                    <TextBox.InputBindings>
+                <xctk:IntegerUpDown Grid.Row="1" Grid.Column="0" Height="25" Text="{Binding NumberOfWeeks, UpdateSourceTrigger=PropertyChanged}" Minimum="1">
+                    <xctk:IntegerUpDown.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding LookupCommand}" />
-                    </TextBox.InputBindings>
-                </TextBox>
-                <ComboBox Grid.Row="1" Grid.Column="1" Height="25" IsReadOnly="False" IsEditable="True" ItemsSource="{Binding PreviousDatasets.Keys}" Text="{Binding DatasetFilter, UpdateSourceTrigger=PropertyChanged}">
+                    </xctk:IntegerUpDown.InputBindings>
+                </xctk:IntegerUpDown>
+                <ComboBox Grid.Row="1" Grid.Column="2" Height="25" IsReadOnly="False" IsEditable="True" ItemsSource="{Binding PreviousDatasets.Keys}" Text="{Binding DatasetFilter, UpdateSourceTrigger=PropertyChanged}">
                     <ComboBox.InputBindings>
                         <KeyBinding Key="Enter" Command="{Binding LookupCommand}" />
                     </ComboBox.InputBindings>
                 </ComboBox>
 
-                <Button Grid.Row="1" Grid.Column="2" Command="{Binding LookupCommand}" Height="25">Search</Button>
+                <Button Grid.Row="1" Grid.Column="4" Command="{Binding LookupCommand}" Height="25">Search</Button>
 
-                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30" />
                         <RowDefinition Height="90*" />

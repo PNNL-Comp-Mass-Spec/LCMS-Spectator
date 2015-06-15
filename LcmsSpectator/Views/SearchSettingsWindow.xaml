@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:LcmsSpectator.Views"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="Search Settings" Height="550" Width="500" ResizeMode="NoResize">
     <Window.InputBindings>
         <KeyBinding Command="{Binding PrevTabCommand}" Key="Left" />
@@ -96,47 +97,48 @@
                               ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding ProductIonToleranceUnit}" IsEnabled="False"/>
 
                     <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Length</TextBlock>
-                    <TextBox Grid.Row="2" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MinSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MinSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" />
 
                     <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Length</TextBlock>
-                    <TextBox Grid.Row="3" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MaxSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <xctk:IntegerUpDown Grid.Row="3" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MaxSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" />
 
                     <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Min Precursor Ion Charge</TextBlock>
-                    <TextBox Grid.Row="4" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MinPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <xctk:IntegerUpDown Grid.Row="4" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MinPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" />
 
                     <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Max Precursor Ion Charge</TextBlock>
-                    <TextBox Grid.Row="5" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MaxPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <xctk:IntegerUpDown Grid.Row="5" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MaxPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" />
 
                     <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" Height="25">Min Product Ion Charge</TextBlock>
-                    <TextBox Grid.Row="6" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MinProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <xctk:IntegerUpDown Grid.Row="6" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MinProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" />
 
                     <TextBlock Grid.Row="7" Grid.Column="0" FontWeight="Bold" Height="25">Max Product Ion Charge</TextBlock>
-                    <TextBox Grid.Row="7" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MaxProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <xctk:IntegerUpDown Grid.Row="7" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MaxProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" />
 
                     <TextBlock Grid.Row="8" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Mass</TextBlock>
-                    <TextBox Grid.Row="8" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <xctk:DoubleUpDown Grid.Row="8" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MinSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                     <TextBlock Grid.Row="9" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Mass</TextBlock>
-                    <TextBox Grid.Row="9" Grid.Column="1" Height="25" TextAlignment="Right"
+                    <xctk:DoubleUpDown Grid.Row="9" Grid.Column="1" Height="25" TextAlignment="Right"
                              Text="{Binding MaxSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                     <TextBlock Grid.Row="10" Grid.Column="0" FontWeight="Bold" Height="25">Min Feature Probability</TextBlock>
-                    <TextBox Grid.Row="10" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MinFeatureProbability, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <xctk:DoubleUpDown Grid.Row="10" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MinFeatureProbability, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Increment="0.1" />
 
                     <TextBlock Grid.Row="11" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="Wrap">Max Dynamic Modifications Per Sequence</TextBlock>
-                    <TextBox Grid.Row="11" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MaxDynamicModificationsPerSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <xctk:IntegerUpDown Grid.Row="11" Grid.Column="1" Height="25" TextAlignment="Right"
+                             Text="{Binding MaxDynamicModificationsPerSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" />
                     
                     <TextBlock Grid.Row="12" Grid.Column="0" FontWeight="Bold" Height="25"># matches per spectrum</TextBlock>
-                    <TextBox Grid.Row="12" Grid.Column="1" Text="{Binding NumMatchesPerSpectrum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right" />
+                    <xctk:IntegerUpDown Grid.Row="12" Grid.Column="1" Text="{Binding NumMatchesPerSpectrum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right"
+                                        Minimum="1" />
 
                     <TextBlock Grid.Row="13" Grid.Column="0" FontWeight="Bold" Height="25">MS/MS Scan Range</TextBlock>
                     <Grid Grid.Row="13" Grid.Column="1" Height="25">
