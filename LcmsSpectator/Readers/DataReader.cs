@@ -18,6 +18,7 @@ namespace LcmsSpectator.Readers
     using LcmsSpectator.Config;
     using LcmsSpectator.Models;
     using LcmsSpectator.Utils;
+    using LcmsSpectator.ViewModels;
     using LcmsSpectator.ViewModels.Data;
     using ReactiveUI;
 
@@ -131,7 +132,11 @@ namespace LcmsSpectator.Readers
             // Show neighboring charge state XICs by default for MSPathFinder results
             if (toolType != null && toolType == ToolType.MsPathFinder)
             {
-                dataSetViewModel.XicViewModel.PrecursorPlotViewModel.PrecursorViewMode = PrecursorViewMode.Charges;
+                var precFragSeq = dataSetViewModel.XicViewModel.PrecursorPlotViewModel.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
+                if (precFragSeq != null)
+                {
+                    precFragSeq.PrecursorViewMode = PrecursorViewMode.Charges;
+                }
             }
 
             // Open ID file
