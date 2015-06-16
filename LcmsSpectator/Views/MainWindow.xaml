@@ -78,7 +78,7 @@
                                             </controls:MvvmTreeView.ContextMenu>
                                                 <controls:MvvmTreeView.Resources>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
-                                                        <TextBlock Text="{Binding ProteinName}">
+                                                        <TextBlock Text="{Binding ProteinName}" ToolTipService.ShowDuration="12000">
                                                             <TextBlock.ToolTip>
                                                                 <StackPanel>
                                                                     <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14" />
@@ -89,7 +89,7 @@
                                                         </TextBlock>
                                                     </HierarchicalDataTemplate>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
-                                                        <TextBlock Text="{Binding Annotation}">
+                                                        <TextBlock Text="{Binding Annotation}" ToolTipService.ShowDuration="12000">
                                                             <TextBlock.ToolTip>
                                                                 <StackPanel>
                                                                     <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14"/>
@@ -109,7 +109,7 @@
                                                         </TextBlock>
                                                     </HierarchicalDataTemplate>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
-                                                    <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}">
+                                                    <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" ToolTipService.ShowDuration="12000">
                                                         <TextBlock.ToolTip>
                                                             <StackPanel>
                                                                 <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14" />
@@ -131,7 +131,7 @@
                                                     </TextBlock>
                                                 </HierarchicalDataTemplate>
                                                     <HierarchicalDataTemplate DataType="{x:Type models1:PrSm}">
-                                                        <TextBlock Text="{Binding ScanText}">
+                                                        <TextBlock Text="{Binding ScanText}" ToolTipService.ShowDuration="12000">
                                                             <TextBlock.ToolTip>
                                                                 <StackPanel>
                                                                     <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14" />
@@ -158,7 +158,7 @@
                                                                     </StackPanel>
                                                                     <StackPanel Orientation="Horizontal">
                                                                         <TextBlock FontWeight="Bold" Width="140">Retention Time:</TextBlock>
-                                                                        <TextBlock Text="{Binding RetentionTime}" />
+                                                                        <TextBlock Text="{Binding RetentionTime, Converter={StaticResource MassFormatter}}" />
                                                                     </StackPanel>
                                                             </StackPanel>
                                                             </TextBlock.ToolTip>

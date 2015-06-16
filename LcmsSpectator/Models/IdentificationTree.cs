@@ -243,6 +243,23 @@ namespace LcmsSpectator.Models
             {
                 proteinId.Value.ClearIds();
             }
+
+            this.ClearEmptyProteins();
+        }
+
+        /// <summary>
+        /// Clear all proteins without proteoforms.
+        /// </summary>
+        public void ClearEmptyProteins()
+        {
+            this.Proteins.Clear();
+            foreach (var protein in this.allProteins)
+            {
+                if (protein.Value.Proteoforms.Count > 0)
+                {
+                    this.Proteins.Add(protein.Key, protein.Value);
+                }
+            }
         }
 
         /// <summary>
