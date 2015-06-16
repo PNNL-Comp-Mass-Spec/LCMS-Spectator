@@ -1,11 +1,20 @@
-﻿namespace LcmsSpectator.ViewModels.Plots
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="FeatureMapViewModel.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   View model that maintains a (false) heat map of LCMS features.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
-
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
@@ -17,6 +26,9 @@
     using OxyPlot.Series;
     using ReactiveUI;
 
+    /// <summary>
+    /// View model that maintains a (false) heat map of LCMS features.
+    /// </summary>
     public class FeatureMapViewModel : ReactiveObject
     {
         /// <summary>
@@ -88,6 +100,16 @@
         /// The maximum for the Y axis of the feature map.
         /// </summary>
         private double ymaximum;
+
+        /// <summary>
+        /// The minimum abundance displayed on feature map.
+        /// </summary>
+        private double abundanceMinimum;
+
+        /// <summary>
+        /// The maximum abundance displayed on feature map.
+        /// </summary>
+        private double abundanceMaximum;
 
         /// <summary>
         /// A value indicating whether whether the  identified MS/MS points associated with features are being shown on
@@ -200,6 +222,7 @@
                 Palette = this.colorDictionary.OxyPalette,
                 Minimum = 1,
                 Maximum = this.colorDictionary.OxyPalette.Colors.Count,
+                AxisTitleDistance = 1
             };
 
             // Initialize x and y axes.
@@ -328,20 +351,20 @@
             IcParameters.Instance.WhenAnyValue(x => x.FeatureColors)
                         .Select(colors => OxyPalette.Interpolate(NumColors, colors))
                         .Subscribe(palette =>
-                            {
-                                this.featureColorAxis.Palette = palette;
-                                this.BuildPlotCommand.Execute(null);
-                            });
+                        {
+                            this.featureColorAxis.Palette = palette;
+                            this.BuildPlotCommand.Execute(null);
+                        });
             IcParameters.Instance.WhenAnyValue(x => x.IdColors, x => x.Ms2ScanColor)
                 .Subscribe(x =>
-                    {
-                        var colorList = new List<OxyColor> { Capacity = x.Item1.Length + 1 };
-                        colorList.Add(x.Item2);
-                        colorList.AddRange(x.Item1);
-                        this.colorDictionary.SetColors(colorList);
-                        this.ms2ColorAxis.Palette = this.colorDictionary.OxyPalette;
-                        this.BuildPlotCommand.Execute(null);
-                    });
+                {
+                    var colorList = new List<OxyColor> { Capacity = x.Item1.Length + 1 };
+                    colorList.Add(x.Item2);
+                    colorList.AddRange(x.Item1);
+                    this.colorDictionary.SetColors(colorList);
+                    this.ms2ColorAxis.Palette = this.colorDictionary.OxyPalette;
+                    this.BuildPlotCommand.Execute(null);
+                });
         }
 
         /// <summary>
@@ -399,6 +422,24 @@
         {
             get { return this.ymaximum; }
             set { this.RaiseAndSetIfChanged(ref this.ymaximum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum abundance displayed on feature map.
+        /// </summary>
+        public double AbundanceMinimum
+        {
+            get { return this.abundanceMinimum; }
+            set { this.RaiseAndSetIfChanged(ref this.abundanceMinimum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum abundance displayed on feature map.
+        /// </summary>
+        public double AbundanceMaximum
+        {
+            get { return this.abundanceMaximum; }
+            set { this.RaiseAndSetIfChanged(ref this.abundanceMaximum, value); }
         }
 
         /// <summary>
@@ -531,10 +572,6 @@
             {
                 this.FeatureMap.Series.Add(series.Value);
             }
-
-            // Add identified Ms2s with no associated features
-            ////this.notFoundMs2S = this.CreateMs2ScatterSeries(this.notFoundMs2, null, this.ms2ColorAxis, "Identified Ms2 (No Feature)", 0, this.showNotFoundMs2);
-            ////this.FeatureMap.Series.Add(this.notFoundMs2S);
 
             // Highlight selected identification.
             this.SetHighlight(this.SelectedPrSm);

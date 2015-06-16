@@ -32,19 +32,19 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left" Name="XMin" DataContext="{Binding FeatureMapViewModel}" Text="{Binding XMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Right" Name="XMax" DataContext="{Binding FeatureMapViewModel}" Text="{Binding XMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <xctk:DoubleUpDown Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left" Name="XMin" DataContext="{Binding FeatureMapViewModel}" Text="{Binding XMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <xctk:DoubleUpDown Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Right" Name="XMax" DataContext="{Binding FeatureMapViewModel}" Text="{Binding XMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-            <TextBox Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Bottom" Name="YMin" DataContext="{Binding FeatureMapViewModel}" Text="{Binding YMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                <TextBox.LayoutTransform>
+            <xctk:DoubleUpDown Increment="100" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Bottom" Name="YMin" DataContext="{Binding FeatureMapViewModel}" Text="{Binding YMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <xctk:DoubleUpDown.LayoutTransform>
                     <RotateTransform Angle="-90" />
-                </TextBox.LayoutTransform>
-            </TextBox>
-            <TextBox Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Top" Name="YMax" DataContext="{Binding FeatureMapViewModel}" Text="{Binding YMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                <TextBox.LayoutTransform>
+                </xctk:DoubleUpDown.LayoutTransform>
+            </xctk:DoubleUpDown>
+            <xctk:DoubleUpDown Increment="100" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Top" Name="YMax" DataContext="{Binding FeatureMapViewModel}" Text="{Binding YMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <xctk:DoubleUpDown.LayoutTransform>
                     <RotateTransform Angle="-90" />
-                </TextBox.LayoutTransform>
-            </TextBox>
+                </xctk:DoubleUpDown.LayoutTransform>
+            </xctk:DoubleUpDown>
 
             <wpf:PlotView Grid.Row="0" Grid.Column="1" Name="FeatureMap" DataContext="{Binding FeatureMapViewModel}" Model="{Binding FeatureMap}" Margin="0,0,10,0">
                 <wpf:PlotView.ContextMenu>

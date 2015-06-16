@@ -4,7 +4,7 @@
 // </copyright>
 // <author>Christopher Wilkins</author>
 // <summary>
-//   View model for feature map plot.
+//   View model for maintaining feature map plot and feature data manipulation.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,7 +14,6 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Collections.Generic;
     using System.Linq;
     using System.Reactive.Linq;
-
     using InformedProteomics.Backend.MassSpecData;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
@@ -22,7 +21,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using ReactiveUI;
 
     /// <summary>
-    /// View model for feature map plot.
+    /// View model for maintaining feature map plot and feature data manipulation.
     /// </summary>
     public class FeatureViewerViewModel : ReactiveObject
     {
@@ -237,16 +236,6 @@ namespace LcmsSpectator.ViewModels.Plots
                 this.FeatureMapViewModel.Features = this.proMexModel.GetFilteredFeatures(
                     this.AbundanceThreshold,
                     this.PointsDisplayed).ToList();
-                ////this.yaxis.AbsoluteMinimum = 0;
-                ////this.yaxis.AbsoluteMaximum = this.features.Max(f => f.MinPoint.Mass);
-                ////this.xaxis.AbsoluteMinimum = 0;
-                ////this.xaxis.AbsoluteMaximum = this.lcms.MaxLcScan;
-
-                ////if (updatePlot)
-                ////{
-                ////    this.BuildPlot(this.abundanceThreshold, this.pointsDisplayed);
-                ////}
-
                 this.ShowSplash = false;
             }
             catch (InvalidCastException)

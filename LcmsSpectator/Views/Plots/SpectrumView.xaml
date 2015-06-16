@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:wpf="http://oxyplot.org/wpf"
              xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" Background="White"
              d:DesignHeight="300" d:DesignWidth="900">
     <UserControl.Resources>
@@ -27,16 +28,16 @@
 
             <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left" Name="XMin" Text="{Binding XMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Right" Name="XMax"  Text="{Binding XMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBox Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Bottom" Name="YMin" Text="{Binding YMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                <TextBox.LayoutTransform>
+            <xctk:DoubleUpDown Increment="100" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Bottom" Name="YMin" Text="{Binding YMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <xctk:DoubleUpDown.LayoutTransform>
                     <RotateTransform Angle="-90" />
-                </TextBox.LayoutTransform>
-            </TextBox>
-            <TextBox Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Top" Name="YMax" Text="{Binding YMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                <TextBox.LayoutTransform>
+                </xctk:DoubleUpDown.LayoutTransform>
+            </xctk:DoubleUpDown>
+            <xctk:DoubleUpDown Increment="100" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Top" Name="YMax" Text="{Binding YMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <xctk:DoubleUpDown.LayoutTransform>
                     <RotateTransform Angle="-90" />
-                </TextBox.LayoutTransform>
-            </TextBox>
+                </xctk:DoubleUpDown.LayoutTransform>
+            </xctk:DoubleUpDown>
 
             <wpf:PlotView Name="Ms2Spectrum" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="1">
                 <wpf:PlotView.ContextMenu>
