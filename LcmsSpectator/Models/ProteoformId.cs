@@ -16,7 +16,6 @@ namespace LcmsSpectator.Models
     using System.Text;
 
     using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.MassFeature;
     using InformedProteomics.Backend.MassSpecData;
 
     /// <summary>
@@ -62,14 +61,29 @@ namespace LcmsSpectator.Models
             this.FormatSequences();
         }
 
+        /// <summary>
+        /// The name of the protein.
+        /// </summary>
         public string ProteinName { get; private set; }
 
+        /// <summary>
+        /// The description of the protein.
+        /// </summary>
         public string ProteinDesc { get; private set; }
 
+        /// <summary>
+        /// The mass of the proteoform sequence.
+        /// </summary>
         public double Mass { get; private set; }
 
+        /// <summary>
+        /// The sequence before the proteoform.
+        /// </summary>
         public string PreSequence { get; private set; }
 
+        /// <summary>
+        /// The proteoform sequence.
+        /// </summary>
         public Sequence Sequence { get; private set; }
 
         /// <summary>
@@ -82,6 +96,9 @@ namespace LcmsSpectator.Models
         /// </summary>
         public string Annotation { get; private set; }
 
+        /// <summary>
+        /// The sequence after the proteoform.
+        /// </summary>
         public string PostSequence { get; private set; }
 
         /// <summary>
@@ -177,6 +194,12 @@ namespace LcmsSpectator.Models
             this.ChargeStates = newChargeStates;
         }
 
+        /// <summary>
+        /// Generate the annotation of a proteoform sequence as a substring of a protein sequence.
+        /// </summary>
+        /// <param name="sequence">The proteoform sequence.</param>
+        /// <param name="proteinSequence">The protein sequence.</param>
+        /// <param name="modLocations">The locations of modifications in the proteoform sequence.</param>
         private void GenerateAnnotation(Sequence sequence, Sequence proteinSequence, string modLocations)
         {
             var cleanSequenceStr = sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue);
@@ -196,7 +219,7 @@ namespace LcmsSpectator.Models
 
                 if (index < proteinSequenceStr.Length - 1)
                 {
-                    nextResidueIndex = index + cleanSequenceStr.Length + 1;
+                    nextResidueIndex = index + cleanSequenceStr.Length;
                 }
             }
 
@@ -212,46 +235,54 @@ namespace LcmsSpectator.Models
             if (nextResidueIndex < proteinSequenceStr.Length)
             {
                 labelBuilder.AppendFormat(".{0}{1}", proteinSequenceStr[nextResidueIndex], nextResidueIndex);
-                this.PreSequence = proteinSequenceStr.Substring(nextResidueIndex);
+                this.PostSequence = proteinSequenceStr.Substring(nextResidueIndex);
             }
 
             this.Annotation = labelBuilder.ToString();
         }
 
-        private void FormatSequences()
+        /// <summary>
+        /// Format the sequences so they have line breaks every [lineLength] characters.
+        /// Does not break in the middle of modifications.
+        /// </summary>
+        /// <param name="lineLength">The target length of a line.</param>
+        private void FormatSequences(int lineLength = 60)
         {
             int pos = 0;
-            const int MaxLineLength = 60;
-
-            this.PreSequence = this.FormatSequenceText(this.PreSequence, ref pos, MaxLineLength);
-            this.SequenceText = this.FormatSequenceText(this.SequenceText, ref pos, MaxLineLength);
-            this.PostSequence = this.FormatSequenceText(this.PostSequence, ref pos, MaxLineLength);
+            this.PreSequence = this.FormatSequenceText(this.PreSequence, ref pos, lineLength);
+            this.SequenceText = this.FormatSequenceText(this.SequenceText, ref pos, lineLength);
+            this.PostSequence = this.FormatSequenceText(this.PostSequence, ref pos, lineLength);
         }
 
-        private string FormatSequenceText(string sequenceText, ref int pos, int maxLineLength)
+        /// <summary>Insert line breaks into sequence every [lineLength] characters.</summary>
+        /// <param name="sequenceText">The sequence to format.</param>
+        /// <param name="pos">The current position.</param>
+        /// <param name="lineLength">Frequency to insert spaces at.</param>
+        /// <returns>The formatted sequence.</returns>
+        private string FormatSequenceText(string sequenceText, ref int pos, int lineLength)
         {
             var seqBuilder = new StringBuilder();
             bool inMod = false;
-            foreach (var a in sequenceText)
+            foreach (var c in sequenceText)
             {
-                if (a == '[')
-                {
+                if (c == '[')
+                {   // start of modification
                     inMod = true;
                 }
 
-                if (a == ']')
-                {
+                if (c == ']')
+                {   // end of modification
                     inMod = false;
                 }
 
-                seqBuilder.Append(a);
+                seqBuilder.Append(c);
 
                 if (inMod)
                 {
                     continue;
                 }
 
-                if (pos > 0 && pos % maxLineLength == 0)
+                if (pos > 0 && pos % lineLength == 0)
                 {
                     seqBuilder.Append('\n');
                 }
