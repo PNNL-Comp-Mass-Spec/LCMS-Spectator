@@ -206,8 +206,8 @@ namespace LcmsSpectator.ViewModels.Plots
                 Y0 = 1,
                 Y1 = data.GetLength(1),
                 TrackerFormatString = 
-                        "{1}: {2:0}" + Environment.NewLine +
-                        "{3}: {4:0}" + Environment.NewLine +
+                        ////"{1}: {2:0}" + Environment.NewLine +
+                        ////"{3}: {4:0}" + Environment.NewLine +
                         "{5}: {6:0.###}ppm",
             };
             this.PlotModel.Series.Add(heatMapSeries);

@@ -41,6 +41,4 @@
                </xcad:LayoutPanel>
            </xcad:LayoutRoot>
         </xcad:DockingManager>
-
-                    <!--<TabControl Margin="15" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></TabControl> -->
 </UserControl>
