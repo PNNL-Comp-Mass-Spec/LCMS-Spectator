@@ -105,7 +105,7 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
                 if (this.protIndex >= this.MaxColors)
                 {
                     // When we've used up all the primary colors, use the colors midway in between
-                    this.offset = OxyPalette.Colors.Count / (this.multiplier * this.MaxColors);
+                    this.offset = OxyPalette.Colors.Count / Math.Max(this.multiplier * this.MaxColors, 1);
                     this.multiplier *= 2;
                 }
             }
