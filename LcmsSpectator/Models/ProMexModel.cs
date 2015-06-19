@@ -20,7 +20,7 @@ namespace LcmsSpectator.Models
     /// <summary>
     /// Model for PROMEX features.
     /// </summary>
-    public class ProMexModel
+    public class ProMexModel : IFeatureExtractor
     {
         /// <summary>
         /// The LCMSRun for the data set this feature map shows.
@@ -78,7 +78,7 @@ namespace LcmsSpectator.Models
         /// <param name="abundanceThreshold">Minimum abundance threshold to filter by.</param>
         /// <param name="maxPoints">Maximum number of features.</param>
         /// <returns>Filtered features.</returns>
-        public IList<Feature> GetFilteredFeatures(double abundanceThreshold, int maxPoints)
+        public IEnumerable<Feature> GetFeatures(double abundanceThreshold, int maxPoints)
         {
             var maxAbundance = Math.Pow(abundanceThreshold, 10);
             if (this.Features == null)

@@ -107,7 +107,7 @@ namespace LcmsSpectator.ViewModels.Plots
             // Update plot if abundance threshold, or points displayed changes
             this.WhenAnyValue(x => x.AbundanceThreshold, x => x.PointsDisplayed)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
-                .Select(x => this.proMexModel.GetFilteredFeatures(x.Item1, x.Item2))
+                .Select(x => this.proMexModel.GetFeatures(x.Item1, x.Item2).ToList())
                 .Where(filteredFeatures => filteredFeatures.Count > 0)
                 .Subscribe(filteredFeatures =>
                         {
@@ -233,7 +233,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 this.MaximumAbundanceThreshold = Math.Log10(this.proMexModel.AbsoluteAbundanceMaximum);
                 this.MinimumAbundanceThreshold = Math.Log10(this.proMexModel.AbsoluteAbundanceMinimum);
                 this.AbundanceThreshold = Math.Max(this.maximumAbundanceThreshold, this.minimumAbundance);
-                this.FeatureMapViewModel.Features = this.proMexModel.GetFilteredFeatures(
+                this.FeatureMapViewModel.Features = this.proMexModel.GetFeatures(
                     this.AbundanceThreshold,
                     this.PointsDisplayed).ToList();
                 this.ShowSplash = false;

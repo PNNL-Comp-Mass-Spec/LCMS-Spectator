@@ -196,6 +196,7 @@
     <Compile Include="Models\Feature.cs" />
     <Compile Include="Models\FragmentationSequence.cs" />
     <Compile Include="Models\IdentificationTree.cs" />
+    <Compile Include="Models\IFeatureExtractor.cs" />
     <Compile Include="Models\IIdData.cs" />
     <Compile Include="Models\MsPfParameters.cs" />
     <Compile Include="Models\ProteinId.cs" />
@@ -235,6 +236,7 @@
     <Compile Include="Utils\IonUtils.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
+    <Compile Include="Utils\SequenceTextFormatter.cs" />
     <Compile Include="Utils\SequenceToStringConverter.cs" />
     <Compile Include="ViewModels\ColorListViewModel.cs" />
     <Compile Include="ViewModels\ColorPaletteViewModel.cs" />
