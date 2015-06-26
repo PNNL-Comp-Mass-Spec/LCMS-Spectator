@@ -341,7 +341,7 @@ namespace LcmsSpectator.ViewModels.Data
             this.InitializeWirings(); // Initialize the wirings for updating these view models
 
             // Create prsms for scan numbers (unidentified)
-            await this.LoadScans();
+            ////await this.LoadScans();
             ////await this.ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun)this.LcMs);
             this.SelectedPrSm.LcMs = this.LcMs; // For the selected PrSm, we should always use the LcMsRun for this dataset.
             this.LoadingScreenViewModel.IsLoading = false; // Hide animated loading screen
@@ -452,6 +452,11 @@ namespace LcmsSpectator.ViewModels.Data
                     var idFileReader = IdFileReaderFactory.CreateReader(searchSettings.GetIdFilePath());
                     var prsms = await idFileReader.ReadAsync();
                     var prsmList = prsms.ToList();
+                    foreach (var prsm in prsmList)
+                    {
+                        prsm.LcMs = this.LcMs;
+                    }
+
                     prsmList.Sort(new PrSm.PrSmScoreComparer());
                     this.ScanViewModel.Data.AddRange(prsmList);
 
