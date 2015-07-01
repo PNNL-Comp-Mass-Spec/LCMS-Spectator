@@ -115,6 +115,7 @@ namespace LcmsSpectator.ViewModels.Plots
             {
                 Title = "Error",
                 Position = AxisPosition.Right,
+                AxisDistance = -0.5,
                 AbsoluteMinimum = 0,
                 Palette = OxyPalette.Interpolate(1000, minColor, maxColor),
                 Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
