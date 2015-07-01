@@ -671,7 +671,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     TrackerFormatString =
                         "{0}" + Environment.NewLine +
                         "{1}: {2:0.###}" + Environment.NewLine +
-                        "{2}: {4:0.###E0}",
+                        "{3}: {4:0.###E0}",
                     IsVisible = proteinName == string.Empty ? this.showFoundUnIdMs2 : this.showFoundIdMs2,
                 };
 
