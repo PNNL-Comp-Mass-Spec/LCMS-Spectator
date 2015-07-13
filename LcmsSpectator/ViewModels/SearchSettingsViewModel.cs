@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using InformedProteomics.Backend.Utils;
+
 namespace LcmsSpectator.ViewModels
 {
     using System;
@@ -58,6 +60,11 @@ namespace LcmsSpectator.ViewModels
         /// The tab index for the tab control.
         /// </summary>
         private int tabIndex;
+
+        /// <summary>
+        /// A value indicating whether the search is currently running.
+        /// </summary>
+        private bool searchRunning;
 
         /// <summary>
         /// The path for the spectrum file.
@@ -212,6 +219,11 @@ namespace LcmsSpectator.ViewModels
         private int numMatchesPerSpectrum;
 
         /// <summary>
+        /// The search progress.
+        /// </summary>
+        private double searchProgress;
+
+        /// <summary>
         /// A task for running an MSPathFinder database search;
         /// </summary>
         private Task runSearchTask;
@@ -228,12 +240,13 @@ namespace LcmsSpectator.ViewModels
         public SearchSettingsViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.LoadingScreenViewModel = new LoadingScreenViewModel();
             this.SearchModes = new[] { 0, 1, 2 };
             this.ToleranceUnits = new[] { ToleranceUnit.Ppm, ToleranceUnit.Th };
             this.SelectedSequence = string.Empty;
             this.FastaEntries = new ReactiveList<FastaEntry>();
             this.SequenceProteins = new FastaEntry[0];
+
+            this.SearchRunning = false;
 
             this.FromFastaEntry = true;
             this.FromSequence = false;
@@ -375,9 +388,13 @@ namespace LcmsSpectator.ViewModels
         public bool Status { get; private set; }
 
         /// <summary>
-        /// Gets a view model for displaying animated loading screen text.
+        /// Gets or sets a value indicating whether the search is currently running.
         /// </summary>
-        public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
+        public bool SearchRunning
+        {
+            get { return this.searchRunning; }
+            set { this.RaiseAndSetIfChanged(ref this.searchRunning, value); }
+        }
 
         /// <summary>
         /// Gets a command that decrements the tab index.
@@ -731,6 +748,15 @@ namespace LcmsSpectator.ViewModels
             set { this.RaiseAndSetIfChanged(ref this.numMatchesPerSpectrum, value); }
         }
 
+        /// <summary>
+        /// Gets or sets the search progress.
+        /// </summary>
+        public double SearchProgress
+        {
+            get { return this.searchProgress; }
+            set { this.RaiseAndSetIfChanged(ref this.searchProgress, value); }
+        }
+
         /// <summary>Get a launcher for TopDown MSPathFinder searches.</summary>
         /// <param name="ms2ScanNums">The MS/MS scan numbers to restrict search to.</param>
         /// <returns>The <see cref="IcTopDownLauncher"/>.</returns>
@@ -902,7 +928,7 @@ namespace LcmsSpectator.ViewModels
         /// <returns>The <see cref="Task"/>.</returns>
         private async Task RunImplementation()
         {
-            LoadingScreenViewModel.IsLoading = true;
+            this.SearchRunning = true;
 
             this.runSearchCancellationToken = new CancellationTokenSource();
 
@@ -921,16 +947,20 @@ namespace LcmsSpectator.ViewModels
             // Create truncated FASTA
             this.truncatedFastaDbFilePath = this.CreateTruncatedFastaFile();
             
+            // Progress updater
+            var progress = new Progress<ProgressData>(progressData => this.SearchProgress = progressData.Percent);
+
             // Run Search
             var topDownLauncher = this.GetTopDownLauncher(ms2Scans);
             this.runSearchTask = Task.Run(
                                           () => topDownLauncher.RunSearch(
                                                                           IcParameters.Instance.IonCorrelationThreshold,
-                                                                          this.runSearchCancellationToken.Token),
-                                          this.runSearchCancellationToken.Token);
+                                                                          this.runSearchCancellationToken.Token,
+                                                                          progress),
+                                                this.runSearchCancellationToken.Token);
             await this.runSearchTask;
             ////topDownLauncher.RunSearch(IcParameters.Instance.IonCorrelationThreshold);
-            LoadingScreenViewModel.IsLoading = false;
+            this.SearchRunning = false;
 
             this.runSearchCancellationToken = null;
 
@@ -948,7 +978,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void CancelImplementation()
         {
-            if (this.LoadingScreenViewModel.IsLoading)
+            if (this.SearchRunning)
             {
                 if (this.dialogService.ConfirmationBox(
                     "Are you sure you would like to cancel the search?",
@@ -959,7 +989,7 @@ namespace LcmsSpectator.ViewModels
                         this.runSearchCancellationToken.Cancel();
                     }
 
-                    this.LoadingScreenViewModel.IsLoading = false;   
+                    this.SearchRunning = false;   
                 }
 
                 return;

@@ -4,6 +4,10 @@
         xmlns:views="clr-namespace:LcmsSpectator.Views"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="Search Settings" Height="550" Width="500" ResizeMode="NoResize">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+    
     <Window.InputBindings>
         <KeyBinding Command="{Binding PrevTabCommand}" Key="Left" />
         <KeyBinding Command="{Binding NextTabCommand}" Key="Right" />
@@ -305,10 +309,22 @@
             </Grid>
         </TabItem>
     </TabControl>
-        
-    <views:LoadingScreen Grid.Row="0" Grid.Column="0" DataContext="{Binding LoadingScreenViewModel}" />
-     
-    <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0">
+
+        <Border Grid.Row="0" Grid.Column="0" BorderBrush="Black" BorderThickness="1" Background="#80000000"
+            VerticalAlignment="Stretch" Visibility="{Binding SearchRunning, Converter={StaticResource BoolToVis}}">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*"/>
+                    <RowDefinition Height="50*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Background="LightGray" Height="100" Width="150">
+                    <TextBlock Margin="10">Searching...</TextBlock>
+                    <ProgressBar Value="{Binding SearchProgress}" Margin="10" Height="20" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0">
         <Button Width="20" Margin="0,0,10,0" Command="{Binding PrevTabCommand}" ToolTip="Previous Tab">&lt;</Button>
         <Button Width="20" Command="{Binding NextTabCommand}" ToolTip="Next Tab">&gt;</Button>
     </StackPanel>
