@@ -330,9 +330,8 @@ namespace LcmsSpectator.ViewModels.Data
             this.rawFilePath = filePath;
 
             // load raw file
-            var massSpecDataType = filePath.EndsWith(FileConstants.RawFileExtensions[0], true, CultureInfo.InvariantCulture) ? 
-                                                        MassSpecDataType.XCaliburRun : MassSpecDataType.MzMLFile;
-            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, massSpecDataType, 0, 0));
+            var massSpecDataReader = MassSpecDataReaderFactory.GetMassSpecDataReader(filePath);
+            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, massSpecDataReader, 0, 0));
 
             // Now that we have an LcMsRun, initialize viewmodels that require it
             this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs);
@@ -439,7 +438,6 @@ namespace LcmsSpectator.ViewModels.Data
                 searchSettings.MaxProductIonCharge = this.MsPfParameters.MaxPrecursorIonCharge;
                 searchSettings.PrecursorIonToleranceValue = this.MsPfParameters.PrecursorTolerancePpm.GetValue();
                 searchSettings.ProductIonToleranceValue = this.MsPfParameters.ProductIonTolerancePpm.GetValue();
-                searchSettings.MinFeatureProbability = this.MsPfParameters.MinFeatureProbablility;
                 searchSettings.MaxDynamicModificationsPerSequence =
                     this.MsPfParameters.MaxDynamicModificationsPerSequence;
             }

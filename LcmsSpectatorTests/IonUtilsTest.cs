@@ -32,42 +32,42 @@ namespace LcmsSpectatorTests
         // bottom up (dda) data
         [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DDA\Q_2014_0523_1_0_amol_uL_DDA.raw",
                   @"\\protoapps\UserData\Wilkins\BottomUp\DDA\Q_2014_0523_1_0_amol_uL_DDA_IcTda.tsv")]
-        public void TestIsotopePeakAlignment(string rawFilePath, string idFilePath)
-        {
-            var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
-            var lcms = PbfLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
-            var ids = idFileReader.Read();
-            var idList = ids.ToList();
-            foreach (var id in idList)
-            {
-                id.LcMs = lcms;
-                id.RawFileName = Path.GetFileNameWithoutExtension(rawFilePath);
-            }
+        ////public void TestIsotopePeakAlignment(string rawFilePath, string idFilePath)
+        ////{
+        ////    var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
+        ////    var lcms = PbfLcMsRun.GetLcMsRun(rawFilePath, MassSpecDataType.XCaliburRun);
+        ////    var ids = idFileReader.Read();
+        ////    var idList = ids.ToList();
+        ////    foreach (var id in idList)
+        ////    {
+        ////        id.LcMs = lcms;
+        ////        id.RawFileName = Path.GetFileNameWithoutExtension(rawFilePath);
+        ////    }
 
-            var prsms = idList.Where(prsm => prsm.Sequence.Count > 0);
+        ////    var prsms = idList.Where(prsm => prsm.Sequence.Count > 0);
 
-            const double relIntThres = 0.1;
-            var tolerance = new Tolerance(10, ToleranceUnit.Ppm);
-            const int maxCharge = 15;
-            var ionTypeFactory = new IonTypeFactory(maxCharge);
-            var ionTypes = ionTypeFactory.GetAllKnownIonTypes().ToArray();
-            foreach (var prsm in prsms)
-            {
-                foreach (var ionType in ionTypes)
-                {
-                    var composition = prsm.Sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
-                    var ion = ionType.GetIon(composition);
-                    var observedPeaks = prsm.Ms2Spectrum.GetAllIsotopePeaks(ion, tolerance, relIntThres);
-                    if (observedPeaks == null) continue;
-                    var errors = IonUtils.GetIsotopePpmError(observedPeaks, ion, relIntThres);
-                    foreach (var error in errors)
-                    {
-                        if (error == null) continue;
-                        Assert.True(error <= tolerance.GetValue());
-                    }
-                }
-            }
-        }
+        ////    const double relIntThres = 0.1;
+        ////    var tolerance = new Tolerance(10, ToleranceUnit.Ppm);
+        ////    const int maxCharge = 15;
+        ////    var ionTypeFactory = new IonTypeFactory(maxCharge);
+        ////    var ionTypes = ionTypeFactory.GetAllKnownIonTypes().ToArray();
+        ////    foreach (var prsm in prsms)
+        ////    {
+        ////        foreach (var ionType in ionTypes)
+        ////        {
+        ////            var composition = prsm.Sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
+        ////            var ion = ionType.GetIon(composition);
+        ////            var observedPeaks = prsm.Ms2Spectrum.GetAllIsotopePeaks(ion, tolerance, relIntThres);
+        ////            if (observedPeaks == null) continue;
+        ////            var errors = IonUtils.GetIsotopePpmError(observedPeaks, ion, relIntThres);
+        ////            foreach (var error in errors)
+        ////            {
+        ////                if (error == null) continue;
+        ////                Assert.True(error <= tolerance.GetValue());
+        ////            }
+        ////        }
+        ////    }
+        ////}
 
         [Test]
         public void TestITraqMod()

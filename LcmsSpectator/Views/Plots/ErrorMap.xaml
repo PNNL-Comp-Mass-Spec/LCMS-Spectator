@@ -15,7 +15,7 @@
             <xcad:LayoutPanel>
                 <xcad:LayoutDocumentPane DockWidth="*">
                     <xcad:LayoutDocument Title="Heat Map" CanClose="False">
-                        <oxy:PlotView Model="{Binding PlotModel}" Margin="0,0,10,0">
+                        <oxy:PlotView Model="{Binding PlotModel}">
                             <oxy:PlotView.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="_Save as Image" Command="{Binding SaveAsImageCommand}" />

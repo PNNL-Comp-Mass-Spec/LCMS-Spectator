@@ -175,7 +175,7 @@ namespace LcmsSpectator.Models
         {
             get
             {
-                return (this.LcMs == null) ? null : this.LcMs.GetSpectrum(this.Scan) as ProductSpectrum;
+                return (this.LcMs == null) ? null : this.LcMs.GetSpectrum(this.Scan, false) as ProductSpectrum;
             }
         }
 

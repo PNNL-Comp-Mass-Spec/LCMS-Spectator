@@ -155,11 +155,6 @@ namespace LcmsSpectator.ViewModels
         private double maxSequenceMass;
 
         /// <summary>
-        /// The minimum feature probability threshold.
-        /// </summary>
-        private double minFeatureProbability;
-
-        /// <summary>
         /// The maximum dynamic modifications for each sequence.
         /// </summary>
         private int maxDynamicModificationsPerSequence;
@@ -335,7 +330,6 @@ namespace LcmsSpectator.ViewModels
             this.PrecursorIonToleranceUnit = ToleranceUnit.Ppm;
             this.ProductIonToleranceValue = 10;
             this.PrecursorIonToleranceUnit = ToleranceUnit.Ppm;
-            this.MinFeatureProbability = 0.15;
             this.minScanNumber = 0;
             this.maxScanNumber = 0;
             this.maxDynamicModificationsPerSequence = 0;
@@ -632,15 +626,6 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Gets or sets the minimum feature probability threshold.
-        /// </summary>
-        public double MinFeatureProbability
-        {
-            get { return this.minFeatureProbability; }
-            set { this.RaiseAndSetIfChanged(ref this.minFeatureProbability, value); }
-        }
-
-        /// <summary>
         /// Gets or sets the maximum dynamic modifications for each sequence.
         /// </summary>
         public int MaxDynamicModificationsPerSequence
@@ -773,7 +758,6 @@ namespace LcmsSpectator.ViewModels
                                          true,
                                          this.SelectedSearchMode,
                                          this.FeatureFilePath,
-                                         this.minFeatureProbability,
                                          ms2ScanNums,
                                          this.NumMatchesPerSpectrum);
         }
@@ -923,9 +907,8 @@ namespace LcmsSpectator.ViewModels
             this.runSearchCancellationToken = new CancellationTokenSource();
 
             // Read spectrum file
-            var massSpecDataType = this.SpectrumFilePath.EndsWith(FileConstants.RawFileExtensions[0], true, CultureInfo.InvariantCulture) ?
-                                                        MassSpecDataType.XCaliburRun : MassSpecDataType.MzMLFile;
-            var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(this.SpectrumFilePath, massSpecDataType, 0, 0), this.runSearchCancellationToken.Token);
+            var massSpecDataReader = MassSpecDataReaderFactory.GetMassSpecDataReader(this.SpectrumFilePath);
+            var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(this.SpectrumFilePath, massSpecDataReader, 0, 0), this.runSearchCancellationToken.Token);
             
             // Get MS/MS scan numbers
             IEnumerable<int> ms2Scans = null;
