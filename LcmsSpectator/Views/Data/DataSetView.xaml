@@ -163,7 +163,23 @@
             <Button Command="{Binding CreateAndAddPrSmCommand}" Grid.Row="0" Grid.Column="14" Height="25" VerticalAlignment="Center"
                     ToolTip="Display XIC and spectra for this sequence and add it to Scan View List">Add Target</Button>
         </Grid>
-        <views:LoadingScreen DataContext="{Binding LoadingScreenViewModel}"
-                             Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" />
+
+        <Border BorderBrush="Black" BorderThickness="1" Background="#80000000"
+            VerticalAlignment="Stretch" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
+                Grid.Row="0" Grid.RowSpan="4" Grid.Column="0">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50*"/>
+                    <RowDefinition Height="50*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Background="LightGray" Height="100" Width="150">
+                    <TextBlock Margin="10">Loading...</TextBlock>
+                    <ProgressBar Value="{Binding LoadProgress}" Margin="10" Height="20" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!--<views:LoadingScreen DataContext="{Binding LoadingScreenViewModel}"
+                             Grid.Row="0" Grid.RowSpan="4" Grid.Column="0" />-->
     </Grid>
 </UserControl>

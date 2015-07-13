@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using InformedProteomics.Backend.Utils;
+
 namespace LcmsSpectator.ViewModels.Data
 {
     using System;
@@ -86,6 +88,16 @@ namespace LcmsSpectator.ViewModels.Data
         private bool idFileOpen;
 
         /// <summary>
+        /// A value indicating whether this dataset is loading.
+        /// </summary>
+        private bool isLoading;
+
+        /// <summary>
+        /// The progress of the loading.
+        /// </summary>
+        private double loadProgress;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DataSetViewModel"/> class. 
         /// </summary>
         /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>
@@ -94,7 +106,6 @@ namespace LcmsSpectator.ViewModels.Data
             this.dialogService = dialogService;
             this.ReadyToClose = false;
             this.IdFileOpen = false;
-            this.LoadingScreenViewModel = new LoadingScreenViewModel();
             this.SelectedPrSm = new PrSm();
             this.ScanViewModel = new ScanViewModel(dialogService, new List<PrSm>());
             this.CreateSequenceViewModel = new CreateSequenceViewModel(dialogService)
@@ -203,11 +214,6 @@ namespace LcmsSpectator.ViewModels.Data
         public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
 
         /// <summary>
-        /// Gets the loading screen view model.
-        /// </summary>
-        public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
-
-        /// <summary>
         /// Gets a command that starts an MSPathFinder with this data set.
         /// </summary>
         public IReactiveCommand StartMsPfSearchCommand { get; private set; }
@@ -301,6 +307,24 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether this dataset is loading.
+        /// </summary>
+        public bool IsLoading
+        {
+            get { return this.isLoading; }
+            set { this.RaiseAndSetIfChanged(ref this.isLoading, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the progress of the loading.
+        /// </summary>
+        public double LoadProgress
+        {
+            get { return this.loadProgress; }
+            set { this.RaiseAndSetIfChanged(ref this.loadProgress, value); }
+        }
+
+        /// <summary>
         /// Set the MSPathFinder parameters given a path to a ID file.
         /// </summary>
         /// <param name="idFilePath">The id file path.</param>
@@ -325,12 +349,14 @@ namespace LcmsSpectator.ViewModels.Data
         /// </returns>
         public async Task InitializeAsync(string filePath)
         {
-            this.LoadingScreenViewModel.IsLoading = true; // Show animated loading screen
+            this.IsLoading = true; // Show animated loading screen
             this.Title = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(filePath));
             this.rawFilePath = filePath;
 
+            var progress = new Progress<ProgressData>(progressData => this.LoadProgress = progressData.Percent);
+
             // load raw file
-            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, 0, 0));
+            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, 0, 0, progress));
 
             // Now that we have an LcMsRun, initialize viewmodels that require it
             this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs);
@@ -342,7 +368,7 @@ namespace LcmsSpectator.ViewModels.Data
             ////await this.LoadScans();
             ////await this.ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun)this.LcMs);
             this.SelectedPrSm.LcMs = this.LcMs; // For the selected PrSm, we should always use the LcMsRun for this dataset.
-            this.LoadingScreenViewModel.IsLoading = false; // Hide animated loading screen
+            this.IsLoading = false; // Hide animated loading screen
         }
 
         /// <summary>
