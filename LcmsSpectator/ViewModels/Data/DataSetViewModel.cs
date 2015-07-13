@@ -330,8 +330,7 @@ namespace LcmsSpectator.ViewModels.Data
             this.rawFilePath = filePath;
 
             // load raw file
-            var massSpecDataReader = MassSpecDataReaderFactory.GetMassSpecDataReader(filePath);
-            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, massSpecDataReader, 0, 0));
+            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, 0, 0));
 
             // Now that we have an LcMsRun, initialize viewmodels that require it
             this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs);

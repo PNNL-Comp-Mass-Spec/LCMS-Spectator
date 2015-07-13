@@ -933,8 +933,7 @@ namespace LcmsSpectator.ViewModels
             this.runSearchCancellationToken = new CancellationTokenSource();
 
             // Read spectrum file
-            var massSpecDataReader = MassSpecDataReaderFactory.GetMassSpecDataReader(this.SpectrumFilePath);
-            var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(this.SpectrumFilePath, massSpecDataReader, 0, 0), this.runSearchCancellationToken.Token);
+            var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(this.SpectrumFilePath, 0, 0), this.runSearchCancellationToken.Token);
             
             // Get MS/MS scan numbers
             IEnumerable<int> ms2Scans = null;
