@@ -95,7 +95,12 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// The progress of the loading.
         /// </summary>
-        private double loadProgress;
+        private double loadProgressPercent;
+
+        /// <summary>
+        /// The status message for the loading.
+        /// </summary>
+        private string loadProgressStatus;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataSetViewModel"/> class. 
@@ -318,10 +323,19 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Gets or sets the progress of the loading.
         /// </summary>
-        public double LoadProgress
+        public double LoadProgressPercent
         {
-            get { return this.loadProgress; }
-            set { this.RaiseAndSetIfChanged(ref this.loadProgress, value); }
+            get { return this.loadProgressPercent; }
+            set { this.RaiseAndSetIfChanged(ref this.loadProgressPercent, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the status message for the loading.
+        /// </summary>
+        public string LoadProgressStatus
+        {
+            get { return this.loadProgressStatus; }
+            set { this.RaiseAndSetIfChanged(ref this.loadProgressStatus, value); }
         }
 
         /// <summary>
@@ -353,7 +367,17 @@ namespace LcmsSpectator.ViewModels.Data
             this.Title = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(filePath));
             this.rawFilePath = filePath;
 
-            var progress = new Progress<ProgressData>(progressData => this.LoadProgress = progressData.Percent);
+            this.LoadProgressPercent = 0.0;
+            this.LoadProgressStatus = "Loading...";
+            var progress = new Progress<ProgressData>(progressData =>
+            {
+                progressData.UpdateFrequencySeconds = 2;
+                if (progressData.ShouldUpdate())
+                {
+                    this.LoadProgressPercent = progressData.Percent;
+                    this.LoadProgressStatus = progressData.Status;   
+                }
+            });
 
             // load raw file
             this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, 0, 0, progress));
@@ -362,12 +386,18 @@ namespace LcmsSpectator.ViewModels.Data
             this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs);
             this.SpectrumViewModel = new SpectrumViewModel(this.dialogService, this.LcMs);
             this.FeatureMapViewModel = new FeatureViewerViewModel((LcMsRun)this.LcMs, this.dialogService);
-            this.InitializeWirings(); // Initialize the wirings for updating these view models
+
+            // When the selected scan changes in the xic plots, the selected scan for the prsm should update
+            this.XicViewModel.SelectedScanUpdated().Subscribe(scan => this.SelectedPrSm.Scan = scan);
+
+            // When an ID is selected on FeatureMap, update selectedPrSm
+            this.FeatureMapViewModel.FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => this.SelectedPrSm = prsm);
 
             // Create prsms for scan numbers (unidentified)
             ////await this.LoadScans();
             ////await this.ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun)this.LcMs);
             this.SelectedPrSm.LcMs = this.LcMs; // For the selected PrSm, we should always use the LcMsRun for this dataset.
+
             this.IsLoading = false; // Hide animated loading screen
         }
 
@@ -394,18 +424,6 @@ namespace LcmsSpectator.ViewModels.Data
                 });
                 this.ScanViewModel.Data.AddRange(prsmScans);
             });
-        }
-
-        /// <summary>
-        /// Initialize the connections between the view models.
-        /// </summary>
-        private void InitializeWirings()
-        {
-            // When the selected scan changes in the xic plots, the selected scan for the prsm should update
-            this.XicViewModel.SelectedScanUpdated().Subscribe(scan => this.SelectedPrSm.Scan = scan);
-
-            // When an ID is selected on FeatureMap, update selectedPrSm
-            this.FeatureMapViewModel.FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => this.SelectedPrSm = prsm);
         }
 
         /// <summary>

@@ -221,7 +221,12 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// The search progress.
         /// </summary>
-        private double searchProgress;
+        private double searchProgressPercent;
+
+        /// <summary>
+        /// The status message for the search progress.
+        /// </summary>
+        private string searchProgressStatus;
 
         /// <summary>
         /// A task for running an MSPathFinder database search;
@@ -751,10 +756,19 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets or sets the search progress.
         /// </summary>
-        public double SearchProgress
+        public double SearchProgressPercent
         {
-            get { return this.searchProgress; }
-            set { this.RaiseAndSetIfChanged(ref this.searchProgress, value); }
+            get { return this.searchProgressPercent; }
+            set { this.RaiseAndSetIfChanged(ref this.searchProgressPercent, value); }
+        }
+
+        /// <summary>
+        /// The status message for the search progress.
+        /// </summary>
+        public string SearchProgressStatus
+        {
+            get { return this.searchProgressStatus; }
+            set { this.RaiseAndSetIfChanged(ref this.searchProgressStatus, value); }
         }
 
         /// <summary>Get a launcher for TopDown MSPathFinder searches.</summary>
@@ -947,7 +961,13 @@ namespace LcmsSpectator.ViewModels
             this.truncatedFastaDbFilePath = this.CreateTruncatedFastaFile();
             
             // Progress updater
-            var progress = new Progress<ProgressData>(progressData => this.SearchProgress = progressData.Percent);
+            this.SearchProgressPercent = 0.0;
+            this.SearchProgressStatus = "Searching...";
+            var progress = new Progress<ProgressData>(progressData =>
+            {
+                this.SearchProgressPercent = progressData.Percent;
+                this.SearchProgressStatus = progressData.Status;
+            });
 
             // Run Search
             var topDownLauncher = this.GetTopDownLauncher(ms2Scans);
