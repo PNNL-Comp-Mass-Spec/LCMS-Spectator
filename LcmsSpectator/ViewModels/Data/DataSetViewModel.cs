@@ -8,26 +8,23 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using InformedProteomics.Backend.Utils;
-
 namespace LcmsSpectator.ViewModels.Data
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
 
     using InformedProteomics.Backend.MassSpecData;
+    using InformedProteomics.Backend.Utils;
 
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers;
     using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
 
     using ReactiveUI;
@@ -432,7 +429,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void StartMsPfSearchImplementation()
         {
-            var searchSettings = new SearchSettingsViewModel(this.dialogService)
+            var searchSettings = new SearchSettingsViewModel(this.dialogService, this.MsPfParameters)
             {
                 SpectrumFilePath = this.rawFilePath,
                 SelectedSearchMode = 1,
@@ -463,26 +460,6 @@ namespace LcmsSpectator.ViewModels.Data
                 scanNum = this.SpectrumViewModel.Ms2SpectrumViewModel.Spectrum.ScanNum;
                 searchSettings.MinScanNumber = scanNum;
                 searchSettings.MaxScanNumber = scanNum;
-            }
-
-            // Set search modifications
-            if (this.MsPfParameters != null)
-            {
-                searchSettings.SearchModifications.AddRange(
-                               this.MsPfParameters.Modifications.Select(
-                                    searchMod => new SearchModificationViewModel(this.dialogService) { SearchModification = searchMod }));
-                searchSettings.MinSequenceLength = this.MsPfParameters.MinSequenceLength;
-                searchSettings.MaxSequenceLength = this.MsPfParameters.MaxSequenceLength;
-                searchSettings.MinSequenceMass = this.MsPfParameters.MinSequenceMass;
-                searchSettings.MaxSequenceMass = this.MsPfParameters.MaxSequenceMass;
-                searchSettings.MinPrecursorIonCharge = this.MsPfParameters.MinPrecursorIonCharge;
-                searchSettings.MaxPrecursorIonCharge = this.MsPfParameters.MaxPrecursorIonCharge;
-                searchSettings.MinProductIonCharge = this.MsPfParameters.MinProductIonCharge;
-                searchSettings.MaxProductIonCharge = this.MsPfParameters.MaxPrecursorIonCharge;
-                searchSettings.PrecursorIonToleranceValue = this.MsPfParameters.PrecursorTolerancePpm.GetValue();
-                searchSettings.ProductIonToleranceValue = this.MsPfParameters.ProductIonTolerancePpm.GetValue();
-                searchSettings.MaxDynamicModificationsPerSequence =
-                    this.MsPfParameters.MaxDynamicModificationsPerSequence;
             }
 
             // TODO: change this so it doesn't use an event and isn't void async

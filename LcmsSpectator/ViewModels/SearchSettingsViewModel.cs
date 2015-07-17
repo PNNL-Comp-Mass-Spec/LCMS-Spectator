@@ -383,6 +383,36 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SearchSettingsViewModel"/> class.
+        /// Initializes from <see cref="MsPfParameters" />, MSPathFinder parameters.
+        /// </summary>
+        /// <param name="dialogService">Dialog service for opening dialogs from view model</param>
+        /// <param name="mspfParameters">The MSPathFinder parameters.</param>
+        public SearchSettingsViewModel(IMainDialogService dialogService, MsPfParameters mspfParameters) : this(dialogService)
+        {
+            if (mspfParameters == null)
+            {
+                return;
+            }
+
+            this.SearchModifications.AddRange(
+               mspfParameters.Modifications.Select(
+                    searchMod => new SearchModificationViewModel(this.dialogService) { SearchModification = searchMod }));
+            this.MinSequenceLength = mspfParameters.MinSequenceLength;
+            this.MaxSequenceLength = mspfParameters.MaxSequenceLength;
+            this.MinSequenceMass = mspfParameters.MinSequenceMass;
+            this.MaxSequenceMass = mspfParameters.MaxSequenceMass;
+            this.MinPrecursorIonCharge = mspfParameters.MinPrecursorIonCharge;
+            this.MaxPrecursorIonCharge = mspfParameters.MaxPrecursorIonCharge;
+            this.MinProductIonCharge = mspfParameters.MinProductIonCharge;
+            this.MaxProductIonCharge = mspfParameters.MaxPrecursorIonCharge;
+            this.PrecursorIonToleranceValue = mspfParameters.PrecursorTolerancePpm.GetValue();
+            this.ProductIonToleranceValue = mspfParameters.ProductIonTolerancePpm.GetValue();
+            this.MaxDynamicModificationsPerSequence =
+                mspfParameters.MaxDynamicModificationsPerSequence;
+        }
+
+        /// <summary>
         /// Event that is triggered when save or cancel are executed.
         /// </summary>
         public event EventHandler ReadyToClose;
