@@ -175,7 +175,19 @@ namespace LcmsSpectator.Models
         {
             get
             {
-                return (this.LcMs == null) ? null : this.LcMs.GetSpectrum(this.Scan, false) as ProductSpectrum;
+                return (this.LcMs == null) ? null : this.LcMs.GetSpectrum(this.Scan) as ProductSpectrum;
+            }
+        }
+
+        /// <summary>
+        /// Gets the ActivationMethod for the MS/MS Spectrum.
+        /// </summary>
+        public ActivationMethod ActivationMethod
+        {
+            get
+            {
+                var spectrum = (this.LcMs == null) ? null : this.LcMs.GetSpectrum(this.Scan, false) as ProductSpectrum;
+                return spectrum == null ? ActivationMethod.Unknown : spectrum.ActivationMethod;
             }
         }
 
@@ -420,12 +432,7 @@ namespace LcmsSpectator.Models
         /// <returns>The FragmentationSequence.</returns>
         public FragmentationSequence GetFragmentationSequence()
         {
-            if (this.lcms == null)
-            {
-                return null;
-            }
-
-            return new FragmentationSequence(this.sequence, this.charge, this.lcms, this.Ms2Spectrum.ActivationMethod);
+            return this.LcMs == null ? null : new FragmentationSequence(this.sequence, this.charge, this.lcms, this.ActivationMethod);
         }
 
         /// <summary>

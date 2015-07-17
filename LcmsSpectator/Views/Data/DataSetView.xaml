@@ -91,7 +91,7 @@
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Scan" Width="3*" Binding="{Binding Scan}" IsReadOnly="True" />
-                                            <DataGridTextColumn Header="Activation Method" Width="5*" Binding="{Binding Ms2Spectrum.ActivationMethod}" IsReadOnly="True" />
+                                            <DataGridTextColumn Header="Activation Method" Width="5*" Binding="{Binding ActivationMethod}" IsReadOnly="True" />
                                             <DataGridTextColumn Header="Retention Time" Width="5*" Binding="{Binding RetentionTime, Converter={StaticResource MassFormatter}}" IsReadOnly="True" />
                                             <DataGridTextColumn Header="Sequence" Width="30*" Binding="{Binding SequenceText}" IsReadOnly="False" />
                                             <DataGridTextColumn Header="Protein" Width="5*" Binding="{Binding ProteinName}" IsReadOnly="False" />
