@@ -388,7 +388,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     break;
                 }
 
-                var spectrum = this.lcms.GetSpectrum(highScan);
+                var spectrum = this.lcms.GetSpectrum(highScan, false);
                 var prodSpectrum = spectrum as ProductSpectrum;
                 if (prodSpectrum == null)
                 {
@@ -419,7 +419,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     break;
                 }
 
-                var spectrum = this.lcms.GetSpectrum(lowScan);
+                var spectrum = this.lcms.GetSpectrum(lowScan, false);
                 var prodSpectrum = spectrum as ProductSpectrum;
                 if (prodSpectrum == null)
                 {
@@ -445,7 +445,13 @@ namespace LcmsSpectator.ViewModels.Plots
                 nextMs2 = lowSpec;
             }
 
-            return nextMs2;
+            ProductSpectrum fullSpectrum = null;
+            if (nextMs2 != null)
+            {
+                fullSpectrum = this.lcms.GetSpectrum(nextMs2.ScanNum) as ProductSpectrum;
+            }
+
+            return fullSpectrum;
         }
     }
 }

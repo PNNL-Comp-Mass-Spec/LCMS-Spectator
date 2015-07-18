@@ -391,7 +391,7 @@ namespace LcmsSpectator.ViewModels.Data
             this.FeatureMapViewModel.FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => this.SelectedPrSm = prsm);
 
             // Create prsms for scan numbers (unidentified)
-            ////await this.LoadScans();
+            await this.LoadScans();
             ////await this.ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun)this.LcMs);
             this.SelectedPrSm.LcMs = this.LcMs; // For the selected PrSm, we should always use the LcMsRun for this dataset.
 
