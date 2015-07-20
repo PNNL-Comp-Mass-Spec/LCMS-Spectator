@@ -272,7 +272,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 else if (primary.ScanNum < scan)
                 {
                     // The primary spectrum scan is above the ms/ms spectrum scan that we selected
-                    primaryTitle = "Previous MS1 Spectrum";
+                    primaryTitle = "Previous MS/MS Spectrum";
                     secondary1Title = "Previous Ms1 Spectrum";
                     secondary2Title = "Ms1 Spectrum";
                     secondary1 = this.lcms.GetSpectrum(this.lcms.GetPrevScanNum(primary.ScanNum, 1));
@@ -367,91 +367,46 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <returns>Product spectrum for the nearest MS/MS spectrum. Returns null if one cannot be found.</returns>
         private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, double precursorMz)
         {
-            // Do not have a valid PrecursorMz, so we're not going to find an ms2 spectrum.
-            if (precursorMz.Equals(0))
+            var lcmsRun = this.lcms as LcMsRun;
+
+            // Do not have a valid LCMSRun or PrecursorMz, so we're not going to find an ms2 spectrum.
+            if (lcmsRun == null || precursorMz.Equals(0))
             {
                 return null;
             }
 
-            // down
-            int highScan = ms1Scan;
-            ProductSpectrum highSpec = null;
-            bool found = false;
-            double highDist = 0.0;
-            while (!found)
+            var scans = lcmsRun.GetFragmentationSpectraScanNums(precursorMz);
+            if (scans.Length == 0)
             {
-                // look for spectrum in the lower part of the scan range
-                highScan = this.lcms.GetNextScanNum(highScan, 2);
-                if (highScan == this.lcms.MaxLcScan + 1)
-                {
-                    highDist = double.PositiveInfinity;
-                    break;
-                }
-
-                var spectrum = this.lcms.GetSpectrum(highScan, false);
-                var prodSpectrum = spectrum as ProductSpectrum;
-                if (prodSpectrum == null)
-                {
-                    break; // Found another ms1, so stop looking
-                }
-
-                if (prodSpectrum.IsolationWindow.Contains(precursorMz))
-                {
-                    highSpec = prodSpectrum;
-                    found = true;
-                }
-
-                highDist++;
+                return null;
             }
 
-            // up
-            ProductSpectrum lowSpec = null;
-            int lowScan = ms1Scan;
-            found = false;
-            double lowDist = 0.0;
-            while (!found)
+            var index = Math.Abs(Array.BinarySearch(scans, ms1Scan));
+            var lowIndex = Math.Max(0, index - 1);
+            var highIndex = Math.Min(scans.Length - 1, index + 1);
+
+            var lowDiff = Math.Abs(index - lowIndex);
+            var highDiff = Math.Abs(highIndex - index);
+
+            var lowSpec = this.lcms.GetSpectrum(scans[lowIndex]) as ProductSpectrum;
+            var highSpec = this.lcms.GetSpectrum(scans[highIndex]) as ProductSpectrum;
+
+            ProductSpectrum spectrum;
+
+            if ((lowDiff < highDiff || (lowDiff == highDiff && lowDiff > 0)) && lowSpec != null)
             {
-                // look for spectrum in the higher part of the scan range
-                lowScan = this.lcms.GetPrevScanNum(lowScan, 2);
-                if (lowScan == this.lcms.MinLcScan - 1)
-                {
-                    lowDist = double.PositiveInfinity;
-                    break;
-                }
-
-                var spectrum = this.lcms.GetSpectrum(lowScan, false);
-                var prodSpectrum = spectrum as ProductSpectrum;
-                if (prodSpectrum == null)
-                {
-                    break; // Found another ms1, so stop looking
-                }
-
-                if (prodSpectrum.IsolationWindow.Contains(precursorMz))
-                {
-                    lowSpec = prodSpectrum;
-                    found = true;
-                }
-
-                lowDist++;
+                spectrum = lowSpec;
             }
-
-            ProductSpectrum nextMs2;
-            if (highDist <= lowDist && highSpec != null)
+            else if (highDiff < lowDiff && highSpec != null)
             {
-                nextMs2 = highSpec;
+                spectrum = highSpec;
             }
             else
             {
-                nextMs2 = lowSpec;
+                spectrum = null;
             }
 
-            ProductSpectrum fullSpectrum = null;
-            if (nextMs2 != null)
-            {
-                fullSpectrum = this.lcms.GetSpectrum(nextMs2.ScanNum) as ProductSpectrum;
-            }
-
-            return fullSpectrum;
+            return spectrum;
         }
     }
 }

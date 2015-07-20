@@ -214,6 +214,14 @@ namespace LcmsSpectator.ViewModels.Plots
                     this.UpdatePlotModel(peakDataPoints);
                 });       // Update plot when data changes
 
+            this.WhenAnyValue(x => x.Spectrum).Where(spectrum => spectrum == null).Subscribe(
+                _ =>
+                    {
+                        this.PlotModel.Annotations.Clear();
+                        this.PlotModel.ClearSeries();
+                        this.PlotModel.InvalidatePlot(true);
+                    });
+
             // Update ions when relative intensity threshold changes.
             IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
             {
