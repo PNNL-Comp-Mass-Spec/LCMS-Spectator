@@ -41,8 +41,9 @@ namespace LcmsSpectator.Readers
         /// Read a MS-GF+ results file.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null)
+        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             return this.ReadFromTsvFile().Result;
         }
@@ -51,8 +52,9 @@ namespace LcmsSpectator.Readers
         /// Read a MS-GF+ results file asynchronously.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null)
+        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             return await this.ReadFromTsvFile();
         }

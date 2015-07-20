@@ -10,6 +10,7 @@
 
 namespace LcmsSpectator.Readers
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
@@ -43,8 +44,9 @@ namespace LcmsSpectator.Readers
         /// Read a MTDB Creator results file.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null)
+        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             return this.ReadAsync().Result;
         }
@@ -53,8 +55,9 @@ namespace LcmsSpectator.Readers
         /// Read a MTDB Creator results file asynchronously.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null)
+        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             var prsms = new List<PrSm>();
 

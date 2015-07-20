@@ -52,6 +52,16 @@ namespace LcmsSpectator.ViewModels
         private bool showSplash;
 
         /// <summary>
+        /// The load progress for the id file.
+        /// </summary>
+        private double idFileLoadProgress;
+
+        /// <summary>
+        /// A value indicating whether an ID file is loading.
+        /// </summary>
+        private bool idFileLoading;
+
+        /// <summary>
         /// Initializes a new instance of the MainWindowViewModel class.
         /// </summary>
         /// <param name="dialogService">Service for view model friendly dialogs</param>
@@ -63,9 +73,8 @@ namespace LcmsSpectator.ViewModels
 
             // Initialize child view models
             this.DataSets = new ReactiveList<DataSetViewModel> { ChangeTrackingEnabled = true };
-            CreateSequenceViewModel = new CreateSequenceViewModel(this.dialogService);
-            LoadingScreenViewModel = new LoadingScreenViewModel();
-            ScanViewModel = new ScanViewModel(this.dialogService, new List<PrSm>());
+            this.CreateSequenceViewModel = new CreateSequenceViewModel(this.dialogService);
+            this.ScanViewModel = new ScanViewModel(this.dialogService, new List<PrSm>());
 
             // Remove filter by unidentified scans from ScanViewModel filters
             this.ScanViewModel.Filters.Remove(this.ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Hide Unidentified Scans"));
@@ -109,8 +118,8 @@ namespace LcmsSpectator.ViewModels
                 .Select(x => x.Sender).Where(sender => sender.ReadyToClose)
                 .Subscribe(dataSet =>
                 {
-                    ScanViewModel.RemovePrSmsFromRawFile(dataSet.Title);
-                    DataSets.Remove(dataSet);
+                    this.ScanViewModel.RemovePrSmsFromRawFile(dataSet.Title);
+                    this.DataSets.Remove(dataSet);
                 });
 
             // If all datasets are closed, show splash screen
@@ -121,10 +130,10 @@ namespace LcmsSpectator.ViewModels
 
             // When the data reader is reading an ID file, show the loading screen
             this.dataReader.WhenAnyValue(x => x.ReadingIdFiles)
-                .Subscribe(readingIdFiles => this.LoadingScreenViewModel.IsLoading = readingIdFiles);
+                .Subscribe(readingIdFiles => this.IdFileLoading = readingIdFiles);
 
             // When a PrSm is selected in the Protein Tree, make all data sets show the PrSm
-            ScanViewModel.WhenAnyValue(x => x.SelectedPrSm)
+            this.ScanViewModel.WhenAnyValue(x => x.SelectedPrSm)
                 .Where(selectedPrSm => selectedPrSm != null)
                 .Subscribe(selectedPrSm =>
                     {
@@ -203,12 +212,7 @@ namespace LcmsSpectator.ViewModels
         /// Gets list of open data sets.
         /// </summary>
         public ReactiveList<DataSetViewModel> DataSets { get; private set; }
-        
-        /// <summary>
-        /// Gets view model for loading screen.
-        /// </summary>
-        public LoadingScreenViewModel LoadingScreenViewModel { get; private set; }
-
+      
         /// <summary>
         /// Gets a value indicating whether or not "Open From DMS" should be shown on the menu based on whether
         /// or not the user is on the PNNL network or not.
@@ -225,6 +229,24 @@ namespace LcmsSpectator.ViewModels
         {
             get { return this.showSplash; }
             private set { this.RaiseAndSetIfChanged(ref this.showSplash, value); }
+        }
+
+        /// <summary>
+        /// Gets the load progress for the id file.
+        /// </summary>
+        public double IdFileLoadProgress
+        {
+            get { return this.idFileLoadProgress; }
+            private set { this.RaiseAndSetIfChanged(ref this.idFileLoadProgress, value); }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether an ID file is loading.
+        /// </summary>
+        public bool IdFileLoading
+        {
+            get { return this.idFileLoading; }
+            private set { this.RaiseAndSetIfChanged(ref this.idFileLoading, value); }
         }
         
         /// <summary>
@@ -349,9 +371,9 @@ namespace LcmsSpectator.ViewModels
 
                     if (!string.IsNullOrWhiteSpace(dataSetViewModel.FastaDbFilePath) && File.Exists(dataSetViewModel.FastaDbFilePath))
                     {
-                        this.LoadingScreenViewModel.IsLoading = true;
+                        this.IdFileLoadProgress = 100;
                         await this.ScanViewModel.IdTree.AddFastaEntriesAsync(await this.dataReader.ReadFastaFile(dataSetViewModel.FastaDbFilePath));
-                        this.LoadingScreenViewModel.IsLoading = false;
+                        this.IdFileLoadProgress = 0;
                     }
 
                     await this.ReadIdFile(idFilePath, dataSetViewModel);
@@ -497,12 +519,14 @@ namespace LcmsSpectator.ViewModels
             {
                 try
                 {
+                    this.IdFileLoadProgress = 100;
                     await this.dataReader.OpenDataSet(
                                                       dataSetViewModel,
                                                       dataSetViewModel.Title,
                                                       idFilePath,
                                                       modIgnoreList: modIgnoreList);
                     attemptToReadFile = false;
+                    this.IdFileLoadProgress = 0;
                 }
                 catch (IcFileReader.InvalidModificationNameException e)
                 {   // file contains an unknown modification
@@ -542,7 +566,7 @@ namespace LcmsSpectator.ViewModels
         {
             var dataSetViewModel = new DataSetViewModel(this.dialogService); // create data set view model
             this.DataSets.Add(dataSetViewModel); // add data set view model. Can only add to ObservableCollection in thread that created it (gui thread)
-            CreateSequenceViewModel.SelectedDataSetViewModel = this.DataSets[0];
+            this.CreateSequenceViewModel.SelectedDataSetViewModel = this.DataSets[0];
             try
             {
                 await this.dataReader.OpenDataSet(dataSetViewModel, rawFilePath);

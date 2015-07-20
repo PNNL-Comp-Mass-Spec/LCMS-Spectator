@@ -53,8 +53,9 @@ namespace LcmsSpectator.Readers
         /// Read a MZID results file.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
         /// <returns>Identification tree of identifications.</returns>
-        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null)
+        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             return this.ReadAsync(modIgnoreList).Result;
         }
@@ -63,8 +64,9 @@ namespace LcmsSpectator.Readers
         /// Read a MZID results file asynchronously.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
         /// <returns>Identification tree of MZID identifications.</returns>
-        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList)
+        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             var dataSet = await Task.Run(() => this.mzIdentMlReader.Read(this.filePath));
             var prsms = new List<PrSm>();

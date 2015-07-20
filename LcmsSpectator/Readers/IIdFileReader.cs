@@ -10,6 +10,7 @@
 
 namespace LcmsSpectator.Readers
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using LcmsSpectator.Models;
@@ -23,14 +24,16 @@ namespace LcmsSpectator.Readers
         /// Read a search results file.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null);
+        IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null);
 
         /// <summary>
         /// Read a search results file asynchronously.
         /// </summary>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null);
+        Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null);
     }
 }

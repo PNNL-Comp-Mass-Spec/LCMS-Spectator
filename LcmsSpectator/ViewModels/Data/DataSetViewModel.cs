@@ -246,6 +246,11 @@ namespace LcmsSpectator.ViewModels.Data
         public string FastaDbFilePath { get; set; }
 
         /// <summary>
+        /// Gets or sets the path for the layout file for this dataset.
+        /// </summary>
+        public string LayoutFilePath { get; set; }
+
+        /// <summary>
         /// Gets view model for extracted ion chromatogram
         /// </summary>
         public XicViewModel XicViewModel
