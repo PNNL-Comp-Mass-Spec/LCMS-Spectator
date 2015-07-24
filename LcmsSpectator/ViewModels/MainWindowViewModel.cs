@@ -369,15 +369,17 @@ namespace LcmsSpectator.ViewModels
                             dataSetViewModel.MsPfParameters.DatabaseFile);
                     }
 
+                    this.IdFileLoadProgress = 100;
+                    this.IdFileLoading = true;
                     if (!string.IsNullOrWhiteSpace(dataSetViewModel.FastaDbFilePath) && File.Exists(dataSetViewModel.FastaDbFilePath))
                     {
-                        this.IdFileLoadProgress = 100;
                         await this.ScanViewModel.IdTree.AddFastaEntriesAsync(await this.dataReader.ReadFastaFile(dataSetViewModel.FastaDbFilePath));
-                        this.IdFileLoadProgress = 0;
                     }
 
                     await this.ReadIdFile(idFilePath, dataSetViewModel);
                     await this.dataReader.OpenDataSet(dataSetViewModel, file, featureFilePath: featureFilePath);
+                    this.IdFileLoadProgress = 0;
+                    this.IdFileLoading = false;
                 }
             }
             catch (Exception e)
@@ -519,14 +521,12 @@ namespace LcmsSpectator.ViewModels
             {
                 try
                 {
-                    this.IdFileLoadProgress = 100;
                     await this.dataReader.OpenDataSet(
                                                       dataSetViewModel,
                                                       dataSetViewModel.Title,
                                                       idFilePath,
                                                       modIgnoreList: modIgnoreList);
                     attemptToReadFile = false;
-                    this.IdFileLoadProgress = 0;
                 }
                 catch (IcFileReader.InvalidModificationNameException e)
                 {   // file contains an unknown modification
