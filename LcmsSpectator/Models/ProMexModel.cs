@@ -12,10 +12,13 @@ namespace LcmsSpectator.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Linq;
     using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.MassSpecData;
     using LcmsSpectator.Readers;
+
+    using QuadTreeLib;
 
     /// <summary>
     /// Model for PROMEX features.
@@ -31,6 +34,16 @@ namespace LcmsSpectator.Models
         /// Maps feature points to features.
         /// </summary>
         private Dictionary<Feature.FeaturePoint, Feature> featurePointToFeature;
+
+        /// <summary>
+        /// Maps IDs to features.
+        /// </summary>
+        private Dictionary<PrSm, Feature> prsmToFeature; 
+
+        /// <summary>
+        /// Spatial representation of features.
+        /// </summary>
+        private QuadTree<Feature> featureTree; 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProMexModel"/> class.
@@ -117,10 +130,8 @@ namespace LcmsSpectator.Models
                 maxPrSm.Scan = feature.AssociatedMs2[feature.AssociatedMs2.Count - 1];
 
                 // Find IDs in the scan range of the feature.
-                var minIdIndex = idList.BinarySearch(minPrSm, prsmScanComp);
-                var maxIdIndex = idList.BinarySearch(maxPrSm, prsmScanComp);
-                minIdIndex = minIdIndex < 0 ? minIdIndex * -1 : minIdIndex;
-                maxIdIndex = maxIdIndex < 0 ? maxIdIndex * -1 : maxIdIndex;
+                var minIdIndex = Math.Abs(idList.BinarySearch(minPrSm, prsmScanComp));
+                var maxIdIndex = Math.Abs(idList.BinarySearch(maxPrSm, prsmScanComp));
                 minIdIndex = Math.Min(Math.Max(minIdIndex - 1, 0), idList.Count - 1);
                 maxIdIndex = Math.Min(Math.Max(maxIdIndex, 0) + 1, idList.Count - 1);
 
@@ -191,6 +202,32 @@ namespace LcmsSpectator.Models
 
             this.AbsoluteAbundanceMaximum = this.Features.Max(f => f.MinPoint.Abundance);
             this.AbsoluteAbundanceMinimum = this.Features.Min(f => f.MinPoint.Abundance);
+
+            this.InitFeatureTree();
+        }
+
+        /// <summary>
+        /// Initialize feature tree with feature data.
+        /// </summary>
+        private void InitFeatureTree()
+        {
+            var minRt = (float)this.lcms.GetElutionTime(this.lcms.MinLcScan);
+            var maxRt = (float)this.lcms.GetElutionTime(this.lcms.MaxLcScan);
+
+            var rectangle = new RectangleF
+            {
+                X = minRt,
+                Width = maxRt - minRt,
+                Y = 0,
+                Height = (float)this.Features.Max(feature => feature.MinPoint.Abundance)
+            };
+
+            this.featureTree = new QuadTree<Feature>(rectangle);
+
+            foreach (var feature in this.Features)
+            {
+                this.featureTree.Insert(feature);
+            }
         }
     }
 }

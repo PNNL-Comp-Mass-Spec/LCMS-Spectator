@@ -11,13 +11,17 @@
 namespace LcmsSpectator.Models
 {
     using System.Collections.Generic;
+    using System.Drawing;
+
     using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.Data.Spectrometry;
+
+    using QuadTreeLib;
 
     /// <summary>
     /// Represents a feature over a LC retention time and charge state range.
     /// </summary>
-    public class Feature
+    public class Feature : IHasRect
     {
         /// <summary>
         /// The point for the lowest retention time of the feature.
@@ -32,14 +36,25 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="Feature"/> class.
         /// </summary>
-        public Feature()
+        /// <param name="minPoint">The point for the lowest retention time of the feature.</param>
+        /// <param name="maxPoint">The point for the highest retention time of the feature.</param>
+        public Feature(FeaturePoint minPoint, FeaturePoint maxPoint)
         {
+            this.MinPoint = minPoint;
+            this.MaxPoint = maxPoint;
             this.AssociatedPrSms = new List<PrSm>();
             this.AssociatedMs2 = new List<int>();
+            this.Rectangle = new RectangleF
+            {
+                X = (float)this.MinPoint.RetentionTime,
+                Y = (float)this.MinPoint.Mass,
+                Height = 1,
+                Width = (float)(this.MaxPoint.RetentionTime - this.MinPoint.RetentionTime)
+            };
         }
 
         /// <summary>
-        /// Gets or sets the point for the lowest retention time of the feature.
+        /// Gets the point for the lowest retention time of the feature.
         /// </summary>
         public FeaturePoint MinPoint
         {
@@ -48,7 +63,7 @@ namespace LcmsSpectator.Models
                 return this.minPoint;
             }
 
-            set
+            private set
             {
                 this.minPoint = value;
                 this.minPoint.Feature = this;
@@ -56,7 +71,7 @@ namespace LcmsSpectator.Models
         }
 
         /// <summary>
-        /// Gets or sets the point for the highest retention time of the feature.
+        /// Gets the point for the highest retention time of the feature.
         /// </summary>
         public FeaturePoint MaxPoint
         {
@@ -65,7 +80,7 @@ namespace LcmsSpectator.Models
                 return this.maxPoint;
             }
 
-            set
+            private set
             {
                 this.maxPoint = value;
                 this.maxPoint.Feature = this;
@@ -86,6 +101,11 @@ namespace LcmsSpectator.Models
         /// Gets the list of MS/MS scan number associated with this feature.
         /// </summary>
         public List<int> AssociatedMs2 { get; private set; }
+
+        /// <summary>
+        /// Gets the geometric rectangle representation for this feature.
+        /// </summary>
+        public RectangleF Rectangle { get; private set; }
         
         /// <summary>
         /// Represents a single LC retention time point for a MS1 feature.

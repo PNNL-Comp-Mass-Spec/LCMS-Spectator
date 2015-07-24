@@ -131,7 +131,7 @@ namespace LcmsSpectator.Readers
                 Isotopes = isotopes,
                 Correlation = summedCorr,
             };
-            return new Feature { MinPoint = minPoint, MaxPoint = maxPoint, Id = id };
+            return new Feature(minPoint, maxPoint) { Id = id };
         }
 
         /// <summary>
