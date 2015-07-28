@@ -1,139 +1,240 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
-using InformedProteomics.Backend.Data.Enum;
-using InformedProteomics.Backend.Data.Sequence;
-using InformedProteomics.Backend.Database;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ProteinId.cs" company="Pacific Northwest National Laboratory">
+//   2015 Pacific Northwest National Laboratory
+// </copyright>
+// <author>Christopher Wilkins</author>
+// <summary>
+//   Class for building a data graph from an InformedProteomics SequenceGraph.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace LcmsSpectator.SequenceGraph
 {
-    public class GraphXSequenceGraph: InformedProteomics.Backend.Data.Sequence.SequenceGraph
-    {
-        public DataGraph DataGraph { get; private set; }
-        public static GraphXSequenceGraph Create(AminoAcidSet aaSet, string annotation, List<SearchModification> mods)
-        {
-            const char delimiter = (char)FastaDatabase.Delimiter;
-            if (annotation == null || !Regex.IsMatch(annotation, @"^[A-Z" + delimiter + @"]\.[A-Z]+\.[A-Z" + delimiter + @"]$")) return null;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
+    using System.Text.RegularExpressions;
 
-            var nTerm = annotation[0] == FastaDatabase.Delimiter
+    using InformedProteomics.Backend.Data.Composition;
+    using InformedProteomics.Backend.Data.Enum;
+    using InformedProteomics.Backend.Data.Sequence;
+    using InformedProteomics.Backend.Database;
+
+    /// <summary>
+    /// Class for building a data graph from an InformedProteomics SequenceGraph.
+    /// </summary>
+    public class GraphXSequenceGraph : InformedProteomics.Backend.Data.Sequence.SequenceGraph
+    {
+        /// <summary>
+        /// AminoAcid on n-terminus of sequence.
+        /// </summary>
+        private readonly AminoAcid nterminal;
+
+        /// <summary>
+        /// AminoAcid on c-terminus of sequence.
+        /// </summary>
+        private readonly AminoAcid cterminal;
+
+        /// <summary>
+        /// Set of data vertices for the GraphX data graph.
+        /// </summary>
+        private DataVertex[][] vertices;
+
+        /// <summary>Initializes a new instance of the <see cref="GraphXSequenceGraph"/> class.</summary>
+        /// <param name="aminoAcidSet">The amino acid set.</param>
+        /// <param name="nterm">The n-terminal residue of the sequence.</param>
+        /// <param name="sequence">The sequence.</param>
+        /// <param name="cterm">The c-terminal residue of the sequence.</param>
+        /// <param name="mods">The search modification to apply to the sequence.</param>
+        protected GraphXSequenceGraph(AminoAcidSet aminoAcidSet, AminoAcid nterm, string sequence, AminoAcid cterm, IEnumerable<SearchModification> mods) :
+                                          base(aminoAcidSet, nterm, sequence, cterm)
+        {
+            var ntermMods = (from m in mods
+                             where (m.IsFixedModification && (m.Location == SequenceLocation.ProteinNTerm || m.Location == SequenceLocation.PeptideNTerm))
+                             select m).ToList();
+            var ctermMods = (from m in mods
+                             where (m.IsFixedModification && (m.Location == SequenceLocation.ProteinCTerm || m.Location == SequenceLocation.PeptideCTerm))
+                             select m).ToList();
+
+            Modification ntermMod = null;
+            foreach (var nmod in ntermMods)
+            {
+                ntermMod = nmod.Modification;
+                if (nmod.TargetResidue == nterm.Residue)
+                {
+                    break;
+                }
+            }
+
+            Modification ctermMod = null;
+            foreach (var cmod in ctermMods)
+            {
+                ctermMod = cmod.Modification;
+                if (cmod.TargetResidue == cterm.Residue)
+                {
+                    break;
+                }
+            }
+
+            this.nterminal = null;
+            this.cterminal = null;
+            if (ntermMod != null)
+            {
+                this.nterminal = new ModifiedAminoAcid(new AminoAcid('(', "NTerm", Composition.Zero), ntermMod);
+            }
+
+            if (ctermMod != null)
+            {
+                this.cterminal = new ModifiedAminoAcid(new AminoAcid(')', "CTerm", Composition.Zero), ctermMod);
+            }
+
+            this.DataGraph = new DataGraph();
+            this.BuildGraph();
+        }
+
+        /// <summary>
+        /// Gets the data graph for the given sequence graph.
+        /// </summary>
+        public DataGraph DataGraph { get; private set; }
+
+        /// <summary>
+        /// Gets the end point of the entire sequence graph.
+        /// </summary>
+        public DataVertex EndPoint
+        {
+            get { return this.vertices[0][0]; }
+        }
+
+        /// <summary>
+        /// Create an instance of a GraphXSequenceGraph for a particular sequence and set of search modifications.
+        /// </summary>
+        /// <param name="aminoAcidSet">The amino acid set.</param>
+        /// <param name="annotation">Annotation (n-terminal, sequence, c-terminal).</param>
+        /// <param name="mods">The search modification to apply to the sequence</param>
+        /// <returns>Constructed GraphXSequenceGraph.</returns>
+        public static GraphXSequenceGraph Create(AminoAcidSet aminoAcidSet, string annotation, IEnumerable<SearchModification> mods)
+        {
+            const char Delimiter = (char)FastaDatabase.Delimiter;
+            if (annotation == null
+                || !Regex.IsMatch(annotation, @"^[A-Z" + Delimiter + @"]\.[A-Z]+\.[A-Z" + Delimiter + @"]$"))
+            {
+                return null;
+            }
+
+            var nterm = annotation[0] == FastaDatabase.Delimiter
                                   ? AminoAcid.ProteinNTerm
                                   : AminoAcid.PeptideNTerm;
-            var cTerm = annotation[annotation.Length - 1] == FastaDatabase.Delimiter
+            var cterm = annotation[annotation.Length - 1] == FastaDatabase.Delimiter
                                   ? AminoAcid.ProteinCTerm
                                   : AminoAcid.PeptideCTerm;
 
             var sequence = annotation.Substring(2, annotation.Length - 4);
-            return new GraphXSequenceGraph(aaSet, nTerm, sequence, cTerm, mods);
+            return new GraphXSequenceGraph(aminoAcidSet, nterm, sequence, cterm, mods);
         }
 
-        public GraphXSequenceGraph(AminoAcidSet aminoAcidSet, AminoAcid nTerm, string sequence, AminoAcid cTerm, List<SearchModification> mods) :
-                                          base(aminoAcidSet, nTerm, sequence, cTerm)
-        {
-            var nTermMods = (from m in mods
-                             where (m.IsFixedModification && m.Location == SequenceLocation.ProteinNTerm || m.Location == SequenceLocation.PeptideNTerm)
-                             select m).ToList();
-            var cTermMods = (from m in mods
-                             where (m.IsFixedModification && m.Location == SequenceLocation.ProteinCTerm || m.Location == SequenceLocation.PeptideCTerm)
-                             select m).ToList();
-
-            Modification nTermMod = null;
-            foreach (var nMod in nTermMods)
-            {
-                nTermMod = nMod.Modification;
-                if (nMod.TargetResidue == nTerm.Residue) break;
-            }
-            Modification cTermMod = null;
-            foreach (var cMod in cTermMods)
-            {
-                cTermMod = cMod.Modification;
-                if (cMod.TargetResidue == cTerm.Residue) break;
-            }
-            _nTerminal = null;
-            _cTerminal = null;
-            if (nTermMod != null) _nTerminal = new ModifiedAminoAcid(new AminoAcid('(', "NTerm", InformedProteomics.Backend.Data.Composition.Composition.Zero), nTermMod);
-            if (cTermMod != null) _cTerminal = new ModifiedAminoAcid(new AminoAcid(')', "CTerm", InformedProteomics.Backend.Data.Composition.Composition.Zero), cTermMod);
-
-            DataGraph = new DataGraph();
-            BuildGraph();
-        }
-
-        public DataVertex EndPoint  { get { return _vertices[0][0]; } }
-
+        /// <summary>
+        /// Build the data graph from a sequence graph.
+        /// </summary>
         private void BuildGraph()
         {
-            var sequenceRev = _sequence.Reverse();
-            var sequence = sequenceRev.Aggregate("", (current, aa) => current + aa);
+            var sequenceRev = this._sequence.Reverse();
+            var sequence = sequenceRev.Aggregate(string.Empty, (current, aa) => current + aa);
             sequence = "\0" + sequence;
-            _vertices = new DataVertex[_maxSeqIndex][];
-            var mods = AminoAcidSet.GetModificationParams();
+            this.vertices = new DataVertex[this._maxSeqIndex][];
+            var mods = this.AminoAcidSet.GetModificationParams();
             int id = 0;
             int ntermIndex = 0;
-            int start = _maxSeqIndex - 2;
+            int start = this._maxSeqIndex - 2;
             int end = 0;
             int offset = 1;
-            if (_nTerminal != null)
+            if (this.nterminal != null)
             {
                 start++;
-                sequence += _nTerminal.Residue;
+                sequence += this.nterminal.Residue;
             }
-            if (_cTerminal != null)
+
+            if (this.cterminal != null)
             {
                 end--;
                 offset = 0;
-                sequence = sequence.Insert(1, _cTerminal.Residue.ToString(CultureInfo.InvariantCulture));
+                sequence = sequence.Insert(1, this.cterminal.Residue.ToString(CultureInfo.InvariantCulture));
             }
+
             // create vertices
             for (var si = start; si > end; si--)
             {
-                var graphSi = si-offset;
-                _vertices[graphSi] = new DataVertex[_graph[si].Length];
-                for (var mi = 0; mi < _graph[si].Length; mi++)
+                var graphSi = si - offset;
+                this.vertices[graphSi] = new DataVertex[this._graph[si].Length];
+                for (var mi = 0; mi < this._graph[si].Length; mi++)
                 {
-                    var node = _graph[si][mi];
+                    var node = this._graph[si][mi];
                     var mod = mods.GetModificationCombination(node.ModificationCombinationIndex);
-                    SetSink(mi);
-                    _vertices[graphSi][mi] = new DataVertex
+                    this.SetSink(mi);
+                    this.vertices[graphSi][mi] = new DataVertex
                     {
                         ID = id++,
                         NTermIndex = ntermIndex,
                         ModIndex = mi,
-                        PrefixComposition = GetComplementaryComposition(si, mi),
-                        SuffixComposition = GetComposition(si, mi),
+                        PrefixComposition = this.GetComplementaryComposition(si, mi),
+                        SuffixComposition = this.GetComposition(si, mi),
                         ModificationCombination = mod,
-                        Text = ""
+                        Text = string.Empty
                     };
-                    var vertex = _vertices[graphSi][mi];
-                    DataGraph.AddVertex(vertex);
+                    var vertex = this.vertices[graphSi][mi];
+                    this.DataGraph.AddVertex(vertex);
                 }
+
                 ntermIndex++;
             }
+
             // connect vertices
-            for (var si = start; si > (end+1); si--)
+            for (var si = start; si > (end + 1); si--)
             {
-                var graphSi = si-offset;
-                for (int mi = 0; mi < _graph[si].Length; mi++)
+                var graphSi = si - offset;
+                for (int mi = 0; mi < this._graph[si].Length; mi++)
                 {
-                    var node = _graph[si][mi];
-                    var currVertex = _vertices[graphSi][mi];
+                    var node = this._graph[si][mi];
+                    var currVertex = this.vertices[graphSi][mi];
                     foreach (var nextModIndex in node.GetPrevNodeIndices())
                     {
-                        var nextVertex = _vertices[graphSi - 1][nextModIndex];
+                        var nextVertex = this.vertices[graphSi - 1][nextModIndex];
                         var currVertexMods = currVertex.ModificationCombination.Modifications;
                         var nextVertexMods = nextVertex.ModificationCombination.Modifications;
                         var result = new List<Modification>(currVertexMods);
                         foreach (var mod in nextVertexMods)
                         {
-                            if (result.Contains(mod)) result.Remove(mod);
+                            if (result.Contains(mod))
+                            {
+                                result.Remove(mod);
+                            }
                         }
+
                         AminoAcid aminoAcid;
-                        if (si == start && _nTerminal != null) aminoAcid = _nTerminal;
-                        else if (si == end + 2 && _cTerminal != null) aminoAcid = _cTerminal;
-                        else aminoAcid = AminoAcidSet.GetAminoAcid(sequence[graphSi]);
+                        if (si == start && this.nterminal != null)
+                        {
+                            aminoAcid = this.nterminal;
+                        }
+                        else if (si == end + 2 && this.cterminal != null)
+                        {
+                            aminoAcid = this.cterminal;
+                        }
+                        else
+                        {
+                            aminoAcid = this.AminoAcidSet.GetAminoAcid(sequence[graphSi]);
+                        }
+
                         var modAa = aminoAcid as ModifiedAminoAcid;
-                        Modification aaMod = null;
-                        if (modAa != null)  aaMod = modAa.Modification;
-                        if (aaMod != null) result.Add(aaMod);
+                        Modification aminoAcidMod = null;
+                        if (modAa != null)
+                        {
+                            aminoAcidMod = modAa.Modification;
+                        }
+
+                        if (aminoAcidMod != null)
+                        {
+                            result.Add(aminoAcidMod);
+                        }
+
                         var edgeModifications = new ModificationCombination(result);
                         var edge = new DataEdge(currVertex, nextVertex)
                         {
@@ -141,14 +242,11 @@ namespace LcmsSpectator.SequenceGraph
                             SequenceIndex = graphSi,
                             Modifications = edgeModifications
                         };
-                        DataGraph.AddEdge(edge);
+
+                        this.DataGraph.AddEdge(edge);
                     }
                 }
             }
         }
-
-        private readonly AminoAcid _nTerminal;
-        private readonly AminoAcid _cTerminal;
-        private DataVertex[][] _vertices;
     }
 }

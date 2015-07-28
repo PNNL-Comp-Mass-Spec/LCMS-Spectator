@@ -265,6 +265,9 @@
     <Compile Include="Readers\TargetFileReader.cs" />
     <Compile Include="SequenceGraph\DataGraph.cs" />
     <Compile Include="SequenceGraph\GraphXSequenceGraph.cs" />
+    <Compile Include="SequenceGraph\SequenceGraph.xaml.cs">
+      <DependentUpon>SequenceGraph.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SequenceGraph\SequenceGraphArea.cs" />
     <Compile Include="SequenceGraph\SequencePath.cs" />
     <Compile Include="Utils\ChargeToStringConverter.cs" />
