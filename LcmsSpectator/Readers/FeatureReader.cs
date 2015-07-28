@@ -74,24 +74,33 @@ namespace LcmsSpectator.Readers
             {
                 "MonoMass",
                 "Abundance",
-                "Probability",
+                "LikelihoodRatio",
                 "Envelope",
                 "MinCharge",
                 "MaxCharge",
-                "SummedCorr",
+                ////"SummedCorr",
                 "MinScan",
                 "MaxScan"
             };
 
+            string likelihoodVarHeader = "LikelihoodRatio";
+
             foreach (var header in expectedHeaders.Where(header => !headers.ContainsKey(header)))
             {
-                throw new KeyNotFoundException(string.Format("Missing expected column header \"{0}\" in feature file.", header));
+                if (header == "LikelihoodRatio" && headers.ContainsKey("Probability"))
+                {
+                    likelihoodVarHeader = "Probability";
+                }
+                else
+                {
+                    throw new KeyNotFoundException(string.Format("Missing expected column header \"{0}\" in feature file.", header));   
+                }
             }
 
             var parts = line.Split(delimeter);
             var mass = Convert.ToDouble(parts[headers["MonoMass"]]);
             var abundance = Convert.ToDouble(parts[headers["Abundance"]]);
-            var score = Convert.ToDouble(parts[headers["Probability"]]);
+            var score = Convert.ToDouble(parts[headers[likelihoodVarHeader]]);
             var isotopes = ReadIsotopicEnvelope(parts[headers["Envelope"]]);
             var minCharge = Convert.ToInt32(parts[headers["MinCharge"]]);
             var maxCharge = Convert.ToInt32(parts[headers["MaxCharge"]]);
@@ -101,7 +110,7 @@ namespace LcmsSpectator.Readers
                 id = Convert.ToInt32(parts[headers["FeatureID"]]);
             }
 
-            var summedCorr = Convert.ToDouble(parts[headers["SummedCorr"]]);
+            var summedCorr = headers.ContainsKey("SummedCorr") ? Convert.ToDouble(parts[headers["SummedCorr"]]) : 0.0;
 
             int mostAbundantIsotopeIndex = Averagine.GetIsotopomerEnvelope(mass).MostAbundantIsotopeIndex;
             List<Peak> minIsotopicProfile = Averagine.GetTheoreticalIsotopeProfile(mass, minCharge, 0);

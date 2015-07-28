@@ -419,11 +419,17 @@ namespace LcmsSpectator.ViewModels
                 if (searchSettings.Status)
                 {
                     var dataSetViewModel = await this.ReadRawFile(searchSettings.SpectrumFilePath);
+                    dataSetViewModel.FastaDbFilePath = searchSettings.FastaDbFilePath;
+                    if (!string.IsNullOrWhiteSpace(dataSetViewModel.FastaDbFilePath) && File.Exists(dataSetViewModel.FastaDbFilePath))
+                    {
+                        await this.ScanViewModel.IdTree.AddFastaEntriesAsync(await this.dataReader.ReadFastaFile(dataSetViewModel.FastaDbFilePath));
+                    }
+
                     await this.ReadIdFile(searchSettings.GetIdFilePath(), dataSetViewModel);
                     await this.dataReader.OpenDataSet(
                             dataSetViewModel,
                             searchSettings.SpectrumFilePath,
-                            featureFilePath: searchSettings.GetFeatureFilePath());   
+                            featureFilePath: searchSettings.GetFeatureFilePath());
                 }
             };
 
