@@ -14,6 +14,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
     using System.IO;
     using System.Reactive.Linq;
 
+    using InformedProteomics.Backend.MassSpecData;
+
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.Utils;
@@ -269,7 +271,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void BrowseRawFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(".raw", FileConstants.RawFileFormatString);
+            var path = this.dialogService.OpenFile(".raw", MassSpecDataReaderFactory.MassSpecDataTypeFilterString);
             if (!string.IsNullOrWhiteSpace(path))
             {
                 this.RawFilePath = path;

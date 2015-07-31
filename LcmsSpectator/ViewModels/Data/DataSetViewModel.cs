@@ -365,6 +365,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </returns>
         public async Task InitializeAsync(string filePath)
         {
+            filePath = MassSpecDataReaderFactory.NormalizeDatasetPath(filePath);
             this.IsLoading = true; // Show animated loading screen
             this.Title = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(filePath));
             this.rawFilePath = filePath;

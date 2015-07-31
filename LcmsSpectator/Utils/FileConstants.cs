@@ -45,7 +45,7 @@ namespace LcmsSpectator.Utils
         /// <summary>
         /// Extensions for raw and MZML files.
         /// </summary>
-        public static readonly string[] RawFileExtensions = { ".raw", ".mzml", ".mzml.gz" };
+        public static readonly string[] RawFileExtensions = { ".mzml", ".mzml.gz", ".raw" };
 
         /// <summary>
         /// Extensions for ID files.

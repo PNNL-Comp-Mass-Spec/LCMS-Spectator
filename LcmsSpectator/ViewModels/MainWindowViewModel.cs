@@ -18,6 +18,8 @@ namespace LcmsSpectator.ViewModels
     using System.Reactive.Linq;
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Composition;
+    using InformedProteomics.Backend.MassSpecData;
+
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
@@ -281,7 +283,7 @@ namespace LcmsSpectator.ViewModels
         /// </returns>
         private async Task OpenRawFileImplementation()
         {
-            var rawFilePaths = this.dialogService.MultiSelectOpenFile(FileConstants.RawFileExtensions[0], FileConstants.RawFileFormatString);
+            var rawFilePaths = this.dialogService.MultiSelectOpenFile(FileConstants.RawFileExtensions[0], MassSpecDataReaderFactory.MassSpecDataTypeFilterString);
             if (rawFilePaths == null)
             {
                 return; // The user did not select any raw files.
