@@ -8,6 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections;
+using System.Collections.Generic;
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.ViewModels.Modifications
 {
     using System;
@@ -45,9 +49,9 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// Initializes a new instance of the <see cref="SearchModificationViewModel"/> class. 
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
-        public SearchModificationViewModel(IDialogService dialogService)
+        public SearchModificationViewModel(IEnumerable<Modification> searchModifications, IDialogService dialogService = null)
         {
-            this.dialogService = dialogService;
+            this.dialogService = dialogService ?? new DialogService();
             this.Modifications = new ReactiveList<Modification>(Modification.CommonModifications);
             this.AminoAcidResidues = new ReactiveList<char>(AminoAcid.StandardAminoAcidCharacters) { '*' };
             this.SequenceLocations = new ReactiveList<SequenceLocation>
@@ -59,7 +63,7 @@ namespace LcmsSpectator.ViewModels.Modifications
             this.IsFixed = new ReactiveList<string> { "Fixed", "Optional" };
             this.FixedSelection = "Fixed";
 
-            this.Modifications = IcParameters.Instance.RegisteredModifications;
+            this.Modifications = new ReactiveList<Modification>(searchModifications);
 
             this.SelectedModification = this.Modifications[0];
             this.SelectedResidue = this.AminoAcidResidues[0];
@@ -83,9 +87,10 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// Create new ModificationViewModel from searchModification
         /// </summary>
         /// <param name="searchModification">Search modification to create the SelectModificationViewModel from.</param>
+        /// <param name="modifications">The registered modifications to choose from.</param>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
-        public SearchModificationViewModel(SearchModification searchModification, IDialogService dialogService)
-            : this(dialogService)
+        public SearchModificationViewModel(SearchModification searchModification, IEnumerable<Modification> modifications, IDialogService dialogService = null)
+            : this(modifications, dialogService)
         {
             this.SearchModification = searchModification;
         }

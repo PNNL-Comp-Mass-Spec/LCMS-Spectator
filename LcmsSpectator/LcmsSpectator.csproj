@@ -169,6 +169,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Rx-XAML.2.3.0-beta2\lib\net45\System.Reactive.Windows.Threading.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -217,28 +218,36 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Config\IcParameters.cs" />
-    <Compile Include="Controls\MultiSelectDataGrid.cs" />
-    <Compile Include="Controls\MultiSelectListBox.cs" />
     <Compile Include="Controls\MvvmTreeView.cs" />
     <Compile Include="DialogServices\DialogService.cs" />
     <Compile Include="DialogServices\IDialogService.cs" />
     <Compile Include="DialogServices\IMainDialogService.cs" />
     <Compile Include="DialogServices\MainDialogService.cs" />
-    <Compile Include="Models\ChargeStateId.cs" />
-    <Compile Include="Models\FastaEntry.cs" />
-    <Compile Include="Models\Feature.cs" />
+    <Compile Include="Models\DTO\ChargeStateId.cs" />
+    <Compile Include="Models\Dataset\DatasetInfo.cs" />
+    <Compile Include="Models\Dataset\IDatasetInfoProvider.cs" />
+    <Compile Include="Models\DTO\FastaEntry.cs" />
+    <Compile Include="Models\DTO\Feature.cs" />
+    <Compile Include="Models\Dataset\FileInfo.cs" />
     <Compile Include="Models\FragmentationSequence.cs" />
-    <Compile Include="Models\IdentificationTree.cs" />
+    <Compile Include="Models\DTO\IdentificationTree.cs" />
     <Compile Include="Models\IFeatureExtractor.cs" />
-    <Compile Include="Models\IIdData.cs" />
-    <Compile Include="Models\MsPfParameters.cs" />
-    <Compile Include="Models\ProteinId.cs" />
-    <Compile Include="Models\ProteoformId.cs" />
-    <Compile Include="Models\PrSm.cs" />
+    <Compile Include="Models\DTO\IIdData.cs" />
+    <Compile Include="Models\Dataset\MsPfParameters.cs" />
+    <Compile Include="Models\Dataset\ProjectInfo.cs" />
+    <Compile Include="Models\DTO\ProteinId.cs" />
+    <Compile Include="Models\DTO\ProteoformId.cs" />
+    <Compile Include="Models\DTO\PrSm.cs" />
+    <Compile Include="Models\PrecursorViewMode.cs" />
     <Compile Include="Models\ScorerFactory.cs" />
-    <Compile Include="Models\Target.cs" />
-    <Compile Include="Models\ToolType.cs" />
+    <Compile Include="Models\DTO\Target.cs" />
+    <Compile Include="Models\DTO\ToolType.cs" />
+    <Compile Include="Config\FeatureMapSettings.cs" />
+    <Compile Include="Config\ImageExportSettings.cs" />
+    <Compile Include="Config\IonTypeSettings.cs" />
+    <Compile Include="Config\ModificationSettings.cs" />
+    <Compile Include="Config\ToleranceSettings.cs" />
+    <Compile Include="Models\SingletonProjectManager.cs" />
     <Compile Include="PlotModels\ColorDicionaries\ProteinColorDictionary.cs" />
     <Compile Include="PlotModels\IDataPoint.cs" />
     <Compile Include="PlotModels\IDataPointSeries.cs" />
@@ -247,17 +256,17 @@
     <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="PlotModels\XicDataPoint.cs" />
     <Compile Include="PlotModels\XicPointSeries.cs" />
-    <Compile Include="Readers\DataReader.cs" />
     <Compile Include="Readers\DmsLookupUtility.cs" />
     <Compile Include="Readers\FastaReaderWriter.cs" />
     <Compile Include="Readers\FeatureReader.cs" />
     <Compile Include="Readers\IcFileReader.cs" />
-    <Compile Include="Readers\IDataReader.cs" />
     <Compile Include="Readers\IdFileReaderFactory.cs" />
     <Compile Include="Readers\IIdFileReader.cs" />
+    <Compile Include="Readers\IProjectLoader.cs" />
     <Compile Include="Readers\MsgfFileReader.cs" />
     <Compile Include="Readers\MtdbReader.cs" />
     <Compile Include="Readers\MzIdentMlReader.cs" />
+    <Compile Include="Readers\ProjectLoader.cs" />
     <Compile Include="Readers\SequenceReaders\ISequenceReader.cs" />
     <Compile Include="Readers\SequenceReaders\LcmsSpectatorSequenceReader.cs" />
     <Compile Include="Readers\SequenceReaders\MsgfPlusSequenceReader.cs" />
@@ -278,9 +287,11 @@
     <Compile Include="Utils\ScoreToStringConverter.cs" />
     <Compile Include="Utils\NeutralLossToStringConverter.cs" />
     <Compile Include="Utils\SequenceToStringConverter.cs" />
-    <Compile Include="ViewModels\ColorListViewModel.cs" />
-    <Compile Include="ViewModels\ColorPaletteViewModel.cs" />
-    <Compile Include="ViewModels\ColorViewModel.cs" />
+    <Compile Include="ViewModels\Colors\ColorListViewModel.cs" />
+    <Compile Include="ViewModels\Colors\ColorPaletteViewModel.cs" />
+    <Compile Include="ViewModels\Colors\ColorViewModel.cs" />
+    <Compile Include="ViewModels\Dataset\DatasetInfoViewModel.cs" />
+    <Compile Include="ViewModels\Dataset\FileInfoViewModel.cs" />
     <Compile Include="ViewModels\Data\BaseIonTypeViewModel.cs" />
     <Compile Include="ViewModels\Data\CreateSequenceViewModel.cs" />
     <Compile Include="ViewModels\Data\FragmentationSequenceViewModel.cs" />
@@ -288,8 +299,9 @@
     <Compile Include="ViewModels\FileSelectors\ExportDatasetViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\ExportImageViewModel.cs" />
     <Compile Include="ViewModels\Data\IFragmentationSequenceViewModel.cs" />
+    <Compile Include="ViewModels\Dataset\ProjectInfoViewModel.cs" />
     <Compile Include="ViewModels\Modifications\CustomModificationViewModel.cs" />
-    <Compile Include="ViewModels\Data\DataSetViewModel.cs" />
+    <Compile Include="ViewModels\Dataset\DataSetViewModel.cs" />
     <Compile Include="ViewModels\Dms\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\Dms\DmsJobViewModel.cs" />
     <Compile Include="ViewModels\Dms\DmsLookupViewModel.cs" />
@@ -301,8 +313,6 @@
     <Compile Include="ViewModels\Filters\IFilter.cs" />
     <Compile Include="ViewModels\Modifications\HeavyModificationsViewModel.cs" />
     <Compile Include="ViewModels\Modifications\HeavyModificationsWindowViewModel.cs" />
-    <Compile Include="ViewModels\Data\IonListViewModel.cs" />
-    <Compile Include="ViewModels\Data\IonTypeSelectorViewModel.cs" />
     <Compile Include="ViewModels\Plots\IsotopicEnvelopePlotViewModel.cs" />
     <Compile Include="ViewModels\Data\LabeledIonViewModel.cs" />
     <Compile Include="ViewModels\LoadingScreenViewModel.cs" />
@@ -313,13 +323,18 @@
     <Compile Include="ViewModels\FileSelectors\OpenDataWindowViewModel.cs" />
     <Compile Include="ViewModels\Data\ScanViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\SelectDataSetViewModel.cs" />
-    <Compile Include="ViewModels\PrecursorSequenceIonViewModel.cs" />
+    <Compile Include="ViewModels\Data\PrecursorSequenceIonViewModel.cs" />
     <Compile Include="ViewModels\SearchSettingsViewModel.cs" />
-    <Compile Include="ViewModels\SettingsViewModel.cs" />
+    <Compile Include="ViewModels\Settings\SettingsViewModel.cs" />
     <Compile Include="ViewModels\Plots\SpectrumPlotViewModel.cs" />
     <Compile Include="ViewModels\Plots\SpectrumViewModel.cs" />
     <Compile Include="ViewModels\Plots\XicPlotViewModel.cs" />
     <Compile Include="ViewModels\Plots\XicViewModel.cs" />
+    <Compile Include="ViewModels\Settings\FeatureMapSettingsViewModel.cs" />
+    <Compile Include="ViewModels\Settings\ImageExportSettingsViewModel.cs" />
+    <Compile Include="ViewModels\Settings\IonTypeSettingsViewModel.cs" />
+    <Compile Include="ViewModels\Settings\ModificationSettingsViewModel.cs" />
+    <Compile Include="ViewModels\Settings\ToleranceSettingsViewModel.cs" />
     <Compile Include="ViewModels\WindowViewModel.cs" />
     <Compile Include="Views\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
@@ -346,6 +361,9 @@
     <Compile Include="Views\DmsLookupView.xaml.cs">
       <DependentUpon>DmsLookupView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\NewProjectWindow.xaml.cs">
+      <DependentUpon>NewProjectWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Plots\ErrorMap.xaml.cs">
       <DependentUpon>ErrorMap.xaml</DependentUpon>
     </Compile>
@@ -366,12 +384,6 @@
     </Compile>
     <Compile Include="Views\Modifications\HeavyModificationsWindow.xaml.cs">
       <DependentUpon>HeavyModificationsWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Data\IonListView.xaml.cs">
-      <DependentUpon>IonListView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Data\IonTypeSelector.xaml.cs">
-      <DependentUpon>IonTypeSelector.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\LoadingScreen.xaml.cs">
       <DependentUpon>LoadingScreen.xaml</DependentUpon>
@@ -481,6 +493,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\NewProjectWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Plots\ErrorMap.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -506,14 +522,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Modifications\HeavyModificationsWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Data\IonListView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Data\IonTypeSelector.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

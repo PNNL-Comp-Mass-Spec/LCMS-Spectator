@@ -8,6 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.IO;
+using System.Linq;
+using LcmsSpectator.Models;
+using LcmsSpectator.Models.Dataset;
+using LcmsSpectator.Models.DTO;
+
 namespace LcmsSpectator.ViewModels.Dms
 {
     using System;
@@ -65,6 +71,11 @@ namespace LcmsSpectator.ViewModels.Dms
         /// The name of the organism database used for this job.
         /// </summary>
         private string organismDb;
+
+        /// <summary>
+        /// A value indicating whether this job has been selected.
+        /// </summary>
+        private bool selected;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DmsJobViewModel"/> class. 
@@ -195,6 +206,85 @@ namespace LcmsSpectator.ViewModels.Dms
         {
             get { return this.organismDb; }
             set { this.RaiseAndSetIfChanged(ref this.organismDb, value); }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this job has been selected.
+        /// </summary>
+        public bool Selected
+        {
+            get { return this.selected; }
+            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
+        }
+
+        /// <summary>
+        /// Get the ID file associated with the selected job.
+        /// </summary>
+        /// <returns>Full path of the ID file associated with the selected job.</returns>
+        public string GetIdFileName()
+        {
+            if (!this.ValidateJob())
+            {
+                return null;
+            }
+
+            var jobDir = Directory.GetFiles(this.JobFolderPath);
+            return (from idFp in jobDir
+                    let ext = Path.GetExtension(idFp)
+                    where ext == ".mzid" || ext == ".gz" || ext == ".zip"
+                    select idFp).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Get the feature file associated with the selected job.
+        /// </summary>
+        /// <returns>Full path of the feature file associated with the selected job.</returns>
+        public string GetFeatureFileName()
+        {
+            if (!this.ValidateJob())
+            {
+                return null;
+            }
+
+            var jobDir = Directory.GetFiles(this.JobFolderPath);
+            return (from idFp in jobDir let ext = Path.GetExtension(idFp) where ext == ".ms1ft" select idFp).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Checks to see if the data set selected is a valid job.
+        /// </summary>
+        /// <returns>A value indicating whether the job selected is valid.</returns>
+        public bool ValidateJob()
+        {
+            return !string.IsNullOrEmpty(this.JobFolderPath) && Directory.Exists(this.JobFolderPath);
+        }
+
+        /// <summary>
+        /// Get the tool type for the selected job
+        /// </summary>
+        /// <returns>The tool type used for the selected job.</returns>
+        public ToolType? GetTool()
+        {
+            if (!this.ValidateJob())
+            {
+                return null;
+            }
+
+            ToolType toolType;
+            switch (this.Tool)
+            {
+                case "MS-GF+":
+                    toolType = ToolType.MsgfPlus;
+                    break;
+                case "MSPathFinder":
+                    toolType = ToolType.MsPathFinder;
+                    break;
+                default:
+                    toolType = ToolType.Other;
+                    break;
+            }
+
+            return toolType;
         }
     }
 }

@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models.Dataset;
+
 namespace LcmsSpectator.DialogServices
 {
     using System;

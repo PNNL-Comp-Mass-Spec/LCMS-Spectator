@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models.DTO;
+
 namespace LcmsSpectator.Models
 {
     using System;

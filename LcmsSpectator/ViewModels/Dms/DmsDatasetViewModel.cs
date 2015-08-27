@@ -8,6 +8,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using LcmsSpectator.Models.Dataset;
+
 namespace LcmsSpectator.ViewModels.Dms
 {
     using System;
@@ -55,6 +60,11 @@ namespace LcmsSpectator.ViewModels.Dms
         /// The path for the folder that this data set is in.
         /// </summary>
         private string datasetFolderPath;
+
+        /// <summary>
+        /// A value indicating whether this dataset has been selected.
+        /// </summary>
+        private bool selected;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DmsDatasetViewModel"/> class. 
@@ -163,6 +173,89 @@ namespace LcmsSpectator.ViewModels.Dms
         {
             get { return this.datasetFolderPath; }
             set { this.RaiseAndSetIfChanged(ref this.datasetFolderPath, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this dataset has been selected.
+        /// </summary>
+        public bool Selected
+        {
+            get { return this.selected; }
+            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
+        }
+
+        /// <summary>
+        /// Get a list of all raw files associated with the selected data set.
+        /// </summary>
+        /// <returns>List containing full paths associated with the selected data set.</returns>
+        public List<string> GetRawFileNames()
+        {
+            if (!this.ValidateDataSet())
+            {
+                return new List<string>();
+            }
+
+            var dataSetDirFiles = Directory.GetFiles(this.DatasetFolderPath);
+            var rawFileNames = (from filePath in dataSetDirFiles
+                                let ext = Path.GetExtension(filePath)
+                                where !string.IsNullOrEmpty(ext)
+                                let extL = ext.ToLower()
+                                where (extL == ".raw" || extL == ".mzml" || extL == ".gz")
+                                select filePath).ToList();
+            for (int i = 0; i < rawFileNames.Count; i++)
+            {
+                var pbfFile = this.GetPbfFileName(rawFileNames[i]);
+                if (!string.IsNullOrEmpty(pbfFile))
+                {
+                    rawFileNames[i] = pbfFile;
+                }
+            }
+
+            return rawFileNames;
+        }
+
+        /// <summary>
+        /// Get the PBF file (if it exists) for a certain raw file associated with this data set.
+        /// </summary>
+        /// <param name="rawFilePath">The path of the raw file to find associated PBF files.</param>
+        /// <returns>The full path to the PBF file.</returns>
+        private string GetPbfFileName(string rawFilePath)
+        {
+            string pbfFilePath = null;
+            if (!this.ValidateDataSet())
+            {
+                return null;
+            }
+
+            var dataSetDirDirectories = Directory.GetDirectories(this.DatasetFolderPath);
+            var pbfFolderPath = (from folderPath in dataSetDirDirectories
+                                 let folderName = Path.GetFileNameWithoutExtension(folderPath)
+                                 where folderName.StartsWith("PBF_Gen")
+                                 select folderPath).FirstOrDefault();
+            if (!string.IsNullOrEmpty(pbfFolderPath))
+            {
+                var pbfIndirectionPath = string.Format(@"{0}\{1}.pbf_CacheInfo.txt", pbfFolderPath, Path.GetFileNameWithoutExtension(rawFilePath));
+                if (!string.IsNullOrEmpty(pbfIndirectionPath) && File.Exists(pbfIndirectionPath))
+                {
+                    var lines = File.ReadAllLines(pbfIndirectionPath);
+                    if (lines.Length > 0)
+                    {
+                        pbfFilePath = lines[0];
+                    }
+                }
+            }
+
+            return pbfFilePath;
+        }
+
+        /// <summary>
+        /// Checks to see if the data set selected is a valid data set.
+        /// </summary>
+        /// <returns>A value indicating whether the data set selected is valid.</returns>
+        public bool ValidateDataSet()
+        {
+            return !string.IsNullOrEmpty(this.DatasetFolderPath)
+                    && Directory.Exists(this.DatasetFolderPath);
         }
     }
 }

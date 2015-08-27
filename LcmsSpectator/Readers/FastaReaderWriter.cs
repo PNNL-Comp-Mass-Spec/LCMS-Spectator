@@ -1,4 +1,6 @@
-﻿namespace LcmsSpectator.Readers
+﻿using LcmsSpectator.Models.DTO;
+
+namespace LcmsSpectator.Readers
 {
     using System;
     using System.Collections.Generic;

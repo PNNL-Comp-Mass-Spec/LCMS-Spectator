@@ -1,0 +1,97 @@
+﻿<Window x:Class="LcmsSpectator.Views.NewProjectWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Configure Project" Height="400" Width="1100">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
+        <GroupBox Grid.Row="0">
+            <GroupBox.Header>
+                <TextBlock Text="Project File" FontWeight="Bold" />
+            </GroupBox.Header>
+
+            <Grid Margin="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="70" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding ProjectFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Column="2" Command="{Binding BrowseProjectFilesCommand}">Browse</Button>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="1">
+            <GroupBox.Header>
+                <TextBlock Text="Output Directory" FontWeight="Bold" />
+            </GroupBox.Header>
+
+            <Grid Margin="3">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="70" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding OutputDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Column="2" Command="{Binding BrowseOutputDirectoriesCommand}">Browse</Button>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Grid.Row="2">
+            <GroupBox.Header>
+                <TextBlock Text="Datasets" FontWeight="Bold" />
+            </GroupBox.Header>
+
+            <Grid Margin="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60*" />
+                    <ColumnDefinition Width="40*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Height="25" HorizontalAlignment="Left">
+                    <Button Content="+ Add Folder" Command="{Binding AddDatasetCommand}" Width="90" />
+                    <Button Content="+ Select Files" Margin="3,0,0,0" Width="90" />
+                    <Button Content="+ From DMS" Margin="3,0,0,0" Width="90" />
+                </StackPanel>
+
+                <DataGrid Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Datasets}" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Width="25">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="-" Command="{Binding RequestRemovalCommand}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Dataset Name" Width="*" Binding="{Binding Dataset.Alias}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                
+                <DataGrid Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridCheckBoxColumn Width="25" Binding="{Binding Selected}" />
+                        <DataGridTextColumn Header="Available Files" Width="80*" Binding="{Binding FileName}" />
+                        <DataGridCheckBoxColumn Header="Type" Width="20*" Binding="{Binding FileType}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </GroupBox>
+
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="4"
+                    HorizontalAlignment="Right">
+            <Button Width="70" Margin="0,0,10,0" Command="{Binding CancelCommand}" IsCancel="True">Cancel</Button>
+            <Button Width="70" Command="{Binding CreateCommand}" IsDefault="True">Open</Button>
+        </StackPanel>
+    </Grid>
+</Window>

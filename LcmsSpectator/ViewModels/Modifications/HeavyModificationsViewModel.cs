@@ -11,12 +11,12 @@
 namespace LcmsSpectator.ViewModels.Modifications
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reactive.Linq;
 
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
 
     using ReactiveUI;
@@ -29,13 +29,20 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Initializes a new instance of the <see cref="HeavyModificationsViewModel"/> class.
         /// </summary>
+        /// <param name="modifications">The registered modifications to pull from.</param>
+        /// <param name="lightModifications">The modifications for light sequences</param>
+        /// <param name="heavyModifications">The modifications for heavy sequences.</param>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
-        public HeavyModificationsViewModel(IDialogService dialogService)
+        public HeavyModificationsViewModel(IEnumerable<Modification> modifications, 
+                                           IEnumerable<SearchModification> lightModifications,
+                                           IEnumerable<SearchModification> heavyModifications,
+                                           IDialogService dialogService = null)
         {
+            dialogService = dialogService ?? new DialogService();
             this.LightModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
             this.HeavyModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
 
-            this.LightModifications.AddRange(IcParameters.Instance.LightModifications.Select(mod => new SearchModificationViewModel(dialogService)
+            this.LightModifications.AddRange(lightModifications.Select(mod => new SearchModificationViewModel(modifications, dialogService)
             {
                 SelectedResidue = mod.TargetResidue,
                 SelectedModification = mod.Modification,
@@ -43,7 +50,7 @@ namespace LcmsSpectator.ViewModels.Modifications
                 FixedSelection = "Fixed"
             }));
 
-            this.HeavyModifications.AddRange(IcParameters.Instance.HeavyModifications.Select(mod => new SearchModificationViewModel(dialogService)
+            this.HeavyModifications.AddRange(heavyModifications.Select(mod => new SearchModificationViewModel(modifications, dialogService)
             {
                 SelectedResidue = mod.TargetResidue,
                 SelectedModification = mod.Modification,
@@ -52,11 +59,11 @@ namespace LcmsSpectator.ViewModels.Modifications
             }));
 
             var addLightModificationCommand = ReactiveCommand.Create();
-            addLightModificationCommand.Subscribe(_ => this.LightModifications.Add(new SearchModificationViewModel(dialogService)));
+            addLightModificationCommand.Subscribe(_ => this.LightModifications.Add(new SearchModificationViewModel(modifications, dialogService)));
             this.AddLightModificationCommand = addLightModificationCommand;
 
             var addHeavyModificationCommand = ReactiveCommand.Create();
-            addHeavyModificationCommand.Subscribe(_ => this.HeavyModifications.Add(new SearchModificationViewModel(dialogService)));
+            addHeavyModificationCommand.Subscribe(_ => this.HeavyModifications.Add(new SearchModificationViewModel(modifications, dialogService)));
             this.AddHeavyModificationCommand = addHeavyModificationCommand;
 
             this.LightModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
@@ -87,14 +94,5 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// Gets a command that adds a new modification to the heavy modifications list.
         /// </summary>
         public IReactiveCommand AddHeavyModificationCommand { get; private set; }
-
-        /// <summary>
-        /// Save the selected heavy and light modifications to the settings.
-        /// </summary>
-        public void Save()
-        {
-            IcParameters.Instance.LightModifications = new ReactiveList<SearchModification>(this.LightModifications.Select(searchModVm => searchModVm.SearchModification));
-            IcParameters.Instance.HeavyModifications = new ReactiveList<SearchModification>(this.HeavyModifications.Select(searchModVm => searchModVm.SearchModification));
-        }
     }
 }

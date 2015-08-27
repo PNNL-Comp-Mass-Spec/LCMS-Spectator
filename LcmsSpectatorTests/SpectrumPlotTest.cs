@@ -4,6 +4,7 @@ using System.Linq;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Config;
+using LcmsSpectator.Models.DTO;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Readers;
 using LcmsSpectator.Utils;

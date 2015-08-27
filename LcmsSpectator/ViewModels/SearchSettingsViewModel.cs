@@ -8,7 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Reactive;
 using InformedProteomics.Backend.Utils;
+using LcmsSpectator.Models.Dataset;
+using LcmsSpectator.Models.DTO;
 
 namespace LcmsSpectator.ViewModels
 {
@@ -35,7 +38,7 @@ namespace LcmsSpectator.ViewModels
     /// <summary>
     /// View model for configuration settings for running an MSPathFinder Database search.
     /// </summary>
-    public class SearchSettingsViewModel : ReactiveObject
+    public class SearchSettingsViewModel : ReactiveObject, IDatasetInfoProvider
     {
         /// <summary>
         /// The maximum possible tab index for the tab control.
@@ -257,9 +260,8 @@ namespace LcmsSpectator.ViewModels
             this.FromSequence = false;
 
             // Browse Spectrum Files Command
-            var browseRawFilesCommand = ReactiveCommand.Create();
-            browseRawFilesCommand.Subscribe(_ => this.BrowseSpectrumFilesImplementation());
-            this.BrowseSpectrumFilesCommand = browseRawFilesCommand;
+            this.BrowseSpectrumFilesCommand = ReactiveCommand.Create();
+            this.BrowseSpectrumFilesCommand.Subscribe(_ => this.BrowseSpectrumFilesImplementation());
 
             // Browse Feature Files Command
             var browseFeatureFilesCommand = ReactiveCommand.Create();
@@ -267,34 +269,28 @@ namespace LcmsSpectator.ViewModels
             this.BrowseFeatureFilesCommand = browseFeatureFilesCommand;
 
             // Browse Fasta DB Files Command
-            var browseFastaDbFilesCommand = ReactiveCommand.Create();
-            browseFastaDbFilesCommand.Subscribe(_ => this.BrowseFastaDbFilesImplementation());
-            this.BrowseFastaDbFilesCommand = browseFastaDbFilesCommand;
+            this.BrowseFastaDbFilesCommand = ReactiveCommand.Create();
+            this.BrowseFastaDbFilesCommand.Subscribe(_ => this.BrowseFastaDbFilesImplementation());
 
             // Browse Output Directories Command
-            var browseOutputDirectoriesCommand = ReactiveCommand.Create();
-            browseOutputDirectoriesCommand.Subscribe(_ => this.BrowseOutputDirectoriesImplementation());
-            this.BrowseOutputDirectoriesCommand = browseOutputDirectoriesCommand;
+            this.BrowseOutputDirectoriesCommand = ReactiveCommand.Create();
+            this.BrowseOutputDirectoriesCommand.Subscribe(_ => this.BrowseOutputDirectoriesImplementation());
 
             // Select All Proteins Command
-            var selectAllProteinsCommand = ReactiveCommand.Create(this.FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
-            selectAllProteinsCommand.Subscribe(_ => this.SelectProteinsImplementation(true));
-            this.SelectAllProteinsCommand = selectAllProteinsCommand;
+            this.SelectAllProteinsCommand = ReactiveCommand.Create(this.FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
+            this.SelectAllProteinsCommand.Subscribe(_ => this.SelectProteinsImplementation(true));
 
             // Select No Proteins Command
-            var selectNoProteins = ReactiveCommand.Create(this.FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
-            selectNoProteins.Subscribe(_ => this.SelectProteinsImplementation(false));
-            this.SelectNoProteinsCommand = selectNoProteins;
+            this.SelectNoProteinsCommand = ReactiveCommand.Create(this.FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
+            this.SelectNoProteinsCommand.Subscribe(_ => this.SelectProteinsImplementation(false));
 
             // Manage Modifications Command
-            var manageModificationsCommand = ReactiveCommand.Create();
-            manageModificationsCommand.Subscribe(_ => this.ManageModificationsImplementation());
-            this.ManageModificationsCommand = manageModificationsCommand;
+            this.ManageModificationsCommand = ReactiveCommand.Create();
+            this.ManageModificationsCommand.Subscribe(_ => this.ManageModificationsImplementation());
 
             // Add Modifications Command
-            var addModificationCommand = ReactiveCommand.Create();
-            addModificationCommand.Subscribe(_ => this.AddModificationImplementation());
-            this.AddModificationCommand = addModificationCommand;
+            this.AddModificationCommand = ReactiveCommand.Create();
+            this.AddModificationCommand.Subscribe(_ => this.AddModificationImplementation());
 
             // Run Command - Disabled when there is no SpectrumFilePath, FastaDbFilePath, or OutputFilePath selected
             this.RunCommand = ReactiveCommand.CreateAsyncTask(
@@ -397,7 +393,12 @@ namespace LcmsSpectator.ViewModels
 
             this.SearchModifications.AddRange(
                mspfParameters.Modifications.Select(
-                    searchMod => new SearchModificationViewModel(this.dialogService) { SearchModification = searchMod }));
+                    searchMod => new SearchModificationViewModel(
+                                        SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications,
+                                        this.dialogService)
+                    {
+                        SearchModification = searchMod
+                    }));
             this.MinSequenceLength = mspfParameters.MinSequenceLength;
             this.MaxSequenceLength = mspfParameters.MaxSequenceLength;
             this.MinSequenceMass = mspfParameters.MinSequenceMass;
@@ -434,62 +435,62 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets a command that decrements the tab index.
         /// </summary>
-        public IReactiveCommand PrevTabCommand { get; private set; }
+        public ReactiveCommand<object> PrevTabCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that increments the tab index.
         /// </summary>
-        public IReactiveCommand NextTabCommand { get; private set; }
+        public ReactiveCommand<object> NextTabCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
         /// </summary>
-        public IReactiveCommand BrowseSpectrumFilesCommand { get; private set; }
+        public ReactiveCommand<object> BrowseSpectrumFilesCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that prompts the user for a feature file path.
         /// </summary>
-        public IReactiveCommand BrowseFeatureFilesCommand { get; private set; }
+        public ReactiveCommand<object> BrowseFeatureFilesCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that prompts the user for a FASTA file path.
         /// </summary>
-        public IReactiveCommand BrowseFastaDbFilesCommand { get; private set; }
+        public ReactiveCommand<object> BrowseFastaDbFilesCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that prompts user for an output directory.
         /// </summary>
-        public IReactiveCommand BrowseOutputDirectoriesCommand { get; private set; }
+        public ReactiveCommand<object> BrowseOutputDirectoriesCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that selects all proteins in the <see cref="FastaEntries" /> list.
         /// </summary>
-        public IReactiveCommand SelectAllProteinsCommand { get; private set; }
+        public ReactiveCommand<object> SelectAllProteinsCommand { get; private set; }
         
         /// <summary>
         /// Gets a command that de-selects all proteins in the <see cref="FastaEntries" /> list.
         /// </summary>
-        public IReactiveCommand SelectNoProteinsCommand { get; private set; }
+        public ReactiveCommand<object> SelectNoProteinsCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that manages the modification registered with the application.
         /// </summary>
-        public IReactiveCommand ManageModificationsCommand { get; private set; }
+        public ReactiveCommand<object> ManageModificationsCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that adds a search modification.
         /// </summary>
-        public IReactiveCommand AddModificationCommand { get; private set; }
+        public ReactiveCommand<object> AddModificationCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that validates search settings and closes the window.
         /// </summary>
-        public IReactiveCommand RunCommand { get; private set; }
+        public ReactiveCommand<Unit> RunCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that closes the window.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; private set; }
+        public ReactiveCommand<object> CancelCommand { get; private set; }
 
         /// <summary>
         /// Gets or sets the tab index for the tab control.
@@ -833,6 +834,28 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Get dataset info associated with this MSPF search.
+        /// </summary>
+        /// <returns>The <see cref="DatasetInfo" />.</returns>
+        public DatasetInfo GetDatasetInfo()
+        {
+            if (!this.Status)
+            {
+                return new DatasetInfo();
+            }
+
+            var files = new List<string>
+            {
+                this.SpectrumFilePath,
+                this.GetFeatureFilePath(),
+                this.GetIdFilePath(),
+                this.FastaDbFilePath
+            };
+
+            return new DatasetInfo(files);
+        }
+
+        /// <summary>
         /// Get final path to feature file.
         /// </summary>
         /// <returns>Path to feature file as a string.</returns>
@@ -933,7 +956,11 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void AddModificationImplementation()
         {
-            this.SearchModifications.Add(new SearchModificationViewModel(this.dialogService));
+            var searchMod =
+                new SearchModificationViewModel(
+                    SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications,
+                    dialogService);
+            this.SearchModifications.Add(searchMod);
         }
 
         /// <summary>
@@ -959,7 +986,7 @@ namespace LcmsSpectator.ViewModels
         private void ManageModificationsImplementation()
         {
             var manageModificationsViewModel = new ManageModificationsViewModel(this.dialogService);
-            manageModificationsViewModel.Modifications.AddRange(IcParameters.Instance.RegisteredModifications);
+            manageModificationsViewModel.Modifications.AddRange(SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications);
             this.dialogService.OpenManageModifications(manageModificationsViewModel);
 
             this.ModificationsUpdated = true;
@@ -1003,7 +1030,7 @@ namespace LcmsSpectator.ViewModels
             var topDownLauncher = this.GetTopDownLauncher(ms2Scans);
             this.runSearchTask = Task.Run(
                                           () => topDownLauncher.RunSearch(
-                                                                          IcParameters.Instance.IonCorrelationThreshold,
+                                                                          SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.IonCorrelationThreshold,
                                                                           this.runSearchCancellationToken.Token,
                                                                           progress),
                                                 this.runSearchCancellationToken.Token);

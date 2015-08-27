@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.ViewModels.Dataset;
+
 namespace LcmsSpectator.ViewModels.FileSelectors
 {
     using System;
@@ -31,7 +33,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// The selected Dataset View Model.
         /// </summary>
-        private DataSetViewModel selectedDataset;
+        private DatasetViewModel selectedDataset;
 
         /// <summary>
         /// The path for the output file.
@@ -43,10 +45,10 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         /// <param name="datasets">The datasets.</param>
-        public ExportDatasetViewModel(IDialogService dialogService, IEnumerable<DataSetViewModel> datasets)
+        public ExportDatasetViewModel(IDialogService dialogService, IEnumerable<DatasetViewModel> datasets)
         {
             this.dialogService = dialogService;
-            this.Datasets = new ReactiveList<DataSetViewModel>(datasets);
+            this.Datasets = new ReactiveList<DatasetViewModel>(datasets);
 
             if (this.Datasets.Count > 0)
             {
@@ -81,12 +83,12 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// Gets the list of datasets.
         /// </summary>
-        public ReactiveList<DataSetViewModel> Datasets { get; private set; }
+        public ReactiveList<DatasetViewModel> Datasets { get; private set; }
 
         /// <summary>
         /// Gets or sets the selected Dataset View Model.
         /// </summary>
-        public DataSetViewModel SelectedDataset
+        public DatasetViewModel SelectedDataset
         {
             get { return this.selectedDataset; }
             set { this.RaiseAndSetIfChanged(ref this.selectedDataset, value); }

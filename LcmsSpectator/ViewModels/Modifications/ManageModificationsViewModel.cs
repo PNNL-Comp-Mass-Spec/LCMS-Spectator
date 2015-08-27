@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.ViewModels.Modifications
 {
     using System;
@@ -94,28 +96,7 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         private void AddImplementation()
         {
-            var customModVm = new CustomModificationViewModel(string.Empty, false, this.dialogService);
-            if (this.dialogService.OpenCustomModification(customModVm))
-            {
-                Modification modification = null;
-                if (customModVm.FromFormulaChecked)
-                {
-                    modification = IcParameters.Instance.RegisterModification(
-                        customModVm.ModificationName,
-                        customModVm.Composition);
-                }
-                else if (customModVm.FromMassChecked)
-                {
-                    modification = IcParameters.Instance.RegisterModification(
-                        customModVm.ModificationName,
-                        customModVm.Mass);
-                }
-
-                if (modification != null)
-                {
-                    this.Modifications.Add(modification);
-                }
-            }
+            SingletonProjectManager.Instance.PromptRegisterModification();
         }
 
         /// <summary>
@@ -149,13 +130,13 @@ namespace LcmsSpectator.ViewModels.Modifications
                 Modification modification = null;
                 if (customModVm.FromFormulaChecked)
                 {
-                    modification = IcParameters.Instance.UpdateOrRegisterModification(
+                    modification = SingletonProjectManager.Instance.UpdateOrRegisterModification(
                         customModVm.ModificationName,
                         customModVm.Composition);
                 }
                 else if (customModVm.FromMassChecked)
                 {
-                    modification = IcParameters.Instance.UpdateOrRegisterModification(
+                    modification = SingletonProjectManager.Instance.UpdateOrRegisterModification(
                         customModVm.ModificationName,
                         customModVm.Mass);
                 }
@@ -188,7 +169,7 @@ namespace LcmsSpectator.ViewModels.Modifications
                                         this.SelectedModification.Name),
                                         "Delete Modification"))
             {
-                IcParameters.Instance.UnregisterModification(this.SelectedModification);
+                SingletonProjectManager.Instance.UnregisterModification(this.SelectedModification);
                 this.Modifications.Remove(this.SelectedModification);
                 this.SelectedModification = this.Modifications.FirstOrDefault();
             }

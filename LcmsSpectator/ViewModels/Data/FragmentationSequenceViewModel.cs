@@ -208,14 +208,14 @@
         /// <param name="selectedActivationMethod">The selected activation method.</param>
         private void SetActivationMethod(ActivationMethod selectedActivationMethod)
         {
-            if (!IcParameters.Instance.AutomaticallySelectIonTypes)
+            if (!SingletonProjectManager.Instance.ProjectInfo.IonTypeSettings.AutomaticallySelectIonTypes)
             {
                 return;
             }
 
             var selectedBaseIonTypes = selectedActivationMethod == ActivationMethod.ETD
-                                           ? IcParameters.Instance.EtdIonTypes
-                                           : IcParameters.Instance.CidHcdIonTypes;
+                                           ? SingletonProjectManager.Instance.ProjectInfo.IonTypeSettings.EtdIonTypes
+                                           : SingletonProjectManager.Instance.ProjectInfo.IonTypeSettings.CidHcdIonTypes;
 
             foreach (var baseIonType in this.BaseIonTypes)
             {
@@ -230,7 +230,7 @@
         private IonType[] GetIonTypes()
         {
             return IonUtils.GetIonTypes(
-                IcParameters.Instance.IonTypeFactory,
+                SingletonProjectManager.IonTypeFactory,
                 this.BaseIonTypes.Where(bit => bit.IsSelected).Select(bit => bit.BaseIonType).ToList(),
                 this.NeutralLosses.Where(nl => nl.IsSelected).Select(nl => nl.NeutralLoss).ToList(),
                 1,

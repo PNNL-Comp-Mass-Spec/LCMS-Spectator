@@ -8,6 +8,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Threading;
+using System.Threading.Tasks;
+using LcmsSpectator.Models.Dataset;
+using Splat;
+
 namespace LcmsSpectator.ViewModels.Dms
 {
     using System;
@@ -25,7 +30,7 @@ namespace LcmsSpectator.ViewModels.Dms
     /// <summary>
     /// A view model for searching DMS for datasets and jobs.
     /// </summary>
-    public class DmsLookupViewModel : ReactiveObject
+    public class DmsLookupViewModel : ReactiveObject, IDatasetInfoProvider
     {
         /// <summary>
         /// The path for the FASTA files on DMS.
@@ -48,6 +53,11 @@ namespace LcmsSpectator.ViewModels.Dms
         private readonly DmsLookupUtility dmsLookupUtility;
 
         /// <summary>
+        /// Cache mapping dataset IDs to jobs.
+        /// </summary>
+        private readonly MemoizingMRUCache<DmsLookupUtility.UdtDatasetInfo, List<DmsLookupUtility.UdtJobInfo>> jobCache;
+
+        /// <summary>
         /// List containing previous searches performed and the number of weeks searched.
         /// </summary>
         private readonly List<Tuple<string, int>> previousResultsList;
@@ -57,16 +67,6 @@ namespace LcmsSpectator.ViewModels.Dms
         /// Set to true when a search has been performed that yielded 0 results.
         /// </summary>
         private bool isNoResultsShown;
-        
-        /// <summary>
-        /// The selected DMS dataset.
-        /// </summary>
-        private DmsDatasetViewModel selectedDataset;
-
-        /// <summary>
-        /// The selected DMS job for the selected dataset.
-        /// </summary>
-        private DmsJobViewModel selectedJob;
 
         /// <summary>
         /// A value indicating whether a search has been performed yet.
@@ -84,9 +84,34 @@ namespace LcmsSpectator.ViewModels.Dms
         private string dataSetFilter;
 
         /// <summary>
+        /// The path to the output directory.
+        /// </summary>
+        private string outputDirectory;
+
+        /// <summary>
+        /// The name of the file being copied.
+        /// </summary>
+        private string copyStatusText;
+
+        /// <summary>
+        /// The progress of the file copy.
+        /// </summary>
+        private double progress;
+
+        /// <summary>
+        /// A value indicating whether files are currently being copied.
+        /// </summary>
+        private bool isCopying;
+
+        /// <summary>
         /// A dictionary mapping name of dataset to number of weeks for quick lookup.
         /// </summary>
         private Dictionary<string, int> previousDatasets;
+
+        /// <summary>
+        /// A cancellation token for cancelling the file copy.
+        /// </summary>
+        private CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DmsLookupViewModel"/> class.
@@ -100,20 +125,26 @@ namespace LcmsSpectator.ViewModels.Dms
             this.previousResultsList = new List<Tuple<string, int>>();
             this.NumberOfWeeks = 10;
             this.PreviousDatasets = new Dictionary<string, int>();
-            this.Datasets = new ReactiveList<DmsDatasetViewModel>();
-            this.Jobs = new ReactiveList<DmsJobViewModel>();
+            this.Datasets = new ReactiveList<DmsDatasetViewModel> { ChangeTrackingEnabled = true };
+            this.Jobs = new ReactiveList<DmsJobViewModel> { ChangeTrackingEnabled = true };
             this.dmsLookupUtility = new DmsLookupUtility();
+            this.jobCache = new MemoizingMRUCache<DmsLookupUtility.UdtDatasetInfo, List<DmsLookupUtility.UdtJobInfo>>(
+                (dataset, o) =>
+                {
+                    var jobMap = this.dmsLookupUtility.GetJobsByDataset(
+                                        new List<DmsLookupUtility.UdtDatasetInfo> { dataset });
+                    List<DmsLookupUtility.UdtJobInfo> jobs;
+                    jobMap.TryGetValue(dataset.DatasetId, out jobs);
+                    return jobs;
+                },
+            20);
 
             var lookUpCommand = ReactiveCommand.Create();
             lookUpCommand.Subscribe(_ => this.Lookup());
             this.LookupCommand = lookUpCommand;
 
             // If there is no data set selected or there is no job selected, disable open button
-            var openCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedDataset, x => x.SelectedJob)
-                                                     .Select(x => x.Item1 != null
-                                                               && !string.IsNullOrEmpty(x.Item1.DatasetFolderPath) 
-                                                               && x.Item2 != null
-                                                               && !string.IsNullOrEmpty(x.Item2.JobFolderPath)));
+            var openCommand = ReactiveCommand.Create();
             openCommand.Subscribe(_ => this.OpenImplementation());
             this.OpenCommand = openCommand;
 
@@ -121,36 +152,17 @@ namespace LcmsSpectator.ViewModels.Dms
             closeCommand.Subscribe(_ => this.CloseImplementation());
             this.CloseCommand = closeCommand;
 
-            this.SelectedDataset = new DmsDatasetViewModel();
-            this.SelectedJob = new DmsJobViewModel();
+            // Add jobs when dataset is selected.
+            this.Datasets.ItemChanged.Where(x => x.PropertyName == "Selected")
+                .Where(x => x.Sender.Selected)
+                .SelectMany(async x => await Task.Run(() => this.jobCache.Get(x.Sender.UdtDatasetInfo)))
+                .Subscribe(jobs => this.Jobs.AddRange(jobs.Select(j => new DmsJobViewModel(j))));
 
-            // When a data set is selected, find jobs for the data set
-            this.WhenAnyValue(x => x.SelectedDataset)
-                .Subscribe(x =>
-                {
-                    this.Jobs.Clear();
-                    if (this.selectedDataset == null)
-                    {
-                        return;
-                    }
-
-                    var jobMap =
-                        this.dmsLookupUtility.GetJobsByDataset(
-                            new List<DmsLookupUtility.UdtDatasetInfo> { this.selectedDataset.UdtDatasetInfo });
-                    List<DmsLookupUtility.UdtJobInfo> jobs;
-                    if (jobMap.TryGetValue(this.selectedDataset.DatasetId, out jobs))
-                    {
-                        foreach (var job in jobs)
-                        {
-                            this.Jobs.Add(new DmsJobViewModel(job));
-                        }
-                    }
-
-                    if (this.Jobs.Count > 0)
-                    {
-                        this.SelectedJob = this.Jobs[0];
-                    }
-                });
+            // Remove jobs when dataset is deselcted
+            this.Datasets.ItemChanged.Where(x => x.PropertyName == "Selected")
+                .Where(x => !x.Sender.Selected)
+                .Select(x => this.Jobs.Where(j => j.DatasetId == x.Sender.DatasetId))
+                .Subscribe(jobs => this.Jobs.RemoveAll(jobs));
 
             // When a null data set is selected and a search has ocurred, show no results screen
             this.WhenAnyValue(x => x.Datasets.Count, x => x.IsFirstSearch)
@@ -203,24 +215,6 @@ namespace LcmsSpectator.ViewModels.Dms
         public bool Status { get; private set; }
 
         /// <summary>
-        /// Gets or sets the selected DMS dataset.
-        /// </summary>
-        public DmsDatasetViewModel SelectedDataset
-        {
-            get { return this.selectedDataset; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedDataset, value); }
-        }
-
-        /// <summary>
-        /// Gets or sets the selected DMS job for the selected dataset.
-        /// </summary>
-        public DmsJobViewModel SelectedJob
-        {
-            get { return this.selectedJob; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedJob, value); }
-        }
-
-        /// <summary>
         /// Gets a value indicating whether or not the No Results alert should be shown.
         /// Set to true when a search has been performed that yielded 0 results.
         /// </summary>
@@ -267,114 +261,74 @@ namespace LcmsSpectator.ViewModels.Dms
         }
 
         /// <summary>
-        /// Checks to see if the data set selected is a valid data set.
+        /// Gets or sets the path to the output directory.
         /// </summary>
-        /// <returns>A value indicating whether the data set selected is valid.</returns>
-        public bool ValidateDataSet()
+        public string OutputDirectory
         {
-            return this.SelectedDataset != null && !string.IsNullOrEmpty(this.SelectedDataset.DatasetFolderPath)
-                    && Directory.Exists(this.SelectedDataset.DatasetFolderPath);
+            get { return this.outputDirectory; }
+            set { this.RaiseAndSetIfChanged(ref this.outputDirectory, value); }
         }
 
         /// <summary>
-        /// Checks to see if the data set selected is a valid job.
+        /// Gets the name of the file being copied.
         /// </summary>
-        /// <returns>A value indicating whether the job selected is valid.</returns>
-        public bool ValidateJob()
+        public string CopyStatusText
         {
-            return this.SelectedJob != null
-                    && !string.IsNullOrEmpty(this.SelectedJob.JobFolderPath) && Directory.Exists(this.SelectedJob.JobFolderPath);
+            get { return this.copyStatusText; }
+            private set { this.RaiseAndSetIfChanged(ref this.copyStatusText, value); }
         }
 
         /// <summary>
-        /// Get a list of all raw files associated with the selected data set.
+        /// Gets or sets the progress of the file copy.
         /// </summary>
-        /// <returns>List containing full paths associated with the selected data set.</returns>
-        public List<string> GetRawFileNames()
+        public double Progress
         {
-            if (!this.ValidateDataSet())
+            get { return this.progress; }
+            private set { this.RaiseAndSetIfChanged(ref this.progress, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether files are currently being copied.
+        /// </summary>
+        public bool IsCopying
+        {
+            get { return this.isCopying; }
+            private set { this.RaiseAndSetIfChanged(ref this.isCopying, value); }
+        }
+
+        /// <summary>
+        /// Gets the dataset info for the selected dataset.
+        /// </summary>
+        /// <returns>The <see cref="DatasetInfo" />.</returns>
+        public DatasetInfo[] GetDatasetInfo()
+        {
+            var files = new List<string>();
+            var selectedDatasets = this.Datasets.Where(ds => ds.Selected).ToList();
+            var selectedJobs = this.Jobs.Where(job => job.Selected).ToList();
+
+            if (!selectedDatasets.Any())
             {
-                return new List<string>();
+                return null;
             }
 
-            var dataSetDirFiles = Directory.GetFiles(this.SelectedDataset.DatasetFolderPath);
-            var rawFileNames = (from filePath in dataSetDirFiles
-                            let ext = Path.GetExtension(filePath)
-                            where !string.IsNullOrEmpty(ext)
-                            let extL = ext.ToLower()
-                            where (extL == ".raw" || extL == ".mzml" || extL == ".gz")
-                            select filePath).ToList();
-            for (int i = 0; i < rawFileNames.Count; i++)
+            foreach (var dataset in selectedDatasets)
             {
-                var pbfFile = this.GetPbfFileName(rawFileNames[i]);
-                if (!string.IsNullOrEmpty(pbfFile))
+                if (dataset.ValidateDataSet())
                 {
-                    rawFileNames[i] = pbfFile;
-                }
+                    files.AddRange(dataset.GetRawFileNames());
+                }   
             }
 
-            return rawFileNames;
-        }
-
-        /// <summary>
-        /// Get the ID file associated with the selected job.
-        /// </summary>
-        /// <returns>Full path of the ID file associated with the selected job.</returns>
-        public string GetIdFileName()
-        {
-            if (!this.ValidateJob())
+            foreach (var job in selectedJobs)
             {
-                return null;
+                if (job.ValidateJob())
+                {
+                    files.Add(job.GetFeatureFileName());
+                    files.Add(job.GetIdFileName());     
+                } 
             }
 
-            var jobDir = Directory.GetFiles(this.SelectedJob.JobFolderPath);
-            return (from idFp in jobDir
-                           let ext = Path.GetExtension(idFp)
-                           where ext == ".mzid" || ext == ".gz" || ext == ".zip"
-                           select idFp).FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Get the feature file associated with the selected job.
-        /// </summary>
-        /// <returns>Full path of the feature file associated with the selected job.</returns>
-        public string GetFeatureFileName()
-        {
-            if (!this.ValidateJob())
-            {
-                return null;
-            }
-
-            var jobDir = Directory.GetFiles(this.SelectedJob.JobFolderPath);
-            return (from idFp in jobDir let ext = Path.GetExtension(idFp) where ext == ".ms1ft" select idFp).FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Get the tool type for the selected job
-        /// </summary>
-        /// <returns>The tool type used for the selected job.</returns>
-        public ToolType? GetTool()
-        {
-            if (!this.ValidateJob())
-            {
-                return null;
-            }
-
-            ToolType toolType;
-            switch (this.SelectedJob.Tool)
-            {
-                case "MS-GF+":
-                    toolType = ToolType.MsgfPlus;
-                    break;
-                case "MSPathFinder":
-                    toolType = ToolType.MsPathFinder;
-                    break;
-                default:
-                    toolType = ToolType.Other;
-                    break;
-            }
-
-            return toolType;
+            return new DatasetInfo(files);
         }
 
         /// <summary>
@@ -405,7 +359,7 @@ namespace LcmsSpectator.ViewModels.Dms
 
             if (this.Datasets.Count > 0)
             {
-                this.SelectedDataset = this.Datasets[0];
+                this.Datasets[0].Selected = true;
             }
         }
 
@@ -465,37 +419,44 @@ namespace LcmsSpectator.ViewModels.Dms
         }
 
         /// <summary>
-        /// Get the PBF file (if it exists) for a certain raw file associated with this data set.
+        /// Copy files from DMS dataset folder to output directory.
         /// </summary>
-        /// <param name="rawFilePath">The path of the raw file to find associated PBF files.</param>
-        /// <returns>The full path to the PBF file.</returns>
-        private string GetPbfFileName(string rawFilePath)
+        /// <returns>Task for awaiting file copy.</returns>
+        private async Task CopyFilesAsync()
         {
-            string pbfFilePath = null;
-            if (!this.ValidateDataSet())
-            {
-                return null;
-            }
-
-            var dataSetDirDirectories = Directory.GetDirectories(this.SelectedDataset.DatasetFolderPath);
-            var pbfFolderPath = (from folderPath in dataSetDirDirectories
-                                 let folderName = Path.GetFileNameWithoutExtension(folderPath)
-                                 where folderName.StartsWith("PBF_Gen")
-                                 select folderPath).FirstOrDefault();
-            if (!string.IsNullOrEmpty(pbfFolderPath))
-            {
-                var pbfIndirectionPath = string.Format(@"{0}\{1}.pbf_CacheInfo.txt", pbfFolderPath, Path.GetFileNameWithoutExtension(rawFilePath));
-                if (!string.IsNullOrEmpty(pbfIndirectionPath) && File.Exists(pbfIndirectionPath))
+            this.cancellationTokenSource = new CancellationTokenSource();
+            await Task.Run(
+                () =>
                 {
-                    var lines = File.ReadAllLines(pbfIndirectionPath);
-                    if (lines.Length > 0)
+                    if (!Directory.Exists(this.OutputDirectory))
                     {
-                        pbfFilePath = lines[0];
+                        return;
                     }
-                }
-            }
 
-            return pbfFilePath;
+                    this.IsCopying = true;
+                    this.Progress = 0;
+
+                    var dataset = this.GetDatasetInfo();
+
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        if (this.cancellationTokenSource.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
+                        var fileName = Path.GetFileName(files[i]);
+                        this.CopyStatusText = string.Format("Copying {0}", fileName);
+                        File.Copy(files[i], string.Format("{0}\\{1}", this.OutputDirectory, fileName), true);
+
+                        this.Progress = ((i + 1) / (double)files.Length) * 100;
+                    }
+
+                    this.CopyStatusText = string.Empty;
+                    this.IsCopying = false;
+                    this.Progress = 100;
+                },
+                this.cancellationTokenSource.Token);
         }
 
         /// <summary>

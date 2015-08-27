@@ -28,10 +28,7 @@
         <views:PrSmView DataContext="{Binding SelectedPrSm}" Grid.Row="0" />
         <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ShowsPreview="True" Background="Transparent"/>
         <!--<xcad:DockingManager Grid.Row="2" Name="AvDock" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">-->
-        <xcad:DockingManager Grid.Row="2" Name="AvDock" Loaded="Window_OnLoaded"  Unloaded="DockingManager_OnUnloaded">
-            <!-- <xcad:DockingManager.Theme>
-                <xcad:Office2007SilverTheme />
-            </xcad:DockingManager.Theme> -->
+        <xcad:DockingManager Grid.Row="2" Name="AvDock">
             <xcad:LayoutRoot>
                 <xcad:LayoutPanel>
                     <xcad:LayoutDocumentPane DockWidth="*">
@@ -104,10 +101,6 @@
                                     </DataGrid>
                                 </Grid>
                             </xcad:LayoutAnchorable>
-     
-                            <!--<xcad:LayoutAnchorable Title="TargetView">
-                                <views:CreateSequenceView DataContext="{Binding CreateSequenceViewModel}" x:Name="CreateSequence"/>
-                            </xcad:LayoutAnchorable> -->
                         </xcad:LayoutAnchorablePane>
                     </xcad:LayoutAnchorablePaneGroup>
                 </xcad:LayoutPanel>

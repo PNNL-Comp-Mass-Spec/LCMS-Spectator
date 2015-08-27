@@ -1,4 +1,7 @@
-﻿namespace LcmsSpectator
+﻿using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Composition;
+
+namespace LcmsSpectator
 {
     using System.Windows;
     using LcmsSpectator.DialogServices;
@@ -22,8 +25,11 @@
         /// </param>
         private void ApplicationStartup(object sender, StartupEventArgs e)
         {
+            // Warm up InformedProteomics Averagine using arbitrary mass
+            Task.Run(() => Averagine.GetIsotopomerEnvelopeFromNominalMass(50000));
+
             var mainWindow = new MainWindow();
-            var mainWindowVm = new MainWindowViewModel(new MainDialogService(), new DataReader());
+            var mainWindowVm = new MainWindowViewModel(new MainDialogService());
             mainWindow.DataContext = mainWindowVm;
             mainWindow.Show();
         }

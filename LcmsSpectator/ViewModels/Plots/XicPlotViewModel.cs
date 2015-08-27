@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
@@ -115,7 +117,7 @@ namespace LcmsSpectator.ViewModels.Plots
             this.lcms = lcms;
             this.showLegend = showLegend;
             this.xaxis = xaxis;
-            this.pointsToSmooth = IcParameters.Instance.PointsToSmooth;
+            this.pointsToSmooth = 9;
             this.PlotTitle = title;
             this.PlotModel = new SelectablePlotModel(xaxis, 1.05)
             {
@@ -191,22 +193,22 @@ namespace LcmsSpectator.ViewModels.Plots
                     this.UpdatePlotModel(xicPoints);
                 });
 
-            // Update ions when relative intensity threshold changes.
-            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
-            {
-                var precFragVm = this.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
-                if (precFragVm != null)
-                {
-                    precFragVm.RelativeIntensityThreshold = precRelInt;
-                }
-            });
+            //// Update ions when relative intensity threshold changes.
+            //IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
+            //{
+            //    var precFragVm = this.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
+            //    if (precFragVm != null)
+            //    {
+            //        precFragVm.RelativeIntensityThreshold = precRelInt;
+            //    }
+            //});
 
-            // Update plot when settings change
-            IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm)
-                .Where(_ => this.ions != null)
-                .Throttle(TimeSpan.FromMilliseconds(250), RxApp.TaskpoolScheduler)
-                .SelectMany(async x => await this.GetXicDataPointsAsync(this.ions, this.PointsToSmooth, false))
-                .Subscribe(this.UpdatePlotModel);
+            //// Update plot when settings change
+            //IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm)
+            //    .Where(_ => this.ions != null)
+            //    .Throttle(TimeSpan.FromMilliseconds(250), RxApp.TaskpoolScheduler)
+            //    .SelectMany(async x => await this.GetXicDataPointsAsync(this.ions, this.PointsToSmooth, false))
+            //    .Subscribe(this.UpdatePlotModel);
         }
 
         /// <summary>
@@ -415,7 +417,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     (int)this.PlotModel.Width,
                     (int)this.PlotModel.Height,
                     OxyColors.White,
-                    IcParameters.Instance.ExportImageDpi);
+                    SingletonProjectManager.Instance.ProjectInfo.ImageExportSettings.ExportImageDpi);
             }
             catch (Exception e)
             {

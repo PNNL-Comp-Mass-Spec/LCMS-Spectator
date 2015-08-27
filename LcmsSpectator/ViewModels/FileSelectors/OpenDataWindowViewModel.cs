@@ -8,6 +8,9 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Windows.Documents;
+
 namespace LcmsSpectator.ViewModels.FileSelectors
 {
     using System;
@@ -18,6 +21,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
 
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
+    using LcmsSpectator.Models.Dataset;
     using LcmsSpectator.Utils;
 
     using ReactiveUI;
@@ -25,7 +29,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
     /// <summary>
     /// View model for selecting raw file path, feature file path, and ID file path.
     /// </summary>
-    public class OpenDataWindowViewModel : ReactiveObject
+    public class OpenDataWindowViewModel : ReactiveObject, IDatasetInfoProvider
     {
         /// <summary>
         /// Dialog service for opening dialogs from view model.
@@ -219,6 +223,28 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         {
             get { return this.datasetSelected; }
             set { this.RaiseAndSetIfChanged(ref this.datasetSelected, value); }
+        }
+
+        /// <summary>
+        /// Gets the dataset info for the chosen dataset.
+        /// </summary>
+        /// <returns>The <see cref="DatasetInfo" />.</returns>
+        public DatasetInfo GetDatasetInfo()
+        {
+            if (!this.Status)
+            {
+                return new DatasetInfo();
+            }
+
+            var files = new List<string>
+            {
+                this.RawFilePath,
+                this.IdFilePath,
+                this.FeatureFilePath,
+                this.ParamFilePath,
+            };
+
+            return new DatasetInfo(files);
         }
 
         /// <summary>

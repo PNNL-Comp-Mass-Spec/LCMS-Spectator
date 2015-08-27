@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
@@ -118,9 +120,9 @@ namespace LcmsSpectator.ViewModels.Plots
                 AxisDistance = -0.5,
                 AbsoluteMinimum = 0,
                 Palette = OxyPalette.Interpolate(1000, minColor, maxColor),
-                Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
-                Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
-                AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
+                Minimum = -1 * SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance,
+                Maximum = SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance,
+                AbsoluteMaximum = SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance,
                 LowColor = OxyColors.Navy,
             };
             this.PlotModel.Axes.Add(this.colorAxis);
@@ -191,9 +193,9 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             // initialize color axis
             ////var minColor = OxyColor.FromRgb(127, 255, 0);
-            this.colorAxis.Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue();
-            this.colorAxis.Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
-            this.colorAxis.AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+            this.colorAxis.Minimum = -1 * SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance;
+            this.colorAxis.Maximum = SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance;
+            this.colorAxis.AbsoluteMaximum = SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance;
 
             this.PlotModel.Series.Clear();
 
@@ -294,7 +296,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
                     if (value.Equals(double.NaN))
                     {
-                        value = (-1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue()) - 1;
+                        value = (-1 * SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance) - 1;
                     }
 
                     data[i, j] = value;
@@ -351,7 +353,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     (int)this.PlotModel.Width,
                     (int)this.PlotModel.Height,
                     OxyColors.White,
-                    IcParameters.Instance.ExportImageDpi);
+                    SingletonProjectManager.Instance.ProjectInfo.ImageExportSettings.ExportImageDpi);
             }
             catch (Exception e)
             {

@@ -9,6 +9,9 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models.DTO;
+using LcmsSpectator.ViewModels.Dataset;
+
 namespace LcmsSpectator.ViewModels.Data
 {
     using System;
@@ -63,7 +66,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// The data set selected by the user.
         /// </summary>
-        private DataSetViewModel selectedDataSetViewModel;
+        private DatasetViewModel selectedDataSetViewModel;
 
         /// <summary>
         /// Initializes a new instance of the CreateSequenceViewModel class. 
@@ -99,7 +102,7 @@ namespace LcmsSpectator.ViewModels.Data
                 this.SelectedCharge = prsm.Charge;
             });
 
-            this.Modifications = IcParameters.Instance.RegisteredModifications;
+            this.Modifications = new ReactiveList<Modification>(SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications);
         }
 
         /// <summary>
@@ -175,7 +178,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Gets or sets the data set selected by the user.
         /// </summary>
-        public DataSetViewModel SelectedDataSetViewModel
+        public DatasetViewModel SelectedDataSetViewModel
         {
             get { return this.selectedDataSetViewModel; }
             set { this.RaiseAndSetIfChanged(ref this.selectedDataSetViewModel, value); }
@@ -241,7 +244,7 @@ namespace LcmsSpectator.ViewModels.Data
                 }
             }
 
-            string rawFileName = this.SelectedDataSetViewModel.Title;
+            string rawFileName = this.SelectedDataSetViewModel.DatasetInfo.Name;
             var prsm = new PrSm
             {
                 Heavy = false,
@@ -265,7 +268,9 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void InsertStaticModifications()
         {
-            if (this.SequenceText == string.Empty || IcParameters.Instance.SearchModifications.Count == 0)
+            var searchModifications =
+                SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.SearchModifications;
+            if (this.SequenceText == string.Empty || searchModifications.Count == 0)
             {
                 return;
             }
@@ -295,7 +300,9 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 var matchStr = match.Value;
                 var residue = matchStr[0];
-                foreach (var searchModification in IcParameters.Instance.SearchModifications)
+                var searchModifications =
+                    SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.SearchModifications;
+                foreach (var searchModification in searchModifications)
                 {
                     if (searchModification.IsFixedModification && 
                         searchModification.Location == SequenceLocation.Everywhere &&
@@ -334,7 +341,9 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 var matchStr = match.Value;
                 var residue = matchStr[0];
-                foreach (var searchModification in IcParameters.Instance.SearchModifications)
+                var searchModifications =
+                    SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.SearchModifications;
+                foreach (var searchModification in searchModifications)
                 {
                     if (searchModification.IsFixedModification &&
                         searchModification.Location == SequenceLocation.Everywhere &&

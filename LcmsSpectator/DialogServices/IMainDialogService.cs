@@ -8,6 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using LcmsSpectator.Models.Dataset;
+using LcmsSpectator.ViewModels.Settings;
+
 namespace LcmsSpectator.DialogServices
 {
     using System;
@@ -77,6 +81,12 @@ namespace LcmsSpectator.DialogServices
         /// <param name="filterViewModel">The view model for the dialog.</param>
         /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
         bool FilterBox(IFilter filterViewModel);
+
+        /// <summary>
+        /// Select multiple raw file paths.
+        /// </summary>
+        /// <returns>List of dataset for those raw file paths.</returns>
+        IEnumerable<DatasetInfo> OpenRawFiles();
 
         /// <summary>
         /// Open an About Box dialog.

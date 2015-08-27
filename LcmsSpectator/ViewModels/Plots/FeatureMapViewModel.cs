@@ -8,6 +8,9 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models.DTO;
+using OxyPlot.Wpf;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
@@ -211,7 +214,10 @@ namespace LcmsSpectator.ViewModels.Plots
             {
                 Title = "Abundance",
                 Position = AxisPosition.Right,
-                Palette = OxyPalette.Interpolate(NumColors, IcParameters.Instance.FeatureColors),
+                Palette = OxyPalette.Interpolate(
+                                       NumColors, 
+                                       SingletonProjectManager.Instance.ProjectInfo.FeatureMapSettings.FeatureColors
+                                                              .Select(c => c.ToOxyColor()).ToArray()),
             };
 
             this.colorDictionary = new ProteinColorDictionary();
@@ -348,23 +354,23 @@ namespace LcmsSpectator.ViewModels.Plots
                         });
                 });
 
-            IcParameters.Instance.WhenAnyValue(x => x.FeatureColors)
-                        .Select(colors => OxyPalette.Interpolate(NumColors, colors))
-                        .Subscribe(palette =>
-                        {
-                            this.featureColorAxis.Palette = palette;
-                            this.BuildPlotCommand.Execute(null);
-                        });
-            IcParameters.Instance.WhenAnyValue(x => x.IdColors, x => x.Ms2ScanColor)
-                .Subscribe(x =>
-                {
-                    var colorList = new List<OxyColor> { Capacity = x.Item1.Length + 1 };
-                    colorList.Add(x.Item2);
-                    colorList.AddRange(x.Item1);
-                    this.colorDictionary.SetColors(colorList);
-                    this.ms2ColorAxis.Palette = this.colorDictionary.OxyPalette;
-                    this.BuildPlotCommand.Execute(null);
-                });
+            ////IcParameters.Instance.WhenAnyValue(x => x.FeatureColors)
+            ////            .Select(colors => OxyPalette.Interpolate(NumColors, colors))
+            ////            .Subscribe(palette =>
+            ////            {
+            ////                this.featureColorAxis.Palette = palette;
+            ////                this.BuildPlotCommand.Execute(null);
+            ////            });
+            ////IcParameters.Instance.WhenAnyValue(x => x.IdColors, x => x.Ms2ScanColor)
+            ////    .Subscribe(x =>
+            ////    {
+            ////        var colorList = new List<OxyColor> { Capacity = x.Item1.Length + 1 };
+            ////        colorList.Add(x.Item2);
+            ////        colorList.AddRange(x.Item1);
+            ////        this.colorDictionary.SetColors(colorList);
+            ////        this.ms2ColorAxis.Palette = this.colorDictionary.OxyPalette;
+            ////        this.BuildPlotCommand.Execute(null);
+            ////    });
         }
 
         /// <summary>
@@ -827,7 +833,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     (int)this.FeatureMap.Width,
                     (int)this.FeatureMap.Height,
                     OxyColors.White,
-                    IcParameters.Instance.ExportImageDpi);
+                    SingletonProjectManager.Instance.ProjectInfo.ImageExportSettings.ExportImageDpi);
             }
             catch (Exception e)
             {

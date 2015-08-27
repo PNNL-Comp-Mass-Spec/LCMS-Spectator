@@ -8,6 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Threading.Tasks;
+using LcmsSpectator.ViewModels.Data;
+using LcmsSpectator.ViewModels.Dataset;
+
 namespace LcmsSpectator.Views
 {
     using System;
@@ -25,9 +29,29 @@ namespace LcmsSpectator.Views
     public partial class DataSetView : UserControl
     {
         /// <summary>
+        /// The path to the deafult layout file.
+        /// </summary>
+        private const string DefaultLayout = "layout.xml";
+
+        /// <summary>
+        /// Lock for accessing layout file.
+        /// </summary>
+        private readonly object layoutFileLock;
+
+        /// <summary>
         /// The selected item in the ScanDataGrid.
         /// </summary>
         private object selectedItem;
+
+        /// <summary>
+        /// The view model for this dataset view.
+        /// </summary>
+        private DatasetViewModel viewModel;
+
+        /// <summary>
+        /// A value that indicates whether this view has been loaded yet.
+        /// </summary>
+        private bool isLoaded;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataSetView"/> class.
@@ -36,6 +60,7 @@ namespace LcmsSpectator.Views
         {
             this.InitializeComponent();
 
+            // Scroll to the selected item in datagrid when an item is selected from outside the GUI.
             ScanDataGrid.SelectionChanged += (o, e) =>
             {
                 object item = ScanDataGrid.SelectedItem;
@@ -49,92 +74,93 @@ namespace LcmsSpectator.Views
                 ScanDataGrid.UpdateLayout();
             };
 
+            // Update layout when datacontext changes.
             this.DataContextChanged += (o, e) =>
             {
-                this.SpectrumView.StartMsPfSearch.DataContext = this.DataContext;    
+                var viewModel = this.DataContext as DatasetViewModel;
+                if (viewModel != null)
+                {
+                    if (this.isLoaded)
+                    {
+                        this.LoadLayout();
+                    }
+
+                    this.SpectrumView.StartMsPfSearch.DataContext = this.DataContext;  
+                }  
             };
+
+            // Load layout when docking manager has loaded.
+            this.AvDock.Loaded += (o, e) =>
+            {
+                var viewModel = this.DataContext as DatasetViewModel;
+                if (viewModel != null)
+                {
+                    if (this.isLoaded)
+                    {
+                        this.LoadLayout();
+                    }
+                }  
+            };
+
+            // Save layout when the docking manager has been destroyed.
+            this.AvDock.Unloaded += (o, e) => Task.Run(() => this.SaveLayout());
         }
 
         /// <summary>
-        /// Event handler for when the DockingManager is unloaded.
-        /// Reads layout serialization file.
+        /// Load layout from layout file.
         /// </summary>
-        /// <param name="sender">The sender DockingManager.</param>
-        /// <param name="e">The event arguments.</param>
-        private void Window_OnLoaded(object sender, RoutedEventArgs e)
+        private void LoadLayout()
         {
-            var fileName = "layoutdoc.xml";
-            if (File.Exists(fileName))
+            string layoutPath = DefaultLayout;
+            if (this.viewModel != null && !string.IsNullOrEmpty(this.viewModel.DatasetInfo.LayoutFile) &&
+                File.Exists(this.viewModel.DatasetInfo.LayoutFile))
             {
-                this.LoadLayout(fileName);
+                layoutPath = this.viewModel.DatasetInfo.LayoutFile;
             }
-            else
-            {
-                var result = MessageBox.Show(
-                    "Cannot find layoutdoc.xml. Would you like to search for it?",
-                    string.Empty,
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Exclamation);
-                if (result == MessageBoxResult.Yes)
-                {
-                    var dialog = new OpenFileDialog { DefaultExt = ".xml", Filter = @"XML Layout Files (*.xml)|*.xml" };
 
-                    var openResult = dialog.ShowDialog();
-                    if (openResult == true)
-                    {
-                        fileName = dialog.FileName;
-                        this.LoadLayout(fileName);
-                    }
-                    else
-                    {
-                        MessageBox.Show(
-                            "Without layout file, LcMsSpectator may not display correctly.",
-                            string.Empty,
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Exclamation);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show(
-                        "Without layout file, LcMsSpectator may not display correctly.",
-                        string.Empty,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Exclamation);
-                }
-            }
+            this.LoadLayout(layoutPath);
         }
 
         /// <summary>
-        /// Load layout from serialized layout string.
+        /// Load layout from layout file.
         /// </summary>
-        /// <param name="layout">Serialized layout string.</param>
+        /// <param name="layout">The path to the layout file.</param>
         private void LoadLayout(string layout)
         {
             var serializer = new XmlLayoutSerializer(AvDock);
-            using (var stream = new StreamReader(layout))
+
+            lock (this.layoutFileLock)
             {
-                serializer.LayoutSerializationCallback += (s, args) =>
+                using (var stream = new StreamReader(layout))
                 {
-                    args.Content = this.FindName(args.Model.ContentId);
-                };
-                serializer.Deserialize(stream);
+                    serializer.LayoutSerializationCallback += (s, args) =>
+                    {
+                        args.Content = this.FindName(args.Model.ContentId);
+                    };
+
+                    serializer.Deserialize(stream);
+                }   
             }
         }
 
         /// <summary>
-        /// Event handler for when the DockingManager is unloaded.
-        /// Writes layout serialization file.
+        /// Save layout to layout file.
         /// </summary>
-        /// <param name="sender">The sender DockingManager.</param>
-        /// <param name="e">The event arguments.</param>
-        private void DockingManager_OnUnloaded(object sender, RoutedEventArgs e)
+        private void SaveLayout()
         {
-            ////using (var fs = new StreamWriter("layoutdoc1.xml"))
-            ////{
-            ////    var xmlLayout = new XmlLayoutSerializer(AvDock);
-            ////    xmlLayout.Serialize(fs);
-            ////}
+            if (this.viewModel == null)
+            {
+                return;
+            }
+
+            lock (this.layoutFileLock)
+            {
+                using (var fs = new StreamWriter(this.viewModel.DatasetInfo.LayoutFile))
+                {
+                    var xmlLayout = new XmlLayoutSerializer(AvDock);
+                    xmlLayout.Serialize(fs);
+                }   
+            }
         }
 
         /// <summary>

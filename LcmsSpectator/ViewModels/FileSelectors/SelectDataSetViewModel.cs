@@ -8,6 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using LcmsSpectator.Models.Dataset;
+using LcmsSpectator.ViewModels.Dataset;
+
 namespace LcmsSpectator.ViewModels.FileSelectors
 {
     using System;
@@ -21,7 +25,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
     /// <summary>
     /// View model for selecting an existing dataset or a new raw file to open.
     /// </summary>
-    public class SelectDataSetViewModel : ReactiveObject
+    public class SelectDataSetViewModel : ReactiveObject, IDatasetInfoProvider
     {
         /// <summary>
         /// Dialog service for opening dialogs from view model.
@@ -31,7 +35,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// The selected dataset.
         /// </summary>
-        private DataSetViewModel selectedDataSet;
+        private DatasetViewModel selectedDataSet;
 
         /// <summary>
         /// The path to the raw file to open a new data set for.
@@ -53,7 +57,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         /// <param name="dataSets">List of datasets for selection by user.</param>
-        public SelectDataSetViewModel(IDialogService dialogService, ReactiveList<DataSetViewModel> dataSets)
+        public SelectDataSetViewModel(IDialogService dialogService, ReactiveList<DatasetViewModel> dataSets)
         {
             this.dialogService = dialogService;
             this.DataSets = dataSets;
@@ -91,7 +95,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// Gets a list of all currently open datasets.
         /// </summary>
-        public ReactiveList<DataSetViewModel> DataSets { get; private set; }
+        public ReactiveList<DatasetViewModel> DataSets { get; private set; }
 
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
@@ -121,7 +125,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// Gets or sets the selected dataset.
         /// </summary>
-        public DataSetViewModel SelectedDataSet
+        public DatasetViewModel SelectedDataSet
         {
             get { return this.selectedDataSet; }
             set { this.RaiseAndSetIfChanged(ref this.selectedDataSet, value); }
@@ -152,6 +156,23 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         {
             get { return this.rawPathSelected; }
             set { this.RaiseAndSetIfChanged(ref this.rawPathSelected, value); }
+        }
+
+        /// <summary>
+        /// Gets the dataset info for the chosen dataset.
+        /// </summary>
+        /// <returns>The <see cref="DatasetInfo" />.</returns>
+        public DatasetInfo GetDatasetInfo()
+        {
+            if (this.RawPathSelected)
+            {
+                var files = new List<string> { this.RawFilePath };
+                return new DatasetInfo(files);
+            }
+            else
+            {
+                return this.SelectedDataSet.DatasetInfo;
+            }
         }
 
         /// <summary>

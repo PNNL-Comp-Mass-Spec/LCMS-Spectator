@@ -8,6 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Documents;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Models.Dataset;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Settings;
+
 namespace LcmsSpectator.DialogServices
 {
     using System;
@@ -166,6 +174,21 @@ namespace LcmsSpectator.DialogServices
         {
             var dialog = new AboutBox();
             dialog.ShowDialog();
+        }
+
+        /// <summary>
+        /// Select multiple raw file paths.
+        /// </summary>
+        /// <returns>List of dataset for those raw file paths.</returns>
+        public IEnumerable<DatasetInfo> OpenRawFiles()
+        {
+            var files = this.MultiSelectOpenFile(FileConstants.RawFileExtensions[0], MassSpecDataReaderFactory.MassSpecDataTypeFilterString);
+            if (files == null)
+            {
+                return new List<DatasetInfo>();
+            }
+
+            return files.Select(file => new DatasetInfo(new List<string> {file}));
         }
 
         /// <summary>

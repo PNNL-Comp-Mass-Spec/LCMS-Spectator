@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.ViewModels.Modifications
 {
     using System;
@@ -28,7 +30,11 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public HeavyModificationsWindowViewModel(IDialogService dialogService)
         {
-            this.HeavyModificationsViewModel = new HeavyModificationsViewModel(dialogService);
+            this.HeavyModificationsViewModel = new HeavyModificationsViewModel(
+                SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications,
+                SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.LightModifications,
+                SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.HeavyModifications,
+                dialogService);
 
             var saveCommand = ReactiveCommand.Create();
             saveCommand.Subscribe(_ => this.SaveImplementation());
@@ -73,9 +79,9 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public void SaveImplementation()
         {
-            this.HeavyModificationsViewModel.Save();
+            //this.HeavyModificationsViewModel.Save();
             this.Status = true;
-            IcParameters.Instance.Update();
+            //IcParameters.Instance.Update();
             if (this.ReadyToClose != null)
             {
                 this.ReadyToClose(this, EventArgs.Empty);

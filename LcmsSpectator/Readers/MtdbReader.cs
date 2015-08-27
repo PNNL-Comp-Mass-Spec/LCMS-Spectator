@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models.DTO;
+
 namespace LcmsSpectator.Readers
 {
     using System;
@@ -98,7 +100,7 @@ namespace LcmsSpectator.Readers
                             rawSequence = rawSequence.Insert(position + 1, symbol + ptm.Mass);
 
                             Composition modComposition = Composition.ParseFromPlainString(ptm.Formula);
-                            Modification mod = IcParameters.Instance.RegisterModification(ptm.Name, modComposition);
+                            Modification mod = SingletonProjectManager.Instance.RegisterModification(ptm.Name, modComposition);
                             entry.Sequence[ptm.Location - 1] = new ModifiedAminoAcid(entry.Sequence[ptm.Location - 1], mod);
                         }
 

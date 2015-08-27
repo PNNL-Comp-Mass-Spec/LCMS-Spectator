@@ -1,4 +1,6 @@
-﻿namespace LcmsSpectator.Models
+﻿using LcmsSpectator.Models.DTO;
+
+namespace LcmsSpectator.Models
 {
     using System.Collections.Generic;
     

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Models.DTO;
 using LcmsSpectator.Readers;
 using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels;

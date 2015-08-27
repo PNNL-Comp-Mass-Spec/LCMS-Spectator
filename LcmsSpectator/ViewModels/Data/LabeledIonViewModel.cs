@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.ViewModels.Data
 {
     using System;
@@ -292,8 +294,8 @@ namespace LcmsSpectator.ViewModels.Data
         private IList<PeakDataPoint> GetPeakDataPoints(Tuple<Spectrum, bool> spectrum, object o)
         {
             var tolerance = this.IsFragmentIon
-                            ? IcParameters.Instance.ProductIonTolerancePpm
-                            : IcParameters.Instance.PrecursorTolerancePpm;
+                            ? SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.GetProductTolerance()
+                            : SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.GetPrecursorTolerance();
             var noPeaks = new List<PeakDataPoint> { new PeakDataPoint(double.NaN, double.NaN, double.NaN, double.NaN, this.Label) { IonType = this.IonType, Index = this.Index } };
             var peakDataPoints = new List<PeakDataPoint>();
             IonType ionType = null;
@@ -311,7 +313,7 @@ namespace LcmsSpectator.ViewModels.Data
                     return peakDataPoints; // Deconvoluted spectrum means decharged (only charge 1 ions shown)
                 }
 
-                var ionTypeFactory = IcParameters.Instance.DeconvolutedIonTypeFactory;
+                var ionTypeFactory = SingletonProjectManager.DeconvolutedIonTypeFactory;
                 var ionTypeName = this.IonType.Name.Insert(1, @"'");
                 ion = ionTypeFactory.GetIonType(ionTypeName).GetIon(this.Composition);
             }
@@ -328,7 +330,7 @@ namespace LcmsSpectator.ViewModels.Data
 
             var peaks = labeledIonPeaks.Item1;
             var correlation = labeledIonPeaks.Item2;
-            if (correlation < IcParameters.Instance.IonCorrelationThreshold)
+            if (correlation < SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.IonCorrelationThreshold)
             {
                 return noPeaks;
             }
@@ -404,20 +406,20 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 x = this.Lcms.GetFullProductExtractedIonChromatogram(
                     this.Ion.GetMostAbundantIsotopeMz(),
-                    IcParameters.Instance.ProductIonTolerancePpm,
+                    SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.GetProductTolerance(),
                     this.PrecursorIon.GetMostAbundantIsotopeMz());   
             }
             else if (this.IsChargeState)
             {
                 x = this.Lcms.GetFullPrecursorIonExtractedIonChromatogram(
                    this.Ion.GetMostAbundantIsotopeMz(),
-                   IcParameters.Instance.PrecursorTolerancePpm);   
+                   SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.GetPrecursorTolerance());   
             }
             else
             {
                 x = this.Lcms.GetFullPrecursorIonExtractedIonChromatogram(
                     this.Ion.GetIsotopeMz(this.Index),
-                    IcParameters.Instance.PrecursorTolerancePpm);
+                    SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.GetPrecursorTolerance());
             }
 
             return x;

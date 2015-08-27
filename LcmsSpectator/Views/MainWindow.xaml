@@ -8,11 +8,13 @@
         xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
         xmlns:models1="clr-namespace:LcmsSpectator.Models"
         xmlns:data="clr-namespace:LcmsSpectator.ViewModels.Data"
+        xmlns:dto="clr-namespace:LcmsSpectator.Models.DTO"
+        xmlns:dataset="clr-namespace:LcmsSpectator.ViewModels.Dataset"
         Title="LcMsSpectator" WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:ChargeToStringConverter x:Key="ChargeFormatter" />
-        <DataTemplate DataType="{x:Type data:DataSetViewModel}">
+        <DataTemplate DataType="{x:Type dataset:DatasetViewModel}">
             <views1:DataSetView />
             
         </DataTemplate>
@@ -50,7 +52,7 @@
             <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
                 <xcad:DockingManager.LayoutItemContainerStyle>
                     <Style TargetType="{x:Type xcad:LayoutItem}">
-                        <Setter Property="Title" Value="{Binding Model.Title}" />
+                        <Setter Property="Title" Value="{Binding Model.DatasetInfo.Name}" />
                         <Setter Property="CloseCommand" Value="{Binding Model.CloseCommand}" />
                     </Style>
                 </xcad:DockingManager.LayoutItemContainerStyle>
@@ -83,7 +85,7 @@
                                                 </ContextMenu>
                                             </controls:MvvmTreeView.ContextMenu>
                                             <controls:MvvmTreeView.Resources>
-                                                <HierarchicalDataTemplate DataType="{x:Type models1:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
+                                                <HierarchicalDataTemplate DataType="{x:Type dto:ProteinId}" ItemsSource="{Binding Proteoforms.Values}">
                                                     <TextBlock Text="{Binding ProteinName}" ToolTipService.ShowDuration="12000">
                                                         <TextBlock.ToolTip>
                                                             <StackPanel>
@@ -94,7 +96,7 @@
                                                         </TextBlock.ToolTip>
                                                         </TextBlock>
                                                 </HierarchicalDataTemplate>
-                                                <HierarchicalDataTemplate DataType="{x:Type models1:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
+                                                <HierarchicalDataTemplate DataType="{x:Type dto:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
                                                     <TextBlock Text="{Binding Annotation}" ToolTipService.ShowDuration="12000">
                                                         <TextBlock.ToolTip>
                                                             <StackPanel>
@@ -114,7 +116,7 @@
                                                         </TextBlock.ToolTip>
                                                         </TextBlock>
                                                 </HierarchicalDataTemplate>
-                                                <HierarchicalDataTemplate DataType="{x:Type models1:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
+                                                <HierarchicalDataTemplate DataType="{x:Type dto:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
                                                     <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" ToolTipService.ShowDuration="12000">
                                                         <TextBlock.ToolTip>
                                                             <StackPanel>
@@ -136,7 +138,7 @@
                                                         </TextBlock.ToolTip>
                                                     </TextBlock>
                                                 </HierarchicalDataTemplate>
-                                                <HierarchicalDataTemplate DataType="{x:Type models1:PrSm}">
+                                                <HierarchicalDataTemplate DataType="{x:Type dto:PrSm}">
                                                     <TextBlock Text="{Binding ScanText}" ToolTipService.ShowDuration="12000">
                                                         <TextBlock.ToolTip>
                                                             <StackPanel>

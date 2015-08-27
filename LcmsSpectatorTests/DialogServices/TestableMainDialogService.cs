@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.ViewModels;
+using LcmsSpectator.ViewModels.Settings;
 
 namespace LcmsSpectatorTests.DialogServices
 {
@@ -202,6 +203,12 @@ namespace LcmsSpectatorTests.DialogServices
 
 
         public bool ExportImageWindow(ExportImageViewModel exportImageViewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public IEnumerable<LcmsSpectator.Models.Dataset.DatasetInfo> OpenRawFiles()
         {
             throw new NotImplementedException();
         }

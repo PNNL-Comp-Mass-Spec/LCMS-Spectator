@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
@@ -222,21 +224,21 @@ namespace LcmsSpectator.ViewModels.Plots
                         this.PlotModel.InvalidatePlot(true);
                     });
 
-            // Update ions when relative intensity threshold changes.
-            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
-            {
-                var precFragVm = this.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
-                if (precFragVm != null)
-                {
-                    precFragVm.RelativeIntensityThreshold = precRelInt;
-                }
-            });
+            //// Update ions when relative intensity threshold changes.
+            //IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
+            //{
+            //    var precFragVm = this.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
+            //    if (precFragVm != null)
+            //    {
+            //        precFragVm.RelativeIntensityThreshold = precRelInt;
+            //    }
+            //});
 
-            // Update plot when settings change
-            IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
-                        .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                        .SelectMany(async x => await Task.WhenAll(this.ions.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum, false))))
-                        .Subscribe(this.UpdatePlotModel);
+            //// Update plot when settings change
+            //IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
+            //            .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
+            //            .SelectMany(async x => await Task.WhenAll(this.ions.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum, false))))
+            //            .Subscribe(this.UpdatePlotModel);
 
             // When AutoAdjustYAxis changes, update value in plot model.
             this.WhenAnyValue(x => x.AutoAdjustYAxis)
@@ -541,8 +543,8 @@ namespace LcmsSpectator.ViewModels.Plots
             // Filtered/Deconvoluted Spectrum?
             var currentSpectrum = this.Spectrum;
             var tolerance = (currentSpectrum is ProductSpectrum)
-                                ? IcParameters.Instance.ProductIonTolerancePpm
-                                : IcParameters.Instance.PrecursorTolerancePpm;
+                                ? SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.GetProductTolerance()
+                                : SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.GetPrecursorTolerance();
             if (this.ShowFilteredSpectrum && this.ShowDeconvolutedSpectrum)
             {
                 if (this.filteredDeconvolutedSpectrum == null)
@@ -554,7 +556,7 @@ namespace LcmsSpectator.ViewModels.Plots
                         Constants.MinCharge,
                         Constants.MaxCharge,
                         tolerance,
-                        IcParameters.Instance.IonCorrelationThreshold, 
+                        SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.IonCorrelationThreshold, 
                         Constants.IsotopeOffsetTolerance);
                 }
 
@@ -579,7 +581,7 @@ namespace LcmsSpectator.ViewModels.Plots
                         Constants.MinCharge,
                         Constants.MaxCharge,
                         tolerance,
-                        IcParameters.Instance.IonCorrelationThreshold,
+                        SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.IonCorrelationThreshold,
                         Constants.IsotopeOffsetTolerance);   
                 }
 
@@ -615,7 +617,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     (int)this.PlotModel.Width,
                     (int)this.PlotModel.Height,
                     OxyColors.White,
-                    IcParameters.Instance.ExportImageDpi);
+                    SingletonProjectManager.Instance.ProjectInfo.ImageExportSettings.ExportImageDpi);
             }
             catch (Exception e)
             {

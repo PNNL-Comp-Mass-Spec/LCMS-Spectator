@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
         xmlns:data="clr-namespace:LcmsSpectator.ViewModels.Data"
+        xmlns:dataset="clr-namespace:LcmsSpectator.ViewModels.Dataset"
         Title="Select Data Set " Height="370" Width="700">
     <Grid Margin="15">
         <Grid.RowDefinitions>
@@ -50,7 +51,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" FontWeight="Bold">Select Data Set</TextBlock>
                         <ListBox Grid.Row="1" Grid.Column="0" ItemsSource="{Binding DataSets}" SelectedItem="{Binding SelectedDataSet}" Margin="0,0,-527,0">
                             <ListBox.ItemTemplate>
-                                <DataTemplate DataType="{x:Type data:DataSetViewModel}">
+                                <DataTemplate DataType="{x:Type dataset:DatasetViewModel}">
                                     <TextBlock Text="{Binding Title}" />
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
