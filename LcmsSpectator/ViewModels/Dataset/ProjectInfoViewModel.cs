@@ -127,11 +127,8 @@ namespace LcmsSpectator.ViewModels.Dataset
         {
             var dmsVm = new DmsLookupViewModel(this.dialogService);
             this.dialogService.OpenDmsLookup(dmsVm);
-            var dataset = dmsVm.GetDatasetInfo();
-            if (dataset != null)
-            {
-                this.Datasets.Add(new DatasetInfoViewModel(dataset));
-            }
+            var datasets = dmsVm.GetDatasetInfo();
+            this.Datasets.AddRange(datasets.Select(ds => new DatasetInfoViewModel(ds)));
         }
     }
 }

@@ -162,16 +162,16 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// Gets the dataset info for the chosen dataset.
         /// </summary>
         /// <returns>The <see cref="DatasetInfo" />.</returns>
-        public DatasetInfo GetDatasetInfo()
+        public List<DatasetInfo> GetDatasetInfo()
         {
             if (this.RawPathSelected)
             {
                 var files = new List<string> { this.RawFilePath };
-                return new DatasetInfo(files);
+                return new List<DatasetInfo> { new DatasetInfo(files) };
             }
             else
             {
-                return this.SelectedDataSet.DatasetInfo;
+                return new List<DatasetInfo>{ this.SelectedDataSet.DatasetInfo };
             }
         }
 

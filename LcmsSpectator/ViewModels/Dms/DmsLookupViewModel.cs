@@ -8,8 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
+using InformedProteomics.Backend.MassFeature;
 using LcmsSpectator.Models.Dataset;
 using Splat;
 
@@ -104,6 +106,17 @@ namespace LcmsSpectator.ViewModels.Dms
         private bool isCopying;
 
         /// <summary>
+        /// A value indicating whether files should be
+        /// copied to the output directory upon opening.
+        /// </summary>
+        private bool shouldCopyFiles;
+
+        /// <summary>
+        /// Save the dataset info.
+        /// </summary>
+        private List<DatasetInfo> datasets; 
+
+        /// <summary>
         /// A dictionary mapping name of dataset to number of weeks for quick lookup.
         /// </summary>
         private Dictionary<string, int> previousDatasets;
@@ -144,25 +157,32 @@ namespace LcmsSpectator.ViewModels.Dms
             this.LookupCommand = lookUpCommand;
 
             // If there is no data set selected or there is no job selected, disable open button
-            var openCommand = ReactiveCommand.Create();
-            openCommand.Subscribe(_ => this.OpenImplementation());
-            this.OpenCommand = openCommand;
+            this.OpenCommand = ReactiveCommand.CreateAsyncTask(
+                                              this.Datasets.ItemChanged.Select(_ => this.Datasets.Any(ds => ds.Selected)),
+                                              async _ => await this.OpenImplementation());
 
-            var closeCommand = ReactiveCommand.Create();
-            closeCommand.Subscribe(_ => this.CloseImplementation());
-            this.CloseCommand = closeCommand;
+            this.CloseCommand = ReactiveCommand.Create();
+            this.CloseCommand.Subscribe(_ => this.CloseImplementation());;
+
+            this.BrowseOutputDirectoriesCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.ShouldCopyFiles));
+            this.BrowseOutputDirectoriesCommand.Subscribe(_ => this.BrowseOutputDirectoriesImplementation());
 
             // Add jobs when dataset is selected.
             this.Datasets.ItemChanged.Where(x => x.PropertyName == "Selected")
                 .Where(x => x.Sender.Selected)
                 .SelectMany(async x => await Task.Run(() => this.jobCache.Get(x.Sender.UdtDatasetInfo)))
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(jobs => this.Jobs.AddRange(jobs.Select(j => new DmsJobViewModel(j))));
 
-            // Remove jobs when dataset is deselcted
+            // Remove jobs when dataset is deselected
             this.Datasets.ItemChanged.Where(x => x.PropertyName == "Selected")
                 .Where(x => !x.Sender.Selected)
                 .Select(x => this.Jobs.Where(j => j.DatasetId == x.Sender.DatasetId))
                 .Subscribe(jobs => this.Jobs.RemoveAll(jobs));
+
+            // Clear cached dataset into when selected datasets/jobs change
+            this.Datasets.ItemChanged.Subscribe(_ => this.datasets = null);
+            this.Jobs.ItemChanged.Subscribe(_ => this.datasets = null);
 
             // When a null data set is selected and a search has ocurred, show no results screen
             this.WhenAnyValue(x => x.Datasets.Count, x => x.IsFirstSearch)
@@ -202,12 +222,17 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <summary>
         /// Gets a command that opens the selected data set and job.
         /// </summary>
-        public IReactiveCommand OpenCommand { get; private set; }
+        public ReactiveCommand<Unit> OpenCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that closes the search without opening a data set or job.
         /// </summary>
-        public IReactiveCommand CloseCommand { get; private set; }
+        public ReactiveCommand<object> CloseCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that opens a file browser for selecting the output directory.
+        /// </summary>
+        public ReactiveCommand<object> BrowseOutputDirectoriesCommand { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether a valid data set has been selected.
@@ -297,12 +322,26 @@ namespace LcmsSpectator.ViewModels.Dms
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether files should be
+        /// copied to the output directory upon opening.
+        /// </summary>
+        public bool ShouldCopyFiles
+        {
+            get { return this.shouldCopyFiles; }
+            set { this.RaiseAndSetIfChanged(ref this.shouldCopyFiles, value); }
+        }
+
+        /// <summary>
         /// Gets the dataset info for the selected dataset.
         /// </summary>
         /// <returns>The <see cref="DatasetInfo" />.</returns>
-        public DatasetInfo[] GetDatasetInfo()
+        public List<DatasetInfo> GetDatasetInfo()
         {
-            var files = new List<string>();
+            if (this.datasets != null)
+            {
+                return this.datasets;
+            }
+
             var selectedDatasets = this.Datasets.Where(ds => ds.Selected).ToList();
             var selectedJobs = this.Jobs.Where(job => job.Selected).ToList();
 
@@ -311,24 +350,23 @@ namespace LcmsSpectator.ViewModels.Dms
                 return null;
             }
 
+            var datasets = new List<DatasetInfo> { Capacity = selectedDatasets.Count };
             foreach (var dataset in selectedDatasets)
             {
-                if (dataset.ValidateDataSet())
+                var fileSet = new List<string>();
+                fileSet.AddRange(dataset.GetRawFileNames());
+                var jobs = selectedJobs.Where(j => j.DatasetId == dataset.DatasetId);
+                foreach (var job in jobs)
                 {
-                    files.AddRange(dataset.GetRawFileNames());
-                }   
+                    fileSet.Add(job.GetFeatureFileName());
+                    fileSet.Add(job.GetIdFileName());
+                }
+
+                datasets.Add(new DatasetInfo(fileSet));
             }
 
-            foreach (var job in selectedJobs)
-            {
-                if (job.ValidateJob())
-                {
-                    files.Add(job.GetFeatureFileName());
-                    files.Add(job.GetIdFileName());     
-                } 
-            }
-
-            return new DatasetInfo(files);
+            this.datasets = datasets;
+            return datasets;
         }
 
         /// <summary>
@@ -436,20 +474,24 @@ namespace LcmsSpectator.ViewModels.Dms
                     this.IsCopying = true;
                     this.Progress = 0;
 
-                    var dataset = this.GetDatasetInfo();
-
-                    for (int i = 0; i < files.Length; i++)
+                    var datasets = this.GetDatasetInfo();
+                    foreach (var dataset in datasets)
                     {
-                        if (this.cancellationTokenSource.IsCancellationRequested)
+                        for (int i = 0; i < dataset.Files.Count; i++)
                         {
-                            break;
-                        }
+                            if (this.cancellationTokenSource.IsCancellationRequested)
+                            {
+                                break;
+                            }
 
-                        var fileName = Path.GetFileName(files[i]);
-                        this.CopyStatusText = string.Format("Copying {0}", fileName);
-                        File.Copy(files[i], string.Format("{0}\\{1}", this.OutputDirectory, fileName), true);
+                            var fileName = Path.GetFileName(dataset.Files[i].FilePath);
+                            this.CopyStatusText = string.Format("Copying {0}", fileName);
+                            var newPath = string.Format("{0}\\{1}", this.OutputDirectory, fileName);
+                            File.Copy(dataset.Files[i].FilePath, newPath, true);
+                            dataset.Files[i].FilePath = newPath;
 
-                        this.Progress = ((i + 1) / (double)files.Length) * 100;
+                            this.Progress = ((i + 1) / (double)dataset.Files.Count) * 100;
+                        }   
                     }
 
                     this.CopyStatusText = string.Empty;
@@ -460,14 +502,19 @@ namespace LcmsSpectator.ViewModels.Dms
         }
 
         /// <summary>
-        /// Implementation for OpenCommand.
+        /// Implementation for <see cref="OpenCommand" />.
         /// Sets status to true, writes the previous result file, and triggers the ReadyToClose event.
         /// </summary>
-        private void OpenImplementation()
+        private async Task OpenImplementation()
         {
             this.Status = true;
             this.previousResultsList.Insert(0, new Tuple<string, int>(this.DatasetFilter.Trim(), this.NumberOfWeeks));
             this.WritePreviousResultFile();
+            if (this.ShouldCopyFiles && !string.IsNullOrWhiteSpace(this.OutputDirectory))
+            {
+                await this.CopyFilesAsync();
+            }
+
             if (this.ReadyToClose != null)
             {
                 this.ReadyToClose(this, EventArgs.Empty);
@@ -475,7 +522,7 @@ namespace LcmsSpectator.ViewModels.Dms
         }
 
         /// <summary>
-        /// Implementation for CloseCommand.
+        /// Implementation for <see cref="CloseCommand" />.
         /// Sets status to false and triggers the ReadyToClose event.
         /// </summary>
         private void CloseImplementation()
@@ -484,6 +531,19 @@ namespace LcmsSpectator.ViewModels.Dms
             if (this.ReadyToClose != null)
             {
                 this.ReadyToClose(this, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Implementation for <see cref="BrowseOutputDirectoriesCommand" />.
+        /// Gets a command that opens a file browser for selecting the output directory.
+        /// </summary>
+        private void BrowseOutputDirectoriesImplementation()
+        {
+            var folder = this.dialogService.OpenFolder("Select output directory.");
+            if (!string.IsNullOrWhiteSpace(folder) && Directory.Exists(folder))
+            {
+                this.OutputDirectory = folder;
             }
         }
     }

@@ -40,23 +40,13 @@ namespace LcmsSpectator.DialogServices
         /// Open a dialog to search for a file on DMS.
         /// </summary>
         /// <param name="dmsLookupViewModel">The view model for the dialog.</param>
-        /// <returns>The name of the data set and the name of the job selected.</returns>
-        public Tuple<string, string> OpenDmsLookup(DmsLookupViewModel dmsLookupViewModel)
+        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
+        public bool OpenDmsLookup(DmsLookupViewModel dmsLookupViewModel)
         {
             var dmsLookupDialog = new DmsLookupView { DataContext = dmsLookupViewModel };
             dmsLookupViewModel.ReadyToClose += (o, e) => dmsLookupDialog.Close();
             dmsLookupDialog.ShowDialog();
-            Tuple<string, string> data = null;
-            if (dmsLookupViewModel.Status)
-            {
-                var dataSetFolderPath = (dmsLookupViewModel.SelectedDataset == null) ? string.Empty : 
-                                    dmsLookupViewModel.SelectedDataset.DatasetFolderPath;
-                var jobFolderPath = (dmsLookupViewModel.SelectedJob == null) ? string.Empty : 
-                                    dmsLookupViewModel.SelectedJob.JobFolderPath;
-                data = new Tuple<string, string>(dataSetFolderPath, jobFolderPath);
-            }
-
-            return data;
+            return dmsLookupViewModel.Status;
         }
 
         /// <summary>

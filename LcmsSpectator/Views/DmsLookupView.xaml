@@ -4,6 +4,10 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="Search DMS" Height="450" Width="1100">
     
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+    
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="75" />
@@ -94,8 +98,18 @@
             </Grid>
         </GroupBox>
 
-        <CheckBox Grid.Row="4">Copy files to output directory</CheckBox>
-        
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="70"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <CheckBox IsChecked="{Binding ShouldCopyFiles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"
+                      Grid.Column="0">Copy files to output directory</CheckBox>
+            <TextBox IsEnabled="{Binding ShouldCopyFiles}" Text="{Binding OutputDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,3,0" Height="25" Grid.Column="1" />
+            <Button Grid.Column="2" Height="25" Command="{Binding BrowseOutputDirectoriesCommand}">Browse</Button>
+        </Grid>
+
         <StackPanel Orientation="Horizontal" Grid.Row="6" Height="25"
                     Visibility="{Binding IsCopying, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BoolToVis}}">
             <ProgressBar Width="70" Minimum="0" Maximum="100"  Value="{Binding Progress}" HorizontalAlignment="Left" Margin="0,0,10,0" />

@@ -269,8 +269,11 @@ namespace LcmsSpectator.ViewModels
             DatasetViewModel datasetVm = null;
             try
             {
-                var dsInfo = provider.GetDatasetInfo();
-                datasetVm = await this.LoadDataset(dsInfo);
+                var dsInfos = provider.GetDatasetInfo();
+                foreach (var dataset in dsInfos)
+                {
+                    datasetVm = await this.LoadDataset(dataset);
+                }
             }
             catch (FileNotFoundException e)
             {

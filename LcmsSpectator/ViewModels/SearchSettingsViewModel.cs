@@ -837,11 +837,11 @@ namespace LcmsSpectator.ViewModels
         /// Get dataset info associated with this MSPF search.
         /// </summary>
         /// <returns>The <see cref="DatasetInfo" />.</returns>
-        public DatasetInfo GetDatasetInfo()
+        public List<DatasetInfo> GetDatasetInfo()
         {
             if (!this.Status)
             {
-                return new DatasetInfo();
+                return new List<DatasetInfo> { new DatasetInfo() };
             }
 
             var files = new List<string>
@@ -852,7 +852,7 @@ namespace LcmsSpectator.ViewModels
                 this.FastaDbFilePath
             };
 
-            return new DatasetInfo(files);
+            return new List<DatasetInfo> { new DatasetInfo(files) };
         }
 
         /// <summary>

@@ -31,8 +31,8 @@ namespace LcmsSpectator.DialogServices
         /// Open a dialog to search for a file on DMS.
         /// </summary>
         /// <param name="dmsLookupViewModel">The view model for the dialog.</param>
-        /// <returns>The name of the data set and the name of the job selected.</returns>
-        Tuple<string, string> OpenDmsLookup(DmsLookupViewModel dmsLookupViewModel);
+        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
+        bool OpenDmsLookup(DmsLookupViewModel dmsLookupViewModel);
 
         /// <summary>
         /// Open a dialog to edit application settings.

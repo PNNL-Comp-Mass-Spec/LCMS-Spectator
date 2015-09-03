@@ -229,11 +229,11 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// Gets the dataset info for the chosen dataset.
         /// </summary>
         /// <returns>The <see cref="DatasetInfo" />.</returns>
-        public DatasetInfo GetDatasetInfo()
+        public List<DatasetInfo> GetDatasetInfo()
         {
             if (!this.Status)
             {
-                return new DatasetInfo();
+                return new List<DatasetInfo>{ new DatasetInfo() };
             }
 
             var files = new List<string>
@@ -244,7 +244,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
                 this.ParamFilePath,
             };
 
-            return new DatasetInfo(files);
+            return new List<DatasetInfo> { new DatasetInfo(files) };
         }
 
         /// <summary>
