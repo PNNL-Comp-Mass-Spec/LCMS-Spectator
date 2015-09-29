@@ -81,7 +81,15 @@ namespace LcmsSpectator.Models.Dataset
                 throw new FileNotFoundException(string.Format("Cannot find file {0}", filePath));
             }
 
-            if (FileConstants.RawFileExtensions.Contains(extension))
+
+            if (string.IsNullOrEmpty(extension))
+            {
+                fileInfo.FileType = FileTypes.Unknown;
+                return fileInfo;
+            }
+
+            extension = extension.ToLower();
+            if (MassSpecDataReaderFactory.MassSpecDataTypeFilterList.Contains(extension))
             {
                 fileInfo.FileType = FileTypes.SpectrumFile;
                 fileInfo.FilePath = MassSpecDataReaderFactory.NormalizeDatasetPath(filePath);
