@@ -29,9 +29,9 @@ namespace LcmsSpectator.Views
     public partial class DataSetView : UserControl
     {
         /// <summary>
-        /// The path to the deafult layout file.
+        /// The path to the default layout file.
         /// </summary>
-        private const string DefaultLayout = "layout.xml";
+        private const string DefaultLayout = "layoutdoc.xml";
 
         /// <summary>
         /// Lock for accessing layout file.
@@ -60,6 +60,8 @@ namespace LcmsSpectator.Views
         {
             this.InitializeComponent();
 
+            this.layoutFileLock = new object();
+
             // Scroll to the selected item in datagrid when an item is selected from outside the GUI.
             ScanDataGrid.SelectionChanged += (o, e) =>
             {
@@ -77,7 +79,7 @@ namespace LcmsSpectator.Views
             // Update layout when datacontext changes.
             this.DataContextChanged += (o, e) =>
             {
-                var viewModel = this.DataContext as DatasetViewModel;
+                this.viewModel = this.DataContext as DatasetViewModel;
                 if (viewModel != null)
                 {
                     if (this.isLoaded)
@@ -92,18 +94,16 @@ namespace LcmsSpectator.Views
             // Load layout when docking manager has loaded.
             this.AvDock.Loaded += (o, e) =>
             {
-                var viewModel = this.DataContext as DatasetViewModel;
+                this.viewModel = this.DataContext as DatasetViewModel;
                 if (viewModel != null)
                 {
-                    if (this.isLoaded)
-                    {
-                        this.LoadLayout();
-                    }
+                    this.isLoaded = true;
+                    this.LoadLayout();
                 }  
             };
 
             // Save layout when the docking manager has been destroyed.
-            this.AvDock.Unloaded += (o, e) => Task.Run(() => this.SaveLayout());
+            this.AvDock.Unloaded += (o, e) => this.SaveLayout();
         }
 
         /// <summary>
@@ -148,13 +148,20 @@ namespace LcmsSpectator.Views
         /// </summary>
         private void SaveLayout()
         {
-            if (this.viewModel == null)
+            if (this.viewModel == null || string.IsNullOrEmpty(this.viewModel.DatasetInfo.LayoutFile))
+            {
+                return;
+            }
+
+            var directory = Path.GetDirectoryName(this.viewModel.DatasetInfo.LayoutFile);
+            if (string.IsNullOrEmpty(directory))
             {
                 return;
             }
 
             lock (this.layoutFileLock)
             {
+                Directory.CreateDirectory(directory);
                 using (var fs = new StreamWriter(this.viewModel.DatasetInfo.LayoutFile))
                 {
                     var xmlLayout = new XmlLayoutSerializer(AvDock);

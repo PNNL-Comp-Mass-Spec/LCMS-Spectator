@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Composition;
-using InformedProteomics.Backend.Data.Sequence;
-using InformedProteomics.Backend.Data.Spectrometry;
-using InformedProteomics.Backend.MassFeature;
-using LcmsSpectator.Config;
-using LcmsSpectator.DialogServices;
-using LcmsSpectator.Models.Dataset;
-using LcmsSpectator.Readers;
-using LcmsSpectator.ViewModels.Data;
-using LcmsSpectator.ViewModels.Dataset;
-using LcmsSpectator.ViewModels.Modifications;
-using ReactiveUI;
-
-namespace LcmsSpectator.Models
+﻿namespace LcmsSpectator.Models
 {
+    using System;
+    using System.Linq;
+    using System.Reactive.Linq;
+    using InformedProteomics.Backend.Data.Composition;
+    using InformedProteomics.Backend.Data.Sequence;
+    using InformedProteomics.Backend.Data.Spectrometry;
+    using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Models.Dataset;
+    using LcmsSpectator.Readers;
+    using LcmsSpectator.ViewModels.Dataset;
+    using LcmsSpectator.ViewModels.Modifications;
+    using ReactiveUI;
+    
     public class SingletonProjectManager : ReactiveObject
     {
         /// <summary>
@@ -55,36 +49,12 @@ namespace LcmsSpectator.Models
             // If dataset is closed, remove it from the project.
             this.Datasets.BeforeItemsRemoved
                          .Where(_ => this.ProjectInfo != null)
-                         .Subscribe(ds => this.ProjectInfo.Datasets.Add(ds.DatasetInfo));
+                         .Subscribe(ds => this.ProjectInfo.Datasets.Remove(ds.DatasetInfo));
 
             // If a dataset is opened, add it to the project.
             this.Datasets.BeforeItemsAdded
                          .Where(_ => this.ProjectInfo != null)
-                         .Subscribe(ds => this.ProjectInfo.Datasets.Remove(ds.DatasetInfo));
-        }
-
-        /// <summary>
-        /// Gets the main dialog service for the application.
-        /// </summary>
-        public IMainDialogService DialogService { get; set; }
-
-        /// <summary>
-        /// Gets the serializer/deserializer for the project.
-        /// </summary>
-        public IProjectLoader ProjectLoader { get; set; }
-
-        /// <summary>
-        /// Gets the list of dataset viewmodels for the project.
-        /// </summary>
-        public ReactiveList<DatasetViewModel> Datasets { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the project info for the currently selected project.
-        /// </summary>
-        public ProjectInfo ProjectInfo
-        {
-            get { return this.projectInfo; }
-            private set { this.RaiseAndSetIfChanged(ref this.projectInfo, value); }
+                         .Subscribe(ds => this.ProjectInfo.AddandInitDataset(ds.DatasetInfo));
         }
 
         /// <summary>
@@ -104,15 +74,39 @@ namespace LcmsSpectator.Models
         }
 
         /// <summary>
-        /// Gets the deconvoluted ion type factory for application.
+        /// Gets the de-convoluted ion type factory for application.
         /// </summary>
         public static IonTypeFactory DeconvolutedIonTypeFactory
         {
             get
-            { 
+            {
                 return deconvolutedIonTypeFactory ??
                        (deconvolutedIonTypeFactory = IonTypeFactory.GetDeconvolutedIonTypeFactory(BaseIonType.AllBaseIonTypes, NeutralLoss.CommonNeutralLosses));
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the main dialog service for the application.
+        /// </summary>
+        public IMainDialogService DialogService { get; set; }
+
+        /// <summary>
+        /// Gets or sets the serializer for the project.
+        /// </summary>
+        public IProjectLoader ProjectLoader { get; set; }
+
+        /// <summary>
+        /// Gets the list of dataset view models for the project.
+        /// </summary>
+        public ReactiveList<DatasetViewModel> Datasets { get; private set; }
+
+        /// <summary>
+        /// Gets the project info for the currently selected project.
+        /// </summary>
+        public ProjectInfo ProjectInfo
+        {
+            get { return this.projectInfo; }
+            private set { this.RaiseAndSetIfChanged(ref this.projectInfo, value); }
         }
 
         /// <summary>

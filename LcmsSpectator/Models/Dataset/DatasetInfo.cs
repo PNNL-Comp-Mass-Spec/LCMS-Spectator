@@ -41,7 +41,7 @@ namespace LcmsSpectator.Models.Dataset
                 var fileInfo = FileInfo.GetFileInfo(file);
                 if (fileInfo.FileType == FileTypes.SpectrumFile)
                 {
-                    this.Name = Path.GetFileName(fileInfo.FilePath);
+                    this.Name = Path.GetFileNameWithoutExtension(fileInfo.FilePath);
                 }
 
                 this.Files.Add(fileInfo);
@@ -56,7 +56,7 @@ namespace LcmsSpectator.Models.Dataset
         {
             this.Files = files.ToList();
             this.Name = this.Files.Where(f => f.FileType == FileTypes.SpectrumFile)
-                .Select(f => Path.GetFileName(f.FilePath)).FirstOrDefault(fn => !string.IsNullOrWhiteSpace(fn));
+                .Select(f => Path.GetFileNameWithoutExtension(f.FilePath)).FirstOrDefault(fn => !string.IsNullOrWhiteSpace(fn));
         }
 
         /// <summary>
@@ -77,8 +77,8 @@ namespace LcmsSpectator.Models.Dataset
         /// <summary>
         /// Get datasets from a collection of input file paths.
         /// </summary>
-        /// <param name="files"></param>
-        /// <returns></returns>
+        /// <param name="files">The files that are part of this dataset.</param>
+        /// <returns>An array of the datasets made from the files.</returns>
         public static DatasetInfo[] GetDatasetsFromInputFilePaths(IEnumerable<string> files)
         {
             var fileInfo = files.Select(FileInfo.GetFileInfo);
@@ -131,7 +131,6 @@ namespace LcmsSpectator.Models.Dataset
         {
             return this.Files.Where(file => file.FileType == FileTypes.FastaFile)
                              .Select(file => file.FilePath).ToArray();
-
         }
     }
 }

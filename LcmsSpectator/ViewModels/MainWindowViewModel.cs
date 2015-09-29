@@ -135,7 +135,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// The project loader for the project open in this application.
+        /// Gets the project loader for the project open in this application.
         /// </summary>
         public SingletonProjectManager ProjectManager { get; private set; }
 

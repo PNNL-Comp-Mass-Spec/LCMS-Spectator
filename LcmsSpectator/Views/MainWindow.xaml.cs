@@ -10,10 +10,11 @@
 
 namespace LcmsSpectator.Views
 {
-    using System;
     using System.IO;
     using System.Windows;
-    using Microsoft.Win32;
+
+    using LcmsSpectator.ViewModels;
+
     using Xceed.Wpf.AvalonDock.Layout.Serialization;
 
     /// <summary>
@@ -22,108 +23,132 @@ namespace LcmsSpectator.Views
     public partial class MainWindow : Window
     {
         /// <summary>
+        /// The path to the default layout file.
+        /// </summary>
+        private const string DefaultLayout = "layout.xml";
+
+        /// <summary>
+        /// Lock for accessing layout file.
+        /// </summary>
+        private readonly object layoutFileLock;
+
+        /// <summary>
+        /// The view model for this dataset view.
+        /// </summary>
+        private MainWindowViewModel viewModel;
+
+        /// <summary>
+        /// A value that indicates whether this view has been loaded yet.
+        /// </summary>
+        private bool isLoaded;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
         public MainWindow()
         {
             this.InitializeComponent();
 
+            this.layoutFileLock = new object();
+
             this.ProgressRow.Height = new GridLength(0, GridUnitType.Pixel);
             this.FileLoadProgress.IsVisibleChanged += (s, e) =>
+            {
+                this.ProgressRow.Height = this.FileLoadProgress.IsVisible ? 
+                                                new GridLength(30, GridUnitType.Pixel) : 
+                                                new GridLength(0, GridUnitType.Pixel);
+            };
+
+            // Update layout when datacontext changes.
+            this.DataContextChanged += (o, e) =>
+            {
+                this.viewModel = this.DataContext as MainWindowViewModel;
+                if (viewModel != null)
                 {
-                    this.ProgressRow.Height = this.FileLoadProgress.IsVisible ? 
-                                                    new GridLength(30, GridUnitType.Pixel) : 
-                                                    new GridLength(0, GridUnitType.Pixel);
-                };
+                    if (this.isLoaded)
+                    {
+                        this.LoadLayout();
+                    }
+                }
+            };
+
+            // Load layout when docking manager has loaded.
+            this.AvDock.Loaded += (o, e) =>
+            {
+                this.viewModel = this.DataContext as MainWindowViewModel;
+                if (viewModel != null)
+                {
+                    this.isLoaded = true;
+                    this.LoadLayout();
+                }
+            };
+
+            // Save layout when the docking manager has been destroyed.
+            this.AvDock.Unloaded += (o, e) => this.SaveLayout();
         }
 
         /// <summary>
-        /// Event handler for when the DockingManager is unloaded.
-        /// Reads layout serialization file.
+        /// Load layout from layout file.
         /// </summary>
-        /// <param name="sender">The sender DockingManager.</param>
-        /// <param name="e">The event arguments.</param>
-        private void Window_OnLoaded(object sender, RoutedEventArgs e)
+        private void LoadLayout()
         {
-            var fileName = "layout.xml";
-            if (File.Exists(fileName))
+            string layoutPath = DefaultLayout;
+            if (this.viewModel != null && !string.IsNullOrEmpty(this.viewModel.ProjectManager.ProjectInfo.LayoutFilePath) &&
+                File.Exists(this.viewModel.ProjectManager.ProjectInfo.LayoutFilePath))
             {
-                this.LoadLayout(fileName);
+                layoutPath = this.viewModel.ProjectManager.ProjectInfo.LayoutFilePath;
             }
-            else
-            {
-                var result = MessageBox.Show(
-                    "Cannot find layout.xml. Would you like to search for it?",
-                    string.Empty,
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Exclamation);
-                if (result == MessageBoxResult.Yes)
-                {
-                    var dialog = new OpenFileDialog { DefaultExt = ".xml", Filter = @"XML Layout Files (*.xml)|*.xml" };
 
-                    var openResult = dialog.ShowDialog();
-                    if (openResult == true)
-                    {
-                        fileName = dialog.FileName;
-                        this.LoadLayout(fileName);
-                    }
-                    else
-                    {
-                        MessageBox.Show(
-                            "Without layout file, LcMsSpectator may not display correctly.",
-                            string.Empty,
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Exclamation);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show(
-                        "Without layout file, LcMsSpectator may not display correctly.",
-                        string.Empty,
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Exclamation);
-                }
-            }
+            this.LoadLayout(layoutPath);
         }
 
         /// <summary>
-        /// Load layout from serialized layout string.
+        /// Load layout from layout file.
         /// </summary>
-        /// <param name="layout">Serialized layout string.</param>
+        /// <param name="layout">The path to the layout file.</param>
         private void LoadLayout(string layout)
         {
-            try
+            var serializer = new XmlLayoutSerializer(AvDock);
+
+            lock (this.layoutFileLock)
             {
-                var serializer = new XmlLayoutSerializer(AvDock);
                 using (var stream = new StreamReader(layout))
                 {
                     serializer.LayoutSerializationCallback += (s, args) =>
                     {
-                        args.Content = Application.Current.MainWindow.FindName(args.Model.ContentId);
+                        args.Content = this.FindName(args.Model.ContentId);
                     };
+
                     serializer.Deserialize(stream);
-                } 
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("Could not load layout file.", string.Empty, MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
         /// <summary>
-        /// Event handler for when the DockingManager is unloaded.
-        /// Writes layout serialization file.
+        /// Save layout to layout file.
         /// </summary>
-        /// <param name="sender">The sender DockingManager.</param>
-        /// <param name="e">The event arguments.</param>
-        private void DockingManager_OnUnloaded(object sender, RoutedEventArgs e)
+        private void SaveLayout()
         {
-            ////using (var fs = new StreamWriter("layout1.xml"))
-            ////{
-            ////    var xmlLayout = new XmlLayoutSerializer(AvDock);
-            ////    xmlLayout.Serialize(fs);
-            ////}
+            if (this.viewModel == null || string.IsNullOrEmpty(this.viewModel.ProjectManager.ProjectInfo.LayoutFilePath))
+            {
+                return;
+            }
+
+            var directory = Path.GetDirectoryName(this.viewModel.ProjectManager.ProjectInfo.LayoutFilePath);
+            if (string.IsNullOrEmpty(directory))
+            {
+                return;
+            }
+
+            lock (this.layoutFileLock)
+            {
+                Directory.CreateDirectory(directory);
+                using (var fs = new StreamWriter(this.viewModel.ProjectManager.ProjectInfo.LayoutFilePath))
+                {
+                    var xmlLayout = new XmlLayoutSerializer(AvDock);
+                    xmlLayout.Serialize(fs);
+                }
+            }
         }
     }
 }

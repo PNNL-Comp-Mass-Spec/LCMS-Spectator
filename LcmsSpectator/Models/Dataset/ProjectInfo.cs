@@ -11,6 +11,8 @@
 namespace LcmsSpectator.Models.Dataset
 {
     using System.Collections.Generic;
+    using System.IO;
+
     using LcmsSpectator.Config;
     
     /// <summary>
@@ -18,11 +20,14 @@ namespace LcmsSpectator.Models.Dataset
     /// </summary>
     public class ProjectInfo
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProjectInfo"/> class.
+        /// </summary>
         public ProjectInfo()
         {
             this.Name = "DefaultProject";
-            this.ProjectFilePath = "DefaultProject/DefaultProject.xml";
-            this.ProjectFilePath = "DefaultProject/DefaultProject_layout.xml";
+            this.ProjectFilePath = string.Empty;
+            this.LayoutFilePath = string.Empty;
             this.OutputDirectory = "DefaultProject";
 
             this.Datasets = new List<DatasetInfo>();
@@ -93,6 +98,16 @@ namespace LcmsSpectator.Models.Dataset
         /// <summary>
         /// Gets or sets the list of files associated with this project (such as target lists).
         /// </summary>
-        public List<FileInfo> Files { get; set; } 
+        public List<FileInfo> Files { get; set; }
+
+        /// <summary>
+        /// Adds a dataset and initializes its output directory and layout output.
+        /// </summary>
+        /// <param name="dataset">The dataset to add.</param>
+        public void AddandInitDataset(DatasetInfo dataset)
+        {
+            this.Datasets.Add(dataset);
+            dataset.LayoutFile = Path.Combine(this.OutputDirectory, string.Format("{0}_layout.xml", dataset.Name));
+        }
     }
 }

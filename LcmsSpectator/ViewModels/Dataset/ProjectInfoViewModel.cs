@@ -70,7 +70,7 @@ namespace LcmsSpectator.ViewModels.Dataset
         public ReactiveCommand<object> OpenFromDmsCommand { get; private set; }
 
         /// <summary>
-        /// The path to the project file.
+        /// Gest the path to the project file.
         /// </summary>
         public string ProjectFilePath
         {
@@ -88,7 +88,7 @@ namespace LcmsSpectator.ViewModels.Dataset
         }
 
         /// <summary>
-        /// The selected datasets.
+        /// Gets the view models for the datasets in this project.
         /// </summary>
         public ReactiveList<DatasetInfoViewModel> Datasets { get; private set; }
 
