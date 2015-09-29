@@ -27,6 +27,9 @@ namespace LcmsSpectator.Models.Dataset
 
             this.Datasets = new List<DatasetInfo>();
             this.ToleranceSettings = new ToleranceSettings();
+            this.ModificationSettings = new ModificationSettings();
+            this.FeatureMapSettings = new FeatureMapSettings();
+            this.IonTypeSettings = new IonTypeSettings();
             this.ImageExportSettings = new ImageExportSettings();
             this.Parameters = new MsPfParameters();
             this.Files = new List<FileInfo>();
