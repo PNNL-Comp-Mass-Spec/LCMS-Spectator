@@ -9,29 +9,28 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using LcmsSpectator.Models.DTO;
-using LcmsSpectator.ViewModels.Dataset;
-using LcmsSpectator.ViewModels.Settings;
-
 namespace LcmsSpectator.ViewModels
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reactive;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
 
-    using System.Reactive;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.Models.Dataset;
-    using LcmsSpectator.Readers;
+    using LcmsSpectator.Models.DTO;
     using LcmsSpectator.ViewModels.Data;
+    using LcmsSpectator.ViewModels.Dataset;
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Modifications;
+    using LcmsSpectator.ViewModels.Settings;
     using LcmsSpectator.Writers;
+
     using ReactiveUI;
 
     /// <summary>
@@ -71,24 +70,20 @@ namespace LcmsSpectator.ViewModels
             {
                 var openDataWindowVm = new OpenDataWindowViewModel(this.dialogService);
                 this.dialogService.OpenDataWindow(openDataWindowVm);
-                return await this.LoadDataset(openDataWindowVm);
+                if (openDataWindowVm.Status)
+                {
+                    await this.LoadDatasets(openDataWindowVm);
+                }
             });
-            this.OpenDataSetCommand.Where(dsvm => dsvm != null).Subscribe(dsvm => this.ProjectManager.Datasets.Add(dsvm));
 
-            this.OpenRawFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await Task.WhenAll(this.dialogService.OpenRawFiles().Select(async ds => await this.LoadDataset(ds))));
-            this.OpenRawFileCommand.Where(dsvms => dsvms != null).Where(dsvms => dsvms.Any())
-                                   .Subscribe(datasets => this.ProjectManager.Datasets.AddRange(datasets));
-
-            ////this.OpenTsvFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.OpenIdFileImplementation());
-            ////this.OpenFeatureFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.OpenFeatureFileImplementation());
+            this.OpenRawFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.LoadDatasets(this.dialogService.OpenRawFiles()));
 
             this.OpenFromDmsCommand = ReactiveCommand.CreateAsyncTask(async _ =>
             {
                 var dmslvm = new DmsLookupViewModel(this.dialogService);
                 this.dialogService.OpenDmsLookup(dmslvm);
-                return await this.LoadDataset(dmslvm);
+                await this.LoadDatasets(dmslvm);
             });
-            this.OpenFromDmsCommand.Where(dsvm => dsvm != null).Subscribe(ds => this.ProjectManager.Datasets.Add(ds));
 
             // Create command to open settings window
             this.OpenSettingsCommand = ReactiveCommand.Create();
@@ -96,9 +91,8 @@ namespace LcmsSpectator.ViewModels
                 _ => this.dialogService.OpenSettings(new SettingsViewModel(SingletonProjectManager.Instance.ProjectInfo, this.dialogService)));
 
             // Create command to open about box
-            var openAboutBoxCommand = ReactiveCommand.Create();
-            openAboutBoxCommand.Subscribe(_ => this.dialogService.OpenAboutBox());
-            this.OpenAboutBoxCommand = openAboutBoxCommand;
+            this.OpenAboutBoxCommand = ReactiveCommand.Create();
+            this.OpenAboutBoxCommand.Subscribe(_ => this.dialogService.OpenAboutBox());
 
             // Create command to open new modification management window
             var openManageModificationsCommand = ReactiveCommand.Create();
@@ -107,14 +101,10 @@ namespace LcmsSpectator.ViewModels
 
             // Create MSPathFinder search command
             this.RunMsPathFinderSearchCommand = ReactiveCommand.Create();
-            this.RunMsPathFinderSearchCommand.SelectMany(async _ => await this.RunMsPathFinderSearchImplementation())
-                                             .Where(dsvm => dsvm != null)
-                                             .Subscribe(dsvm => this.ProjectManager.Datasets.Add(dsvm));
 
             // Create export command
-            var exportResultsCommand = ReactiveCommand.Create(this.ProjectManager.Datasets.WhenAnyValue(x => x.Count).Select(count => count > 0));
-            exportResultsCommand.Subscribe(_ => this.ExportResultsImplementation());
-            this.ExportResultsCommand = exportResultsCommand;
+            this.ExportResultsCommand = ReactiveCommand.Create(this.ProjectManager.Datasets.WhenAnyValue(x => x.Count).Select(count => count > 0));
+            this.ExportResultsCommand.Subscribe(_ => this.ExportResultsImplementation());
 
             // If all datasets are closed, show splash screen
             this.ProjectManager.Datasets.BeforeItemsRemoved.Subscribe(x => this.ShowSplash = this.ProjectManager.Datasets.Count == 1);
@@ -143,27 +133,17 @@ namespace LcmsSpectator.ViewModels
         /// Gets command that opens a dialog box prompting the user for a raw file path,
         /// feature file path, and ID file path, then opens the files.
         /// </summary>
-        public ReactiveCommand<DatasetViewModel> OpenDataSetCommand { get; private set; }
+        public ReactiveCommand<Unit> OpenDataSetCommand { get; private set; }
 
         /// <summary>
         /// Gets command that prompts the user for raw file(s) to open.
         /// </summary>
-        public ReactiveCommand<DatasetViewModel[]> OpenRawFileCommand { get; private set; }
-        
-        /// <summary>
-        /// Gets command that prompts the user for id file to open.
-        /// </summary>
-        public ReactiveCommand<Unit> OpenTsvFileCommand { get; private set; }
-        
-        /// <summary>
-        /// Gets command that prompts user for feature file to open.
-        /// </summary>
-        public ReactiveCommand<Unit> OpenFeatureFileCommand { get; private set; }
+        public ReactiveCommand<Unit> OpenRawFileCommand { get; private set; }
         
         /// <summary>
         /// Gets command that opens the DMS search dialog.
         /// </summary>
-        public ReactiveCommand<DatasetViewModel> OpenFromDmsCommand { get; private set; }
+        public ReactiveCommand<Unit> OpenFromDmsCommand { get; private set; }
         
         /// <summary>
         /// Gets command that opens settings window.
@@ -220,7 +200,7 @@ namespace LcmsSpectator.ViewModels
         private void ManageModificationsImplementation()
         {
             var manageModificationsViewModel = new ManageModificationsViewModel(this.dialogService);
-            manageModificationsViewModel.Modifications.AddRange(this.ProjectManager.ProjectInfo.ModificationSettings.RegisteredModifications);
+            manageModificationsViewModel.Modifications.AddRange(this.ProjectManager.ProjectInfo.RegisteredModifications);
             this.dialogService.OpenManageModifications(manageModificationsViewModel);
 
             // Update all sequences with new modifications.
@@ -228,20 +208,6 @@ namespace LcmsSpectator.ViewModels
             {
                 prsm.UpdateModifications();
             }
-        }
-
-        /// <summary>
-        /// Implementation for <see cref="RunMsPathFinderSearchCommand"/>.
-        /// Runs an MSPathFinder database search.
-        /// </summary>
-        private IObservable<DatasetViewModel> RunMsPathFinderSearchImplementation()
-        {
-            var searchSettings = new SearchSettingsViewModel(this.dialogService);
-            this.dialogService.SearchSettingsWindow(searchSettings);
-
-            return searchSettings.RunCommand.WhenAnyValue(x => x)
-                                 .Merge(searchSettings.CancelCommand)
-                                 .SelectMany(async _ => await this.LoadDataset(searchSettings));
         }
 
         /// <summary>
@@ -264,23 +230,27 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         /// <param name="provider">The <see cref="IDatasetInfoProvider" />.</param>
         /// <returns>Task that returns a <see cref="DatasetViewModel" /> for the loaded data set.</returns>
-        private async Task<DatasetViewModel> LoadDataset(IDatasetInfoProvider provider)
+        private async Task LoadDatasets(IDatasetInfoProvider provider)
         {
-            DatasetViewModel datasetVm = null;
             try
             {
-                var dsInfos = provider.GetDatasetInfo();
-                foreach (var dataset in dsInfos)
-                {
-                    datasetVm = await this.LoadDataset(dataset);
-                }
+                var datasetInfo = provider.GetDatasetInfo();
+                await this.LoadDatasets(datasetInfo);
             }
             catch (FileNotFoundException e)
             {
                 this.dialogService.ExceptionAlert(e);
             }
+        }
 
-            return datasetVm;
+        /// <summary>
+        /// Load datasets.
+        /// </summary>
+        /// <param name="datasets">The <see cref="IDatasetInfoProvider" />.</param>
+        /// <returns>Task that returns a <see cref="DatasetViewModel" /> for the loaded data set.</returns>
+        private async Task LoadDatasets(IEnumerable<DatasetInfo> datasets)
+        {
+            await Task.WhenAll(datasets.Select(this.LoadDataset));
         }
 
         /// <summary>
@@ -288,34 +258,28 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         /// <param name="datasetInfo">Path to raw file to open</param>
         /// <returns>Task that returns a <see cref="DatasetViewModel" /> for the loaded data set.</returns>
-        private async Task<DatasetViewModel> LoadDataset(DatasetInfo datasetInfo)
+        private async Task LoadDataset(DatasetInfo datasetInfo)
         {
-            var dataSetViewModel = new DatasetViewModel(datasetInfo, this.dialogService); // create data set view model
+            var datasetViewModel = new DatasetViewModel(datasetInfo, this.dialogService); // create data set view model
             try
             {
+                this.ProjectManager.Datasets.Add(datasetViewModel);
+
                 // Load dataset.
-                await dataSetViewModel.InitializeAsync();
+                await datasetViewModel.InitializeAsync();
 
                 // Load IDs and FASTAs into ProteinTree.
-                this.ScanViewModel.Data.AddRange(dataSetViewModel.ScanViewModel.Data.Where(p => p.Sequence.Count > 0));
-                var fastas = dataSetViewModel.DatasetInfo.GetFastaFilePaths();
-                foreach (var fasta in fastas)
-                {
-                    await
-                        this.ScanViewModel.IdTree.AddFastaEntriesAsync(
-                            await Task.Run(() => FastaReaderWriter.ReadFastaFile(fasta)));
-                }
+                this.ScanViewModel.Data.AddRange(datasetViewModel.ScanViewModel.Data.Where(p => p.Sequence.Count > 0));
+                await this.ScanViewModel.IdTree.AddFastaFilesAsync(datasetViewModel.DatasetInfo.GetFastaFilePaths());
             }
             catch (Exception)
             {
-                this.dialogService.ExceptionAlert(new Exception(string.Format("Cannot read {0}.", Path.GetFileNameWithoutExtension(dataSetViewModel.DatasetInfo.Name))));
-                if (this.ProjectManager.Datasets.Count > 0 && this.ProjectManager.Datasets.Contains(dataSetViewModel))
+                this.dialogService.ExceptionAlert(new Exception(string.Format("Cannot read {0}.", Path.GetFileNameWithoutExtension(datasetViewModel.DatasetInfo.Name))));
+                if (this.ProjectManager.Datasets.Count > 0 && this.ProjectManager.Datasets.Contains(datasetViewModel))
                 {
-                    this.ProjectManager.Datasets.Remove(dataSetViewModel);
+                    this.ProjectManager.Datasets.Remove(datasetViewModel);
                 }
             }
-
-            return dataSetViewModel;
         }
     }
 }

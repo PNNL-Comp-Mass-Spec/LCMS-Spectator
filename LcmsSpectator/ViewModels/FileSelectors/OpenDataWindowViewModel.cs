@@ -231,18 +231,26 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <returns>The <see cref="DatasetInfo" />.</returns>
         public List<DatasetInfo> GetDatasetInfo()
         {
-            if (!this.Status)
+            var files = new List<string>();
+            if (!string.IsNullOrEmpty(this.RawFilePath))
             {
-                return new List<DatasetInfo>{ new DatasetInfo() };
+                files.Add(this.RawFilePath);
             }
 
-            var files = new List<string>
+            if (!string.IsNullOrEmpty(this.IdFilePath))
             {
-                this.RawFilePath,
-                this.IdFilePath,
-                this.FeatureFilePath,
-                this.ParamFilePath,
-            };
+                files.Add(this.IdFilePath);
+            }
+
+            if (!string.IsNullOrEmpty(this.FeatureFilePath))
+            {
+                files.Add(this.FeatureFilePath);
+            }
+
+            if (!string.IsNullOrEmpty(this.ParamFilePath))
+            {
+                files.Add(this.ParamFilePath);
+            }
 
             return new List<DatasetInfo> { new DatasetInfo(files) };
         }

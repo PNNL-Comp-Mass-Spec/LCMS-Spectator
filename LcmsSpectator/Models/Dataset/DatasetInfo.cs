@@ -14,6 +14,8 @@ namespace LcmsSpectator.Models.Dataset
     using System.IO;
     using System.Linq;
 
+    using LcmsSpectator.Config;
+
     /// <summary>
     /// A class representing a dataset.
     /// </summary>
@@ -27,6 +29,12 @@ namespace LcmsSpectator.Models.Dataset
             this.Name = string.Empty;
             this.Files = new List<FileInfo>();
             this.LayoutFile = string.Empty;
+            this.ToleranceSettings = new ToleranceSettings();
+            this.ModificationSettings = new ModificationSettings();
+            this.FeatureMapSettings = new FeatureMapSettings();
+            this.IonTypeSettings = new IonTypeSettings();
+            this.ImageExportSettings = new ImageExportSettings();
+            this.Parameters = new MsPfParameters();
         }
 
         /// <summary>
@@ -73,6 +81,36 @@ namespace LcmsSpectator.Models.Dataset
         /// Gets or sets the path to the serialized layout file for this dataset.
         /// </summary>
         public string LayoutFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tolerance settings for the project.
+        /// </summary>
+        public ToleranceSettings ToleranceSettings { get; set; }
+
+        /// <summary>
+        /// Gets or sets the modification settings for the project.
+        /// </summary>
+        public ModificationSettings ModificationSettings { get; set; }
+
+        /// <summary>
+        /// Gets or sets the settings for the feature map.
+        /// </summary>
+        public FeatureMapSettings FeatureMapSettings { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ion type settings for the project.
+        /// </summary>
+        public IonTypeSettings IonTypeSettings { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image export settings for the project.
+        /// </summary>
+        public ImageExportSettings ImageExportSettings { get; set; }
+
+        /// <summary>
+        /// Gets or sets the parameter settings for this project.
+        /// </summary>
+        public MsPfParameters Parameters { get; set; }
 
         /// <summary>
         /// Get datasets from a collection of input file paths.

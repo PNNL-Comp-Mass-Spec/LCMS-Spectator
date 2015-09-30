@@ -3,8 +3,10 @@ using InformedProteomics.Backend.Data.Composition;
 
 namespace LcmsSpectator
 {
+    using System;
     using System.Windows;
     using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Models;
     using LcmsSpectator.Readers;
     using LcmsSpectator.ViewModels;
     using LcmsSpectator.Views;
@@ -32,6 +34,20 @@ namespace LcmsSpectator
             var mainWindowVm = new MainWindowViewModel(new MainDialogService());
             mainWindow.DataContext = mainWindowVm;
             mainWindow.Show();
+        }
+
+        /// <summary>
+        /// The app_ on exit.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void App_OnExit(object sender, ExitEventArgs e)
+        {
+            SingletonProjectManager.Instance.SaveProject();
         }
     }
 }

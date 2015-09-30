@@ -39,16 +39,16 @@ namespace LcmsSpectator.ViewModels.Settings
             this.CancelCommand = ReactiveCommand.Create();
             this.CancelCommand.Subscribe(_ => this.CancelImplementation());
 
-            this.HeavyModificationsViewModel = new HeavyModificationsViewModel(
-                projectInfo.ModificationSettings.RegisteredModifications,
-                projectInfo.ModificationSettings.LightModifications,
-                projectInfo.ModificationSettings.HeavyModifications,
-                dialogService);
+            //this.HeavyModificationsViewModel = new HeavyModificationsViewModel(
+            //    projectInfo.ModificationSettings.RegisteredModifications,
+            //    projectInfo.ModificationSettings.LightModifications,
+            //    projectInfo.ModificationSettings.HeavyModifications,
+            //    dialogService);
 
-            this.FeatureMapSettingsViewModel = new FeatureMapSettingsViewModel(projectInfo.FeatureMapSettings);
-            this.ImageExportSettingsViewModel = new ImageExportSettingsViewModel(projectInfo.ImageExportSettings);
-            this.IonTypeSettingsViewModel = new IonTypeSettingsViewModel(projectInfo.IonTypeSettings);
-            this.ToleranceSettingsViewModel = new ToleranceSettingsViewModel(projectInfo.ToleranceSettings);
+            this.FeatureMapSettingsViewModel = new FeatureMapSettingsViewModel(projectInfo.Datasets[0].FeatureMapSettings, SingletonProjectManager.Instance.Datasets);
+            this.ImageExportSettingsViewModel = new ImageExportSettingsViewModel(projectInfo.Datasets[0].ImageExportSettings, SingletonProjectManager.Instance.Datasets);
+            this.IonTypeSettingsViewModel = new IonTypeSettingsViewModel(projectInfo.Datasets[0].IonTypeSettings, SingletonProjectManager.Instance.Datasets);
+            this.ToleranceSettingsViewModel = new ToleranceSettingsViewModel(projectInfo.Datasets[0].ToleranceSettings, SingletonProjectManager.Instance.Datasets);
         }
 
         /// <summary>

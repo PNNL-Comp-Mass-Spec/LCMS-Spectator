@@ -8,7 +8,6 @@
 
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassFeature;
 
     using LcmsSpectator.Config;
     using LcmsSpectator.Models;
@@ -38,6 +37,16 @@
         private IonType[] selectedIonTypes;
 
         /// <summary>
+        /// The tolerances used for creating ions in this spectrum.
+        /// </summary>
+        private ToleranceSettings toleranceSettings;
+
+        /// <summary>
+        /// The ion type settings.
+        /// </summary>
+        private IonTypeSettings ionTypeSettings;
+
+        /// <summary>
         /// A value indicating whether to add precursor ions to labeled ion lists.
         /// </summary>
         private bool addPrecursorIons;
@@ -52,6 +61,8 @@
                 1,
                 null,
                 ActivationMethod.HCD);
+
+            this.ToleranceSettings = new ToleranceSettings();
 
             this.BaseIonTypes = new ReactiveList<BaseIonTypeViewModel>
             {
@@ -77,6 +88,8 @@
             this.HeavyModifications = new SearchModification[0];
             this.LabeledIonViewModels = new LabeledIonViewModel[0];
             this.SelectedIonTypes = new IonType[0];
+            this.ToleranceSettings = new ToleranceSettings();
+            this.IonTypeSettings = new IonTypeSettings();
 
             this.AddPrecursorIons = true;
 
@@ -179,6 +192,24 @@
         }
 
         /// <summary>
+        /// Gets or sets the tolerances used for creating ions.
+        /// </summary>
+        public ToleranceSettings ToleranceSettings
+        {
+            get { return this.toleranceSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.toleranceSettings, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the ion type settings.
+        /// </summary>
+        public IonTypeSettings IonTypeSettings
+        {
+            get { return this.ionTypeSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.ionTypeSettings, value); }
+        }
+
+        /// <summary>
         /// Gets the labeled ion view models for the sequence.
         /// </summary>
         /// <returns>Task that returns the labeled ion view models for the sequence.</returns>
@@ -208,14 +239,14 @@
         /// <param name="selectedActivationMethod">The selected activation method.</param>
         private void SetActivationMethod(ActivationMethod selectedActivationMethod)
         {
-            if (!SingletonProjectManager.Instance.ProjectInfo.IonTypeSettings.AutomaticallySelectIonTypes)
+            if (!this.IonTypeSettings.AutomaticallySelectIonTypes)
             {
                 return;
             }
 
             var selectedBaseIonTypes = selectedActivationMethod == ActivationMethod.ETD
-                                           ? SingletonProjectManager.Instance.ProjectInfo.IonTypeSettings.EtdIonTypes
-                                           : SingletonProjectManager.Instance.ProjectInfo.IonTypeSettings.CidHcdIonTypes;
+                                           ? this.IonTypeSettings.EtdIonTypes
+                                           : this.IonTypeSettings.CidHcdIonTypes;
 
             foreach (var baseIonType in this.BaseIonTypes)
             {

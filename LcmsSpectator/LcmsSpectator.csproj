@@ -325,6 +325,7 @@
     <Compile Include="ViewModels\FileSelectors\SelectDataSetViewModel.cs" />
     <Compile Include="ViewModels\Data\PrecursorSequenceIonViewModel.cs" />
     <Compile Include="ViewModels\SearchSettingsViewModel.cs" />
+    <Compile Include="ViewModels\Settings\BaseSettingsViewModel.cs" />
     <Compile Include="ViewModels\Settings\SettingsViewModel.cs" />
     <Compile Include="ViewModels\Plots\SpectrumPlotViewModel.cs" />
     <Compile Include="ViewModels\Plots\SpectrumViewModel.cs" />

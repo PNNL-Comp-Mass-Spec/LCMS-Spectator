@@ -68,6 +68,16 @@ namespace LcmsSpectator.ViewModels.Plots
         private ReactiveList<PeakDataPoint> dataTable;
 
         /// <summary>
+        /// The settings for the tolerances used for creating plot.
+        /// </summary>
+        private ToleranceSettings toleranceSettings;
+
+        /// <summary>
+        /// The settings for exporting the error map as an image.
+        /// </summary>
+        private ImageExportSettings imageExportSettings;
+
+        /// <summary>
         /// Initializes a new instance of the ErrorMapViewModel class. 
         /// </summary>
         /// <param name="dialogService">
@@ -76,6 +86,7 @@ namespace LcmsSpectator.ViewModels.Plots
         public ErrorMapViewModel(IDialogService dialogService)
         {
             this.dialogService = dialogService;
+            this.toleranceSettings = new ToleranceSettings();
             this.PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
 
             // Init x axis
@@ -120,9 +131,9 @@ namespace LcmsSpectator.ViewModels.Plots
                 AxisDistance = -0.5,
                 AbsoluteMinimum = 0,
                 Palette = OxyPalette.Interpolate(1000, minColor, maxColor),
-                Minimum = -1 * SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance,
-                Maximum = SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance,
-                AbsoluteMaximum = SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance,
+                Minimum = -1 * this.toleranceSettings.ProductTolerance,
+                Maximum = this.toleranceSettings.ProductTolerance,
+                AbsoluteMaximum = this.toleranceSettings.ProductTolerance,
                 LowColor = OxyColors.Navy,
             };
             this.PlotModel.Axes.Add(this.colorAxis);
@@ -150,6 +161,24 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.dataTable; }
             set { this.RaiseAndSetIfChanged(ref this.dataTable, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the settings for the tolerances used for creating plot.
+        /// </summary>
+        public ToleranceSettings ToleranceSettings
+        {
+            get { return this.toleranceSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.toleranceSettings, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the settings for exporting the error map as an image.
+        /// </summary>
+        public ImageExportSettings ImageExportSettings
+        {
+            get { return this.imageExportSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.imageExportSettings, value); }
         }
 
         /// <summary>
@@ -193,9 +222,9 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             // initialize color axis
             ////var minColor = OxyColor.FromRgb(127, 255, 0);
-            this.colorAxis.Minimum = -1 * SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance;
-            this.colorAxis.Maximum = SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance;
-            this.colorAxis.AbsoluteMaximum = SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance;
+            this.colorAxis.Minimum = -1 * this.toleranceSettings.ProductTolerance;
+            this.colorAxis.Maximum = this.toleranceSettings.ProductTolerance;
+            this.colorAxis.AbsoluteMaximum = this.toleranceSettings.ProductTolerance;
 
             this.PlotModel.Series.Clear();
 
@@ -296,7 +325,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
                     if (value.Equals(double.NaN))
                     {
-                        value = (-1 * SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.ProductTolerance) - 1;
+                        value = (-1 * this.toleranceSettings.ProductTolerance) - 1;
                     }
 
                     data[i, j] = value;
@@ -353,7 +382,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     (int)this.PlotModel.Width,
                     (int)this.PlotModel.Height,
                     OxyColors.White,
-                    SingletonProjectManager.Instance.ProjectInfo.ImageExportSettings.ExportImageDpi);
+                    this.ImageExportSettings.ExportImageDpi);
             }
             catch (Exception e)
             {

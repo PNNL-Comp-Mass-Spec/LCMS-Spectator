@@ -1,13 +1,18 @@
 ﻿namespace LcmsSpectator.ViewModels.Settings
 {
+    using System.Collections;
+    using System.Collections.Generic;
+
     using InformedProteomics.Backend.Data.Spectrometry;
     using LcmsSpectator.Config;
+    using LcmsSpectator.ViewModels.Dataset;
+
     using ReactiveUI;
     
     /// <summary>
     /// View model for tolerance settings.
     /// </summary>
-    public class ToleranceSettingsViewModel : ReactiveObject
+    public class ToleranceSettingsViewModel : BaseSettingsViewModel
     {
         /// <summary>
         /// The precursor ion tolerance value.
@@ -39,7 +44,7 @@
         /// </summary>
         private double precursorRelativeIntensityThreshold;
 
-        public ToleranceSettingsViewModel(ToleranceSettings toleranceSettings)
+        public ToleranceSettingsViewModel(ToleranceSettings toleranceSettings, IEnumerable<DatasetViewModel> datasets) : base(datasets)
         {
             this.ToleranceUnits = new ReactiveList<ToleranceUnit> { ToleranceUnit.Ppm, ToleranceUnit.Th };
 

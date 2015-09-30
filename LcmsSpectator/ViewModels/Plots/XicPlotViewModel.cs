@@ -8,8 +8,6 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using LcmsSpectator.Models;
-
 namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
@@ -100,6 +98,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// A value indicating whether or not point markers are displayed on the XIC plot.
         /// </summary>
         private bool showPointMarkers;
+
+        /// <summary>
+        /// The settings for exporting the error map as an image.
+        /// </summary>
+        private ImageExportSettings imageExportSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="XicPlotViewModel"/> class. 
@@ -303,6 +306,15 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// Gets or sets the settings for exporting the error map as an image.
+        /// </summary>
+        public ImageExportSettings ImageExportSettings
+        {
+            get { return this.imageExportSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.imageExportSettings, value); }
+        }
+
+        /// <summary>
         /// Clear data on plot.
         /// </summary>
         public void ClearPlot()
@@ -417,7 +429,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     (int)this.PlotModel.Width,
                     (int)this.PlotModel.Height,
                     OxyColors.White,
-                    SingletonProjectManager.Instance.ProjectInfo.ImageExportSettings.ExportImageDpi);
+                    this.ImageExportSettings.ExportImageDpi);
             }
             catch (Exception e)
             {

@@ -1,12 +1,8 @@
 ﻿namespace LcmsSpectator.ViewModels.Data
 {
-    using System.Collections.Generic;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Threading.Tasks;
-
     using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
 
+    using LcmsSpectator.Config;
     using LcmsSpectator.Models;
 
     public interface IFragmentationSequenceViewModel
@@ -25,5 +21,10 @@
         /// Gets the LabeledIonViewModels for this sequence.
         /// </summary>
         LabeledIonViewModel[] LabeledIonViewModels { get; }
+
+        /// <summary>
+        /// Gets or sets the tolerances used for creating ions in this spectrum.
+        /// </summary>
+        ToleranceSettings ToleranceSettings { get; set; }
     }
 }

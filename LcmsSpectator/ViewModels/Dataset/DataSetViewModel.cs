@@ -8,25 +8,25 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using InformedProteomics.Backend.MassSpecData;
-using InformedProteomics.Backend.Utils;
-using LcmsSpectator.DialogServices;
-using LcmsSpectator.Models;
-using LcmsSpectator.Models.Dataset;
-using LcmsSpectator.Models.DTO;
-using LcmsSpectator.Readers;
-using LcmsSpectator.ViewModels.Data;
-using LcmsSpectator.ViewModels.Plots;
-using ReactiveUI;
-
 namespace LcmsSpectator.ViewModels.Dataset
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Reactive.Linq;
+    using System.Threading.Tasks;
+    using InformedProteomics.Backend.MassSpecData;
+    using InformedProteomics.Backend.Utils;
+    using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Models;
+    using LcmsSpectator.Models.Dataset;
+    using LcmsSpectator.Models.DTO;
+    using LcmsSpectator.Readers;
+    using LcmsSpectator.ViewModels.Data;
+    using LcmsSpectator.ViewModels.Plots;
+    using ReactiveUI;
+    
     /// <summary>
     /// Class representing a data set, containing a LCMSRun, identifications, and features.
     /// </summary>
@@ -51,11 +51,6 @@ namespace LcmsSpectator.ViewModels.Dataset
         /// View model for mass spec feature map plot
         /// </summary>
         private FeatureViewerViewModel featureMapViewModel;
-
-        /// <summary>
-        /// The title of this data set
-        /// </summary>
-        private string title;
 
         /// <summary>
         /// A value indicating whether or not this data set is ready to be closed?
@@ -100,9 +95,9 @@ namespace LcmsSpectator.ViewModels.Dataset
             this.IdFileOpen = false;
             this.SelectedPrSm = new PrSm();
             this.ScanViewModel = new ScanViewModel(dialogService, new List<PrSm>());
-            this.CreateSequenceViewModel = new CreateSequenceViewModel(dialogService)
+            this.CreateSequenceViewModel = new CreateSequenceViewModel(dialogService, this.LcMs)
             {
-                SelectedDataSetViewModel = this
+                ModificationSettings = datasetInfo.ModificationSettings,
             };
 
             this.CreateSequenceViewModel.CreateAndAddPrSmCommand.Subscribe(
@@ -180,23 +175,21 @@ namespace LcmsSpectator.ViewModels.Dataset
                 .Subscribe(f => f.Selected = true);
 
             // Start MsPf Search Command
-            var startMsPfSearchCommand = ReactiveCommand.Create();
-            startMsPfSearchCommand.Subscribe(_ => this.StartMsPfSearchImplementation());
-            this.StartMsPfSearchCommand = startMsPfSearchCommand;
+            this.StartMsPfSearchCommand = ReactiveCommand.Create();
+            this.StartMsPfSearchCommand.Subscribe(_ => this.StartMsPfSearchImplementation());
 
             // Close command verifies that the user wants to close the dataset, then sets ReadyToClose to true if they are
-            var closeCommand = ReactiveCommand.Create();
-            closeCommand.Subscribe(_ =>
+            this.CloseCommand = ReactiveCommand.Create();
+            this.CloseCommand.Subscribe(_ =>
             {
                 this.ReadyToClose =
-                    dialogService.ConfirmationBox(
+                    this.dialogService.ConfirmationBox(
                         string.Format("Are you sure you would like to close {0}?", this.DatasetInfo.Name), string.Empty);
             });
-            this.CloseCommand = closeCommand;
         }
 
         /// <summary>
-        /// The LCMSRun representing the raw file for this dataset.
+        /// Gets the LCMSRun representing the raw file for this dataset.
         /// </summary>
         public ILcMsRun LcMs { get; private set; }
 
@@ -213,13 +206,13 @@ namespace LcmsSpectator.ViewModels.Dataset
         /// <summary>
         /// Gets a command that starts an MSPathFinder with this data set.
         /// </summary>
-        public IReactiveCommand StartMsPfSearchCommand { get; private set; }
+        public ReactiveCommand<object> StartMsPfSearchCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that is activated when the close button is clicked on a dataset.
         /// Initiates a close request for the main view model
         /// </summary>
-        public IReactiveCommand CloseCommand { get; private set; }
+        public ReactiveCommand<object> CloseCommand { get; private set; }
 
         /// <summary>
         /// Gets the dataset info for this dataset.
@@ -310,33 +303,45 @@ namespace LcmsSpectator.ViewModels.Dataset
         /// <summary>
         /// Initialize this data set by reading the raw file asynchronously and initializing child view models
         /// </summary>
-        /// <param name="filePath">The raw File Path.</param>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
+        /// <returns>The <see cref="Task"/>.</returns>
         public async Task InitializeAsync()
         {
             this.IsLoading = true; // Show animated loading screen
 
+            var progData = new ProgressData
+            {
+                UpdateFrequencySeconds = 1,
+                IsPartialRange = true,
+                MaxPercentage = 80
+            };
+
             this.LoadProgressPercent = 0.0;
             this.LoadProgressStatus = "Loading...";
-            var progress = new Progress<ProgressData>(progressData =>
+            var progress = new Progress<ProgressData>(pd =>
             {
-                progressData.UpdateFrequencySeconds = 2;
-                if (progressData.ShouldUpdate())
+                if (progData.ShouldUpdate())
                 {
-                    this.LoadProgressPercent = progressData.Percent;
-                    this.LoadProgressStatus = progressData.Status;   
+                    this.LoadProgressPercent = progData.UpdatePercent(pd.Percent).Percent;
+                    this.LoadProgressStatus = pd.Status;   
                 }
             });
 
             // Load data files.
             await this.LoadSpectrumFile(progress);
+
+            progData.StepRange(90);
             await this.LoadIdFiles(progress);
-            await this.LoadFeatureFiles(progress);
+
+            progData.StepRange(100);
+            await Task.Run(() => this.LoadFeatureFiles(progress));
 
             // Now that we have a LcMsRun, initialize viewmodels that require it
-            this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs);
+            this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs)
+            {
+                ToleranceSettings = this.DatasetInfo.ToleranceSettings,
+                ImageExportSettings = this.DatasetInfo.ImageExportSettings
+            };
+
             this.SpectrumViewModel = new SpectrumViewModel(this.dialogService, this.LcMs);
             this.FeatureMapViewModel = new FeatureViewerViewModel((LcMsRun)this.LcMs, this.dialogService);
 
@@ -359,34 +364,49 @@ namespace LcmsSpectator.ViewModels.Dataset
         /// <returns>The <see cref="Task" />.</returns>
         private async Task LoadSpectrumFile(IProgress<ProgressData> progress)
         {
+            var progData = new ProgressData { IsPartialRange = true, MaxPercentage = 5 };
+            var stepProgress = new Progress<ProgressData>(pd => progress.Report(progData.UpdatePercent(pd.Percent)));
+
             // load raw file
-            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(this.DatasetInfo.GetSpectrumFilePath(), 0, 0, progress));
-            await this.LoadScans();
+            var spectrumFilePath = this.DatasetInfo.GetSpectrumFilePath();
+            string pbfPath, fileName, tempPath;
+            if (!File.Exists(PbfLcMsRun.GetCheckPbfFilePath(spectrumFilePath, out pbfPath, out fileName, out tempPath)))
+            {
+                progData.MaxPercentage = 90;
+            }
+
+            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(spectrumFilePath, 0, 0, stepProgress));
+
+            // Load scans into scan data grid.
+            progData.StepRange(100);
+            progData.Status = "Loading scans.";
+            await Task.Run(() => this.LoadScans(stepProgress));
         }
 
         /// <summary>
         /// Load all scans from a raw file and insert them into the scan view model.
         /// </summary>
-        /// <returns>
-        /// The <see cref="Task"/>.
-        /// </returns>
-        private Task LoadScans()
+        /// <param name="progress">The progress reporter.</param>
+        private void LoadScans(IProgress<ProgressData> progress)
         {
-            return Task.Run(() =>
+            var progData = new ProgressData();
+            var scans = this.LcMs.GetScanNumbers(1).ToList();
+            scans.AddRange(this.LcMs.GetScanNumbers(2));
+            scans.Sort();
+
+            for (int i = 0; i < scans.Count; i++)
             {
-                var scans = this.LcMs.GetScanNumbers(1).ToList();
-                scans.AddRange(this.LcMs.GetScanNumbers(2));
-                scans.Sort();
-                var prsmScans = scans.Select(scan => new PrSm
+                this.ScanViewModel.Data.Add(new PrSm
                 {
-                    Scan = scan,
+                    Scan = scans[i],
                     RawFileName = this.DatasetInfo.Name,
                     LcMs = this.LcMs,
                     QValue = -1.0,
                     Score = double.NaN,
                 });
-                this.ScanViewModel.Data.AddRange(prsmScans);
-            });
+
+                progress.Report(progData.UpdatePercent((100.0 * i) / scans.Count));
+            }
         }
 
         /// <summary>
@@ -396,15 +416,26 @@ namespace LcmsSpectator.ViewModels.Dataset
         /// <returns>The <see cref="Task"/>.</returns>
         private async Task LoadIdFiles(IProgress<ProgressData> progress)
         {
-            bool attemptToReadFile = true;
+            var progData = new ProgressData();
             var modIgnoreList = new List<string>();
-            do
+
+            var idFiles =
+                this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.IdentificationFile).ToList();
+
+            // Iterate over files to open
+            for (int i = 0; i < idFiles.Count; i++)
             {
-                try
+                progData.Status = string.Format("Loading {0}", Path.GetFileName(idFiles[i].FilePath));
+                var reader = IdFileReaderFactory.CreateReader(idFiles[i].FilePath);
+                bool attemptToReadFile = true;
+
+                // If an InvalidModificationName exception is thrown, prompt the user to determine
+                // how to resolve the modification. Keep trying to read the file until all modifications
+                // are resolved.
+                do
                 {
-                    foreach (var file in this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.IdentificationFile))
+                    try
                     {
-                        var reader = IdFileReaderFactory.CreateReader(file.FilePath);
                         var ids = await reader.ReadAsync();
                         var idList = ids.ToList();
                         foreach (var id in idList)
@@ -415,59 +446,57 @@ namespace LcmsSpectator.ViewModels.Dataset
 
                         this.ScanViewModel.Data.AddRange(idList);
                         this.IdFileOpen = true;
+                        attemptToReadFile = false;
                     }
-
-                    attemptToReadFile = false;
-                }
-                catch (IcFileReader.InvalidModificationNameException e)
-                {   // file contains an unknown modification
-                    var result =
-                        this.dialogService.ConfirmationBox(
-                            string.Format(
-                                "{0}\nWould you like to add this modification?\nIf not, all sequences containing this modification will be ignored.",
-                                e.Message),
-                            "Unknown Modification");
-                    if ((!result) || SingletonProjectManager.Instance.PromptRegisterModification(e.ModificationName, true))
+                    catch (IcFileReader.InvalidModificationNameException e)
                     {
-                        modIgnoreList.Add(e.ModificationName);
+                        // file contains an unknown modification
+                        var result =
+                            this.dialogService.ConfirmationBox(
+                                string.Format(
+                                    "{0}\nWould you like to add this modification?\nIf not, all sequences containing this modification will be ignored.",
+                                    e.Message),
+                                "Unknown Modification");
+                        if ((!result) || SingletonProjectManager.Instance.PromptRegisterModification(e.ModificationName))
+                        {
+                            modIgnoreList.Add(e.ModificationName);
+                        }
+                    }
+                    catch (KeyNotFoundException e)
+                    {   // file does not have correct headers
+                        this.dialogService.ExceptionAlert(e);
+                        attemptToReadFile = false;
+                    }
+                    catch (IOException e)
+                    {   // unable to read or open file.
+                        this.dialogService.ExceptionAlert(e);
+                        attemptToReadFile = false;
                     }
                 }
-                catch (KeyNotFoundException e)
-                {   // file does not have correct headers
-                    this.dialogService.ExceptionAlert(e);
-                    return;
-                }
-                catch (IOException e)
-                {   // unable to read or open file.
-                    this.dialogService.ExceptionAlert(e);
-                    return;
-                }
+                while (attemptToReadFile);
+
+                progress.Report(progData.UpdatePercent((100.0 * i) / idFiles.Count));
             }
-            while (attemptToReadFile);
         }
 
         /// <summary>
         /// Load all feature files.
         /// </summary>
         /// <param name="progress">The progress reporter.</param>
-        /// <returns>The <see cref="Task" />.</returns>
-        private async Task LoadFeatureFiles(IProgress<ProgressData> progress)
+        private void LoadFeatureFiles(IProgress<ProgressData> progress)
         {
-            await Task.Run(() =>
+            var progData = new ProgressData();
+            var featureFilePaths =
+                this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.FeatureFile)
+                    .Select(file => file.FilePath).ToList();
+
+            for (int i = 0; i < featureFilePaths.Count; i++)
             {
-                var featureFilePath =
-                    this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.FeatureFile)
-                        .Select(file => file.FilePath)
-                        .FirstOrDefault();
+                this.FeatureMapViewModel.OpenFeatureFile(featureFilePaths[i]);
+                this.FeatureMapViewModel.UpdateIds(this.ScanViewModel.FilteredData);   
 
-                if (string.IsNullOrEmpty(featureFilePath))
-                {
-                    return;
-                }
-
-                this.FeatureMapViewModel.OpenFeatureFile(featureFilePath);
-                this.FeatureMapViewModel.UpdateIds(this.ScanViewModel.FilteredData);
-            });
+                progress.Report(progData.UpdatePercent((100.0 * i) / featureFilePaths.Count));
+            }
         }
 
         /// <summary>
@@ -476,13 +505,14 @@ namespace LcmsSpectator.ViewModels.Dataset
         /// </summary>
         private void StartMsPfSearchImplementation()
         {
-            var searchSettings = new SearchSettingsViewModel(this.dialogService, SingletonProjectManager.Instance.ProjectInfo.Parameters)
+            var searchSettings = new SearchSettingsViewModel(this.dialogService, this.DatasetInfo.Parameters)
             {
                 SpectrumFilePath = this.DatasetInfo.GetSpectrumFilePath(),
                 SelectedSearchMode = 1,
                 FastaDbFilePath = this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.FastaFile).Select(file => file.FilePath).FirstOrDefault(),
                 OutputFilePath = string.Format("{0}\\{1}", Directory.GetCurrentDirectory(), this.DatasetInfo.Name),
-                SelectedSequence = this.SelectedPrSm.Sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue)
+                SelectedSequence = this.SelectedPrSm.Sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue),
+                IonCorrelationThreshold = this.DatasetInfo.ToleranceSettings.IonCorrelationThreshold
             };
 
             // Set feature file path.

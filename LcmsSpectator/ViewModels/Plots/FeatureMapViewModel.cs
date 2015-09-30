@@ -20,7 +20,6 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Reactive.Linq;
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
     using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.Utils;
     using OxyPlot;
@@ -178,6 +177,16 @@ namespace LcmsSpectator.ViewModels.Plots
         private Feature.FeaturePoint selectedFeature;
 
         /// <summary>
+        /// The settings for the feature map.
+        /// </summary>
+        private FeatureMapSettings featureMapSettings;
+
+        /// <summary>
+        /// The settings for exporting the feature map as an image.
+        /// </summary>
+        private ImageExportSettings imageExportSettings;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="FeatureMapViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from the view model.</param>
@@ -194,19 +203,19 @@ namespace LcmsSpectator.ViewModels.Plots
             this.IsLogarithmicAbundanceAxis = true;
             this.FeatureSize = 0.1;
 
-            var featureSelectedCommand = ReactiveCommand.Create();
-            featureSelectedCommand.Subscribe(_ => this.FeatureSelectedImplementation());
-            this.FeatureSelectedCommand = featureSelectedCommand;
+            this.FeatureSelectedCommand = ReactiveCommand.Create();
+            this.FeatureSelectedCommand.Subscribe(_ => this.FeatureSelectedImplementation());
+
+            this.FeatureMapSettings = new FeatureMapSettings();
+            this.ImageExportSettings = new ImageExportSettings();
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
-            var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => this.SaveAsImageImplementation());
-            this.SaveAsImageCommand = saveAsImageCommand;
+            this.SaveAsImageCommand = ReactiveCommand.Create();
+            this.SaveAsImageCommand.Subscribe(_ => this.SaveAsImageImplementation());
 
-            var buildPlotCommand = ReactiveCommand.Create();
-            buildPlotCommand.Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
+            this.BuildPlotCommand = ReactiveCommand.Create();
+            this.BuildPlotCommand.Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
                 .Subscribe(_ => this.BuildPlot());
-            this.BuildPlotCommand = buildPlotCommand;
 
             // Initialize color axes.
             const int NumColors = 5000;
@@ -216,8 +225,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 Position = AxisPosition.Right,
                 Palette = OxyPalette.Interpolate(
                                        NumColors, 
-                                       SingletonProjectManager.Instance.ProjectInfo.FeatureMapSettings.FeatureColors
-                                                              .Select(c => c.ToOxyColor()).ToArray()),
+                                       this.FeatureMapSettings.FeatureColors.Select(c => c.ToOxyColor()).ToArray()),
             };
 
             this.colorDictionary = new ProteinColorDictionary();
@@ -376,23 +384,41 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets a command that saves the feature map as a PNG image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; private set; }
+        public ReactiveCommand<object> SaveAsImageCommand { get; private set; }
 
         /// <summary>
         /// Gets a command activated when a feature is selected (double clicked) on the
         /// feature map plot.
         /// </summary>
-        public IReactiveCommand FeatureSelectedCommand { get; private set; }
+        public ReactiveCommand<object> FeatureSelectedCommand { get; private set; }
 
         /// <summary>
         /// Gets a command for building the feature map plot.
         /// </summary>
-        public IReactiveCommand BuildPlotCommand { get; private set; }
+        public ReactiveCommand<object> BuildPlotCommand { get; private set; }
         
         /// <summary>
         /// Gets the Plot model for the feature map.
         /// </summary>
         public PlotModel FeatureMap { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the settings for the feature map.
+        /// </summary>
+        public FeatureMapSettings FeatureMapSettings
+        {
+            get { return this.featureMapSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.featureMapSettings, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the settings for exporting the feature map as an image.
+        /// </summary>
+        public ImageExportSettings ImageExportSettings
+        {
+            get { return this.imageExportSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.imageExportSettings, value); }
+        }
 
         /// <summary>
         /// Gets or sets the minimum for the X axis of the feature map.
@@ -833,7 +859,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     (int)this.FeatureMap.Width,
                     (int)this.FeatureMap.Height,
                     OxyColors.White,
-                    SingletonProjectManager.Instance.ProjectInfo.ImageExportSettings.ExportImageDpi);
+                    this.ImageExportSettings.ExportImageDpi);
             }
             catch (Exception e)
             {

@@ -8,8 +8,6 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using LcmsSpectator.Models;
-
 namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
@@ -151,6 +149,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private string title;
 
         /// <summary>
+        /// The settings for exporting the spectrum to an image.
+        /// </summary>
+        private ImageExportSettings imageExportSettings;
+
+        /// <summary>
         /// Initializes a new instance of the SpectrumPlotViewModel class. 
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from ViewModel.</param>
@@ -185,6 +188,8 @@ namespace LcmsSpectator.ViewModels.Plots
             };
 
             this.ions = new LabeledIonViewModel[0];
+
+            this.ImageExportSettings = new ImageExportSettings();
 
             // When Spectrum updates, clear the filtered spectrum, deconvoluted spectrum, and filtered+deconvoluted spectrum
             this.WhenAnyValue(x => x.Spectrum)
@@ -223,22 +228,6 @@ namespace LcmsSpectator.ViewModels.Plots
                         this.PlotModel.ClearSeries();
                         this.PlotModel.InvalidatePlot(true);
                     });
-
-            //// Update ions when relative intensity threshold changes.
-            //IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
-            //{
-            //    var precFragVm = this.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
-            //    if (precFragVm != null)
-            //    {
-            //        precFragVm.RelativeIntensityThreshold = precRelInt;
-            //    }
-            //});
-
-            //// Update plot when settings change
-            //IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
-            //            .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-            //            .SelectMany(async x => await Task.WhenAll(this.ions.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum, false))))
-            //            .Subscribe(this.UpdatePlotModel);
 
             // When AutoAdjustYAxis changes, update value in plot model.
             this.WhenAnyValue(x => x.AutoAdjustYAxis)
@@ -289,15 +278,13 @@ namespace LcmsSpectator.ViewModels.Plots
             };
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
-            var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => this.SaveAsImageImplementation());
-            this.SaveAsImageCommand = saveAsImageCommand;
+            this.SaveAsImageCommand = ReactiveCommand.Create();
+            this.SaveAsImageCommand.Subscribe(_ => this.SaveAsImageImplementation());
 
             // Error map command opens a new error map window and passes it the most abundant isotope peak data points
             // and the current sequence.
-            var openErrorMapCommand = ReactiveCommand.Create();
-            openErrorMapCommand.Subscribe(_ => dialogService.OpenErrorMapWindow(this.errorMapViewModel));
-            this.OpenErrorMapCommand = openErrorMapCommand;
+            this.OpenErrorMapCommand = ReactiveCommand.Create();
+            this.OpenErrorMapCommand.Subscribe(_ => dialogService.OpenErrorMapWindow(this.errorMapViewModel));
         }
 
         /// <summary>
@@ -429,14 +416,23 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// Gets or sets the settings for exporting the spectrum to an image.
+        /// </summary>
+        public ImageExportSettings ImageExportSettings
+        {
+            get { return this.imageExportSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.imageExportSettings, value); }
+        }
+
+        /// <summary>
         /// Gets a command that prompts user for file path and save plot as image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; private set; }
+        public ReactiveCommand<object> SaveAsImageCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that opens error heat map and table for this spectrum and ions
         /// </summary>
-        public IReactiveCommand OpenErrorMapCommand { get; private set; }
+        public ReactiveCommand<object> OpenErrorMapCommand { get; private set; }
 
         /// <summary>
         /// Build spectrum plot model.
@@ -543,8 +539,8 @@ namespace LcmsSpectator.ViewModels.Plots
             // Filtered/Deconvoluted Spectrum?
             var currentSpectrum = this.Spectrum;
             var tolerance = (currentSpectrum is ProductSpectrum)
-                                ? SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.GetProductTolerance()
-                                : SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.GetPrecursorTolerance();
+                                ? this.FragmentationSequenceViewModel.ToleranceSettings.GetProductTolerance()
+                                : this.FragmentationSequenceViewModel.ToleranceSettings.GetPrecursorTolerance();
             if (this.ShowFilteredSpectrum && this.ShowDeconvolutedSpectrum)
             {
                 if (this.filteredDeconvolutedSpectrum == null)
@@ -556,7 +552,7 @@ namespace LcmsSpectator.ViewModels.Plots
                         Constants.MinCharge,
                         Constants.MaxCharge,
                         tolerance,
-                        SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.IonCorrelationThreshold, 
+                        this.FragmentationSequenceViewModel.ToleranceSettings.IonCorrelationThreshold, 
                         Constants.IsotopeOffsetTolerance);
                 }
 
@@ -581,7 +577,7 @@ namespace LcmsSpectator.ViewModels.Plots
                         Constants.MinCharge,
                         Constants.MaxCharge,
                         tolerance,
-                        SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.IonCorrelationThreshold,
+                        this.FragmentationSequenceViewModel.ToleranceSettings.IonCorrelationThreshold,
                         Constants.IsotopeOffsetTolerance);   
                 }
 
@@ -617,7 +613,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     (int)this.PlotModel.Width,
                     (int)this.PlotModel.Height,
                     OxyColors.White,
-                    SingletonProjectManager.Instance.ProjectInfo.ImageExportSettings.ExportImageDpi);
+                    this.ImageExportSettings.ExportImageDpi);
             }
             catch (Exception e)
             {

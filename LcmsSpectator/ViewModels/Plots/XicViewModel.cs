@@ -14,10 +14,11 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Globalization;
     using System.Reactive.Linq;
     using InformedProteomics.Backend.MassSpecData;
+
+    using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels.Data;
-    using LcmsSpectator.ViewModels.Modifications;
     using OxyPlot.Axes;
     using ReactiveUI;
 
@@ -26,11 +27,6 @@ namespace LcmsSpectator.ViewModels.Plots
     /// </summary>
     public class XicViewModel : ReactiveObject
     {
-        /// <summary>
-        /// Dialog service for opening dialogs from view model.
-        /// </summary>
-        private readonly IMainDialogService dialogService;
-
         /// <summary>
         /// LCMSRun for the data set that this XIC plot is part of.
         /// </summary>
@@ -89,13 +85,22 @@ namespace LcmsSpectator.ViewModels.Plots
         private FragmentationSequence fragmentationSequence;
 
         /// <summary>
+        /// The tolerances to be used for creating the XICs.
+        /// </summary>
+        private ToleranceSettings toleranceSettings;
+
+        /// <summary>
+        /// The settings for exporting the XICs to images.
+        /// </summary>
+        private ImageExportSettings imageExportSettings;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="XicViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>
         /// <param name="lcms">the LCMSRun representing the raw file for this dataset.</param>
-        public XicViewModel(IMainDialogService dialogService, ILcMsRun lcms)
+        public XicViewModel(IDialogService dialogService, ILcMsRun lcms)
         {
-            this.dialogService = dialogService;
             this.lcms = lcms;
             this.fragmentXAxis = new LinearAxis
             {
@@ -106,12 +111,12 @@ namespace LcmsSpectator.ViewModels.Plots
             };
             this.fragmentXAxis.AxisChanged += this.XAxisChanged;
             this.FragmentPlotViewModel = new XicPlotViewModel(
-                                        this.dialogService,
-                                        new FragmentationSequenceViewModel { AddPrecursorIons = false },
+                                        dialogService,
+                                        new FragmentationSequenceViewModel { AddPrecursorIons = false, ToleranceSettings = this.ToleranceSettings },
                                         lcms,
                                         "Fragment XIC",
                                         this.fragmentXAxis,
-                                        false);
+                                        false) { ImageExportSettings = this.ImageExportSettings };
             this.heavyFragmentXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
@@ -122,12 +127,16 @@ namespace LcmsSpectator.ViewModels.Plots
             };
             this.heavyFragmentXAxis.AxisChanged += this.XAxisChanged;
             this.HeavyFragmentPlotViewModel = new XicPlotViewModel(
-                this.dialogService,
-                new FragmentationSequenceViewModel { AddPrecursorIons = false },
+                dialogService,
+                new FragmentationSequenceViewModel
+                    {
+                        AddPrecursorIons = false,
+                        ToleranceSettings = this.ToleranceSettings
+                    },
                 lcms,
                 "Heavy Fragment XIC",
                 this.heavyFragmentXAxis,
-                false);
+                false) { ImageExportSettings = this.ImageExportSettings };
             this.precursorXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
@@ -137,9 +146,15 @@ namespace LcmsSpectator.ViewModels.Plots
                 AbsoluteMaximum = lcms.MaxLcScan + 1
             };
             this.precursorXAxis.AxisChanged += this.XAxisChanged;
-            this.PrecursorPlotViewModel = new XicPlotViewModel(this.dialogService, new PrecursorSequenceIonViewModel(), lcms, "Precursor XIC", this.precursorXAxis)
+            this.PrecursorPlotViewModel = new XicPlotViewModel(
+                                                 dialogService,
+                                                 new PrecursorSequenceIonViewModel { ToleranceSettings = this.ToleranceSettings },
+                                                 lcms,
+                                                 "Precursor XIC",
+                                                 this.precursorXAxis)
             {
                 IsPlotUpdating = true,
+                ImageExportSettings = this.ImageExportSettings
             };
 
             this.heavyPrecursorXAxis = new LinearAxis
@@ -152,17 +167,14 @@ namespace LcmsSpectator.ViewModels.Plots
             };
             this.heavyPrecursorXAxis.AxisChanged += this.XAxisChanged;
             this.HeavyPrecursorPlotViewModel = new XicPlotViewModel(
-                this.dialogService,
-                new PrecursorSequenceIonViewModel(),
+                dialogService,
+                new PrecursorSequenceIonViewModel { ToleranceSettings = this.ToleranceSettings },
                 lcms,
                 "Heavy Precursor XIC",
-                this.heavyPrecursorXAxis);
+                this.heavyPrecursorXAxis) { ImageExportSettings = this.ImageExportSettings };
 
             this.showHeavy = false;
             this.showFragmentXic = false;
-            var openHeavyModificationsCommand = ReactiveCommand.Create();
-            openHeavyModificationsCommand.Subscribe(_ => this.OpenHeavyModificationsImplentation());
-            this.OpenHeavyModificationsCommand = openHeavyModificationsCommand;
 
             // Update area ratios when the area of any of the plots changes
             this.WhenAny(x => x.FragmentPlotViewModel.Area, x => x.HeavyFragmentPlotViewModel.Area, (x, y) => x.Value / y.Value)
@@ -210,11 +222,6 @@ namespace LcmsSpectator.ViewModels.Plots
         public XicPlotViewModel HeavyPrecursorPlotViewModel { get; private set; }
 
         /// <summary>
-        /// Gets command that opens window for selecting heavy modifications for light and heavy peptides.
-        /// </summary>
-        public IReactiveCommand OpenHeavyModificationsCommand { get; private set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the fragment XICs are shown.
         /// </summary>
         public bool ShowFragmentXic
@@ -256,6 +263,24 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.fragmentationSequence; }
             set { this.RaiseAndSetIfChanged(ref this.fragmentationSequence, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the tolerances to be used for creating the XICs.
+        /// </summary>
+        public ToleranceSettings ToleranceSettings
+        {
+            get { return this.toleranceSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.toleranceSettings, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the settings for exporting the XICs to images.
+        /// </summary>
+        public ImageExportSettings ImageExportSettings
+        {
+            get { return this.imageExportSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.imageExportSettings, value); }
         }
 
         /// <summary>
@@ -348,16 +373,6 @@ namespace LcmsSpectator.ViewModels.Plots
 
                 this.axisInternalChange = false;
             }
-        }
-
-        /// <summary>
-        /// Implementation for OpenHeavyModificationsCommand.
-        /// Open window for selecting heavy modifications for light and heavy peptides.
-        /// </summary>
-        private void OpenHeavyModificationsImplentation()
-        {
-            var heavyModificationsWindowVm = new HeavyModificationsWindowViewModel(this.dialogService);
-            this.dialogService.OpenHeavyModifications(heavyModificationsWindowVm);
         }
 
         /// <summary>

@@ -9,9 +9,6 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using LcmsSpectator.Models.DTO;
-using LcmsSpectator.ViewModels.Dataset;
-
 namespace LcmsSpectator.ViewModels.Data
 {
     using System;
@@ -27,6 +24,7 @@ namespace LcmsSpectator.ViewModels.Data
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
+    using LcmsSpectator.Models.DTO;
     using LcmsSpectator.Readers.SequenceReaders;
     using LcmsSpectator.Utils;
 
@@ -42,6 +40,11 @@ namespace LcmsSpectator.ViewModels.Data
         /// Dialog service for opening dialogs from view model.
         /// </summary>
         private readonly IDialogService dialogService;
+
+        /// <summary>
+        /// LCMSRun for the data set that this XIC plot is part of.
+        /// </summary>
+        private readonly ILcMsRun lcms;
 
         /// <summary>
         /// The selected protein-spectrum match.
@@ -64,18 +67,19 @@ namespace LcmsSpectator.ViewModels.Data
         private string sequenceText;
 
         /// <summary>
-        /// The data set selected by the user.
+        /// The settings for modifications.
         /// </summary>
-        private DatasetViewModel selectedDataSetViewModel;
+        private ModificationSettings modificationSettings;
 
         /// <summary>
         /// Initializes a new instance of the CreateSequenceViewModel class. 
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
-        public CreateSequenceViewModel(IDialogService dialogService)
+        /// <param name="lcms">LCMS run data set for this XIC plot. </param>
+        public CreateSequenceViewModel(IDialogService dialogService, ILcMsRun lcms)
         {
-            this.Targets = new ReactiveList<Target>();
             this.dialogService = dialogService;
+            this.lcms = lcms;
             this.SequenceText = string.Empty;
 
             var createPrSmCommand = ReactiveCommand.Create();
@@ -102,13 +106,8 @@ namespace LcmsSpectator.ViewModels.Data
                 this.SelectedCharge = prsm.Charge;
             });
 
-            this.Modifications = new ReactiveList<Modification>(SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications);
+            this.Modifications = new ReactiveList<Modification>(SingletonProjectManager.Instance.ProjectInfo.RegisteredModifications);
         }
-
-        /// <summary>
-        /// Gets the list of target sequences and charges.
-        /// </summary>
-        public ReactiveList<Target> Targets { get; private set; }
 
         /// <summary>
         /// Gets a list of modifications registered with LCMSSpectator.
@@ -176,12 +175,12 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
-        /// Gets or sets the data set selected by the user.
+        /// Gets or sets the settings for modifications.
         /// </summary>
-        public DatasetViewModel SelectedDataSetViewModel
+        public ModificationSettings ModificationSettings
         {
-            get { return this.selectedDataSetViewModel; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedDataSetViewModel, value); }
+            get { return this.modificationSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.modificationSettings, value); }
         }
 
         /// <summary>
@@ -231,7 +230,7 @@ namespace LcmsSpectator.ViewModels.Data
                 return;
             }
 
-            ILcMsRun lcms = this.SelectedDataSetViewModel.LcMs;
+            ILcMsRun lcms = this.lcms;
             
             double score = -1.0;
             if (lcms != null && this.SelectedScan > 0 && this.ScorerFactory != null && sequence.Count > 0)
@@ -244,11 +243,9 @@ namespace LcmsSpectator.ViewModels.Data
                 }
             }
 
-            string rawFileName = this.SelectedDataSetViewModel.DatasetInfo.Name;
             var prsm = new PrSm
             {
                 Heavy = false,
-                RawFileName = rawFileName,
                 ProteinName = string.Empty,
                 ProteinDesc = string.Empty,
                 Scan = Math.Min(Math.Max(this.SelectedScan, 0), lcms.MaxLcScan),
@@ -268,8 +265,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void InsertStaticModifications()
         {
-            var searchModifications =
-                SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.SearchModifications;
+            var searchModifications = this.ModificationSettings.SearchModifications;
             if (this.SequenceText == string.Empty || searchModifications.Count == 0)
             {
                 return;
@@ -300,8 +296,7 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 var matchStr = match.Value;
                 var residue = matchStr[0];
-                var searchModifications =
-                    SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.SearchModifications;
+                var searchModifications = this.ModificationSettings.SearchModifications;
                 foreach (var searchModification in searchModifications)
                 {
                     if (searchModification.IsFixedModification && 
@@ -341,8 +336,7 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 var matchStr = match.Value;
                 var residue = matchStr[0];
-                var searchModifications =
-                    SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.SearchModifications;
+                var searchModifications = this.ModificationSettings.SearchModifications;
                 foreach (var searchModification in searchModifications)
                 {
                     if (searchModification.IsFixedModification &&

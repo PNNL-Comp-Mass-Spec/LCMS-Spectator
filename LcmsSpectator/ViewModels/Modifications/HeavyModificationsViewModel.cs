@@ -58,13 +58,11 @@ namespace LcmsSpectator.ViewModels.Modifications
                 FixedSelection = "Fixed"
             }));
 
-            var addLightModificationCommand = ReactiveCommand.Create();
-            addLightModificationCommand.Subscribe(_ => this.LightModifications.Add(new SearchModificationViewModel(modifications, dialogService)));
-            this.AddLightModificationCommand = addLightModificationCommand;
+            this.AddLightModificationCommand = ReactiveCommand.Create();
+            this.AddLightModificationCommand.Subscribe(_ => this.LightModifications.Add(new SearchModificationViewModel(modifications, dialogService)));
 
-            var addHeavyModificationCommand = ReactiveCommand.Create();
-            addHeavyModificationCommand.Subscribe(_ => this.HeavyModifications.Add(new SearchModificationViewModel(modifications, dialogService)));
-            this.AddHeavyModificationCommand = addHeavyModificationCommand;
+            this.AddHeavyModificationCommand = ReactiveCommand.Create();
+            this.AddHeavyModificationCommand.Subscribe(_ => this.HeavyModifications.Add(new SearchModificationViewModel(modifications, dialogService)));
 
             this.LightModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
                 .Select(x => x.Sender).Where(sender => sender.Remove)
@@ -88,11 +86,11 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Gets a command that adds a new modification to the light modifications list.
         /// </summary>
-        public IReactiveCommand AddLightModificationCommand { get; private set; }
+        public ReactiveCommand<object> AddLightModificationCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that adds a new modification to the heavy modifications list.
         /// </summary>
-        public IReactiveCommand AddHeavyModificationCommand { get; private set; }
+        public ReactiveCommand<object> AddHeavyModificationCommand { get; private set; }
     }
 }

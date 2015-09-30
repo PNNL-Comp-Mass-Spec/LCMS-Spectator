@@ -51,14 +51,6 @@ namespace LcmsSpectator.Views
 
             this.layoutFileLock = new object();
 
-            this.ProgressRow.Height = new GridLength(0, GridUnitType.Pixel);
-            this.FileLoadProgress.IsVisibleChanged += (s, e) =>
-            {
-                this.ProgressRow.Height = this.FileLoadProgress.IsVisible ? 
-                                                new GridLength(30, GridUnitType.Pixel) : 
-                                                new GridLength(0, GridUnitType.Pixel);
-            };
-
             // Update layout when datacontext changes.
             this.DataContextChanged += (o, e) =>
             {

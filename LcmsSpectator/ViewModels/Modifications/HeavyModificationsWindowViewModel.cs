@@ -28,12 +28,12 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// Initializes a new instance of the <see cref="HeavyModificationsWindowViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
-        public HeavyModificationsWindowViewModel(IDialogService dialogService)
+        public HeavyModificationsWindowViewModel(IDialogService dialogService, ModificationSettings settings)
         {
             this.HeavyModificationsViewModel = new HeavyModificationsViewModel(
-                SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications,
-                SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.LightModifications,
-                SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.HeavyModifications,
+                SingletonProjectManager.Instance.ProjectInfo.RegisteredModifications,
+                settings.LightModifications,
+                settings.HeavyModifications,
                 dialogService);
 
             var saveCommand = ReactiveCommand.Create();

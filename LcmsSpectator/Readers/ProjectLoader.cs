@@ -35,6 +35,11 @@ namespace LcmsSpectator.Readers
         /// <param name="projectInfo">The <see cref="ProjectInfo" /> to save.</param>
         public void SaveProject(ProjectInfo projectInfo)
         {
+            if (string.IsNullOrEmpty(projectInfo.ProjectFilePath))
+            {
+                return;
+            }
+
             var projectSerializer = new DataContractSerializer(typeof (ProjectInfo));
             using (var writer = File.Open(projectInfo.ProjectFilePath, FileMode.Create))
             {

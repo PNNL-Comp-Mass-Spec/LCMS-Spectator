@@ -8,12 +8,6 @@ namespace LcmsSpectator.Config
     {
         public ModificationSettings()
         {
-            this.RegisteredModifications = new List<Modification>(Modification.CommonModifications)
-            {
-                Modification.LysToHeavyLys,
-                Modification.ArgToHeavyArg
-            };
-
             this.SearchModifications = new List<SearchModification>
             {
                 new SearchModification(Modification.Carbamidomethylation, 'C', SequenceLocation.Everywhere, true)
@@ -26,11 +20,6 @@ namespace LcmsSpectator.Config
                 new SearchModification(Modification.ArgToHeavyArg, 'R', SequenceLocation.PeptideCTerm, true)
             };
         }
-
-        /// <summary>
-        /// Gets or sets the list of all registered modifications.
-        /// </summary>
-        public List<Modification> RegisteredModifications { get; set; } 
 
         /// <summary>
         /// Gets or sets the list of static modifications used by the application.

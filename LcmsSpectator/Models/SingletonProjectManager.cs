@@ -169,7 +169,7 @@
         public Modification RegisterModification(string modName, Composition composition)
         {
             var mod = Modification.RegisterAndGetModification(modName, composition);
-            this.ProjectInfo.ModificationSettings.RegisteredModifications.Add(mod);
+            this.ProjectInfo.RegisteredModifications.Add(mod);
             return mod;
         }
 
@@ -182,7 +182,7 @@
         public Modification RegisterModification(string modName, double mass)
         {
             var mod = Modification.RegisterAndGetModification(modName, mass);
-            this.ProjectInfo.ModificationSettings.RegisteredModifications.Add(mod);
+            this.ProjectInfo.RegisteredModifications.Add(mod);
             return mod;
         }
 
@@ -195,13 +195,13 @@
         public Modification UpdateOrRegisterModification(string modName, Composition composition)
         {
             var mod = Modification.UpdateAndGetModification(modName, composition);
-            var regMod = this.ProjectInfo.ModificationSettings.RegisteredModifications.FirstOrDefault(m => m.Name == modName);
+            var regMod = this.ProjectInfo.RegisteredModifications.FirstOrDefault(m => m.Name == modName);
             if (regMod != null)
             {
-                this.ProjectInfo.ModificationSettings.RegisteredModifications.Remove(regMod);
+                this.ProjectInfo.RegisteredModifications.Remove(regMod);
             }
 
-            this.ProjectInfo.ModificationSettings.RegisteredModifications.Add(mod);
+            this.ProjectInfo.RegisteredModifications.Add(mod);
             return mod;
         }
 
@@ -214,13 +214,13 @@
         public Modification UpdateOrRegisterModification(string modName, double mass)
         {
             var mod = Modification.UpdateAndGetModification(modName, mass);
-            var regMod = this.ProjectInfo.ModificationSettings.RegisteredModifications.FirstOrDefault(m => m.Name == modName);
+            var regMod = this.ProjectInfo.RegisteredModifications.FirstOrDefault(m => m.Name == modName);
             if (regMod != null)
             {
-                this.ProjectInfo.ModificationSettings.RegisteredModifications.Remove(regMod);
+                this.ProjectInfo.RegisteredModifications.Remove(regMod);
             }
 
-            this.ProjectInfo.ModificationSettings.RegisteredModifications.Add(mod);
+            this.ProjectInfo.RegisteredModifications.Add(mod);
             return mod;
         }
 
@@ -231,9 +231,9 @@
         public void UnregisterModification(Modification modification)
         {
             Modification.UnregisterModification(modification);
-            if (this.ProjectInfo.ModificationSettings.RegisteredModifications.Contains(modification))
+            if (this.ProjectInfo.RegisteredModifications.Contains(modification))
             {
-                this.ProjectInfo.ModificationSettings.RegisteredModifications.Remove(modification);
+                this.ProjectInfo.RegisteredModifications.Remove(modification);
             }
         }
     }

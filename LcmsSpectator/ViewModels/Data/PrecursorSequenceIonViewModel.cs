@@ -6,6 +6,8 @@
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
+
+    using LcmsSpectator.Config;
     using LcmsSpectator.Models;
     using ReactiveUI;
     
@@ -47,6 +49,11 @@
         private bool chargeViewMode;
 
         /// <summary>
+        /// The tolerances used for creating ions.
+        /// </summary>
+        private ToleranceSettings toleranceSettings;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PrecursorSequenceIonViewModel"/> class.
         /// </summary>
         public PrecursorSequenceIonViewModel()
@@ -59,6 +66,7 @@
             this.HeavyModifications = new SearchModification[0];
             this.PrecursorViewMode = PrecursorViewMode.Isotopes;
             this.LabeledIonViewModels = new LabeledIonViewModel[0];
+            this.ToleranceSettings = new ToleranceSettings();
 
             this.WhenAnyValue(x => x.ChargeViewMode).Subscribe(chargeViewMode => this.IsotopeViewMode = !chargeViewMode);
             this.WhenAnyValue(x => x.IsotopeViewMode).Subscribe(isotopeViewMode => this.ChargeViewMode = !isotopeViewMode);
@@ -71,7 +79,12 @@
                     this.ChargeViewMode = viewMode == PrecursorViewMode.Charges;
                 });
 
-            this.WhenAnyValue(x => x.PrecursorViewMode, x => x.RelativeIntensityThreshold, x => x.HeavyModifications, x => x.FragmentationSequence)
+            this.WhenAnyValue(
+                              x => x.PrecursorViewMode,
+                              x => x.RelativeIntensityThreshold,
+                              x => x.HeavyModifications,
+                              x => x.FragmentationSequence,
+                              x => x.ToleranceSettings)
                 .SelectMany(async _ => await this.GetLabeledIonViewModels())
                 .Subscribe(livms => this.LabeledIonViewModels = livms);
         }
@@ -137,6 +150,15 @@
         {
             get { return this.chargeViewMode; }
             set { this.RaiseAndSetIfChanged(ref this.chargeViewMode, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the tolerances used for creating ions.
+        /// </summary>
+        public ToleranceSettings ToleranceSettings
+        {
+            get { return this.toleranceSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.toleranceSettings, value); }
         }
 
         /// <summary>

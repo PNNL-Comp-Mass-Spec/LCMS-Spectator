@@ -6,16 +6,18 @@
     using System.Text;
     using System.Threading.Tasks;
     using LcmsSpectator.Config;
+    using LcmsSpectator.ViewModels.Dataset;
+
     using ReactiveUI;
     
-    public class ImageExportSettingsViewModel : ReactiveObject
+    public class ImageExportSettingsViewModel : BaseSettingsViewModel
     {
         /// <summary>
         /// The DPI resolution for image exporting.
         /// </summary>
         private int exportImageDpi;
 
-        public ImageExportSettingsViewModel(ImageExportSettings imageExportSettings)
+        public ImageExportSettingsViewModel(ImageExportSettings imageExportSettings, IEnumerable<DatasetViewModel> datasets) : base(datasets)
         {
             this.ExportImageDpi = imageExportSettings.ExportImageDpi;
         }
@@ -41,6 +43,6 @@
         {
             get { return this.exportImageDpi; }
             set { this.RaiseAndSetIfChanged(ref this.exportImageDpi, value); }
-        } 
+        }
     }
 }

@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
-using LcmsSpectator.Config;
-using LcmsSpectator.ViewModels.Colors;
-
-namespace LcmsSpectator.ViewModels.Settings
+﻿namespace LcmsSpectator.ViewModels.Settings
 {
-    public class FeatureMapSettingsViewModel
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Windows.Media;
+    using LcmsSpectator.Config;
+    using LcmsSpectator.ViewModels.Colors;
+    using LcmsSpectator.ViewModels.Dataset;
+
+    using ReactiveUI;
+
+    public class FeatureMapSettingsViewModel : BaseSettingsViewModel
     {
-        public FeatureMapSettingsViewModel(FeatureMapSettings featureMapSettings)
+        public FeatureMapSettingsViewModel(FeatureMapSettings featureMapSettings, IEnumerable<DatasetViewModel> datasets) : base(datasets)
         {
             this.FeatureColors = new ColorListViewModel();
             this.FeatureColors.ColorViewModels.AddRange(featureMapSettings.FeatureColors.Select(c => new ColorViewModel { SelectedColor = c }));

@@ -13,6 +13,8 @@ namespace LcmsSpectator.Models.Dataset
     using System.Collections.Generic;
     using System.IO;
 
+    using InformedProteomics.Backend.Data.Sequence;
+
     using LcmsSpectator.Config;
     
     /// <summary>
@@ -31,12 +33,12 @@ namespace LcmsSpectator.Models.Dataset
             this.OutputDirectory = "DefaultProject";
 
             this.Datasets = new List<DatasetInfo>();
-            this.ToleranceSettings = new ToleranceSettings();
-            this.ModificationSettings = new ModificationSettings();
-            this.FeatureMapSettings = new FeatureMapSettings();
-            this.IonTypeSettings = new IonTypeSettings();
-            this.ImageExportSettings = new ImageExportSettings();
-            this.Parameters = new MsPfParameters();
+            this.RegisteredModifications = new List<Modification>(Modification.CommonModifications)
+            {
+                Modification.LysToHeavyLys,
+                Modification.ArgToHeavyArg
+            };
+
             this.Files = new List<FileInfo>();
         }
 
@@ -66,34 +68,9 @@ namespace LcmsSpectator.Models.Dataset
         public List<DatasetInfo> Datasets { get; set; }
 
         /// <summary>
-        /// Gets or sets the tolerance settings for the project.
+        /// Gets or sets the list of all registered modifications.
         /// </summary>
-        public ToleranceSettings ToleranceSettings { get; set; }
-
-        /// <summary>
-        /// Gets or sets the modification settings for the project.
-        /// </summary>
-        public ModificationSettings ModificationSettings { get; set; }
-
-        /// <summary>
-        /// Gets or sets the settings for the feature map.
-        /// </summary>
-        public FeatureMapSettings FeatureMapSettings { get; set; }
-
-        /// <summary>
-        /// Gets or sets the ion type settings for the project.
-        /// </summary>
-        public IonTypeSettings IonTypeSettings { get; set; }
-
-        /// <summary>
-        /// Gets or sets the image export settings for the project.
-        /// </summary>
-        public ImageExportSettings ImageExportSettings { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameter settings for this project.
-        /// </summary>
-        public MsPfParameters Parameters { get; set; }
+        public List<Modification> RegisteredModifications { get; set; } 
 
         /// <summary>
         /// Gets or sets the list of files associated with this project (such as target lists).

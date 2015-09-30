@@ -17,6 +17,8 @@ using InformedProteomics.Backend.MassSpecData;
 
 namespace LcmsSpectator.Models.DTO
 {
+    using LcmsSpectator.Readers;
+
     /// <summary>
     /// A class containing a hierarchy of Protein-Spectrum-Match identifications.
     /// The hierarchy is: Protein, Proteoform, Charge state, ID
@@ -169,6 +171,20 @@ namespace LcmsSpectator.Models.DTO
             foreach (var entry in fastaEntry)
             {
                 this.AddFastaEntry(entry);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously add FASTA entries from files.
+        /// </summary>
+        /// <param name="fastaFilePaths">The paths to the fasta files.</param>
+        /// <returns>The <see cref="Task" />.</returns>
+        public async Task AddFastaFilesAsync(IEnumerable<string> fastaFilePaths)
+        {
+            foreach (var path in fastaFilePaths)
+            {
+                var entries = await Task.Run(() => FastaReaderWriter.ReadFastaFile(path));
+                await this.AddFastaEntriesAsync(entries);
             }
         }
 

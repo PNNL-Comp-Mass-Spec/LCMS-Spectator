@@ -221,6 +221,11 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private int numMatchesPerSpectrum;
 
+                /// <summary>
+        /// The threshold for correlation between theoretical isotopic profile and actual.
+        /// </summary>
+        private double ionCorrelationThreshold;
+
         /// <summary>
         /// The search progress.
         /// </summary>
@@ -394,7 +399,7 @@ namespace LcmsSpectator.ViewModels
             this.SearchModifications.AddRange(
                mspfParameters.Modifications.Select(
                     searchMod => new SearchModificationViewModel(
-                                        SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications,
+                                        SingletonProjectManager.Instance.ProjectInfo.RegisteredModifications,
                                         this.dialogService)
                     {
                         SearchModification = searchMod
@@ -785,6 +790,15 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Gets or sets the threshold for correlation between theoretical isotopic profile and actual.
+        /// </summary>
+        public double IonCorrelationThreshold
+        {
+            get { return this.ionCorrelationThreshold; }
+            set { this.RaiseAndSetIfChanged(ref this.ionCorrelationThreshold, value); }
+        }
+
+        /// <summary>
         /// Gets or sets the search progress.
         /// </summary>
         public double SearchProgressPercent
@@ -958,7 +972,7 @@ namespace LcmsSpectator.ViewModels
         {
             var searchMod =
                 new SearchModificationViewModel(
-                    SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications,
+                    SingletonProjectManager.Instance.ProjectInfo.RegisteredModifications,
                     dialogService);
             this.SearchModifications.Add(searchMod);
         }
@@ -986,7 +1000,7 @@ namespace LcmsSpectator.ViewModels
         private void ManageModificationsImplementation()
         {
             var manageModificationsViewModel = new ManageModificationsViewModel(this.dialogService);
-            manageModificationsViewModel.Modifications.AddRange(SingletonProjectManager.Instance.ProjectInfo.ModificationSettings.RegisteredModifications);
+            manageModificationsViewModel.Modifications.AddRange(SingletonProjectManager.Instance.ProjectInfo.RegisteredModifications);
             this.dialogService.OpenManageModifications(manageModificationsViewModel);
 
             this.ModificationsUpdated = true;
@@ -1030,7 +1044,7 @@ namespace LcmsSpectator.ViewModels
             var topDownLauncher = this.GetTopDownLauncher(ms2Scans);
             this.runSearchTask = Task.Run(
                                           () => topDownLauncher.RunSearch(
-                                                                          SingletonProjectManager.Instance.ProjectInfo.ToleranceSettings.IonCorrelationThreshold,
+                                                                          this.ionCorrelationThreshold,
                                                                           this.runSearchCancellationToken.Token,
                                                                           progress),
                                                 this.runSearchCancellationToken.Token);

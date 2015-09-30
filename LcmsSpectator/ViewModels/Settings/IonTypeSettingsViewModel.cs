@@ -7,9 +7,11 @@
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Spectrometry;
     using LcmsSpectator.Config;
+    using LcmsSpectator.ViewModels.Dataset;
+
     using ReactiveUI;
     
-    public class IonTypeSettingsViewModel : ReactiveObject
+    public class IonTypeSettingsViewModel : BaseSettingsViewModel
     {
         /// <summary>
         /// The Cid/Hcd ion types as a space-separated string.
@@ -21,7 +23,7 @@
         /// </summary>
         private string etdIonTypeText;
 
-        public IonTypeSettingsViewModel(IonTypeSettings ionTypeSettings)
+        public IonTypeSettingsViewModel(IonTypeSettings ionTypeSettings, IEnumerable<DatasetViewModel> datasets) : base(datasets)
         {
             this.CidHcdIonTypes = new ReactiveList<BaseIonType>(ionTypeSettings.CidHcdIonTypes);
             this.CidHcdIonTypeText = this.CidHcdIonTypes.Aggregate(string.Empty, (current, ionType) => current + ionType.Symbol + " ");

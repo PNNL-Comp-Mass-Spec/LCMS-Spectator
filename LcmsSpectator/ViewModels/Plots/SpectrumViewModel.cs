@@ -78,6 +78,16 @@ namespace LcmsSpectator.ViewModels.Plots
         private FragmentationSequence fragmentationSequence;
 
         /// <summary>
+        /// The tolerances to be used for creating the XICs.
+        /// </summary>
+        private ToleranceSettings toleranceSettings;
+
+        /// <summary>
+        /// The settings for exporting the XICs to images.
+        /// </summary>
+        private ImageExportSettings imageExportSettings;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SpectrumViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
@@ -219,6 +229,24 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.fragmentationSequence; }
             set { this.RaiseAndSetIfChanged(ref this.fragmentationSequence, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the tolerances to be used for creating the XICs.
+        /// </summary>
+        public ToleranceSettings ToleranceSettings
+        {
+            get { return this.toleranceSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.toleranceSettings, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the settings for exporting the XICs to images.
+        /// </summary>
+        public ImageExportSettings ImageExportSettings
+        {
+            get { return this.imageExportSettings; }
+            set { this.RaiseAndSetIfChanged(ref this.imageExportSettings, value); }
         }
 
         /// <summary>

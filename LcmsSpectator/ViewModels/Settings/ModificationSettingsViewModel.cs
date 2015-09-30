@@ -7,8 +7,12 @@ using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.Settings
 {
-    public class ModificationSettingsViewModel : ReactiveObject
-    {
+    using LcmsSpectator.ViewModels.Dataset;
 
+    public class ModificationSettingsViewModel : BaseSettingsViewModel
+    {
+        public ModificationSettingsViewModel(IEnumerable<DatasetViewModel> datasets) : base(datasets)
+        {
+        }
     }
 }
