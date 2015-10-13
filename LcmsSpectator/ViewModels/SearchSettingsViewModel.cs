@@ -809,28 +809,30 @@ namespace LcmsSpectator.ViewModels
             var searchModifications = this.SearchModifications.Select(searchModification => searchModification.SearchModification).ToList();
             var aminoAcidSet = new AminoAcidSet(searchModifications, this.maxDynamicModificationsPerSequence);
             return new IcTopDownLauncher(
-                                         this.SpectrumFilePath,
-                                         this.truncatedFastaDbFilePath,
-                                         this.OutputFilePath,
-                                         aminoAcidSet,
-                                         this.MinSequenceLength,
-                                         this.MaxSequenceLength,
-                                         1,
-                                         0,
-                                         this.MinPrecursorIonCharge,
-                                         this.MaxPrecursorIonCharge,
-                                         this.MinProductIonCharge,
-                                         this.MaxProductIonCharge,
-                                         this.MinSequenceMass,
-                                         this.MaxSequenceMass,
-                                         this.PrecursorIonToleranceValue,
-                                         this.ProductIonToleranceValue,
-                                         true,
-                                         this.SelectedSearchMode,
-                                         this.FeatureFilePath,
-                                         4,
-                                         ms2ScanNums,
-                                         this.NumMatchesPerSpectrum);
+                this.SpectrumFilePath,
+                this.truncatedFastaDbFilePath,
+                this.OutputFilePath,
+                aminoAcidSet,
+                this.FeatureFilePath)
+            {
+                MinSequenceLength = this.MinSequenceLength,
+                MaxSequenceLength = this.MaxSequenceLength,
+                MaxNumNTermCleavages = 1,
+                MaxNumCTermCleavages = 0,
+                MinPrecursorIonCharge = this.MinPrecursorIonCharge,
+                MaxPrecursorIonCharge = this.MaxPrecursorIonCharge,
+                MinProductIonCharge = this.MinProductIonCharge,
+                MaxProductIonCharge = this.MaxProductIonCharge,
+                MinSequenceMass = this.MinSequenceMass,
+                MaxSequenceMass = this.MaxSequenceMass,
+                PrecursorIonTolerancePpm = this.PrecursorIonToleranceValue,
+                ProductIonTolerancePpm = this.ProductIonToleranceValue,
+                RunTargetDecoyAnalysis = true,
+                SearchMode = this.SelectedSearchMode,
+                MaxNumThreads = 4,
+                ScanNumbers = ms2ScanNums,
+                NumMatchesPerSpectrum = this.NumMatchesPerSpectrum,
+            };
         }
 
         /// <summary>
