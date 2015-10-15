@@ -10,6 +10,8 @@ using LcmsSpectator.Models.Dataset;
 
 namespace LcmsSpectator.Readers
 {
+    using System.Xml;
+
     public class ProjectLoader : IProjectLoader
     {
         /// <summary>
@@ -40,8 +42,9 @@ namespace LcmsSpectator.Readers
                 return;
             }
 
-            var projectSerializer = new DataContractSerializer(typeof (ProjectInfo));
-            using (var writer = File.Open(projectInfo.ProjectFilePath, FileMode.Create))
+            var xmlSettings = new XmlWriterSettings() { Indent = true, CloseOutput = true };
+            var projectSerializer = new DataContractSerializer(typeof(ProjectInfo));
+            using (var writer = XmlWriter.Create(File.Open(projectInfo.ProjectFilePath, FileMode.Create), xmlSettings))
             {
                 projectSerializer.WriteObject(writer, projectInfo);
             }

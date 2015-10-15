@@ -1,8 +1,12 @@
 ﻿namespace LcmsSpectator.Models
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Reactive;
     using System.Reactive.Linq;
+    using System.Windows.Documents;
+
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
@@ -101,7 +105,7 @@
         public ReactiveList<DatasetViewModel> Datasets { get; private set; }
 
         /// <summary>
-        /// Gets the project info for the currently selected project.
+        /// Gets or sets the project info for the currently selected project.
         /// </summary>
         public ProjectInfo ProjectInfo
         {
@@ -116,7 +120,28 @@
         public void LoadProject(string filePath)
         {
             var projectLoader = this.ProjectLoader ?? new ProjectLoader();
-            this.ProjectInfo = projectLoader.LoadProject(filePath);
+            this.LoadProject(projectLoader.LoadProject(filePath));
+        }
+
+        /// <summary>
+        /// Load a project from its project information.
+        /// </summary>
+        /// <param name="project">The project to load.</param>
+        public void LoadProject(ProjectInfo project)
+        {
+            this.ProjectInfo = project;
+            foreach (var modification in project.RegisteredModifications)
+            {
+                try
+                {
+                    Modification.Register(modification);
+                }
+                catch (ArgumentException e)
+                {
+                    Modification.UnregisterModification(modification);
+                    Modification.Register(modification);
+                }
+            }
         }
 
         /// <summary>

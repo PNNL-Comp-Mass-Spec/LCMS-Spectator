@@ -2,6 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Configure Project" Height="400" Width="1100">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="50" />
@@ -10,6 +13,8 @@
             <RowDefinition Height="10" />
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
+        
+        <!-- Project file path -->
         <GroupBox Grid.Row="0">
             <GroupBox.Header>
                 <TextBlock Text="Project File" FontWeight="Bold" />
@@ -26,6 +31,8 @@
                 <Button Grid.Column="2" Command="{Binding BrowseProjectFilesCommand}">Browse</Button>
             </Grid>
         </GroupBox>
+
+        <!-- Output Directory -->
         <GroupBox Grid.Row="1">
             <GroupBox.Header>
                 <TextBlock Text="Output Directory" FontWeight="Bold" />
@@ -43,6 +50,7 @@
             </Grid>
         </GroupBox>
 
+        <!-- Dataset info -->
         <GroupBox Grid.Row="2">
             <GroupBox.Header>
                 <TextBlock Text="Datasets" FontWeight="Bold" />
@@ -58,13 +66,15 @@
                     <ColumnDefinition Width="40*" />
                 </Grid.ColumnDefinitions>
 
+                <!-- File selection buttons -->
                 <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Height="25" HorizontalAlignment="Left">
-                    <Button Content="+ Add Folder" Command="{Binding AddDatasetCommand}" Width="90" />
-                    <Button Content="+ Select Files" Margin="3,0,0,0" Width="90" />
-                    <Button Content="+ From DMS" Margin="3,0,0,0" Width="90" />
+                    <Button Content="+ Add Folder" Width="90" Command="{Binding LoadFolderCommand}" />
+                    <Button Content="+ Select Files" Margin="3,0,0,0" Width="90" Command="{Binding SelectFilesCommand}" />
+                    <Button Content="+ From DMS" Margin="3,0,0,0" Width="90" Command="{Binding OpenFromDmsCommand}" Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}" />
                 </StackPanel>
 
-                <DataGrid Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Datasets}" AutoGenerateColumns="False">
+                <!-- Dataset datagrid -->
+                <DataGrid Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Datasets}" SelectedItem="{Binding SelectedDataset}" AutoGenerateColumns="False">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Width="25">
                             <DataGridTemplateColumn.CellTemplate>
@@ -73,25 +83,27 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="Dataset Name" Width="*" Binding="{Binding Dataset.Alias}" />
+                        <DataGridTextColumn Header="Dataset Name" Width="*" Binding="{Binding  Name}" />
                     </DataGrid.Columns>
                 </DataGrid>
                 
-                <DataGrid Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" AutoGenerateColumns="False">
+                <!-- File selection datagrid -->
+                <DataGrid Grid.Row="1" Grid.Column="1" Margin="3,0,0,0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedDataset.Files}">
                     <DataGrid.Columns>
                         <DataGridCheckBoxColumn Width="25" Binding="{Binding Selected}" />
-                        <DataGridTextColumn Header="Available Files" Width="80*" Binding="{Binding FileName}" />
-                        <DataGridCheckBoxColumn Header="Type" Width="20*" Binding="{Binding FileType}" />
+                        <DataGridTextColumn Header="Available Files" Width="80*" Binding="{Binding FileNameWithExtension}" />
+                        <DataGridTextColumn Header="Type" Width="20*" Binding="{Binding FileType}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
         </GroupBox>
 
+        <!-- OK/Cancel buttons -->
         <StackPanel Orientation="Horizontal"
                     Grid.Row="4"
                     HorizontalAlignment="Right">
             <Button Width="70" Margin="0,0,10,0" Command="{Binding CancelCommand}" IsCancel="True">Cancel</Button>
-            <Button Width="70" Command="{Binding CreateCommand}" IsDefault="True">Open</Button>
+            <Button Width="70" Command="{Binding OkCommand}" IsDefault="True">Open</Button>
         </StackPanel>
     </Grid>
 </Window>

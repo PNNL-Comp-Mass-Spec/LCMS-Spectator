@@ -843,6 +843,7 @@ namespace LcmsSpectator.ViewModels
                                          true,
                                          this.SelectedSearchMode,
                                          this.FeatureFilePath,
+                                         4,
                                          ms2ScanNums,
                                          this.NumMatchesPerSpectrum);
         }

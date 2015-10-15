@@ -32,8 +32,7 @@ namespace LcmsSpectator.ViewModels.Dataset
             this.RemoveDataset = ReactiveCommand.Create();
             this.RemoveDataset.Select(
                 _ =>
-                    dialogService.ConfirmationBox(
-                        string.Format("Are you sure that you would like to close {0}?", this.Name), "Close"))
+                    dialogService.ConfirmationBox($"Are you sure that you would like to close {this.Name}?", "Close"))
                 .Subscribe(response => this.ReadyToClose = response);
 
             if (datasetInfo != null)
@@ -55,7 +54,7 @@ namespace LcmsSpectator.ViewModels.Dataset
         /// <summary>
         /// Gets the list of files that are part of this dataset.
         /// </summary>
-        public ReactiveList<FileInfoViewModel> Files { get; private set; }
+        public ReactiveList<FileInfoViewModel> Files { get; }
 
         /// <summary>
         /// Gets or sets a value that indicates whether this dataset is ready to be closed.
@@ -69,7 +68,7 @@ namespace LcmsSpectator.ViewModels.Dataset
         /// <summary>
         /// Gets a command that is triggered when this dataset should be removed.
         /// </summary>
-        public ReactiveCommand<object> RemoveDataset { get; private set; }
+        public ReactiveCommand<object> RemoveDataset { get; }
 
         /// <summary>
         /// Gets the <see cref="DatasetInfo" /> for this view model.

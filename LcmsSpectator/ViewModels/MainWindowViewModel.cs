@@ -62,6 +62,13 @@ namespace LcmsSpectator.ViewModels
             // Initialize child view models
             this.ScanViewModel = new ScanViewModel(this.dialogService, new List<PrSm>());
 
+            // New project command
+            this.NewProjectCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.NewProjectImplementation());
+
+            // Configure project command is executable when a project is open.
+            this.ConfigureProjectCommand = ReactiveCommand.Create(this.ProjectManager.WhenAnyValue(x => x.ProjectInfo)
+                                                                      .Select(project => project != null && project.Name != "DefaultProject"));
+
             // Remove filter by unidentified scans from ScanViewModel filters
             this.ScanViewModel.Filters.Remove(this.ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Hide Unidentified Scans"));
 
@@ -127,62 +134,69 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets the project loader for the project open in this application.
         /// </summary>
-        public SingletonProjectManager ProjectManager { get; private set; }
+        public SingletonProjectManager ProjectManager { get; }
+
+        /// <summary>
+        /// Gets a command that opens a dialog for a new project and loads the project.
+        /// </summary>
+        public ReactiveCommand<Unit> NewProjectCommand { get; }
+
+        /// <summary>
+        /// Gets a command that opens a dialog for configuring the active project.
+        /// </summary>
+        public ReactiveCommand<Object> ConfigureProjectCommand { get; }
 
         /// <summary>
         /// Gets command that opens a dialog box prompting the user for a raw file path,
         /// feature file path, and ID file path, then opens the files.
         /// </summary>
-        public ReactiveCommand<Unit> OpenDataSetCommand { get; private set; }
+        public ReactiveCommand<Unit> OpenDataSetCommand { get; }
 
         /// <summary>
         /// Gets command that prompts the user for raw file(s) to open.
         /// </summary>
-        public ReactiveCommand<Unit> OpenRawFileCommand { get; private set; }
+        public ReactiveCommand<Unit> OpenRawFileCommand { get; }
         
         /// <summary>
         /// Gets command that opens the DMS search dialog.
         /// </summary>
-        public ReactiveCommand<Unit> OpenFromDmsCommand { get; private set; }
+        public ReactiveCommand<Unit> OpenFromDmsCommand { get; }
         
         /// <summary>
         /// Gets command that opens settings window.
         /// </summary>
-        public ReactiveCommand<object> OpenSettingsCommand { get; private set; }
+        public ReactiveCommand<object> OpenSettingsCommand { get; }
         
         /// <summary>
         /// Gets command that opens about box.
         /// </summary>
-        public ReactiveCommand<object> OpenAboutBoxCommand { get; private set; }
+        public ReactiveCommand<object> OpenAboutBoxCommand { get; }
         
         /// <summary>
         /// Gets command that opens a window for managing registered modifications.
         /// </summary>
-        public IReactiveCommand<object> OpenManageModificationsCommand { get; private set; }
+        public IReactiveCommand<object> OpenManageModificationsCommand { get; }
 
         /// <summary>
         /// Gets command that runs an MSPathFinder database search.
         /// </summary>
-        public ReactiveCommand<object> RunMsPathFinderSearchCommand { get; private set; }
+        public ReactiveCommand<object> RunMsPathFinderSearchCommand { get; }
 
         /// <summary>
         /// Gets a command that exports results of a data set to a file.
         /// </summary>
-        public ReactiveCommand<object> ExportResultsCommand { get; private set; }
+        public ReactiveCommand<object> ExportResultsCommand { get; }
 
         /// <summary>
         /// Gets view model for list of scans and identifications.
         /// </summary>
-        public ScanViewModel ScanViewModel { get; private set; }
+        public ScanViewModel ScanViewModel { get; }
       
         /// <summary>
         /// Gets a value indicating whether or not "Open From DMS" should be shown on the menu based on whether
         /// or not the user is on the PNNL network or not.
         /// </summary>
-        public bool ShowOpenFromDms
-        {
-            get { return System.Net.Dns.GetHostEntry(string.Empty).HostName.Contains("pnl.gov"); }
-        }
+        public bool ShowOpenFromDms => System.Net.Dns.GetHostEntry(string.Empty).HostName.Contains("pnl.gov");
 
         /// <summary>
         /// Gets a value indicating whether or not splash screen is visible.
@@ -274,10 +288,30 @@ namespace LcmsSpectator.ViewModels
             }
             catch (Exception)
             {
-                this.dialogService.ExceptionAlert(new Exception(string.Format("Cannot read {0}.", Path.GetFileNameWithoutExtension(datasetViewModel.DatasetInfo.Name))));
+                this.dialogService.ExceptionAlert(new Exception(
+                    $"Cannot read {Path.GetFileNameWithoutExtension(datasetViewModel.DatasetInfo.Name)}."));
                 if (this.ProjectManager.Datasets.Count > 0 && this.ProjectManager.Datasets.Contains(datasetViewModel))
                 {
                     this.ProjectManager.Datasets.Remove(datasetViewModel);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Implementation for <see cref="NewProjectCommand" />.
+        /// Opens a dialog for a new project and loads the project.
+        /// </summary>
+        /// <returns>The <see cref="Task" />.</returns>
+        private async Task NewProjectImplementation()
+        {
+            var projectVm = new ProjectInfoViewModel(this.dialogService) { ShowOpenFromDms = this.ShowOpenFromDms };
+            if (this.dialogService.OpenProjectEditor(projectVm))
+            {
+                var project = projectVm.ProjectInfo;
+                SingletonProjectManager.Instance.LoadProject(project);
+                if (project.Datasets.Any())
+                {
+                    await this.LoadDatasets(projectVm.ProjectInfo.Datasets);
                 }
             }
         }

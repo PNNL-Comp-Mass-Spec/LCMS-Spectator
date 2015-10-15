@@ -1,0 +1,83 @@
+﻿<Window x:Class="LcmsSpectator.Views.ImageExportSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        Title="Image Export Settings" Height="Auto" Width="350">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" Name="SpectrumExportSettingsRow" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <GroupBox>
+            <GroupBox.Header>
+                <TextBlock FontWeight="Bold" Margin="3,0,3,0">Image Export Settings</TextBlock>
+            </GroupBox.Header>
+
+            <Grid Margin="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="65*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Height -->
+                <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Height (px)</TextBlock>
+                <xctk:IntegerUpDown Grid.Row="0" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Left"
+                            Minimum="0" Increment="100" />
+
+                <!-- Width -->
+                <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Width (px)</TextBlock>
+                <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Left"
+                            Minimum="0" Increment="100" />
+
+                <!-- Dots-per-inch -->
+                <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Dots-per-inch</TextBlock>
+                <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Left"
+                            Minimum="0" Increment="10" />
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="1" Margin="0,10,0,0">
+            <GroupBox.Header>
+                <CheckBox FontWeight="Bold" Margin="3,0,3,0">Split Image</CheckBox>
+            </GroupBox.Header>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                    <RowDefinition Height="30" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="65*" />
+                    <ColumnDefinition Width="35*" />
+                </Grid.ColumnDefinitions>
+                
+                <!-- Maximum M/Z -->
+                <TextBlock VerticalAlignment="Center" Grid.Row="0" Grid.Column="0">Maximum M/Z Per Image</TextBlock>
+                <xctk:IntegerUpDown Grid.Row="0" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Left"
+                            Minimum="0" Increment="10" />
+                
+                <!-- Image Tile Rows -->
+                <TextBlock VerticalAlignment="Center" Grid.Row="1" Grid.Column="0">Tile rows</TextBlock>
+                <xctk:IntegerUpDown Grid.Row="1" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Left"
+                            Minimum="0" Increment="10" />
+
+                <!-- Image Tile Columns -->
+                <TextBlock VerticalAlignment="Center" Grid.Row="2">Tile columns</TextBlock>
+                <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Left"
+                            Minimum="0" Increment="10" />
+            </Grid>
+        </GroupBox>
+
+        <StackPanel Grid.Row="3" Grid.Column="0" Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Height="25" Width="90">Cancel</Button>
+            <Button Height="25" Width="90" Margin="5,0,0,0">Export</Button>
+        </StackPanel>
+    </Grid>
+</Window>

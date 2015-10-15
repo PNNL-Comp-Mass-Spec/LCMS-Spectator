@@ -45,10 +45,12 @@ namespace LcmsSpectator.ViewModels.Dataset
         /// <summary>
         /// Gets the name of the file.
         /// </summary>
-        public string FileName
-        {
-            get { return Path.GetFileNameWithoutExtension(this.FilePath); }
-        }
+        public string FileName => Path.GetFileNameWithoutExtension(this.FilePath);
+
+        /// <summary>
+        /// Gets the name of the file with the extension intact.
+        /// </summary>
+        public string FileNameWithExtension => Path.GetFileName(this.FilePath);
 
         /// <summary>
         /// Gets the type of the file.

@@ -21,6 +21,11 @@
         <!-- Menu -->
         <Menu VerticalAlignment="Top">
             <MenuItem Header="_File">
+                <MenuItem Header="Project">
+                    <MenuItem Header="New Project" Command="{Binding NewProjectCommand}" />
+                    <MenuItem Header="Configure Project" Command="{Binding ConfigureProjectCommand}" />
+                    <MenuItem Header="Load Project" />
+                </MenuItem>
                 <MenuItem Header="Open _Data Set" Command="{Binding OpenDataSetCommand}" />
                 <MenuItem Header="Open _Raw/MzML File(s)" Command="{Binding OpenRawFileCommand}" />
                 <MenuItem Header="Open _Id File" Command="{Binding OpenTsvFileCommand}" />

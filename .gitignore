@@ -4,3 +4,4 @@
 **/obj/
 **/StyleCop.Cache
 packages/
+.vs/

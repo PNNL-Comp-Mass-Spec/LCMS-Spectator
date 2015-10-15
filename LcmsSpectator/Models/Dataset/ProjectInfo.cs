@@ -14,8 +14,6 @@ namespace LcmsSpectator.Models.Dataset
     using System.IO;
 
     using InformedProteomics.Backend.Data.Sequence;
-
-    using LcmsSpectator.Config;
     
     /// <summary>
     /// A class that represents a project composed of settings and multiple datasets.

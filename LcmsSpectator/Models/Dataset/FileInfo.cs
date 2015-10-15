@@ -7,14 +7,15 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.IO;
-using InformedProteomics.Backend.MassSpecData;
-
 namespace LcmsSpectator.Models.Dataset
 {
+    using System.IO;
     using System.Linq;
+
+    using InformedProteomics.Backend.MassSpecData;
+
     using LcmsSpectator.Utils;
-    
+
     /// <summary>
     /// Enumeration of all the file types that are supported by the application.
     /// </summary>
@@ -23,27 +24,27 @@ namespace LcmsSpectator.Models.Dataset
         /// <summary>
         /// Represents a spectrum file (*.MZML, *.RAW)
         /// </summary>
-        SpectrumFile,
+        Spectra,
 
         /// <summary>
         /// Represents a identification results file (*.MZID, or .tsv - MSPF/MS-GF+ results)
         /// </summary>
-        IdentificationFile,
+        Identifications,
 
         /// <summary>
         /// Represents a feature finder results file (*.MS1FT - ProMex)
         /// </summary>
-        FeatureFile,
+        Features,
 
         /// <summary>
         /// Represents a FASTA database file. (*.fasta)
         /// </summary>
-        FastaFile,
+        Fasta,
 
         /// <summary>
         /// Represents a MSPathFinder parameter file. (*.param)
         /// </summary>
-        ParamFile,
+        Param,
 
         /// <summary>
         /// Represents a file with unknown file type.
@@ -91,20 +92,20 @@ namespace LcmsSpectator.Models.Dataset
             extension = extension.ToLower();
             if (MassSpecDataReaderFactory.MassSpecDataTypeFilterList.Contains(extension))
             {
-                fileInfo.FileType = FileTypes.SpectrumFile;
+                fileInfo.FileType = FileTypes.Spectra;
                 fileInfo.FilePath = MassSpecDataReaderFactory.NormalizeDatasetPath(filePath);
             }
             else if (FileConstants.IdFileExtensions.Contains(extension))
             {
-                fileInfo.FileType = FileTypes.IdentificationFile;
+                fileInfo.FileType = FileTypes.Identifications;
             }
             else if (FileConstants.FeatureFileExtensions.Contains(extension))
             {
-                fileInfo.FileType = FileTypes.FeatureFile;
+                fileInfo.FileType = FileTypes.Features;
             }
             else if (extension != null && extension.ToLower() == ".fasta")
             {
-                fileInfo.FileType = FileTypes.FastaFile;
+                fileInfo.FileType = FileTypes.Fasta;
             }
 
             return fileInfo;

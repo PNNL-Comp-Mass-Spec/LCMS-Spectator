@@ -8,23 +8,25 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Documents;
-using InformedProteomics.Backend.MassSpecData;
-using LcmsSpectator.Models.Dataset;
-using LcmsSpectator.Utils;
-using LcmsSpectator.ViewModels.Settings;
-
 namespace LcmsSpectator.DialogServices
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reactive.Linq;
+
+    using InformedProteomics.Backend.MassSpecData;
+
+    using LcmsSpectator.Models.Dataset;
+    using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Dataset;
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Filters;
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
+    using LcmsSpectator.ViewModels.Settings;
     using LcmsSpectator.Views;
     using LcmsSpectator.Views.FileSelectors;
     using LcmsSpectator.Views.Filters;
@@ -36,6 +38,20 @@ namespace LcmsSpectator.DialogServices
     /// </summary>
     public class MainDialogService : DialogService, IMainDialogService
     {
+        /// <summary>
+        /// Open a dialog for opening or editing a project.
+        /// </summary>
+        /// <param name="projectInfoViewModel">The view model for the dialog.</param>
+        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
+        public bool OpenProjectEditor(ProjectInfoViewModel projectInfoViewModel)
+        {
+            var newProjectWindow = new NewProjectWindow { DataContext = projectInfoViewModel };
+            projectInfoViewModel.OkCommand.Merge(projectInfoViewModel.CancelCommand);
+            projectInfoViewModel.ReadyToClose += (o, e) => newProjectWindow.Close();
+            newProjectWindow.ShowDialog();
+            return projectInfoViewModel.Status;
+        }
+
         /// <summary>
         /// Open a dialog to search for a file on DMS.
         /// </summary>

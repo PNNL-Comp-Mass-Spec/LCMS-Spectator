@@ -6,6 +6,7 @@ using LcmsSpectator.ViewModels.Settings;
 
 namespace LcmsSpectatorTests.DialogServices
 {
+    using LcmsSpectator.ViewModels.Dataset;
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Filters;
@@ -43,6 +44,17 @@ namespace LcmsSpectatorTests.DialogServices
         
         public bool DmsLookupOpened { get; private set; }
         public DmsLookupViewModel DmsLookupViewModel { get; private set; }
+
+        public bool OpenProjectEditor(ProjectInfoViewModel projectInfoViewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IMainDialogService.OpenDmsLookup(DmsLookupViewModel dmsLookupViewModel)
+        {
+            throw new NotImplementedException();
+        }
+
         public Tuple<string, string> OpenDmsLookup(DmsLookupViewModel dmsLookupViewModel)
         {
             DmsLookupViewModel = dmsLookupViewModel;

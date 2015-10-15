@@ -8,25 +8,33 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using LcmsSpectator.Models.Dataset;
-using LcmsSpectator.ViewModels.Settings;
-
 namespace LcmsSpectator.DialogServices
 {
     using System;
+    using System.Collections.Generic;
+
+    using LcmsSpectator.Models.Dataset;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Dataset;
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Filters;
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
+    using LcmsSpectator.ViewModels.Settings;
 
     /// <summary>
     /// Interface for dialog services for opening LCMSSpectator dialog boxes from a view model.
     /// </summary>
     public interface IMainDialogService : IDialogService
     {
+        /// <summary>
+        /// Open a dialog for opening or editing a project.
+        /// </summary>
+        /// <param name="projectInfoViewModel">The view model for the dialog.</param>
+        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
+        bool OpenProjectEditor(ProjectInfoViewModel projectInfoViewModel);
+
         /// <summary>
         /// Open a dialog to search for a file on DMS.
         /// </summary>

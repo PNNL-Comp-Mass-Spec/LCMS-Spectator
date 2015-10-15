@@ -47,12 +47,15 @@ namespace LcmsSpectator.Models.Dataset
             foreach (var file in files)
             {
                 var fileInfo = FileInfo.GetFileInfo(file);
-                if (fileInfo.FileType == FileTypes.SpectrumFile)
+                if (fileInfo.FileType == FileTypes.Spectra)
                 {
                     this.Name = Path.GetFileNameWithoutExtension(fileInfo.FilePath);
                 }
 
-                this.Files.Add(fileInfo);
+                if (fileInfo.FileType != FileTypes.Unknown)
+                {
+                    this.Files.Add(fileInfo);
+                }
             }
         }
 
@@ -63,7 +66,7 @@ namespace LcmsSpectator.Models.Dataset
         public DatasetInfo(IEnumerable<FileInfo> files)
         {
             this.Files = files.ToList();
-            this.Name = this.Files.Where(f => f.FileType == FileTypes.SpectrumFile)
+            this.Name = this.Files.Where(f => f.FileType == FileTypes.Spectra)
                 .Select(f => Path.GetFileNameWithoutExtension(f.FilePath)).FirstOrDefault(fn => !string.IsNullOrWhiteSpace(fn));
         }
 
@@ -117,10 +120,10 @@ namespace LcmsSpectator.Models.Dataset
         /// </summary>
         /// <param name="files">The files that are part of this dataset.</param>
         /// <returns>An array of the datasets made from the files.</returns>
-        public static DatasetInfo[] GetDatasetsFromInputFilePaths(IEnumerable<string> files)
+        public static DatasetInfo[] GetDatasetsFromInputFilePaths(IEnumerable<string> files) 
         {
             var fileInfo = files.Select(FileInfo.GetFileInfo);
-            var spectrumFiles = fileInfo.Where(f => f.FileType == FileTypes.SpectrumFile);
+            var spectrumFiles = fileInfo.Where(f => f.FileType == FileTypes.Spectra);
             var nameToFileSet = new Dictionary<string, List<FileInfo>>();
             var uniqueFiles = new HashSet<FileInfo>();
             foreach (var file in spectrumFiles)
@@ -128,11 +131,13 @@ namespace LcmsSpectator.Models.Dataset
                 var name = Path.GetFileNameWithoutExtension(file.FilePath);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    var otherFiles = fileInfo.Where(f => f.FilePath.Contains(name) && f.FileType != FileTypes.SpectrumFile);
-                    if (!nameToFileSet.ContainsKey(name))
+                    if (nameToFileSet.ContainsKey(name))
                     {
-                        nameToFileSet.Add(name, new List<FileInfo>());
+                        continue;
                     }
+
+                    nameToFileSet.Add(name, new List<FileInfo>());
+                    var otherFiles = fileInfo.Where(f => f.FilePath.Contains(name) && f.FileType != FileTypes.Spectra);
 
                     uniqueFiles.Add(file);
                     nameToFileSet[name].Add(file);
@@ -157,7 +162,7 @@ namespace LcmsSpectator.Models.Dataset
         /// <returns>The path for the spectrum file.</returns>
         public string GetSpectrumFilePath()
         {
-            return this.Files.Where(file => file.FileType == FileTypes.SpectrumFile)
+            return this.Files.Where(file => file.FileType == FileTypes.Spectra)
                              .Select(file => file.FilePath).FirstOrDefault();
         }
 
@@ -167,7 +172,7 @@ namespace LcmsSpectator.Models.Dataset
         /// <returns>Array of FASTA file paths.</returns>
         public string[] GetFastaFilePaths()
         {
-            return this.Files.Where(file => file.FileType == FileTypes.FastaFile)
+            return this.Files.Where(file => file.FileType == FileTypes.Fasta)
                              .Select(file => file.FilePath).ToArray();
         }
     }

@@ -332,9 +332,6 @@ namespace LcmsSpectator.ViewModels.Dataset
             progData.StepRange(90);
             await this.LoadIdFiles(progress);
 
-            progData.StepRange(100);
-            await Task.Run(() => this.LoadFeatureFiles(progress));
-
             // Now that we have a LcMsRun, initialize viewmodels that require it
             this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs)
             {
@@ -344,6 +341,9 @@ namespace LcmsSpectator.ViewModels.Dataset
 
             this.SpectrumViewModel = new SpectrumViewModel(this.dialogService, this.LcMs);
             this.FeatureMapViewModel = new FeatureViewerViewModel((LcMsRun)this.LcMs, this.dialogService);
+
+            progData.StepRange(100);
+            await Task.Run(() => this.LoadFeatureFiles(progress));
 
             // When the selected scan changes in the xic plots, the selected scan for the prsm should update
             this.XicViewModel.SelectedScanUpdated().Subscribe(scan => this.SelectedPrSm.Scan = scan);
@@ -420,7 +420,7 @@ namespace LcmsSpectator.ViewModels.Dataset
             var modIgnoreList = new List<string>();
 
             var idFiles =
-                this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.IdentificationFile).ToList();
+                this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.Identifications).ToList();
 
             // Iterate over files to open
             for (int i = 0; i < idFiles.Count; i++)
@@ -487,7 +487,7 @@ namespace LcmsSpectator.ViewModels.Dataset
         {
             var progData = new ProgressData();
             var featureFilePaths =
-                this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.FeatureFile)
+                this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.Features)
                     .Select(file => file.FilePath).ToList();
 
             for (int i = 0; i < featureFilePaths.Count; i++)
@@ -509,7 +509,7 @@ namespace LcmsSpectator.ViewModels.Dataset
             {
                 SpectrumFilePath = this.DatasetInfo.GetSpectrumFilePath(),
                 SelectedSearchMode = 1,
-                FastaDbFilePath = this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.FastaFile).Select(file => file.FilePath).FirstOrDefault(),
+                FastaDbFilePath = this.DatasetInfo.Files.Where(file => file.FileType == FileTypes.Fasta).Select(file => file.FilePath).FirstOrDefault(),
                 OutputFilePath = string.Format("{0}\\{1}", Directory.GetCurrentDirectory(), this.DatasetInfo.Name),
                 SelectedSequence = this.SelectedPrSm.Sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue),
                 IonCorrelationThreshold = this.DatasetInfo.ToleranceSettings.IonCorrelationThreshold
