@@ -331,6 +331,22 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void InitializeDefaultFilters()
         {
+            // Filter by scan #
+            this.Filters.Add(new MultiValueFilterViewModel(
+                "Scan",
+                "Filter by Scan number",
+                "Enter scan numbers to filter by separated by a comma",
+                (d, v) => d.Where(p => v.Any(val => ((PrSm)p).Scan == Convert.ToInt32(val))),
+                o =>
+                {
+                    int conv;
+                    var str = o as string;
+                    return Int32.TryParse(str, out conv);
+                },
+                this.dialogService,
+                null,
+                ','));
+
             // Filter by subsequence
             this.Filters.Add(new MultiValueFilterViewModel(
                     "Sequence", 

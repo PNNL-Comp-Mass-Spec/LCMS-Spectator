@@ -54,6 +54,12 @@ namespace LcmsSpectator.ViewModels.Filters
         private string selectedValue;
 
         /// <summary>
+        /// The deliimeter to use for parsing a string containing a list.
+        /// 0 = no delimiter.
+        /// </summary>
+        private char delimiter;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MultiValueFilterViewModel"/> class. 
         /// Initializes instance of the Filter
         /// </summary>
@@ -64,6 +70,10 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <param name="validator">Function that determines if the filter value is valid.</param>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         /// <param name="values">The default possible values to filter by.</param>
+        /// <param name="delimiter">
+        /// The deliimeter to use for parsing a string containing a list.
+        /// 0 = no delimiter.
+        /// </param>
         /// <param name="defaultValue">The default value to filter by.</param>
         public MultiValueFilterViewModel(
                                          string name,
@@ -73,6 +83,7 @@ namespace LcmsSpectator.ViewModels.Filters
                                          Validate validator,
                                          IDialogService dialogService,
                                          IEnumerable<string> values = null,
+                                         char delimiter = '\0',
                                          string defaultValue = "")
         {
             if (values == null)
@@ -96,8 +107,10 @@ namespace LcmsSpectator.ViewModels.Filters
             this.CancelCommand = cancelCommand;
 
             var selectValueCommand = ReactiveCommand.Create(
-                                         this.WhenAnyValue(x => x.Value, x => x.Values.Count).Select(
-                                                  v => !string.IsNullOrWhiteSpace(v.Item1) && this.validator(v.Item1) && !this.Values.Contains(v.Item1)));
+                                         this.WhenAnyValue(x => x.Value)
+                                             .Select(value => this.ParseValues(value))
+                                             .Select(vals => vals.Any()));
+
             selectValueCommand.Subscribe(_ => this.SelectValueImplementation());
             this.SelectValueCommand = selectValueCommand;
 
@@ -107,6 +120,7 @@ namespace LcmsSpectator.ViewModels.Filters
 
             this.Value = defaultValue;
             this.Values = new ReactiveList<string>();
+            this.delimiter = delimiter;
             this.dialogService = dialogService;
             this.Status = false;
         }
@@ -268,13 +282,18 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         private void SelectValueImplementation()
         {
-            if (this.validator(this.Value))
+            var values = this.ParseValues(this.Value);
+            values = values.Where(val => this.validator(val)).Where(val => !this.Values.Contains(val));
+            if (value.Any())
             {
-                this.Values.Add(this.Value);
+                foreach (var v in values)
+                {
+                    this.Values.Add(v);
+                }
             }
             else
             {
-                this.dialogService.MessageBox("Invalid filter value.");
+                this.dialogService.MessageBox("No valid filter values selected.");
             }
         }
 
@@ -288,6 +307,38 @@ namespace LcmsSpectator.ViewModels.Filters
             {
                 this.Values.Remove(this.SelectedValue);
             }
+        }
+
+        /// <summary>
+        /// Splits the value list on the delimiter if the delimiter isn't 0.
+        /// </summary>
+        /// <param name="valueList">The string to split.</param>
+        /// <returns>List of split values.</returns>
+        private IEnumerable<string> ParseValues(string valueList)
+        {
+            List<string> values;
+
+            if (this.delimiter != '\0')
+            {
+                values = valueList.Split(this.delimiter).ToList();
+            }
+            else
+            {
+                values = new List<string> { valueList };
+            }
+
+            // Trim white space
+            for (int i = 0; i < values.Count; i++)
+            {
+                values[i] = values[i].Trim();
+            }
+
+            // Get only values that are not in value list.
+            values = values.Where(val => !string.IsNullOrWhiteSpace(val))
+                           .Where(val => !this.Values.Contains(val))
+                           .ToList();
+
+            return values;
         }
     }
 }
