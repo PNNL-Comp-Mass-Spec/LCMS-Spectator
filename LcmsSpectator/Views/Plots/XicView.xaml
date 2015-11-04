@@ -19,7 +19,7 @@
             <ColumnDefinition Width="Auto" Name="LightColumn" />
             <ColumnDefinition Width="Auto" Name ="HeavyColumn" />
         </Grid.ColumnDefinitions>
-        <Viewbox Grid.Row="0" Grid.Column="0" StretchDirection="Both" HorizontalAlignment="Stretch" MinHeight="25">
+        <Viewbox Grid.Row="0" Grid.Column="0" StretchDirection="Both" HorizontalAlignment="Stretch">
             <TextBlock TextAlignment="Center" FontWeight="Bold" DataContext="{Binding FragmentPlotViewModel}" Text="{Binding PlotTitle}" />
         </Viewbox>
         <Grid Grid.Row="1" Grid.Column="0" DataContext="{Binding FragmentPlotViewModel}">
@@ -50,7 +50,7 @@
                     IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
                     ToolTip="Smoothing Window Points" />
         </Grid>
-        <Viewbox Grid.Row="0" Grid.Column="1"  StretchDirection="Both" HorizontalAlignment="Stretch" MinHeight="25">
+        <Viewbox Grid.Row="0" Grid.Column="1"  StretchDirection="Both" HorizontalAlignment="Stretch">
             <TextBlock  TextAlignment="Center" FontWeight="Bold" DataContext="{Binding HeavyFragmentPlotViewModel}" Text="{Binding PlotTitle}" />
         </Viewbox>
         <Grid Grid.Row="1" Grid.Column="1" DataContext="{Binding HeavyFragmentPlotViewModel}">
@@ -82,7 +82,7 @@
                     ToolTip="Smoothing Window Points"/>
         </Grid>
         <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="Bold" Text="{Binding FragmentAreaRatioLabel}" />
-        <Viewbox Grid.Row="3" Grid.Column="0"  StretchDirection="Both" HorizontalAlignment="Stretch" MinHeight="25">
+        <Viewbox Grid.Row="3" Grid.Column="0"  StretchDirection="Both" HorizontalAlignment="Stretch">
             <TextBlock  TextAlignment="Center" FontWeight="Bold" DataContext="{Binding PrecursorPlotViewModel}" Text="{Binding PlotTitle}" />
         </Viewbox>
         <Grid Grid.Row="4" Grid.Column="0" DataContext="{Binding PrecursorPlotViewModel}">
@@ -119,7 +119,7 @@
                     IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
                     ToolTip="Smoothing Window Points"/>
         </Grid>
-        <Viewbox Grid.Row="3" Grid.Column="1" StretchDirection="Both" HorizontalAlignment="Stretch" MinHeight="25">
+        <Viewbox Grid.Row="3" Grid.Column="1" StretchDirection="Both" HorizontalAlignment="Stretch">
             <TextBlock TextAlignment="Center" FontWeight="Bold" DataContext="{Binding HeavyPrecursorPlotViewModel}" Text="{Binding PlotTitle}"/>
         </Viewbox>
         <Grid Grid.Row="4" Grid.Column="1" DataContext="{Binding HeavyPrecursorPlotViewModel}">
