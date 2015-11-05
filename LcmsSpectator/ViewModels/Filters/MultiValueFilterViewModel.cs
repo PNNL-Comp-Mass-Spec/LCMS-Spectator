@@ -316,29 +316,22 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <returns>List of split values.</returns>
         private IEnumerable<string> ParseValues(string valueList)
         {
-            List<string> values;
+            IEnumerable<string> parsedValues;
 
             if (this.delimiter != '\0')
             {
-                values = valueList.Split(this.delimiter).ToList();
+                parsedValues = valueList.Split(this.delimiter).Select(val => val.Trim());
             }
             else
             {
-                values = new List<string> { valueList };
-            }
-
-            // Trim white space
-            for (int i = 0; i < values.Count; i++)
-            {
-                values[i] = values[i].Trim();
+                parsedValues = new List<string> { valueList.Trim() };
             }
 
             // Get only values that are not in value list.
-            values = values.Where(val => !string.IsNullOrWhiteSpace(val))
-                           .Where(val => !this.Values.Contains(val))
-                           .ToList();
+            parsedValues = parsedValues.Where(val => !string.IsNullOrWhiteSpace(val))
+                                       .Where(val => !this.Values.Contains(val));
 
-            return values;
+            return parsedValues;
         }
     }
 }
