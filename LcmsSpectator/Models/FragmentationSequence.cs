@@ -115,7 +115,7 @@
         /// <param name="ionTypes">List of IonTypes.</param>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A list of fragment labeled ions.</returns>
-        private List<LabeledIonViewModel> GetFragmentLabels(IList<IonType> ionTypes, SearchModification[] labelModifications = null)
+        public List<LabeledIonViewModel> GetFragmentLabels(IList<IonType> ionTypes, SearchModification[] labelModifications = null)
         {
             var fragmentLabelList = new List<LabeledIonViewModel> { Capacity = this.Sequence.Count * ionTypes.Count * this.Charge };
             if (this.Sequence.Count < 1 || this.lcms == null)
@@ -172,7 +172,7 @@
         /// <param name="relativeIntensityThreshold">Relative intensity threshold (fraction of most abundant isotope)</param>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A list of precursor labeled ions.</returns>
-        private List<LabeledIonViewModel> GetIsotopePrecursorLabels(double relativeIntensityThreshold = 0.1, IEnumerable<SearchModification> labelModifications = null)
+        public List<LabeledIonViewModel> GetIsotopePrecursorLabels(double relativeIntensityThreshold = 0.1, IEnumerable<SearchModification> labelModifications = null)
         {
             var ions = new List<LabeledIonViewModel>();
             if (this.Sequence.Count == 0 || this.lcms == null)
@@ -209,7 +209,7 @@
         /// </summary>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A list of neighboring charge state labeled ions.</returns>
-        private List<LabeledIonViewModel> GetChargePrecursorLabels(IEnumerable<SearchModification> labelModifications = null)
+        public List<LabeledIonViewModel> GetChargePrecursorLabels(IEnumerable<SearchModification> labelModifications = null)
         {
             var ions = new List<LabeledIonViewModel>();
             var numChargeStates = IonUtils.GetNumNeighboringChargeStates(this.Charge);

@@ -10,6 +10,8 @@
 
 namespace LcmsSpectator.PlotModels
 {
+    using System.Collections.Generic;
+
     using InformedProteomics.Backend.Data.Spectrometry;
     using OxyPlot;
     
@@ -84,6 +86,25 @@ namespace LcmsSpectator.PlotModels
         public DataPoint GetDataPoint()
         {
             return new DataPoint(this.X, this.Y);
+        }
+
+        /// <summary>
+        /// Comparison class for comparing two data points by their M/Z values.
+        /// </summary>
+        public class MzComparer : IComparer<PeakDataPoint>
+        {
+            /// <summary>
+            /// Compares two <see cref="PeakDataPoint" /> objects by their M/Z values.
+            /// </summary>
+            /// <param name="x">The left data point.</param>
+            /// <param name="y">The right data point.</param>
+            /// <returns>
+            /// A value indicating whether the left is less than, equal to, or greater than the right.
+            /// </returns>
+            public int Compare(PeakDataPoint x, PeakDataPoint y)
+            {
+                return x.X.CompareTo(y.X);
+            }
         }
     }
 }

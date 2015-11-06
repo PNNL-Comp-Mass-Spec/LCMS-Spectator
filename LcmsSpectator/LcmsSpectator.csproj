@@ -406,6 +406,8 @@
       <DependentUpon>XicView.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Writers\Exporters\SpectrumPeakExporter.cs" />
+    <Compile Include="Writers\Exporters\SpectrumPlotExporter.cs" />
     <Compile Include="Writers\IcFileWriter.cs" />
     <Compile Include="Writers\IdWriterFactory.cs" />
     <Compile Include="Writers\IIdWriter.cs" />
