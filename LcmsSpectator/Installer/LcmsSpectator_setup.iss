@@ -101,7 +101,7 @@ Name: {commonappdata}\LcmsSpectator; Flags: uninsalwaysuninstall
 [Icons]
 Name: {commondesktop}\{cm:AppName}; Filename: {app}\LcmsSpectator.exe; Tasks: desktopicon; IconFilename: {app}..\Resources\iconSmall.ico; Comment: LcmsSpectator; IconIndex: 0
 Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{cm:AppName}; Filename: {app}\LcmsSpectator.exe; Tasks: quicklaunchicon; IconFilename: {app}..\Resources\iconSmall.ico; Comment: LcmsSpectator; IconIndex: 0
-Name: {group}\LCMS Specator; Filename: {app}\LcmsSpectator.exe; Comment: LCMS Spectator
+Name: {group}\LCMS Spectator; Filename: {app}\LcmsSpectator.exe; Comment: LCMS Spectator
 
 [Tasks]
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
