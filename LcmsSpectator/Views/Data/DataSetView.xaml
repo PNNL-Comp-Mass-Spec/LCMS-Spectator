@@ -87,6 +87,11 @@
                                                     </MenuItem.ItemContainerStyle>
                                                 </MenuItem>
                                                 <MenuItem Header="_Clear All Filters" Command="{Binding ClearFiltersCommand}" />
+                                                <Separator />
+                                                <MenuItem Header="Export">
+                                                    <MenuItem Header="Export Spectra" Command="{Binding ExportSpectraCommand}" />
+                                                    <MenuItem Header="Export Peaks" Command="{Binding ExportPeaksCommand}" />
+                                                </MenuItem>
                                             </ContextMenu>
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>

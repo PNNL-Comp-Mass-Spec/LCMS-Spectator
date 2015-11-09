@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 namespace LcmsSpectator.Writers.Exporters
 {
     using System.IO;
+    using System.Windows.Input;
     using System.Windows.Shapes;
 
+    using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Utils;
 
@@ -17,7 +19,7 @@ namespace LcmsSpectator.Writers.Exporters
 
     using Path = System.IO.Path;
 
-    class SpectrumPeakExporter
+    public class SpectrumPeakExporter
     {
         private readonly IEnumerable<IonType> ionTypes;
 
@@ -27,8 +29,9 @@ namespace LcmsSpectator.Writers.Exporters
 
         private readonly Tolerance tolerance;
 
-        public SpectrumPeakExporter(string outputFile, IEnumerable<BaseIonType> baseIonTypes, Tolerance tolerance)
+        public SpectrumPeakExporter(string outputFile, IEnumerable<BaseIonType> baseIonTypes = null, Tolerance tolerance = null)
         {
+            this.outputFile = outputFile;
             baseIonTypes = baseIonTypes ?? new HashSet<BaseIonType> { BaseIonType.B, BaseIonType.Y };
             this.baseIonTypes = new HashSet<BaseIonType>();
             this.baseIonTypes.UnionWith(baseIonTypes);
@@ -36,7 +39,7 @@ namespace LcmsSpectator.Writers.Exporters
             var ionTypeFactory = new IonTypeFactory(100);
             var allIonTypes = ionTypeFactory.GetAllKnownIonTypes();
             this.ionTypes = allIonTypes.Where(ionType => this.baseIonTypes.Contains(ionType.BaseIonType));
-            this.tolerance = tolerance;
+            this.tolerance = tolerance ?? new Tolerance(10, ToleranceUnit.Ppm);
         }
 
         public void Export(IList<PrSm> ids, IProgress<ProgressData> progress = null)
@@ -46,7 +49,7 @@ namespace LcmsSpectator.Writers.Exporters
             int i = 1;
             foreach (var id in ids)
             {
-                var outPath = Path.Combine(this.outputFile, string.Format("Scan_{0}_{1}.tsv", id.Scan, id.ProteinName));
+                var outPath = Path.Combine(this.outputFile, string.Format("Scan_{0}.tsv", id.Scan));
                 this.Export(id, outPath);
                 progress.Report(progressData.UpdatePercent((100.0 * i++) / ids.Count));
             }
@@ -59,7 +62,7 @@ namespace LcmsSpectator.Writers.Exporters
             int i = 1;
             foreach (var id in ids)
             {
-                var outPath = Path.Combine(this.outputFile, string.Format("Scan_{0}_{1}.tsv", id.Scan, id.ProteinName));
+                var outPath = Path.Combine(this.outputFile, string.Format("Scan_{0}.tsv", id.Scan));
                 await this.ExportAsync(id, outPath);
                 progress.Report(progressData.UpdatePercent((100.0 * i++) / ids.Count));
             }
@@ -98,13 +101,23 @@ namespace LcmsSpectator.Writers.Exporters
 
         private IEnumerable<Tuple<Peak, PeakDataPoint>> GetMappedPeaks(PrSm id)
         {
+            var lcms = id.LcMs;
             var fragSequence = id.GetFragmentationSequence();
-            var fragments = fragSequence.GetFragmentLabels(this.ionTypes.Where(ionType => ionType.Charge <= id.Charge).ToList());
-            var spectrum = id.Ms2Spectrum;
+            var fragments = lcms.GetMsLevel(id.Scan) == 2 ? 
+                            fragSequence.GetFragmentLabels(this.ionTypes.Where(ionType => ionType.Charge <= id.Charge).ToList()) :
+                            fragSequence.GetChargePrecursorLabels();
+            var spectrum = lcms.GetSpectrum(id.Scan, true);
 
+            // Get the fragment peaks
             var fragmentPeaks = fragments.SelectMany(fragment => fragment.GetPeaks(spectrum, false, false))
                                          .OrderBy(peakDataPoint => peakDataPoint.X)
                                          .ToArray();
+
+            // Set the correct residue for the fragment peaks
+            foreach (var peak in fragmentPeaks)
+            {
+                peak.Residue = this.GetResidue(id.Sequence, peak.Index, peak.IonType.IsPrefixIon);
+            }
 
             return spectrum.Peaks.Select(peak => this.GetMatch(peak, fragmentPeaks));
         }
@@ -131,12 +144,11 @@ namespace LcmsSpectator.Writers.Exporters
             if (peakDataPoint != null)
             {
                 line = string.Format(
-                                     "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}",
+                                     "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
                                      peak.Mz,
                                      peak.Intensity,
-                                     peakDataPoint.IonType.BaseIonType,
+                                     this.GetIonName(peakDataPoint.IonType, peakDataPoint.Index),
                                      peakDataPoint.IonType.Charge,
-                                     peakDataPoint.Index,
                                      peakDataPoint.Residue,
                                      peakDataPoint.Error,
                                      peakDataPoint.Correlation);
@@ -151,7 +163,18 @@ namespace LcmsSpectator.Writers.Exporters
 
         private string GetHeaders()
         {
-            return "M/Z\tIntensity\tIon\tCharge\tSequence Index\tResidue\tError(ppm)\tCorrelation";
+            return "M/Z\tIntensity\tIon\tCharge\tResidue\tError(ppm)\tCorrelation";
+        }
+
+        private string GetIonName(IonType ionType, int index)
+        {
+            return string.Format("{0}{1}", ionType.BaseIonType.Symbol, index);
+        }
+
+        private char GetResidue(Sequence sequence, int index, bool isPrefix)
+        {
+            var sequenceIndex = isPrefix ? index - 1 : sequence.Count - index;
+            return sequence[sequenceIndex].Residue;
         }
     }
 }

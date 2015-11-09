@@ -14,16 +14,19 @@ namespace LcmsSpectator.ViewModels.Data
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Reactive;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
 
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
 
+    using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Filters;
+    using LcmsSpectator.Writers.Exporters;
 
     using ReactiveUI;
 
@@ -138,12 +141,25 @@ namespace LcmsSpectator.ViewModels.Data
                 .Select(x => x.Sender)
                 .Where(sender => sender.Sequence.Count > 0)
                 .Subscribe(this.UpdatePrSmScore);
+
+            this.ExportSpectraCommand = ReactiveCommand.CreateAsyncTask(_ => this.ExportSpectraImplementation());
+            this.ExportPeaksCommand = ReactiveCommand.CreateAsyncTask(_ => this.ExportPeaksImplementation());
         }
 
         /// <summary>
         /// Gets a command that clears all the filters.
         /// </summary>
         public IReactiveCommand ClearFiltersCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that exports the spectra plots for the selected identifications.
+        /// </summary>
+        public ReactiveCommand<Unit> ExportSpectraCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that exports the spectra peaks to TSV for the selected identifications.
+        /// </summary>
+        public ReactiveCommand<Unit> ExportPeaksCommand { get; private set; }
 
         /// <summary>
         /// Gets the list of possible filters.
@@ -489,6 +505,34 @@ namespace LcmsSpectator.ViewModels.Data
 
             var scorer = this.ScorerFactory.GetScorer(prsm.Ms2Spectrum);
             prsm.Score = IonUtils.ScoreSequence(scorer, prsm.Sequence);
+        }
+
+        /// <summary>
+        /// Gets a command that exports the spectra plots for the selected identifications.
+        /// </summary>
+        /// <returns>Task that asynchronously exports plots.</returns>
+        private async Task ExportSpectraImplementation()
+        {
+            var folderPath = this.dialogService.OpenFolder();
+            if (!string.IsNullOrEmpty(folderPath))
+            {
+                var exporter = new SpectrumPlotExporter(folderPath, null, IcParameters.Instance.ExportImageDpi);
+                await exporter.ExportAsync(this.FilteredData);
+            }
+        }
+
+        /// <summary>
+        /// Gets a command that exports the spectra peaks to TSV for the selected identifications.
+        /// </summary>
+        /// <returns>Task that asynchronously exports plots.</returns>
+        private async Task ExportPeaksImplementation()
+        {
+            var folderPath = this.dialogService.OpenFolder();
+            if (!string.IsNullOrEmpty(folderPath))
+            {
+                var exporter = new SpectrumPeakExporter(folderPath);
+                await exporter.ExportAsync(this.FilteredData);
+            }
         }
     }
 }
