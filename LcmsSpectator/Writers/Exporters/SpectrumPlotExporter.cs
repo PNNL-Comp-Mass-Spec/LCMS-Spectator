@@ -120,8 +120,8 @@ namespace LcmsSpectator.Writers.Exporters
             };
 
             // Add axes
-            var xaxis = new LinearAxis { Title = "M/Z" };
-            var yaxis = new LinearAxis { Title = "Intensity" };
+            var xaxis = new LinearAxis { Title = "M/Z", Position = AxisPosition.Bottom };
+            var yaxis = new LinearAxis { Title = "Intensity", Position = AxisPosition.Left, Minimum = 0 };
             plotModel.Axes.Add(xaxis);
             plotModel.Axes.Add(yaxis);
 
