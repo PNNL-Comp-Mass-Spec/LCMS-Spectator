@@ -216,15 +216,15 @@ namespace LcmsSpectator.ViewModels.Data
                 }
             }
 
-            if (sequence.Count == 0 && this.SelectedCharge == 0)
+            if (sequence.Count > 0 && this.SelectedCharge == 0)
             {
-                this.dialogService.MessageBox("Invalid Charge.");
+                this.dialogService.MessageBox("Invalid Charge state.");
                     return;
             }
 
             if (sequence.Count == 0 && this.SelectedScan < 0)
             {
-                this.dialogService.MessageBox("Invalid sequence and scan number.");
+                this.dialogService.MessageBox("Invalid scan number.");
                 return;
             }
 
