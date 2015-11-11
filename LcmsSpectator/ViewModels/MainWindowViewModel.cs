@@ -18,6 +18,7 @@ namespace LcmsSpectator.ViewModels
     using System.Reactive.Linq;
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Composition;
+    using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.MassSpecData;
 
     using LcmsSpectator.Config;
@@ -562,7 +563,11 @@ namespace LcmsSpectator.ViewModels
             }
             while (attemptToReadFile);
 
-            this.ScanViewModel.Data.AddRange(dataSetViewModel.ScanViewModel.Data.Where(p => p.Sequence.Count > 0));
+            var identifications = dataSetViewModel.ScanViewModel.Data.Where(p => p.Sequence.Count > 0).ToList();
+
+            this.RegisterUnknownModifications(identifications);
+
+            this.ScanViewModel.Data.AddRange(identifications);
         }
 
         /// <summary>
@@ -589,6 +594,33 @@ namespace LcmsSpectator.ViewModels
             }
 
             return dataSetViewModel;
+        }
+
+        private void RegisterUnknownModifications(List<PrSm> ids)
+        {
+            var registeredModNames = new HashSet<string>(IcParameters.Instance.RegisteredModifications.Select(mod => mod.Name));
+            foreach (var prsm in ids)
+            {
+                foreach (var aminoAcid in prsm.Sequence)
+                {
+                    if (aminoAcid is ModifiedAminoAcid)
+                    {
+                        var modifiedAminoAcid = aminoAcid as ModifiedAminoAcid;
+                        var modification = modifiedAminoAcid.Modification;
+                        if (!registeredModNames.Contains(modification.Name))
+                        {
+                            if (modification.Composition is CompositionWithDeltaMass)
+                            {
+                                IcParameters.Instance.RegisterModification(modification.Name, modification.Mass);
+                            }
+                            else
+                            {
+                                IcParameters.Instance.RegisterModification(modification.Name, modification.Composition);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -110,6 +110,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\OxyPlot.Wpf.2015.1.982-alpha\lib\net45\OxyPlot.Xps.dll</HintPath>
     </Reference>
+    <Reference Include="PHRPReader, Version=1.1.5553.26605, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\PHRPReader.dll</HintPath>
+    </Reference>
     <Reference Include="PSI_Interface">
       <HintPath>..\Library\PSI_Interface\PSI_Interface.dll</HintPath>
     </Reference>
@@ -256,6 +260,7 @@
     <Compile Include="Readers\IdFileReaderFactory.cs" />
     <Compile Include="Readers\IIdFileReader.cs" />
     <Compile Include="Readers\MsgfFileReader.cs" />
+    <Compile Include="Readers\MsgfSynopsisReader.cs" />
     <Compile Include="Readers\MtdbReader.cs" />
     <Compile Include="Readers\MzIdentMlReader.cs" />
     <Compile Include="Readers\SequenceReaders\ISequenceReader.cs" />

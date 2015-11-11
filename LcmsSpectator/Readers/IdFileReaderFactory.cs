@@ -21,10 +21,16 @@ namespace LcmsSpectator.Readers
                     break;
                 case ".tsv":
                 case ".txt":
+                    if (fileName.EndsWith("_syn.txt"))
+                    {
+                        reader = new MsgfSynopsisReader(fileName);
+                        break;
+                    }
+
                     var streamReader = new StreamReader(fileName);
                     var line = streamReader.ReadLine();
                     if (line != null && line.Contains("MSGFScore")) reader = new MsgfFileReader(fileName);
-                    if (line != null && line.Contains("#MatchedFragments")) reader = new IcFileReader(fileName);
+                    else if (line != null && line.Contains("#MatchedFragments")) reader = new IcFileReader(fileName);
                     streamReader.Close();
                     break;
 				case ".mzid":
