@@ -14,6 +14,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reactive;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Spectrometry;
@@ -24,6 +25,8 @@ namespace LcmsSpectator.ViewModels.Plots
     using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Data;
+    using LcmsSpectator.Writers.Exporters;
+
     using OxyPlot;
     using OxyPlot.Annotations;
     using OxyPlot.Axes;
@@ -147,6 +150,16 @@ namespace LcmsSpectator.ViewModels.Plots
         /// The title of spectrum plot.
         /// </summary>
         private string title;
+
+        /// <summary>
+        /// The peak data points for the current plot.
+        /// </summary>
+        private IList<PeakDataPoint>[] peakDataPoints;
+
+        /// <summary>
+        /// The actual spectrum that is being displayed.
+        /// </summary>
+        private Spectrum currentSpectrum;
 
         /// <summary>
         /// Initializes a new instance of the SpectrumPlotViewModel class. 
@@ -296,6 +309,8 @@ namespace LcmsSpectator.ViewModels.Plots
             var openErrorMapCommand = ReactiveCommand.Create();
             openErrorMapCommand.Subscribe(_ => dialogService.OpenErrorMapWindow(this.errorMapViewModel));
             this.OpenErrorMapCommand = openErrorMapCommand;
+
+            this.SaveAsTsvCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.SaveAsTsvImplementation());
         }
 
         /// <summary>
@@ -437,6 +452,11 @@ namespace LcmsSpectator.ViewModels.Plots
         public IReactiveCommand OpenErrorMapCommand { get; private set; }
 
         /// <summary>
+        /// Gets a command that prompts user for file path and save spectrum as TSV to that path.
+        /// </summary>
+        public ReactiveCommand<Unit> SaveAsTsvCommand { get; private set; }
+
+        /// <summary>
         /// Build spectrum plot model.
         /// </summary>
         /// <param name="peakDataPoints">Ion peaks to highlight and annotate on spectrum plot.</param>
@@ -450,7 +470,8 @@ namespace LcmsSpectator.ViewModels.Plots
             this.errorMapViewModel.SetData(this.FragmentationSequenceViewModel.FragmentationSequence.Sequence, peakDataPoints);
             this.PlotModel.Series.Clear();
             this.PlotModel.Annotations.Clear();
-            var currentSpectrum = this.GetSpectrum();
+            this.currentSpectrum = this.GetSpectrum();
+            this.peakDataPoints = peakDataPoints;
             var spectrumPeaks = currentSpectrum.Peaks.Select(peak => new PeakDataPoint(peak.Mz, peak.Intensity, 0.0, 0.0, string.Empty));
             var spectrumSeries = new PeakPointSeries
             {
@@ -587,6 +608,41 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             return currentSpectrum;
+        }
+
+        /// <summary>
+        /// Prompt user for file path and save spectrum as TSV to that path.
+        /// </summary>
+        private async Task SaveAsTsvImplementation()
+        {
+            if (this.currentSpectrum == null)
+            {
+                return;
+            }
+
+            if (this.peakDataPoints == null)
+            {
+                this.peakDataPoints = new IList<PeakDataPoint>[0];
+            }
+
+            var filePath = this.dialogService.SaveFile(".tsv", @"TSV Files (*.tsv)|*.tsv");
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            var fragmentPeaks =
+                this.peakDataPoints.SelectMany(peaks => peaks)
+                    .Where(peak => !peak.X.Equals(double.NaN))
+                    .Where(peak => !peak.Y.Equals(double.NaN))
+                    .OrderBy(peak => peak.X)
+                    .ToArray();
+
+            var peakExporter = new SpectrumPeakExporter(string.Empty, null, IcParameters.Instance.ProductIonTolerancePpm);
+            await peakExporter.ExportAsync(
+                    this.currentSpectrum,
+                    fragmentPeaks,
+                    filePath);
         }
 
         /// <summary>

@@ -68,6 +68,32 @@ namespace LcmsSpectator.Writers.Exporters
             }
         }
 
+        public async Task ExportAsync(Spectrum spectrum, PeakDataPoint[] peakDataPoints, string outputFilePath)
+        {
+            using (var writer = new StreamWriter(outputFilePath))
+            {
+                await writer.WriteLineAsync(this.GetHeaders());
+                foreach (var peak in spectrum.Peaks)
+                {
+                    var match = await Task.Run(() => this.GetMatch(peak, peakDataPoints));
+                    await writer.WriteLineAsync(this.GetLine(match));
+                }
+            }
+        }
+
+        public void Export(Spectrum spectrum, PeakDataPoint[] peakDataPoints, string outputFilePath)
+        {
+            using (var writer = new StreamWriter(outputFilePath))
+            {
+                writer.WriteLine(this.GetHeaders());
+                foreach (var peak in spectrum.Peaks)
+                {
+                    var match = this.GetMatch(peak, peakDataPoints);
+                    writer.WriteLine(this.GetLine(match));
+                }
+            }
+        }
+
         public void Export(PrSm id, string outputFilePath)
         {
             using (var writer = new StreamWriter(outputFilePath))

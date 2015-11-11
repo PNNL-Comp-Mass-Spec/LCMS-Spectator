@@ -73,6 +73,7 @@
                         <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" Name="AutoAdjustYCheck" />
                         <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustmentCheck" />
                         <MenuItem Header="Save As _Image" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
+                        <MenuItem Header="Save Peak List" Command="{Binding SaveAsTsvCommand}" />
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
             </wpf:PlotView>
