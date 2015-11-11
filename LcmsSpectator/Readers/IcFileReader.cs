@@ -37,6 +37,7 @@ namespace LcmsSpectator.Readers
         public IcFileReader(string filePath)
         {
             this.filePath = filePath;
+            this.Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -62,6 +63,8 @@ namespace LcmsSpectator.Readers
             var modIgnore = modIgnoreList == null ? new List<string>() : new List<string>(modIgnoreList);
             return await this.ReadFile(modIgnore);
         }
+
+        public IList<Modification> Modifications { get; }
 
         /// <summary>
         /// Create a sequence object with modifications.

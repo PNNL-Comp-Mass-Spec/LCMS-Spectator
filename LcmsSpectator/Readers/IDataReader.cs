@@ -11,7 +11,11 @@
 namespace LcmsSpectator.Readers
 {
     using System.Collections.Generic;
+    using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
+
+    using InformedProteomics.Backend.Data.Sequence;
+
     using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels;
     using LcmsSpectator.ViewModels.Data;
@@ -83,5 +87,7 @@ namespace LcmsSpectator.Readers
         /// <param name="filePath">The path to the FASTA database file.</param>
         /// <returns>Task that returns IEnumerable of FASTA entries.</returns>
         Task<IEnumerable<FastaEntry>> ReadFastaFile(string filePath);
+
+        IList<Modification> Modifications { get; } 
     }
 }

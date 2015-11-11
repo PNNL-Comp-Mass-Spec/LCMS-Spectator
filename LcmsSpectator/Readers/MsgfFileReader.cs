@@ -15,6 +15,9 @@ namespace LcmsSpectator.Readers
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+
+    using InformedProteomics.Backend.Data.Sequence;
+
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers.SequenceReaders;
 
@@ -35,6 +38,7 @@ namespace LcmsSpectator.Readers
         public MsgfFileReader(string filePath)
         {
             this.filePath = filePath;
+            this.Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -58,6 +62,8 @@ namespace LcmsSpectator.Readers
         {
             return await this.ReadFromTsvFile();
         }
+
+        public IList<Modification> Modifications { get; }
 
         /// <summary>
         /// Read a MS-GF+ results from TSV file.

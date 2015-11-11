@@ -24,8 +24,14 @@ namespace LcmsSpectator.Readers
         public MsgfSynopsisReader(string filePath)
         {
             this.filePath = filePath;
+            this.Modifications = new List<Modification>();
         }
-        
+
+        /// <summary>
+        /// Gets a list of modifications that potentially need to be registered after reading.
+        /// </summary>
+        public IList<Modification> Modifications { get; private set; }
+
         public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             var oStartupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = true };
@@ -46,19 +52,22 @@ namespace LcmsSpectator.Readers
                 var parsedSequence = this.ParseSequence(psm.PeptideCleanSequence, psm.ModifiedResidues);
                 foreach (var protein in proteins)
                 {
-                    identifications.Add(new PrSm
+                    var prsm = new PrSm
                     {
                         Heavy = false,
                         ProteinName = protein,
                         ProteinDesc = string.Empty,
                         Charge = psm.Charge,
                         Sequence = parsedSequence,
-                        SequenceText = this.GetSequenceText(parsedSequence),
                         Scan = psm.ScanNumber,
                         Score = Convert.ToDouble(psm.MSGFSpecProb),
                         UseGolfScoring = true,
                         QValue = 0,
-                    });
+                    };
+
+                    prsm.SetSequence(this.GetSequenceText(parsedSequence), parsedSequence);
+
+                    identifications.Add(prsm);
                 }
             }
 
@@ -87,8 +96,16 @@ namespace LcmsSpectator.Readers
                     var def = mod.ModDefinition;
                     var location = mod.ResidueLocInPeptide - 1;
                     var aminoAcid = sequence[location];
+                    var modification = this.TryGetExistingModification(
+                        mod.ModDefinition.MassCorrectionTag,
+                        mod.ModDefinition.ModificationMass);
 
-                    var modification = new Modification(0, mod.ModDefinition.ModificationMass, mod.ModDefinition.MassCorrectionTag);
+                    if (modification == null)
+                    {   // could not find existing modification
+                        modification = new Modification(0, mod.ModDefinition.ModificationMass, mod.ModDefinition.MassCorrectionTag);
+                        this.Modifications.Add(modification);
+                    }
+
                     sequence[location] = new ModifiedAminoAcid(aminoAcid, modification);
                 }
             }
@@ -120,6 +137,21 @@ namespace LcmsSpectator.Readers
             }
 
             return result;
+        }
+
+        private Modification TryGetExistingModification(string name, double mass)
+        {
+            var modification = Modification.Get(name);
+            if (modification == null)
+            {
+                var massMods = Modification.GetFromMass(mass);
+                if (massMods != null && massMods.Any())
+                {
+                    modification = massMods[0];
+                }
+            }
+
+            return modification;
         }
     }
 }

@@ -13,6 +13,9 @@ namespace LcmsSpectator.Readers
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+
+    using InformedProteomics.Backend.Data.Sequence;
+
     using LcmsSpectator.Models;
     
     /// <summary>
@@ -35,5 +38,10 @@ namespace LcmsSpectator.Readers
         /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
         Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null);
+
+        /// <summary>
+        /// Gets a list of modifications that potentially need to be registered after reading.
+        /// </summary>
+        IList<Modification> Modifications { get; }
     }
 }

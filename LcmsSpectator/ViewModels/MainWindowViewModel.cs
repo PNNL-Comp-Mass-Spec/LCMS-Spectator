@@ -565,7 +565,7 @@ namespace LcmsSpectator.ViewModels
 
             var identifications = dataSetViewModel.ScanViewModel.Data.Where(p => p.Sequence.Count > 0).ToList();
 
-            this.RegisterUnknownModifications(identifications);
+            this.RegisterUnknownModifications(this.dataReader.Modifications);
 
             this.ScanViewModel.Data.AddRange(identifications);
         }
@@ -596,28 +596,20 @@ namespace LcmsSpectator.ViewModels
             return dataSetViewModel;
         }
 
-        private void RegisterUnknownModifications(List<PrSm> ids)
+        private void RegisterUnknownModifications(IList<Modification> modifications)
         {
-            var registeredModNames = new HashSet<string>(IcParameters.Instance.RegisteredModifications.Select(mod => mod.Name));
-            foreach (var prsm in ids)
+            var registeredNames = new HashSet<string>();
+            foreach (var modification in modifications)
             {
-                foreach (var aminoAcid in prsm.Sequence)
+                if (!registeredNames.Contains(modification.Name))
                 {
-                    if (aminoAcid is ModifiedAminoAcid)
+                    if (modification.Composition is CompositionWithDeltaMass)
                     {
-                        var modifiedAminoAcid = aminoAcid as ModifiedAminoAcid;
-                        var modification = modifiedAminoAcid.Modification;
-                        if (!registeredModNames.Contains(modification.Name))
-                        {
-                            if (modification.Composition is CompositionWithDeltaMass)
-                            {
-                                IcParameters.Instance.RegisterModification(modification.Name, modification.Mass);
-                            }
-                            else
-                            {
-                                IcParameters.Instance.RegisterModification(modification.Name, modification.Composition);
-                            }
-                        }
+                        var x = IcParameters.Instance.RegisterModification(modification.Name, modification.Mass);
+                    }
+                    else
+                    {
+                        var x = IcParameters.Instance.RegisterModification(modification.Name, modification.Composition);
                     }
                 }
             }

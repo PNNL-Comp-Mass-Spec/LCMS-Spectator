@@ -38,6 +38,7 @@ namespace LcmsSpectator.Readers
         public MtdbReader(string filePath)
         {
             this.filePath = filePath;
+            this.Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -116,5 +117,7 @@ namespace LcmsSpectator.Readers
 
             return prsms;
         }
+
+        public IList<Modification> Modifications { get; }
     }
 }

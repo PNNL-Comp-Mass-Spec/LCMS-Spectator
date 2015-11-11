@@ -394,6 +394,26 @@ namespace LcmsSpectator.Models
         #endregion
 
         /// <summary>
+        /// Set sequece as the visibile sequence and actual underlying sequence.
+        /// If the underlying sequence is null, the visible sequence will be parsed to
+        /// create it.
+        /// </summary>
+        /// <param name="sequenceStr">The visible sequence.</param>
+        /// <param name="sequence">Actual underlying sequence.</param>
+        public void SetSequence(string sequenceStr, Sequence sequence = null)
+        {
+            if (sequence != null)
+            {
+                this.sequenceText = sequenceStr;
+                this.Sequence = sequence;
+            }
+            else
+            {
+                this.SequenceText = sequenceStr;
+            }
+        }
+
+        /// <summary>
         /// Update all modifications in the sequence.
         /// </summary>
         public void UpdateModifications()

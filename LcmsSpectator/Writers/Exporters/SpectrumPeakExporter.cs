@@ -76,7 +76,7 @@ namespace LcmsSpectator.Writers.Exporters
                 writer.WriteLine(this.GetHeaders());
                 foreach (var match in matches)
                 {
-                    writer.WriteLine(this.GetLine(match));
+                    writer.WriteLine(this.GetLine(match)); 
                 }
             }
         }

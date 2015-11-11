@@ -15,6 +15,9 @@ namespace LcmsSpectator.Readers
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+
+    using InformedProteomics.Backend.Data.Sequence;
+
     using LcmsSpectator.Config;
     using LcmsSpectator.Models;
     using LcmsSpectator.Utils;
@@ -50,6 +53,7 @@ namespace LcmsSpectator.Readers
             this.ReadingRawFiles = false;
             this.ReadingIdFiles = false;
             this.ReadingFeatureFiles = false;
+            this.Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -97,6 +101,7 @@ namespace LcmsSpectator.Readers
                 id.LcMs = dataSetViewModel.LcMs;
             }
 
+            this.Modifications = reader.Modifications;
             dataSetViewModel.ScanViewModel.Data.AddRange(idList);
             dataSetViewModel.IdFileOpen = true;
         }
@@ -198,5 +203,7 @@ namespace LcmsSpectator.Readers
         {
             return Task.Run(() => FastaReaderWriter.ReadFastaFile(filePath));
         }
+
+        public IList<Modification> Modifications { get; private set; }
     }
 }

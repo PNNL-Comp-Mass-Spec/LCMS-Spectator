@@ -13,6 +13,9 @@ namespace LcmsSpectator.Readers
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+
+    using InformedProteomics.Backend.Data.Sequence;
+
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers.SequenceReaders;
     using MTDBFramework.Algorithms;
@@ -47,6 +50,7 @@ namespace LcmsSpectator.Readers
                 TargetFilterType = TargetWorkflowType.BOTTOM_UP
             };
             this.mzIdentMlReader = new MTDBFramework.IO.MzIdentMlReader(options);
+            this.Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -117,5 +121,7 @@ namespace LcmsSpectator.Readers
 
             return prsms;
         }
+
+        public IList<Modification> Modifications { get; }
     }
 }
