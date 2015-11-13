@@ -74,9 +74,52 @@ namespace LcmsSpectator.Readers
             return identifications;
         }
 
-        public Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
+        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
-            return Task.Run(() => this.Read(modIgnoreList, progress));
+            var oStartupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = true };
+            var phrpReader = new clsPHRPReader(this.filePath, oStartupOptions);
+
+            if (!string.IsNullOrEmpty(phrpReader.ErrorMessage))
+            {
+                throw new Exception(phrpReader.ErrorMessage);
+            }
+
+            var identifications = await Task.Run(
+                () =>
+                    {
+                        var ids = new List<PrSm>();
+                        while (phrpReader.MoveNext())
+                        {
+                            phrpReader.FinalizeCurrentPSM();
+                            var psm = phrpReader.CurrentPSM;
+                            var proteins = psm.Proteins;
+
+                            var parsedSequence = this.ParseSequence(psm.PeptideCleanSequence, psm.ModifiedResidues);
+                            foreach (var protein in proteins)
+                            {
+                                var prsm = new PrSm
+                                               {
+                                                   Heavy = false,
+                                                   ProteinName = protein,
+                                                   ProteinDesc = string.Empty,
+                                                   Charge = psm.Charge,
+                                                   Sequence = parsedSequence,
+                                                   Scan = psm.ScanNumber,
+                                                   Score = Convert.ToDouble(psm.MSGFSpecProb),
+                                                   UseGolfScoring = true,
+                                                   QValue = 0,
+                                               };
+
+                                prsm.SetSequence(this.GetSequenceText(parsedSequence), parsedSequence);
+
+                                ids.Add(prsm);
+                            }
+                        }
+
+                        return ids;
+                    });
+
+            return identifications;
         }
 
         /// <summary>

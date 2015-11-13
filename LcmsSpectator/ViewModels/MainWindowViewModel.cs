@@ -530,15 +530,17 @@ namespace LcmsSpectator.ViewModels
             {
                 try
                 {
-                    await this.dataReader.OpenDataSet(
-                                                      dataSetViewModel,
-                                                      dataSetViewModel.Title,
-                                                      idFilePath,
-                                                      modIgnoreList: modIgnoreList);
+                    await
+                        this.dataReader.OpenDataSet(
+                            dataSetViewModel,
+                            dataSetViewModel.Title,
+                            idFilePath,
+                            modIgnoreList: modIgnoreList);
                     attemptToReadFile = false;
                 }
                 catch (IcFileReader.InvalidModificationNameException e)
-                {   // file contains an unknown modification
+                {
+                    // file contains an unknown modification
                     var result =
                         this.dialogService.ConfirmationBox(
                             string.Format(
@@ -551,12 +553,19 @@ namespace LcmsSpectator.ViewModels
                     }
                 }
                 catch (KeyNotFoundException e)
-                {   // file does not have correct headers
+                {
+                    // file does not have correct headers
                     this.dialogService.ExceptionAlert(e);
                     return;
                 }
                 catch (IOException e)
-                {   // unable to read or open file.
+                {
+                    // unable to read or open file.
+                    this.dialogService.ExceptionAlert(e);
+                    return;
+                }
+                catch (Exception e)
+                {   // Most likely trying to open a synopsis file while missing some files.
                     this.dialogService.ExceptionAlert(e);
                     return;
                 }
