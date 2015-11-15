@@ -98,6 +98,7 @@ DefaultDirName={pf}\LcmsSpectator
 DefaultGroupName=PAST Toolkit
 AppCopyright=© PNNL
 PrivilegesRequired=poweruser
+SetupIconFile=LcmsSpectator\Resources\iconSmall.ico
 OutputBaseFilename=LcmsSpectatorSetup
 ;VersionInfoVersion=1.1.16
 VersionInfoVersion={#ApplicationVersion}
