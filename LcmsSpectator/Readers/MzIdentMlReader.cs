@@ -122,6 +122,6 @@ namespace LcmsSpectator.Readers
             return prsms;
         }
 
-        public IList<Modification> Modifications { get; }
+        public IList<Modification> Modifications { get; private set; }
     }
 }

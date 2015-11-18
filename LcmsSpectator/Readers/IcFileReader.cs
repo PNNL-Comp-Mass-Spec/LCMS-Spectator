@@ -64,7 +64,7 @@ namespace LcmsSpectator.Readers
             return await this.ReadFile(modIgnore);
         }
 
-        public IList<Modification> Modifications { get; }
+        public IList<Modification> Modifications { get; private set; }
 
         /// <summary>
         /// Create a sequence object with modifications.

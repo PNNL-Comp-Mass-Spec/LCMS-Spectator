@@ -63,7 +63,7 @@ namespace LcmsSpectator.Readers
             return await this.ReadFromTsvFile();
         }
 
-        public IList<Modification> Modifications { get; }
+        public IList<Modification> Modifications { get; private set; }
 
         /// <summary>
         /// Read a MS-GF+ results from TSV file.
