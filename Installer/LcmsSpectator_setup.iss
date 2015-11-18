@@ -86,6 +86,8 @@ Name: {group}\LCMS Spectator; Filename: {app}\LcmsSpectator.exe; Comment: LCMS S
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 [Setup]
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
 AppName=LcmsSpectator
 AppVersion={#ApplicationVersion}
 ;AppVerName=LcmsSpectator
