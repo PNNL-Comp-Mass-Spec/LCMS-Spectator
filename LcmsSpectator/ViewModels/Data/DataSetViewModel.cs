@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using InformedProteomics.Backend.Database;
+
 namespace LcmsSpectator.ViewModels.Data
 {
     using System;
@@ -438,7 +440,7 @@ namespace LcmsSpectator.ViewModels.Data
             var searchSettings = new SearchSettingsViewModel(this.dialogService, this.MsPfParameters)
             {
                 SpectrumFilePath = this.rawFilePath,
-                SelectedSearchMode = 1,
+                SelectedSearchMode = InternalCleavageType.SingleInternalCleavage,
                 FastaDbFilePath = this.FastaDbFilePath,
                 OutputFilePath = string.Format("{0}\\{1}", Directory.GetCurrentDirectory(), this.Title),
                 SelectedSequence = this.SelectedPrSm.Sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue)

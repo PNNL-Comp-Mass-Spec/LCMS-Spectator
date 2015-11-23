@@ -8,6 +8,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using InformedProteomics.Backend.Database;
 using InformedProteomics.Backend.Utils;
 
 namespace LcmsSpectator.ViewModels
@@ -94,7 +95,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// The search mode selected from <see cref="SearchModes" />.
         /// </summary>
-        private int selectedSearchMode;
+        private InternalCleavageType selectedSearchMode;
 
         /// <summary>
         /// The description for the selected search mode.
@@ -245,7 +246,7 @@ namespace LcmsSpectator.ViewModels
         public SearchSettingsViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.SearchModes = new[] { 0, 1, 2 };
+            this.SearchModes = new[] { InternalCleavageType.MultipleInternalCleavages, InternalCleavageType.SingleInternalCleavage, InternalCleavageType.NoInternalCleavage };
             this.ToleranceUnits = new[] { ToleranceUnit.Ppm, ToleranceUnit.Th };
             this.SelectedSequence = string.Empty;
             this.FastaEntries = new ReactiveList<FastaEntry>();
@@ -335,7 +336,7 @@ namespace LcmsSpectator.ViewModels
             this.CancelCommand = cancelCommand;
 
             // Default values
-            this.SelectedSearchMode = 1;
+            this.SelectedSearchMode = InternalCleavageType.SingleInternalCleavage;
             this.MinSequenceLength = 21;
             this.MaxSequenceLength = 300;
             this.MinPrecursorIonCharge = 2;
@@ -357,7 +358,7 @@ namespace LcmsSpectator.ViewModels
 
             // When search mode is selected, display correct search mode description
             this.WhenAnyValue(x => x.SelectedSearchMode)
-                .Subscribe(searchMode => this.SearchModeDescription = this.searchModeDescriptions[searchMode]);
+                .Subscribe(searchMode => this.SearchModeDescription = this.searchModeDescriptions[(int)searchMode]);
 
             // When Spectrum file path is selected, use its directory for the output path by default if a output path
             // has not already been selected.
@@ -539,7 +540,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets the list of possible MSPathFinder search modes.
         /// </summary>
-        public int[] SearchModes { get; private set; }
+        public InternalCleavageType[] SearchModes { get; private set; }
 
         /// <summary>
         /// Gets the list of entries in the FASTA file.
@@ -554,7 +555,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets or sets the search mode selected from <see cref="SearchModes" />.
         /// </summary>
-        public int SelectedSearchMode
+        public InternalCleavageType SelectedSearchMode
         {
             get { return this.selectedSearchMode; }
             set { this.RaiseAndSetIfChanged(ref this.selectedSearchMode, value); }
@@ -827,7 +828,7 @@ namespace LcmsSpectator.ViewModels
                 MaxSequenceMass = this.MaxSequenceMass,
                 PrecursorIonTolerancePpm = this.PrecursorIonToleranceValue,
                 ProductIonTolerancePpm = this.ProductIonToleranceValue,
-                RunTargetDecoyAnalysis = true,
+                RunTargetDecoyAnalysis = DatabaseSearchMode.Both,
                 SearchMode = this.SelectedSearchMode,
                 MaxNumThreads = 4,
                 ScanNumbers = ms2ScanNums,
