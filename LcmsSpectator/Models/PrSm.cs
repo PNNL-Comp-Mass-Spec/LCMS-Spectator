@@ -124,6 +124,7 @@ namespace LcmsSpectator.Models
             this.Mass = double.NaN;
             this.PrecursorMz = double.NaN;
             this.QValue = -1.0;
+            this.charge = 1;
         }
 
         #region Public Properties

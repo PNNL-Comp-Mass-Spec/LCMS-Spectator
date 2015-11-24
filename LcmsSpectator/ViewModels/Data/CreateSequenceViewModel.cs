@@ -96,7 +96,7 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 this.SelectedScan = prsm.Scan;
                 this.SequenceText = prsm.SequenceText;
-                this.SelectedCharge = prsm.Charge;
+                this.SelectedCharge = Math.Max(prsm.Charge, 1);
             });
 
             this.Modifications = IcParameters.Instance.RegisteredModifications;
