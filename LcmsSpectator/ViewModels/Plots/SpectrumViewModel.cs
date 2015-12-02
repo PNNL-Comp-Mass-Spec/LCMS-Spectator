@@ -381,7 +381,8 @@ namespace LcmsSpectator.ViewModels.Plots
                 return null;
             }
 
-            var index = Math.Abs(Array.BinarySearch(scans, ms1Scan));
+            var index = Array.BinarySearch(scans, ms1Scan);
+            index = index < 0 ? ~index : index;
             var lowIndex = Math.Max(0, index - 1);
             var highIndex = Math.Min(scans.Length - 1, index + 1);
 
