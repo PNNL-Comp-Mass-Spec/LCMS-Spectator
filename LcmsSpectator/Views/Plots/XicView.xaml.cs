@@ -32,9 +32,11 @@ namespace LcmsSpectator.Views.Plots
             {
                 this.LightColumn.Width = new GridLength(50, GridUnitType.Star);
                 this.HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
+                this.LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
                 if (this.ShowFragment.IsChecked == true)
                 {
                     this.FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                    this.FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
                 }
             }
             else
@@ -42,6 +44,7 @@ namespace LcmsSpectator.Views.Plots
                 this.LightColumn.Width = new GridLength(100, GridUnitType.Star);
                 this.HeavyColumn.Width = new GridLength(0, GridUnitType.Star);
                 this.FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
+                this.LinkColumn.Width = new GridLength(0, GridUnitType.Pixel);
             }
 
             if (this.ShowFragment.IsChecked == true)
@@ -49,9 +52,11 @@ namespace LcmsSpectator.Views.Plots
                 this.FragmentPlotRow.Height = new GridLength(60, GridUnitType.Star);
                 this.FragmentTitleRow.Height = new GridLength(4, GridUnitType.Star);
                 this.PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
+                this.FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
                 if (this.ShowHeavy.IsChecked == true)
                 {
                     this.FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                    this.LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
                 }
             }
             else
@@ -60,6 +65,7 @@ namespace LcmsSpectator.Views.Plots
                 this.FragmentTitleRow.Height = new GridLength(0, GridUnitType.Pixel);
                 this.PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
                 this.FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
+                this.FragmentLinkRow.Height = new GridLength(0, GridUnitType.Pixel);
             }
         }
 
@@ -76,11 +82,13 @@ namespace LcmsSpectator.Views.Plots
             this.FragmentIonXic.Visibility = Visibility.Visible;
             this.FragmentIonXic.UpdateLayout();
             this.PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
+            this.FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
             if (this.ShowHeavy.IsChecked == true)
             {
                 this.HeavyFragmentIonXic.Visibility = Visibility.Visible;
                 this.FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
                 this.HeavyFragmentIonXic.UpdateLayout();
+                this.LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
             }
         }
 
@@ -96,7 +104,7 @@ namespace LcmsSpectator.Views.Plots
             this.FragmentTitleRow.Height = new GridLength(0, GridUnitType.Pixel);
             this.PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
             this.FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
-
+            this.FragmentLinkRow.Height = new GridLength(0, GridUnitType.Pixel);
             this.FragmentIonXic.Visibility = Visibility.Collapsed;
             this.FragmentIonXic.UpdateLayout();
             this.HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
@@ -115,11 +123,13 @@ namespace LcmsSpectator.Views.Plots
             this.HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
             this.PrecursorIonXic.Visibility = Visibility.Visible;
             this.PrecursorIonXic.UpdateLayout();
+            this.LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
             if (this.ShowFragment.IsChecked == true)
             {
                 this.HeavyFragmentIonXic.Visibility = Visibility.Visible;
                 this.HeavyFragmentIonXic.UpdateLayout();
                 this.FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                this.FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
             }
         }
 
@@ -137,6 +147,7 @@ namespace LcmsSpectator.Views.Plots
 
             this.HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
             this.HeavyFragmentIonXic.UpdateLayout();
+            this.LinkColumn.Width = new GridLength(0, GridUnitType.Pixel);
         }
     }
 }

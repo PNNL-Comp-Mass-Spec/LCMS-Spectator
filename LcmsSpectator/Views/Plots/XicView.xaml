@@ -11,12 +11,14 @@
             <RowDefinition Height="4*" Name="FragmentTitleRow" />
             <RowDefinition Height="60*" Name="FragmentPlotRow" />
             <RowDefinition Height="20"  Name="FragmentAreaRow" />
+            <RowDefinition Height="30" Name="FragmentLinkRow" />
             <RowDefinition Height="4*" />
             <RowDefinition Height="40*" Name="PrecursorPlotRow" />
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" Name="LightColumn" />
+            <ColumnDefinition Width="30" Name="LinkColumn" />
             <ColumnDefinition Width="Auto" Name ="HeavyColumn" />
         </Grid.ColumnDefinitions>
         <Viewbox Grid.Row="0" Grid.Column="0" StretchDirection="Both" HorizontalAlignment="Stretch">
@@ -50,10 +52,17 @@
                     IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
                     ToolTip="Smoothing Window Points" />
         </Grid>
-        <Viewbox Grid.Row="0" Grid.Column="1"  StretchDirection="Both" HorizontalAlignment="Stretch">
+
+        <!-- Fragment/Precursor Link Button -->
+        <Button Grid.Row="3" Grid.Column="0" Height="25" Width="25" Content="{Binding PrecursorToFragmentLinkLabel}" Command="{Binding LinkPrecursorToFragmentCommand}" />
+
+        <!-- Fragment/Heavy-Fragment Link Button -->
+        <Button Grid.Row="1" Grid.Column="1" Height="25" Width="25" Content="{Binding LightToHeavyLinkLabel}" Command="{Binding LinkLightToHeavyCommand}" />
+
+        <Viewbox Grid.Row="0" Grid.Column="2"  StretchDirection="Both" HorizontalAlignment="Stretch">
             <TextBlock  TextAlignment="Center" FontWeight="Bold" DataContext="{Binding HeavyFragmentPlotViewModel}" Text="{Binding PlotTitle}" />
         </Viewbox>
-        <Grid Grid.Row="1" Grid.Column="1" DataContext="{Binding HeavyFragmentPlotViewModel}">
+        <Grid Grid.Row="1" Grid.Column="2" DataContext="{Binding HeavyFragmentPlotViewModel}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="30" />
@@ -82,10 +91,10 @@
                     ToolTip="Smoothing Window Points"/>
         </Grid>
         <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="Bold" Text="{Binding FragmentAreaRatioLabel}" />
-        <Viewbox Grid.Row="3" Grid.Column="0"  StretchDirection="Both" HorizontalAlignment="Stretch">
+        <Viewbox Grid.Row="4" Grid.Column="0"  StretchDirection="Both" HorizontalAlignment="Stretch">
             <TextBlock  TextAlignment="Center" FontWeight="Bold" DataContext="{Binding PrecursorPlotViewModel}" Text="{Binding PlotTitle}" />
         </Viewbox>
-        <Grid Grid.Row="4" Grid.Column="0" DataContext="{Binding PrecursorPlotViewModel}">
+        <Grid Grid.Row="5" Grid.Column="0" DataContext="{Binding PrecursorPlotViewModel}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="12" />
                 <ColumnDefinition Width="30" />
@@ -119,10 +128,17 @@
                     IsSnapToTickEnabled="True" TickPlacement="BottomRight" AutoToolTipPlacement="BottomRight"
                     ToolTip="Smoothing Window Points"/>
         </Grid>
-        <Viewbox Grid.Row="3" Grid.Column="1" StretchDirection="Both" HorizontalAlignment="Stretch">
+
+        <!-- Heavy-Fragment/Heavy-Precursor Link Button -->
+        <Button Grid.Row="3" Grid.Column="2" Height="25" Width="25" Content="{Binding PrecursorToFragmentLinkLabel}" Command="{Binding LinkPrecursorToFragmentCommand}" />
+
+        <!-- Precursor/Heavy-Precursor Link Button -->
+        <Button Grid.Row="5" Grid.Column="1" Height="25" Width="25" Content="{Binding LightToHeavyLinkLabel}" Command="{Binding LinkLightToHeavyCommand}" />
+
+        <Viewbox Grid.Row="4" Grid.Column="2" StretchDirection="Both" HorizontalAlignment="Stretch">
             <TextBlock TextAlignment="Center" FontWeight="Bold" DataContext="{Binding HeavyPrecursorPlotViewModel}" Text="{Binding PlotTitle}"/>
         </Viewbox>
-        <Grid Grid.Row="4" Grid.Column="1" DataContext="{Binding HeavyPrecursorPlotViewModel}">
+        <Grid Grid.Row="5" Grid.Column="2" DataContext="{Binding HeavyPrecursorPlotViewModel}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="30" />
@@ -133,6 +149,12 @@
                     <ContextMenu>
                         <MenuItem Header="Show Point _Markers" IsCheckable="True" IsChecked="{Binding ShowPointMarkers, Mode=TwoWay}" />
                         <MenuItem Header="Show _Legend" IsCheckable="True" IsChecked="{Binding ShowLegend, Mode=TwoWay}" />
+                        <Separator />
+                        <MenuItem Header="Mode" DataContext="{Binding FragmentationSequenceViewModel}">
+                            <MenuItem Header="Isotopes" IsCheckable="True" IsChecked="{Binding IsotopeViewMode, Mode=TwoWay}" />
+                            <MenuItem Header="Neighboring Charges" IsCheckable="True" IsChecked="{Binding ChargeViewMode, Mode=TwoWay}" />
+                        </MenuItem>
+                        <Separator />
                         <MenuItem Header="Save as _Image" Command="{Binding SaveAsImageCommand}" />
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
@@ -150,7 +172,7 @@
                     IsSnapToTickEnabled="True" TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft"
                     ToolTip="Smoothing Window Points"/>
         </Grid>
-        <Grid Grid.Row="5" Grid.Column="1">
+        <Grid Grid.Row="6" Grid.Column="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50*" />
                 <ColumnDefinition Width="50*" />
@@ -158,7 +180,7 @@
             <TextBlock Grid.Column="0" FontWeight="Bold" Text="{Binding PrecursorAreaRatioLabel}" />
             <Button Grid.Column="1" HorizontalAlignment="Right" Width="190" Command="{Binding OpenHeavyModificationsCommand}">Set Light/Heavy Modifications</Button>
         </Grid>
-        <Grid Grid.Row="5" Grid.Column="0">
+        <Grid Grid.Row="6" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="33*" />
                 <ColumnDefinition Width="33*" />

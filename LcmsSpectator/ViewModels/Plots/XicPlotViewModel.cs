@@ -108,7 +108,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="title">Title of XIC plot </param>
         /// <param name="xaxis">XAxis for XIC plot. </param>
         /// <param name="showLegend">Should a legend be shown on the plot by default? </param>
-        public XicPlotViewModel(IDialogService dialogService, IFragmentationSequenceViewModel fragSeqVm, ILcMsRun lcms, string title, LinearAxis xaxis, bool showLegend = true)
+        public XicPlotViewModel(IDialogService dialogService, IFragmentationSequenceViewModel fragSeqVm, ILcMsRun lcms, string title, LinearAxis xaxis, bool showLegend = true, AxisPosition vertAxes = AxisPosition.Left)
         {
             this.dialogService = dialogService;
             this.FragmentationSequenceViewModel = fragSeqVm;
@@ -122,7 +122,8 @@ namespace LcmsSpectator.ViewModels.Plots
                 YAxis =
                 {
                     Title = "Intensity",
-                    StringFormat = "0e0"
+                    StringFormat = "0e0",
+                    Position = vertAxes
                 }
             };
 

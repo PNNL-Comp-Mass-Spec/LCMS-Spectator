@@ -11,6 +11,7 @@
 namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Reactive.Linq;
     using InformedProteomics.Backend.MassSpecData;
@@ -89,6 +90,16 @@ namespace LcmsSpectator.ViewModels.Plots
         private FragmentationSequence fragmentationSequence;
 
         /// <summary>
+        /// Tracks which axes each axis is linked to.
+        /// </summary>
+        private readonly Dictionary<LinearAxis, List<LinearAxis>> linkedAxes;
+
+        /// <summary>
+        /// Tacks whether or not a link between two axes exists.
+        /// </summary>
+        private readonly HashSet<Tuple<LinearAxis, LinearAxis>> plotLinkageTracker;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="XicViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>
@@ -127,7 +138,8 @@ namespace LcmsSpectator.ViewModels.Plots
                 lcms,
                 "Heavy Fragment XIC",
                 this.heavyFragmentXAxis,
-                false);
+                false,
+                AxisPosition.Right);
             this.precursorXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
@@ -156,13 +168,28 @@ namespace LcmsSpectator.ViewModels.Plots
                 new PrecursorSequenceIonViewModel(),
                 lcms,
                 "Heavy Precursor XIC",
-                this.heavyPrecursorXAxis);
+                this.heavyPrecursorXAxis,
+                vertAxes: AxisPosition.Right);
 
             this.showHeavy = false;
             this.showFragmentXic = false;
             var openHeavyModificationsCommand = ReactiveCommand.Create();
             openHeavyModificationsCommand.Subscribe(_ => this.OpenHeavyModificationsImplentation());
             this.OpenHeavyModificationsCommand = openHeavyModificationsCommand;
+
+            this.linkedAxes = new Dictionary<LinearAxis, List<LinearAxis>>
+            {
+                { this.precursorXAxis, new List<LinearAxis>() },
+                { this.fragmentXAxis, new List<LinearAxis>() },
+                { this.heavyPrecursorXAxis, new List<LinearAxis>() },
+                { this.heavyFragmentXAxis, new List<LinearAxis>() }
+            };
+
+            this.plotLinkageTracker = new HashSet<Tuple<LinearAxis, LinearAxis>>();
+            this.TogglePlotLinks(this.fragmentXAxis, this.heavyFragmentXAxis);
+            this.TogglePlotLinks(this.precursorXAxis, this.heavyPrecursorXAxis);
+            this.TogglePlotLinks(this.precursorXAxis, this.fragmentXAxis);
+            this.TogglePlotLinks(this.heavyPrecursorXAxis, this.heavyFragmentXAxis);
 
             // Update area ratios when the area of any of the plots changes
             this.WhenAny(x => x.FragmentPlotViewModel.Area, x => x.HeavyFragmentPlotViewModel.Area, (x, y) => x.Value / y.Value)
@@ -187,6 +214,27 @@ namespace LcmsSpectator.ViewModels.Plots
                     this.PrecursorPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
                     this.HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
                 });
+
+            this.PrecursorToFragmentLinkLabel = "L";
+            this.LightToHeavyLinkLabel = "L";
+
+            this.LinkLightToHeavyCommand = ReactiveCommand.Create();
+            this.LinkLightToHeavyCommand.Subscribe(
+                _ =>
+                    {
+                        this.TogglePlotLinks(this.fragmentXAxis, this.heavyFragmentXAxis);
+                        this.TogglePlotLinks(this.precursorXAxis, this.heavyPrecursorXAxis);
+                        this.LightToHeavyLinkLabel = this.LightToHeavyLinkLabel == "L" ? "U" : "L";
+                    });
+
+            this.LinkPrecursorToFragmentCommand = ReactiveCommand.Create();
+            this.LinkPrecursorToFragmentCommand.Subscribe(
+                _ =>
+                    {
+                        this.TogglePlotLinks(this.precursorXAxis, this.fragmentXAxis);
+                        this.TogglePlotLinks(this.heavyPrecursorXAxis, this.heavyFragmentXAxis);
+                        this.PrecursorToFragmentLinkLabel = this.PrecursorToFragmentLinkLabel == "L" ? "U" : "L";
+                    });
         }
 
         /// <summary>
@@ -212,7 +260,33 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets command that opens window for selecting heavy modifications for light and heavy peptides.
         /// </summary>
-        public IReactiveCommand OpenHeavyModificationsCommand { get; private set; }
+        public ReactiveCommand<object> OpenHeavyModificationsCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that links the Precursor XIC axes to the Fragment XIC axes.
+        /// </summary>
+        public ReactiveCommand<object> LinkLightToHeavyCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that links the precursor XIC axes to the Heavy Precursor XIC axes.
+        /// </summary>
+        public ReactiveCommand<object> LinkPrecursorToFragmentCommand { get; private set; }
+
+        private string lightToHeavyLinkLabel;
+
+        public string LightToHeavyLinkLabel
+        {
+            get { return this.lightToHeavyLinkLabel; }
+            private set { this.RaiseAndSetIfChanged(ref this.lightToHeavyLinkLabel, value); }
+        }
+
+        private string precursorToFragmentLinkLabel;
+
+        public string PrecursorToFragmentLinkLabel
+        {
+            get { return this.precursorToFragmentLinkLabel; }
+            private set { this.RaiseAndSetIfChanged(ref this.precursorToFragmentLinkLabel, value); }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the fragment XICs are shown.
@@ -320,33 +394,110 @@ namespace LcmsSpectator.ViewModels.Plots
             if (!this.axisInternalChange)
             {
                 this.axisInternalChange = true;
+                this.axisInternalChange = true;
                 var axis = sender as LinearAxis;
                 if (axis == null)
                 {
                     return;
                 }
 
-                if (sender != this.fragmentXAxis)
-                {
-                    this.fragmentXAxis.Zoom(axis.ActualMinimum, axis.ActualMaximum);
-                }
-
-                if (sender != this.heavyFragmentXAxis)
-                {
-                    this.heavyFragmentXAxis.Zoom(axis.ActualMinimum, axis.ActualMaximum);
-                }
-
-                if (sender != this.precursorXAxis)
-                {
-                    this.precursorXAxis.Zoom(axis.ActualMinimum, axis.ActualMaximum);
-                }
-
-                if (sender != this.heavyPrecursorXAxis)
-                {
-                    this.heavyPrecursorXAxis.Zoom(axis.ActualMinimum, axis.ActualMaximum);
-                }
-
+                this.UpdateAxesRecursive(axis, new HashSet<LinearAxis>());
                 this.axisInternalChange = false;
+            }
+        }
+
+        private void UpdateAxesRecursive(LinearAxis sender, HashSet<LinearAxis> alreadyUpdated)
+        {
+            if (alreadyUpdated.Contains(sender))
+            {
+                return;
+            }
+
+            alreadyUpdated.Add(sender);
+            if (this.linkedAxes.ContainsKey(sender))
+            {
+                var links = this.linkedAxes[sender];
+                foreach (var link in links)
+                {
+                    link.Zoom(sender.ActualMinimum, sender.ActualMaximum);
+                    this.UpdateAxesRecursive(link, alreadyUpdated);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Toggle the linkage between two plot's axes.
+        /// </summary>
+        /// <param name="axis1">First axis.</param>
+        /// <param name="axis2">Second axis.</param>
+        private void TogglePlotLinks(LinearAxis axis1, LinearAxis axis2)
+        {
+            var key = new Tuple<LinearAxis, LinearAxis>(axis1, axis2);
+            if (this.plotLinkageTracker.Contains(key))
+            {
+                this.RemoveLinks(axis1, axis2);
+                this.plotLinkageTracker.Remove(key);
+            }
+            else
+            {
+                this.AddLinks(axis1, axis2);
+                this.plotLinkageTracker.Add(key);
+            }
+        }
+
+        /// <summary>
+        /// Link two axes together so they scroll together.
+        /// </summary>
+        /// <param name="axis1">First axis to link.</param>
+        /// <param name="axis2">Second axis to link.</param>
+        private void AddLinks(LinearAxis axis1, LinearAxis axis2)
+        {
+            this.AddLink(axis1, axis2);
+            this.AddLink(axis2, axis1);
+        }
+
+        /// <summary>
+        /// Link the second axis to the first so the second one scrolls when the first does.
+        /// </summary>
+        /// <param name="axis1">The first axis.</param>
+        /// <param name="axis2">The second axis.</param>
+        private void AddLink(LinearAxis axis1, LinearAxis axis2)
+        {
+            if (this.linkedAxes.ContainsKey(axis1))
+            {
+                var links = this.linkedAxes[axis1];
+                if (!links.Contains(axis2))
+                {
+                    links.Add(axis2);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Unlink two axes together so they do not scroll together.
+        /// </summary>
+        /// <param name="axis1">First axis to unlink.</param>
+        /// <param name="axis2">Second axis to unlink.</param>
+        private void RemoveLinks(LinearAxis axis1, LinearAxis axis2)
+        {
+            this.RemoveLink(axis1, axis2);
+            this.RemoveLink(axis2, axis1);
+        }
+
+        /// <summary>
+        /// Unlink the second axis to the first so the second one does not scroll when the first does.
+        /// </summary>
+        /// <param name="axis1">The first axis.</param>
+        /// <param name="axis2">The second axis.</param>
+        private void RemoveLink(LinearAxis axis1, LinearAxis axis2)
+        {
+            if (this.linkedAxes.ContainsKey(axis1))
+            {
+                var links = this.linkedAxes[axis1];
+                if (links.Contains(axis2))
+                {
+                    links.Remove(axis2);
+                }
             }
         }
 
