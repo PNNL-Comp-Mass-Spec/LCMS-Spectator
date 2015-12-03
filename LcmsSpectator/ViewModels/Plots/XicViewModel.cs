@@ -13,8 +13,11 @@ namespace LcmsSpectator.ViewModels.Plots
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Reactive.Linq;
     using InformedProteomics.Backend.MassSpecData;
+
+    using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels.Data;
@@ -176,6 +179,11 @@ namespace LcmsSpectator.ViewModels.Plots
             var openHeavyModificationsCommand = ReactiveCommand.Create();
             openHeavyModificationsCommand.Subscribe(_ => this.OpenHeavyModificationsImplentation());
             this.OpenHeavyModificationsCommand = openHeavyModificationsCommand;
+
+            this.PrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
+            this.FragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
+            this.HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
+            this.HeavyFragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
 
             this.linkedAxes = new Dictionary<LinearAxis, List<LinearAxis>>
             {
@@ -509,6 +517,10 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             var heavyModificationsWindowVm = new HeavyModificationsWindowViewModel(this.dialogService);
             this.dialogService.OpenHeavyModifications(heavyModificationsWindowVm);
+            this.PrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
+            this.FragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
+            this.HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
+            this.HeavyFragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
         }
 
         /// <summary>
