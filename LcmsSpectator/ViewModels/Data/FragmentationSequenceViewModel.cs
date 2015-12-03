@@ -92,7 +92,7 @@
 
                 foreach (var neutralLoss in NeutralLosses)
                 {
-                    neutralLoss.IsSelected = false;
+                    neutralLoss.IsSelected = neutralLoss.NeutralLoss == NeutralLoss.NoLoss && neutralLoss.IsSelected;
                 }
             });
             this.HideAllIonsCommand = hideAllIonsCommand;
