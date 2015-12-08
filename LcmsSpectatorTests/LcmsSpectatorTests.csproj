@@ -164,6 +164,7 @@
     <Compile Include="DialogServices\TestableMainDialogService.cs" />
     <Compile Include="IonUtilsTest.cs" />
     <Compile Include="MainWindowTest.cs" />
+    <Compile Include="MsPathFinderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScanViewTest.cs" />
     <Compile Include="SpectrumPlotTest.cs" />
