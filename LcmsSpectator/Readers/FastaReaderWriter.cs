@@ -54,6 +54,11 @@
                 }
             }
 
+            if (fastaEntry != null)
+            {
+                entries.Add(fastaEntry);
+            }
+
             return entries;
         }
 
