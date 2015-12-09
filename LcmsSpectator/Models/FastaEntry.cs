@@ -12,6 +12,9 @@ namespace LcmsSpectator.Models
 {
     using System;
     using System.Text;
+
+    using InformedProteomics.Backend.Data.Sequence;
+
     using ReactiveUI;
 
     /// <summary>
@@ -43,6 +46,11 @@ namespace LcmsSpectator.Models
         /// A value indicating whether this entry has been selected.
         /// </summary>
         private bool selected;
+
+        /// <summary>
+        /// Gets or sets the protein sequence as an InformedProteomics sequence.
+        /// </summary>
+        private Sequence proteinSequence;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FastaEntry"/> class. 
@@ -96,14 +104,14 @@ namespace LcmsSpectator.Models
             set { this.RaiseAndSetIfChanged(ref this.selected, value); }
         }
 
-        /////// <summary>
-        /////// Gets or sets the protein sequence as an InformedProteomics sequence.
-        /////// </summary>
-        ////public Sequence ProteinSequence
-        ////{
-        ////    get { return this.proteinSequence; }
-        ////    private set { this.RaiseAndSetIfChanged(ref this.proteinSequence, value); }
-        ////}
+        /// <summary>
+        /// Gets or sets the protein sequence as an InformedProteomics sequence.
+        /// </summary>
+        public Sequence ProteinSequence
+        {
+            get { return this.proteinSequence; }
+            set { this.RaiseAndSetIfChanged(ref this.proteinSequence, value); }
+        }
 
         /// <summary>
         /// Gets an entry formatted as it should be in a FASTA database file.

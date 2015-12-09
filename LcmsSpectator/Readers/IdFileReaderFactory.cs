@@ -31,6 +31,7 @@ namespace LcmsSpectator.Readers
                     var line = streamReader.ReadLine();
                     if (line != null && line.Contains("MSGFScore")) reader = new MsgfFileReader(fileName);
                     else if (line != null && line.Contains("#MatchedFragments")) reader = new IcFileReader(fileName);
+                    else if (line != null && line.Contains("Score")) reader = new BruteForceSearchResultsReader(fileName);
                     streamReader.Close();
                     break;
 				case ".mzid":

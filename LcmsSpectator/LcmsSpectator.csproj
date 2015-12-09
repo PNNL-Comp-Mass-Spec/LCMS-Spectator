@@ -251,6 +251,7 @@
     <Compile Include="PlotModels\SelectablePlotModel.cs" />
     <Compile Include="PlotModels\XicDataPoint.cs" />
     <Compile Include="PlotModels\XicPointSeries.cs" />
+    <Compile Include="Readers\BruteForceSearchResultsReader.cs" />
     <Compile Include="Readers\DataReader.cs" />
     <Compile Include="Readers\DmsLookupUtility.cs" />
     <Compile Include="Readers\FastaReaderWriter.cs" />

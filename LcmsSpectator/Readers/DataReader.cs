@@ -151,7 +151,13 @@ namespace LcmsSpectator.Readers
 
                 if (dataSetViewModel.MsPfParameters == null)
                 {
-                    dataSetViewModel.SetMsPfParameters(string.IsNullOrWhiteSpace(paramFilePath) ? idFilePath : paramFilePath);   
+                    dataSetViewModel.SetMsPfParameters(string.IsNullOrWhiteSpace(paramFilePath) ? idFilePath : paramFilePath);
+                }
+
+                if (dataSetViewModel.MsPfParameters != null)
+                {
+                    IcParameters.Instance.ProductIonTolerancePpm = dataSetViewModel.MsPfParameters.ProductIonTolerancePpm;
+                    IcParameters.Instance.PrecursorTolerancePpm = dataSetViewModel.MsPfParameters.PrecursorTolerancePpm;
                 }
 
                 await this.ReadIdFile(dataSetViewModel, idFilePath, modIgnoreList);

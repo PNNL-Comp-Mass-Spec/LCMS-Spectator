@@ -7,6 +7,8 @@
     using System.Text;
     using System.Threading.Tasks;
 
+    using InformedProteomics.Backend.Data.Sequence;
+
     using LcmsSpectator.Models;
 
     public class FastaReaderWriter
@@ -16,7 +18,7 @@
         /// </summary>
         /// <param name="filePath">The path to the FASTA DB file.</param>
         /// <returns>Enumerable of entries in the file.</returns>
-        public static IEnumerable<FastaEntry> ReadFastaFile(string filePath)
+        public static IEnumerable<FastaEntry> ReadFastaFile(string filePath, bool parseSequence = false)
         {
             FastaEntry fastaEntry = null;
             List<FastaEntry> entries = new List<FastaEntry>();
@@ -56,6 +58,11 @@
 
             if (fastaEntry != null)
             {
+                if (parseSequence)
+                {
+                    fastaEntry.ProteinSequence = new Sequence(fastaEntry.ProteinSequenceText, new AminoAcidSet());
+                }
+
                 entries.Add(fastaEntry);
             }
 

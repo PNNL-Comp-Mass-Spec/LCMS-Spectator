@@ -132,12 +132,14 @@ namespace LcmsSpectator.Models
         /// </returns>
         public static MsPfParameters ReadFromFile(string filePath)
         {
-            if (filePath.Contains("_IcTsv") || filePath.Contains("IcTda"))
+            var extension = Path.GetExtension(filePath).ToLower();
+
+            if (!string.IsNullOrEmpty(extension) && extension == ".param")
             {
-                return ReadFromIdFilePath(filePath);
+                return ReadFromParameterFile(filePath);
             }
 
-            return ReadFromParameterFile(filePath);
+            return ReadFromIdFilePath(filePath);
         }
 
         /// <summary>
@@ -257,14 +259,10 @@ namespace LcmsSpectator.Models
                 return null;
             }
 
-            string dataSetName;
+            string dataSetName = fileName;
             if (fileName.EndsWith("_IcTsv") || fileName.EndsWith("_IcTda"))
             {
                 dataSetName = fileName.Substring(0, fileName.Length - 6);
-            }
-            else
-            {
-                return null;
             }
 
             var paramFilePath = string.Format(@"{0}\{1}.param", path, dataSetName);
