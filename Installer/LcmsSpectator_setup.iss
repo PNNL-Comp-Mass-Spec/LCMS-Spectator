@@ -1,49 +1,50 @@
 ; This is an Inno Setup configuration file
 ; http://www.jrsoftware.org/isinfo.php
 
-#define ApplicationVersion GetFileVersion('..\LcmsSpectator\bin\x64\Release\LcmsSpectator.exe')
+#define ApplicationVersion GetFileVersion('..\LcmsSpectator\bin\Release\LcmsSpectator.exe')
 
 [CustomMessages]
 AppName=LcmsSpectator
 [Messages]
-WelcomeLabel2=This will install [name/ver] on your computer.%n%nLcmsSpectator is a standalone Windows graphical user interface tool for viewing LC-MS data and identifications.
+; WelcomeLabel2 is set using the code section
+;WelcomeLabel2=This will install [name/ver] on your computer.%n%nLcmsSpectator is a standalone Windows graphical user interface tool for viewing LC-MS data and identifications.
 
 [Files]
 ; Application files
-Source: LcmsSpectator\bin\x64\Release\layout.xml;                                DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\layoutdoc.xml;                             DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\LcmsSpectator.exe;                         DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\LcmsSpectator.exe.config;                  DestDir: {app}
+Source: LcmsSpectator\bin\Release\layout.xml;                                DestDir: {app}
+Source: LcmsSpectator\bin\Release\layoutdoc.xml;                             DestDir: {app}
+Source: LcmsSpectator\bin\Release\LcmsSpectator.exe;                         DestDir: {app}
+Source: LcmsSpectator\bin\Release\LcmsSpectator.exe.config;                  DestDir: {app}
 
 ; Nuget-Installed libraries
-Source: LcmsSpectator\bin\x64\Release\GraphX.Controls.dll;                       DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\GraphX.PCL.Common.dll;                     DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\GraphX.PCL.Logic.dll;                      DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\OxyPlot.dll;                               DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\OxyPlot.Wpf.dll;                           DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\OxyPlot.Xps.dll;                           DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\QuickGraph.Data.dll;                       DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\QuickGraph.dll;                            DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\QuickGraph.Graphviz.dll;                   DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\QuickGraph.Serialization.dll;              DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\ReactiveUI.dll;                            DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\ReactiveUI.Events.dll;                     DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\Splat.dll;                                 DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\System.Reactive.Core.dll;                  DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\System.Reactive.Interfaces.dll;            DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\System.Reactive.Linq.dll;                  DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\System.Reactive.PlatformServices.dll;      DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\System.Reactive.Windows.Threading.dll;     DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\Xceed.Wpf.AvalonDock.dll;                  DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\Xceed.Wpf.AvalonDock.Themes.Aero.dll;      DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\Xceed.Wpf.AvalonDock.Themes.Metro.dll;     DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\Xceed.Wpf.AvalonDock.Themes.VS2010.dll;    DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\Xceed.Wpf.DataGrid.dll;                    DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\Xceed.Wpf.Toolkit.dll;                     DestDir: {app}
+Source: LcmsSpectator\bin\Release\GraphX.Controls.dll;                       DestDir: {app}
+Source: LcmsSpectator\bin\Release\GraphX.PCL.Common.dll;                     DestDir: {app}
+Source: LcmsSpectator\bin\Release\GraphX.PCL.Logic.dll;                      DestDir: {app}
+Source: LcmsSpectator\bin\Release\OxyPlot.dll;                               DestDir: {app}
+Source: LcmsSpectator\bin\Release\OxyPlot.Wpf.dll;                           DestDir: {app}
+Source: LcmsSpectator\bin\Release\OxyPlot.Xps.dll;                           DestDir: {app}
+Source: LcmsSpectator\bin\Release\QuickGraph.Data.dll;                       DestDir: {app}
+Source: LcmsSpectator\bin\Release\QuickGraph.dll;                            DestDir: {app}
+Source: LcmsSpectator\bin\Release\QuickGraph.Graphviz.dll;                   DestDir: {app}
+Source: LcmsSpectator\bin\Release\QuickGraph.Serialization.dll;              DestDir: {app}
+Source: LcmsSpectator\bin\Release\ReactiveUI.dll;                            DestDir: {app}
+Source: LcmsSpectator\bin\Release\ReactiveUI.Events.dll;                     DestDir: {app}
+Source: LcmsSpectator\bin\Release\Splat.dll;                                 DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Reactive.Core.dll;                  DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Reactive.Interfaces.dll;            DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Reactive.Linq.dll;                  DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Reactive.PlatformServices.dll;      DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Reactive.Windows.Threading.dll;     DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.dll;                  DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Aero.dll;      DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Metro.dll;     DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.VS2010.dll;    DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.DataGrid.dll;                    DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.Toolkit.dll;                     DestDir: {app}
 
-Source: LcmsSpectator\bin\x64\Release\System.Data.SQLite.dll;                    DestDir: {app}
-Source: LcmsSpectator\bin\x64\Release\x64\SQLite.Interop.dll;                    DestDir: {app}\x64
-Source: LcmsSpectator\bin\x64\Release\x86\SQLite.Interop.dll;                    DestDir: {app}\x86
+Source: LcmsSpectator\bin\Release\System.Data.SQLite.dll;                    DestDir: {app}
+Source: LcmsSpectator\bin\Release\x64\SQLite.Interop.dll;                    DestDir: {app}\x64
+Source: LcmsSpectator\bin\Release\x86\SQLite.Interop.dll;                    DestDir: {app}\x86
 
 ; Separately-managed libraries
 Source: Library\QuadTreeLib.dll;                                                 DestDir: {app}
@@ -86,7 +87,8 @@ Name: {group}\LCMS Spectator; Filename: {app}\LcmsSpectator.exe; Comment: LCMS S
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 [Setup]
-ArchitecturesAllowed=x64
+; As AnyCPU, we can install as 32-bit or 64-bit, so allow installing on 32-bit Windows, but make sure it installs as 64-bit on 64-bit Windows
+ArchitecturesAllowed=x64 x86
 ArchitecturesInstallIn64BitMode=x64
 AppName=LcmsSpectator
 AppVersion={#ApplicationVersion}
@@ -121,3 +123,34 @@ SolidCompression=yes
 [UninstallDelete]
 Name: {app}; Type: filesandordirs
 Name: {app}\Tools; Type: filesandordirs
+
+[Code]
+function GetInstallArch(): String;
+begin
+  { Return a user value }
+  if Is64BitInstallMode then
+    Result := '64'
+  else
+    Result := '32';
+end;
+
+procedure InitializeWizard;
+var
+  message2_a: string;
+  message2_b: string;
+  message2_c: string;
+  message2: string;
+  appname: string;
+  appversion: string;
+begin
+  appname := '{#SetupSetting("AppName")}';
+  appversion := '{#SetupSetting("AppVersion")}';
+  (* #13 is carriage return, #10 is new line *)
+  message2_a := 'This will install ' + appname + ' version ' + appversion + ' on your computer.' + #10#10 + 
+                'LcmsSpectator is a standalone Windows graphical user interface tool for viewing LC-MS data and identifications.'
+                + #10#10#10#10 + 'NOTICE:' + #10 + 'Reading of some data files requires access to a ';
+  message2_b := '-bit ProteoWizard installation. Please install ';
+  message2_c := '-bit ProteoWizard before using the program to avoid errors.' + #10#10;
+  message2 := message2_a + GetInstallArch + message2_b + GetInstallArch + message2_c;
+  WizardForm.WelcomeLabel2.Caption := message2;
+end;
