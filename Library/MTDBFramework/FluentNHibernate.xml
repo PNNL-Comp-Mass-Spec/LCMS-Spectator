@@ -2226,6 +2226,11 @@
             Inverts the next boolean operation
             </summary>
         </member>
+        <member name="T:FluentNHibernate.Mapping.Providers.IndeterminateSubclassMappingProviderCollection">
+            <summary>
+            This collection optimizes search for already mapped types in subclasses providers. Matters in models with huge inheritance trees.
+            </summary>
+        </member>
         <member name="M:FluentNHibernate.Mapping.TuplizerPart.Type(System.Type)">
             <summary>
             Sets the tuplizer type.

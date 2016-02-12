@@ -2484,9 +2484,16 @@
             <summary>
             Handle the child nodes of the DataCollection element
             Called by ReadMzIdentML (xml hierarchy)
-            Currently we are only working with the AnalysisData child element
             </summary>
             <param name="reader">XmlReader that is only valid for the scope of the single DataCollection element</param>
+        </member>
+        <member name="M:MTDBFramework.IO.MzIdentMlReader.ReadInputs(System.Xml.XmlReader)">
+            <summary>
+            Handle child nodes of Inputs element
+            Called by ReadDataCollection (xml hierarchy)
+            Currently we are only working with the SpectraData child elements
+            </summary>
+            <param name="reader">XmlReader that is only valid for the scope of the single AnalysisData element</param>
         </member>
         <member name="M:MTDBFramework.IO.MzIdentMlReader.ReadAnalysisData(System.Xml.XmlReader)">
             <summary>
@@ -2510,13 +2517,12 @@
             </summary>
             <param name="reader">XmlReader that is only valid for the scope of the single SpectrumIdentificationResult element</param>
         </member>
-        <member name="M:MTDBFramework.IO.MzIdentMlReader.ReadSpectrumIdentificationItem(System.Xml.XmlReader,System.Collections.Generic.List{MTDBFramework.IO.MzIdentMlReader.SpectrumIdItem})">
+        <member name="M:MTDBFramework.IO.MzIdentMlReader.ReadSpectrumIdentificationItem(System.Xml.XmlReader)">
             <summary>
             Handle a single SpectrumIdentificationItem element and child nodes
             Called by ReadSpectrumIdentificationResult (xml hierarchy)
             </summary>
             <param name="reader">XmlReader that is only valid for the scope of the single SpectrumIdentificationItem element</param>
-            <param name="specRes">List of SpectrumIdItems that the read data is stored in</param>
         </member>
         <member name="M:MTDBFramework.IO.MzIdentMlReader.MapToMsgf(System.Collections.Generic.List{MTDBFramework.Data.MsgfPlusResult},System.String)">
             <summary>
