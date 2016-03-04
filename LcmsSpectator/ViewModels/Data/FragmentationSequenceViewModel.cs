@@ -8,7 +8,6 @@
 
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassFeature;
 
     using LcmsSpectator.Config;
     using LcmsSpectator.Models;
@@ -53,17 +52,15 @@
                 null,
                 ActivationMethod.HCD);
 
-            this.BaseIonTypes = new ReactiveList<BaseIonTypeViewModel>
-            {
-                new BaseIonTypeViewModel { BaseIonType = BaseIonType.A },
-                new BaseIonTypeViewModel { BaseIonType = BaseIonType.B, IsSelected = true },
-                new BaseIonTypeViewModel { BaseIonType = BaseIonType.C },
-                new BaseIonTypeViewModel { BaseIonType = BaseIonType.X },
-                new BaseIonTypeViewModel { BaseIonType = BaseIonType.Y, IsSelected = true },
-                new BaseIonTypeViewModel { BaseIonType = BaseIonType.Z }
-            };
+            var baseIonTypes = BaseIonType.AllBaseIonTypes.Select(
+                    bit =>
+                    new BaseIonTypeViewModel
+                    {
+                        BaseIonType = bit,
+                        IsSelected = bit == BaseIonType.B || bit == BaseIonType.Y
+                    });
 
-            this.BaseIonTypes.ChangeTrackingEnabled = true;
+            this.BaseIonTypes = new ReactiveList<BaseIonTypeViewModel>(baseIonTypes) { ChangeTrackingEnabled = true };
 
             this.NeutralLosses = new ReactiveList<NeutralLossViewModel>
             {
@@ -85,12 +82,12 @@
             hideAllIonsCommand.Subscribe(_ =>
             {
                 this.AddPrecursorIons = false;
-                foreach (var baseIonType in BaseIonTypes)
+                foreach (var baseIonType in this.BaseIonTypes)
                 {
                     baseIonType.IsSelected = false;
                 }
 
-                foreach (var neutralLoss in NeutralLosses)
+                foreach (var neutralLoss in this.NeutralLosses)
                 {
                     neutralLoss.IsSelected = neutralLoss.NeutralLoss == NeutralLoss.NoLoss && neutralLoss.IsSelected;
                 }

@@ -17,6 +17,7 @@ namespace LcmsSpectator.ViewModels.Data
 
     using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.Data.Composition;
+    using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
     using InformedProteomics.Backend.Utils;
@@ -143,7 +144,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public Ion Ion
         {
-            get { return this.IonType.GetIon(this.Composition); }
+            get { return new Ion(this.Composition, this.IonType.Charge); }
         }
 
         /// <summary>

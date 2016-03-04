@@ -1,0 +1,89 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+NETPrediction
+</name>
+</assembly>
+<members>
+<member name="M:NETPrediction.clsFeedForwardANN.GetNextNet(System.Int32@)">
+	<summary>
+ Giving a specific ANN an number allows for many
+ ANNs in the dll. Not needed here.
+ </summary>
+	<param name="DiagnBPNetNum"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:NETPrediction.clsFeedForwardANN.MakeNet(System.Int32,System.Int32,System.Int32)">
+	<summary>
+ Dummy function.  No arguments needed.
+ </summary>
+	<param name="DiagnBPNetNum"></param>
+	<param name="BpMomentum"></param>
+	<param name="License"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:NETPrediction.clsFeedForwardANN.MakeSlab(System.Int32,System.Int32,System.Int32,System.Int32)">
+	<summary>
+ Make a slab
+ </summary>
+	<param name="DiagnBPNetNum">Not used</param>
+	<param name="Slab"></param>
+	<param name="Neurons"></param>
+	<param name="LayerType">Not used</param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:NETPrediction.clsFeedForwardANN.MakeLink(System.Int32,System.Int32,System.Single,System.Int32,System.Int32)">
+	<summary>
+ Dummy function. No arguments needed.
+ </summary>
+	<param name="DiagnBPNetNum"></param>
+	<param name="SlabNo"></param>
+	<param name="RandWts"></param>
+	<param name="FromSlab"></param>
+	<param name="ToSlab"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:NETPrediction.clsFeedForwardANN.PutLink(System.Int32,System.Int32,System.Single[])">
+	<summary>
+ Put a link
+ </summary>
+	<param name="DiagnBPNetNum">Not used</param>
+	<param name="Link"></param>
+	<param name="Weights"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:NETPrediction.clsFeedForwardANN.PutSlab(System.Int32,System.Int32,System.Single[])">
+	<summary>
+ Put a Slab
+ </summary>
+	<param name="DiagnBPNetNum">Not used</param>
+	<param name="Slab">Not used</param>
+	<param name="Input"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:NETPrediction.clsFeedForwardANN.BpPropagate(System.Int32,System.Int32)">
+	<summary>
+ Dummy function. No arguments needed.
+ </summary>
+	<param name="DiagnBPNetNum"></param>
+	<param name="ToSlab"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:NETPrediction.clsFeedForwardANN.GetSlab(System.Int32,System.Int32,System.Single[]@)">
+	<summary>
+ Get a slab
+ </summary>
+	<param name="DiagnBPNetNum">Not used</param>
+	<param name="SlabX">Not Needed</param>
+	<param name="Output"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="T:NETPrediction.clsFeedForwardANN">
+	<summary>
+ Neural network support class
+ Written by Lars Kangas for PNNL in 2010
+ </summary>
+</member>
+</members>
+</doc>
