@@ -28,9 +28,12 @@
                             <DataGrid.Columns>
                                 <!--<DataGridTextColumn Header="Residue" Binding="{Binding Residue}" /> -->
                                 <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
+                                <DataGridTextColumn Header="Residue" Binding="{Binding Residue}" />
                                 <DataGridTextColumn Header="Ion" Binding="{Binding IonType.BaseIonType.Symbol}" />
                                 <DataGridTextColumn Header="Charge" Binding="{Binding IonType.Charge}" />
                                 <DataGridTextColumn Header="M/Z" Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" />
+                                <DataGridTextColumn Header="Monoisotopic Mass" Binding="{Binding MonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" />
+                                <DataGridTextColumn Header="Theo Monoisotopic Mass" Binding="{Binding TheoMonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" />
                                 <DataGridTextColumn Header="Intensity" Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" />
                                 <DataGridTextColumn Header="Error (ppm)" Binding="{Binding Error, Converter={StaticResource DoubleToStringConverter}}" />
                                 <DataGridTextColumn Header="Correlation" Width="*" Binding="{Binding Correlation, Converter={StaticResource DoubleToStringConverter}}" />

@@ -295,7 +295,15 @@ namespace LcmsSpectator.ViewModels.Data
             var tolerance = this.IsFragmentIon
                             ? IcParameters.Instance.ProductIonTolerancePpm
                             : IcParameters.Instance.PrecursorTolerancePpm;
-            var noPeaks = new List<PeakDataPoint> { new PeakDataPoint(double.NaN, double.NaN, double.NaN, double.NaN, this.Label) { IonType = this.IonType, Index = this.Index } };
+            var noPeaks = new List<PeakDataPoint>
+            {
+                new PeakDataPoint(double.NaN, double.NaN, double.NaN, double.NaN, this.Label)
+                {
+                    TheoMonoisotopicMass = this.Ion.Composition.Mass,
+                    IonType = this.IonType,
+                    Index = this.Index
+                }
+            };
             var peakDataPoints = new List<PeakDataPoint>();
             IonType ionType = null;
             if (this.IsFragmentIon)
@@ -313,7 +321,8 @@ namespace LcmsSpectator.ViewModels.Data
                 }
 
                 var ionTypeFactory = IcParameters.Instance.DeconvolutedIonTypeFactory;
-                var ionTypeName = this.IonType.Name.Insert(1, @"'");
+
+                var ionTypeName = this.IonType.BaseIonType.GetDeconvolutedIon().Symbol;
                 ion = ionTypeFactory.GetIonType(ionTypeName).GetIon(this.Composition);
             }
             else
@@ -342,6 +351,8 @@ namespace LcmsSpectator.ViewModels.Data
                 {
                     peakDataPoints.Add(new PeakDataPoint(peaks[i].Mz, peaks[i].Intensity, errors[i].Value, correlation, this.Label)
                     {
+                        MonoisotopicMass = (peaks[i].Mz * this.Ion.Charge) - InformedProteomics.Backend.Data.Biology.Constants.Proton * this.Ion.Charge,
+                        TheoMonoisotopicMass = this.Ion.Composition.Mass,
                         Index = this.Index,
                         IonType = ionType,
                     });

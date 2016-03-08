@@ -231,7 +231,7 @@
                 this.BaseIonTypes.Where(bit => bit.IsSelected).Select(bit => bit.BaseIonType).ToList(),
                 this.NeutralLosses.Where(nl => nl.IsSelected).Select(nl => nl.NeutralLoss).ToList(),
                 1,
-                Math.Max(Math.Min(3 * this.fragmentationSequence.Charge, 100), 1)).ToArray();
+                10).ToArray();
         }
     }
 }

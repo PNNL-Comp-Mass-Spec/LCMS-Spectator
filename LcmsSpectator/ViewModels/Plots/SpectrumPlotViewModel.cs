@@ -105,6 +105,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showDeconvolutedSpectrum;
 
         /// <summary>
+        /// A value indicating whether or not the deconvoluted ions are showing.
+        /// </summary>
+        private bool showDeconvolutedIons;
+
+        /// <summary>
         /// A value indicating whether or not the filtered spectrum is showing.
         /// </summary>
         private bool showFilteredSpectrum;
@@ -216,14 +221,16 @@ namespace LcmsSpectator.ViewModels.Plots
                               x => x.Spectrum,
                               x => x.FragmentationSequenceViewModel.LabeledIonViewModels,
                               x => x.ShowDeconvolutedSpectrum,
+                              x => x.ShowDeconvolutedIons,
                               x => x.ShowFilteredSpectrum,
                               x => x.ShowUnexplainedPeaks)
                 .Where(x => x.Item1 != null && x.Item2 != null)
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum))))
+                .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum || this.ShowDeconvolutedIons))))
                 .Subscribe(peakDataPoints =>
                 {
                     this.ions = this.FragmentationSequenceViewModel.LabeledIonViewModels;
+                    this.SetTerminalResidues(peakDataPoints);
                     this.UpdatePlotModel(peakDataPoints);
                 });       // Update plot when data changes
 
@@ -310,7 +317,8 @@ namespace LcmsSpectator.ViewModels.Plots
             openErrorMapCommand.Subscribe(_ => dialogService.OpenErrorMapWindow(this.errorMapViewModel));
             this.OpenErrorMapCommand = openErrorMapCommand;
 
-            this.SaveAsTsvCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.SaveAsTsvImplementation());
+            this.SaveAsTsvCommand = ReactiveCommand.Create();
+            this.SaveAsTsvCommand.Subscribe(o => this.SaveAsTsvImplementation());
         }
 
         /// <summary>
@@ -357,6 +365,15 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.showDeconvolutedSpectrum; }
             set { this.RaiseAndSetIfChanged(ref this.showDeconvolutedSpectrum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether or not the deconvoluted ions are showing.
+        /// </summary>
+        public bool ShowDeconvolutedIons
+        {
+            get { return this.showDeconvolutedIons; }
+            set { this.RaiseAndSetIfChanged(ref this.showDeconvolutedIons, value); }
         }
 
         /// <summary>
@@ -454,7 +471,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets a command that prompts user for file path and save spectrum as TSV to that path.
         /// </summary>
-        public ReactiveCommand<Unit> SaveAsTsvCommand { get; private set; }
+        public ReactiveCommand<object> SaveAsTsvCommand { get; private set; }
 
         /// <summary>
         /// Build spectrum plot model.
@@ -610,10 +627,24 @@ namespace LcmsSpectator.ViewModels.Plots
             return currentSpectrum;
         }
 
+        private void SetTerminalResidues(IList<PeakDataPoint>[] peakDataPoints)
+        {
+            var sequence = this.FragmentationSequenceViewModel.FragmentationSequence.Sequence;
+            foreach (var peakDataPoint in peakDataPoints.SelectMany(x => x))
+            {
+                if (peakDataPoint.IonType != null)
+                {
+                    peakDataPoint.Residue = peakDataPoint.IonType.IsPrefixIon
+                                ? sequence[peakDataPoint.Index - 1].Residue
+                                : sequence[sequence.Count - peakDataPoint.Index].Residue;
+                }
+            }
+        }
+
         /// <summary>
         /// Prompt user for file path and save spectrum as TSV to that path.
         /// </summary>
-        private async Task SaveAsTsvImplementation()
+        private void SaveAsTsvImplementation()
         {
             if (this.currentSpectrum == null)
             {
@@ -639,7 +670,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     .ToArray();
 
             var peakExporter = new SpectrumPeakExporter(string.Empty, null, IcParameters.Instance.ProductIonTolerancePpm);
-            await peakExporter.ExportAsync(
+            peakExporter.Export(
                     this.currentSpectrum,
                     fragmentPeaks,
                     filePath);

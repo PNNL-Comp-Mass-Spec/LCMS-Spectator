@@ -172,10 +172,11 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             // Remove NaN values for data table (only showing fragment ions found in spectrum in data table)
-            this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints.Where(dp => !dp.Error.Equals(double.NaN)));
+            //this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints.Where(dp => !dp.Error.Equals(double.NaN)));
+            this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints);
 
             // Build and invalidate erorr map plot display
-            this.BuildPlotModel(sequence, this.GetDataArray(dataPoints));
+            this.BuildPlotModel(sequence, this.GetDataArray(dataPoints, sequence.Count));
         }
 
         /// <summary>
@@ -248,49 +249,50 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Organize the peak data points by ion type
         /// </summary>
-        /// <param name="dataPoints">
-        /// The data Points.
-        /// </param>
+        /// <param name="dataPoints">The data Points.</param>
+        /// <param name="sequenceLength">The length of the sequence.</param>
         /// <returns>
         /// 2d array where first dimension is sequence and second dimension is ion type
         /// </returns>
-        private double[,] GetDataArray(IEnumerable<PeakDataPoint> dataPoints)
+        private double[,] GetDataArray(IEnumerable<PeakDataPoint> dataPoints, int sequenceLength)
         {
-            var dataDict = new Dictionary<IonType, List<double>>();
+            var dataDict = new Dictionary<IonType, PeakDataPoint[]>();
 
             // partition data set by ion type
             foreach (var dataPoint in dataPoints)
             {
                 if (!dataDict.ContainsKey(dataPoint.IonType))
                 {
-                    dataDict.Add(dataPoint.IonType, new List<double>());
+                    dataDict.Add(dataPoint.IonType, new PeakDataPoint[sequenceLength]);
                 }
 
                 var points = dataDict[dataPoint.IonType];
 
-                int index = dataPoint.Index + 1;
+                int index = dataPoint.Index - 1;
 
                 if (!dataPoint.IonType.IsPrefixIon)
                 {
-                    index = points.Count - dataPoint.Index;
+                    index = sequenceLength - dataPoint.Index;
                 }
 
-                var position = Math.Max(0, Math.Min(index, points.Count));
-                points.Insert(position, dataPoint.Error);
+                // If the ion type has multiple options, choose the best one.
+                if (points[index] == null || (dataPoint.Y / dataPoint.Error) > (points[index].Y / points[index].Error))
+                {
+                    points[index] = dataPoint;
+                }
             }
-
-            var seqLength = dataDict.Values.Max(v => v.Count);
 
             this.ionTypes = dataDict.Keys.ToArray();
 
-            var data = new double[seqLength, dataDict.Keys.Count];
+            var data = new double[sequenceLength, dataDict.Keys.Count];
 
             // create two dimensional array from partitioned data
-            for (int i = 0; i < seqLength; i++)
+            for (int i = 0; i < sequenceLength; i++)
             {
                 for (int j = 0; j < this.ionTypes.Length; j++)
                 {
-                    var value = dataDict[this.ionTypes[j]][i];
+                    var dataPoint = dataDict[this.ionTypes[j]][i];
+                    var value = dataPoint == null ? double.NaN : dataPoint.Error;
 
                     if (value.Equals(double.NaN))
                     {

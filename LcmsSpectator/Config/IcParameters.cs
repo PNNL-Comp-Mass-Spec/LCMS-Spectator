@@ -392,6 +392,11 @@ namespace LcmsSpectator.Config
         /// <returns>List of BaseIonTypes representing each ion type in the string.</returns>
         public static List<BaseIonType> IonTypeStringParse(string str)
         {
+            if (str == "*")
+            {
+                return BaseIonType.AllBaseIonTypes.ToList();
+            }
+
             var parts = str.Split(' ');
             var ionNames = new Dictionary<string, BaseIonType>
             {
@@ -442,6 +447,11 @@ namespace LcmsSpectator.Config
         /// <returns>String containing ion type symbols separated by spaces.</returns>
         public string GetCidHcdIonTypes()
         {
+            if (this.CidHcdIonTypes.Count == BaseIonType.AllBaseIonTypes.Count())
+            {
+                return "*";
+            }
+
             return this.CidHcdIonTypes.Aggregate(string.Empty, (current, ionType) => current + ionType.Symbol + " ");
         }
 
@@ -451,6 +461,11 @@ namespace LcmsSpectator.Config
         /// <returns>String containing ion type symbols separated by spaces.</returns>
         public string GetEtdIonTypes()
         {
+            if (this.EtdIonTypes.Count == BaseIonType.AllBaseIonTypes.Count())
+            {
+                return "*";
+            }
+
             return this.EtdIonTypes.Aggregate(string.Empty, (current, ionType) => current + ionType.Symbol + " ");
         }
 
