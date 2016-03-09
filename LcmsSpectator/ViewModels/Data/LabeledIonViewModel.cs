@@ -320,10 +320,7 @@ namespace LcmsSpectator.ViewModels.Data
                     return peakDataPoints; // Deconvoluted spectrum means decharged (only charge 1 ions shown)
                 }
 
-                var ionTypeFactory = IcParameters.Instance.DeconvolutedIonTypeFactory;
-
-                var ionTypeName = this.IonType.BaseIonType.GetDeconvolutedIon().Symbol;
-                ion = ionTypeFactory.GetIonType(ionTypeName).GetIon(this.Composition);
+                ion = new Ion(this.Composition - Composition.Hydrogen, 1);
             }
             else
             {

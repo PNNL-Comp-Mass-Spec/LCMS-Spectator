@@ -16,6 +16,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.IO;
     using System.Linq;
 
+    using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
 
@@ -64,6 +65,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// The data that is shown in the "Table" view. This excludes any fragments without data.
         /// </summary>
         private ReactiveList<PeakDataPoint> dataTable;
+
+        /// <summary>
+        /// The percentage of the sequence explained by fragment ion peaks.
+        /// </summary>
+        private double sequenceCoverage;
 
         /// <summary>
         /// Initializes a new instance of the ErrorMapViewModel class. 
@@ -151,6 +157,15 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// Gets the percentage of the sequence explained by fragment ion peaks.
+        /// </summary>
+        public double SequenceCoverage
+        {
+            get { return this.sequenceCoverage; }
+            private set { this.RaiseAndSetIfChanged(ref this.sequenceCoverage, value); }
+        }
+
+        /// <summary>
         /// Set sequence and data displayed on heat map.
         /// </summary>
         /// <param name="sequence">The sequence to display as the x axis of the plot.</param>
@@ -175,8 +190,11 @@ namespace LcmsSpectator.ViewModels.Plots
             //this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints.Where(dp => !dp.Error.Equals(double.NaN)));
             this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints);
 
+            this.SequenceCoverage = IonUtils.CalculateSequenceCoverage(this.DataTable, sequence.Count);
+
             // Build and invalidate erorr map plot display
-            this.BuildPlotModel(sequence, this.GetDataArray(dataPoints, sequence.Count));
+            this.BuildErrorPlotModel(sequence, this.GetErrorDataArray(dataPoints, sequence.Count));
+            //this.BuildErrorPlotModel(sequence, this.GetCoverageDataArray(dataPoints, sequence.Count));
         }
 
         /// <summary>
@@ -188,7 +206,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// First dimension is sequence
         /// Second dimension is ion type
         /// </param>
-        private void BuildPlotModel(IReadOnlyList<AminoAcid> sequence, double[,] data)
+        private void BuildErrorPlotModel(IReadOnlyList<AminoAcid> sequence, double[,] data)
         {
             // initialize color axis
             ////var minColor = OxyColor.FromRgb(127, 255, 0);
@@ -226,7 +244,10 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 var ionType = this.ionTypes[Math.Min((int)y - 1, this.ionTypes.Length - 1)];
-                return string.Format("{0}({1}+)", ionType.BaseIonType.Symbol, ionType.Charge);
+                var symbol = ionType.BaseIonType == null ? ionType.Name : ionType.BaseIonType.Symbol;
+                return ionType.Charge == 1 ?
+                       symbol :
+                       string.Format("{0}({1}+)", symbol, ionType.Charge);
             };
 
             // Set xAxis double -> string label converter function
@@ -254,7 +275,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <returns>
         /// 2d array where first dimension is sequence and second dimension is ion type
         /// </returns>
-        private double[,] GetDataArray(IEnumerable<PeakDataPoint> dataPoints, int sequenceLength)
+        private double[,] GetErrorDataArray(IEnumerable<PeakDataPoint> dataPoints, int sequenceLength)
         {
             var dataDict = new Dictionary<IonType, PeakDataPoint[]>();
 
@@ -300,6 +321,62 @@ namespace LcmsSpectator.ViewModels.Plots
                     }
 
                     data[i, j] = value;
+                }
+            }
+
+            return data;
+        }
+
+        /// <summary>
+        /// Organize the peak data points by ion type
+        /// </summary>
+        /// <param name="dataPoints">The data Points.</param>
+        /// <param name="sequenceLength">The length of the sequence.</param>
+        /// <returns>
+        /// 2d array where first dimension is sequence and second dimension is ion type
+        /// </returns>
+        private double[,] GetCoverageDataArray(IEnumerable<PeakDataPoint> dataPoints, int sequenceLength)
+        {
+            var dataDict = new Dictionary<BaseIonType, bool[]>();
+            // partition data set by ion type
+            foreach (var dataPoint in dataPoints)
+            {
+                if (!dataDict.ContainsKey(dataPoint.IonType.BaseIonType))
+                {
+                    dataDict.Add(dataPoint.IonType.BaseIonType, new bool[sequenceLength]);
+                }
+
+                var points = dataDict[dataPoint.IonType.BaseIonType];
+
+                int index = dataPoint.Index - 1;
+
+                if (!dataPoint.IonType.IsPrefixIon)
+                {
+                    index = sequenceLength - dataPoint.Index;
+                }
+
+                points[index] = true;
+            }
+
+            this.ionTypes = dataDict.Keys.Select(
+                                     baseIonType => new IonType(
+                                                                baseIonType.Symbol,
+                                                                Composition.Zero,
+                                                                1,
+                                                                baseIonType.IsPrefix))
+                    .ToArray();
+
+            var data = new double[sequenceLength, dataDict.Keys.Count];
+
+            var errorThresh = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+
+            // create two dimensional array from partitioned data
+            for (int i = 0; i < sequenceLength; i++)
+            {
+                int j = 0;
+                foreach (var baseIonType in dataDict.Keys)
+                {
+                    data[i, j++] = dataDict[baseIonType][i] ? errorThresh : -1 * (errorThresh + 1);
                 }
             }
 

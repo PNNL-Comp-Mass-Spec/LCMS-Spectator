@@ -10,38 +10,51 @@
     <UserControl.Resources>
         <utils:DoubleToStringConverter x:Key="DoubleToStringConverter" />
     </UserControl.Resources>
-    <xcad:DockingManager Margin="15" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="AvDock">
-        <xcad:LayoutRoot>
-            <xcad:LayoutPanel>
-                <xcad:LayoutDocumentPane DockWidth="*">
-                    <xcad:LayoutDocument Title="Heat Map" CanClose="False">
-                        <oxy:PlotView Model="{Binding PlotModel}">
-                            <oxy:PlotView.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="_Save as Image" Command="{Binding SaveAsImageCommand}" />
-                                </ContextMenu>
-                            </oxy:PlotView.ContextMenu>
-                        </oxy:PlotView>
-                    </xcad:LayoutDocument>
-                    <xcad:LayoutDocument Title="Table" CanClose="False">
-                        <DataGrid ItemsSource="{Binding DataTable}" AutoGenerateColumns="False">
-                            <DataGrid.Columns>
-                                <!--<DataGridTextColumn Header="Residue" Binding="{Binding Residue}" /> -->
-                                <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
-                                <DataGridTextColumn Header="Residue" Binding="{Binding Residue}" />
-                                <DataGridTextColumn Header="Ion" Binding="{Binding IonType.BaseIonType.Symbol}" />
-                                <DataGridTextColumn Header="Charge" Binding="{Binding IonType.Charge}" />
-                                <DataGridTextColumn Header="M/Z" Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" />
-                                <DataGridTextColumn Header="Monoisotopic Mass" Binding="{Binding MonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" />
-                                <DataGridTextColumn Header="Theo Monoisotopic Mass" Binding="{Binding TheoMonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" />
-                                <DataGridTextColumn Header="Intensity" Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" />
-                                <DataGridTextColumn Header="Error (ppm)" Binding="{Binding Error, Converter={StaticResource DoubleToStringConverter}}" />
-                                <DataGridTextColumn Header="Correlation" Width="*" Binding="{Binding Correlation, Converter={StaticResource DoubleToStringConverter}}" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </xcad:LayoutDocument>
-                 </xcad:LayoutDocumentPane>
-               </xcad:LayoutPanel>
-           </xcad:LayoutRoot>
+    <Grid Margin="15" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+
+        <xcad:DockingManager Name="AvDock">
+            <xcad:LayoutRoot>
+                <xcad:LayoutPanel>
+                    <xcad:LayoutDocumentPane DockWidth="*">
+                        <xcad:LayoutDocument Title="Heat Map" CanClose="False">
+                            <oxy:PlotView Model="{Binding PlotModel}">
+                                <oxy:PlotView.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="_Save as Image" Command="{Binding SaveAsImageCommand}" />
+                                    </ContextMenu>
+                                </oxy:PlotView.ContextMenu>
+                            </oxy:PlotView>
+                        </xcad:LayoutDocument>
+                        <xcad:LayoutDocument Title="Table" CanClose="False">
+                            <DataGrid ItemsSource="{Binding DataTable}" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <!--<DataGridTextColumn Header="Residue" Binding="{Binding Residue}" /> -->
+                                    <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
+                                    <DataGridTextColumn Header="Residue" Binding="{Binding Residue}" />
+                                    <DataGridTextColumn Header="Ion" Binding="{Binding IonType.BaseIonType.Symbol}" />
+                                    <DataGridTextColumn Header="Charge" Binding="{Binding IonType.Charge}" />
+                                    <DataGridTextColumn Header="M/Z" Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" />
+                                    <DataGridTextColumn Header="Monoisotopic Mass" Binding="{Binding MonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" />
+                                    <DataGridTextColumn Header="Theo Monoisotopic Mass" Binding="{Binding TheoMonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" />
+                                    <DataGridTextColumn Header="Intensity" Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" />
+                                    <DataGridTextColumn Header="Error (ppm)" Binding="{Binding Error, Converter={StaticResource DoubleToStringConverter}}" />
+                                    <DataGridTextColumn Header="Correlation" Width="*" Binding="{Binding Correlation, Converter={StaticResource DoubleToStringConverter}}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </xcad:LayoutDocument>
+                    </xcad:LayoutDocumentPane>
+                </xcad:LayoutPanel>
+            </xcad:LayoutRoot>
         </xcad:DockingManager>
+        
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0">
+            <TextBlock FontWeight="Bold">Sequence Coverage: </TextBlock>
+            <TextBlock Text="{Binding SequenceCoverage}" />
+        </StackPanel>
+    </Grid>
+    
 </UserControl>

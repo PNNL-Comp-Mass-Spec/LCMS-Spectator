@@ -163,6 +163,12 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
             this.fragmentColors.Add(BaseIonType.Y.Symbol, ionYColors.Colors);
             this.fragmentColors.Add(BaseIonType.Y.GetDeconvolutedIon().Symbol, ionYColors.Colors);
 
+            var ionYM1Start = OxyColor.FromRgb(ColorMin, 0, 0);
+            var ionYM1End = OxyColor.FromRgb(ColorMax, 0, 0);
+            var ionYM1Colors = OxyPalette.Interpolate(length, ionYM1End, ionYM1Start);
+            this.fragmentColors.Add(BaseIonType.YM1.Symbol, ionYM1Colors.Colors);
+            this.fragmentColors.Add(BaseIonType.YM1.GetDeconvolutedIon().Symbol, ionYM1Colors.Colors);
+
             var ionZStart = OxyColor.FromRgb(ColorMin, 0, ColorMin);
             var ionZEnd = OxyColor.FromRgb(ColorMax, 0, ColorMax);
             var ionZColors = OxyPalette.Interpolate(length, ionZEnd, ionZStart);

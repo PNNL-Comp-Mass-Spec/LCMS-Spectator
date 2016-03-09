@@ -632,7 +632,7 @@ namespace LcmsSpectator.ViewModels.Plots
             var sequence = this.FragmentationSequenceViewModel.FragmentationSequence.Sequence;
             foreach (var peakDataPoint in peakDataPoints.SelectMany(x => x))
             {
-                if (peakDataPoint.IonType != null)
+                if (peakDataPoint.IonType != null && peakDataPoint.IonType.Name != "Precursor")
                 {
                     peakDataPoint.Residue = peakDataPoint.IonType.IsPrefixIon
                                 ? sequence[peakDataPoint.Index - 1].Residue

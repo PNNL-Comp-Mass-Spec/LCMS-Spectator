@@ -167,7 +167,7 @@ namespace LcmsSpectator.Writers.Exporters
             var peak = match.Item1;
             var peakDataPoint = match.Item2;
 
-            if (peakDataPoint != null)
+            if (peakDataPoint != null && peakDataPoint.IonType != null)
             {
                 line = string.Format(
                                      "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
