@@ -17,7 +17,8 @@
         <oxy:PlotView Grid.Row="0" Model="{Binding PlotModel}">
             <oxy:PlotView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="_Save as Image" Command="{Binding SaveAsImageCommand}" />
+                    <MenuItem Header="Save as _Image" Command="{Binding SaveAsImageCommand}" />
+                    <MenuItem Header="Save Data Table" Command="{Binding SaveDataTableCommand}" />
                 </ContextMenu>
             </oxy:PlotView.ContextMenu>
         </oxy:PlotView>

@@ -26,6 +26,12 @@
                             </xcad:LayoutDocument>
                             <xcad:LayoutDocument Title="Table" CanClose="False">
                                 <DataGrid ItemsSource="{Binding DataTable}" AutoGenerateColumns="False">
+                                    <DataGrid.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Save as _Image" Command="{Binding SaveAsImageCommand}" />
+                                            <MenuItem Header="Save Data Table" Command="{Binding SaveDataTableCommand}" />
+                                        </ContextMenu>
+                                    </DataGrid.ContextMenu>
                                     <DataGrid.Columns>
                                         <!--<DataGridTextColumn Header="Residue" Binding="{Binding Residue}" /> -->
                                         <DataGridTextColumn Header="Index" Binding="{Binding Index}" />

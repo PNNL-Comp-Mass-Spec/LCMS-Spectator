@@ -42,6 +42,27 @@ namespace LcmsSpectator.Writers.Exporters
             this.tolerance = tolerance ?? new Tolerance(10, ToleranceUnit.Ppm);
         }
 
+        public void Export(IList<PeakDataPoint> peakDataPoints, IProgress<ProgressData> progress = null)
+        {
+            using (var writer = new StreamWriter(this.outputFile))
+            {
+                // Write headers
+                writer.WriteLine("Monoisotopic Mass\tM/Z\tIntensity\tIonType\tCharge\tResidue");
+                foreach (var peakDataPoint in peakDataPoints)
+                {
+                    writer.WriteLine(
+                           "{0}\t{1}\t{2}\t{3}\t{4}\t{5}{6}",
+                           peakDataPoint.MonoisotopicMass,
+                           peakDataPoint.X,
+                           peakDataPoint.Y,
+                           peakDataPoint.IonType.BaseIonType.Symbol,
+                           peakDataPoint.IonType.Charge,
+                           peakDataPoint.Residue,
+                           peakDataPoint.Index);
+                }
+            }
+        }
+
         public void Export(IList<PrSm> ids, IProgress<ProgressData> progress = null)
         {
             progress = progress ?? new Progress<ProgressData>();

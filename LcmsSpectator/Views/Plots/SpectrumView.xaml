@@ -46,7 +46,7 @@
                         <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                         <MenuItem Header="Show Deconvoluted Ions" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedIons, Mode=TwoWay}" />
                         <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
-                        <MenuItem Header="Open _Error Map" Command="{Binding OpenErrorMapCommand}" />
+                        <MenuItem Header="Open _Error/Coverage Map" Command="{Binding OpenErrorMapCommand}" />
                         <MenuItem Header="Run MsPf Search" Command="{Binding StartMsPfSearchCommand}" Name="StartMsPfSearch" />
                         <Separator />
                         <MenuItem Header="Ion Types" ItemsSource="{Binding BaseIonTypes}" DataContext="{Binding FragmentationSequenceViewModel}">

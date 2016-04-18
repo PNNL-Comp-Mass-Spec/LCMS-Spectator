@@ -24,6 +24,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.PlotModels;
     using LcmsSpectator.Utils;
+    using LcmsSpectator.Writers.Exporters;
 
     using OxyPlot;
     using OxyPlot.Axes;
@@ -177,6 +178,9 @@ namespace LcmsSpectator.ViewModels.Plots
             saveAsImageCommand.Subscribe(_ => this.SaveAsImageImpl());
             this.SaveAsImageCommand = saveAsImageCommand;
 
+            this.SaveDataTableCommand = ReactiveCommand.Create();
+            this.SaveDataTableCommand.Subscribe(_ => this.SaveDataTableImpl());
+
             this.AvailableMapTypes = new ReactiveList<MapTypes>(new List<MapTypes>
             {
                 MapTypes.ErrorMap,
@@ -204,6 +208,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Gets a command that prompts user for file path and save plot as image.
         /// </summary>
         public IReactiveCommand SaveAsImageCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that prompt user for file path and save data table as list.
+        /// </summary>
+        public ReactiveCommand<object> SaveDataTableCommand { get; private set; }
 
         /// <summary>
         /// Gets the list of types of maps that can be displayed.
@@ -545,6 +554,35 @@ namespace LcmsSpectator.ViewModels.Plots
                     (int)this.PlotModel.Height,
                     OxyColors.White,
                     IcParameters.Instance.ExportImageDpi);
+            }
+            catch (Exception e)
+            {
+                this.dialogService.ExceptionAlert(e);
+            }
+        }
+
+        /// <summary>
+        /// Prompt user for file path and save data table as list.
+        /// </summary>
+        private void SaveDataTableImpl()
+        {
+            var filePath = this.dialogService.SaveFile(".tsv", @"Tab-separated value Files (*.tsv)|*.tsv");
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            try
+            {
+                var directory = Path.GetDirectoryName(filePath);
+                if (directory == null || !Directory.Exists(directory))
+                {
+                    throw new FormatException(
+                        string.Format("Cannot save image due to invalid file name: {0}", filePath));
+                }
+
+                var peakExporter = new SpectrumPeakExporter(filePath);
+                peakExporter.Export(this.DataTable.Where(p => !p.X.Equals(double.NaN)).ToList());
             }
             catch (Exception e)
             {
