@@ -3,8 +3,58 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:LcmsSpectator.Views"
         xmlns:plots="clr-namespace:LcmsSpectator.Views.Plots"
+        xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+        xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
+        xmlns:oxy="http://oxyplot.org/wpf"
         Title="Error Map" Height="300" Width="300">
+    <Window.Resources>
+        <utils:DoubleToStringConverter x:Key="DoubleToStringConverter" />
+    </Window.Resources>
     <Grid>
-        <plots:ErrorMap />
+        <Grid Margin="15" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+
+            <xcad:DockingManager Name="AvDock">
+                <xcad:LayoutRoot>
+                    <xcad:LayoutPanel>
+                        <xcad:LayoutDocumentPane DockWidth="*">
+                            <xcad:LayoutDocument Title="Heat Map" CanClose="False">
+                                <plots:ErrorMap />
+                            </xcad:LayoutDocument>
+                            <xcad:LayoutDocument Title="Table" CanClose="False">
+                                <DataGrid ItemsSource="{Binding DataTable}" AutoGenerateColumns="False">
+                                    <DataGrid.Columns>
+                                        <!--<DataGridTextColumn Header="Residue" Binding="{Binding Residue}" /> -->
+                                        <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
+                                        <DataGridTextColumn Header="Residue" Binding="{Binding Residue}" />
+                                        <DataGridTextColumn Header="Ion" Binding="{Binding IonType.BaseIonType.Symbol}" />
+                                        <DataGridTextColumn Header="Charge" Binding="{Binding IonType.Charge}" />
+                                        <DataGridTextColumn Header="M/Z" Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" />
+                                        <DataGridTextColumn Header="Monoisotopic Mass" Binding="{Binding MonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" />
+                                        <DataGridTextColumn Header="Theo Monoisotopic Mass" Binding="{Binding TheoMonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" />
+                                        <DataGridTextColumn Header="Intensity" Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" />
+                                        <DataGridTextColumn Header="Error (ppm)" Binding="{Binding Error, Converter={StaticResource DoubleToStringConverter}}" />
+                                        <DataGridTextColumn Header="Correlation" Width="*" Binding="{Binding Correlation, Converter={StaticResource DoubleToStringConverter}}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </xcad:LayoutDocument>
+                        </xcad:LayoutDocumentPane>
+                    </xcad:LayoutPanel>
+                </xcad:LayoutRoot>
+            </xcad:DockingManager>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Left">
+                <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" >Sequence Coverage:</TextBlock>
+                <TextBlock Text="{Binding SequenceCoverage}" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1"  Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Right">
+                <TextBlock FontWeight="Bold" Margin="0,0,10,0" VerticalAlignment="Center">Selected heatmap:</TextBlock>
+                <ComboBox Width="100" ItemsSource="{Binding AvailableMapTypes}" SelectedItem="{Binding SelectedMapType}" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

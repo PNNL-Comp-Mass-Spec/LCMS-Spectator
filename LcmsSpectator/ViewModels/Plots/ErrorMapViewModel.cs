@@ -37,6 +37,22 @@ namespace LcmsSpectator.ViewModels.Plots
     public class ErrorMapViewModel : ReactiveObject
     {
         /// <summary>
+        /// The type of maps to display.
+        /// </summary>
+        public enum MapTypes
+        {
+            /// <summary>
+            /// Map displays the errors of the fragment ions.
+            /// </summary>
+            ErrorMap,
+
+            /// <summary>
+            /// Map displays the coverage of the fragment ions.
+            /// </summary>
+            CoverageMap,
+        }
+
+        /// <summary>
         /// Dialog service for opening dialogs from view model.
         /// </summary>
         private readonly IDialogService dialogService;
@@ -70,6 +86,16 @@ namespace LcmsSpectator.ViewModels.Plots
         /// The percentage of the sequence explained by fragment ion peaks.
         /// </summary>
         private double sequenceCoverage;
+
+        /// <summary>
+        /// The currently selected sequence.
+        /// </summary>
+        private Sequence selectedSequence;
+
+        /// <summary>
+        /// The currently selected peak data points.
+        /// </summary>
+        private IEnumerable<IList<PeakDataPoint>> selectedPeakDataPoints;
 
         /// <summary>
         /// Initializes a new instance of the ErrorMapViewModel class. 
@@ -135,6 +161,16 @@ namespace LcmsSpectator.ViewModels.Plots
             var saveAsImageCommand = ReactiveCommand.Create();
             saveAsImageCommand.Subscribe(_ => this.SaveAsImageImpl());
             this.SaveAsImageCommand = saveAsImageCommand;
+
+            this.AvailableMapTypes = new ReactiveList<MapTypes>(new List<MapTypes>
+            {
+                MapTypes.ErrorMap,
+                MapTypes.CoverageMap,
+            });
+
+            this.SelectedMapType = MapTypes.ErrorMap;
+            this.WhenAnyValue(x => x.SelectedMapType)
+                .Subscribe(_ => this.SetData(this.selectedSequence, this.selectedPeakDataPoints));
         }
 
         /// <summary>
@@ -146,6 +182,25 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Gets a command that prompts user for file path and save plot as image.
         /// </summary>
         public IReactiveCommand SaveAsImageCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the list of types of maps that can be displayed.
+        /// </summary>
+        public ReactiveList<MapTypes> AvailableMapTypes { get; private set; }
+
+        /// <summary>
+        /// The type of map to display.
+        /// </summary>
+        private MapTypes selectedMapType;
+
+        /// <summary>
+        /// Gets or sets the type of map to display.
+        /// </summary>
+        public MapTypes SelectedMapType
+        {
+            get { return this.selectedMapType; }
+            set { this.RaiseAndSetIfChanged(ref this.selectedMapType, value); }
+        }
 
         /// <summary>
         /// Gets or sets the data that is shown in the "Table" view. This excludes any fragments without data.
@@ -172,6 +227,9 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="peakDataPoints">The peak data points to extract error values from.</param>
         public void SetData(Sequence sequence, IEnumerable<IList<PeakDataPoint>> peakDataPoints)
         {
+            this.selectedSequence = sequence;
+            this.selectedPeakDataPoints = peakDataPoints;
+
             if (sequence == null || peakDataPoints == null)
             {
                 return;
@@ -190,11 +248,14 @@ namespace LcmsSpectator.ViewModels.Plots
             //this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints.Where(dp => !dp.Error.Equals(double.NaN)));
             this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints);
 
-            this.SequenceCoverage = IonUtils.CalculateSequenceCoverage(this.DataTable, sequence.Count);
+            this.SequenceCoverage = Math.Round(IonUtils.CalculateSequenceCoverage(this.DataTable, sequence.Count), 3);
 
             // Build and invalidate erorr map plot display
-            this.BuildErrorPlotModel(sequence, this.GetErrorDataArray(dataPoints, sequence.Count));
-            //this.BuildErrorPlotModel(sequence, this.GetCoverageDataArray(dataPoints, sequence.Count));
+            this.BuildErrorPlotModel(
+                        sequence,
+                        this.SelectedMapType == MapTypes.ErrorMap ? 
+                                    this.GetErrorDataArray(dataPoints, sequence.Count) :
+                                    this.GetCoverageDataArray(dataPoints, sequence.Count));
         }
 
         /// <summary>
@@ -348,14 +409,17 @@ namespace LcmsSpectator.ViewModels.Plots
 
                 var points = dataDict[dataPoint.IonType.BaseIonType];
 
-                int index = dataPoint.Index - 1;
+                if (!dataPoint.X.Equals(double.NaN))
+                {   // Only set valid data.
+                    int index = dataPoint.Index - 1;    // index is 1-indexed, dataDict is 0-indexed
 
-                if (!dataPoint.IonType.IsPrefixIon)
-                {
-                    index = sequenceLength - dataPoint.Index;
+                    if (!dataPoint.IonType.IsPrefixIon)
+                    {
+                        index = sequenceLength - dataPoint.Index;
+                    }
+
+                    points[index] = true;
                 }
-
-                points[index] = true;
             }
 
             this.ionTypes = dataDict.Keys.Select(
