@@ -88,6 +88,21 @@ namespace LcmsSpectator.ViewModels.Plots
         private double sequenceCoverage;
 
         /// <summary>
+        /// The iontype selected from the error map.
+        /// </summary>
+        private string selectedIonType;
+
+        /// <summary>
+        /// The residue and index of the seleted item.
+        /// </summary>
+        private string selectedAminoAcid;
+
+        /// <summary>
+        /// The value of the selected item.
+        /// </summary>
+        private string selectedValue;
+
+        /// <summary>
         /// The currently selected sequence.
         /// </summary>
         private Sequence selectedSequence;
@@ -170,7 +185,14 @@ namespace LcmsSpectator.ViewModels.Plots
 
             this.SelectedMapType = MapTypes.ErrorMap;
             this.WhenAnyValue(x => x.SelectedMapType)
-                .Subscribe(_ => this.SetData(this.selectedSequence, this.selectedPeakDataPoints));
+                .Subscribe(
+                    _ =>
+                        {
+                            this.SetData(this.selectedSequence, this.selectedPeakDataPoints);
+                            this.SelectedAminoAcid = string.Empty;
+                            this.SelectedIonType = string.Empty;
+                            this.SelectedValue = string.Empty;
+                        });
         }
 
         /// <summary>
@@ -221,6 +243,33 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// Gets the iontype selected from the error map.
+        /// </summary>
+        public string SelectedIonType
+        {
+            get { return this.selectedIonType; }
+            private set { this.RaiseAndSetIfChanged(ref this.selectedIonType, value); }
+        }
+
+        /// <summary>
+        /// Gets the residue and index of the seleted item.
+        /// </summary>
+        public string SelectedAminoAcid
+        {
+            get { return this.selectedAminoAcid; }
+            private set { this.RaiseAndSetIfChanged(ref this.selectedAminoAcid, value); }
+        }
+
+        /// <summary>
+        /// Gets the value of the selected item.
+        /// </summary>
+        public string SelectedValue
+        {
+            get { return this.selectedValue; }
+            private set { this.RaiseAndSetIfChanged(ref this.selectedValue, value); }
+        }
+
+        /// <summary>
         /// Set sequence and data displayed on heat map.
         /// </summary>
         /// <param name="sequence">The sequence to display as the x axis of the plot.</param>
@@ -256,6 +305,7 @@ namespace LcmsSpectator.ViewModels.Plots
                         this.SelectedMapType == MapTypes.ErrorMap ? 
                                     this.GetErrorDataArray(dataPoints, sequence.Count) :
                                     this.GetCoverageDataArray(dataPoints, sequence.Count));
+            this.PlotModel.MouseDown += this.MapMouseDown;
         }
 
         /// <summary>
@@ -499,6 +549,40 @@ namespace LcmsSpectator.ViewModels.Plots
             catch (Exception e)
             {
                 this.dialogService.ExceptionAlert(e);
+            }
+        }
+
+        /// <summary>
+        /// Event handler for click event. Selects data based on cell clicked in heat map.
+        /// </summary>
+        /// <param name="sender">The sender heatmap plotmodel.</param>
+        /// <param name="args">The event arguments.</param>
+        private void MapMouseDown(object sender, OxyMouseEventArgs args)
+        {
+            var series = this.PlotModel.GetSeriesFromPoint(args.Position);
+            var heatMap = series as HeatMapSeries;
+            if (heatMap != null)
+            {
+                var point = heatMap.GetNearestPoint(args.Position, true);
+                var dataPoint = point.DataPoint;
+
+                var ionType = this.ionTypes[((int)dataPoint.Y) - 1];
+                var seqIndex = ((int)dataPoint.X) - 1;
+                var ionIndex = ionType.IsPrefixIon ? seqIndex + 1 : this.selectedSequence.Count - seqIndex - 1;
+                var aminoAcid = this.selectedSequence[seqIndex];
+
+                var value = point.Text;
+
+                this.SelectedIonType = ionType.Name;
+                this.SelectedAminoAcid = string.Format("{0}{1}", aminoAcid.Residue, ionIndex);
+
+                if (value.Contains(" "))
+                {
+                    var parts = value.Split(' ');
+                    value = parts[1];
+                }
+
+                this.SelectedValue = value;
             }
         }
     }
