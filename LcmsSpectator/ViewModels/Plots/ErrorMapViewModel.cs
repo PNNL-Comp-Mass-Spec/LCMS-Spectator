@@ -15,6 +15,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Windows.Data;
 
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
@@ -616,8 +617,21 @@ namespace LcmsSpectator.ViewModels.Plots
 
                 if (value.Contains(" "))
                 {
+
                     var parts = value.Split(' ');
                     value = parts[1];
+                }
+
+                if (this.SelectedMapType == MapTypes.CoverageMap)
+                {
+                    if (value.Contains("ppm"))
+                    {
+                        var parts = value.Split('p');
+                        value = parts[0];
+                    }
+
+                    var intVal = Convert.ToInt32(value);
+                    value = intVal > 0 ? "Covered" : "Not Covered";
                 }
 
                 this.SelectedValue = value;
