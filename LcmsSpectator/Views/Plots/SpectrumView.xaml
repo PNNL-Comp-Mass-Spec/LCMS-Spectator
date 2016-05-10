@@ -42,6 +42,7 @@
             <wpf:PlotView Name="Ms2Spectrum" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="1">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
+                        <MenuItem Header="Select _Spectra" Command="{Binding OpenScanSelectionCommand}" />
                         <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                         <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                         <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
@@ -100,6 +101,7 @@
                 <wpf:PlotView Name="PreviousMs1" DataContext="{Binding Secondary1ViewModel}" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="1" Width="400">
                     <wpf:PlotView.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="Select _Spectra" Command="{Binding OpenScanSelectionCommand}" />
                             <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                             <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                             <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
@@ -112,6 +114,7 @@
                 <wpf:PlotView Name="NextMs1" DataContext="{Binding Secondary2ViewModel}" Model="{Binding Path=PlotModel}" Grid.Row="1"  Grid.Column="1" Width="400">
                     <wpf:PlotView.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="Select _Spectra" Command="{Binding OpenScanSelectionCommand}" />
                             <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
                             <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
                             <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />

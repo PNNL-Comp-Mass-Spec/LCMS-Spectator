@@ -77,6 +77,11 @@ namespace LcmsSpectator.ViewModels
         public ReactiveCommand<object> CancelCommand { get; private set; }
 
         /// <summary>
+        /// Gets an observable that determines whether or not  the Success command is executable.
+        /// </summary>
+        protected abstract IObservable<bool> CanSucceed { get; }
+
+        /// <summary>
         /// Function that checks whether or not the input to this window is valid.
         /// </summary>
         /// <returns>A value indicating whether the input to this window is valid.</returns>

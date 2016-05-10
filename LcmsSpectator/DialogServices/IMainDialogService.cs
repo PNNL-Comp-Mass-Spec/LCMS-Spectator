@@ -12,6 +12,7 @@ namespace LcmsSpectator.DialogServices
 {
     using System;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Filters;
@@ -108,5 +109,12 @@ namespace LcmsSpectator.DialogServices
         /// <param name="exportImageViewModel">The view model for the dialog.</param>
         /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
         bool ExportImageWindow(ExportImageViewModel exportImageViewModel);
+
+        /// <summary>
+        /// Open a window for selecting scan numbers for display.
+        /// </summary>
+        /// <param name="scanSelectionViewModel">The view model for the dialog.</param>
+        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
+        bool OpenScanSelectionWindow(ScanSelectionViewModel scanSelectionViewModel);
     }
 }

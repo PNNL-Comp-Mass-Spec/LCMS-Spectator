@@ -18,6 +18,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Reactive.Linq;
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Spectrometry;
+    using InformedProteomics.Backend.MassSpecData;
     using InformedProteomics.TopDown.Scoring;
     using LcmsSpectator.Config;
     using LcmsSpectator.DialogServices;
@@ -160,6 +161,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// The actual spectrum that is being displayed.
         /// </summary>
         private Spectrum currentSpectrum;
+
+        /// <summary>
+        /// The scan selection view model. Updated when the spectrum is updated.
+        /// </summary>
+        private ScanSelectionViewModel scanSelectionViewModel;
 
         /// <summary>
         /// Initializes a new instance of the SpectrumPlotViewModel class. 
@@ -310,6 +316,9 @@ namespace LcmsSpectator.ViewModels.Plots
             openErrorMapCommand.Subscribe(_ => dialogService.OpenErrorMapWindow(this.errorMapViewModel));
             this.OpenErrorMapCommand = openErrorMapCommand;
 
+            this.OpenScanSelectionCommand = ReactiveCommand.Create();
+            this.OpenScanSelectionCommand.Subscribe(_ => this.OpenScanSelectionImplementation());
+
             this.SaveAsTsvCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.SaveAsTsvImplementation());
         }
 
@@ -450,6 +459,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Gets a command that opens error heat map and table for this spectrum and ions
         /// </summary>
         public IReactiveCommand OpenErrorMapCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that opens the scan selection view model
+        /// </summary>
+        public ReactiveCommand<object> OpenScanSelectionCommand { get; private set; }
 
         /// <summary>
         /// Gets a command that prompts user for file path and save spectrum as TSV to that path.
@@ -643,6 +657,47 @@ namespace LcmsSpectator.ViewModels.Plots
                     this.currentSpectrum,
                     fragmentPeaks,
                     filePath);
+        }
+
+        /// <summary>
+        /// Implementation for the <see cref="OpenScanSelectionCommand" />.
+        /// Opens scans selection window to allow users to select scans,
+        /// and then updates the plots.
+        /// </summary>
+        private void OpenScanSelectionImplementation()
+        {
+            var lcms = this.FragmentationSequenceViewModel.FragmentationSequence.LcMsRun as LcMsRun;
+            var msLevel = this.FragmentationSequenceViewModel is PrecursorSequenceIonViewModel ? 1 : 2;
+            if (this.scanSelectionViewModel == null || !this.scanSelectionViewModel.Contains(this.Spectrum.ScanNum))
+            {
+                var scans = lcms.GetScanNumbers(msLevel);
+                int minScan = 0;
+                int maxScan = 0;
+                if (this.Spectrum != null)
+                {
+                    minScan = this.Spectrum.ScanNum;
+                    maxScan = this.Spectrum.ScanNum;
+                }
+
+                this.scanSelectionViewModel = new ScanSelectionViewModel(this.Spectrum.MsLevel, scans)
+                {
+                    MinScanNumber = minScan,
+                    MaxScanNumber = maxScan,
+                    BaseScan = minScan
+                };   
+            }
+
+            if (this.dialogService.OpenScanSelectionWindow(this.scanSelectionViewModel))
+            {
+                this.Spectrum = this.scanSelectionViewModel.GetSelectedSpectrum(lcms);
+                this.Title = this.scanSelectionViewModel.ScanNumbers.Count > 1 ? 
+                            string.Format(
+                                "Summed MS{0} Spectra (Scans {1}-{2})",
+                                msLevel,
+                                this.scanSelectionViewModel.ScanNumbers.Min(),
+                                this.scanSelectionViewModel.ScanNumbers.Max()) :
+                             string.Format("MS{0} Spectrum (Scan: {1})", msLevel, this.Spectrum.ScanNum);
+            }
         }
 
         /// <summary>

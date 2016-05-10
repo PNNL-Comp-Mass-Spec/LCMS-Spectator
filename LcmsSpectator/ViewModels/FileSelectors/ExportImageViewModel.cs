@@ -11,7 +11,6 @@
 namespace LcmsSpectator.ViewModels.FileSelectors
 {
     using System;
-    using System.IO;
     using System.Reactive.Linq;
     using LcmsSpectator.DialogServices;
     using OxyPlot;
@@ -144,6 +143,14 @@ namespace LcmsSpectator.ViewModels.FileSelectors
                             this.Height,
                             OxyColors.White,
                             this.Dpi);
+        }
+
+        /// <summary>
+        /// Gets an observable that determines whether or not  the Success command is executable.
+        /// </summary>
+        protected override IObservable<bool> CanSucceed
+        {
+            get { return this.WhenAnyValue(x => x.FilePath).Select(_ => this.Validate()); }
         }
 
         /// <summary>

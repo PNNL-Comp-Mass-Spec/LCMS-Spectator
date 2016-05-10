@@ -12,12 +12,14 @@ namespace LcmsSpectator.DialogServices
 {
     using System;
     using LcmsSpectator.ViewModels;
+    using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Filters;
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
     using LcmsSpectator.Views;
+    using LcmsSpectator.Views.Data;
     using LcmsSpectator.Views.FileSelectors;
     using LcmsSpectator.Views.Filters;
     using LcmsSpectator.Views.Modifications;
@@ -213,6 +215,19 @@ namespace LcmsSpectator.DialogServices
             exportImageViewModel.ReadyToClose += (o, e) => exportImageDialog.Close();
             exportImageDialog.ShowDialog();
             return exportImageViewModel.Status;
+        }
+
+        /// <summary>
+        /// Open a window for selecting scan numbers for display.
+        /// </summary>
+        /// <param name="scanSelectionViewModel">The view model for the dialog.</param>
+        /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
+        public bool OpenScanSelectionWindow(ScanSelectionViewModel scanSelectionViewModel)
+        {
+            var window = new ScanSelectionWindow { DataContext = scanSelectionViewModel };
+            scanSelectionViewModel.ReadyToClose += (o, e) => window.Close();
+            window.ShowDialog();
+            return scanSelectionViewModel.Status;
         }
     }
 }

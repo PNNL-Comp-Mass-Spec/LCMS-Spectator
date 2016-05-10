@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="LcmsSpectator.Views.SequenceViewer.SequenceViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:LcmsSpectator.Views.SequenceViewer"
+             xmlns:sequenceViewer="clr-namespace:LcmsSpectator.ViewModels.SequenceViewer"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance d:Type=sequenceViewer:SequenceViewerViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <ListView ItemsSource="{Binding SequenceFragments}" />
+        <!--<ListView ItemsSource="{Binding SequenceFragments}">
+            --><!--<ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>-->
+            <!--<ListView.ItemTemplate>
+                <DataTemplate DataType="{x:Type sequenceViewer:FragmentViewModel}">
+                    <TextBlock Text="{Binding Residue}" />
+                    --><!--<Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                    </Grid>--><!--
+                </DataTemplate>
+            </ListView.ItemTemplate>--><!--
+        </ListView>-->
+    </Grid>
+</UserControl>
