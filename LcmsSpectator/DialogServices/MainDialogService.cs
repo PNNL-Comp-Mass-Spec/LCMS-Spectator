@@ -11,6 +11,8 @@
 namespace LcmsSpectator.DialogServices
 {
     using System;
+    using System.Windows;
+
     using LcmsSpectator.ViewModels;
     using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Dms;
@@ -18,12 +20,14 @@ namespace LcmsSpectator.DialogServices
     using LcmsSpectator.ViewModels.Filters;
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
+    using LcmsSpectator.ViewModels.SequenceViewer;
     using LcmsSpectator.Views;
     using LcmsSpectator.Views.Data;
     using LcmsSpectator.Views.FileSelectors;
     using LcmsSpectator.Views.Filters;
     using LcmsSpectator.Views.Modifications;
     using LcmsSpectator.Views.Plots;
+    using LcmsSpectator.Views.SequenceViewer;
 
     /// <summary>
     /// Dialog services for opening LCMSSpectator dialog boxes from a view model.
@@ -228,6 +232,13 @@ namespace LcmsSpectator.DialogServices
             scanSelectionViewModel.ReadyToClose += (o, e) => window.Close();
             window.ShowDialog();
             return scanSelectionViewModel.Status;
+        }
+
+        public void OpenSequenceViewer(SequenceViewerViewModel sequenceViewerViewModel)
+        {
+            var control = new SequenceViewer { DataContext = sequenceViewerViewModel };
+            var window = new Window { Content = control };
+            window.Show();
         }
     }
 }

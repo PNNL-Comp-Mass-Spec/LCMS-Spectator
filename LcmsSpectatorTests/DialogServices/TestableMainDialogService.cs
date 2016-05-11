@@ -5,11 +5,13 @@ using LcmsSpectator.ViewModels;
 
 namespace LcmsSpectatorTests.DialogServices
 {
+    using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Filters;
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
+    using LcmsSpectator.ViewModels.SequenceViewer;
 
     /// <summary>
     /// The purpose of this class is to private a testable dialog service that does not actually
@@ -187,8 +189,7 @@ namespace LcmsSpectatorTests.DialogServices
         {
             throw new NotImplementedException();
         }
-
-
+        
         void IMainDialogService.SearchSettingsWindow(SearchSettingsViewModel searchSettingsViewModel)
         {
             throw new NotImplementedException();
@@ -202,6 +203,16 @@ namespace LcmsSpectatorTests.DialogServices
 
 
         public bool ExportImageWindow(ExportImageViewModel exportImageViewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool OpenScanSelectionWindow(ScanSelectionViewModel scanSelectionViewModel)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OpenSequenceViewer(SequenceViewerViewModel sequenceViewerViewModel)
         {
             throw new NotImplementedException();
         }

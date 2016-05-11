@@ -15,7 +15,7 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
 
         public char Residue { get; set; }
 
-        public string Modification { get; set; }
+        public string ModificationSymbol { get; set; }
 
         public FragmentIonViewModel SuffixIon { get; set; }
     }

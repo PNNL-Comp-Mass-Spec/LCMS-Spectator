@@ -26,6 +26,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Data;
+    using LcmsSpectator.ViewModels.SequenceViewer;
     using LcmsSpectator.Writers.Exporters;
 
     using OxyPlot;
@@ -168,6 +169,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private ScanSelectionViewModel scanSelectionViewModel;
 
         /// <summary>
+        /// The sequence viewer.
+        /// </summary>
+        private SequenceViewerViewModel sequenceViewerViewModel;
+
+        /// <summary>
         /// Initializes a new instance of the SpectrumPlotViewModel class. 
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from ViewModel.</param>
@@ -201,6 +207,8 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
             };
 
+            this.sequenceViewerViewModel = new SequenceViewerViewModel();
+
             this.ions = new LabeledIonViewModel[0];
 
             // When Spectrum updates, clear the filtered spectrum, deconvoluted spectrum, and filtered+deconvoluted spectrum
@@ -231,6 +239,12 @@ namespace LcmsSpectator.ViewModels.Plots
                 {
                     this.ions = this.FragmentationSequenceViewModel.LabeledIonViewModels;
                     this.UpdatePlotModel(peakDataPoints);
+
+                    if (this.FragmentationSequenceViewModel is FragmentationSequenceViewModel)
+                    {
+                        this.sequenceViewerViewModel.FragmentationSequence = this.FragmentationSequenceViewModel as FragmentationSequenceViewModel;
+                        this.sequenceViewerViewModel.SelectedSpectrum = this.Spectrum as ProductSpectrum;
+                    }
                 });       // Update plot when data changes
 
             this.WhenAnyValue(x => x.Spectrum).Where(spectrum => spectrum == null).Subscribe(
@@ -320,6 +334,12 @@ namespace LcmsSpectator.ViewModels.Plots
             this.OpenScanSelectionCommand.Subscribe(_ => this.OpenScanSelectionImplementation());
 
             this.SaveAsTsvCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.SaveAsTsvImplementation());
+
+            //if (this.FragmentationSequenceViewModel != null
+            //    && this.FragmentationSequenceViewModel is FragmentationSequenceViewModel)
+            //{
+            //    this.dialogService.OpenSequenceViewer(this.sequenceViewerViewModel);
+            //}
         }
 
         /// <summary>

@@ -6,10 +6,13 @@
     using System.Reactive.Linq;
     using System.Windows.Media;
 
+    using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
 
     using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.ViewModels.Data;
+
+    using OxyPlot.Wpf;
 
     using ReactiveUI;
 
@@ -36,11 +39,15 @@
         public SequenceViewerViewModel()
         {
             this.SequenceFragments = new ReactiveList<FragmentViewModel>();
+
+            this.IonColorDictionary = new IonColorDictionary(2);
+
+            // Update the sequence displayed when the fragmentation sequence or spectrum changes.
             this.WhenAnyValue(
                               x => x.SelectedSpectrum,
-                              x => x.FragmentationSequence,
-                              x => x.IonColorDictionary)
+                              x => x.FragmentationSequence)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.ParseFragmentationSequence());
         }
 
@@ -68,7 +75,7 @@
         public IonColorDictionary IonColorDictionary
         {
             get { return this.ionColorDictionary; }
-            set { this.RaiseAndSetIfChanged(ref this.ionColorDictionary, value); }
+            private set { this.RaiseAndSetIfChanged(ref this.ionColorDictionary, value); }
         }
 
         /// <summary>
@@ -81,7 +88,7 @@
         /// </summary>
         private void ParseFragmentationSequence()
         {
-            if (this.SequenceFragments != null && this.SequenceFragments.Count > 0)
+            if (this.SequenceFragments.Count > 0)
             {
                 this.SequenceFragments.Clear();
             }
@@ -97,46 +104,52 @@
                 this.ClearSequenceFragments();
             }
 
-            var labeledIonViewModels = this.FragmentationSequence.LabeledIonViewModels;
+            var labeledIonViewModels = this.FragmentationSequence.LabeledIonViewModels.Where(l => l.IsFragmentIon);
             var sequence = this.FragmentationSequence.FragmentationSequence.Sequence;
             var sequenceFragments = new FragmentViewModel[sequence.Count]; // sorted by sequence index
             for (int i = 0; i < sequence.Count; i++)
             {
                 sequenceFragments[i] = new FragmentViewModel { Residue = sequence[i].Residue };
+                var modAa = sequence[i] as ModifiedAminoAcid;
+                if (modAa != null)
+                {
+                    sequenceFragments[i].ModificationSymbol = modAa.Modification.Name.Substring(0, Math.Min(2, modAa.Modification.Name.Length));
+                }
             }
 
             foreach (var labeledIonViewModel in labeledIonViewModels)
             {
                 var index = labeledIonViewModel.IonType.IsPrefixIon
-                                ? labeledIonViewModel.Index
+                                ? labeledIonViewModel.Index - 1
                                 : sequence.Count - labeledIonViewModel.Index;
 
                 var peakDataPoints = labeledIonViewModel.GetPeaks(this.SelectedSpectrum, false);
-                if (peakDataPoints.Count == 0)
+                if (peakDataPoints.Count == 1 && peakDataPoints[0].X.Equals(double.NaN))
                 {   // Not observed, nothing to add.
                     continue;
                 }
 
-                // Add fragment prefix or suffix ion to the sequence.
                 var sequenceFragment = sequenceFragments[index];
                 var fragmentIon = labeledIonViewModel.IonType.IsPrefixIon
-                                      ? sequenceFragment.PrefixIon.LabeledIonViewModel
-                                      : sequenceFragment.SuffixIon.LabeledIonViewModel;
+                                      ? sequenceFragment.PrefixIon
+                                      : sequenceFragment.SuffixIon;
                 var ionToAdd = labeledIonViewModel;
                 if (fragmentIon != null)
+                // Add fragment prefix or suffix ion to the sequence.
                 {   // This a fragment ion has already been marked for this cleavage, select the one that is higher intensity.
-                    var newPeakDataPoints = fragmentIon.GetPeaks(this.SelectedSpectrum, false);
+                    var label = fragmentIon.LabeledIonViewModel;
+                    var newPeakDataPoints = label.GetPeaks(this.SelectedSpectrum, false);
                     var currentMaxAbundance = peakDataPoints.Max(pd => pd.Y);
                     var newMaxAbundance = newPeakDataPoints.Count == 0 ? 0 : newPeakDataPoints.Max(pd => pd.Y);
-                    ionToAdd = newMaxAbundance > currentMaxAbundance ? fragmentIon : labeledIonViewModel;
+                    ionToAdd = newMaxAbundance > currentMaxAbundance ? label : labeledIonViewModel;
                 }
 
                 // Determine the color of the ion.
-                var color = new Color();
+                Brush brush = null;
                 if (this.IonColorDictionary != null)
                 {
                     var oxyColor = this.IonColorDictionary.GetColor(ionToAdd.IonType.BaseIonType, 1);
-                    color = new Color { R = oxyColor.R, G = oxyColor.G, B = oxyColor.B };
+                    brush = oxyColor.ToBrush();
                 }
 
                 // Finally, add the ion.
@@ -145,7 +158,7 @@
                     sequenceFragment.PrefixIon = new FragmentIonViewModel
                     {
                         LabeledIonViewModel = ionToAdd,
-                        Color = color
+                        Color = brush
                     };
                 }
                 else
@@ -153,7 +166,7 @@
                     sequenceFragment.SuffixIon = new FragmentIonViewModel
                     {
                         LabeledIonViewModel = ionToAdd,
-                        Color = color
+                        Color = brush
                     };
                 }
             }
@@ -162,8 +175,6 @@
             {
                 this.SequenceFragments.Add(sequenceFragment);
             }
-
-            //this.SequenceFragments.AddRange(sequenceFragments);
         }
 
         /// <summary>

@@ -8,6 +8,7 @@
     using InformedProteomics.Backend.Data.Spectrometry;
 
     using LcmsSpectator.Models;
+    using LcmsSpectator.PlotModels.ColorDicionaries;
 
     public interface IFragmentationSequenceViewModel
     {

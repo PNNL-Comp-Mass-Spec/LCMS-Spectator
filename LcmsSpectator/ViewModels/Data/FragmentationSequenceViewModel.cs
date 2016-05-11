@@ -12,6 +12,7 @@
 
     using LcmsSpectator.Config;
     using LcmsSpectator.Models;
+    using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.Utils;
     using ReactiveUI;
 

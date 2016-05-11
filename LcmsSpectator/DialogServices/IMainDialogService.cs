@@ -18,6 +18,7 @@ namespace LcmsSpectator.DialogServices
     using LcmsSpectator.ViewModels.Filters;
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
+    using LcmsSpectator.ViewModels.SequenceViewer;
 
     /// <summary>
     /// Interface for dialog services for opening LCMSSpectator dialog boxes from a view model.
@@ -116,5 +117,11 @@ namespace LcmsSpectator.DialogServices
         /// <param name="scanSelectionViewModel">The view model for the dialog.</param>
         /// <returns>A value indicating whether the user clicked OK on the dialog.</returns>
         bool OpenScanSelectionWindow(ScanSelectionViewModel scanSelectionViewModel);
+
+        /// <summary>
+        /// Open a window displaying the sequence viewer.
+        /// </summary>
+        /// <param name="sequenceViewerViewModel">The view model for the window.</param>
+        void OpenSequenceViewer(SequenceViewerViewModel sequenceViewerViewModel);
     }
 }
