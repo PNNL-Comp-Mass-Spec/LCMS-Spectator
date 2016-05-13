@@ -89,12 +89,12 @@ namespace LcmsSpectator.ViewModels.Plots
             this.PrevMs1SpectrumViewModel = new SpectrumPlotViewModel(
                 dialogService,
                 new PrecursorSequenceIonViewModel { PrecursorViewMode = PrecursorViewMode.Charges },
-                1.1,
+                1.25,
                 false);
             this.NextMs1SpectrumViewModel = new SpectrumPlotViewModel(
                 dialogService,
                 new PrecursorSequenceIonViewModel { PrecursorViewMode = PrecursorViewMode.Charges },
-                1.1,
+                1.25,
                 false);
 
             // When prev ms1 spectrum plot is zoomed/panned, next ms1 spectrum plot should zoom/pan

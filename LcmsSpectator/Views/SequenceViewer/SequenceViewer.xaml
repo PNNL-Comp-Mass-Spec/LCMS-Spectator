@@ -7,38 +7,43 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance d:Type=sequenceViewer:SequenceViewerViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        <ListView ItemsSource="{Binding SequenceFragments}">
-            <ListView.ItemsPanel>
+    <UserControl.Resources>
+        <ControlTemplate x:Key="IonTemplate">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+                <TextBlock FontSize="13" Text="{Binding LabeledIonViewModel.IonType.BaseIonType.Symbol}" FontWeight="Bold"
+                                           Foreground="{Binding Color}"/>
+
+                <StackPanel>
+                    <TextBlock Text="{Binding ChargeSymbol}"
+                                               FontSize="9"
+                                               Foreground="{Binding Color}" />
+                    <TextBlock Text="{Binding LabeledIonViewModel.Index}"
+                                               FontSize="9"
+                                               Foreground="{Binding Color}"/>
+                </StackPanel>
+            </StackPanel>
+        </ControlTemplate>
+    </UserControl.Resources>
+    <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Margin="10,0,10,0" MaxHeight="100">
+        <ItemsControl ItemsSource="{Binding SequenceFragments}">
+            <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel Width="1000" />
+                    <WrapPanel />
                 </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-            <ListView.ItemTemplate>
-                <DataTemplate DataType="{x:Type sequenceViewer:FragmentViewModel}">
-                    <Grid Height="100" Width="40" Margin="0,0,0,10">
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Height="90" Width="40" Margin="0,0,0,5">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
                             <RowDefinition Height="*" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <!-- Suffix -->
-                        <Border Grid.Row="0" DataContext="{Binding SuffixIon}" Margin="-4,0,0,0"
+                        <Border Grid.Row="0" DataContext="{Binding SuffixIon}" Margin="-2,0,0,0"
                                 BorderThickness="2,2,0,0" BorderBrush="{Binding Color}"
                                 Width="36" HorizontalAlignment="Left">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
-                                <TextBlock FontSize="13" Text="{Binding LabeledIonViewModel.IonType.BaseIonType.Symbol}" FontWeight="Bold"
-                                           Foreground="{Binding Color}" />
-                                
-                                <StackPanel>
-                                    <TextBlock Text="{Binding ChargeSymbol}"
-                                               FontSize="9"
-                                               Foreground="{Binding Color}" />
-                                    <TextBlock Text="{Binding LabeledIonViewModel.Index}"
-                                               FontSize="9"
-                                               Foreground="{Binding Color}"/>
-                                </StackPanel>
-                            </StackPanel>
+                            <ContentControl Template="{StaticResource IonTemplate}" />
                         </Border>
                 
                         <!-- Residue -->                      
@@ -47,34 +52,27 @@
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Border Grid.Row="0" BorderThickness="2,0,0,0" BorderBrush="{Binding SuffixIon.Color}" Margin="-4,0,0,0" />
+                            <Border Grid.Row="0" BorderThickness="2,0,0,0" BorderBrush="{Binding SuffixIon.Color}" Margin="-2,0,0,0" />
                             <Border Grid.Row="1" BorderThickness="0,0,2,0" BorderBrush="{Binding PrefixIon.Color}" />
                         </Grid>
                         <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Residue}" FontFamily="Courier New" FontSize="18" FontWeight="Bold" />
+                            <!--<StackPanel.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Add/Edit Modification" Command="{Binding SelectModificationCommand}" />
+                                </ContextMenu>
+                            </StackPanel.ContextMenu>-->
+                            <TextBlock Text="{Binding AminoAcid.Residue}" FontFamily="Courier New" FontSize="18" FontWeight="Bold" />
                             <TextBlock FontSize="9" Text="{Binding ModificationSymbol}" />
                         </StackPanel>
 
                         <!-- Prefix -->
                         <Border Grid.Row="2" DataContext="{Binding PrefixIon}" BorderThickness="0,0,2,2" BorderBrush="{Binding Color}"
                                 Width="38" HorizontalAlignment="Right">
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
-                                <TextBlock FontSize="13" Text="{Binding LabeledIonViewModel.IonType.BaseIonType.Symbol}" FontWeight="Bold"
-                                           Foreground="{Binding Color}"/>
-                                
-                                <StackPanel>
-                                    <TextBlock Text="{Binding ChargeSymbol}"
-                                               FontSize="9"
-                                               Foreground="{Binding Color}" />
-                                    <TextBlock Text="{Binding LabeledIonViewModel.Index}"
-                                               FontSize="9"
-                                               Foreground="{Binding Color}"/>
-                                </StackPanel>
-                            </StackPanel>
+                            <ContentControl Template="{StaticResource IonTemplate}" />
                         </Border>
                     </Grid>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-    </Grid>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
 </UserControl>

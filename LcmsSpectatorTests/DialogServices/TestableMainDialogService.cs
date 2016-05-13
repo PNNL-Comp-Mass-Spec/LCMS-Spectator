@@ -151,8 +151,12 @@ namespace LcmsSpectatorTests.DialogServices
             throw new NotImplementedException();
         }
 
+        public ModificationViewModel OpenSelectModificationWindow(SelectModificationViewModel selectModificationViewModel)
+        {
+            throw new NotImplementedException();
+        }
 
-		public bool OpenDataWindow(OpenDataWindowViewModel openDataWindowViewModel)
+        public bool OpenDataWindow(OpenDataWindowViewModel openDataWindowViewModel)
 		{
 			throw new NotImplementedException();
 		}

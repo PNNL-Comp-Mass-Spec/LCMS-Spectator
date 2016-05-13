@@ -30,7 +30,7 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <summary>
         /// The path for the FASTA files on DMS.
         /// </summary>
-        public const string FastaFilePath = @"\\gigasax\DMS_FASTA_File_Archive\static\forward";
+        public const string FastaFilePath = @"\\gigasax\DMS_FASTA_File_Archive\dynamic\forward";
 
         /// <summary>
         /// The name of the the previous results file

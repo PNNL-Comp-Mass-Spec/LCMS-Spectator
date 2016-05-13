@@ -107,6 +107,19 @@ namespace LcmsSpectator.DialogServices
         }
 
         /// <summary>
+        /// Open dialog to select a modification from the list.
+        /// </summary>
+        /// <param name="selectModificationViewModel">The view model for the dialog.</param>
+        /// <returns>The selected modification.</returns>
+        public ModificationViewModel OpenSelectModificationWindow(SelectModificationViewModel selectModificationViewModel)
+        {
+            var selectModificationWindow = new SelectModificationWindow { DataContext = selectModificationViewModel };
+            selectModificationViewModel.ReadyToClose += (s, e) => selectModificationWindow.Close();
+            selectModificationWindow.ShowDialog();
+            return selectModificationViewModel.SelectedModification;
+        }
+
+        /// <summary>
         /// Open a dialog to select a raw, id, and feature file path to open.
         /// </summary>
         /// <param name="openDataWindowViewModel">The view model for the dialog.</param>

@@ -324,7 +324,7 @@
         /// </summary>
         protected override IObservable<bool> CanSucceed
         {
-            get { return this.ScanNumbers.CountChanging.Select(_ => this.Validate()); }
+            get { return this.WhenAnyValue(x => x.ScanNumbers.Count).Select(_ => this.Validate()); }
         }
 
         /// <summary>

@@ -9,6 +9,8 @@
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
 
+    using LcmsSpectator.DialogServices;
+    using LcmsSpectator.Models;
     using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.ViewModels.Data;
 
@@ -18,6 +20,11 @@
 
     public class SequenceViewerViewModel : ReactiveObject
     {
+        /// <summary>
+        /// Service for opening LCMSSpectator dialogs.
+        /// </summary>
+        private IMainDialogService dialogService;
+
         /// <summary>
         /// The currently selected MS/MS spectrum.
         /// </summary>
@@ -36,9 +43,11 @@
         /// <summary>
         /// Initializes new instance of the <see cref="SequenceViewerViewModel" /> class.
         /// </summary>
-        public SequenceViewerViewModel()
+        /// <param name="dialogService">Service for opening LCMSSpectator dialogs.</param>
+        public SequenceViewerViewModel(IMainDialogService dialogService = null)
         {
-            this.SequenceFragments = new ReactiveList<FragmentViewModel>();
+            this.dialogService = dialogService ?? new MainDialogService();
+            this.SequenceFragments = new ReactiveList<FragmentViewModel> { ChangeTrackingEnabled = true };
 
             this.IonColorDictionary = new IonColorDictionary(2);
 
@@ -49,6 +58,10 @@
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.ParseFragmentationSequence());
+
+            this.SequenceFragments.ItemChanged.Where(x => x.PropertyName == "AminoAcid")
+                .Subscribe(x => this.UpdateSequence(x.Sender.AminoAcid, x.Sender.Index));
+
         }
 
         /// <summary>
@@ -94,13 +107,15 @@
             }
 
             if (this.FragmentationSequence == null)
-            {   // Invalid fragmentation sequence: Just show nothing.
+            {
+                // Invalid fragmentation sequence: Just show nothing.
                 this.SequenceFragments.Clear();
                 return;
             }
 
             if (this.SelectedSpectrum == null)
-            {   // Invalid spectrum: clear all ions while retaining the sequence displayed.
+            {
+                // Invalid spectrum: clear all ions while retaining the sequence displayed.
                 this.ClearSequenceFragments();
             }
 
@@ -109,12 +124,7 @@
             var sequenceFragments = new FragmentViewModel[sequence.Count]; // sorted by sequence index
             for (int i = 0; i < sequence.Count; i++)
             {
-                sequenceFragments[i] = new FragmentViewModel { Residue = sequence[i].Residue };
-                var modAa = sequence[i] as ModifiedAminoAcid;
-                if (modAa != null)
-                {
-                    sequenceFragments[i].ModificationSymbol = modAa.Modification.Name.Substring(0, Math.Min(2, modAa.Modification.Name.Length));
-                }
+                sequenceFragments[i] = new FragmentViewModel(sequence[i], i, this.dialogService);
             }
 
             foreach (var labeledIonViewModel in labeledIonViewModels)
@@ -125,7 +135,8 @@
 
                 var peakDataPoints = labeledIonViewModel.GetPeaks(this.SelectedSpectrum, false);
                 if (peakDataPoints.Count == 1 && peakDataPoints[0].X.Equals(double.NaN))
-                {   // Not observed, nothing to add.
+                {
+                    // Not observed, nothing to add.
                     continue;
                 }
 
@@ -135,8 +146,9 @@
                                       : sequenceFragment.SuffixIon;
                 var ionToAdd = labeledIonViewModel;
                 if (fragmentIon != null)
-                // Add fragment prefix or suffix ion to the sequence.
-                {   // This a fragment ion has already been marked for this cleavage, select the one that is higher intensity.
+                    // Add fragment prefix or suffix ion to the sequence.
+                {
+                    // This a fragment ion has already been marked for this cleavage, select the one that is higher intensity.
                     var label = fragmentIon.LabeledIonViewModel;
                     var newPeakDataPoints = label.GetPeaks(this.SelectedSpectrum, false);
                     var currentMaxAbundance = peakDataPoints.Max(pd => pd.Y);
@@ -156,18 +168,18 @@
                 if (labeledIonViewModel.IonType.IsPrefixIon)
                 {
                     sequenceFragment.PrefixIon = new FragmentIonViewModel
-                    {
-                        LabeledIonViewModel = ionToAdd,
-                        Color = brush
-                    };
+                                                     {
+                                                         LabeledIonViewModel = ionToAdd,
+                                                         Color = brush
+                                                     };
                 }
                 else
                 {
                     sequenceFragment.SuffixIon = new FragmentIonViewModel
-                    {
-                        LabeledIonViewModel = ionToAdd,
-                        Color = brush
-                    };
+                                                     {
+                                                         LabeledIonViewModel = ionToAdd,
+                                                         Color = brush
+                                                     };
                 }
             }
 
@@ -187,6 +199,18 @@
                 sequenceFragment.PrefixIon = null;
                 sequenceFragment.SuffixIon = null;
             }
+        }
+
+        /// <summary>
+        /// Update the sequence when a fragment amino acid is changed.
+        /// </summary>
+        private void UpdateSequence(AminoAcid aminoAcid, int index)
+        {
+            var fragSeq = this.FragmentationSequence.FragmentationSequence;
+            var newSequence = new Sequence(this.FragmentationSequence.FragmentationSequence.Sequence);
+            newSequence[index] = aminoAcid;
+            this.FragmentationSequence.FragmentationSequence = 
+                new FragmentationSequence(newSequence, fragSeq.Charge, fragSeq.LcMsRun, fragSeq.ActivationMethod);
         }
     }
 }

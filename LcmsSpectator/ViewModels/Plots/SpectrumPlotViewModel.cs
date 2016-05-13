@@ -169,11 +169,6 @@ namespace LcmsSpectator.ViewModels.Plots
         private ScanSelectionViewModel scanSelectionViewModel;
 
         /// <summary>
-        /// The sequence viewer.
-        /// </summary>
-        private SequenceViewerViewModel sequenceViewerViewModel;
-
-        /// <summary>
         /// Initializes a new instance of the SpectrumPlotViewModel class. 
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from ViewModel.</param>
@@ -207,7 +202,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
             };
 
-            this.sequenceViewerViewModel = new SequenceViewerViewModel();
+            this.SequenceViewerViewModel = new SequenceViewerViewModel();
 
             this.ions = new LabeledIonViewModel[0];
 
@@ -242,8 +237,8 @@ namespace LcmsSpectator.ViewModels.Plots
 
                     if (this.FragmentationSequenceViewModel is FragmentationSequenceViewModel)
                     {
-                        this.sequenceViewerViewModel.FragmentationSequence = this.FragmentationSequenceViewModel as FragmentationSequenceViewModel;
-                        this.sequenceViewerViewModel.SelectedSpectrum = this.Spectrum as ProductSpectrum;
+                        this.SequenceViewerViewModel.FragmentationSequence = this.FragmentationSequenceViewModel as FragmentationSequenceViewModel;
+                        this.SequenceViewerViewModel.SelectedSpectrum = this.Spectrum as ProductSpectrum;
                     }
                 });       // Update plot when data changes
 
@@ -334,12 +329,6 @@ namespace LcmsSpectator.ViewModels.Plots
             this.OpenScanSelectionCommand.Subscribe(_ => this.OpenScanSelectionImplementation());
 
             this.SaveAsTsvCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.SaveAsTsvImplementation());
-
-            //if (this.FragmentationSequenceViewModel != null
-            //    && this.FragmentationSequenceViewModel is FragmentationSequenceViewModel)
-            //{
-            //    this.dialogService.OpenSequenceViewer(this.sequenceViewerViewModel);
-            //}
         }
 
         /// <summary>
@@ -471,6 +460,11 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// Gets or sets the sequence viewer.
+        /// </summary>
+        public SequenceViewerViewModel SequenceViewerViewModel { get; private set; }
+
+        /// <summary>
         /// Gets a command that prompts user for file path and save plot as image.
         /// </summary>
         public IReactiveCommand SaveAsImageCommand { get; private set; }
@@ -566,9 +560,14 @@ namespace LcmsSpectator.ViewModels.Plots
                 };
 
                 // Create ion name annotation
+                var annotationName = points[0].Title.Contains("Precursor")
+                                         ? string.Format("{0}\n{1,12:F3}",
+                                                         points[0].Title,
+                                                         points[0].X)
+                                         : points[0].Title;
                 var annotation = new TextAnnotation
                 {
-                    Text = points[0].Title,
+                    Text = annotationName,
                     TextColor = color,
                     FontWeight = FontWeights.Bold,
                     Layer = AnnotationLayer.AboveSeries,
@@ -576,8 +575,10 @@ namespace LcmsSpectator.ViewModels.Plots
                     Background = OxyColors.White,
                     Padding = new OxyThickness(0.1),
                     TextPosition = new DataPoint(points[0].X, points[0].Y),
+                    TextHorizontalAlignment = HorizontalAlignment.Center,
                     StrokeThickness = 0
                 };
+
                 this.PlotModel.Series.Add(ionSeries);
                 this.PlotModel.Annotations.Add(annotation);
             }

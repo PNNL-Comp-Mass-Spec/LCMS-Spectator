@@ -304,6 +304,7 @@
     <Compile Include="ViewModels\Dms\DmsDatasetViewModel.cs" />
     <Compile Include="ViewModels\Dms\DmsJobViewModel.cs" />
     <Compile Include="ViewModels\Dms\DmsLookupViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\SelectModificationViewModel.cs" />
     <Compile Include="ViewModels\Plots\ErrorMapViewModel.cs" />
     <Compile Include="ViewModels\Plots\FeatureMapViewModel.cs" />
     <Compile Include="ViewModels\Plots\FeatureViewerViewModel.cs" />
@@ -362,6 +363,9 @@
     </Compile>
     <Compile Include="Views\DmsLookupView.xaml.cs">
       <DependentUpon>DmsLookupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Modifications\SelectModificationWindow.xaml.cs">
+      <DependentUpon>SelectModificationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Plots\ErrorMap.xaml.cs">
       <DependentUpon>ErrorMap.xaml</DependentUpon>
@@ -504,6 +508,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DmsLookupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Modifications\SelectModificationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

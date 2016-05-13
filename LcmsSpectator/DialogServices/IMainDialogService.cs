@@ -60,6 +60,13 @@ namespace LcmsSpectator.DialogServices
         void OpenManageModifications(ManageModificationsViewModel manageModificationsViewModel);
 
         /// <summary>
+        /// Open dialog to select a modification from the list.
+        /// </summary>
+        /// <param name="selectModificationViewModel">The view model for the dialog.</param>
+        /// <returns>The selected modification.</returns>
+        ModificationViewModel OpenSelectModificationWindow(SelectModificationViewModel selectModificationViewModel);
+
+        /// <summary>
         /// Open a dialog to select a raw, id, and feature file path to open.
         /// </summary>
         /// <param name="openDataWindowViewModel">The view model for the dialog.</param>
