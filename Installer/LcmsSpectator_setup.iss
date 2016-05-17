@@ -109,7 +109,6 @@ VersionInfoVersion={#ApplicationVersion}
 VersionInfoCompany=PNNL
 VersionInfoDescription=LcmsSpectator
 VersionInfoCopyright=PNNL
-DisableFinishedPage=true
 ShowLanguageDialog=no
 ChangesAssociations=true
 EnableDirDoesntExistWarning=true
