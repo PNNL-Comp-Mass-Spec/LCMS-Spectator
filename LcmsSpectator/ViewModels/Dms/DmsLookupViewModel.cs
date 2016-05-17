@@ -35,7 +35,7 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <summary>
         /// The name of the the previous results file
         /// </summary>
-        private const string PreviousResultsFile = "dmsSearches.txt";
+        private const string PreviousResultsFile = @"LCMSSpectator\dmsSearches.txt";
 
         /// <summary>
         /// Dialog service for opening dialogs from view model.
@@ -415,9 +415,10 @@ namespace LcmsSpectator.ViewModels.Dms
         private void OpenPreviousResultFile()
         {
             var prevResults = new Dictionary<string, int>();
-            if (File.Exists(PreviousResultsFile))
+            var previousResultFilePath = this.GetOrCreatePreviousSearchPath();
+            if (File.Exists(previousResultFilePath))
             {
-                var file = File.ReadAllLines(PreviousResultsFile);
+                var file = File.ReadAllLines(previousResultFilePath);
                 foreach (var line in file)
                 {
                     int numWeeks;
@@ -455,7 +456,7 @@ namespace LcmsSpectator.ViewModels.Dms
                 previousResults = this.previousResultsList.GetRange(0, Math.Min(30, this.previousResultsList.Count - 1));
             }
 
-            using (var outFile = new StreamWriter(PreviousResultsFile))
+            using (var outFile = new StreamWriter(this.GetOrCreatePreviousSearchPath()))
             {
                 foreach (var item in previousResults)
                 {
@@ -524,6 +525,24 @@ namespace LcmsSpectator.ViewModels.Dms
             {
                 this.ReadyToClose(this, EventArgs.Empty);
             }
+        }
+
+        /// <summary>
+        /// Will return the path to the previous search result file, and will
+        /// create the directory in the user's AppData path if it does not already exist.
+        /// </summary>
+        /// <returns>The path to the previous search result file.</returns>
+        private string GetOrCreatePreviousSearchPath()
+        {
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var filePath = Path.Combine(appDataPath, PreviousResultsFile);
+            var directory = Path.GetDirectoryName(filePath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            return filePath;
         }
     }
 }
