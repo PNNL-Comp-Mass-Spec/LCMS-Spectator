@@ -328,7 +328,8 @@ namespace LcmsSpectator.ViewModels.Plots
             this.OpenScanSelectionCommand = ReactiveCommand.Create();
             this.OpenScanSelectionCommand.Subscribe(_ => this.OpenScanSelectionImplementation());
 
-            this.SaveAsTsvCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.SaveAsTsvImplementation());
+            this.SaveAsTsvCommand = ReactiveCommand.Create();
+            this.SaveAsTsvCommand.Subscribe(_ => this.SaveAsTsvImplementation());
         }
 
         /// <summary>
@@ -482,7 +483,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets a command that prompts user for file path and save spectrum as TSV to that path.
         /// </summary>
-        public ReactiveCommand<Unit> SaveAsTsvCommand { get; private set; }
+        public ReactiveCommand<object> SaveAsTsvCommand { get; private set; }
 
         /// <summary>
         /// Build spectrum plot model.
@@ -648,7 +649,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Prompt user for file path and save spectrum as TSV to that path.
         /// </summary>
-        private async Task SaveAsTsvImplementation()
+        private void SaveAsTsvImplementation()
         {
             if (this.currentSpectrum == null)
             {
@@ -674,7 +675,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     .ToArray();
 
             var peakExporter = new SpectrumPeakExporter(string.Empty, null, IcParameters.Instance.ProductIonTolerancePpm);
-            await peakExporter.ExportAsync(
+            peakExporter.Export(
                     this.currentSpectrum,
                     fragmentPeaks,
                     filePath);
