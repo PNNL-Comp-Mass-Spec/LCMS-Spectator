@@ -8,11 +8,9 @@
 
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassFeature;
 
     using LcmsSpectator.Config;
     using LcmsSpectator.Models;
-    using LcmsSpectator.PlotModels.ColorDicionaries;
     using LcmsSpectator.Utils;
     using ReactiveUI;
 
@@ -230,12 +228,15 @@
         /// <returns>Array of IonTypes.</returns>
         private IonType[] GetIonTypes()
         {
+            var charge = Math.Min(this.fragmentationSequence.Charge - 1, 100);
+            charge = Math.Max(charge, 1);
+
             return IonUtils.GetIonTypes(
                 IcParameters.Instance.IonTypeFactory,
                 this.BaseIonTypes.Where(bit => bit.IsSelected).Select(bit => bit.BaseIonType).ToList(),
                 this.NeutralLosses.Where(nl => nl.IsSelected).Select(nl => nl.NeutralLoss).ToList(),
                 1,
-                Math.Max(Math.Min(3 * this.fragmentationSequence.Charge, 100), 1)).ToArray();
+                charge).ToArray();
         }
     }
 }
