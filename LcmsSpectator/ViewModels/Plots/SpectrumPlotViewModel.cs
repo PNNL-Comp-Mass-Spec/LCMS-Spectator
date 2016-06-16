@@ -330,6 +330,9 @@ namespace LcmsSpectator.ViewModels.Plots
 
             this.SaveAsTsvCommand = ReactiveCommand.Create();
             this.SaveAsTsvCommand.Subscribe(_ => this.SaveAsTsvImplementation());
+
+            this.SaveToClipboardCommand = ReactiveCommand.Create();
+            this.SaveToClipboardCommand.Subscribe(_ => this.SaveToClipboardImplementation());
         }
 
         /// <summary>
@@ -457,7 +460,7 @@ namespace LcmsSpectator.ViewModels.Plots
         public IFragmentationSequenceViewModel FragmentationSequenceViewModel
         {
             get { return this.fragmentationSequenceViewModel; }
-            private set { this.RaiseAndSetIfChanged(ref this.fragmentationSequenceViewModel, value); }
+            set { this.RaiseAndSetIfChanged(ref this.fragmentationSequenceViewModel, value); }
         }
 
         /// <summary>
@@ -484,6 +487,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Gets a command that prompts user for file path and save spectrum as TSV to that path.
         /// </summary>
         public ReactiveCommand<object> SaveAsTsvCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that copies the peaks in view to the user's clipboard.
+        /// </summary>
+        public ReactiveCommand<object> SaveToClipboardCommand { get; private set; }
 
         /// <summary>
         /// Build spectrum plot model.
@@ -682,6 +690,36 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// Copies the peaks in view to the user's clipboard.
+        /// </summary>
+        private void SaveToClipboardImplementation()
+        {
+            if (this.currentSpectrum == null)
+            {
+                return;
+            }
+
+            if (this.peakDataPoints == null)
+            {
+                this.peakDataPoints = new IList<PeakDataPoint>[0];
+            }
+
+            var fragmentPeaks =
+                this.peakDataPoints.SelectMany(peaks => peaks)
+                    .Where(peak => !peak.X.Equals(double.NaN))
+                    .Where(peak => !peak.Y.Equals(double.NaN))
+                    .OrderBy(peak => peak.X)
+                    .ToArray();
+
+            var peakExporter = new SpectrumPeakExporter(string.Empty, null, IcParameters.Instance.ProductIonTolerancePpm);
+            peakExporter.ExportToClipBoard(
+                    this.currentSpectrum,
+                    fragmentPeaks,
+                    this.PlotModel.XAxis.ActualMinimum,
+                    this.PlotModel.XAxis.ActualMaximum);
+        }
+
+        /// <summary>
         /// Implementation for the <see cref="OpenScanSelectionCommand" />.
         /// Opens scans selection window to allow users to select scans,
         /// and then updates the plots.
@@ -689,7 +727,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private void OpenScanSelectionImplementation()
         {
             var lcms = this.FragmentationSequenceViewModel.FragmentationSequence.LcMsRun as LcMsRun;
-            var msLevel = this.FragmentationSequenceViewModel is PrecursorSequenceIonViewModel ? 1 : 2;
+            var msLevel = this.Spectrum is ProductSpectrum ? 2 : 1;
             if (this.scanSelectionViewModel == null || !this.scanSelectionViewModel.Contains(this.Spectrum.ScanNum))
             {
                 var scans = lcms.GetScanNumbers(msLevel);

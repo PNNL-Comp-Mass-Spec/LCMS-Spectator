@@ -81,17 +81,35 @@ namespace LcmsSpectator.Writers.Exporters
             }
         }
 
-        public void Export(Spectrum spectrum, PeakDataPoint[] peakDataPoints, string outputFilePath)
+        public void Export(Spectrum spectrum, PeakDataPoint[] peakDataPoints, string outputFilePath, double minMz = 0, double maxMz = double.PositiveInfinity)
         {
             using (var writer = new StreamWriter(outputFilePath))
             {
                 writer.WriteLine(this.GetHeaders());
                 foreach (var peak in spectrum.Peaks)
                 {
-                    var match = this.GetMatch(peak, peakDataPoints);
-                    writer.WriteLine(this.GetLine(match));
+                    if (peak.Mz >= minMz && peak.Mz <= maxMz)
+                    {
+                        var match = this.GetMatch(peak, peakDataPoints);
+                        writer.WriteLine(this.GetLine(match));
+                    }
                 }
             }
+        }
+
+        public void ExportToClipBoard(Spectrum spectrum, PeakDataPoint[] peakDataPoints, double minMz = 0, double maxMz = double.PositiveInfinity)
+        {
+            var stringBuilder = new StringBuilder(this.GetHeaders());
+            foreach (var peak in spectrum.Peaks)
+            {
+                if (peak.Mz >= minMz && peak.Mz <= maxMz)
+                {
+                    var match = this.GetMatch(peak, peakDataPoints);
+                    stringBuilder.AppendLine(this.GetLine(match));
+                }
+            }
+
+            System.Windows.Clipboard.SetText(stringBuilder.ToString());
         }
 
         public void Export(PrSm id, string outputFilePath)
