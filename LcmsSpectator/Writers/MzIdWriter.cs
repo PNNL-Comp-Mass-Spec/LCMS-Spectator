@@ -17,7 +17,7 @@ namespace LcmsSpectator.Writers
     using PSI_Interface.IdentData;
     using PSI_Interface.IdentData.mzIdentML;
 
-    using Modification = PSI_Interface.IdentData.Modification;
+    using Modification = PSI_Interface.IdentData.ModificationObj;
 
     public class MzIdWriter : IIdWriter
     {
@@ -50,7 +50,7 @@ namespace LcmsSpectator.Writers
             
             var mzIdWriter = new MzIdentMLWriter(this.filePath);
 
-            var identData = new IdentData
+            var identData = new IdentDataObj
                                 {
                                     Name = name,
 
@@ -77,7 +77,7 @@ namespace LcmsSpectator.Writers
 
                 var modification = modAa.Modification;
 
-                var cvParams = new IdentData();
+                var cvParams = new IdentDataObj();
 
                 var mod = new Modification
                 {
