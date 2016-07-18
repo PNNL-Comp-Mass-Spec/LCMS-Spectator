@@ -52,7 +52,7 @@ PHRPReader
 	<summary>
  Update the monoisotopic mass for this sequence
  </summary>
-	<param name="MonoisotopicMass"></param>
+	<param name="monoMass"></param>
 	<remarks></remarks>
 </member><member name="P:PHRPReader.clsScanStatsReader.ErrorMessage">
 	<summary>
@@ -374,6 +374,15 @@ PHRPReader
  </summary>
 	<param name="objCleavageStateCalculator"></param>
 	<remarks></remarks>
+</member><member name="M:PHRPReader.clsProteinInfo.#ctor(System.String,System.Int32,PHRPReader.clsPeptideCleavageStateCalculator.ePeptideCleavageStateConstants,PHRPReader.clsPeptideCleavageStateCalculator.ePeptideTerminusStateConstants)">
+	<summary>
+ Constructor
+ </summary>
+	<param name="ProteinName"></param>
+	<param name="SeqID"></param>
+	<param name="CleavageState"></param>
+	<param name="TerminusState"></param>
+	<remarks></remarks>
 </member><member name="P:PHRPReader.clsPHRPStartupOptions.MaxProteinsPerPSM">
 	<summary>
  Maximum number of proteins to associate with each PSM
@@ -381,6 +390,14 @@ PHRPReader
 	<value></value>
 	<returns></returns>
 	<remarks>0 means to load all proteins</remarks>
+</member><member name="P:PHRPReader.clsPHRPStartupOptions.PeptideMassCalculator">
+	<summary>
+ Use this to override the default peptide mass calculator class;
+ this is useful if custom amino acids are in use
+ </summary>
+	<value></value>
+	<returns></returns>
+	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPHRPSeqMapReader.#ctor(System.String,System.String,PHRPReader.clsPHRPReader.ePeptideHitResultType)">
 	<summary>
  Constructor
@@ -605,6 +622,17 @@ PHRPReader
 	<param name="fastReadMode">When set to true, then reads the next data line, but doesn't perform text parsing required to determine cleavage state</param>
 	<returns>True if success, false if an error</returns>
 	<remarks>When fastReadMode is True, you should call FinalizePSM to populate the remaining fields</remarks>
+</member><member name="M:PHRPReader.clsPHRPParserMSGFDB.UpdateMassCalculatorMasses(System.String,PHRPReader.clsMSGFPlusParamFileModExtractor,PHRPReader.clsPeptideMassCalculator,System.String@)">
+	<summary>
+ Look for custom amino acid definitions in the MSGF+ parameter file
+ If any are found, update the amino acid mass values in the PeptideMassCalculator instance
+ </summary>
+	<param name="strSearchEngineParamFileName"></param>
+	<param name="modFileProcessor"></param>
+	<param name="peptideMassCalculator"></param>
+	<param name="errorMessage"></param>
+	<returns></returns>
+	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPHRPParserInspect.#ctor(System.String,System.String)">
 	<summary>
  Constructor; assumes blnLoadModsAndSeqInfo=True
@@ -659,6 +687,16 @@ PHRPReader
  When set to true, then calls to MoveNext will read the next data line, but will skip several additional processing steps for performance reasons
  </summary>
 	<remarks>If the peptide is a peptide of interest, then call FinalizeCurrentPSM</remarks>
+</member><member name="F:PHRPReader.clsPHRPReader.mParentIonMzMatchNonMsx">
+	<summary>
+ RegEx to extract parent ions from filter strings that do not have Full msx
+ </summary>
+	<remarks>Shared (aka static) only to speed up unit tests</remarks>
+</member><member name="F:PHRPReader.clsPHRPReader.mParentIonMzMatchMsx">
+	<summary>
+ RegEx to extract parent ions from filter strings that have Full msx
+ </summary>
+	<remarks>Shared (aka static) only to speed up unit tests</remarks>
 </member><member name="P:PHRPReader.clsPHRPReader.CanRead">
 	<summary>
  Returns True if the input file was successfully opened and data remains to be read
@@ -1146,6 +1184,14 @@ PHRPReader
  </summary>
 	<returns>True if a line was read, false if not more data is available</returns>
 	<remarks>When FastReadMode is True, you should call FinalizeCurrentPSM to populate the remaining fields if the peptide is a peptide of interest</remarks>
+</member><member name="M:PHRPReader.clsPHRPReader.ExtractParentIonMzFromFilterText(System.String,System.Double@)">
+	<summary>
+ This function extracts the Parent Ion m/z from the filter string
+ </summary>
+	<param name="scanFilterText"></param>
+	<param name="parentIonMZ"></param>
+	<returns>True if parsing successful</returns>
+	<remarks>The original version of this code (C#) is in ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(string, out double)</remarks>
 </member><member name="M:PHRPReader.clsPHRPReader.FinalizeCurrentPSM">
 	<summary>
  When FastReadMode is True, you first call MoveNext to read the peptide scores, then if the peptide
@@ -1507,6 +1553,12 @@ PHRPReader
 	<param name="strSequenceWithMods"></param>
 	<returns></returns>
 	<remarks>List of ambiguous mods, where the keys are the start residues and the values are the ambiguous mod info</remarks>
+</member><member name="M:PHRPReader.clsPHRPParser.IsNumber(System.String)">
+	<summary>
+ Examines the string to determine if it is numeric
+ </summary>
+	<param name="strData"></param>
+	<returns>True if a number, otherwise false</returns>
 </member><member name="M:PHRPReader.clsPHRPParser.LoadModSummary">
 	<summary>
  Reads the data in strModSummaryFilePath.  Populates mModInfo with the modification names, masses, and affected residues
@@ -1566,24 +1618,104 @@ PHRPReader
  Dictionary of protein names and residue start/end positions
  </summary>
 	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPeptideModificationContainer.AddModification(PHRPReader.clsModificationDefinition,System.Boolean)">
+	<summary>
+ Add objModificationDefinition to mModifications
+ However, do not add if a duplicate modification
+ Furthermore, if everything matches except for .TargetResidues, then add the new target residues to the existing, matching mod
+ </summary>
+	<param name="objModificationDefinition"></param>
+	<param name="blnUseNextAvailableModificationSymbol"></param>
+	<returns>The index of the newly added modification, or the the index of the modification that objModificationDefinition matches </returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPeptideModificationContainer.GenerateGenericModMassName(System.Double)">
+	<summary>
+ Converts a modification mass to a generic 8 character name
+ The name will always start with + or - then will have the modification mass, rounded as necessary to give an 8 character name
+ </summary>
+	<param name="dblModificationMass"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPeptideModificationContainer.GetBestIntegerBasedMassCorrectionTag(System.Double)">
+	<summary>
+ Looks for the best match in mIntegerMassCorrectionTagLookup for dblModificationMass (which should be close to a integer value)
+ </summary>
+	<param name="dblModificationMass"></param>
+	<returns>The mass correction tag name if a match, otherwise nothing</returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPeptideModificationContainer.LookupModificationDefinitionByMass(System.Double,System.Char,PHRPReader.clsAminoAcidModInfo.eResidueTerminusStateConstants,System.Boolean@,System.Boolean,System.Byte)">
+	<summary>
+ Looks for an existing modification with the given modification mass and target residues
+ </summary>
+	<param name="dblModificationMass"></param>
+	<param name="chTargetResidue">If defined, then returns the first modification with the given mass and containing the residue in .TargetResidues; if no match, then looks for the first modification with the given mass and no defined .TargetResidues</param>
+	<param name="eResidueTerminusState"></param>
+	<param name="blnExistingModFound"></param>
+	<param name="blnAddToModificationListIfUnknown"></param>
+	<param name="MassDigitsOfPrecision"></param>
+	<returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True</returns>
+	<remarks>If chTargetResidue is nothing, then follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
+</member><member name="M:PHRPReader.clsPeptideModificationContainer.LookupModificationDefinitionByMassAndModType(System.Double,PHRPReader.clsModificationDefinition.eModificationTypeConstants,System.Char,PHRPReader.clsAminoAcidModInfo.eResidueTerminusStateConstants,System.Boolean@,System.Boolean,System.Byte)">
+	<summary>
+ Looks for an existing modification with the given modification mass, modification type, and target residues
+ </summary>
+	<param name="dblModificationMass"></param>
+	<param name="eModType"></param>
+	<param name="chTargetResidue">If defined, then returns the first modification with the given mass and containing the residue in .TargetResidues; if no match, then looks for the first modification with the given mass and no defined .TargetResidues</param>
+	<param name="eResidueTerminusState"></param>
+	<param name="blnExistingModFound"></param>
+	<param name="blnAddToModificationListIfUnknown"></param>
+	<param name="MassDigitsOfPrecision"></param>
+	<returns>The best matched modification; if no match is found, then returns a newly created modification definition, adding it to mModifications if blnAddToModificationListIfUnknown = True</returns>
+	<remarks>If chTargetResidue is nothing, then follows similar matching logic, but skips defined modifications with defined .TargetResidues</remarks>
+</member><member name="T:PHRPReader.clsPeptideMassCalculator.udtAtomCountsType">
+	<summary>
+ Tracks elemental composition of each amino acid
+ </summary>
+	<remarks>In MGSF+, amino acids can only be C, H, N, O, and S</remarks>
+</member><member name="P:PHRPReader.clsPeptideMassCalculator.ErrorMessage">
+	<summary>
+ Most recent error message
+ </summary>
+	<value></value>
+	<returns></returns>
+	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPeptideMassCalculator.#ctor">
 	<summary>
  Constructor
  </summary>
 	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPeptideMassCalculator.AddAminoAcidStatEntry(System.Byte)">
+	<summary>
+ Adds a new entry to parallel arrays AminoAcidMasses and AminoAcidSymbols
+ </summary>
+	<param name="intIndex"></param>
+	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPeptideMassCalculator.ComputeSequenceMass(System.String)">
 	<summary>
- Compute the mass of peptide sequence strSequence.  If modification symbols are present, returns -1
+ Compute the mass of peptide sequence strSequence (it cannot contain modification symbols)
  </summary>
 	<param name="strSequence"></param>
-	<returns></returns>
-	<remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+	<returns>Monoisotopic mass, or -1 if an error</returns>
+	<remarks>
+ Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True
+ If modification symbols are present, returns -1</remarks>
 </member><member name="M:PHRPReader.clsPeptideMassCalculator.ComputeSequenceMass(System.String,System.Int32,PHRPReader.clsPeptideMassCalculator.udtPeptideSequenceModInfoType[]@)">
 	<summary>
  Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
  </summary>
 	<param name="strSequence"></param>
-	<returns></returns>
+	<param name="intModCount"></param>
+	<param name="udtResidueModificationInfo">Array of modified residues; index 0 to intModCount-1</param>
+	<returns>The computed mass, or -1 if an error</returns>
+	<remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+</member><member name="M:PHRPReader.clsPeptideMassCalculator.ComputeSequenceMass(System.String,System.Collections.Generic.List{PHRPReader.clsPeptideMassCalculator.udtPeptideSequenceModInfoType})">
+	<summary>
+ Compute the mass of peptide sequence strSequence; uses the information in udtResidueModificationInfo() to determine modification masses
+ </summary>
+	<param name="strSequence"></param>
+	<param name="modifiedResidues">List of modified residues</param>
+	<returns>The computed mass, or -1 if an error</returns>
 	<remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
 </member><member name="M:PHRPReader.clsPeptideMassCalculator.ComputeSequenceMassNumericMods(System.String)">
 	<summary>
@@ -1595,6 +1727,13 @@ PHRPReader
 	<param name="strSequence"></param>
 	<returns></returns>
 	<remarks>Looks for and removes prefix and suffix letters if .RemovePrefixAndSuffixIfPresent = True</remarks>
+</member><member name="M:PHRPReader.clsPeptideMassCalculator.ConvertElementalCompositionToAtomCounts(System.Collections.Generic.Dictionary{System.Char,System.Int32})">
+	<summary>
+ Populate a udtAtomCountsType instance using the information in elementalComposition
+ </summary>
+	<param name="elementalComposition"></param>
+	<returns></returns>
+	<remarks>Only valid for amino acids, since udtAtomCountsType only supports C, H, N, O, and S</remarks>
 </member><member name="M:PHRPReader.clsPeptideMassCalculator.ConvoluteMass(System.Double,System.Int32,System.Int32)">
 	<summary>
  Converts the m/z value from one charge state to another charge state.  Either charge state can be 0, which means an uncharged peptide
@@ -1616,6 +1755,17 @@ PHRPReader
  Returns the mass of the specified amino acid
  </summary>
 	<param name="chAminoAcidSymbol"></param>
+	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPeptideMassCalculator.GetAtomCountsStruct(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+	<summary>
+ Create a new udtAtomCountsType struct with the specified number of atoms
+ </summary>
+	<param name="countC"></param>
+	<param name="countH"></param>
+	<param name="countN"></param>
+	<param name="countO"></param>
+	<param name="countS"></param>
 	<returns></returns>
 	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPeptideMassCalculator.MassToPPM(System.Double,System.Double)">
@@ -1648,6 +1798,17 @@ PHRPReader
 	<param name="dblPPMToConvert"></param>
 	<param name="dblCurrentMZ"></param>
 	<returns></returns>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPeptideMassCalculator.ResetAminoAcidMasses">
+	<summary>
+ Reset all of the amino acid masses and atom counts to default values
+ </summary>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsPeptideMassCalculator.ResetAminoAcidToDefault(System.Char)">
+	<summary>
+ Reset the mass and atom counts of the given amino acid to use default values
+ </summary>
+	<param name="aminoAcidSymbol">Letter between A and Z</param>
 	<remarks></remarks>
 </member><member name="M:PHRPReader.clsPeptideMassCalculator.ResetTerminusMasses">
 	<summary>
@@ -1792,6 +1953,37 @@ PHRPReader
  </summary>
 	<param name="strInputFilePath">Input file path</param>
 	<returns>A Dictionary where keys are ResultID and values are MSGF_SpecProb values (stored as strings)</returns>
+</member><member name="T:PHRPReader.clsMSGFPlusParamFileModExtractor.udtModInfoType">
+	<summary>
+ Tracks dynamic and static modification details
+ Also tracks Custom amino acids
+ </summary>
+	<remarks>
+ Notes when tracking information for custom amino acids
+   ModName:    Name associated with the custom amino acid
+   ModMass:    Composition string, for example C5H7N1O2S0 for Hydroxyproline
+   ModMassVal: Computed mass of the composition string
+   Residues:   Single letter abbreviation for the custom amino acid, for example J or X
+   ModType:    eMSGFDBModType.CustomAA
+   ModSymbol:  ?   (a question mark; not used)
+ </remarks>
+</member><member name="M:PHRPReader.clsMSGFPlusParamFileModExtractor.#ctor(System.String)">
+	<summary>
+ Constructor
+ </summary>
+	<param name="toolName">
+ Search engine name, typically MSGF+
+ This name is only used in log messages
+ </param>
+	<remarks></remarks>
+</member><member name="M:PHRPReader.clsMSGFPlusParamFileModExtractor.ExtractModInfoFromParamFile(System.String,System.Collections.Generic.List{PHRPReader.clsMSGFPlusParamFileModExtractor.udtModInfoType}@)">
+	<summary>
+ Extracts mod info from either a MSGF+ or MSPathFinder param file or from a MSGFDB_Mods.txt file
+ </summary>
+	<param name="paramFilePath"></param>
+	<param name="lstModInfo"></param>
+	<returns>True if success; false if a problem</returns>
+	<remarks></remarks>
 </member><member name="F:PHRPReader.clsModificationDefinition.eModificationTypeConstants.UnknownType">
 	<summary>
  Unknown mod type on a residue; essentially treated as a dynamic mod

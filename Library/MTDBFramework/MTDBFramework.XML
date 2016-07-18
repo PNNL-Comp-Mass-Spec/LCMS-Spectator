@@ -321,6 +321,28 @@
             Options accessor
             </summary>
         </member>
+        <member name="T:MTDBFramework.Algorithms.MtdbProcessor.EvidenceUMCAssociation">
+            <summary>
+            Container to keep Evidence and UMCLight associated correctly TODO: Can use a Tuple or KeyValuePair instead?
+            </summary>
+        </member>
+        <member name="M:MTDBFramework.Algorithms.MtdbProcessor.EvidenceUMCAssociation.#ctor(MTDBFramework.Data.Evidence,PNNLOmics.Data.Features.UMCLight)">
+            <summary>
+            Constructor - set the association
+            </summary>
+            <param name="ev"></param>
+            <param name="umc"></param>
+        </member>
+        <member name="P:MTDBFramework.Algorithms.MtdbProcessor.EvidenceUMCAssociation.Evidence">
+            <summary>
+            Evidence
+            </summary>
+        </member>
+        <member name="P:MTDBFramework.Algorithms.MtdbProcessor.EvidenceUMCAssociation.UMC">
+            <summary>
+            UMCLight
+            </summary>
+        </member>
         <member name="T:MTDBFramework.Algorithms.Alignment.PeptideTargetAligner">
             <summary>
             Target alignment for peptides
@@ -876,6 +898,13 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:MTDBFramework.Data.Evidence.CompareTo(MTDBFramework.Data.Evidence)">
+            <summary>
+            Comparison function for sorting by <see cref="P:MTDBFramework.Data.Evidence.Sequence"/>, then by <see cref="P:MTDBFramework.Data.Evidence.Scan"/>, then by <see cref="P:MTDBFramework.Data.Evidence.MonoisotopicMass"/>
+            </summary>
+            <param name="other"></param>
+            <returns></returns>
+        </member>
         <member name="P:MTDBFramework.Data.Evidence.Spectrum">
             <summary>
             Spectra data
@@ -1333,14 +1362,14 @@
             MTDBFramework configuration options
             </summary>
         </member>
-        <member name="F:MTDBFramework.Data.Options.Id">
-            <summary>
-            Id
-            </summary>
-        </member>
         <member name="M:MTDBFramework.Data.Options.#ctor">
             <summary>
             Constructor to default values
+            </summary>
+        </member>
+        <member name="P:MTDBFramework.Data.Options.Id">
+            <summary>
+            Id
             </summary>
         </member>
         <member name="P:MTDBFramework.Data.Options.DatabaseType">
@@ -2088,7 +2117,7 @@
         </member>
         <member name="M:MTDBFramework.IO.PeptideCache.TryGetValue(System.String,System.Double@)">
             <summary>
-            If the peptide exists in the cache, returns its predictedNET 
+            If the peptide exists in the cache, returns its predictedNET
             </summary>
             <param name="peptide"></param>
             <param name="predictedNET"></param>
@@ -2422,28 +2451,28 @@
             <param name="options">Options used for the MSGFPlus Target Filter</param>
         </member>
         <member name="M:MTDBFramework.IO.MzIdentMlReader.Read(System.String)">
-            <summary>
-            Entry point for MZIdentMLReader, overriden from PHRPReaderBase
-            Read the MZIdentML file, map the data to MSGF+ data, compute the NETs, and return the LCMS DataSet
-            </summary>
-            <param name="path">Path to *.mzid/mzIdentML file</param>
-            <returns>LCMSDataSet</returns>
-            <remarks>
-            XML Reader parses an MZIdentML file, storing data as follows:
-              PeptideRef holds Peptide data, such as sequence, number, and type of modifications
-              Database Information holds the length of the peptide and the protein description 
-              Peptide Evidence holds the pre, post, start and end for the peptide for Tryptic End calculations.
-            The element that holds the most information is the Spectrum ID Item, which has the calculated mz,
-            experimental mz, charge state, MSGF raw score, Denovo score, MSGF SpecEValue, MSGF EValue, 
-            MSGF QValue, MSGR PepQValue, Scan number as well as which peptide it is and which evidences 
-            it has from the analysis run.
+             <summary>
+             Entry point for MZIdentMLReader, overriden from PHRPReaderBase
+             Read the MZIdentML file, map the data to MSGF+ data, compute the NETs, and return the LCMS DataSet
+             </summary>
+             <param name="path">Path to *.mzid/mzIdentML file</param>
+             <returns>LCMSDataSet</returns>
+             <remarks>
+             XML Reader parses an MZIdentML file, storing data as follows:
+               PeptideRef holds Peptide data, such as sequence, number, and type of modifications
+               Database Information holds the length of the peptide and the protein description
+               Peptide Evidence holds the pre, post, start and end for the peptide for Tryptic End calculations.
+             The element that holds the most information is the Spectrum ID Item, which has the calculated mz,
+             experimental mz, charge state, MSGF raw score, Denovo score, MSGF SpecEValue, MSGF EValue,
+             MSGF QValue, MSGR PepQValue, Scan number as well as which peptide it is and which evidences
+             it has from the analysis run.
             
-            After the XML Reader, it then goes through each Spectrum ID item and maps the appropriate values
-            to the appropriate variables as a MSGF+ result. If the result passes the filter for MSGF+, it
-            then adds the data for if there are modifications and adds the result to a running list of results.
-            When all the results are tabulated, it passes them through to the AnalysisHelper class to calculate
-            both the observed and the predicted NETs and then returns an LCMSDataSet of the results with the MZIdent tool
-            </remarks>
+             After the XML Reader, it then goes through each Spectrum ID item and maps the appropriate values
+             to the appropriate variables as a MSGF+ result. If the result passes the filter for MSGF+, it
+             then adds the data for if there are modifications and adds the result to a running list of results.
+             When all the results are tabulated, it passes them through to the AnalysisHelper class to calculate
+             both the observed and the predicted NETs and then returns an LCMSDataSet of the results with the MZIdent tool
+             </remarks>
         </member>
         <member name="M:MTDBFramework.IO.MzIdentMlReader.ReadMzIdentMl(System.Xml.XmlReader)">
             <summary>
@@ -2651,7 +2680,7 @@
             </summary>
             <remarks>
             If the path ends with "msgfplus.mzid" or "mzid.gz" then it's an MZIdentML file, but if it's not, then
-            it determines the type of reader to return based on the extension of the file, using that to 
+            it determines the type of reader to return based on the extension of the file, using that to
             determine if it is a Sequest, XTandem, MSAlign or MSGF+ file
             The if statement is due to the PHRP Reader not meaning to be used on .mzid files
             </remarks>
@@ -2783,7 +2812,7 @@
             &lt;!--accompanying Design Science License for more details--&gt;
             &lt;umod:unimod xmlns:umod=&quot;http://www.unimod.org/xmlns/schema/unimod_2&quot;
                          xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-                         xsi:schemaLocation=&quot;http://www.unimod.org/xmlns/schema/unimod_2 http://www.unimod. [rest of string was truncated]&quot;;.
+                         xsi:schemaLocation=&quot;http://www.unimod.org/xmlns/schema/unimod_2 http://www.unimod.org/xm [rest of string was truncated]&quot;;.
              </summary>
         </member>
         <member name="T:MTDBFramework.UI.AlignmentProgressChangedEventArgs">
