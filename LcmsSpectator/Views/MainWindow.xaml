@@ -172,7 +172,7 @@
                                                 </HierarchicalDataTemplate>
                                             </controls:MvvmTreeView.Resources>
                                         </controls:MvvmTreeView>
-                                        <ProgressBar Visibility="{Binding IdFileLoading, Converter={StaticResource BoolToVis}}" Grid.Row="1" Height="25" VerticalAlignment="Bottom" Value="{Binding IdFileLoadProgress}" x:Name="FileLoadProgress" />
+                                        <ProgressBar Visibility="{Binding IdFileLoading, Converter={StaticResource BoolToVis}}" Grid.Row="1" Height="25" VerticalAlignment="Bottom" Value="{Binding IdFileLoadProgress, Mode=OneWay}" x:Name="FileLoadProgress" />
                                     </Grid>
                                     </xcad:LayoutAnchorable>
                                 </xcad:LayoutAnchorablePane>
