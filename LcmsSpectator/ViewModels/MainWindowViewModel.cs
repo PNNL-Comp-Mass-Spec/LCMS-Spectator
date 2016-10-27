@@ -30,6 +30,7 @@ namespace LcmsSpectator.ViewModels
     using LcmsSpectator.ViewModels.Dms;
     using LcmsSpectator.ViewModels.FileSelectors;
     using LcmsSpectator.ViewModels.Modifications;
+    //using LcmsSpectator.ViewModels.StableIsotopeViewer;
     using LcmsSpectator.Writers;
     using ReactiveUI;
 
@@ -93,6 +94,12 @@ namespace LcmsSpectator.ViewModels
             var openSettingsCommand = ReactiveCommand.Create();
             openSettingsCommand.Subscribe(_ => this.dialogService.OpenSettings(new SettingsViewModel(this.dialogService)));
             this.OpenSettingsCommand = openSettingsCommand;
+
+            // Create command to opne isotopic profile viewer
+            this.OpenIsotopicProfileViewerCommand = ReactiveCommand.Create();
+            //this.OpenIsotopicProfileViewerCommand.Subscribe(this.OpenIsotopicProfileViewer);
+
+            //this.OpenIsotopicProfileViewer(new object());
 
             // Create command to open about box
             var openAboutBoxCommand = ReactiveCommand.Create();
@@ -181,6 +188,11 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public IReactiveCommand OpenSettingsCommand { get; private set; }
         
+        /// <summary>
+        /// Gets a command that opens the isotopic profile viewer.
+        /// </summary>
+        public ReactiveCommand<object> OpenIsotopicProfileViewerCommand { get; private set; }
+
         /// <summary>
         /// Gets command that opens about box.
         /// </summary>
@@ -650,5 +662,11 @@ namespace LcmsSpectator.ViewModels
 
             return true;
         }
+
+        //public void OpenIsotopicProfileViewer(object o)
+        //{
+        //    var ds = new MainDialogService();
+        //    ds.OpenStableIsotopeViewer(new StableIsotopeViewModel());
+        //}
     }
 }

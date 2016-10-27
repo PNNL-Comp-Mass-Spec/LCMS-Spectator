@@ -1,0 +1,239 @@
+﻿<Window x:Class="LcmsSpectator.Views.StableIsotopeViewer.StableIsotopeViewer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:stableIsotopeViewer="clr-namespace:LcmsSpectator.ViewModels.StableIsotopeViewer"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        mc:Ignorable="d"
+        Title="Stable Isotope Viewer" Height="750" Width="500"
+        d:DataContext="{d:DesignInstance d:Type=stableIsotopeViewer:StableIsotopeViewModel, IsDesignTimeCreatable=True}">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
+    <ScrollViewer Margin="5" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />        <!-- Plot row -->
+                <RowDefinition Height="30" />       <!-- Command button row -->
+                <RowDefinition Height="55" />       <!-- Settings row -->
+                <RowDefinition Height="10" />       <!-- Spacer -->
+                <RowDefinition Height="Auto" />     <!-- Observed peaks row -->
+                <RowDefinition Height="10" />       <!-- Spacer -->
+                <RowDefinition Height="Auto" />     <!-- Isotope proportions row -->
+            </Grid.RowDefinitions>
+
+            <!-- Plot -->
+            <oxy:PlotView Grid.Row="0" DataContext="{Binding IsotopicEnvelopePlotViewModel}" Model="{Binding PlotModel}" />
+
+            <!-- Command Buttons -->
+            <!-- Build Plot button -->
+            <Button Grid.Row="1" Height="25"  Width="100" HorizontalAlignment="Right" Command="{Binding BuildPlotCommand}">Build Plot</Button>
+
+            <!-- Mass/Charge Selection -->
+            <DataGrid Grid.Row="2" ItemsSource="{Binding SettingsCollection}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+
+                    <!-- Mass editor -->
+                    <DataGridTemplateColumn Header="Mass" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <xctk:DoubleUpDown Value="{Binding Mass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Charge editor -->
+                    <DataGridTemplateColumn Header="Charge" Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <xctk:IntegerUpDown Value="{Binding Charge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Tolerance editor -->
+                    <DataGridTemplateColumn Header="Tolerance" Width="140">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="55*" />
+                                        <ColumnDefinition Width="45*" />
+                                    </Grid.ColumnDefinitions>
+                                    <xctk:DoubleUpDown  Grid.Column="0"
+                                                        Value="{Binding ToleranceValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" />
+                                    <ComboBox Grid.Column="1"
+                                              ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding ToleranceUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Relative Intensity Threshold -->
+                    <DataGridTemplateColumn Header="Relative Intensity Threshold" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <xctk:DoubleUpDown Value="{Binding RelativeIntensityThreshold, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Increment="0.01" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Observed peak list -->
+            <Expander Grid.Row="4" ExpandDirection="Down" Name="ObservedPeakListExpander" MaxHeight="150">
+                <Expander.Header>
+                    <Grid Width="445" Height="25">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Header label -->
+                        <TextBlock Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center">Observed Peaks</TextBlock>
+                        
+                        <!-- Controls for manipulating observed peak list -->
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Right" Height="25" Orientation="Horizontal"
+                                    IsEnabled="{Binding ElementName=ObservedPeakListExpander, 
+                                                        Path=IsExpanded}"
+                                    Visibility="{Binding ElementName=ObservedPeakListExpander,
+                                                         Path=IsExpanded,
+                                                         Converter={StaticResource BoolToVis}}">
+                            
+                            <!-- Profile peaks -->
+                            <CheckBox Margin="0,0,6,0" VerticalAlignment="Center" IsChecked="{Binding IsProfile, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Profile Mode</CheckBox>
+                            
+                            <!-- Clear button -->
+                            <Button Margin="0,0,3,0" Width="40" Command="{Binding ClearObservedPeaksCommand}">Clear</Button>
+                            
+                            <!-- Paste button -->
+                            <Button Margin="0,0,3,0" Width="70" Command="{Binding PastePeaksFromClipboardCommand}">Paste Text</Button>
+                            
+                            <!-- Add row button -->
+                            <Button Width="30" Height="25" Command="{Binding AddObservedPeakCommand}">+</Button>
+                        </StackPanel>
+                    </Grid>
+                </Expander.Header>
+                
+                <!-- Peak list -->
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding ObservedPeaks}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="30">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28" />
+                                        <ColumnDefinition Width="15*" />
+                                        <ColumnDefinition Width="35*" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="15*" />
+                                        <ColumnDefinition Width="35*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Remove button -->
+                                    <Button Grid.Column="0"
+                                            Command="{Binding RemoveCommand}"
+                                            Height="25" Width="25"
+                                            VerticalAlignment="Center" HorizontalAlignment="Left">-</Button>
+                                    
+                                    <!-- M/z -->
+                                    <TextBlock Grid.Column="1" Height="25" VerticalAlignment="Center" Padding="3">M/Z</TextBlock>
+                                    <xctk:DoubleUpDown Grid.Column="2" Height="25" VerticalAlignment="Center" Minimum="0"
+                                                   Value="{Binding Item.X, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <!-- Intensity -->
+                                    <TextBlock Grid.Column="4" Height="25" VerticalAlignment="Center" Padding="3">Intensity</TextBlock>
+                                    <xctk:DoubleUpDown Grid.Column="5" Height="25" VerticalAlignment="Center"
+                                                   Minimum="0"
+                                                   Value="{Binding Item.Y, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Expander>
+
+            <!-- Isotope proportions -->
+            <Expander Grid.Row="6" ExpandDirection="Down" Name="IsotopeProportionExpander">
+                <Expander.Header>
+                    <Grid Width="355" Height="25">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="175" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Header label -->
+                        <TextBlock Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center">Isotope Proportions</TextBlock>
+
+                        <!-- Tune Isotope Concentrations Button -->
+                        <StackPanel Grid.Column="2" Height="25" HorizontalAlignment="Right"
+                                    Orientation="Horizontal"
+                                    IsEnabled="{Binding ElementName=IsotopeProportionExpander, 
+                                                        Path=IsExpanded}"
+                                    Visibility="{Binding ElementName=IsotopeProportionExpander,
+                                                         Path=IsExpanded,
+                                                         Converter={StaticResource BoolToVis}}">
+                            <Button Width="120" Command="{Binding TuneConcentrationCommand}" Margin="0,0,5,0">Tune Concentrations</Button>
+
+                            <!-- Reset to defaults button -->
+                            <Button Width="50" Command="{Binding ResetToDefaultProportionsCommand}">Reset</Button>
+                        </StackPanel>
+                    </Grid>
+                </Expander.Header>
+                <Grid Margin="5" Height="50">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="45" />
+                        <ColumnDefinition Width="5" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Select element -->
+                    <ComboBox Grid.Row="0" Height="25" VerticalAlignment="Bottom"
+                              ItemsSource="{Binding IsotopeProportions.Values}"
+                              SelectedItem="{Binding SelectedElement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Atom.Code}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    
+                    <!-- Isotope proportions -->
+                    <ItemsControl Grid.Column="2" Height="50" BorderThickness="0" DataContext="{Binding SelectedElement}"
+                                  ItemsSource="{Binding IsotopeRatios}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="25" />
+                                        <RowDefinition Height="30" />
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- Nominal mass label -->
+                                    <TextBlock Grid.Row="0" Text="{Binding NominalMass}" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" />
+                                    
+                                    <!-- Isotope Proportion Selection -->
+                                    <RadioButton Grid.Row="1" IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsSelectable}">
+                                        <xctk:DoubleUpDown Value="{Binding Proportion, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" Maximum="1" Increment="0.01"
+                                                           IsEnabled="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                           Height="25" Width="60" />
+                                    </RadioButton>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Expander>
+        </Grid>
+    </ScrollViewer>
+</Window>

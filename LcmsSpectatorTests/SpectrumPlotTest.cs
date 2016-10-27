@@ -18,6 +18,8 @@ namespace LcmsSpectatorTests
 {
     using System;
 
+    using InformedProteomics.Backend.Data.Composition;
+
     using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Plots;

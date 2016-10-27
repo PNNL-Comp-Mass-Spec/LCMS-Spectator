@@ -306,21 +306,28 @@ namespace LcmsSpectator.ViewModels.Data
             Ion ion;
             if (deconvoluted)
             {
-                if (!this.IsFragmentIon || this.IonType.Charge > 1)
+                if (this.IonType.Charge > 1)
                 {
                     return peakDataPoints; // Deconvoluted spectrum means decharged (only charge 1 ions shown)
                 }
 
-                var ionTypeFactory = IcParameters.Instance.DeconvolutedIonTypeFactory;
-                var ionTypeName = this.IonType.Name.Insert(1, @"'");
-                ion = ionTypeFactory.GetIonType(ionTypeName).GetIon(this.Composition);
+                if (!this.IsFragmentIon)
+                {
+                    ion = new Ion(this.Composition, 1);
+                }
+                else
+                {
+                    var ionTypeFactory = IcParameters.Instance.DeconvolutedIonTypeFactory;
+                    var ionTypeName = this.IonType.Name.Insert(1, @"'");
+                    ion = ionTypeFactory.GetIonType(ionTypeName).GetIon(this.Composition);
+                }
             }
             else
             {
                 ion = this.Ion;
             }
 
-            var labeledIonPeaks = IonUtils.GetIonPeaks(ion, spectrum.Item1, tolerance);
+            var labeledIonPeaks = IonUtils.GetIonPeaks(ion, spectrum.Item1, tolerance, deconvoluted);
             if (labeledIonPeaks.Item1 == null)
             {
                 return noPeaks;
@@ -333,7 +340,7 @@ namespace LcmsSpectator.ViewModels.Data
                 return noPeaks;
             }
 
-            var errors = IonUtils.GetIsotopePpmError(peaks, ion, 0.1);
+            var errors = IonUtils.GetIsotopePpmError(peaks, ion, 0.1, deconvoluted);
             peakDataPoints = new List<PeakDataPoint> { Capacity = errors.Length };
             for (int i = 0; i < errors.Length; i++)
             {

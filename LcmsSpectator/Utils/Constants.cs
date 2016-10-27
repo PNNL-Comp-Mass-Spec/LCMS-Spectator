@@ -28,7 +28,7 @@ namespace LcmsSpectator.Utils
         /// <summary>
         /// Minimum possible charge for product ions.
         /// </summary>
-        public const int IsotopeOffsetTolerance = 2;
+        public const int IsotopeOffsetTolerance = 4;
 
         /// <summary>
         /// Minimum possible isotope index.

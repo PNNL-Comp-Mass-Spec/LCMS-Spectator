@@ -614,13 +614,21 @@ namespace LcmsSpectator.ViewModels.Plots
                 {
                     this.filteredDeconvolutedSpectrum = new Spectrum(currentSpectrum.Peaks, currentSpectrum.ScanNum);
                     this.filteredDeconvolutedSpectrum.FilterNosieByIntensityHistogram();
-                    this.deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
-                        currentSpectrum,
-                        Constants.MinCharge,
-                        Constants.MaxCharge,
-                        tolerance,
-                        IcParameters.Instance.IonCorrelationThreshold, 
-                        Constants.IsotopeOffsetTolerance);
+                    this.deconvolutedSpectrum = Deconvoluter.GetCombinedDeconvolutedSpectrum(
+                            currentSpectrum,
+                            Constants.MinCharge,
+                            Constants.MaxCharge,
+                            Constants.IsotopeOffsetTolerance,
+                            1.1,
+                            tolerance,
+                            IcParameters.Instance.IonCorrelationThreshold);
+                    //this.deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
+                    //    currentSpectrum,
+                    //    Constants.MinCharge,
+                    //    Constants.MaxCharge,
+                    //    tolerance,
+                    //    IcParameters.Instance.IonCorrelationThreshold, 
+                    //    Constants.IsotopeOffsetTolerance);
                 }
 
                 currentSpectrum = this.filteredDeconvolutedSpectrum;
@@ -639,13 +647,21 @@ namespace LcmsSpectator.ViewModels.Plots
             {
                 if (this.deconvolutedSpectrum == null)
                 {
-                    this.deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
+                    this.deconvolutedSpectrum = Deconvoluter.GetCombinedDeconvolutedSpectrum(
                         currentSpectrum,
                         Constants.MinCharge,
                         Constants.MaxCharge,
+                        Constants.IsotopeOffsetTolerance,
+                        1.1,
                         tolerance,
-                        IcParameters.Instance.IonCorrelationThreshold,
-                        Constants.IsotopeOffsetTolerance);   
+                        IcParameters.Instance.IonCorrelationThreshold);
+                    //this.deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
+                    //    currentSpectrum,
+                    //    Constants.MinCharge,
+                    //    Constants.MaxCharge,
+                    //    tolerance,
+                    //    IcParameters.Instance.IonCorrelationThreshold,
+                    //    Constants.IsotopeOffsetTolerance);   
                 }
 
                 currentSpectrum = this.deconvolutedSpectrum;

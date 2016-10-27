@@ -100,6 +100,7 @@ namespace LcmsSpectator.Writers.Exporters
         public void ExportToClipBoard(Spectrum spectrum, PeakDataPoint[] peakDataPoints, double minMz = 0, double maxMz = double.PositiveInfinity)
         {
             var stringBuilder = new StringBuilder(this.GetHeaders());
+            stringBuilder.AppendLine();
             foreach (var peak in spectrum.Peaks)
             {
                 if (peak.Mz >= minMz && peak.Mz <= maxMz)

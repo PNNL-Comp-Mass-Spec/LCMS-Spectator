@@ -19,6 +19,7 @@ namespace LcmsSpectator.DialogServices
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
     using LcmsSpectator.ViewModels.SequenceViewer;
+    //using LcmsSpectator.ViewModels.StableIsotopeViewer;
 
     /// <summary>
     /// Interface for dialog services for opening LCMSSpectator dialog boxes from a view model.
@@ -130,5 +131,17 @@ namespace LcmsSpectator.DialogServices
         /// </summary>
         /// <param name="sequenceViewerViewModel">The view model for the window.</param>
         void OpenSequenceViewer(SequenceViewerViewModel sequenceViewerViewModel);
+
+        /// <summary>
+        /// Opens the window displaying the stable isotope viewer.
+        /// </summary>
+        /// <param name="viewModel">The view model for the window.</param>
+        //    void OpenStableIsotopeViewer(StableIsotopeViewModel viewModel);
+
+        //    /// <summary>
+        //    /// Opens a window displaying the isotopic profile tuner tool.
+        //    /// </summary>
+        //    /// <param name="viewModel">The view model for the window.</param>
+        //    void OpenIsotopicConcentrationTuner(IsotopicConcentrationTunerViewModel viewModel);
     }
 }

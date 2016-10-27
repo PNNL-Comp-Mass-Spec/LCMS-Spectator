@@ -224,8 +224,24 @@ namespace LcmsSpectator.Utils
         /// </returns>
         public static Tuple<Peak[], double> GetIonPeaks(Ion ion, Spectrum spectrum, Tolerance tolerance, bool decharged = false)
         {
-            var ionCorrelation = spectrum.GetCorrScore(ion, tolerance);
-            var isotopePeaks = spectrum.GetAllIsotopePeaks(ion, tolerance, 0.1);
+            double ionCorrelation = 0.0;
+            Peak[] isotopePeaks = null;
+
+            if (!decharged)
+            {
+                ionCorrelation = spectrum.GetCorrScore(ion, tolerance);
+                isotopePeaks = spectrum.GetAllIsotopePeaks(ion, tolerance, 0.1);
+            }
+            else
+            {
+                var peak = spectrum.FindPeak(ion.Composition.Mass, tolerance);
+                if (peak != null)
+                {
+                    ionCorrelation = 1.0;
+                    isotopePeaks = new Peak[1];
+                    isotopePeaks[0] = peak;
+                }
+            }
             return new Tuple<Peak[], double>(isotopePeaks, ionCorrelation);
         }
 
@@ -257,21 +273,31 @@ namespace LcmsSpectator.Utils
         /// <param name="ion">The ion to calculate theoretical isotope envelope for.</param>
         /// <param name="relativeIntensityThreshold">Relative intensity threshold for calculating isotopes</param>
         /// <returns>Array of ppm errors for each peak.</returns>
-        public static double?[] GetIsotopePpmError(Peak[] peaks, Ion ion, double relativeIntensityThreshold)
+        public static double?[] GetIsotopePpmError(Peak[] peaks, Ion ion, double relativeIntensityThreshold, bool deconvoluted = false)
         {
-            var isotopes = ion.GetIsotopes(relativeIntensityThreshold).ToArray();
-            var ppmErrors = new double?[isotopes.Max(i => i.Index) + 1];
-            foreach (Isotope isotope in isotopes)
+            double?[] ppmErrors;
+            if (!deconvoluted)
             {
-                var isotopeIndex = isotope.Index;
-                if (peaks[isotopeIndex] == null)
+                var isotopes = ion.GetIsotopes(relativeIntensityThreshold).ToArray();
+                ppmErrors = new double?[isotopes.Max(i => i.Index) + 1];
+                foreach (Isotope isotope in isotopes)
                 {
-                    ppmErrors[isotopeIndex] = null;
+                    var isotopeIndex = isotope.Index;
+                    if (peaks[isotopeIndex] == null)
+                    {
+                        ppmErrors[isotopeIndex] = null;
+                    }
+                    else
+                    {
+                        ppmErrors[isotopeIndex] = GetPeakPpmError(peaks[isotopeIndex], ion.GetIsotopeMz(isotopeIndex));
+                    }
                 }
-                else
-                {
-                    ppmErrors[isotopeIndex] = GetPeakPpmError(peaks[isotopeIndex], ion.GetIsotopeMz(isotopeIndex));
-                }
+            }
+            else
+            {
+                var mz = ion.Composition.Mass;
+                ppmErrors = new double?[1];
+                ppmErrors[0] = GetPeakPpmError(peaks[0], mz);
             }
 
             return ppmErrors;

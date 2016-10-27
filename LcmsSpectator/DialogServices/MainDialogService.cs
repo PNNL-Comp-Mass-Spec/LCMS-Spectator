@@ -21,6 +21,7 @@ namespace LcmsSpectator.DialogServices
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
     using LcmsSpectator.ViewModels.SequenceViewer;
+    //using LcmsSpectator.ViewModels.StableIsotopeViewer;
     using LcmsSpectator.Views;
     using LcmsSpectator.Views.Data;
     using LcmsSpectator.Views.FileSelectors;
@@ -28,6 +29,7 @@ namespace LcmsSpectator.DialogServices
     using LcmsSpectator.Views.Modifications;
     using LcmsSpectator.Views.Plots;
     using LcmsSpectator.Views.SequenceViewer;
+    //using LcmsSpectator.Views.StableIsotopeViewer;
 
     /// <summary>
     /// Dialog services for opening LCMSSpectator dialog boxes from a view model.
@@ -253,5 +255,25 @@ namespace LcmsSpectator.DialogServices
             var window = new Window { Content = control };
             window.Show();
         }
+
+        /// <summary>
+        /// Opens the window displaying the stable isotope viewer.
+        /// </summary>
+        /// <param name="viewModel">The view model for the window.</param>
+        //public void OpenStableIsotopeViewer(StableIsotopeViewModel viewModel)
+        //{
+        //    var window = new StableIsotopeViewer { DataContext = viewModel };
+        //    window.Show();
+        //}
+
+        ///// <summary>
+        ///// Opens a window displaying the isotopic profile tuner tool.
+        ///// </summary>
+        ///// <param name="viewModel">The view model for the window.</param>
+        //public void OpenIsotopicConcentrationTuner(IsotopicConcentrationTunerViewModel viewModel)
+        //{
+        //    var dialog = new IsotopicConcentrationTuner { DataContext = viewModel };
+        //    dialog.ShowDialog();
+        //}
     }
 }

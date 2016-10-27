@@ -40,6 +40,9 @@
             <MenuItem Header="_Search">
                 <MenuItem Header="_Run MSPathFinder" Command="{Binding RunMsPathFinderSearchCommand}" />
             </MenuItem>
+            <MenuItem Header="_Tools">
+                <MenuItem Header="_Open Isotopic Profile Viewer" Command="{Binding OpenIsotopicProfileViewerCommand}" />
+            </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Command="{Binding OpenAboutBoxCommand}" />
             </MenuItem>
