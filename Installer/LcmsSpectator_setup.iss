@@ -63,17 +63,17 @@ Source: Library\MTDBFramework\PHRPReader.dll;                                   
 
 ; InformedProteomics
 Source: Library\InformedProteomics.Backend.dll;                                  DestDir: {app}
+Source: Library\InformedProteomics.FeatureFinding.dll;                           DestDir: {app}
 Source: Library\InformedProteomics.Scoring.dll;                                  DestDir: {app}
 Source: Library\InformedProteomics.TopDown.dll;                                  DestDir: {app}
 Source: Library\MathNet.Numerics.dll;                                            DestDir: {app}
 Source: Library\ProteinFileReader.dll;                                           DestDir: {app}
 Source: Library\SAIS.dll;                                                        DestDir: {app}
-Source: Library\ThermoRawFileReaderDLL.dll;                                      DestDir: {app}
+Source: Library\ThermoRawFileReader.dll;                                         DestDir: {app}
 
 ; PSI_Interface
 Source: Library\PSI_Interface\PSI_Interface.dll;                                               DestDir: {app}
 Source: Library\PSI_Interface\Ionic.Zip.dll;                                                   DestDir: {app}
-Source: Library\PSI_Interface\zlib.net.dll;                                                    DestDir: {app}
 
 [Dirs]
 Name: {commonappdata}\LcmsSpectator; Flags: uninsalwaysuninstall
