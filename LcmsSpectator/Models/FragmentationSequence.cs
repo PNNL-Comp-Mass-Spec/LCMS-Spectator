@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+
+    using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
@@ -25,16 +27,6 @@
         private readonly MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel> fragmentCache;
 
         /// <summary>
-        /// Cache for for previously calculated prefix compositions for a given sequence.
-        /// </summary>
-        private readonly MemoizingMRUCache<Sequence, Composition[]> prefixCompositionCache;
-
-        /// <summary>
-        /// Cache for previously calculated suffix compositions for a given sequence.
-        /// </summary>
-        private readonly MemoizingMRUCache<Sequence, Composition[]> suffixCompositionCache;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="FragmentationSequence"/> class.
         /// </summary>
         /// <param name="sequence">The underlying sequence.</param>
@@ -44,8 +36,6 @@
         public FragmentationSequence(Sequence sequence, int charge, ILcMsRun lcms, ActivationMethod activationMethod)
         {
             this.cacheLock = new object();
-            this.prefixCompositionCache = new MemoizingMRUCache<Sequence, Composition[]>(this.GetPrefixCompositions, 20);
-            this.suffixCompositionCache = new MemoizingMRUCache<Sequence, Composition[]>(this.GetSuffixCompositions, 20);
             this.fragmentCache = new MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel>(this.GetLabeledIonViewModel, 1000);
 
             this.Sequence = sequence;
@@ -123,40 +113,34 @@
                 return fragmentLabelList;
             }
 
-            var sequence = this.Sequence;
-
-            if (labelModifications != null)
-            {
-                sequence = IonUtils.GetHeavySequence(sequence, labelModifications);
-            }
+            var sequence = labelModifications == null ? this.Sequence : IonUtils.GetHeavySequence(this.Sequence, labelModifications);
 
             var precursorIon = IonUtils.GetPrecursorIon(sequence, this.Charge);
             lock (this.cacheLock)
             {
-                var prefixCompositions = this.prefixCompositionCache.Get(sequence);
-                var suffixCompositions = this.suffixCompositionCache.Get(sequence);
                 foreach (var ionType in ionTypes)
                 {
                     var ionFragments = new List<LabeledIonViewModel>();
-                    for (int i = 0; i < prefixCompositions.Length; i++)
+                    for (int i = 1; i < this.Sequence.Count; i++)
                     {
-                        var composition = ionType.IsPrefixIon
-                            ? prefixCompositions[i]
-                            : suffixCompositions[i];
-                        LabeledIonViewModel label =
-                             this.fragmentCache.Get(new Tuple<Composition, IonType>(composition, ionType));
-                        label.Index = ionType.IsPrefixIon ? i + 1 : (sequence.Count - (i + 1));
-                        if (label.PrecursorIon == null)
+                        var startIndex = ionType.IsPrefixIon ? 0 : i;
+                        var length = ionType.IsPrefixIon ? i : sequence.Count - i;
+                        var fragment = new Sequence(this.Sequence.GetRange(startIndex, length));
+                        var ions = ionType.GetPossibleIons(fragment);
+
+                        foreach (var ion in ions)
                         {
-                            label.PrecursorIon = precursorIon;
+                            var labeledIonViewModel = this.fragmentCache.Get(new Tuple<Composition, IonType>(ion.Composition, ionType));
+                            labeledIonViewModel.Index = length;
+                            labeledIonViewModel.PrecursorIon = precursorIon;
+
+                            ionFragments.Add(labeledIonViewModel);
                         }
 
-                        ionFragments.Add(label);
-                    }
-
-                    if (!ionType.IsPrefixIon)
-                    {
-                        ionFragments.Reverse();
+                        if (!ionType.IsPrefixIon)
+                        {
+                            ionFragments.Reverse();
+                        }
                     }
 
                     fragmentLabelList.AddRange(ionFragments);
@@ -259,40 +243,6 @@
         private LabeledIonViewModel GetLabeledIonViewModel(Tuple<Composition, IonType> key, object ob)
         {
             return new LabeledIonViewModel(key.Item1, key.Item2, true, this.LcMsRun);
-        }
-
-        /// <summary>
-        /// Calculate the compositions for the prefixes of a protein/peptide sequence.
-        /// </summary>
-        /// <param name="sequence">The sequence.</param>
-        /// <param name="ob">Object required for cache access.</param>
-        /// <returns>Array of prefix compositions.</returns>
-        private Composition[] GetPrefixCompositions(Sequence sequence, object ob)
-        {
-            var compositions = new Composition[sequence.Count - 1];
-            for (int i = 1; i < sequence.Count; i++)
-            {
-                compositions[i - 1] = sequence.GetComposition(0, i);
-            }
-
-            return compositions;
-        }
-
-        /// <summary>
-        /// Calculate the compositions for the suffixes of a protein/peptide sequence.
-        /// </summary>
-        /// <param name="sequence">The sequence.</param>
-        /// <param name="ob">Object required for cache access.</param>
-        /// <returns>Array of prefix compositions.</returns>
-        private Composition[] GetSuffixCompositions(Sequence sequence, object ob)
-        {
-            var compositions = new Composition[sequence.Count - 1];
-            for (int i = 1; i < sequence.Count; i++)
-            {
-                compositions[i - 1] = sequence.GetComposition(i, sequence.Count);
-            }
-
-            return compositions;
         }
     }
 }

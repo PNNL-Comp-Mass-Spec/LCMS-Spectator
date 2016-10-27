@@ -15,7 +15,9 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Windows.Data;
 
+    using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
 
@@ -23,6 +25,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.PlotModels;
     using LcmsSpectator.Utils;
+    using LcmsSpectator.Writers.Exporters;
 
     using OxyPlot;
     using OxyPlot.Axes;
@@ -35,6 +38,22 @@ namespace LcmsSpectator.ViewModels.Plots
     /// </summary>
     public class ErrorMapViewModel : ReactiveObject
     {
+        /// <summary>
+        /// The type of maps to display.
+        /// </summary>
+        public enum MapTypes
+        {
+            /// <summary>
+            /// Map displays the errors of the fragment ions.
+            /// </summary>
+            ErrorMap,
+
+            /// <summary>
+            /// Map displays the coverage of the fragment ions.
+            /// </summary>
+            CoverageMap,
+        }
+
         /// <summary>
         /// Dialog service for opening dialogs from view model.
         /// </summary>
@@ -64,6 +83,36 @@ namespace LcmsSpectator.ViewModels.Plots
         /// The data that is shown in the "Table" view. This excludes any fragments without data.
         /// </summary>
         private ReactiveList<PeakDataPoint> dataTable;
+
+        /// <summary>
+        /// The percentage of the sequence explained by fragment ion peaks.
+        /// </summary>
+        private double sequenceCoverage;
+
+        /// <summary>
+        /// The iontype selected from the error map.
+        /// </summary>
+        private string selectedIonType;
+
+        /// <summary>
+        /// The residue and index of the seleted item.
+        /// </summary>
+        private string selectedAminoAcid;
+
+        /// <summary>
+        /// The value of the selected item.
+        /// </summary>
+        private string selectedValue;
+
+        /// <summary>
+        /// The currently selected sequence.
+        /// </summary>
+        private Sequence selectedSequence;
+
+        /// <summary>
+        /// The currently selected peak data points.
+        /// </summary>
+        private IEnumerable<IList<PeakDataPoint>> selectedPeakDataPoints;
 
         /// <summary>
         /// Initializes a new instance of the ErrorMapViewModel class. 
@@ -129,6 +178,26 @@ namespace LcmsSpectator.ViewModels.Plots
             var saveAsImageCommand = ReactiveCommand.Create();
             saveAsImageCommand.Subscribe(_ => this.SaveAsImageImpl());
             this.SaveAsImageCommand = saveAsImageCommand;
+
+            this.SaveDataTableCommand = ReactiveCommand.Create();
+            this.SaveDataTableCommand.Subscribe(_ => this.SaveDataTableImpl());
+
+            this.AvailableMapTypes = new ReactiveList<MapTypes>(new List<MapTypes>
+            {
+                MapTypes.ErrorMap,
+                MapTypes.CoverageMap,
+            });
+
+            this.SelectedMapType = MapTypes.ErrorMap;
+            this.WhenAnyValue(x => x.SelectedMapType)
+                .Subscribe(
+                    _ =>
+                        {
+                            this.SetData(this.selectedSequence, this.selectedPeakDataPoints);
+                            this.SelectedAminoAcid = string.Empty;
+                            this.SelectedIonType = string.Empty;
+                            this.SelectedValue = string.Empty;
+                        });
         }
 
         /// <summary>
@@ -142,6 +211,30 @@ namespace LcmsSpectator.ViewModels.Plots
         public IReactiveCommand SaveAsImageCommand { get; private set; }
 
         /// <summary>
+        /// Gets a command that prompt user for file path and save data table as list.
+        /// </summary>
+        public ReactiveCommand<object> SaveDataTableCommand { get; private set; }
+
+        /// <summary>
+        /// Gets the list of types of maps that can be displayed.
+        /// </summary>
+        public ReactiveList<MapTypes> AvailableMapTypes { get; private set; }
+
+        /// <summary>
+        /// The type of map to display.
+        /// </summary>
+        private MapTypes selectedMapType;
+
+        /// <summary>
+        /// Gets or sets the type of map to display.
+        /// </summary>
+        public MapTypes SelectedMapType
+        {
+            get { return this.selectedMapType; }
+            set { this.RaiseAndSetIfChanged(ref this.selectedMapType, value); }
+        }
+
+        /// <summary>
         /// Gets or sets the data that is shown in the "Table" view. This excludes any fragments without data.
         /// </summary>
         public ReactiveList<PeakDataPoint> DataTable
@@ -151,12 +244,51 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// Gets the percentage of the sequence explained by fragment ion peaks.
+        /// </summary>
+        public double SequenceCoverage
+        {
+            get { return this.sequenceCoverage; }
+            private set { this.RaiseAndSetIfChanged(ref this.sequenceCoverage, value); }
+        }
+
+        /// <summary>
+        /// Gets the iontype selected from the error map.
+        /// </summary>
+        public string SelectedIonType
+        {
+            get { return this.selectedIonType; }
+            private set { this.RaiseAndSetIfChanged(ref this.selectedIonType, value); }
+        }
+
+        /// <summary>
+        /// Gets the residue and index of the seleted item.
+        /// </summary>
+        public string SelectedAminoAcid
+        {
+            get { return this.selectedAminoAcid; }
+            private set { this.RaiseAndSetIfChanged(ref this.selectedAminoAcid, value); }
+        }
+
+        /// <summary>
+        /// Gets the value of the selected item.
+        /// </summary>
+        public string SelectedValue
+        {
+            get { return this.selectedValue; }
+            private set { this.RaiseAndSetIfChanged(ref this.selectedValue, value); }
+        }
+
+        /// <summary>
         /// Set sequence and data displayed on heat map.
         /// </summary>
         /// <param name="sequence">The sequence to display as the x axis of the plot.</param>
         /// <param name="peakDataPoints">The peak data points to extract error values from.</param>
         public void SetData(Sequence sequence, IEnumerable<IList<PeakDataPoint>> peakDataPoints)
         {
+            this.selectedSequence = sequence;
+            this.selectedPeakDataPoints = peakDataPoints;
+
             if (sequence == null || peakDataPoints == null)
             {
                 return;
@@ -172,10 +304,18 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             // Remove NaN values for data table (only showing fragment ions found in spectrum in data table)
-            this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints.Where(dp => !dp.Error.Equals(double.NaN)));
+            //this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints.Where(dp => !dp.Error.Equals(double.NaN)));
+            this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints);
+
+            this.SequenceCoverage = Math.Round(IonUtils.CalculateSequenceCoverage(this.DataTable, sequence.Count), 3);
 
             // Build and invalidate erorr map plot display
-            this.BuildPlotModel(sequence, this.GetDataArray(dataPoints));
+            this.BuildErrorPlotModel(
+                        sequence,
+                        this.SelectedMapType == MapTypes.ErrorMap ? 
+                                    this.GetErrorDataArray(dataPoints, sequence.Count) :
+                                    this.GetCoverageDataArray(dataPoints, sequence.Count));
+            this.PlotModel.MouseDown += this.MapMouseDown;
         }
 
         /// <summary>
@@ -187,7 +327,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// First dimension is sequence
         /// Second dimension is ion type
         /// </param>
-        private void BuildPlotModel(IReadOnlyList<AminoAcid> sequence, double[,] data)
+        private void BuildErrorPlotModel(IReadOnlyList<AminoAcid> sequence, double[,] data)
         {
             // initialize color axis
             ////var minColor = OxyColor.FromRgb(127, 255, 0);
@@ -225,7 +365,10 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 var ionType = this.ionTypes[Math.Min((int)y - 1, this.ionTypes.Length - 1)];
-                return string.Format("{0}({1}+)", ionType.BaseIonType.Symbol, ionType.Charge);
+                var symbol = ionType.BaseIonType == null ? ionType.Name : ionType.BaseIonType.Symbol;
+                return ionType.Charge == 1 ?
+                       symbol :
+                       string.Format("{0}({1}+)", symbol, ionType.Charge);
             };
 
             // Set xAxis double -> string label converter function
@@ -248,49 +391,50 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Organize the peak data points by ion type
         /// </summary>
-        /// <param name="dataPoints">
-        /// The data Points.
-        /// </param>
+        /// <param name="dataPoints">The data Points.</param>
+        /// <param name="sequenceLength">The length of the sequence.</param>
         /// <returns>
         /// 2d array where first dimension is sequence and second dimension is ion type
         /// </returns>
-        private double[,] GetDataArray(IEnumerable<PeakDataPoint> dataPoints)
+        private double[,] GetErrorDataArray(IEnumerable<PeakDataPoint> dataPoints, int sequenceLength)
         {
-            var dataDict = new Dictionary<IonType, List<double>>();
+            var dataDict = new Dictionary<IonType, PeakDataPoint[]>();
 
             // partition data set by ion type
             foreach (var dataPoint in dataPoints)
             {
                 if (!dataDict.ContainsKey(dataPoint.IonType))
                 {
-                    dataDict.Add(dataPoint.IonType, new List<double>());
+                    dataDict.Add(dataPoint.IonType, new PeakDataPoint[sequenceLength]);
                 }
 
                 var points = dataDict[dataPoint.IonType];
 
-                int index = dataPoint.Index + 1;
+                int index = dataPoint.Index - 1;
 
                 if (!dataPoint.IonType.IsPrefixIon)
                 {
-                    index = points.Count - dataPoint.Index;
+                    index = sequenceLength - dataPoint.Index;
                 }
 
-                var position = Math.Max(0, Math.Min(index, points.Count));
-                points.Insert(position, dataPoint.Error);
+                // If the ion type has multiple options, choose the best one.
+                if (points[index] == null || (dataPoint.Y / dataPoint.Error) > (points[index].Y / points[index].Error))
+                {
+                    points[index] = dataPoint;
+                }
             }
-
-            var seqLength = dataDict.Values.Max(v => v.Count);
 
             this.ionTypes = dataDict.Keys.ToArray();
 
-            var data = new double[seqLength, dataDict.Keys.Count];
+            var data = new double[sequenceLength, dataDict.Keys.Count];
 
             // create two dimensional array from partitioned data
-            for (int i = 0; i < seqLength; i++)
+            for (int i = 0; i < sequenceLength; i++)
             {
                 for (int j = 0; j < this.ionTypes.Length; j++)
                 {
-                    var value = dataDict[this.ionTypes[j]][i];
+                    var dataPoint = dataDict[this.ionTypes[j]][i];
+                    var value = dataPoint == null ? double.NaN : dataPoint.Error;
 
                     if (value.Equals(double.NaN))
                     {
@@ -298,6 +442,65 @@ namespace LcmsSpectator.ViewModels.Plots
                     }
 
                     data[i, j] = value;
+                }
+            }
+
+            return data;
+        }
+
+        /// <summary>
+        /// Organize the peak data points by ion type
+        /// </summary>
+        /// <param name="dataPoints">The data Points.</param>
+        /// <param name="sequenceLength">The length of the sequence.</param>
+        /// <returns>
+        /// 2d array where first dimension is sequence and second dimension is ion type
+        /// </returns>
+        private double[,] GetCoverageDataArray(IEnumerable<PeakDataPoint> dataPoints, int sequenceLength)
+        {
+            var dataDict = new Dictionary<BaseIonType, bool[]>();
+            // partition data set by ion type
+            foreach (var dataPoint in dataPoints)
+            {
+                if (!dataDict.ContainsKey(dataPoint.IonType.BaseIonType))
+                {
+                    dataDict.Add(dataPoint.IonType.BaseIonType, new bool[sequenceLength]);
+                }
+
+                var points = dataDict[dataPoint.IonType.BaseIonType];
+
+                if (!dataPoint.X.Equals(double.NaN))
+                {   // Only set valid data.
+                    int index = dataPoint.Index - 1;    // index is 1-indexed, dataDict is 0-indexed
+
+                    if (!dataPoint.IonType.IsPrefixIon)
+                    {
+                        index = sequenceLength - dataPoint.Index;
+                    }
+
+                    points[index] = true;
+                }
+            }
+
+            this.ionTypes = dataDict.Keys.Select(
+                                     baseIonType => new IonType(
+                                                                baseIonType.Symbol,
+                                                                Composition.Zero,
+                                                                1,
+                                                                baseIonType.IsPrefix))
+                    .ToArray();
+
+            var data = new double[sequenceLength, dataDict.Keys.Count];
+
+            var errorThresh = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+
+            // create two dimensional array from partitioned data
+            for (int i = 0; i < sequenceLength; i++)
+            {
+                int j = 0;
+                foreach (var baseIonType in dataDict.Keys)
+                {
+                    data[i, j++] = dataDict[baseIonType][i] ? errorThresh : -1 * (errorThresh + 1);
                 }
             }
 
@@ -356,6 +559,82 @@ namespace LcmsSpectator.ViewModels.Plots
             catch (Exception e)
             {
                 this.dialogService.ExceptionAlert(e);
+            }
+        }
+
+        /// <summary>
+        /// Prompt user for file path and save data table as list.
+        /// </summary>
+        private void SaveDataTableImpl()
+        {
+            var filePath = this.dialogService.SaveFile(".tsv", @"Tab-separated value Files (*.tsv)|*.tsv");
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            try
+            {
+                var directory = Path.GetDirectoryName(filePath);
+                if (directory == null || !Directory.Exists(directory))
+                {
+                    throw new FormatException(
+                        string.Format("Cannot save image due to invalid file name: {0}", filePath));
+                }
+
+                var peakExporter = new SpectrumPeakExporter(filePath);
+                peakExporter.Export(this.DataTable.Where(p => !p.X.Equals(double.NaN)).ToList());
+            }
+            catch (Exception e)
+            {
+                this.dialogService.ExceptionAlert(e);
+            }
+        }
+
+        /// <summary>
+        /// Event handler for click event. Selects data based on cell clicked in heat map.
+        /// </summary>
+        /// <param name="sender">The sender heatmap plotmodel.</param>
+        /// <param name="args">The event arguments.</param>
+        private void MapMouseDown(object sender, OxyMouseEventArgs args)
+        {
+            var series = this.PlotModel.GetSeriesFromPoint(args.Position);
+            var heatMap = series as HeatMapSeries;
+            if (heatMap != null)
+            {
+                var point = heatMap.GetNearestPoint(args.Position, true);
+                var dataPoint = point.DataPoint;
+
+                var ionType = this.ionTypes[((int)dataPoint.Y) - 1];
+                var seqIndex = ((int)dataPoint.X) - 1;
+                var ionIndex = ionType.IsPrefixIon ? seqIndex + 1 : this.selectedSequence.Count - seqIndex - 1;
+                var aminoAcid = this.selectedSequence[seqIndex];
+
+                var value = point.Text;
+
+                this.SelectedIonType = ionType.Name;
+                this.SelectedAminoAcid = string.Format("{0}{1}", aminoAcid.Residue, ionIndex);
+
+                if (value.Contains(" "))
+                {
+
+                    var parts = value.Split(' ');
+                    value = parts[1];
+                }
+
+                if (this.SelectedMapType == MapTypes.CoverageMap)
+                {
+                    if (value.Contains("ppm"))
+                    {
+                        var parts = value.Split('p');
+                        value = parts[0];
+                    }
+
+                    var intVal = Convert.ToInt32(value);
+                    value = intVal > 0 ? "Covered" : "Not Covered";
+                }
+
+                this.SelectedValue = value;
             }
         }
     }

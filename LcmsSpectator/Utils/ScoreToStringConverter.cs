@@ -93,7 +93,7 @@ namespace LcmsSpectator.Utils
                 }
                 else if (d > 1000 || d < 0.001)
                 {
-                    formatted = string.Format("{0:0.###}", d);
+                    formatted = string.Format("{0:0.#####}", d);
                 }
                 else
                 {

@@ -113,39 +113,69 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
 
             var ionAStart = OxyColor.FromRgb(0, ColorMin, 0);
             var ionAEnd = OxyColor.FromRgb(0, ColorMax, 0);
-            var ionAColors = OxyPalette.Interpolate(length, new[] { ionAEnd, ionAStart });
+            var ionAColors = OxyPalette.Interpolate(length, ionAEnd, ionAStart);
             this.fragmentColors.Add(BaseIonType.A.Symbol, ionAColors.Colors);
             this.fragmentColors.Add(BaseIonType.A.GetDeconvolutedIon().Symbol, ionAColors.Colors);
+            this.fragmentColors.Add(BaseIonType.Ar.Symbol, ionAColors.Colors);
+            this.fragmentColors.Add(BaseIonType.Ar.GetDeconvolutedIon().Symbol, ionAColors.Colors);
 
             var ionBStart = OxyColor.FromRgb(0, 0, ColorMin);
             var ionBEnd = OxyColor.FromRgb(0, 0, ColorMax);
-            var ionBColors = OxyPalette.Interpolate(length, new[] { ionBEnd, ionBStart });
+            var ionBColors = OxyPalette.Interpolate(length, ionBEnd, ionBStart);
             this.fragmentColors.Add(BaseIonType.B.Symbol, ionBColors.Colors);
             this.fragmentColors.Add(BaseIonType.B.GetDeconvolutedIon().Symbol, ionBColors.Colors);
 
             var ionCStart = OxyColor.FromRgb(0, ColorMin, ColorMin);
             var ionCEnd = OxyColor.FromRgb(0, ColorMax, ColorMax);
-            var ionCColors = OxyPalette.Interpolate(length, new[] { ionCEnd, ionCStart });
+            var ionCColors = OxyPalette.Interpolate(length, ionCEnd, ionCStart);
             this.fragmentColors.Add(BaseIonType.C.Symbol, ionCColors.Colors);
             this.fragmentColors.Add(BaseIonType.C.GetDeconvolutedIon().Symbol, ionCColors.Colors);
 
+            var ionDStart = OxyColor.FromRgb(255, ColorMin / 2, 8);
+            var ionDEnd = OxyColor.FromRgb(255, ColorMin, 0);
+            var ionDColors = OxyPalette.Interpolate(length, ionDEnd, ionDStart);
+            this.fragmentColors.Add(BaseIonType.D.Symbol, ionDColors.Colors);
+            this.fragmentColors.Add(BaseIonType.D.GetDeconvolutedIon().Symbol, ionDColors.Colors);
+
+            var ionVStart = OxyColor.FromRgb(210, 105, 30);
+            var ionVEnd = OxyColor.FromRgb(139, 69, 19);
+            var ionVColors = OxyPalette.Interpolate(length, ionVEnd, ionVStart);
+            this.fragmentColors.Add(BaseIonType.V.Symbol, ionVColors.Colors);
+            this.fragmentColors.Add(BaseIonType.V.GetDeconvolutedIon().Symbol, ionVColors.Colors);
+
+            var ionWStart = OxyColor.FromRgb(220, 220, 220);
+            var ionWEnd = OxyColor.FromRgb(169, 169, 169);
+            var ionWColors = OxyPalette.Interpolate(length, ionWEnd, ionWStart);
+            this.fragmentColors.Add(BaseIonType.W.Symbol, ionWColors.Colors);
+            this.fragmentColors.Add(BaseIonType.W.GetDeconvolutedIon().Symbol, ionWColors.Colors);
+
             var ionXStart = OxyColor.FromRgb(ColorMin, ColorMin, 0);
             var ionXEnd = OxyColor.FromRgb(ColorMax, ColorMax, 0);
-            var ionXColors = OxyPalette.Interpolate(length, new[] { ionXEnd, ionXStart });
+            var ionXColors = OxyPalette.Interpolate(length, ionXEnd, ionXStart);
             this.fragmentColors.Add(BaseIonType.X.Symbol, ionXColors.Colors);
             this.fragmentColors.Add(BaseIonType.X.GetDeconvolutedIon().Symbol, ionXColors.Colors);
+            this.fragmentColors.Add(BaseIonType.Xr.Symbol, ionXColors.Colors);
+            this.fragmentColors.Add(BaseIonType.Xr.GetDeconvolutedIon().Symbol, ionXColors.Colors);
 
             var ionYStart = OxyColor.FromRgb(ColorMin, 0, 0);
             var ionYEnd = OxyColor.FromRgb(ColorMax, 0, 0);
-            var ionYColors = OxyPalette.Interpolate(length, new[] { ionYEnd, ionYStart });
+            var ionYColors = OxyPalette.Interpolate(length, ionYEnd, ionYStart);
             this.fragmentColors.Add(BaseIonType.Y.Symbol, ionYColors.Colors);
             this.fragmentColors.Add(BaseIonType.Y.GetDeconvolutedIon().Symbol, ionYColors.Colors);
 
+            var ionYM1Start = OxyColor.FromRgb(ColorMin, 0, 0);
+            var ionYM1End = OxyColor.FromRgb(ColorMax, 0, 0);
+            var ionYM1Colors = OxyPalette.Interpolate(length, ionYM1End, ionYM1Start);
+            this.fragmentColors.Add(BaseIonType.YM1.Symbol, ionYM1Colors.Colors);
+            this.fragmentColors.Add(BaseIonType.YM1.GetDeconvolutedIon().Symbol, ionYM1Colors.Colors);
+
             var ionZStart = OxyColor.FromRgb(ColorMin, 0, ColorMin);
             var ionZEnd = OxyColor.FromRgb(ColorMax, 0, ColorMax);
-            var ionZColors = OxyPalette.Interpolate(length, new[] { ionZEnd, ionZStart });
+            var ionZColors = OxyPalette.Interpolate(length, ionZEnd, ionZStart);
             this.fragmentColors.Add(BaseIonType.Z.Symbol, ionZColors.Colors);
             this.fragmentColors.Add(BaseIonType.Z.GetDeconvolutedIon().Symbol, ionZColors.Colors);
+            this.fragmentColors.Add(BaseIonType.Zr.Symbol, ionZColors.Colors);
+            this.fragmentColors.Add(BaseIonType.Zr.GetDeconvolutedIon().Symbol, ionZColors.Colors);
 
             this.precursorColors = new Dictionary<int, OxyColor>
             {

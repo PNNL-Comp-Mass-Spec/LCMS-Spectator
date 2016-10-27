@@ -20,6 +20,8 @@ namespace LcmsSpectator.Utils
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Utils;
+
+    using LcmsSpectator.PlotModels;
     using LcmsSpectator.ViewModels;
     using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Modifications;
@@ -424,6 +426,38 @@ namespace LcmsSpectator.Utils
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             var ion = new Ion(composition + Composition.H2O, charge);
             return Math.Round(ion.GetMostAbundantIsotopeMz(), 2);
+        }
+
+        /// <summary>
+        /// Calculates sequence coverage as a percentage.
+        /// </summary>
+        /// <param name="foundFragments"></param>
+        /// <param name="sequenceLength"></param>
+        /// <returns></returns>
+        public static double CalculateSequenceCoverage(IList<PeakDataPoint> foundFragments, int sequenceLength)
+        {
+            var cutIndexToPeak = new Dictionary<int, List<PeakDataPoint>>();
+            foreach (var peak in foundFragments)
+            {
+                var cutIndex = peak.IonType.IsPrefixIon ? peak.Index : sequenceLength - peak.Index;
+                if (!cutIndexToPeak.ContainsKey(cutIndex))
+                {
+                    cutIndexToPeak.Add(cutIndex, new List<PeakDataPoint>());
+                }
+
+                cutIndexToPeak[cutIndex].Add(peak);
+            }
+
+            int counter = 0;
+            for (int i = 1; i < sequenceLength; i++)
+            {
+                if (cutIndexToPeak.ContainsKey(i))
+                {
+                    counter++;
+                }
+            }
+
+            return (100.0 * counter) / sequenceLength;
         }
     }
 }

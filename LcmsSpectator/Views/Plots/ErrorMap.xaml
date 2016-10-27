@@ -7,38 +7,49 @@
              xmlns:utils="clr-namespace:LcmsSpectator.Utils"
              xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <utils:DoubleToStringConverter x:Key="DoubleToStringConverter" />
-    </UserControl.Resources>
-    <xcad:DockingManager Margin="15" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="AvDock">
-        <xcad:LayoutRoot>
-            <xcad:LayoutPanel>
-                <xcad:LayoutDocumentPane DockWidth="*">
-                    <xcad:LayoutDocument Title="Heat Map" CanClose="False">
-                        <oxy:PlotView Model="{Binding PlotModel}">
-                            <oxy:PlotView.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="_Save as Image" Command="{Binding SaveAsImageCommand}" />
-                                </ContextMenu>
-                            </oxy:PlotView.ContextMenu>
-                        </oxy:PlotView>
-                    </xcad:LayoutDocument>
-                    <xcad:LayoutDocument Title="Table" CanClose="False">
-                        <DataGrid ItemsSource="{Binding DataTable}" AutoGenerateColumns="False">
-                            <DataGrid.Columns>
-                                <!--<DataGridTextColumn Header="Residue" Binding="{Binding Residue}" /> -->
-                                <DataGridTextColumn Header="Index" Binding="{Binding Index}" />
-                                <DataGridTextColumn Header="Ion" Binding="{Binding IonType.BaseIonType.Symbol}" />
-                                <DataGridTextColumn Header="Charge" Binding="{Binding IonType.Charge}" />
-                                <DataGridTextColumn Header="M/Z" Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" />
-                                <DataGridTextColumn Header="Intensity" Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" />
-                                <DataGridTextColumn Header="Error (ppm)" Binding="{Binding Error, Converter={StaticResource DoubleToStringConverter}}" />
-                                <DataGridTextColumn Header="Correlation" Width="*" Binding="{Binding Correlation, Converter={StaticResource DoubleToStringConverter}}" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </xcad:LayoutDocument>
-                 </xcad:LayoutDocumentPane>
-               </xcad:LayoutPanel>
-           </xcad:LayoutRoot>
-        </xcad:DockingManager>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+
+        <oxy:PlotView Grid.Row="0" Model="{Binding PlotModel}">
+            <oxy:PlotView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Save as _Image" Command="{Binding SaveAsImageCommand}" />
+                    <MenuItem Header="Save Data Table" Command="{Binding SaveDataTableCommand}" />
+                </ContextMenu>
+            </oxy:PlotView.ContextMenu>
+        </oxy:PlotView>
+        
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="33*" />
+
+                <ColumnDefinition Width="33*" />
+
+                <ColumnDefinition Width="33*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <TextBlock FontWeight="Bold" Margin="0,0,5,0">Ion:</TextBlock>
+                <TextBlock Text="{Binding SelectedIonType}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <TextBlock FontWeight="Bold" Margin="0,0,5,0">Residue:</TextBlock>
+                <TextBlock Text="{Binding SelectedAminoAcid}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <TextBlock FontWeight="Bold" Margin="0,0,5,0">Value</TextBlock>
+                <TextBlock Text="{Binding SelectedValue}" />
+            </StackPanel>
+
+        </Grid>
+    </Grid>
+    
+
+
 </UserControl>

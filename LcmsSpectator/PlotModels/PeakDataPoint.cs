@@ -49,6 +49,10 @@ namespace LcmsSpectator.PlotModels
         /// </summary>
         public double Y { get; set; }
 
+        public double MonoisotopicMass { get; set; }
+
+        public double TheoMonoisotopicMass { get; set; }
+
         /// <summary>
         /// Gets or sets the residue that this peak is associated with.
         /// </summary>

@@ -170,6 +170,11 @@
             Reset all data in the struct
             </summary>
         </member>
+        <member name="M:ThermoRawFileReader.RawFileInfo.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
         <member name="T:ThermoRawFileReader.udtMRMMassRangeType">
             <summary>
             Type for storing MRM Mass Ranges
@@ -591,6 +596,11 @@
             Full neutral loss scan
             </summary>
         </member>
+        <member name="F:ThermoRawFileReader.MRMScanTypeConstants.SIM">
+            <summary>
+            Selected Ion Monitoring (SIM), which is MS1 of a limited m/z range
+            </summary>
+        </member>
         <member name="T:ThermoRawFileReader.IonModeConstants">
             <summary>
             Ion Modes
@@ -774,6 +784,43 @@
             MS Tune Information
             </summary>
         </member>
+        <member name="P:ThermoRawFileReader.XRawFileIO.FileInfo">
+            <summary>
+            Get FileInfo about the currently loaded .raw file
+            </summary>
+        </member>
+        <member name="P:ThermoRawFileReader.XRawFileIO.LoadMSMethodInfo">
+            <summary>
+            MS Method information
+            </summary>
+        </member>
+        <member name="P:ThermoRawFileReader.XRawFileIO.LoadMSTuneInfo">
+            <summary>
+            MS Tune Info
+            </summary>
+        </member>
+        <member name="E:ThermoRawFileReader.XRawFileIO.ReportError">
+            <summary>
+            Event handler for reporting error messages
+            </summary>
+        </member>
+        <member name="T:ThermoRawFileReader.XRawFileIO.ReportErrorEventHandler">
+            <summary>
+            Event handler delegate for reporting error messages
+            </summary>
+            <param name="strMessage"></param>
+        </member>
+        <member name="E:ThermoRawFileReader.XRawFileIO.ReportWarning">
+            <summary>
+            Event handler for reporting warning messages
+            </summary>
+        </member>
+        <member name="T:ThermoRawFileReader.XRawFileIO.ReportWarningEventHandler">
+            <summary>
+            Event handler delegate for reporting warning messages
+            </summary>
+            <param name="strMessage"></param>
+        </member>
         <member name="M:ThermoRawFileReader.XRawFileIO.RaiseErrorMessage(System.String)">
             <summary>
             Report an error message to the error event handler
@@ -799,10 +846,10 @@
         </member>
         <member name="M:ThermoRawFileReader.XRawFileIO.DetermineMRMScanType(System.String)">
             <summary>
-            Determins the MRM scan type by parsing the scan filter string
+            Determines the MRM scan type by parsing the scan filter string
             </summary>
             <param name="filterText"></param>
-            <returns></returns>
+            <returns>MRM scan type enum</returns>
         </member>
         <member name="M:ThermoRawFileReader.XRawFileIO.DetermineIonizationMode(System.String)">
             <summary>
@@ -817,7 +864,25 @@
             </summary>
             <param name="filterText"></param>
             <param name="mrmScanType"></param>
-            <param name="mrmInfo"></param>
+            <param name="mrmInfo">Output: MRM info class</param>
+            <remarks>We do not parse mass information out for Full Neutral Loss scans</remarks>
+        </member>
+        <member name="M:ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(System.String,System.Double@)">
+            <summary>
+            Parse out the parent ion from filterText
+            </summary>
+            <param name="filterText"></param>
+            <param name="parentIonMz">Parent ion m/z (output)</param>
+            <returns>True if success</returns>
+            <remarks>If multiple parent ion m/z values are listed then parentIonMz will have the last one.  However, if the filter text contains "Full msx" then parentIonMz will have the first parent ion listed</remarks>
+            <remarks>
+            This was created for use in other programs that only need the parent ion m/z, and no other functions from ThermoRawFileReader.
+            Other projects that use this:
+                 PHRPReader
+            
+            To copy this, take the code from this function, plus the regex strings <see cref="F:ThermoRawFileReader.XRawFileIO.PARENTION_ONLY_NONMSX_REGEX"/> and <see cref="F:ThermoRawFileReader.XRawFileIO.PARENTION_ONLY_MSX_REGEX"/>,
+            with their uses in <see cref="F:ThermoRawFileReader.XRawFileIO.mFindParentIonOnlyNonMsx"/> and <see cref="F:ThermoRawFileReader.XRawFileIO.mFindParentIonOnlyMsx"/>
+            </remarks>
         </member>
         <member name="M:ThermoRawFileReader.XRawFileIO.ExtractParentIonMZFromFilterText(System.String,System.Double@,System.Int32@,System.String@)">
             <summary>
@@ -899,7 +964,7 @@
             </summary>
             <param name="filterText"></param>
             <param name="msLevel"></param>
-            <param name="simScan"></param>
+            <param name="simScan">True if mrmScanType is SIM or MRMQMS</param>
             <param name="mrmScanType"></param>
             <param name="zoomScan"></param>
             <returns>True if filterText contains a known MS scan type</returns>
@@ -1098,43 +1163,6 @@
             <returns>The number of data points, or -1 if an error</returns>
             <remarks>If intMaxNumberOfPeaks is 0 (or negative), then returns all data; set intMaxNumberOfPeaks to > 0 to limit the number of data points returned</remarks>
         </member>
-        <member name="P:ThermoRawFileReader.XRawFileIO.FileInfo">
-            <summary>
-            Get FileInfo about the currently loaded .raw file
-            </summary>
-        </member>
-        <member name="P:ThermoRawFileReader.XRawFileIO.LoadMSMethodInfo">
-            <summary>
-            MS Method information
-            </summary>
-        </member>
-        <member name="P:ThermoRawFileReader.XRawFileIO.LoadMSTuneInfo">
-            <summary>
-            MS Tune Info
-            </summary>
-        </member>
-        <member name="E:ThermoRawFileReader.XRawFileIO.ReportError">
-            <summary>
-            Event handler for reporting error messages
-            </summary>
-        </member>
-        <member name="E:ThermoRawFileReader.XRawFileIO.ReportWarning">
-            <summary>
-            Event handler for reporting warning messages
-            </summary>
-        </member>
-        <member name="T:ThermoRawFileReader.XRawFileIO.ReportErrorEventHandler">
-            <summary>
-            Event handler delegate for reporting error messages
-            </summary>
-            <param name="strMessage"></param>
-        </member>
-        <member name="T:ThermoRawFileReader.XRawFileIO.ReportWarningEventHandler">
-            <summary>
-            Event handler delegate for reporting warning messages
-            </summary>
-            <param name="strMessage"></param>
-        </member>
         <member name="T:ThermoRawFileReader.clsScanInfo">
             <summary>
             Container for metadata relating to a single scan
@@ -1159,50 +1187,6 @@
             <summary>
             Status Log data
             </summary>
-        </member>
-        <member name="M:ThermoRawFileReader.clsScanInfo.#ctor(System.Int32)">
-            <summary>
-            Constructor with only scan number
-            </summary>
-            <remarks></remarks>
-        </member>
-        <member name="M:ThermoRawFileReader.clsScanInfo.#ctor(System.Int32,ThermoRawFileReader.udtScanHeaderInfoType)">
-            <summary>
-            Constructor with scan number and data in a udtScanHeaderInfoType struct
-            </summary>
-            <remarks></remarks>
-        </member>
-        <member name="M:ThermoRawFileReader.clsScanInfo.StoreScanEvents(System.String[],System.String[])">
-            <summary>
-            Store this scan's scan events using a parallel string arrays
-            </summary>
-            <param name="eventNames"></param>
-            <param name="eventValues"></param>
-            <remarks></remarks>
-        </member>
-        <member name="M:ThermoRawFileReader.clsScanInfo.StoreStatusLog(System.String[],System.String[])">
-            <summary>
-            Store this scan's scan events using a parallel string arrays
-            </summary>
-            <param name="logNames"></param>
-            <param name="logValues"></param>
-            <remarks></remarks>
-        </member>
-        <member name="M:ThermoRawFileReader.clsScanInfo.TryGetScanEvent(System.String,System.String@,System.Boolean)">
-            <summary>
-            Get the event value associated with the given scan event name
-            </summary>
-            <param name="eventName">Event name to find</param>
-            <param name="eventValue">Event value</param>
-            <param name="partialMatchToStart">Set to true to match the start of an event name, and not require a full match</param>
-            <returns>True if found a match for the event name, otherwise false</returns>
-            <remarks>Event names nearly always end in a colon, e.g. "Monoisotopic M/Z:" or "Charge State:"</remarks>
-        </member>
-        <member name="M:ThermoRawFileReader.clsScanInfo.ToString">
-            <summary>
-            Overridden ToString(): Displays a short summary of this object
-            </summary>
-            <returns></returns>
         </member>
         <member name="P:ThermoRawFileReader.clsScanInfo.CacheDateUTC">
             <summary>
@@ -1419,6 +1403,50 @@
             <value></value>
             <returns>List of key/value pairs</returns>
             <remarks></remarks>
+        </member>
+        <member name="M:ThermoRawFileReader.clsScanInfo.#ctor(System.Int32)">
+            <summary>
+            Constructor with only scan number
+            </summary>
+            <remarks></remarks>
+        </member>
+        <member name="M:ThermoRawFileReader.clsScanInfo.#ctor(System.Int32,ThermoRawFileReader.udtScanHeaderInfoType)">
+            <summary>
+            Constructor with scan number and data in a udtScanHeaderInfoType struct
+            </summary>
+            <remarks></remarks>
+        </member>
+        <member name="M:ThermoRawFileReader.clsScanInfo.StoreScanEvents(System.String[],System.String[])">
+            <summary>
+            Store this scan's scan events using a parallel string arrays
+            </summary>
+            <param name="eventNames"></param>
+            <param name="eventValues"></param>
+            <remarks></remarks>
+        </member>
+        <member name="M:ThermoRawFileReader.clsScanInfo.StoreStatusLog(System.String[],System.String[])">
+            <summary>
+            Store this scan's scan events using a parallel string arrays
+            </summary>
+            <param name="logNames"></param>
+            <param name="logValues"></param>
+            <remarks></remarks>
+        </member>
+        <member name="M:ThermoRawFileReader.clsScanInfo.TryGetScanEvent(System.String,System.String@,System.Boolean)">
+            <summary>
+            Get the event value associated with the given scan event name
+            </summary>
+            <param name="eventName">Event name to find</param>
+            <param name="eventValue">Event value</param>
+            <param name="partialMatchToStart">Set to true to match the start of an event name, and not require a full match</param>
+            <returns>True if found a match for the event name, otherwise false</returns>
+            <remarks>Event names nearly always end in a colon, e.g. "Monoisotopic M/Z:" or "Charge State:"</remarks>
+        </member>
+        <member name="M:ThermoRawFileReader.clsScanInfo.ToString">
+            <summary>
+            Overridden ToString(): Displays a short summary of this object
+            </summary>
+            <returns></returns>
         </member>
     </members>
 </doc>

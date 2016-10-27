@@ -107,6 +107,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showDeconvolutedSpectrum;
 
         /// <summary>
+        /// A value indicating whether or not the deconvoluted ions are showing.
+        /// </summary>
+        private bool showDeconvolutedIons;
+
+        /// <summary>
         /// A value indicating whether or not the filtered spectrum is showing.
         /// </summary>
         private bool showFilteredSpectrum;
@@ -225,14 +230,16 @@ namespace LcmsSpectator.ViewModels.Plots
                               x => x.Spectrum,
                               x => x.FragmentationSequenceViewModel.LabeledIonViewModels,
                               x => x.ShowDeconvolutedSpectrum,
+                              x => x.ShowDeconvolutedIons,
                               x => x.ShowFilteredSpectrum,
                               x => x.ShowUnexplainedPeaks)
                 .Where(x => x.Item1 != null && x.Item2 != null)
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum))))
+                .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum || this.ShowDeconvolutedIons))))
                 .Subscribe(peakDataPoints =>
                 {
                     this.ions = this.FragmentationSequenceViewModel.LabeledIonViewModels;
+                    this.SetTerminalResidues(peakDataPoints);
                     this.UpdatePlotModel(peakDataPoints);
 
                     if (this.FragmentationSequenceViewModel is FragmentationSequenceViewModel)
@@ -379,6 +386,15 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.showDeconvolutedSpectrum; }
             set { this.RaiseAndSetIfChanged(ref this.showDeconvolutedSpectrum, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether or not the deconvoluted ions are showing.
+        /// </summary>
+        public bool ShowDeconvolutedIons
+        {
+            get { return this.showDeconvolutedIons; }
+            set { this.RaiseAndSetIfChanged(ref this.showDeconvolutedIons, value); }
         }
 
         /// <summary>
@@ -668,6 +684,20 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             return currentSpectrum;
+        }
+
+        private void SetTerminalResidues(IList<PeakDataPoint>[] peakDataPoints)
+        {
+            var sequence = this.FragmentationSequenceViewModel.FragmentationSequence.Sequence;
+            foreach (var peakDataPoint in peakDataPoints.SelectMany(x => x))
+            {
+                if (peakDataPoint.IonType != null && peakDataPoint.IonType.Name != "Precursor")
+                {
+                    peakDataPoint.Residue = peakDataPoint.IonType.IsPrefixIon
+                                ? sequence[peakDataPoint.Index - 1].Residue
+                                : sequence[sequence.Count - peakDataPoint.Index].Residue;
+                }
+            }
         }
 
         /// <summary>
