@@ -188,7 +188,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 MapTypes.CoverageMap,
             });
 
-            this.SelectedMapType = MapTypes.ErrorMap;
+            this.SelectedMapType = MapTypes.CoverageMap;
             this.WhenAnyValue(x => x.SelectedMapType)
                 .Subscribe(
                     _ =>

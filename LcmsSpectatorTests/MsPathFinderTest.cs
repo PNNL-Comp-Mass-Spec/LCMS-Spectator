@@ -22,6 +22,8 @@ namespace LcmsSpectatorTests
 
     using NUnit.Framework;
 
+    using MsPfParameters = LcmsSpectator.Models.MsPfParameters;
+
     [TestFixture]
     public class MsPathFinderTest
     {

@@ -635,7 +635,6 @@ namespace LcmsSpectator.ViewModels.Plots
                             Constants.MinCharge,
                             Constants.MaxCharge,
                             Constants.IsotopeOffsetTolerance,
-                            1.1,
                             tolerance,
                             IcParameters.Instance.IonCorrelationThreshold);
                     //this.deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
@@ -668,7 +667,6 @@ namespace LcmsSpectator.ViewModels.Plots
                         Constants.MinCharge,
                         Constants.MaxCharge,
                         Constants.IsotopeOffsetTolerance,
-                        1.1,
                         tolerance,
                         IcParameters.Instance.IonCorrelationThreshold);
                     //this.deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(

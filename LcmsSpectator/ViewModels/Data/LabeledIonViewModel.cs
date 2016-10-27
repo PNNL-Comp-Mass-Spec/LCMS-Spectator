@@ -144,7 +144,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public Ion Ion
         {
-            get { return new Ion(this.Composition, this.IonType.Charge); }
+            get { return new Ion(this.Composition + (this.IsFragmentIon ? Composition.Zero : Composition.H2O), this.IonType.Charge); }
         }
 
         /// <summary>

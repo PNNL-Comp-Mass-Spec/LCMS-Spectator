@@ -33,6 +33,8 @@ namespace LcmsSpectator.ViewModels
     using LcmsSpectator.ViewModels.Modifications;
     using ReactiveUI;
 
+    using MsPfParameters = LcmsSpectator.Models.MsPfParameters;
+
     /// <summary>
     /// View model for configuration settings for running an MSPathFinder Database search.
     /// </summary>
