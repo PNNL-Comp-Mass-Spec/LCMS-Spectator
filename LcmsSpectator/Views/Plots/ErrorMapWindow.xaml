@@ -52,10 +52,10 @@
                 </xcad:LayoutRoot>
             </xcad:DockingManager>
 
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Left">
+            <!--<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Left">
                 <TextBlock FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0" >Sequence Coverage:</TextBlock>
                 <TextBlock Text="{Binding SequenceCoverage}" VerticalAlignment="Center" />
-            </StackPanel>
+            </StackPanel>-->
 
             <StackPanel Grid.Row="1"  Orientation="Horizontal" Margin="0,5,0,0" HorizontalAlignment="Right">
                 <TextBlock FontWeight="Bold" Margin="0,0,10,0" VerticalAlignment="Center">Selected heatmap:</TextBlock>
