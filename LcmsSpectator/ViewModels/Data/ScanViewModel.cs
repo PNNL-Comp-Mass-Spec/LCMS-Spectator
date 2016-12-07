@@ -13,6 +13,7 @@ namespace LcmsSpectator.ViewModels.Data
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Reactive;
     using System.Reactive.Linq;
@@ -144,6 +145,12 @@ namespace LcmsSpectator.ViewModels.Data
 
             this.ExportSpectraCommand = ReactiveCommand.CreateAsyncTask(_ => this.ExportSpectraImplementation());
             this.ExportPeaksCommand = ReactiveCommand.CreateAsyncTask(_ => this.ExportPeaksImplementation());
+            this.ExportProteinTreeCommand = ReactiveCommand.Create();
+            this.ExportProteinTreeCommand.Subscribe(_ => this.ExportProteinTreeImplentation());
+
+            this.ExportProteinTreeAsTsvCommand = ReactiveCommand.Create();
+            this.ExportProteinTreeAsTsvCommand.Subscribe(_ => this.ExportProteinTreeAsTsvImplentation());
+
         }
 
         /// <summary>
@@ -160,6 +167,16 @@ namespace LcmsSpectator.ViewModels.Data
         /// Gets a command that exports the spectra peaks to TSV for the selected identifications.
         /// </summary>
         public ReactiveCommand<Unit> ExportPeaksCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that exports the protein tree as a hierarchy.
+        /// </summary>
+        public ReactiveCommand<object> ExportProteinTreeCommand { get; private set; }
+        
+        /// <summary>
+        /// Gets a command that exports the protein tree as a tab separated value file.
+        /// </summary>
+        public ReactiveCommand<object> ExportProteinTreeAsTsvCommand { get; private set; }
 
         /// <summary>
         /// Gets the list of possible filters.
@@ -532,6 +549,58 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 var exporter = new SpectrumPeakExporter(folderPath);
                 await exporter.ExportAsync(this.FilteredData);
+            }
+        }
+
+        private void ExportProteinTreeImplentation()
+        {
+            var path = this.dialogService.SaveFile(".txt", "Text Files|*.txt");
+            if (!string.IsNullOrEmpty(path))
+            {
+                using (var writer = new StreamWriter(path))
+                {
+                    foreach (var prot in this.IdTree.ProteinIds)
+                    {
+                        writer.WriteLine(prot.ProteinName);
+                        foreach (var proteoform in prot.Proteoforms)
+                        {
+                            writer.WriteLine("\t{0}", proteoform.Value.Annotation);
+                            foreach (var charge in proteoform.Value.ChargeStates)
+                            {
+                                writer.WriteLine("\t\t{0}+", charge.Key);
+                                foreach (var prsm in charge.Value.PrSms)
+                                {
+                                    writer.WriteLine("\t\t\t{0} (Score: {1})", prsm.Value.Scan, prsm.Value.Score);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ExportProteinTreeAsTsvImplentation()
+        {
+            var path = this.dialogService.SaveFile(".tsv", "Tab-separated values|*.tsv");
+            if (!string.IsNullOrEmpty(path))
+            {
+                using (var writer = new StreamWriter(path))
+                {
+                    writer.WriteLine("Scan\tProtein\tProteoform\tCharge\tScore");
+                    foreach (var prot in this.IdTree.Proteins)
+                    {
+                        foreach (var proteoform in prot.Value.Proteoforms)
+                        {
+                            foreach (var charge in proteoform.Value.ChargeStates)
+                            {
+                                foreach (var scan in charge.Value.PrSms)
+                                {
+                                    writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", scan.Value.Scan, prot.Key, proteoform.Value.Annotation, charge.Key, scan.Value.Score);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -83,6 +83,11 @@
                                                         </MenuItem.ItemContainerStyle>
                                                     </MenuItem>
                                                     <MenuItem Header="_Clear All Filters" Command="{Binding ClearFiltersCommand}" />
+                                                    <Separator />
+                                                    <MenuItem Header="Export">
+                                                        <MenuItem Header="As Text File" Command="{Binding ExportProteinTreeCommand}" />
+                                                        <MenuItem Header="As Tab-separted file" Command="{Binding ExportProteinTreeAsTsvCommand}" />
+                                                    </MenuItem>
                                                 </ContextMenu>
                                             </controls:MvvmTreeView.ContextMenu>
                                             <controls:MvvmTreeView.Resources>
