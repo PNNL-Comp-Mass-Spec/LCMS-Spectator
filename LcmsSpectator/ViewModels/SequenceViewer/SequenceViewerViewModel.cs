@@ -1,6 +1,7 @@
 ﻿namespace LcmsSpectator.ViewModels.SequenceViewer
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
 
     using System.Reactive.Linq;
@@ -11,7 +12,9 @@
 
     using LcmsSpectator.DialogServices;
     using LcmsSpectator.Models;
+    using LcmsSpectator.PlotModels;
     using LcmsSpectator.PlotModels.ColorDicionaries;
+    using LcmsSpectator.Utils;
     using LcmsSpectator.ViewModels.Data;
 
     using OxyPlot.Wpf;
@@ -39,6 +42,11 @@
         /// The dictionary that determines how to color fragment ions.
         /// </summary>
         private IonColorDictionary ionColorDictionary;
+
+        /// <summary>
+        /// The percentage of fragments found in the spectrum.
+        /// </summary>
+        private double sequenceCoverage;
 
         /// <summary>
         /// Initializes new instance of the <see cref="SequenceViewerViewModel" /> class.
@@ -98,6 +106,15 @@
         public ReactiveList<FragmentViewModel> SequenceFragments { get; private set; }
 
         /// <summary>
+        /// Gets the percentage of fragments found in the spectrum.
+        /// </summary>
+        public double SequenceCoverage
+        {
+            get { return this.sequenceCoverage; }
+            private set { this.RaiseAndSetIfChanged(ref this.sequenceCoverage, value); }
+        }
+
+        /// <summary>
         /// Parse the fragment sequence into the format required for display.
         /// </summary>
         private void ParseFragmentationSequence()
@@ -128,6 +145,8 @@
                 sequenceFragments[i] = new FragmentViewModel(sequence[i], i, this.dialogService);
             }
 
+            var allPeakDataPoints = new List<PeakDataPoint>();
+
             foreach (var labeledIonViewModel in labeledIonViewModels)
             {
                 var index = labeledIonViewModel.IonType.IsPrefixIon
@@ -140,6 +159,8 @@
                     // Not observed, nothing to add.
                     continue;
                 }
+
+                allPeakDataPoints.Add(peakDataPoints[0]);
 
                 var sequenceFragment = sequenceFragments[index];
                 var fragmentIon = labeledIonViewModel.IonType.IsPrefixIon
@@ -188,6 +209,10 @@
             {
                 this.SequenceFragments.Add(sequenceFragment);
             }
+
+            this.SequenceCoverage = Math.Round(IonUtils.CalculateSequenceCoverage(
+                allPeakDataPoints,
+                this.FragmentationSequence.FragmentationSequence.Sequence.Count), 3);
         }
 
         /// <summary>

@@ -29,55 +29,67 @@
             </StackPanel>
         </ControlTemplate>
     </UserControl.Resources>
-    <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-        <ItemsControl ItemsSource="{Binding SequenceFragments}" Name="SequenceContainer">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid Height="90" Width="40" Margin="0,0,0,5">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <!-- Suffix -->
-                        <Border Grid.Row="0" DataContext="{Binding SuffixIon}" Margin="-2,0,0,0"
-                                BorderThickness="2,2,0,0" BorderBrush="{Binding Color}"
-                                Width="36" HorizontalAlignment="Left">
-                            <ContentControl Template="{StaticResource IonTemplate}" />
-                        </Border>
-                
-                        <!-- Residue -->                      
-                        <Grid Grid.Row="1">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="20" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Margin="0,0,5,0" FontWeight="Bold">Sequence Coverage:</TextBlock>
+            <TextBlock Text="{Binding SequenceCoverage}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="0" CanContentScroll="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding SequenceFragments}" Name="SequenceContainer">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Height="90" Width="40" Margin="0,0,0,5">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <Border Grid.Row="0" BorderThickness="2,0,0,0" BorderBrush="{Binding SuffixIon.Color}" Margin="-2,0,0,0" />
-                            <Border Grid.Row="1" BorderThickness="0,0,2,0" BorderBrush="{Binding PrefixIon.Color}" />
-                        </Grid>
-                        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <!--<StackPanel.ContextMenu>
+                            <!-- Suffix -->
+                            <Border Grid.Row="0" DataContext="{Binding SuffixIon}" Margin="-2,0,0,0"
+                                BorderThickness="2,2,0,0" BorderBrush="{Binding Color}"
+                                Width="36" HorizontalAlignment="Left">
+                                <ContentControl Template="{StaticResource IonTemplate}" />
+                            </Border>
+
+                            <!-- Residue -->
+                            <Grid Grid.Row="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="0" BorderThickness="2,0,0,0" BorderBrush="{Binding SuffixIon.Color}" Margin="-2,0,0,0" />
+                                <Border Grid.Row="1" BorderThickness="0,0,2,0" BorderBrush="{Binding PrefixIon.Color}" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <!--<StackPanel.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Add/Edit Modification" Command="{Binding SelectModificationCommand}" />
                                 </ContextMenu>
                             </StackPanel.ContextMenu>-->
-                            <TextBlock Text="{Binding AminoAcid.Residue}" FontFamily="Courier New" FontSize="18" FontWeight="Bold" />
-                            <TextBlock FontSize="9" Text="{Binding ModificationSymbol}" />
-                        </StackPanel>
+                                <TextBlock Text="{Binding AminoAcid.Residue}" FontFamily="Courier New" FontSize="18" FontWeight="Bold" />
+                                <TextBlock FontSize="9" Text="{Binding ModificationSymbol}" />
+                            </StackPanel>
 
-                        <!-- Prefix -->
-                        <Border Grid.Row="2" DataContext="{Binding PrefixIon}" BorderThickness="0,0,2,2" BorderBrush="{Binding Color}"
+                            <!-- Prefix -->
+                            <Border Grid.Row="2" DataContext="{Binding PrefixIon}" BorderThickness="0,0,2,2" BorderBrush="{Binding Color}"
                                 Width="38" HorizontalAlignment="Right">
-                            <ContentControl Template="{StaticResource IonTemplate}" />
-                        </Border>
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </ScrollViewer>
+                                <ContentControl Template="{StaticResource IonTemplate}" />
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
 </UserControl>
