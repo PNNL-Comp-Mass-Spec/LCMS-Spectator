@@ -10,6 +10,11 @@
     </LayoutPanel>
     <LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="221" DockHeight="200" FloatingWidth="221" FloatingHeight="862" FloatingLeft="979" FloatingTop="1002">
       <LayoutAnchorablePane DockHeight="200" FloatingWidth="221" FloatingHeight="862" FloatingLeft="979" FloatingTop="1002">
+        <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Sequence View" IsSelected="True" ContentId="SequenceView" FloatingLeft="979" FloatingTop="1002" FloatingWidth="221" FloatingHeight="862" LastActivationTimeStamp="06/11/2015 15:08:35" />
+      </LayoutAnchorablePane>
+    </LayoutAnchorablePaneGroup>
+    <LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="221" DockHeight="200" FloatingWidth="221" FloatingHeight="862" FloatingLeft="979" FloatingTop="1002">
+      <LayoutAnchorablePane DockHeight="200" FloatingWidth="221" FloatingHeight="862" FloatingLeft="979" FloatingTop="1002">
         <LayoutAnchorable AutoHideMinWidth="100" AutoHideMinHeight="100" Title="Scan View" IsSelected="True" ContentId="ScanView" FloatingLeft="979" FloatingTop="1002" FloatingWidth="221" FloatingHeight="862" LastActivationTimeStamp="06/11/2015 15:08:35" />
       </LayoutAnchorablePane>
     </LayoutAnchorablePaneGroup>

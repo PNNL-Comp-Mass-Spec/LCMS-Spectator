@@ -26,5 +26,7 @@
         /// Gets the LabeledIonViewModels for this sequence.
         /// </summary>
         LabeledIonViewModel[] LabeledIonViewModels { get; }
+
+        Task<LabeledIonViewModel[]> GetLabeledIonViewModels();
     }
 }

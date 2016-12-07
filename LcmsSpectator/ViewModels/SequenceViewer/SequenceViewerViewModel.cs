@@ -54,7 +54,8 @@
             // Update the sequence displayed when the fragmentation sequence or spectrum changes.
             this.WhenAnyValue(
                               x => x.SelectedSpectrum,
-                              x => x.FragmentationSequence)
+                              x => x.FragmentationSequence,
+                              x => x.FragmentationSequence.LabeledIonViewModels)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(_ => this.ParseFragmentationSequence());

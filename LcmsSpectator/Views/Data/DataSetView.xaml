@@ -9,6 +9,7 @@
              xmlns:plots="clr-namespace:LcmsSpectator.Views.Plots"
              xmlns:data="clr-namespace:LcmsSpectator.Views.Data"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:sequenceViewer="clr-namespace:LcmsSpectator.Views.SequenceViewer"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
@@ -68,6 +69,11 @@
                         </xcad:LayoutDocument>
                     </xcad:LayoutDocumentPane>
                     <xcad:LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="*" DockHeight="200">
+                        <xcad:LayoutAnchorablePane IsMaximized="True">
+                            <xcad:LayoutAnchorable Title="Sequence View">
+                                <sequenceViewer:SequenceViewer x:Name="SequenceView" DataContext="{Binding SpectrumViewModel.Ms2SpectrumViewModel.SequenceViewerViewModel}" />
+                            </xcad:LayoutAnchorable>
+                        </xcad:LayoutAnchorablePane>
                         <xcad:LayoutAnchorablePane IsMaximized="True">
                             <xcad:LayoutAnchorable Title="Scan View">
                                 <Grid x:Name="ScanView">

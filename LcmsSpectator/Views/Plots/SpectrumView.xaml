@@ -19,7 +19,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" MaxHeight="100" />
+            <!--<RowDefinition Height="Auto" MaxHeight="100" />-->
         </Grid.RowDefinitions>
         <Grid Grid.Row="0" Grid.Column="0" DataContext="{Binding PrimarySpectrumViewModel}">
             <Grid.RowDefinitions>
@@ -73,8 +73,9 @@
                                 </Style>
                             </MenuItem.ItemContainerStyle>
                         </MenuItem>
-                        <MenuItem Header="Select Fragment Ions" Command="{Binding SelectFragmentIonsCommand}" />
+                        <!--<MenuItem Header="Select Fragment Ions" Command="{Binding SelectFragmentIonsCommand}" /> -->
                         <MenuItem Header="Show Precursor Ions" IsCheckable="True" IsChecked="{Binding AddPrecursorIons, Mode=TwoWay}" DataContext="{Binding FragmentationSequenceViewModel}" />
+                        <MenuItem Header="Select All Ions" Command="{Binding SelectAllIonsCommand}" DataContext="{Binding FragmentationSequenceViewModel}" />
                         <MenuItem Header="Hide All Ions" Command="{Binding HideAllIonsCommand}" DataContext="{Binding FragmentationSequenceViewModel}"  />
                         <Separator />
                         <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" Name="AutoAdjustYCheck" />
@@ -137,6 +138,6 @@
                 </wpf:PlotView>
             </Grid>
         </Expander>
-        <sequenceViewer:SequenceViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" DataContext="{Binding Ms2SpectrumViewModel.SequenceViewerViewModel}" />
+        <!--<sequenceViewer:SequenceViewer Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" DataContext="{Binding Ms2SpectrumViewModel.SequenceViewerViewModel}" />-->
     </Grid>
 </UserControl>

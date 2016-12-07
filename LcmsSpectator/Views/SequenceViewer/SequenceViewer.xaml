@@ -7,6 +7,11 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance d:Type=sequenceViewer:SequenceViewerViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem Click="MenuItem_OnClick" Header="Save as Image" />
+        </ContextMenu>
+    </UserControl.ContextMenu>
     <UserControl.Resources>
         <ControlTemplate x:Key="IonTemplate">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
@@ -24,8 +29,8 @@
             </StackPanel>
         </ControlTemplate>
     </UserControl.Resources>
-    <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Margin="10,0,10,0" MaxHeight="100">
-        <ItemsControl ItemsSource="{Binding SequenceFragments}">
+    <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding SequenceFragments}" Name="SequenceContainer">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel />

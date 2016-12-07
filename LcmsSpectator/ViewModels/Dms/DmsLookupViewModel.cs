@@ -345,8 +345,16 @@ namespace LcmsSpectator.ViewModels.Dms
                 return null;
             }
 
-            var jobDir = Directory.GetFiles(this.SelectedJob.JobFolderPath);
-            return (from idFp in jobDir let ext = Path.GetExtension(idFp) where ext == ".ms1ft" select idFp).FirstOrDefault();
+            // Find promex folder
+            var promexDir = Directory.GetDirectories(this.SelectedDataset.DatasetFolderPath).FirstOrDefault(d => d.Contains("ProMex"));
+            if (string.IsNullOrEmpty(promexDir))
+            {
+                return null;
+            }
+
+            var promexDirFiles = Directory.GetFiles(promexDir);
+
+            return (from idFp in promexDirFiles let ext = Path.GetExtension(idFp) where ext == ".ms1ft" select idFp).FirstOrDefault();
         }
 
         /// <summary>

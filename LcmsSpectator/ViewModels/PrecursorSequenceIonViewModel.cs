@@ -156,5 +156,10 @@
                            this.RelativeIntensityThreshold,
                            this.HeavyModifications)).ToArray();
         }
+
+        Task<LabeledIonViewModel[]> IFragmentationSequenceViewModel.GetLabeledIonViewModels()
+        {
+            return this.GetLabeledIonViewModels();
+        }
     }
 }

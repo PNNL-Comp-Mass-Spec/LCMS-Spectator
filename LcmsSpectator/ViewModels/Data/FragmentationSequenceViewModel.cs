@@ -113,6 +113,22 @@
             this.WhenAnyValue(x => x.FragmentationSequence, x => x.SelectedIonTypes, x => x.HeavyModifications, x => x.AddPrecursorIons)
                 .SelectMany(async _ => await this.GetLabeledIonViewModels())
                 .Subscribe(livms => this.LabeledIonViewModels = livms);
+
+            this.SelectAllIonsCommand = ReactiveCommand.Create();
+            this.SelectAllIonsCommand.Subscribe(_ =>
+            {
+                foreach (var ion in this.BaseIonTypes)
+                {
+                    ion.IsSelected = true;
+                }
+
+                this.AddPrecursorIons = true;
+            });
+
+            IcParameters.Instance.WhenAnyValue(x => x.CidHcdIonTypes, x => x.EtdIonTypes)
+                                 .Throttle(TimeSpan.FromMilliseconds(50), RxApp.TaskpoolScheduler)
+                                 .Where(_ => this.FragmentationSequence != null)
+                                 .Subscribe(_ => this.SetActivationMethod(this.FragmentationSequence.ActivationMethod));
         }
 
         /// <summary>
@@ -128,6 +144,11 @@
         /// Gets a command that deselects all ion types.
         /// </summary>
         public IReactiveCommand HideAllIonsCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that selects all ion types.
+        /// </summary>
+        public ReactiveCommand<object> SelectAllIonsCommand { get; private set; }
 
         /// <summary>
         /// Gets the list of possible base ion types.
@@ -203,7 +224,7 @@
         /// Set ion types based on the selected activation method.
         /// </summary>
         /// <param name="selectedActivationMethod">The selected activation method.</param>
-        private void SetActivationMethod(ActivationMethod selectedActivationMethod)
+        public void SetActivationMethod(ActivationMethod selectedActivationMethod)
         {
             if (!IcParameters.Instance.AutomaticallySelectIonTypes)
             {
@@ -235,6 +256,11 @@
                 this.NeutralLosses.Where(nl => nl.IsSelected).Select(nl => nl.NeutralLoss).ToList(),
                 1,
                 charge).ToArray();
+        }
+
+        Task<LabeledIonViewModel[]> IFragmentationSequenceViewModel.GetLabeledIonViewModels()
+        {
+            return GetLabeledIonViewModels();
         }
     }
 }

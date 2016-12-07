@@ -589,6 +589,20 @@ namespace LcmsSpectator.ViewModels
             this.RegisterUnknownModifications(this.dataReader.Modifications);
 
             this.ScanViewModel.Data.AddRange(identifications);
+
+            foreach (var id in identifications)
+            {
+                if (!this.ScanViewModel.IdTree.Proteins.ContainsKey(id.ProteinName))
+                {
+                    this.ScanViewModel.IdTree.AddFastaEntry(new FastaEntry()
+                    {
+                        ProteinName = id.ProteinName,
+                        ProteinDescription = id.ProteinDesc,
+                        ProteinSequence = id.Sequence,
+                        ProteinSequenceText = id.SequenceText
+                    });
+                }
+            }
         }
 
         /// <summary>

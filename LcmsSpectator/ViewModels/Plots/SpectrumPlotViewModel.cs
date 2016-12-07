@@ -235,7 +235,16 @@ namespace LcmsSpectator.ViewModels.Plots
                               x => x.ShowUnexplainedPeaks)
                 .Where(x => x.Item1 != null && x.Item2 != null)
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                .SelectMany(async x => await Task.WhenAll(x.Item2.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum || this.ShowDeconvolutedIons))))
+                .SelectMany(async x =>
+                {
+                    var vms = await this.FragmentationSequenceViewModel.GetLabeledIonViewModels();
+                    return  await
+                            Task.WhenAll(
+                                vms.Select(
+                                    ion =>
+                                        ion.GetPeaksAsync(this.GetSpectrum(),
+                                            this.ShowDeconvolutedSpectrum || this.ShowDeconvolutedIons)));
+                })
                 .Subscribe(peakDataPoints =>
                 {
                     this.ions = this.FragmentationSequenceViewModel.LabeledIonViewModels;
@@ -691,9 +700,12 @@ namespace LcmsSpectator.ViewModels.Plots
             {
                 if (peakDataPoint.IonType != null && peakDataPoint.IonType.Name != "Precursor")
                 {
-                    peakDataPoint.Residue = peakDataPoint.IonType.IsPrefixIon
-                                ? sequence[peakDataPoint.Index - 1].Residue
-                                : sequence[sequence.Count - peakDataPoint.Index].Residue;
+                    int index = peakDataPoint.IonType.IsPrefixIon
+                        ? peakDataPoint.Index - 1
+                        : sequence.Count - peakDataPoint.Index;
+                    //if (index < 0 || index > sequence.Count - 1) continue;
+
+                    peakDataPoint.Residue = sequence[index].Residue;
                 }
             }
         }
