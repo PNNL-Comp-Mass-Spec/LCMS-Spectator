@@ -61,6 +61,7 @@
                                     <Setter Property="Header" Value="{Binding BaseIonType.Symbol}" />
                                     <Setter Property="IsCheckable" Value="True" />
                                     <Setter Property="IsChecked" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                    <Setter Property="StaysOpenOnClick" Value="True" />
                                 </Style>
                             </MenuItem.ItemContainerStyle>
                         </MenuItem>
@@ -70,6 +71,7 @@
                                     <Setter Property="Header" Value="{Binding NeutralLoss, Converter={StaticResource NeutralLossToString}}" />
                                     <Setter Property="IsCheckable" Value="True" />
                                     <Setter Property="IsChecked" Value="{Binding IsSelected, Mode=TwoWay}" />
+                                    <Setter Property="StaysOpenOnClick" Value="True" />
                                 </Style>
                             </MenuItem.ItemContainerStyle>
                         </MenuItem>

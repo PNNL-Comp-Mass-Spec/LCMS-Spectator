@@ -140,7 +140,17 @@ namespace LcmsSpectator.Utils
                 {
                     for (int i = minCharge; i <= maxCharge; i++)
                     {
-                        ionTypes.Add(GetIonType(ionTypeFactory, baseIonType, neutralLoss, i));
+                        IonType ionType;
+                        try
+                        {
+                            ionType = GetIonType(ionTypeFactory, baseIonType, neutralLoss, i);
+                        }
+                        catch (KeyNotFoundException ex)
+                        {
+                            continue;
+                        }
+
+                        ionTypes.Add(ionType);
                     }
                 }
             }
