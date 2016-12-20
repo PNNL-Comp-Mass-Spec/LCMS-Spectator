@@ -467,7 +467,7 @@ namespace LcmsSpectator.Utils
                 }
             }
 
-            return (100.0 * counter) / sequenceLength;
+            return (100.0 * counter) / (sequenceLength - 1);
         }
     }
 }
