@@ -130,7 +130,8 @@ namespace LcmsSpectator.Readers
             if (!string.IsNullOrEmpty(rawFilePath) && dataSetViewModel.LcMs == null)
             {
                 this.ReadingRawFiles = true;
-                await dataSetViewModel.InitializeAsync(rawFilePath);
+                await Task.Delay(20).ConfigureAwait(false);
+                await dataSetViewModel.InitializeAsync(rawFilePath).ConfigureAwait(false);
                 this.ReadingRawFiles = false;
             }
 
