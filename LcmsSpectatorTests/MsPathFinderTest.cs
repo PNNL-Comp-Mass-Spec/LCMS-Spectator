@@ -48,33 +48,33 @@ namespace LcmsSpectatorTests
             var scanNumbers = lcmsRun.GetScanNumbers(2);
 
             // Initialize MSPathFinder
-            var launcher = new IcTopDownLauncher(
-                specFilePath,
-                fastaFilePath,
-                outputDirectory,
-                aminoAcidSet)
-            {
-                MinSequenceLength = 1,
-                MaxSequenceLength = 100,
-                MaxNumNTermCleavages = 1,
-                MaxNumCTermCleavages = 0,
-                MinPrecursorIonCharge = 1,
-                MaxPrecursorIonCharge = 20,
-                MinProductIonCharge = 1,
-                MaxProductIonCharge = 20,
-                MinSequenceMass = 1,
-                MaxSequenceMass = 30000,
-                PrecursorIonTolerancePpm = 100,
-                ProductIonTolerancePpm = 100,
-                RunTargetDecoyAnalysis = DatabaseSearchMode.Both,
-                SearchMode = InternalCleavageType.NoInternalCleavage,
-                MaxNumThreads = 4,
-                ScanNumbers = scanNumbers,
-                NumMatchesPerSpectrum = 1,
-                TagBasedSearch = false,
-            };
+            //var launcher = new IcTopDownLauncher(
+            //    specFilePath,
+            //    fastaFilePath,
+            //    outputDirectory,
+            //    aminoAcidSet)
+            //{
+            //    MinSequenceLength = 1,
+            //    MaxSequenceLength = 100,
+            //    MaxNumNTermCleavages = 1,
+            //    MaxNumCTermCleavages = 0,
+            //    MinPrecursorIonCharge = 1,
+            //    MaxPrecursorIonCharge = 20,
+            //    MinProductIonCharge = 1,
+            //    MaxProductIonCharge = 20,
+            //    MinSequenceMass = 1,
+            //    MaxSequenceMass = 30000,
+            //    PrecursorIonTolerancePpm = 100,
+            //    ProductIonTolerancePpm = 100,
+            //    RunTargetDecoyAnalysis = DatabaseSearchMode.Both,
+            //    SearchMode = InternalCleavageType.NoInternalCleavage,
+            //    MaxNumThreads = 4,
+            //    ScanNumbers = scanNumbers,
+            //    NumMatchesPerSpectrum = 1,
+            //    TagBasedSearch = false,
+            //};
 
-            launcher.RunSearch(correlationThreshold);
+            //launcher.RunSearch(correlationThreshold);
         }
 
         [TestCase(176, "GIGAVLKVLTTGLPALISWIKRKRQQ")]
@@ -102,118 +102,118 @@ namespace LcmsSpectatorTests
             var aminoAcidSet = new AminoAcidSet(searchModifications, 1);
             var sequence = this.LoadSequence(sequenceStr, aminoAcidSet);
 
-            var scorerFactory = new ScorerFactory(new Tolerance(30, ToleranceUnit.Ppm), 1, 5);
-            var scorer = scorerFactory.GetScorer(productSpectrum);
+            //var scorerFactory = new ScorerFactory(new Tolerance(30, ToleranceUnit.Ppm), 1, 5);
+            //var scorer = scorerFactory.GetScorer(productSpectrum);
 
-            var score = IonUtils.ScoreSequence(scorer, sequence);
+            //var score = IonUtils.ScoreSequence(scorer, sequence);
 
-            Console.WriteLine(score);
+            //Console.WriteLine(score);
         }
 
         [TestCase(0.7, 1)]
-        public void BruteForceSearch(double minCorrelation, int idsPerSpectrum)
-        {
-            // Set input file paths.
-            const string specFilePath =
-                @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID\9 pep mix 365 mTorr with ims 45V CID.pbf";
-            const string fastaFilePath = @"\\protoapps\userdata\Wilkins\UIMF Files\melittin.fasta";
-            const string outputDirectory =
-                @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID";
-            const string paramFilePath =
-                @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID\9 pep mix 365 mTorr with ims 45V CID.param";
+        //public void BruteForceSearch(double minCorrelation, int idsPerSpectrum)
+        //{
+        //    // Set input file paths.
+        //    const string specFilePath =
+        //        @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID\9 pep mix 365 mTorr with ims 45V CID.pbf";
+        //    const string fastaFilePath = @"\\protoapps\userdata\Wilkins\UIMF Files\melittin.fasta";
+        //    const string outputDirectory =
+        //        @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID";
+        //    const string paramFilePath =
+        //        @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID\9 pep mix 365 mTorr with ims 45V CID.param";
 
-            // Create output file path
-            var specFileName = Path.GetFileNameWithoutExtension(specFilePath);
-            var fastaFileName = Path.GetFileNameWithoutExtension(fastaFilePath);
-            string outputFilePath = Path.Combine(outputDirectory, string.Format("{0}_{1}.tsv", specFileName, fastaFileName));
+        //    // Create output file path
+        //    var specFileName = Path.GetFileNameWithoutExtension(specFilePath);
+        //    var fastaFileName = Path.GetFileNameWithoutExtension(fastaFilePath);
+        //    string outputFilePath = Path.Combine(outputDirectory, string.Format("{0}_{1}.tsv", specFileName, fastaFileName));
 
-            // Read input files
-            var parameters = MsPfParameters.ReadFromFile(paramFilePath);
-            var lcmsRun = PbfLcMsRun.GetLcMsRun(specFilePath);
-            var fastaEntries = FastaReaderWriter.ReadFastaFile(fastaFilePath).ToList();
+        //    // Read input files
+        //    var parameters = MsPfParameters.ReadFromFile(paramFilePath);
+        //    var lcmsRun = PbfLcMsRun.GetLcMsRun(specFilePath);
+        //    var fastaEntries = FastaReaderWriter.ReadFastaFile(fastaFilePath).ToList();
 
-            // Initialize components for scoring
-            var aminoAcidSet = new AminoAcidSet(parameters.Modifications, parameters.MaxDynamicModificationsPerSequence);
-            var scorerFactory = new ScorerFactory(
-                                      parameters.ProductIonTolerancePpm,
-                                      parameters.MinProductIonCharge,
-                                      parameters.MaxProductIonCharge,
-                                      minCorrelation);
+        //    // Initialize components for scoring
+        //    var aminoAcidSet = new AminoAcidSet(parameters.Modifications, parameters.MaxDynamicModificationsPerSequence);
+        //    var scorerFactory = new ScorerFactory(
+        //                              parameters.ProductIonTolerancePpm,
+        //                              parameters.MinProductIonCharge,
+        //                              parameters.MaxProductIonCharge,
+        //                              minCorrelation);
 
-            var scans = lcmsRun.GetScanNumbers(2);
-            var scanToIdsMap = scans.ToDictionary(scan => scan, scan => new List<SearchIdentification>());
+        //    var scans = lcmsRun.GetScanNumbers(2);
+        //    var scanToIdsMap = scans.ToDictionary(scan => scan, scan => new List<SearchIdentification>());
 
-            // Score all scans against all sequences.
-            foreach (var scan in scans)
-            {
-                // Get spectrum
-                var productSpectrum = lcmsRun.GetSpectrum(scan) as ProductSpectrum;
-                if (productSpectrum == null)
-                {
-                    continue;
-                }
+        //    // Score all scans against all sequences.
+        //    foreach (var scan in scans)
+        //    {
+        //        // Get spectrum
+        //        var productSpectrum = lcmsRun.GetSpectrum(scan) as ProductSpectrum;
+        //        if (productSpectrum == null)
+        //        {
+        //            continue;
+        //        }
 
-                // Get scorer
-                var scorer = scorerFactory.GetScorer(productSpectrum);
+        //        // Get scorer
+        //        var scorer = scorerFactory.GetScorer(productSpectrum);
 
-                foreach (var entry in fastaEntries)
-                {
-                    // Get sequence
-                    var sequence = this.LoadSequence(entry.ProteinSequenceText, aminoAcidSet);
+        //        foreach (var entry in fastaEntries)
+        //        {
+        //            // Get sequence
+        //            var sequence = this.LoadSequence(entry.ProteinSequenceText, aminoAcidSet);
 
-                    // Finally score the spectrum against the sequence
-                    var score = IonUtils.ScoreSequence(scorer, sequence);
+        //            // Finally score the spectrum against the sequence
+        //            var score = IonUtils.ScoreSequence(scorer, sequence);
 
-                    if (scan == 176 && entry.ProteinName == "Melittin")
-                    {
-                        Console.WriteLine();
-                    }
+        //            if (scan == 176 && entry.ProteinName == "Melittin")
+        //            {
+        //                Console.WriteLine();
+        //            }
 
-                    if (score > 0.0)
-                    {
-                        scanToIdsMap[scan].Add(new SearchIdentification
-                        {
-                            Scan = scan,
-                            ProteinName = entry.ProteinName,
-                            ProteinDesc = entry.ProteinDescription,
-                            Sequence = sequence,
-                            Score = score
-                        });
-                    }
-                }
-            }
+        //            if (score > 0.0)
+        //            {
+        //                scanToIdsMap[scan].Add(new SearchIdentification
+        //                {
+        //                    Scan = scan,
+        //                    ProteinName = entry.ProteinName,
+        //                    ProteinDesc = entry.ProteinDescription,
+        //                    Sequence = sequence,
+        //                    Score = score
+        //                });
+        //            }
+        //        }
+        //    }
 
-            // Remove redundant IDs
-            foreach (var scanIds in scanToIdsMap)
-            {
-                if (scanIds.Value.Count > idsPerSpectrum)
-                {
-                    var alterIds = new List<SearchIdentification>(scanIds.Value);
-                    var actualIds = alterIds.OrderByDescending(id => id.Score).Take(idsPerSpectrum).ToList();
-                    scanToIdsMap[scanIds.Key].Clear();
-                    scanToIdsMap[scanIds.Key].AddRange(actualIds);
-                }
-            }
+        //    // Remove redundant IDs
+        //    foreach (var scanIds in scanToIdsMap)
+        //    {
+        //        if (scanIds.Value.Count > idsPerSpectrum)
+        //        {
+        //            var alterIds = new List<SearchIdentification>(scanIds.Value);
+        //            var actualIds = alterIds.OrderByDescending(id => id.Score).Take(idsPerSpectrum).ToList();
+        //            scanToIdsMap[scanIds.Key].Clear();
+        //            scanToIdsMap[scanIds.Key].AddRange(actualIds);
+        //        }
+        //    }
 
-            // Write results
-            var ids = scanToIdsMap.SelectMany(scanIds => scanIds.Value);
-            using (var writer = new StreamWriter(outputFilePath))
-            {
-                writer.WriteLine("Scan\tSequence\tProtein\tDescription\tScore\tFdr\tQValue");
-                foreach (var id in ids)
-                {
-                    writer.WriteLine(
-                                     "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
-                                     id.Scan,
-                                     this.GetSequenceString(id.Sequence),
-                                     id.ProteinName,
-                                     id.ProteinDesc,
-                                     id.Score,
-                                     id.Fdr,
-                                     id.Qvalue);
-                }
-            }
-        }
+        //    // Write results
+        //    var ids = scanToIdsMap.SelectMany(scanIds => scanIds.Value);
+        //    using (var writer = new StreamWriter(outputFilePath))
+        //    {
+        //        writer.WriteLine("Scan\tSequence\tProtein\tDescription\tScore\tFdr\tQValue");
+        //        foreach (var id in ids)
+        //        {
+        //            writer.WriteLine(
+        //                             "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
+        //                             id.Scan,
+        //                             this.GetSequenceString(id.Sequence),
+        //                             id.ProteinName,
+        //                             id.ProteinDesc,
+        //                             id.Score,
+        //                             id.Fdr,
+        //                             id.Qvalue);
+        //        }
+        //    }
+        //}
 
         private string GetSequenceString(Sequence sequence)
         {
