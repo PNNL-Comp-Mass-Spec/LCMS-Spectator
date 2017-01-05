@@ -62,13 +62,15 @@
       <HintPath>..\packages\GraphX.2.3.3.0\lib\net40-client\GraphX.PCL.Logic.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="InformedProteomics.Backend, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Library\InformedProteomics.Backend.dll</HintPath>
+    <Reference Include="InformedProteomics.Backend">
+      <HintPath>..\Library\InformedProteomics\InformedProteomics.Backend.dll</HintPath>
     </Reference>
-    <Reference Include="InformedProteomics.TopDown, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="InformedProteomics.Scoring">
+      <HintPath>..\Library\InformedProteomics\InformedProteomics.Scoring.dll</HintPath>
+    </Reference>
+    <Reference Include="Ionic.Zip, Version=1.9.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Library\InformedProteomics.TopDown.dll</HintPath>
+      <HintPath>..\..\informed-proteomics\lib\PSI_Interface\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=3.2.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.2.1\lib\net45\nunit.framework.dll</HintPath>
@@ -88,6 +90,10 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="PSI_Interface, Version=1.1.6179.32903, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\PSI_Interface\PSI_Interface.dll</HintPath>
+    </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraphPCL.3.6.61114.2\lib\net40-client\QuickGraph.dll</HintPath>
     </Reference>

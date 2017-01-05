@@ -398,15 +398,7 @@ namespace LcmsSpectator.Config
             }
 
             var parts = str.Split(' ');
-            var ionNames = new Dictionary<string, BaseIonType>
-            {
-                { BaseIonType.A.Symbol, BaseIonType.A },
-                { BaseIonType.B.Symbol, BaseIonType.B },
-                { BaseIonType.C.Symbol, BaseIonType.C },
-                { BaseIonType.X.Symbol, BaseIonType.X },
-                { BaseIonType.Y.Symbol, BaseIonType.Y },
-                { BaseIonType.Z.Symbol, BaseIonType.Z }
-            };
+            var ionNames = BaseIonType.AllBaseIonTypes.ToDictionary(bit => bit.Symbol, bit => bit);
 
             return (from part in parts where ionNames.ContainsKey(part) select ionNames[part]).ToList();
         }

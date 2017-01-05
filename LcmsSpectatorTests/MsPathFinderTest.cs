@@ -14,7 +14,6 @@ namespace LcmsSpectatorTests
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Database;
     using InformedProteomics.Backend.MassSpecData;
-    using InformedProteomics.TopDown.Execution;
 
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers;

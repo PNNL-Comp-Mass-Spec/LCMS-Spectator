@@ -380,7 +380,7 @@ namespace LcmsSpectator.ViewModels.Data
                 if (progressData.ShouldUpdate())
                 {
                     this.LoadProgressPercent = progressData.Percent;
-                    this.LoadProgressStatus = progressData.Status;   
+                    this.LoadProgressStatus = progressData.Status;
                 }
             });
 

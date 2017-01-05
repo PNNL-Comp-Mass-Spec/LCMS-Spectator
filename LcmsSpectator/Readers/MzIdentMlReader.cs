@@ -12,15 +12,17 @@ namespace LcmsSpectator.Readers
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using System.Threading.Tasks;
 
     using InformedProteomics.Backend.Data.Sequence;
+    using InformedProteomics.Backend.Results;
 
     using LcmsSpectator.Models;
     using LcmsSpectator.Readers.SequenceReaders;
-    using MTDBFramework.Algorithms;
-    using MTDBFramework.Data;
-    
+
+    using PSI_Interface.IdentData;
+
     /// <summary>
     /// Reader for MZID files.
     /// </summary>
@@ -34,7 +36,7 @@ namespace LcmsSpectator.Readers
         /// <summary>
         /// MTDB Creator MZID reader.
         /// </summary>
-        private readonly MTDBFramework.IO.MzIdentMlReader mzIdentMlReader;
+        private readonly SimpleMZIdentMLReader mzIdentMlReader;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MzIdentMlReader"/> class.
@@ -43,13 +45,7 @@ namespace LcmsSpectator.Readers
         public MzIdentMlReader(string filePath)
         {
             this.filePath = filePath;
-            var options = new Options
-            {
-                MsgfQValue = 1.0,
-                MaxMsgfSpecProb = 1.0,
-                TargetFilterType = TargetWorkflowType.BOTTOM_UP
-            };
-            this.mzIdentMlReader = new MTDBFramework.IO.MzIdentMlReader(options);
+            this.mzIdentMlReader = new SimpleMZIdentMLReader();
             this.Modifications = new List<Modification>();
         }
 
@@ -72,54 +68,61 @@ namespace LcmsSpectator.Readers
         /// <returns>Identification tree of MZID identifications.</returns>
         public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
-            var dataSet = await Task.Run(() => this.mzIdentMlReader.Read(this.filePath));
+            var dataset = await Task.Run(() => this.mzIdentMlReader.Read(this.filePath));
             var prsms = new List<PrSm>();
-
-            var evidences = dataSet.Evidences;
-
             var sequenceReader = new SequenceReader();
 
-            foreach (var evidence in evidences)
+            foreach (var evidence in dataset.Identifications)
             {
-                var msgfPlusEvidence = evidence as MsgfPlusResult;
-                var sequenceText = evidence.SeqWithNumericMods;
-                var index = sequenceText.IndexOf('.');
-                var lastIndex = sequenceText.LastIndexOf('.');
-                if (index != lastIndex && index >= 0 && lastIndex >= 0 && sequenceText.Length > 1)
-                {
-                    sequenceText = sequenceText.Substring(
-                        index + 1,
-                        sequenceText.Length - (sequenceText.Length - lastIndex) - (index + 1));
-                }
+                var sequence = evidence.Peptide.GetIpSequence();
+                var sequenceStr = this.GetSequenceStr(sequence);
 
-                double qvalue = -1;
-                double score = double.NaN;
-
-                if (msgfPlusEvidence != null)
+                foreach (var pepEv in evidence.PepEvidence)
                 {
-                    score = msgfPlusEvidence.SpecEValue;
-                    qvalue = msgfPlusEvidence.QValue;
-                }
+                    if (pepEv.IsDecoy)
+                    {
+                        continue;
+                    }
 
-                foreach (var protein in evidence.Proteins)
-                {
                     var prsm = new PrSm(sequenceReader)
                     {
                         Heavy = false,
-                        Scan = evidence.Scan,
+                        Scan = evidence.ScanNum,
                         Charge = evidence.Charge,
-                        ////Sequence = sequenceReader.Read(sequenceText),
-                        SequenceText = sequenceText,
-                        ProteinName = protein.ProteinName,
-                        Score = score,
+                        Sequence = sequence,
+                        SequenceText = sequenceStr,
+                        ProteinName = pepEv.DbSeq.Accession,
+                        ProteinDesc = pepEv.DbSeq.ProteinDescription,
+                        Score = evidence.SpecEv,
                         UseGolfScoring = true,
-                        QValue = qvalue,
+                        QValue = evidence.QValue,
                     };
                     prsms.Add(prsm);
                 }
             }
 
             return prsms;
+        }
+
+        /// <summary>
+        /// Get the sequence as a string.
+        /// </summary>
+        /// <param name="sequence">The sequence to convert</param>
+        /// <returns></returns>
+        private string GetSequenceStr(Sequence sequence)
+        {
+            var sequenceStr = new StringBuilder();
+            foreach (var aa in sequence)
+            {
+                sequenceStr.Append(aa.Residue);
+                if (aa is ModifiedAminoAcid)
+                {
+                    var modAa = aa as ModifiedAminoAcid;
+                    sequenceStr.AppendFormat("[{0}]", modAa.Modification.Name);
+                }
+            }
+
+            return sequenceStr.ToString();
         }
 
         public IList<Modification> Modifications { get; private set; }

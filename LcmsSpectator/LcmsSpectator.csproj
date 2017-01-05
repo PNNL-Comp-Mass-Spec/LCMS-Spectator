@@ -89,13 +89,13 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="InformedProteomics.Backend">
-      <HintPath>..\Library\InformedProteomics.Backend.dll</HintPath>
+      <HintPath>..\Library\InformedProteomics\InformedProteomics.Backend.dll</HintPath>
+    </Reference>
+    <Reference Include="InformedProteomics.Scoring">
+      <HintPath>..\Library\InformedProteomics\InformedProteomics.Scoring.dll</HintPath>
     </Reference>
     <Reference Include="InformedProteomics.TopDown">
-      <HintPath>..\Library\InformedProteomics.TopDown.dll</HintPath>
-    </Reference>
-    <Reference Include="Ionic.Zip">
-      <HintPath>..\Library\PSI_Interface\Ionic.Zip.dll</HintPath>
+      <HintPath>..\Library\InformedProteomics\InformedProteomics.TopDown.dll</HintPath>
     </Reference>
     <Reference Include="MTDBFramework, Version=1.0.5478.23028, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -113,15 +113,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\OxyPlot.Wpf.2015.1.982-alpha\lib\net45\OxyPlot.Xps.dll</HintPath>
     </Reference>
-    <Reference Include="PHRPReader, Version=1.1.5553.26605, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Library\PHRPReader.dll</HintPath>
+    <Reference Include="PHRPReader">
+      <HintPath>..\Library\PHRPReader\PHRPReader.dll</HintPath>
     </Reference>
-    <Reference Include="PSI_Interface">
+    <Reference Include="PSI_Interface, Version=1.1.6179.32903, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Library\PSI_Interface\PSI_Interface.dll</HintPath>
     </Reference>
     <Reference Include="QuadTreeLib">
-      <HintPath>..\Library\QuadTreeLib.dll</HintPath>
+      <HintPath>..\Library\QuadTreeLib\QuadTreeLib.dll</HintPath>
     </Reference>
     <Reference Include="QuickGraph">
       <HintPath>..\packages\QuickGraphPCL.3.6.61114.2\lib\net40-client\QuickGraph.dll</HintPath>

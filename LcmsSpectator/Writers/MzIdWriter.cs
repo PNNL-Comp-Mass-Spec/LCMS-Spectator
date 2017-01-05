@@ -17,8 +17,6 @@ namespace LcmsSpectator.Writers
     using PSI_Interface.IdentData;
     using PSI_Interface.IdentData.mzIdentML;
 
-    using Modification = PSI_Interface.IdentData.ModificationObj;
-
     public class MzIdWriter : IIdWriter
     {
         /// <summary>
@@ -47,14 +45,7 @@ namespace LcmsSpectator.Writers
             {
                 name = first.RawFileName;
             }
-            
-            var mzIdWriter = new MzIdentMLWriter(this.filePath);
-
-            var identData = new IdentDataObj
-                                {
-                                    Name = name,
-
-                                };
+           
         }
 
         /// <summary>
@@ -78,15 +69,6 @@ namespace LcmsSpectator.Writers
                 var modification = modAa.Modification;
 
                 var cvParams = new IdentDataObj();
-
-                var mod = new Modification
-                {
-                    MonoisotopicMassDelta = modAa.Mass,
-                    Location = i,
-                    ////CVParams = this.accessionModMap[modification.AccessionNum]
-                };
-
-                modList.Add(mod);
             }
 
             return modList;

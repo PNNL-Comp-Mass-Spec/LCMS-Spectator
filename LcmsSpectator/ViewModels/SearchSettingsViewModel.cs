@@ -811,31 +811,28 @@ namespace LcmsSpectator.ViewModels
         {
             var searchModifications = this.SearchModifications.Select(searchModification => searchModification.SearchModification).ToList();
             var aminoAcidSet = new AminoAcidSet(searchModifications, this.maxDynamicModificationsPerSequence);
-            return new IcTopDownLauncher(
-                this.SpectrumFilePath,
-                this.truncatedFastaDbFilePath,
-                this.OutputFilePath,
-                aminoAcidSet,
-                this.FeatureFilePath)
-            {
-                MinSequenceLength = this.MinSequenceLength,
-                MaxSequenceLength = this.MaxSequenceLength,
-                MaxNumNTermCleavages = 1,
-                MaxNumCTermCleavages = 0,
-                MinPrecursorIonCharge = this.MinPrecursorIonCharge,
-                MaxPrecursorIonCharge = this.MaxPrecursorIonCharge,
-                MinProductIonCharge = this.MinProductIonCharge,
-                MaxProductIonCharge = this.MaxProductIonCharge,
-                MinSequenceMass = this.MinSequenceMass,
-                MaxSequenceMass = this.MaxSequenceMass,
-                PrecursorIonTolerancePpm = this.PrecursorIonToleranceValue,
-                ProductIonTolerancePpm = this.ProductIonToleranceValue,
-                RunTargetDecoyAnalysis = DatabaseSearchMode.Both,
-                SearchMode = this.SelectedSearchMode,
-                MaxNumThreads = 4,
-                ScanNumbers = ms2ScanNums,
-                NumMatchesPerSpectrum = this.NumMatchesPerSpectrum,
-            };
+            return
+                new IcTopDownLauncher(
+                    new InformedProteomics.TopDown.Execution.MsPfParameters
+                        {
+                            MinSequenceLength = this.MinSequenceLength,
+                            MaxSequenceLength = this.MaxSequenceLength,
+                            //MaxNumNTermCleavages = 1,
+                            //MaxNumCTermCleavages = 0,
+                            MinPrecursorIonCharge = this.MinPrecursorIonCharge,
+                            MaxPrecursorIonCharge = this.MaxPrecursorIonCharge,
+                            MinProductIonCharge = this.MinProductIonCharge,
+                            MaxProductIonCharge = this.MaxProductIonCharge,
+                            MinSequenceMass = this.MinSequenceMass,
+                            MaxSequenceMass = this.MaxSequenceMass,
+                           // PrecursorIonTolerancePpm = this.PrecursorIonToleranceValue,
+                            //ProductIonTolerancePpm = this.ProductIonToleranceValue,
+                            //RunTargetDecoyAnalysis = DatabaseSearchMode.Both,
+                            //SearchMode = this.SelectedSearchMode,
+                            //MaxNumThreads = 4,
+                            //ScanNumbers = ms2ScanNums,
+                            //NumMatchesPerSpectrum = this.NumMatchesPerSpectrum,
+                        });
         }
 
         /// <summary>
