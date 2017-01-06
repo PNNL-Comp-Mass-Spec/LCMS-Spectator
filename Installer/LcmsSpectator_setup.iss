@@ -47,33 +47,38 @@ Source: LcmsSpectator\bin\Release\x64\SQLite.Interop.dll;                    Des
 Source: LcmsSpectator\bin\Release\x86\SQLite.Interop.dll;                    DestDir: {app}\x86
 
 ; Separately-managed libraries
-Source: Library\QuadTreeLib.dll;                                                 DestDir: {app}
+Source: Library\QuadTreeLib\QuadTreeLib.dll;                                 DestDir: {app}
+Source: Library\MwtWinDll.dll;                                               DestDir: {app}
 
 ; PNNLOmics
-Source: Library\alglibnet2.dll;                                                  DestDir: {app}
-Source: Library\PNNLOmics.dll;                                                   DestDir: {app}
+Source: Library\InformedProteomics\alglibnet2.dll;                           DestDir: {app}
+Source: Library\InformedProteomics\PNNLOmics.dll;                            DestDir: {app}
 
 ; MTDBFramework
-Source: Library\MTDBFramework\FluentNHibernate.dll;                                            DestDir: {app}
-Source: Library\MTDBFramework\Iesi.Collections.dll;                                            DestDir: {app}
-Source: Library\MTDBFramework\MTDBFramework.dll;                                               DestDir: {app}
-Source: Library\MTDBFramework\NHibernate.dll;                                                  DestDir: {app}
-Source: Library\MTDBFramework\NETPrediction.dll;                                               DestDir: {app}
-Source: Library\MTDBFramework\PHRPReader.dll;                                                  DestDir: {app}
+Source: Library\MTDBFramework\FluentNHibernate.dll;                          DestDir: {app}
+Source: Library\MTDBFramework\Iesi.Collections.dll;                          DestDir: {app}
+Source: Library\MTDBFramework\MTDBFramework.dll;                             DestDir: {app}
+Source: Library\MTDBFramework\NHibernate.dll;                                DestDir: {app}
+Source: Library\MTDBFramework\NETPrediction.dll;                             DestDir: {app}
+Source: Library\MTDBFramework\PHRPReader.dll;                                DestDir: {app}
 
 ; InformedProteomics
-Source: Library\InformedProteomics.Backend.dll;                                  DestDir: {app}
-Source: Library\InformedProteomics.FeatureFinding.dll;                           DestDir: {app}
-Source: Library\InformedProteomics.Scoring.dll;                                  DestDir: {app}
-Source: Library\InformedProteomics.TopDown.dll;                                  DestDir: {app}
-Source: Library\MathNet.Numerics.dll;                                            DestDir: {app}
-Source: Library\ProteinFileReader.dll;                                           DestDir: {app}
-Source: Library\SAIS.dll;                                                        DestDir: {app}
-Source: Library\ThermoRawFileReader.dll;                                         DestDir: {app}
+Source: Library\InformedProteomics\InformedProteomics.Backend.dll;           DestDir: {app}
+Source: Library\InformedProteomics\InformedProteomics.FeatureFinding.dll;    DestDir: {app}
+Source: Library\InformedProteomics\InformedProteomics.Scoring.dll;           DestDir: {app}
+Source: Library\InformedProteomics\InformedProteomics.TopDown.dll;           DestDir: {app}
+Source: Library\InformedProteomics\MathNet.Numerics.dll;                     DestDir: {app}
+Source: Library\InformedProteomics\ProteinFileReader.dll;                    DestDir: {app}
+Source: Library\InformedProteomics\SAIS.dll;                                 DestDir: {app}
+Source: Library\InformedProteomics\ThermoRawFileReader.dll;                  DestDir: {app}
 
 ; PSI_Interface
-Source: Library\PSI_Interface\PSI_Interface.dll;                                               DestDir: {app}
-Source: Library\PSI_Interface\Ionic.Zip.dll;                                                   DestDir: {app}
+Source: Library\PSI_Interface\PSI_Interface.dll;                             DestDir: {app}
+Source: Library\PSI_Interface\Ionic.Zip.dll;                                 DestDir: {app}
+
+; Xceed Themes
+Source: Library\Theme\Xceed.Wpf.Themes.dll;                                  DestDir: {app}
+Source: Library\Theme\Xceed.Wpf.Themes.Office2007.dll;                       DestDir: {app}
 
 [Dirs]
 Name: {commonappdata}\LcmsSpectator; Flags: uninsalwaysuninstall
