@@ -79,7 +79,7 @@ namespace LcmsSpectator.Readers
 
                 foreach (var pepEv in evidence.PepEvidence)
                 {
-                    if (pepEv.IsDecoy)
+                    if (pepEv.IsDecoy || pepEv.DbSeq.Accession.StartsWith("XXX"))
                     {
                         continue;
                     }
