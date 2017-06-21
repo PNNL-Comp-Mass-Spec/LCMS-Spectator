@@ -172,6 +172,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComparisonTests.cs" />
+    <Compile Include="CreateFigures.cs" />
     <Compile Include="DialogServices\TestableMainDialogService.cs" />
     <Compile Include="IonUtilsTest.cs" />
     <Compile Include="MainWindowTest.cs" />
