@@ -326,6 +326,7 @@
     <Compile Include="ViewModels\FileSelectors\OpenDataWindowViewModel.cs" />
     <Compile Include="ViewModels\Data\ScanViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\SelectDataSetViewModel.cs" />
+    <Compile Include="ViewModels\PlotViewModel.cs" />
     <Compile Include="ViewModels\PrecursorSequenceIonViewModel.cs" />
     <Compile Include="ViewModels\SearchSettingsViewModel.cs" />
     <Compile Include="ViewModels\SequenceViewer\FragmentIonViewModel.cs" />
@@ -336,6 +337,10 @@
     <Compile Include="ViewModels\Plots\SpectrumViewModel.cs" />
     <Compile Include="ViewModels\Plots\XicPlotViewModel.cs" />
     <Compile Include="ViewModels\Plots\XicViewModel.cs" />
+    <Compile Include="ViewModels\StableIsotopeViewer\IsotopeProportionSelectorViewModel.cs" />
+    <Compile Include="ViewModels\StableIsotopeViewer\IsotopeProportionViewModel.cs" />
+    <Compile Include="ViewModels\StableIsotopeViewer\IsotopicConcentrationTunerViewModel.cs" />
+    <Compile Include="ViewModels\StableIsotopeViewer\StableIsotopeViewModel.cs" />
     <Compile Include="ViewModels\WindowViewModel.cs" />
     <Compile Include="Views\AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
@@ -414,6 +419,9 @@
     <Compile Include="Views\FileSelectors\SelectDataSetView.xaml.cs">
       <DependentUpon>SelectDataSetView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\plotViewer.xaml.cs">
+      <DependentUpon>plotViewer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SearchSettingsWindow.xaml.cs">
       <DependentUpon>SearchSettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -430,6 +438,12 @@
     <Compile Include="Views\Plots\XicView.xaml.cs">
       <DependentUpon>XicView.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\StableIsotopeViewer\IsotopicConcentrationTuner.xaml.cs">
+      <DependentUpon>IsotopicConcentrationTuner.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\StableIsotopeViewer\StableIsotopeViewer.xaml.cs">
+      <DependentUpon>StableIsotopeViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Writers\Exporters\SpectrumPeakExporter.cs" />
     <Compile Include="Writers\Exporters\SpectrumPlotExporter.cs" />
@@ -576,6 +590,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\plotViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SearchSettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -595,6 +613,14 @@
     <Page Include="Views\Plots\XicView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\StableIsotopeViewer\IsotopicConcentrationTuner.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\StableIsotopeViewer\StableIsotopeViewer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -638,10 +664,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\PNNL_Logo.jpg" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModels\StableIsotopeViewer\" />
-    <Folder Include="Views\StableIsotopeViewer\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.101.0\build\net451\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.101.0\build\net451\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

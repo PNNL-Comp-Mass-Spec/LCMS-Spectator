@@ -16,6 +16,8 @@
 
     using ReactiveUI;
 
+    using IsotopicConcentrationTuner = InformedProteomics.Backend.Utils.IsotopicConcentrationTuner;
+
     /// <summary>
     /// View model for editing, running, and displaying results for the <see cref="IsotopicConcentrationTuner" />.
     /// </summary>

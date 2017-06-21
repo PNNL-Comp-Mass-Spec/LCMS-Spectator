@@ -12,7 +12,7 @@ namespace LcmsSpectatorTests.DialogServices
     using LcmsSpectator.ViewModels.Modifications;
     using LcmsSpectator.ViewModels.Plots;
     using LcmsSpectator.ViewModels.SequenceViewer;
-    //using LcmsSpectator.ViewModels.StableIsotopeViewer;
+    using LcmsSpectator.ViewModels.StableIsotopeViewer;
 
     /// <summary>
     /// The purpose of this class is to private a testable dialog service that does not actually
@@ -222,14 +222,14 @@ namespace LcmsSpectatorTests.DialogServices
             throw new NotImplementedException();
         }
 
-        //public void OpenStableIsotopeViewer(StableIsotopeViewModel viewModel)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public void OpenStableIsotopeViewer(StableIsotopeViewModel viewModel)
+        {
+            throw new NotImplementedException();
+        }
 
-        //public void OpenIsotopicConcentrationTuner(IsotopicConcentrationTunerViewModel viewModel)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public void OpenIsotopicConcentrationTuner(IsotopicConcentrationTunerViewModel viewModel)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
