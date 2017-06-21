@@ -154,6 +154,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showUnexplainedPeaks;
 
         /// <summary>
+        /// A value indicating whether only the top 20 intensity peaks should be shown in the spectrum.
+        /// </summary>
+        private bool showOnlyTop20Peaks;
+
+        /// <summary>
         /// The title of spectrum plot.
         /// </summary>
         private string title;
@@ -232,7 +237,8 @@ namespace LcmsSpectator.ViewModels.Plots
                               x => x.ShowDeconvolutedSpectrum,
                               x => x.ShowDeconvolutedIons,
                               x => x.ShowFilteredSpectrum,
-                              x => x.ShowUnexplainedPeaks)
+                              x => x.ShowUnexplainedPeaks,
+                              x => x.ShowOnlyTop20Peaks)
                 .Where(x => x.Item1 != null && x.Item2 != null)
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
                 .SelectMany(async x =>
@@ -377,6 +383,15 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             get { return this.showUnexplainedPeaks; }
             set { this.RaiseAndSetIfChanged(ref this.showUnexplainedPeaks, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether only the top 20 intensity peaks should be shown in the spectrum.
+        /// </summary>
+        public bool ShowOnlyTop20Peaks
+        {
+            get { return this.showOnlyTop20Peaks; }
+            set { this.RaiseAndSetIfChanged(ref this.showOnlyTop20Peaks, value); }
         }
 
         /// <summary>
@@ -688,6 +703,12 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 currentSpectrum = this.deconvolutedSpectrum;
+            }
+
+            if (this.ShowOnlyTop20Peaks)
+            {
+                var top20Peaks = currentSpectrum.Peaks.OrderByDescending(p => p.Intensity).Take(20).OrderBy(p => p.Mz).ToList();
+                currentSpectrum = new Spectrum(top20Peaks, currentSpectrum.ScanNum);
             }
 
             return currentSpectrum;
