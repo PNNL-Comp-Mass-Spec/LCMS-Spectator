@@ -22,7 +22,7 @@ namespace LcmsSpectator.ViewModels
     using OxyPlot.Wpf;
 
     using ReactiveUI;
-    
+
     /// <summary>
     /// Tracks settings and then publishes them to application settings when user clicks OK.
     /// </summary>
@@ -40,7 +40,7 @@ namespace LcmsSpectator.ViewModels
         private bool automaticallySelectIonTypes;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SettingsViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="SettingsViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from a view model.</param>
         public SettingsViewModel(IMainDialogService dialogService)
@@ -222,7 +222,7 @@ namespace LcmsSpectator.ViewModels
         /// Gets or sets a value indicating whether the ion types should be changed
         /// when the activation method of the currently selected MS/MS spectrum changes?
         /// </summary>
-        public bool AutomaticallySelectIonTypes 
+        public bool AutomaticallySelectIonTypes
         {
             get { return this.automaticallySelectIonTypes; }
             set { this.RaiseAndSetIfChanged(ref this.automaticallySelectIonTypes, value); }
@@ -237,12 +237,12 @@ namespace LcmsSpectator.ViewModels
         /// Gets the view model for the feature color list.
         /// </summary>
         public ColorListViewModel FeatureColors { get; private set; }
-        
+
         /// <summary>
         /// Gets the view model for the id color list.
         /// </summary>
         public ColorListViewModel IdColors { get; private set; }
-        
+
         /// <summary>
         /// Gets or sets the color for the MS/MS scans on the feature map.
         /// </summary>

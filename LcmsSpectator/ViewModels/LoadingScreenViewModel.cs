@@ -15,7 +15,7 @@ namespace LcmsSpectator.ViewModels
     using System.Threading;
     using System.Threading.Tasks;
     using ReactiveUI;
-    
+
     /// <summary>
     /// View model that displays animated loading screen text.
     /// </summary>

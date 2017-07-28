@@ -158,14 +158,14 @@ namespace LcmsSpectatorTests.DialogServices
         }
 
         public bool OpenDataWindow(OpenDataWindowViewModel openDataWindowViewModel)
-		{
-			throw new NotImplementedException();
-		}
+        {
+            throw new NotImplementedException();
+        }
 
-		public bool OpenSelectDataWindow(SelectDataSetViewModel selectDataViewModel)
-		{
-			throw new NotImplementedException();
-		}
+        public bool OpenSelectDataWindow(SelectDataSetViewModel selectDataViewModel)
+        {
+            throw new NotImplementedException();
+        }
 
 
         public void OpenErrorMapWindow(ErrorMapViewModel errorMapViewModel)
