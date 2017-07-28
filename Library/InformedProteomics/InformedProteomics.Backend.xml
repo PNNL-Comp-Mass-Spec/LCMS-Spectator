@@ -529,7 +529,7 @@
             <summary>
             Gets theoretical isotope peaks whose intensities are relative to the most intense isotope
             </summary>
-            <param name="relativeIntensityThreshold">relative isotope intensity threshold</param>
+            <param name="minimumRelativeIntensity">Minimum intensity threshold for including the isotope in the results</param>
             <returns>Enumerable of isotope peaks</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Data.Biology.Ion.GetIsotopes(System.Int32)">
@@ -559,6 +559,24 @@
             </summary>
             <param name="c"></param>
             <returns></returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.Data.Composition.Composition.ParseFromPlainString(System.String)">
+            <summary>
+            Parse a plain-string empirical formula, for example
+            C2H3N1O1S
+            </summary>
+            <param name="plaincompositionStr"></param>
+            <remarks>Empirical formula cannot have parentheses or spaces</remarks>
+            <returns>Composition object, or null if a parse error</returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.Data.Composition.Composition.Parse(System.String)">
+            <summary>
+            Parse unimod-like composition string, for example
+            H(117) C(77) N(17) O(26) S(2)
+            </summary>
+            <param name="compositionStr"></param>
+            <remarks>Requires the use of parentheses for element counts.  Also requires whitespace (typically a space) between each element and count</remarks>
+            <returns>Composition object, or null if a parse error</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Data.Composition.Composition.GetMonoIsotopicMass">
             <summary>
@@ -700,6 +718,11 @@
             The list of search modifications provided via the mods file.
             </summary>
         </member>
+        <member name="F:InformedProteomics.Backend.Data.Sequence.Modification.UNKNOWN_PSI_MOD_ACCESSION">
+            <summary>
+            Integer portion of MS:1001460
+            </summary>
+        </member>
         <member name="M:InformedProteomics.Backend.Data.Sequence.Modification.ToString">
             <summary>
             Returns a string that represents this modification object.
@@ -707,6 +730,25 @@
             <returns>
             A string that represents the modification.
             </returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.Data.Sequence.Modification.Get(System.String)">
+            <summary>
+            Retrieve a Modification object for the given mod
+            </summary>
+            <param name="psiMsName"></param>
+            <remarks>Returns null if the mod name is not recognized</remarks>
+        </member>
+        <member name="M:InformedProteomics.Backend.Data.Sequence.Modification.Get(System.String,System.Double)">
+            <summary>
+            Retrieve a Modification object for the given mod
+            </summary>
+            <param name="modName">ModName (either an official PSI name or a generic name)</param>
+            <param name="deltaMass"></param>
+        </member>
+        <member name="F:InformedProteomics.Backend.Data.Sequence.Modification.MassToModMap">
+            <summary>
+            Dictionary mapping mod mass (formatted with const MOD_MASS_FORMAT_STRING) to mod name
+            </summary>
         </member>
         <member name="M:InformedProteomics.Backend.Data.Sequence.Modification.UpdateAndGetModification(System.String,InformedProteomics.Backend.Data.Composition.Composition)">
             <summary>
@@ -889,6 +931,13 @@
             <summary>
             Version of the immediate prior input file (raw, mzML, .d folder, etc.)
             </summary>
+        </member>
+        <member name="M:InformedProteomics.Backend.Data.Spectrometry.Isotope.CompareTo(InformedProteomics.Backend.Data.Spectrometry.Isotope)">
+            <summary>
+            Compare two isotopes by Index
+            </summary>
+            <param name="other"></param>
+            <returns></returns>
         </member>
         <member name="T:InformedProteomics.Backend.Data.Spectrometry.ProductSpectrum">
             <summary>
@@ -1838,7 +1887,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.MassSpecData.MassSpecDataReaderFactory.IsThermoRawAvailable">
             <summary>
-            Tests to see if we can load the needed  Thermo MSFileReader DLL without errors
+            Tests to see if we can load the needed Thermo MSFileReader DLL without errors
             </summary>
             <returns></returns>
         </member>
@@ -3014,7 +3063,7 @@
             <param name="precursorSignalToNoiseRatioThreshold"></param>
             <param name="productSignalToNoiseRatioThreshold"></param>
         </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.#ctor(System.String,InformedProteomics.Backend.MassSpecData.IMassSpecDataReader,System.String,System.Double,System.Double,System.IProgress{InformedProteomics.Backend.Utils.ProgressData},System.Boolean)">
+        <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.#ctor(System.String,InformedProteomics.Backend.MassSpecData.IMassSpecDataReader,System.String,System.Double,System.Double,System.IProgress{InformedProteomics.Backend.Utils.ProgressData},System.Boolean,System.Int32,System.Int32)">
             <summary>
             Constructor for creating and/or opening a PBF file
             </summary>
@@ -3025,6 +3074,8 @@
             <param name="productSignalToNoiseRatioThreshold"></param>
             <param name="progress"></param>
             <param name="keepDataReaderOpen">use 'true' if the data reader should not be closed when finished creating the PBF file</param>
+            <param name="scanStart">Minimum scan number to include in the .PBF file; 0 to disable this filter</param>
+            <param name="scanEnd">Maximum scan number to include to the .PBF file; 0 to disable this filter</param>
         </member>
         <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.#ctor(System.Double,System.Double)">
             <summary>
@@ -3033,7 +3084,7 @@
             <param name="precursorSignalToNoiseRatioThreshold"></param>
             <param name="productSignalToNoiseRatioThreshold"></param>
         </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.GetPbfFile(System.String,InformedProteomics.Backend.MassSpecData.IMassSpecDataReader,System.String,System.IProgress{InformedProteomics.Backend.Utils.ProgressData},System.Boolean)">
+        <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.GetPbfFile(System.String,InformedProteomics.Backend.MassSpecData.IMassSpecDataReader,System.String,System.IProgress{InformedProteomics.Backend.Utils.ProgressData},System.Boolean,System.Int32,System.Int32)">
             <summary>
             Given a spec file path and other information, either open an existing pbf corresponding to the spec file path, or create a new one
             </summary>
@@ -3042,8 +3093,10 @@
             <param name="pbfFileName"></param>
             <param name="progress"></param>
             <param name="keepDataReaderOpen"></param>
+            <param name="scanStart">Minimum scan number to include in the .PBF file; 0 to disable this filter</param>
+            <param name="scanEnd">Maximum scan number to include to the .PBF file; 0 to disable this filter</param>
         </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.BuildPbfFile(System.String,InformedProteomics.Backend.MassSpecData.IMassSpecDataReader,System.String,System.String,System.IProgress{InformedProteomics.Backend.Utils.ProgressData},System.Boolean)">
+        <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.BuildPbfFile(System.String,InformedProteomics.Backend.MassSpecData.IMassSpecDataReader,System.String,System.String,System.IProgress{InformedProteomics.Backend.Utils.ProgressData},System.Boolean,System.Int32,System.Int32)">
             <summary>
             Code for writing a PBF file. Should only be called from a constructor.
             </summary>
@@ -3053,6 +3106,8 @@
             <param name="tempPath"></param>
             <param name="progress"></param>
             <param name="keepDataReaderOpen"></param>
+            <param name="scanStart">Minimum scan number to include in the .PBF file; 0 to disable this filter</param>
+            <param name="scanEnd">Maximum scan number to include to the .PBF file; 0 to disable this filter</param>
         </member>
         <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.OpenPbfFile(System.String)">
             <summary>
@@ -3208,13 +3263,15 @@
             <param name="writer"></param>
             <param name="progress"></param>
         </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.WriteToPbf(InformedProteomics.Backend.MassSpecData.IMassSpecDataReader,System.IO.BinaryWriter,System.IProgress{InformedProteomics.Backend.Utils.ProgressData})">
+        <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.WriteToPbf(InformedProteomics.Backend.MassSpecData.IMassSpecDataReader,System.IO.BinaryWriter,System.Int32,System.Int32,System.IProgress{InformedProteomics.Backend.Utils.ProgressData})">
             <summary>
             Bulk of code to write a PBF file. Protected internal to support DPbfLcMsRun.
             </summary>
             <param name="msdr"></param>
             <param name="writer"></param>
+            <param name="endScan"></param>
             <param name="progress"></param>
+            <param name="startScan"></param>
         </member>
         <member name="M:InformedProteomics.Backend.MassSpecData.PbfLcMsRun.GetMzBinIndex(System.Double)">
             <summary>
@@ -4184,6 +4241,37 @@
             Not optimized. Not destructive.
             </remarks>
             <param name="d">Right side of the equation.</param>
+        </member>
+        <member name="T:InformedProteomics.Backend.Utils.TsvFileParser">
+            <summary>
+            Parses the data in a tab-delimited file, caching the data in memory
+            </summary>
+            <remarks>
+            The data is stored in memory both as full rows (one string per row), and parsed by column
+            Column names are case-sensitive
+            </remarks>
+        </member>
+        <member name="M:InformedProteomics.Backend.Utils.TsvFileParser.#ctor(System.String,System.Char)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="filePath">File to read</param>
+            <param name="delimeter">Delimeter, tab by default</param>
+        </member>
+        <member name="P:InformedProteomics.Backend.Utils.TsvFileParser.FileName">
+            <summary>
+            Filename
+            </summary>
+        </member>
+        <member name="P:InformedProteomics.Backend.Utils.TsvFileParser.NumData">
+            <summary>
+            Number of rows
+            </summary>
+        </member>
+        <member name="F:InformedProteomics.Backend.Utils.TsvFileParser._header">
+            <summary>
+            Map from header column index to header column name
+            </summary>
         </member>
     </members>
 </doc>

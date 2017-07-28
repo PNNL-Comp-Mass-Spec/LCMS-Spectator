@@ -142,102 +142,6 @@
             Constructor: Populates the relationship dictionaries
             </summary>
         </member>
-        <member name="M:PSI_Interface.CV.CV.PopulateCVInfoList">
-            <summary>Populate the list of included Controlled Vocabularies, with descriptive information</summary>
-        </member>
-        <member name="T:PSI_Interface.CV.CV.RelationsOtherTypes">
-            <summary>Enum listing all relationships between CV terms used in the included CVs</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.Unknown">
-            <summary>Unknown term relationship</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_regexp">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_units">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_order">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_domain">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.correlates_with">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.decreased_in_magnitude_relative_to">
-            <summary>"q1 decreased_in_magnitude_relative_to q2 if and only if magnitude(q1) &lt; magnitude(q2). Here, magnitude(q) is a function that maps a quality to a unit-invariant scale."</summary>
-            <remarks>This relation is used to determine the 'directionality' of relative qualities such as 'decreased strength', relative to the parent type, 'strength'.</remarks>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.different_in_magnitude_relative_to">
-            <summary>"q1 different_in_magnitude_relative_to q2 if and only if magnitude(q1) NOT =~ magnitude(q2). Here, magnitude(q) is a function that maps a quality to a unit-invariant scale."</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.directly_associated_with">
-            <summary>"q1 directly_associated_with q2 iff q1 is dependent on q2, and the magnitude of q1 increases if the magnitude of q2 is increased, or the magnitude of q1 decreases if the magnitude of q2 is decreased. The relationship is not necessarily linear."</summary>
-            <remarks>Example: 'Lewy bodies increased number related to dystrophic neurite increased number' (from annotation of PMID:8740227 in http://ccdb.ucsd.edu/1.0/NDPO.owl#ndpo_404). Here the increase in the number of lewy bodies is directly_associated_with the increase in the number of dystrophic neurites.\nAssociation is weaker than correlation or proportionality. These relations may be later added to PATO.</remarks>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_cross_section">
-            <summary>"s3 has_cross_section s3 if and only if : there exists some 2d plane that intersects the bearer of s3, and the impression of s3 upon that plane has shape quality s2."</summary>
-            <remarks>Example: a spherical object has the quality of being spherical, and the spherical quality has_cross_section round.</remarks>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_dividend_entity">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_dividend_quality">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_divisor_entity">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_divisor_quality">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_part">
-            <summary>"Q1 has_part Q2 if and only if: every instance of Q1 is a quality_of an entity that has_quality some Q2."</summary>
-            <remarks>We use the has_part relation to relate complex qualities to more primitive ones. A complex quality is a collection of qualities. The complex quality cannot exist without the sub-qualities. For example, the quality 'swollen' necessarily comes with the qualities of 'protruding' and 'increased size'.</remarks>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_ratio_quality">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_relative_magnitude">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.increased_in_magnitude_relative_to">
-            <summary>"q1 increased_in_magnitude_relative_to q2 if and only if magnitude(q1) &gt; magnitude(q2). Here, magnitude(q) is a function that maps a quality to a unit-invariant scale."</summary>
-            <remarks>This relation is used to determine the 'directionality' of relative qualities such as 'increased strength', relative to the parent type, 'strength'.</remarks>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.inversely_associated_with">
-            <summary>"q1 inversely_associated_with q2 iff q1 is dependent on q2, and the magnitude of q1 decreases if the magnitude of q2 is increased, or the magnitude of q1 increases if the magnitude of q2 is decreased. The relationship is not necessarily linear."</summary>
-            <remarks>Association is weaker than correlation or proportionality. These relations may be later added to PATO.</remarks>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.is_magnitude_of">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.is_measurement_of">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.is_unit_of">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.realized_by">
-            <summary>Description not provided</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.reciprocal_of">
-            <summary>"q1 reciprocal_of q2 if and only if : q1 and q2 are relational qualities and a phenotype e q1 e2 mutually implies a phenotype e2 q2 e."</summary>
-            <remarks>There are frequently two ways to state the same thing: we can say 'spermatocyte lacks asters' or 'asters absent from spermatocyte'. In this case the quality is 'lacking all parts of type' - it is a (relational) quality of the spermatocyte, and it is with respect to instances of 'aster'. One of the popular requirements of PATO is that it continue to support 'absent', so we need to relate statements which use this quality to the 'lacking all parts of type' quality.</remarks>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.similar_in_magnitude_relative_to">
-            <summary>"q1 similar_in_magnitude_relative_to q2 if and only if magnitude(q1) =~ magnitude(q2). Here, magnitude(q) is a function that maps a quality to a unit-invariant scale."</summary>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.singly_occurring_form_of">
-            <summary>Description not provided</summary>
-            <remarks>PATO divides qualities between normal (monadic, singly-occurring) qualities and relational qualities. Relational qualities stand in the 'towards' relation with respect to some additional entity. For example, The sensitivity of an eye towards red light. In some cases we want to represent a quality such as 'protruding' in both monadic and relational branches. We use this relation to link them.</remarks>
-        </member>
-        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.towards">
-            <summary>Description not provided</summary>
-            <remarks>Relation binding a relational quality or disposition to the relevant type of entity.</remarks>
-        </member>
         <member name="T:PSI_Interface.CV.CV.CVID">
             <summary>
             A full enumeration of the Controlled Vocabularies PSI-MS, UNIMOD, and the vocabularies they depend on
@@ -5317,7 +5221,7 @@
             <summary>LECO bench-top GC time-of-flight mass spectrometer.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_quantification_datatype">
-            <summary>The data type of the value reported in a QuantLayer for a feature, peptide, protein, protein group.</summary>
+            <summary>The data type of the value reported in a QuantLayer.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_quantification_object_attribute">
             <summary>Attributes describing the details of an object relevant for reporting quantification workflows or values.</summary>
@@ -5413,7 +5317,7 @@
             <summary>Spectral counting workflow (number of identified MS2 spectra as approximation of peptide / protein quant).</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_iTRAQ_quantitation_analysis">
-            <summary>Quantification analysis using the SCIEX iTRAQ isobaric labelling workflow, wherein 2-8 reporter ions are measured in MS2 spectra near 114 m/z.</summary>
+            <summary>Quantification analysis using the SCIEX amine-reactive isobaric tags for relative and absolute quantification (iTRAQ) labelling workflow, wherein 2-8 reporter ions are measured in MS2 spectra near in the 114-121 m/z range.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_SRM_quantitation_analysis">
             <summary>Selected Reaction Monitoring workflow (XIC quantitation of precursor / fragment mass pair).</summary>
@@ -5427,8 +5331,8 @@
         <member name="F:PSI_Interface.CV.CV.CVID.MS_LC_MS_feature_volume">
             <summary>Real (intensity times area) volume of the LC-MS feature.</summary>
         </member>
-        <member name="F:PSI_Interface.CV.CV.CVID.MS_peptide_PSM_count">
-            <summary>The number of MS2 spectra identified for this peptide in spectral counting.</summary>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_sequence_level_spectral_count">
+            <summary>The number of MS2 spectra identified for a raw peptide sequence without PTMs and charge state in spectral counting.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_MS1_feature_maximum_intensity">
             <summary>Maximum intensity of MS1 feature.</summary>
@@ -5929,7 +5833,7 @@
             <summary>Quantitation analysis using an isobaric labelling workflow.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_quantitation_analysis">
-            <summary>Quantitation analysis using the Thermo Fisher tandem mass tag (TMT) labelling workflow.</summary>
+            <summary>Quantitation analysis using the Thermo Fisher amine-reactive tandem mass tag (TMT) labelling workflow, wherein 2-10 reporter ions are measured in MS2 spectra in the 126-131 m/z.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_desorption_electrospray_ionization">
             <summary>Combination of electrospray and desorption ionization method that ionizes gases, liquids and solids in open air under atmospheric pressure.</summary>
@@ -7540,7 +7444,7 @@
             <summary>A normalized spectral abundance factor (NSAF).</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_distributed_normalized_spectral_abundance_factor">
-            <summary>A distributed normalized spectral abundance factor (dNSAF.</summary>
+            <summary>A distributed normalized spectral abundance factor (dNSAF).</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_PTM_localization_distinct_peptide_level_statistic">
             <summary>Statistic to convey the confidence of the localization of an amino acid modification on a peptide sequence.</summary>
@@ -7741,7 +7645,7 @@
             <summary>The name of the sample labelled with the light SILAC label.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent">
-            <summary>Tandem mass tag reagent.</summary>
+            <summary>Tandem mass tag reagent used in TMT, glycoTMT, iodoTMT, aminoxyTMT or hydrazideTMT isobaric labeling.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent_126">
             <summary>The name of the sample labelled with the TMT reagent 126.</summary>
@@ -7762,7 +7666,7 @@
             <summary>The name of the sample labelled with the TMT reagent 131.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_iTRAQ_reagent">
-            <summary>Isobaric tag for relative and absolute quantitation reagent.</summary>
+            <summary>Isobaric tag for relative and absolute quantitation (iTRAQ or iTRAQH) reagent.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_iTRAQ_reagent_113">
             <summary>The name of the sample labelled with the iTRAQ reagent 113.</summary>
@@ -8054,6 +7958,156 @@
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.MS_Orbitrap_Fusion_Lumos">
             <summary>Thermo Scientific Orbitrap Fusion Lumos mass spectrometer with Tribrid architecture consisting of quadrupole mass filter, linear ion trap and Orbitrap mass analyzers.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_peptide_level_spectral_count">
+            <summary>The number of MS2 spectra identified for a peptide sequence specified by the amino acid one-letter codes plus optional PTMs in spectral counting.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_peptide_ion_level_spectral_count">
+            <summary>The number of MS2 spectra identified for a molecular ion defined by the peptide sequence represented by the amino acid one-letter codes, plus optional PTMs plus optional charged aducts plus the charge state, in spectral counting.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_feature_level_quantification_datatype">
+            <summary>The data type of the value reported in a QuantLayer for a feature.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_PSM_level_quantification_datatype">
+            <summary>The data type of the value reported in a QuantLayer for a PSM.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_peptide_level_quantification_datatype">
+            <summary>The data type of the value reported in a QuantLayer for a peptide.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_protein_level_quantification_datatype">
+            <summary>The data type of the value reported in a QuantLayer for a protein.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_protein_group_level_quantification_datatype">
+            <summary>The data type of the value reported in a QuantLayer for a protein group.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_unmapped_peptide">
+            <summary>Within the context of a proteogenomics approach, a peptide sequence that has not been mapped to a genomic location.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_unmapped_protein">
+            <summary>Within the context of a proteogenomics approach, a protein sequence that has not been mapped to a genomic location.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_noise_array">
+            <summary>A data array of noise values.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_sampled_noise_m_z_array">
+            <summary>A data array of parallel, independent m/z values for a sampling of noise across a spectrum (typically much smaller than MS:1000514, the m/z array).</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_sampled_noise_intensity_array">
+            <summary>A data array of intensity values for the amplitude of noise variation superposed on the baseline (MS:1002745) across a spectrum (for use with MS:1002743, sampled noise m/z array).</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_sampled_noise_baseline_array">
+            <summary>A data array of baseline intensity values (the intensity in the absence of analytes) for a sampling of noise across a spectrum (for use with MS:1002743, sampled noise m/z array).</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_MS_Numpress_linear_prediction_compression_followed_by_zlib_compression">
+            <summary>Compression using MS-Numpress linear prediction compression and zlib.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_MS_Numpress_positive_integer_compression_followed_by_zlib_compression">
+            <summary>Compression using MS-Numpress positive integer compression and zlib.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_MS_Numpress_short_logged_float_compression_followed_by_zlib_compression">
+            <summary>Compression using MS-Numpress short logged float compression and zlib.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_Mascot_IntegratedSpectralLibrarySearch">
+            <summary>Means that Mascot has integrated the search results of database and spectral library search into a single data set.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_NIST_MSPepSearch">
+            <summary>Search tool of the NIST (National Institute of Standrads and Technology) for spectral library searches.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_NIST_MSP_format">
+            <summary>MSP text format defined by the NIST.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_database_type_spectral_library">
+            <summary>Database containing spectra.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_value_between_0_and_1000_inclusive">
+            <summary>Value range for scores.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_MSPepSearch_score">
+            <summary>MSPepSearch score (0 for entirely dissimilar and 1000 for identical observed spectrum and library spectrum.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_combined_ms_ms___spectral_library_search">
+            <summary>A combined MS2 (with fragment ions) and spectral library search.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_iodoTMT_quantitation_analysis">
+            <summary>Quantitation analysis using the Thermo Fisher sulfhydryl-reactive iodo tandem mass tag (iodoTMT) labelling workflow.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_glyco_TMT_quantitation_analysis">
+            <summary>Quantitation analysis using the Thermo Fisher carbonyl-reactive glyco-tandem mass tag (glyco-TMT) labelling workflow.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_aminoxyTMT_quantitation_analysis">
+            <summary>Quantitation analysis using the Thermo Fisher carbonyl-reactive aminoxy tandem mass tag (aminoxyTMT) labelling workflow.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_hydrazideTMT_quantitation_analysis">
+            <summary>Quantitation analysis using the Thermo Fisher carbonyl-reactive hydrazide tandem mass tag (hydrazide-TMT) labelling workflow.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_iTRAQH_quantitation_analysis">
+            <summary>Quantification analysis using the carbonyl-reactive isobaric tags for relative and absolute quantification hydrazide (iTRAQH) labelling workflow.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiART_quantitation_analysis">
+            <summary>Quantification analysis using the amine-reactive deuterium isobaric amine reactive tag (DiART) labelling workflow.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiLeu_quantitation_analysis">
+            <summary>Quantification analysis using the amine-reactive dimethyl leucine (DiLeu) tag labelling workflow.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent_127N">
+            <summary>The name of the sample labelled with the TMT reagent 127N.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent_127C">
+            <summary>The name of the sample labelled with the TMT reagent 127C.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent_128N">
+            <summary>The name of the sample labelled with the TMT reagent 128N.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent_128C">
+            <summary>The name of the sample labelled with the TMT reagent 128C.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent_129N">
+            <summary>The name of the sample labelled with the TMT reagent 129N.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent_129C">
+            <summary>The name of the sample labelled with the TMT reagent 129C.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent_130N">
+            <summary>The name of the sample labelled with the TMT reagent 130N.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_TMT_reagent_130C">
+            <summary>The name of the sample labelled with the TMT reagent 130C.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiART_reagent">
+            <summary>Deuterium isobaric amine reactive tag labeling reagent.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiART_reagent_114">
+            <summary>The name of the sample labelled with the DiART reagent 114.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiART_reagent_115">
+            <summary>The name of the sample labelled with the DiART reagent 115.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiART_reagent_116">
+            <summary>The name of the sample labelled with the DiART reagent 116.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiART_reagent_117">
+            <summary>The name of the sample labelled with the DiART reagent 117.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiART_reagent_118">
+            <summary>The name of the sample labelled with the DiART reagent 118.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiART_reagent_119">
+            <summary>The name of the sample labelled with the DiART reagent 119.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiLeu_reagent">
+            <summary>Dimethyl leucine labeling reagent.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiLeu_reagent_115">
+            <summary>The name of the sample labelled with the DiLeu reagent 115.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiLeu_reagent_116">
+            <summary>The name of the sample labelled with the DiLeu reagent 116.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiLeu_reagent_117">
+            <summary>The name of the sample labelled with the DiLeu reagent 117.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.MS_DiLeu_reagent_118">
+            <summary>The name of the sample labelled with the DiLeu reagent 118.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_unimod_root_node">
             <summary>The root node of the unimod modifications ontology.</summary>
@@ -8572,7 +8626,7 @@
             <summary>Mercury Mercaptan.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_IodoU_AMP">
-            <summary>Cross-link of (Iodo)-uracil MP with W,F,Y.</summary>
+            <summary>(Iodo)-uracil MP.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_CAMthiopropanoyl">
             <summary>3-(carbamidomethylthio)propanoyl.</summary>
@@ -8640,7 +8694,7 @@
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_B10621">
             <summary>Bis-N-I-sulfonerahodamine.</summary>
         </member>
-        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_DTBP">
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_DTBPc">
             <summary>Dimethyl 3,3\'-dithiobispropionimidate.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_FP_Biotin">
@@ -9666,10 +9720,10 @@
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Gly_loss_Amide">
             <summary>Enzymatic glycine removal leaving an amidated C-terminus.</summary>
         </member>
-        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_BMOE">
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_BMOE">
             <summary>Addition of BMOE crosslinker.</summary>
         </member>
-        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_DFDNB">
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_DFDNB">
             <summary>Addition of DFDNB crosslinker.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_TMPP_Ac">
@@ -9862,7 +9916,7 @@
             <summary>High molecular absorption label for proteins.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_DimethylamineGMBS">
-            <summary>Modified GMBS X linker for proteins.</summary>
+            <summary>Modified GMBS X linker.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Label_15N_2_2H_9_">
             <summary>SILAC label.</summary>
@@ -10029,8 +10083,8 @@
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_DSS">
             <summary>Water-quenched monolink of DSS/BS3 crosslinker to Lys or N-terminus.</summary>
         </member>
-        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_EGS">
-            <summary>Monolink of EGS crosslinker to Lys or N-terminus.</summary>
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_EGS244">
+            <summary>Water quenched monolink of EGS cross-linker.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_DST">
             <summary>Monolink of DST crosslinker to Lys or N-terminus.</summary>
@@ -10044,8 +10098,8 @@
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_DMP_de">
             <summary>Monolink of DMP crosslinker to Lys or N-terminus.</summary>
         </member>
-        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_EGScleaved">
-            <summary>EGS crosslinker to Lys or N-terminus following hydroxylamine cleavage.</summary>
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Xlink_EGS115">
+            <summary>Cleavage product of EGS protein crosslinks by hydroylamine treatment.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Biotin_Thermo_88310">
             <summary>Desthiobiotin modification of lysine.</summary>
@@ -12165,11 +12219,23 @@
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Brij58">
             <summary>Brij 58 synthetic polymer terminus.</summary>
         </member>
-        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_beta_FNA">
-            <summary>Î’-Funaltrexamine.</summary>
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_betaFNA">
+            <summary>Beta-Funaltrexamine.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_dHex_1_Hex_7_HexNAc_4_">
             <summary>Fucosylated biantennary + 2 alphaGal.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Biotin_Thermo_21328">
+            <summary>EZ-Link Sulfo-NHS-SS-Biotin.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_PhosphoCytidine">
+            <summary>Cytidine monophosphate.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_AzidoF">
+            <summary>Azidophenylalanine.</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.CVID.UNIMOD_Dimethylaminoethyl">
+            <summary>Cys alkylation by dimethylaminoethyl halide.</summary>
         </member>
         <member name="F:PSI_Interface.CV.CV.CVID.PATO_pato_OBSOLETE">
             <summary>Description not provided</summary>
@@ -20721,11 +20787,149 @@
         <member name="F:PSI_Interface.CV.CV.CVID.UO_terabyte">
             <summary>An information unit which is equal to 1000 gigabytes.</summary>
         </member>
-        <member name="M:PSI_Interface.CV.CV.PopulateTermData">
-            <summary>Populate the CV Term data objects</summary>
+        <member name="M:PSI_Interface.CV.CV.PopulateCVInfoList">
+            <summary>Populate the list of included Controlled Vocabularies, with descriptive information</summary>
+        </member>
+        <member name="T:PSI_Interface.CV.CV.RelationsOtherTypes">
+            <summary>Enum listing all relationships between CV terms used in the included CVs</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.Unknown">
+            <summary>Unknown term relationship</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_regexp">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_units">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_order">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_domain">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.correlates_with">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.decreased_in_magnitude_relative_to">
+            <summary>"q1 decreased_in_magnitude_relative_to q2 if and only if magnitude(q1) &lt; magnitude(q2). Here, magnitude(q) is a function that maps a quality to a unit-invariant scale."</summary>
+            <remarks>This relation is used to determine the 'directionality' of relative qualities such as 'decreased strength', relative to the parent type, 'strength'.</remarks>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.different_in_magnitude_relative_to">
+            <summary>"q1 different_in_magnitude_relative_to q2 if and only if magnitude(q1) NOT =~ magnitude(q2). Here, magnitude(q) is a function that maps a quality to a unit-invariant scale."</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.directly_associated_with">
+            <summary>"q1 directly_associated_with q2 iff q1 is dependent on q2, and the magnitude of q1 increases if the magnitude of q2 is increased, or the magnitude of q1 decreases if the magnitude of q2 is decreased. The relationship is not necessarily linear."</summary>
+            <remarks>Example: 'Lewy bodies increased number related to dystrophic neurite increased number' (from annotation of PMID:8740227 in http://ccdb.ucsd.edu/1.0/NDPO.owl#ndpo_404). Here the increase in the number of lewy bodies is directly_associated_with the increase in the number of dystrophic neurites.\nAssociation is weaker than correlation or proportionality. These relations may be later added to PATO.</remarks>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_cross_section">
+            <summary>"s3 has_cross_section s3 if and only if : there exists some 2d plane that intersects the bearer of s3, and the impression of s3 upon that plane has shape quality s2."</summary>
+            <remarks>Example: a spherical object has the quality of being spherical, and the spherical quality has_cross_section round.</remarks>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_dividend_entity">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_dividend_quality">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_divisor_entity">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_divisor_quality">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_part">
+            <summary>"Q1 has_part Q2 if and only if: every instance of Q1 is a quality_of an entity that has_quality some Q2."</summary>
+            <remarks>We use the has_part relation to relate complex qualities to more primitive ones. A complex quality is a collection of qualities. The complex quality cannot exist without the sub-qualities. For example, the quality 'swollen' necessarily comes with the qualities of 'protruding' and 'increased size'.</remarks>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_ratio_quality">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.has_relative_magnitude">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.increased_in_magnitude_relative_to">
+            <summary>"q1 increased_in_magnitude_relative_to q2 if and only if magnitude(q1) &gt; magnitude(q2). Here, magnitude(q) is a function that maps a quality to a unit-invariant scale."</summary>
+            <remarks>This relation is used to determine the 'directionality' of relative qualities such as 'increased strength', relative to the parent type, 'strength'.</remarks>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.inversely_associated_with">
+            <summary>"q1 inversely_associated_with q2 iff q1 is dependent on q2, and the magnitude of q1 decreases if the magnitude of q2 is increased, or the magnitude of q1 increases if the magnitude of q2 is decreased. The relationship is not necessarily linear."</summary>
+            <remarks>Association is weaker than correlation or proportionality. These relations may be later added to PATO.</remarks>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.is_magnitude_of">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.is_measurement_of">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.is_opposite_of">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.is_unit_of">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.realized_by">
+            <summary>Description not provided</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.reciprocal_of">
+            <summary>"q1 reciprocal_of q2 if and only if : q1 and q2 are relational qualities and a phenotype e q1 e2 mutually implies a phenotype e2 q2 e."</summary>
+            <remarks>There are frequently two ways to state the same thing: we can say 'spermatocyte lacks asters' or 'asters absent from spermatocyte'. In this case the quality is 'lacking all parts of type' - it is a (relational) quality of the spermatocyte, and it is with respect to instances of 'aster'. One of the popular requirements of PATO is that it continue to support 'absent', so we need to relate statements which use this quality to the 'lacking all parts of type' quality.</remarks>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.similar_in_magnitude_relative_to">
+            <summary>"q1 similar_in_magnitude_relative_to q2 if and only if magnitude(q1) =~ magnitude(q2). Here, magnitude(q) is a function that maps a quality to a unit-invariant scale."</summary>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.singly_occurring_form_of">
+            <summary>Description not provided</summary>
+            <remarks>PATO divides qualities between normal (monadic, singly-occurring) qualities and relational qualities. Relational qualities stand in the 'towards' relation with respect to some additional entity. For example, The sensitivity of an eye towards red light. In some cases we want to represent a quality such as 'protruding' in both monadic and relational branches. We use this relation to link them.</remarks>
+        </member>
+        <member name="F:PSI_Interface.CV.CV.RelationsOtherTypes.towards">
+            <summary>Description not provided</summary>
+            <remarks>Relation binding a relational quality or disposition to the relevant type of entity.</remarks>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.FillRelationsIsAPart1">
+            <summary>Populate the relationships between CV terms, breakdown part 1</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.FillRelationsIsAPart2">
+            <summary>Populate the relationships between CV terms, breakdown part 2</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.FillRelationsIsAPart3">
+            <summary>Populate the relationships between CV terms, breakdown part 3</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.FillRelationsIsAPart4">
+            <summary>Populate the relationships between CV terms, breakdown part 4</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.FillRelationsIsAPart5">
+            <summary>Populate the relationships between CV terms, breakdown part 5</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.FillRelationsIsAPart6">
+            <summary>Populate the relationships between CV terms, breakdown part 6</summary>
         </member>
         <member name="M:PSI_Interface.CV.CV.FillRelationsIsA">
             <summary>Populate the relationships between CV terms</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.PopulateTermDataPart1">
+            <summary>Populate the CV Term data objects, breakdown part 1</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.PopulateTermDataPart2">
+            <summary>Populate the CV Term data objects, breakdown part 2</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.PopulateTermDataPart3">
+            <summary>Populate the CV Term data objects, breakdown part 3</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.PopulateTermDataPart4">
+            <summary>Populate the CV Term data objects, breakdown part 4</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.PopulateTermDataPart5">
+            <summary>Populate the CV Term data objects, breakdown part 5</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.PopulateTermDataPart6">
+            <summary>Populate the CV Term data objects, breakdown part 6</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.PopulateTermDataPart7">
+            <summary>Populate the CV Term data objects, breakdown part 7</summary>
+        </member>
+        <member name="M:PSI_Interface.CV.CV.PopulateTermData">
+            <summary>Populate the CV Term data objects</summary>
         </member>
         <member name="T:PSI_Interface.CV.CVTranslator">
             <summary>
@@ -20890,94 +21094,243 @@
             <param name="calcMz">(optional) Calculated m/z of the peptide; default double.NaN (not added)</param>
             <returns>Object: Must populate PeptideEvidences and Peptide, as well as add score information to CVParams and UserParams</returns>
         </member>
-        <member name="T:PSI_Interface.IdentData.IdentDataObjs.IdentDataInternalTypeAbstract">
+        <member name="T:PSI_Interface.IdentData.IdentDataObj">
             <summary>
-            Base abstraction for all IdentData types to tie them to the root object
+                MzIdentML MzIdentMLType
+            </summary>
+            <remarks>
+                The upper-most hierarchy level of mzIdentML with sub-containers for example describing software,
+                protocols and search results (spectrum identifications or protein detection results).
+            </remarks>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.#ctor(PSI_Interface.IdentData.mzIdentML.MzIdentMLType)">
+            <summary>
+                Create an IdentDataObj directly from an MzIdentMLType object - fully cascades for the entire contents of
+                MzIdentMLType
+            </summary>
+            <param name="mzid"></param>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.#ctor(System.Boolean)">
+            <summary>
+                Constructor - basic initialization
+            </summary>
+            <param name="createTranslator">If the default CV list should be used for the file</param>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.Id">
+            <remarks>
+                An identifier is an unambiguous string that is unique within the scope
+                (i.e. a document, a set of related documents, or a repository) of its use.
+            </remarks>
+            Required Attribute
+            string
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.Name">
+            <remarks>The potentially ambiguous common identifier, such as a human-readable name for the instance.</remarks>
+            Required Attribute
+            string
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.CVList">
+            <remarks>min 1, max 1</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.AnalysisSoftwareList">
+            <remarks>min 0, max 1</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.Provider">
+            <remarks>The Provider of the mzIdentML record in terms of the contact and software.</remarks>
+            <remarks>min 0, max 1</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.AuditCollection">
+            <remarks>min 0, max 1</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.AnalysisSampleCollection">
+            <remarks>min 0, max 1</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.SequenceCollection">
+            <remarks>min 0, max 1</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.AnalysisCollection">
+            <remarks>min 1, max 1</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.AnalysisProtocolCollection">
+            <remarks>min 1, max 1</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.DataCollection">
+            <remarks>min 1, max 1</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.BibliographicReferences">
+            <remarks>Any bibliographic references associated with the file</remarks>
+            <remarks>min 0, max unbounded</remarks>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.CreationDate">
+            <remarks>The date on which the file was produced.</remarks>
+            Optional Attribute
+            dataTime
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.CreationDateSpecified">
+            <summary>
+            Attribute Existence - true if CreationDate has bee set.
             </summary>
         </member>
-        <member name="T:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1">
-            <summary>
-            This is a subclass of List, specifically because there needs to be a connection from the IdentData class to all other objects it contains
-            for handling of CVParams and references
-            </summary>
-            <typeparam name="T"></typeparam>
+        <member name="P:PSI_Interface.IdentData.IdentDataObj.Version">
+            <remarks>
+                The version of the schema this instance document refers to, in the format x.y.z.
+                Changes to z should not affect prevent instance documents from validating.
+            </remarks>
+            Required Attribute
+            string, regex: "(1\.1\.\d+)"
         </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.#ctor">
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.DefaultCV">
             <summary>
-            Create a new list
+                Set the default CV lists for CV term reference and mapping
             </summary>
         </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.op_Implicit(`0[])~PSI_Interface.IdentData.IdentDataObjs.IdentDataList{`0}">
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.CascadeProperties">
             <summary>
-            Attempt at converting from an array to an IdentDataList
+                Cascade the identData reference throughout the entire set of objects.
             </summary>
-            <param name="items"></param>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.RebuildLists">
+            <summary>
+                Rebuild some of the internal lists using object references
+            </summary>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSpectrumIdentificationItem(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SpectrumIdentificationItemObj" /> that matches id
+            </summary>
+            <param name="id"></param>
             <returns></returns>
         </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.#ctor(System.Collections.Generic.IEnumerable{`0})">
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindDbSequence(System.String)">
             <summary>
-            Create a new list and populate it with the provided items.
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.DbSequenceObj" /> that matches id
             </summary>
-            <param name="items"></param>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.IdentData">
-            <summary>
-            IdentData object that all items in the list should be tied to.
-            </summary>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.Add(`0)">
-            <summary>
-            Add an item to the list, setting the IdentData property of the added object
-            </summary>
-            <param name="item"></param>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Add a range of items to the list, setting the IdentData property of each added object
-            </summary>
-            <param name="items"></param>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.Equals(System.Object)">
-            <summary>
-            Object equality
-            </summary>
-            <param name="obj"></param>
+            <param name="id"></param>
             <returns></returns>
         </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.Equals(PSI_Interface.IdentData.IdentDataObjs.IdentDataList{`0})">
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindPeptide(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.PeptideObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindPeptideEvidence(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.PeptideEvidenceObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindMeasure(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.MeasureObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindMassTable(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.MassTableObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSample(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SampleObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindAnalysisSoftware(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.AnalysisSoftwareObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindOrganization(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.OrganizationObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindContact(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.AbstractContactObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSearchDatabase(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SearchDatabaseInfo" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSpectraData(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SpectraDataObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSpectrumIdentificationList(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SpectrumIdentificationListObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSpectrumIdentificationProtocol(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SpectrumIdentificationProtocolObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindProteinDetectionProtocol(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.ProteinDetectionProtocolObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindProteinDetectionList(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.ProteinDetectionListObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindTranslationTable(System.String)">
+            <summary>
+                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.TranslationTableObj" /> that matches id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.Equals(PSI_Interface.IdentData.IdentDataObj)">
             <summary>
             Object equality
             </summary>
             <param name="other"></param>
             <returns></returns>
         </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.GetHashCode">
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.Equals(System.Object)">
             <summary>
-            Object hash code
+            Object Equality
             </summary>
+            <param name="other"></param>
             <returns></returns>
         </member>
-        <member name="T:PSI_Interface.IdentData.IdentDataObjs.IdentDataListExtensions">
+        <member name="M:PSI_Interface.IdentData.IdentDataObj.GetHashCode">
             <summary>
-            Extensions that require certain data types
+            Object Hash code
             </summary>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataListExtensions.GetCvParam(PSI_Interface.IdentData.IdentDataObjs.IdentDataList{PSI_Interface.IdentData.IdentDataObjs.CVParamObj},PSI_Interface.CV.CV.CVID,System.String)">
-            <summary>
-            Get the CVParam that matches the specified CV term, defaulting to the value provided if not found.
-            </summary>
-            <param name="cvParamList"></param>
-            <param name="cvid"></param>
-            <param name="valueIfNotFound"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataListExtensions.GetCvParam(PSI_Interface.IdentData.IdentDataObjs.IdentDataList{PSI_Interface.IdentData.IdentDataObjs.ParamBaseObj},PSI_Interface.CV.CV.CVID,System.String)">
-            <summary>
-            Get the CVParam that matches the specified CV term, defaulting to the value provided if not found.
-            </summary>
-            <param name="paramList"></param>
-            <param name="cvid"></param>
-            <param name="valueIfNotFound"></param>
             <returns></returns>
         </member>
         <member name="T:PSI_Interface.IdentData.IdentDataObjs.AbstractContactObj">
@@ -22139,6 +22492,96 @@
             <summary>
                 Object hash code
             </summary>
+            <returns></returns>
+        </member>
+        <member name="T:PSI_Interface.IdentData.IdentDataObjs.IdentDataInternalTypeAbstract">
+            <summary>
+            Base abstraction for all IdentData types to tie them to the root object
+            </summary>
+        </member>
+        <member name="T:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1">
+            <summary>
+            This is a subclass of List, specifically because there needs to be a connection from the IdentData class to all other objects it contains
+            for handling of CVParams and references
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.#ctor">
+            <summary>
+            Create a new list
+            </summary>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.op_Implicit(`0[])~PSI_Interface.IdentData.IdentDataObjs.IdentDataList{`0}">
+            <summary>
+            Attempt at converting from an array to an IdentDataList
+            </summary>
+            <param name="items"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.#ctor(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Create a new list and populate it with the provided items.
+            </summary>
+            <param name="items"></param>
+        </member>
+        <member name="P:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.IdentData">
+            <summary>
+            IdentData object that all items in the list should be tied to.
+            </summary>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.Add(`0)">
+            <summary>
+            Add an item to the list, setting the IdentData property of the added object
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Add a range of items to the list, setting the IdentData property of each added object
+            </summary>
+            <param name="items"></param>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.Equals(System.Object)">
+            <summary>
+            Object equality
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.Equals(PSI_Interface.IdentData.IdentDataObjs.IdentDataList{`0})">
+            <summary>
+            Object equality
+            </summary>
+            <param name="other"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataList`1.GetHashCode">
+            <summary>
+            Object hash code
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:PSI_Interface.IdentData.IdentDataObjs.IdentDataListExtensions">
+            <summary>
+            Extensions that require certain data types
+            </summary>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataListExtensions.GetCvParam(PSI_Interface.IdentData.IdentDataObjs.IdentDataList{PSI_Interface.IdentData.IdentDataObjs.CVParamObj},PSI_Interface.CV.CV.CVID,System.String)">
+            <summary>
+            Get the CVParam that matches the specified CV term, defaulting to the value provided if not found.
+            </summary>
+            <param name="cvParamList"></param>
+            <param name="cvid"></param>
+            <param name="valueIfNotFound"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.IdentData.IdentDataObjs.IdentDataListExtensions.GetCvParam(PSI_Interface.IdentData.IdentDataObjs.IdentDataList{PSI_Interface.IdentData.IdentDataObjs.ParamBaseObj},PSI_Interface.CV.CV.CVID,System.String)">
+            <summary>
+            Get the CVParam that matches the specified CV term, defaulting to the value provided if not found.
+            </summary>
+            <param name="paramList"></param>
+            <param name="cvid"></param>
+            <param name="valueIfNotFound"></param>
             <returns></returns>
         </member>
         <member name="T:PSI_Interface.IdentData.IdentDataObjs.IExternalDataType">
@@ -25186,245 +25629,6 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="T:PSI_Interface.IdentData.IdentDataObj">
-            <summary>
-                MzIdentML MzIdentMLType
-            </summary>
-            <remarks>
-                The upper-most hierarchy level of mzIdentML with sub-containers for example describing software,
-                protocols and search results (spectrum identifications or protein detection results).
-            </remarks>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.#ctor(PSI_Interface.IdentData.mzIdentML.MzIdentMLType)">
-            <summary>
-                Create an IdentDataObj directly from an MzIdentMLType object - fully cascades for the entire contents of
-                MzIdentMLType
-            </summary>
-            <param name="mzid"></param>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.#ctor(System.Boolean)">
-            <summary>
-                Constructor - basic initialization
-            </summary>
-            <param name="createTranslator">If the default CV list should be used for the file</param>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.Id">
-            <remarks>
-                An identifier is an unambiguous string that is unique within the scope
-                (i.e. a document, a set of related documents, or a repository) of its use.
-            </remarks>
-            Required Attribute
-            string
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.Name">
-            <remarks>The potentially ambiguous common identifier, such as a human-readable name for the instance.</remarks>
-            Required Attribute
-            string
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.CVList">
-            <remarks>min 1, max 1</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.AnalysisSoftwareList">
-            <remarks>min 0, max 1</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.Provider">
-            <remarks>The Provider of the mzIdentML record in terms of the contact and software.</remarks>
-            <remarks>min 0, max 1</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.AuditCollection">
-            <remarks>min 0, max 1</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.AnalysisSampleCollection">
-            <remarks>min 0, max 1</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.SequenceCollection">
-            <remarks>min 0, max 1</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.AnalysisCollection">
-            <remarks>min 1, max 1</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.AnalysisProtocolCollection">
-            <remarks>min 1, max 1</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.DataCollection">
-            <remarks>min 1, max 1</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.BibliographicReferences">
-            <remarks>Any bibliographic references associated with the file</remarks>
-            <remarks>min 0, max unbounded</remarks>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.CreationDate">
-            <remarks>The date on which the file was produced.</remarks>
-            Optional Attribute
-            dataTime
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.CreationDateSpecified">
-            <summary>
-            Attribute Existence - true if CreationDate has bee set.
-            </summary>
-        </member>
-        <member name="P:PSI_Interface.IdentData.IdentDataObj.Version">
-            <remarks>
-                The version of the schema this instance document refers to, in the format x.y.z.
-                Changes to z should not affect prevent instance documents from validating.
-            </remarks>
-            Required Attribute
-            string, regex: "(1\.1\.\d+)"
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.DefaultCV">
-            <summary>
-                Set the default CV lists for CV term reference and mapping
-            </summary>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.CascadeProperties">
-            <summary>
-                Cascade the identData reference throughout the entire set of objects.
-            </summary>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.RebuildLists">
-            <summary>
-                Rebuild some of the internal lists using object references
-            </summary>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSpectrumIdentificationItem(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SpectrumIdentificationItemObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindDbSequence(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.DbSequenceObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindPeptide(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.PeptideObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindPeptideEvidence(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.PeptideEvidenceObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindMeasure(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.MeasureObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindMassTable(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.MassTableObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSample(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SampleObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindAnalysisSoftware(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.AnalysisSoftwareObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindOrganization(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.OrganizationObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindContact(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.AbstractContactObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSearchDatabase(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SearchDatabaseInfo" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSpectraData(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SpectraDataObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSpectrumIdentificationList(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SpectrumIdentificationListObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindSpectrumIdentificationProtocol(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.SpectrumIdentificationProtocolObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindProteinDetectionProtocol(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.ProteinDetectionProtocolObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindProteinDetectionList(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.ProteinDetectionListObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.FindTranslationTable(System.String)">
-            <summary>
-                Find the <see cref="T:PSI_Interface.IdentData.IdentDataObjs.TranslationTableObj" /> that matches id
-            </summary>
-            <param name="id"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.Equals(PSI_Interface.IdentData.IdentDataObj)">
-            <summary>
-            Object equality
-            </summary>
-            <param name="other"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.Equals(System.Object)">
-            <summary>
-            Object Equality
-            </summary>
-            <param name="other"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.IdentData.IdentDataObj.GetHashCode">
-            <summary>
-            Object Hash code
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:PSI_Interface.IdentData.mzIdentML.MzIdentMLType">
             <summary>
             MzIdentML MzIdentMLType
@@ -27957,6 +28161,11 @@
             If the mzid results are from searching a DTA file
             </summary>
         </member>
+        <member name="P:PSI_Interface.IdentData.SimpleMZIdentMLReader.SpectrumIdItem.IsSpectrumIdNotTheScanNumber">
+            <summary>
+            If the mzid results are from searching a DTA file
+            </summary>
+        </member>
         <member name="P:PSI_Interface.IdentData.SimpleMZIdentMLReader.SpectrumIdItem.ScanNumCVParam">
             <summary>
             Scan number, as specified in the mzid using a CVParam (if available)
@@ -27990,6 +28199,11 @@
         <member name="P:PSI_Interface.IdentData.SimpleMZIdentMLReader.DatabaseSequence.ProteinDescription">
             <summary>
             Protein description
+            </summary>
+        </member>
+        <member name="P:PSI_Interface.IdentData.SimpleMZIdentMLReader.DatabaseSequence.DatabaseId">
+            <summary>
+            Database Id - internal reference in mzid file
             </summary>
         </member>
         <member name="T:PSI_Interface.IdentData.SimpleMZIdentMLReader.Modification">
@@ -28053,6 +28267,11 @@
         <member name="P:PSI_Interface.IdentData.SimpleMZIdentMLReader.PeptideEvidence.IsDecoy">
             <summary>
             If the result is a decoy
+            </summary>
+        </member>
+        <member name="P:PSI_Interface.IdentData.SimpleMZIdentMLReader.PeptideEvidence.HadDecoyAttribute">
+            <summary>
+            Set to true if the 'isDecoy' attribute was present in the mzid file for this peptide evidence
             </summary>
         </member>
         <member name="P:PSI_Interface.IdentData.SimpleMZIdentMLReader.PeptideEvidence.Post">
@@ -28134,12 +28353,13 @@
             Get the version of the analysis software, if provided
             </summary>
         </member>
-        <member name="M:PSI_Interface.IdentData.SimpleMZIdentMLReader.Read(System.String)">
+        <member name="M:PSI_Interface.IdentData.SimpleMZIdentMLReader.Read(System.String,System.Threading.CancellationToken)">
             <summary>
             Entry point for SimpleMZIdentMLReader
             Read the MZIdentML file, map the data to easy-to-use objects, and return the collection of objects
             </summary>
             <param name="path">Path to *.mzid/mzIdentML file</param>
+            <param name="cancelToken">Cancellation token, to interrupt reading between spectra</param>
             <returns><see cref="T:PSI_Interface.IdentData.SimpleMZIdentMLReader.SimpleMZIdentMLData"/></returns>
             <remarks>
             XML Reader parses an MZIdentML file, storing data as follows:
@@ -28224,6 +28444,14 @@
             </summary>
             <param name="reader">XmlReader that is only valid for the scope of the single AnalysisData element</param>
         </member>
+        <member name="M:PSI_Interface.IdentData.SimpleMZIdentMLReader.ReadSearchDatabase(System.Xml.XmlReader)">
+            <summary>
+            Handle child nodes of SeachDatabase element
+            Called by ReadDataCollection (xml hierarchy)
+            Currently we are only working with the SpectraData child elements
+            </summary>
+            <param name="reader">XmlReader that is only valid for the scope of the single AnalysisData element</param>
+        </member>
         <member name="M:PSI_Interface.IdentData.SimpleMZIdentMLReader.ReadAnalysisData(System.Xml.XmlReader)">
             <summary>
             Handle child nodes of AnalysisData element
@@ -28295,58 +28523,6 @@
             <param name="bytesPerValue">number of bytes per value, generally 4 (float) or 8 (double)</param>
             <param name="compress">if the data should be compressed</param>
             <returns>byte encoded data</returns>
-        </member>
-        <member name="T:PSI_Interface.MSData.MSDataInternalTypeAbstract">
-            <summary>
-            Class specifically for usage with the MSData required types, for the data pass-through for CVParam translation
-            </summary>
-        </member>
-        <member name="T:PSI_Interface.MSData.MSDataList`1">
-            <summary>
-            This is a subclass of List, specifically because there needs to be a connection from the MSData class to all other objects it contains
-            for handling of CVParams and references
-            </summary>
-            <typeparam name="T"></typeparam>
-        </member>
-        <member name="M:PSI_Interface.MSData.MSDataList`1.#ctor">
-            <summary>
-            Constructor
-            </summary>
-        </member>
-        <member name="M:PSI_Interface.MSData.MSDataList`1.op_Implicit(`0[])~PSI_Interface.MSData.MSDataList{`0}">
-            <summary>
-            Convert array to list
-            </summary>
-            <param name="items"></param>
-            <returns></returns>
-        </member>
-        <member name="M:PSI_Interface.MSData.MSDataList`1.#ctor(System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Create array from IEnumerable
-            </summary>
-            <param name="items"></param>
-        </member>
-        <member name="P:PSI_Interface.MSData.MSDataList`1.MsData">
-            <summary>
-            Reference to root object
-            </summary>
-        </member>
-        <member name="P:PSI_Interface.MSData.MSDataList`1.DefaultArrayLength">
-            <summary>
-            Default length of binary data array
-            </summary>
-        </member>
-        <member name="M:PSI_Interface.MSData.MSDataList`1.Add(`0)">
-            <summary>
-            Add an item
-            </summary>
-            <param name="item"></param>
-        </member>
-        <member name="M:PSI_Interface.MSData.MSDataList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Add a group of items
-            </summary>
-            <param name="items"></param>
         </member>
         <member name="T:PSI_Interface.MSData.MSData">
             <summary>
@@ -29790,6 +29966,58 @@
             </summary>
             <param name="fd"></param>
             <param name="instance"></param>
+        </member>
+        <member name="T:PSI_Interface.MSData.MSDataInternalTypeAbstract">
+            <summary>
+            Class specifically for usage with the MSData required types, for the data pass-through for CVParam translation
+            </summary>
+        </member>
+        <member name="T:PSI_Interface.MSData.MSDataList`1">
+            <summary>
+            This is a subclass of List, specifically because there needs to be a connection from the MSData class to all other objects it contains
+            for handling of CVParams and references
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:PSI_Interface.MSData.MSDataList`1.#ctor">
+            <summary>
+            Constructor
+            </summary>
+        </member>
+        <member name="M:PSI_Interface.MSData.MSDataList`1.op_Implicit(`0[])~PSI_Interface.MSData.MSDataList{`0}">
+            <summary>
+            Convert array to list
+            </summary>
+            <param name="items"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PSI_Interface.MSData.MSDataList`1.#ctor(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Create array from IEnumerable
+            </summary>
+            <param name="items"></param>
+        </member>
+        <member name="P:PSI_Interface.MSData.MSDataList`1.MsData">
+            <summary>
+            Reference to root object
+            </summary>
+        </member>
+        <member name="P:PSI_Interface.MSData.MSDataList`1.DefaultArrayLength">
+            <summary>
+            Default length of binary data array
+            </summary>
+        </member>
+        <member name="M:PSI_Interface.MSData.MSDataList`1.Add(`0)">
+            <summary>
+            Add an item
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="M:PSI_Interface.MSData.MSDataList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Add a group of items
+            </summary>
+            <param name="items"></param>
         </member>
         <member name="T:PSI_Interface.MSData.mzML.mzMLType">
             <summary>
@@ -31457,6 +31685,11 @@
             Array of intensity values
             </summary>
         </member>
+        <member name="P:PSI_Interface.MSData.SimpleMzMLReader.SimpleSpectrum.Peaks">
+            <summary>
+            Array of peak data
+            </summary>
+        </member>
         <member name="P:PSI_Interface.MSData.SimpleMzMLReader.SimpleSpectrum.TotalIonCurrent">
             <summary>
             Total Ion Current
@@ -31474,6 +31707,28 @@
             <param name="mzs">array of mzs</param>
             <param name="intensities">array of intensities</param>
             <param name="scanNum">spectrum scan number</param>
+        </member>
+        <member name="M:PSI_Interface.MSData.SimpleMzMLReader.SimpleSpectrum.#ctor(PSI_Interface.MSData.SimpleMzMLReader.Peak[],System.Int32)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="peaks">array of peaks</param>
+            <param name="scanNum">spectrum scan number</param>
+        </member>
+        <member name="T:PSI_Interface.MSData.SimpleMzMLReader.Peak">
+            <summary>
+            Peak data
+            </summary>
+        </member>
+        <member name="P:PSI_Interface.MSData.SimpleMzMLReader.Peak.Mz">
+            <summary>
+            Peak m/z
+            </summary>
+        </member>
+        <member name="P:PSI_Interface.MSData.SimpleMzMLReader.Peak.Intensity">
+            <summary>
+            Peak intensity
+            </summary>
         </member>
         <member name="T:PSI_Interface.MSData.SimpleMzMLReader.SimpleProductSpectrum">
             <summary>
@@ -31516,6 +31771,13 @@
             </summary>
             <param name="mzs">array of mzs</param>
             <param name="intensities">array of intensities</param>
+            <param name="scanNum">spectrum scan number</param>
+        </member>
+        <member name="M:PSI_Interface.MSData.SimpleMzMLReader.SimpleProductSpectrum.#ctor(PSI_Interface.MSData.SimpleMzMLReader.Peak[],System.Int32)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="peaks">array of peaks</param>
             <param name="scanNum">spectrum scan number</param>
         </member>
         <member name="M:PSI_Interface.MSData.SimpleMzMLReader.#ctor(System.String,System.Boolean,System.Boolean)">
@@ -31605,6 +31867,12 @@
             <summary>
             Close the file handles and cleanup any temp files
             </summary>
+        </member>
+        <member name="M:PSI_Interface.MSData.SimpleMzMLReader.Dispose(System.Boolean)">
+            <summary>
+            Dispose, with a decreased chance of issues/failure
+            </summary>
+            <param name="disposing"></param>
         </member>
         <member name="M:PSI_Interface.MSData.SimpleMzMLReader.ClearDataCache">
             <summary>
