@@ -423,9 +423,9 @@ namespace LcmsSpectator.ViewModels.Data
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             var relativeIntensities = composition.GetIsotopomerEnvelope();
             var indices = new List<int> { -1 };
-            for (int i = 0; i < relativeIntensities.Envolope.Length; i++)
+            for (int i = 0; i < relativeIntensities.Envelope.Length; i++)
             {
-                if (relativeIntensities.Envolope[i] >= IcParameters.Instance.PrecursorRelativeIntensityThreshold
+                if (relativeIntensities.Envelope[i] >= IcParameters.Instance.PrecursorRelativeIntensityThreshold
                     || i == 0)
                 {
                     indices.Add(i);

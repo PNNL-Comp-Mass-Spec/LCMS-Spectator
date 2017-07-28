@@ -69,12 +69,12 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             // Calculate theoretical isotopic profile using averagine
             var theoEnvelope = Averagine.GetIsotopomerEnvelope(mass);
-            var theoretical = new PeakDataPoint[theoEnvelope.Envolope.Length];
+            var theoretical = new PeakDataPoint[theoEnvelope.Envelope.Length];
 
             // Calculate m/z for each isotope index (observed)
-            for (var isotopeIndex = 0; isotopeIndex < theoEnvelope.Envolope.Length; isotopeIndex++)
+            for (var isotopeIndex = 0; isotopeIndex < theoEnvelope.Envelope.Length; isotopeIndex++)
             {
-                var intensity = theoEnvelope.Envolope[isotopeIndex];
+                var intensity = theoEnvelope.Envelope[isotopeIndex];
                 var mz = Ion.GetIsotopeMz(mass, charge, isotopeIndex);
                 var m = (mz * charge * Constants.Proton) - (charge * Constants.Proton);
                 theoretical[isotopeIndex] = new PeakDataPoint(m, intensity, 0.0, 0.0, string.Empty);
