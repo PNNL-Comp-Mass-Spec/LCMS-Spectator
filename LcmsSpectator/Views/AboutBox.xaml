@@ -31,7 +31,7 @@
                 <Label x:Name="LabelVersion" Content="Version" Grid.Column="1" Grid.Row="1"/>
                 <Label x:Name="LabelCopyright" Content="Copyright" Grid.Column="1" Grid.Row="2"/>
                 <Label x:Name="LabelCompanyName" Content="Company Name" Grid.Column="1" Grid.Row="3"/>
-                <TextBox x:Name="TextBoxDescription" Grid.Column="1" Grid.Row="4" TextWrapping="Wrap" Text="Description" Margin="3"/>
+                <TextBox x:Name="TextBoxDescription" Grid.Column="1" Grid.Row="4" TextWrapping="Wrap" Text="Description" Margin="3" IsReadOnly="True"/>
             </Grid>
         </GroupBox>
         <Grid Grid.Row="2" Width="100" HorizontalAlignment="Right">
