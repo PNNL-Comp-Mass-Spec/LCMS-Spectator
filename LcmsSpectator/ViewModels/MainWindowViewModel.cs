@@ -122,6 +122,11 @@ namespace LcmsSpectator.ViewModels
             exportResultsCommand.Subscribe(_ => this.ExportResultsImplementation());
             this.ExportResultsCommand = exportResultsCommand;
 
+            // Create export command
+            var quitProgramCommand = ReactiveCommand.Create();
+            quitProgramCommand.Subscribe(_ => this.dialogService.QuitProgram());
+            this.QuitProgramCommand = quitProgramCommand;
+
             this.ShowSplash = true;
 
             // When a data set sets its ReadyToClose property to true, remove it from dataset list
@@ -213,6 +218,11 @@ namespace LcmsSpectator.ViewModels
         /// Gets a command that exports results of a data set to a file.
         /// </summary>
         public IReactiveCommand ExportResultsCommand { get; private set; }
+
+        /// <summary>
+        /// Gets a command that exits the program
+        /// </summary>
+        public IReactiveCommand QuitProgramCommand { get; }
 
         /// <summary>
         /// Gets view model for list of scans and identifications.

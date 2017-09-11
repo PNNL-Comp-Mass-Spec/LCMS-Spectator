@@ -231,5 +231,10 @@ namespace LcmsSpectatorTests.DialogServices
         {
             throw new NotImplementedException();
         }
+
+        public void QuitProgram()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

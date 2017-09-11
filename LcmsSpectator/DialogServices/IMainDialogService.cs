@@ -143,5 +143,10 @@ namespace LcmsSpectator.DialogServices
         /// </summary>
         /// <param name="viewModel">The view model for the window.</param>
         void OpenIsotopicConcentrationTuner(IsotopicConcentrationTunerViewModel viewModel);
+
+        /// <summary>
+        /// Exit the program
+        /// </summary>
+        void QuitProgram();
     }
 }

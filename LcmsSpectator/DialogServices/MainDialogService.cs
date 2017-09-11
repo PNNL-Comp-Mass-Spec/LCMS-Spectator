@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows.Forms;
+
 namespace LcmsSpectator.DialogServices
 {
     using System;
@@ -276,6 +278,17 @@ namespace LcmsSpectator.DialogServices
         {
             var dialog = new IsotopicConcentrationTuner { DataContext = viewModel };
             dialog.ShowDialog();
+        }
+
+        /// <summary>
+        /// Exit the program
+        /// </summary>
+        public void QuitProgram()
+        {
+            var result = System.Windows.Forms.MessageBox.Show("Exit the program?", "Quit", MessageBoxButtons.OKCancel, MessageBoxIcon.Question,
+                                                              MessageBoxDefaultButton.Button1);
+            if (result == DialogResult.OK)
+                Application.Current.Shutdown();
         }
     }
 }

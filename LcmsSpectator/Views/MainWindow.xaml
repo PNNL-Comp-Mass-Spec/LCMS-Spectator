@@ -32,6 +32,8 @@
                           Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}" />
                 <Separator />
                 <MenuItem Header="_Export Results" Command="{Binding ExportResultsCommand}" />
+                <Separator />
+                <MenuItem Header="E_xit" Command="{Binding QuitProgramCommand}" />
             </MenuItem>
             <MenuItem Header="_Config">
                 <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
