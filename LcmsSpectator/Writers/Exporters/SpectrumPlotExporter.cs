@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace LcmsSpectator.Writers.Exporters
@@ -11,7 +10,6 @@ namespace LcmsSpectator.Writers.Exporters
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Utils;
 
-    using LcmsSpectator.Config;
     using LcmsSpectator.Models;
     using LcmsSpectator.PlotModels;
     using LcmsSpectator.PlotModels.ColorDicionaries;
@@ -113,7 +111,7 @@ namespace LcmsSpectator.Writers.Exporters
             // Set up plot
             var plotModel = new PlotModel
             {
-                Title = msLevel == 2 ? string.Format("MS/MS Scan {0}", id.Scan) : 
+                Title = msLevel == 2 ? string.Format("MS/MS Scan {0}", id.Scan) :
                                        string.Format("MS Scan {0}", id.Scan),
                 IsLegendVisible = false,
 

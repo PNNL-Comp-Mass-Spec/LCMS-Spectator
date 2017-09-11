@@ -6,7 +6,7 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("LcmsSpectator")]
-[assembly: AssemblyDescription("Authors: Chris Wilkins, Sangtae Kim, and Jungkap Park                                                         Visualization tool for LC-MS data. \n\n http://omics.pnl.gov/")]
+[assembly: AssemblyDescription("Authors: Chris Wilkins, Sangtae Kim, and Jungkap Park \n\nVisualization tool for LC-MS data. \n\nhttp://omics.pnl.gov/")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pacific Northwest National Laboratory")]
 [assembly: AssemblyProduct("LcmsSpectator")]

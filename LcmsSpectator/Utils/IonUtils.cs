@@ -22,12 +22,8 @@ namespace LcmsSpectator.Utils
     using InformedProteomics.Backend.Utils;
 
     using LcmsSpectator.PlotModels;
-    using LcmsSpectator.ViewModels;
     using LcmsSpectator.ViewModels.Data;
-    using LcmsSpectator.ViewModels.Modifications;
 
-    using ReactiveUI;
-    
     /// <summary>
     /// This is a utility class for containing methods for performing common calculations on sequences and ions.
     /// </summary>
@@ -64,7 +60,7 @@ namespace LcmsSpectator.Utils
         /// <summary>
         /// Get an product ion type from an ion type factory.
         /// </summary>
-        /// <param name="ionTypeFactory">IonTypeFactory to get flyweight ion types.</param>
+        /// <param name="ionTypeFactory">IonTypeFactory for obtaining ion information (mass, charge, etc.)</param>
         /// <param name="baseIonType">The base ion type.</param>
         /// <param name="neutralLoss">The neutral loss of ion type.</param>
         /// <param name="charge">The charge of product ion type.</param>
@@ -120,7 +116,7 @@ namespace LcmsSpectator.Utils
         /// <summary>
         /// Get all ion types of all combinations of base ion types, neutral losses, and charge range.
         /// </summary>
-        /// <param name="ionTypeFactory">IonTypeFactory to get flyweight ion types from.</param>
+        /// <param name="ionTypeFactory">IonTypeFactory for obtaining ion information (mass, charge, etc.)</param>
         /// <param name="baseIonTypes">The base ion types.</param>
         /// <param name="neutralLosses">The neutral losses.</param>
         /// <param name="minCharge">Lowest charge of charge range.</param>

@@ -14,14 +14,11 @@ namespace LcmsSpectator.Config
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Windows.Media;
 
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.Utils;
-    using LcmsSpectator.Models;
 
     using OxyPlot;
 
@@ -74,7 +71,7 @@ namespace LcmsSpectator.Config
         private int pointsToSmooth;
 
         /// <summary>
-        /// The minimum relative intensity for isotopes of precursor ions displayed. 
+        /// The minimum relative intensity for isotopes of precursor ions displayed.
         /// </summary>
         private double precursorRelativeIntensityThreshold;
 
@@ -104,12 +101,12 @@ namespace LcmsSpectator.Config
         private ReactiveList<SearchModification> heavyModifications;
 
         /// <summary>
-        /// The factory for generating flyweight <see cref="IonType" />s.
+        /// The factory for obtaining <see cref="IonType" />s.
         /// </summary>
         private IonTypeFactory ionTypeFactory;
 
         /// <summary>
-        /// Factory for generating flyweight de-convoluted <see cref="IonType" />s.
+        /// Factory for obtaining deconvoluted <see cref="IonType" />s.
         /// </summary>
         private IonTypeFactory deconvolutedIonTypeFactory;
 
@@ -120,13 +117,13 @@ namespace LcmsSpectator.Config
         private bool automaticallySelectIonTypes;
 
         /// <summary>
-        /// The ion types that are automatically selected when the activation method of the 
+        /// The ion types that are automatically selected when the activation method of the
         /// selected MS/MS spectrum is CID or HCD.
         /// </summary>
         private List<BaseIonType> cidBaseIonTypes;
 
         /// <summary>
-        /// The ion types that are automatically selected when the activation method of the 
+        /// The ion types that are automatically selected when the activation method of the
         /// selected MS/MS spectrum is ETD.
         /// </summary>
         private List<BaseIonType> etdIonTypes;
@@ -147,7 +144,7 @@ namespace LcmsSpectator.Config
         private OxyColor ms2ScanColor;
 
         /// <summary>
-        /// Prevents a default instance of the <see cref="IcParameters"/> class from being created. 
+        /// Prevents a default instance of the <see cref="IcParameters"/> class from being created.
         /// Instantiate default values of LCMSSpectator application settings.
         /// </summary>
         private IcParameters()
@@ -167,7 +164,7 @@ namespace LcmsSpectator.Config
             this.LightModifications = new ReactiveList<SearchModification>();
             this.HeavyModifications = new ReactiveList<SearchModification>
             {
-                new SearchModification(Modification.LysToHeavyLys, 'K', SequenceLocation.PeptideCTerm, true), 
+                new SearchModification(Modification.LysToHeavyLys, 'K', SequenceLocation.PeptideCTerm, true),
                 new SearchModification(Modification.ArgToHeavyArg, 'R', SequenceLocation.PeptideCTerm, true)
             };
             IonTypeFactory = new IonTypeFactory(100);
@@ -227,7 +224,7 @@ namespace LcmsSpectator.Config
             get { return this.productIonTolerance; }
             set { this.RaiseAndSetIfChanged(ref this.productIonTolerance, value); }
         }
-        
+
         /// <summary>
         /// Gets or sets the minimum pearson correlation for ions displayed in MS/MS spectra.
         /// </summary>
@@ -247,7 +244,7 @@ namespace LcmsSpectator.Config
         }
 
         /// <summary>
-        /// Gets or sets the minimum relative intensity for isotopes of precursor ions displayed. 
+        /// Gets or sets the minimum relative intensity for isotopes of precursor ions displayed.
         /// </summary>
         public double PrecursorRelativeIntensityThreshold
         {
@@ -299,9 +296,9 @@ namespace LcmsSpectator.Config
             get { return this.heavyModifications; }
             set { this.RaiseAndSetIfChanged(ref this.heavyModifications, value); }
         }
-        
+
         /// <summary>
-        /// Gets the factory for generating flyweight <see cref="IonType" />s.
+        /// Gets the factory for obtaining <see cref="IonType" />s.
         /// </summary>
         public IonTypeFactory IonTypeFactory
         {
@@ -310,7 +307,7 @@ namespace LcmsSpectator.Config
         }
 
         /// <summary>
-        /// Gets the factory for generating flyweight de-convoluted <see cref="IonType" />s.
+        /// Gets the factory for obtaining deconvoluted <see cref="IonType" />s.
         /// </summary>
         public IonTypeFactory DeconvolutedIonTypeFactory
         {
@@ -329,7 +326,7 @@ namespace LcmsSpectator.Config
         }
 
         /// <summary>
-        /// Gets or sets the ion types that are automatically selected when the activation method of the 
+        /// Gets or sets the ion types that are automatically selected when the activation method of the
         /// selected MS/MS spectrum is CID or HCD.
         /// </summary>
         public List<BaseIonType> CidHcdIonTypes
@@ -339,7 +336,7 @@ namespace LcmsSpectator.Config
         }
 
         /// <summary>
-        /// Gets or sets the ion types that are automatically selected when the activation method of the 
+        /// Gets or sets the ion types that are automatically selected when the activation method of the
         /// selected MS/MS spectrum is ETD.
         /// </summary>
         public List<BaseIonType> EtdIonTypes

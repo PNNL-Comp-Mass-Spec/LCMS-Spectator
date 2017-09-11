@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Readers;
 using LcmsSpectator.Utils;
-using LcmsSpectator.ViewModels;
 using LcmsSpectatorTests.DialogServices;
 using NUnit.Framework;
-using OxyPlot.Axes;
 
 namespace LcmsSpectatorTests
 {
