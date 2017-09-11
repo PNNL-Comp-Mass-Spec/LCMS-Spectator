@@ -167,57 +167,57 @@ namespace LcmsSpectator.ViewModels
         /// Gets command that opens a dialog box prompting the user for a raw file path,
         /// feature file path, and ID file path, then opens the files.
         /// </summary>
-        public IReactiveCommand OpenDataSetCommand { get; private set; }
+        public IReactiveCommand OpenDataSetCommand { get; }
 
         /// <summary>
         /// Gets command that prompts the user for raw file(s) to open.
         /// </summary>
-        public IReactiveCommand OpenRawFileCommand { get; private set; }
-        
+        public IReactiveCommand OpenRawFileCommand { get; }
+
         /// <summary>
         /// Gets command that prompts the user for id file to open.
         /// </summary>
-        public IReactiveCommand OpenTsvFileCommand { get; private set; }
-        
+        public IReactiveCommand OpenTsvFileCommand { get; }
+
         /// <summary>
         /// Gets command that prompts user for feature file to open.
         /// </summary>
-        public IReactiveCommand OpenFeatureFileCommand { get; private set; }
-        
+        public IReactiveCommand OpenFeatureFileCommand { get; }
+
         /// <summary>
         /// Gets command that opens the DMS search dialog.
         /// </summary>
-        public IReactiveCommand OpenFromDmsCommand { get; private set; }
-        
+        public IReactiveCommand OpenFromDmsCommand { get; }
+
         /// <summary>
         /// Gets command that opens settings window.
         /// </summary>
-        public IReactiveCommand OpenSettingsCommand { get; private set; }
-        
+        public IReactiveCommand OpenSettingsCommand { get; }
+
         /// <summary>
         /// Gets a command that opens the isotopic profile viewer.
         /// </summary>
-        public ReactiveCommand<object> OpenIsotopicProfileViewerCommand { get; private set; }
+        public ReactiveCommand<object> OpenIsotopicProfileViewerCommand { get; }
 
         /// <summary>
         /// Gets command that opens about box.
         /// </summary>
-        public IReactiveCommand OpenAboutBoxCommand { get; private set; }
-        
+        public IReactiveCommand OpenAboutBoxCommand { get; }
+
         /// <summary>
         /// Gets command that opens a window for managing registered modifications.
         /// </summary>
-        public IReactiveCommand OpenManageModificationsCommand { get; private set; }
+        public IReactiveCommand OpenManageModificationsCommand { get; }
 
         /// <summary>
         /// Gets command that runs an MSPathFinder database search.
         /// </summary>
-        public IReactiveCommand RunMsPathFinderSearchCommand { get; private set; }
+        public IReactiveCommand RunMsPathFinderSearchCommand { get; }
 
         /// <summary>
         /// Gets a command that exports results of a data set to a file.
         /// </summary>
-        public IReactiveCommand ExportResultsCommand { get; private set; }
+        public IReactiveCommand ExportResultsCommand { get; }
 
         /// <summary>
         /// Gets a command that exits the program
@@ -227,18 +227,18 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets view model for list of scans and identifications.
         /// </summary>
-        public ScanViewModel ScanViewModel { get; private set; }
-        
+        public ScanViewModel ScanViewModel { get; }
+
         /// <summary>
         /// Gets view model for editing sequence, charge, and scan number.
         /// </summary>
-        public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
-        
+        public CreateSequenceViewModel CreateSequenceViewModel { get; }
+
         /// <summary>
         /// Gets list of open data sets.
         /// </summary>
-        public ReactiveList<DataSetViewModel> DataSets { get; private set; }
-      
+        public ReactiveList<DataSetViewModel> DataSets { get; }
+
         /// <summary>
         /// Gets a value indicating whether or not "Open From DMS" should be shown on the menu based on whether
         /// or not the user is on the PNNL network or not.
@@ -274,7 +274,7 @@ namespace LcmsSpectator.ViewModels
             get { return this.idFileLoading; }
             private set { this.RaiseAndSetIfChanged(ref this.idFileLoading, value); }
         }
-        
+
         /// <summary>
         /// Implementation for <see cref="OpenDataSetCommand" />.
         /// Prompts the user for a raw file path, id file path, and feature file path and opens them.
@@ -290,7 +290,7 @@ namespace LcmsSpectator.ViewModels
 
                 if (!string.IsNullOrWhiteSpace(openDataViewModel.FastaFilePath) && File.Exists(openDataViewModel.FastaFilePath))
                 {
-                    await this.ScanViewModel.IdTree.AddFastaEntriesAsync(await this.dataReader.ReadFastaFile(openDataViewModel.FastaFilePath));   
+                    await this.ScanViewModel.IdTree.AddFastaEntriesAsync(await this.dataReader.ReadFastaFile(openDataViewModel.FastaFilePath));
                 }
 
                 await this.ReadIdFile(openDataViewModel.IdFilePath, dataSetViewModel);
@@ -523,7 +523,7 @@ namespace LcmsSpectator.ViewModels
 
             if (!string.IsNullOrEmpty(rawFilePath) &&
                 dataSetViewModel != null &&
-                !string.IsNullOrEmpty(resultFileExtension) && 
+                !string.IsNullOrEmpty(resultFileExtension) &&
                 FileConstants.IdFileExtensions.Contains(resultFileExtension.ToLower()))
             {   // Valid raw file path, DataSetViewModel, and ID file path
                 await this.ReadIdFile(resultFilePath, dataSetViewModel);
