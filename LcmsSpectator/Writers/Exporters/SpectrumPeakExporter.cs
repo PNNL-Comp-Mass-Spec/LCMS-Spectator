@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 namespace LcmsSpectator.Writers.Exporters
 {
     using System.IO;
-    using System.Windows.Input;
-    using System.Windows.Shapes;
 
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
@@ -142,7 +140,7 @@ namespace LcmsSpectator.Writers.Exporters
                 writer.WriteLine(this.GetHeaders());
                 foreach (var match in matches)
                 {
-                    writer.WriteLine(this.GetLine(match)); 
+                    writer.WriteLine(this.GetLine(match));
                 }
             }
         }
@@ -169,7 +167,7 @@ namespace LcmsSpectator.Writers.Exporters
         {
             var lcms = id.LcMs;
             var fragSequence = id.GetFragmentationSequence();
-            var fragments = lcms.GetMsLevel(id.Scan) == 2 ? 
+            var fragments = lcms.GetMsLevel(id.Scan) == 2 ?
                             fragSequence.GetFragmentLabels(this.ionTypes.Where(ionType => ionType.Charge <= id.Charge).ToList()) :
                             fragSequence.GetChargePrecursorLabels();
             var spectrum = lcms.GetSpectrum(id.Scan, true);
