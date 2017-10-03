@@ -30,6 +30,8 @@ namespace LcmsSpectator.Readers
         /// </summary>
         private readonly string filePath;
 
+        private readonly bool doNotReadQValue = false;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="IcFileReader"/> class.
         /// </summary>
@@ -37,6 +39,7 @@ namespace LcmsSpectator.Readers
         public IcFileReader(string filePath)
         {
             this.filePath = filePath;
+            doNotReadQValue = filePath.ToLower().Contains("_ictarget") || filePath.ToLower().Contains("_icdecoy");
             this.Modifications = new List<Modification>();
         }
 
@@ -215,8 +218,11 @@ namespace LcmsSpectator.Readers
                 "Scan",
                 "Charge",
                 "ProteinDesc",
-                "QValue",
             };
+            if (!doNotReadQValue)
+            {
+                expectedHeaders.Add("QValue");
+            }
 
             foreach (var header in expectedHeaders.Where(header => !headers.ContainsKey(header)))
             {
@@ -258,8 +264,11 @@ namespace LcmsSpectator.Readers
                     ProteinName = protein,
                     ProteinDesc = parts[headers["ProteinDesc"]].Split(';').FirstOrDefault(),
                     Score = Math.Round(score, 3),
-                    QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),
                 };
+                if (!doNotReadQValue)
+                {
+                    prsm.QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4);
+                }
                 prsms.Add(prsm);
             }
 
@@ -306,7 +315,7 @@ namespace LcmsSpectator.Readers
         public class InvalidModificationNameException : Exception
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="InvalidModificationNameException"/> class. 
+            /// Initializes a new instance of the <see cref="InvalidModificationNameException"/> class.
             /// </summary>
             /// <param name="message">Exception message.</param>
             /// <param name="modificationName">The name of the invalid modification.</param>
