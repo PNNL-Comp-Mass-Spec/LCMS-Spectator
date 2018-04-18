@@ -42,9 +42,9 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="20*" />
                     <ColumnDefinition Width="3" />
-                    <ColumnDefinition Width="50*" />
+                    <ColumnDefinition Width="80*" />
                     <ColumnDefinition Width="3" />
                     <ColumnDefinition Width="70" />
                 </Grid.ColumnDefinitions>
@@ -174,17 +174,28 @@
                             </TextBlock>
                         </Grid>
                     </Border>
-
                 </Grid>
             </Grid>
         </GroupBox>
-        <StackPanel
-            Grid.Row="2"
-            HorizontalAlignment="Right"
-            Orientation="Horizontal">
-            <Button Width="70" Command="{Binding CloseCommand}">Cancel</Button>
-            <Label Width="10" />
-            <Button Width="70" Command="{Binding OpenCommand}">Open</Button>
-        </StackPanel>
+        <DockPanel Grid.Row="2" LastChildFill="False">
+            <TextBlock
+                Margin="5,0"
+                DockPanel.Dock="Left"
+                Text="{Binding SearchStatus}" />
+            <Button
+                Width="70"
+                Margin="5,0"
+                Command="{Binding OpenCommand}"
+                DockPanel.Dock="Right">
+                Open
+            </Button>
+            <Button
+                Width="70"
+                Margin="5,0"
+                Command="{Binding CloseCommand}"
+                DockPanel.Dock="Right">
+                Cancel
+            </Button>
+        </DockPanel>
     </Grid>
 </Window>

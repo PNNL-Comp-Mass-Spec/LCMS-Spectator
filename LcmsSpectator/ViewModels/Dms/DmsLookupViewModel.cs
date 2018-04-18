@@ -69,6 +69,11 @@ namespace LcmsSpectator.ViewModels.Dms
         private DmsJobViewModel selectedJob;
 
         /// <summary>
+        /// Search status
+        /// </summary>
+        private string searchStatus;
+
+        /// <summary>
         /// A value indicating whether a search has been performed yet.
         /// </summary>
         private bool isFirstSearch;
@@ -216,6 +221,14 @@ namespace LcmsSpectator.ViewModels.Dms
             set => this.RaiseAndSetIfChanged(ref selectedJob, value);
         }
 
+        /// <summary>
+        /// Search status
+        /// </summary>
+        public string SearchStatus
+        {
+            get => searchStatus;
+            set => this.RaiseAndSetIfChanged(ref searchStatus, value);
+        }
         /// <summary>
         /// Gets a value indicating whether or not the No Results alert should be shown.
         /// Set to true when a search has been performed that yielded 0 results.
@@ -385,6 +398,8 @@ namespace LcmsSpectator.ViewModels.Dms
         private void Lookup()
         {
             Datasets.Clear();
+            SearchStatus = string.Empty;
+
             if (NumberOfWeeks < 1)
             {
                 dialogService.MessageBox("Number of weeks must be greater than 0.");
@@ -404,6 +419,8 @@ namespace LcmsSpectator.ViewModels.Dms
             {
                 Datasets.Add(new DmsDatasetViewModel(dataset.Value));
             }
+
+            SearchStatus = string.Format("Found {0} dataset{1}", dataSets.Count, dataSets.Count == 1 ? "" : "s");
 
             if (Datasets.Count > 0)
             {
