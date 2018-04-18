@@ -47,14 +47,14 @@ namespace LcmsSpectator.Readers
         private readonly string connectionString;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DmsLookupUtility"/> class. 
+        /// Initializes a new instance of the <see cref="DmsLookupUtility"/> class.
         /// </summary>
         public DmsLookupUtility() : this(DmsConnectionString)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DmsLookupUtility"/> class. 
+        /// Initializes a new instance of the <see cref="DmsLookupUtility"/> class.
         /// </summary>
         /// <param name="connectionString">The connection String.</param>
         public DmsLookupUtility(string connectionString)
@@ -156,15 +156,17 @@ namespace LcmsSpectator.Readers
                                     Experiment = this.GetDBString(reader, 2),
                                     Organism = this.GetDBString(reader, 3),
                                     Instrument = this.GetDBString(reader, 4),
-                                    Created = reader.GetDateTime(5),
+                                    Created = reader.IsDBNull(5) ? DateTime.MinValue : reader.GetDateTime(5),
                                     DatasetFolderPath = this.GetDBString(reader, 6)
                                 };
 
                                 // Purged datasets that were archived prior to ~August 2013 will have DatasetFolderPath of the form
-                                // \\a2.emsl.pnl.gov\dmsarch\LTQ_Orb_2\2014_1\LNA_CF_Replete_vitro_B1_INH_peri_25Feb14_Leopard_14-02-01
+                                // \\agate.emsl.pnl.gov\dmsarch\LTQ_Orb_2\2014_1\LNA_CF_Replete_vitro_B1_INH_peri_25Feb14_Leopard_14-02-01
+
                                 // Newer purged datasetes will have DatasetFolderPath shown as
                                 // \\MyEMSL\IMS04_AgTOF05\2014_3\TB_UR_38_14Jul14_Methow_13-10-14
-                                // Retrieving datasets from MyEMSL is doable using MyEMSLReader.dll but is probably something you don't want to worry about at this time
+
+                                // Retrieving datasets from MyEMSL is doable using MyEMSLReader.dll but is not yet supported
                                 dctDatasets.Add(datasetInfo.DatasetId, datasetInfo);
                             }
                         }
@@ -313,7 +315,7 @@ namespace LcmsSpectator.Readers
                                     Job = reader.GetInt32(0),
                                     DatasetId = reader.GetInt32(1),
                                     Tool = this.GetDBString(reader, 2),
-                                    Completed = reader.GetDateTime(3),
+                                    Completed = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3),
                                     JobFolderPath = this.GetDBString(reader, 4),
                                     ParameterFile = this.GetDBString(reader, 5),
                                     SettingsFile = this.GetDBString(reader, 6),
