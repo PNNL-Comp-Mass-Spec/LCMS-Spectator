@@ -31,13 +31,23 @@ namespace LcmsSpectator.Writers.Exporters
         public SpectrumPlotExporter(string outputFile, IEnumerable<BaseIonType> baseIonTypes, int dpi)
         {
             this.outputFile = outputFile;
-            baseIonTypes = baseIonTypes ?? new HashSet<BaseIonType> { BaseIonType.B, BaseIonType.Y };
-            this.baseIonTypes = new HashSet<BaseIonType>();
-            this.baseIonTypes.UnionWith(baseIonTypes);
+
+            var ionTypeList = new HashSet<BaseIonType>();
+            if (baseIonTypes != null)
+            {
+                foreach (var ionType in baseIonTypes)
+                    ionTypeList.Add(ionType);
+            }
+
+            if (ionTypeList.Count == 0)
+            {
+                ionTypeList.Add(BaseIonType.B);
+                ionTypeList.Add(BaseIonType.Y);
+            }
 
             var ionTypeFactory = new IonTypeFactory(100);
             var allIonTypes = ionTypeFactory.GetAllKnownIonTypes();
-            this.ionTypes = allIonTypes.Where(ionType => this.baseIonTypes.Contains(ionType.BaseIonType));
+            ionTypes = allIonTypes.Where(ionType => ionTypeList.Contains(ionType.BaseIonType));
             this.dpi = dpi;
         }
 

@@ -29,14 +29,24 @@ namespace LcmsSpectator.Writers.Exporters
         public SpectrumPeakExporter(string outputFile, IEnumerable<BaseIonType> baseIonTypes = null, Tolerance tolerance = null)
         {
             this.outputFile = outputFile;
-            baseIonTypes = baseIonTypes ?? new HashSet<BaseIonType> { BaseIonType.B, BaseIonType.Y };
-            this.baseIonTypes = new HashSet<BaseIonType>();
-            this.baseIonTypes.UnionWith(baseIonTypes);
+
+            var ionTypeList = new HashSet<BaseIonType>();
+            if (baseIonTypes != null)
+            {
+                foreach (var ionType in baseIonTypes)
+                    ionTypeList.Add(ionType);
+            }
+
+            if (ionTypeList.Count == 0)
+            {
+                ionTypeList.Add(BaseIonType.B);
+                ionTypeList.Add(BaseIonType.Y);
+            }
 
             var ionTypeFactory = new IonTypeFactory(100);
             var allIonTypes = ionTypeFactory.GetAllKnownIonTypes();
-            this.ionTypes = allIonTypes.Where(ionType => this.baseIonTypes.Contains(ionType.BaseIonType));
-            this.tolerance = tolerance ?? new Tolerance(10, ToleranceUnit.Ppm);
+            ionTypes = allIonTypes.Where(ionType => ionTypeList.Contains(ionType.BaseIonType));
+            // this.tolerance = tolerance ?? new Tolerance(10, ToleranceUnit.Ppm);
         }
 
         public void Export(IList<PeakDataPoint> peakDataPoints, IProgress<ProgressData> progress = null)
