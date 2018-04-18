@@ -306,16 +306,10 @@ namespace LcmsSpectatorTests
 
         private void WriteMissingIds(List<SimpleMZIdentMLReader.SpectrumIdItem> mzids, string filePath)
         {
-            var count = 0;
             using (var writer = new StreamWriter(filePath))
             {
                 foreach (var id in mzids)
                 {
-                    //if (count++ >= 762)
-                    //{
-                    //    continue;
-                    //}
-
                     var proteins = id.PepEvidence.Select(pepEv => pepEv.DbSeq.Accession).Aggregate(string.Empty, (l, r) => l + ";" + r);
                     writer.WriteLine(id.ScanNum + "\t" + id.Peptide.Sequence + "\t" + proteins + "\t" + id.SpecEv + "\t" + id.QValue);
                 }

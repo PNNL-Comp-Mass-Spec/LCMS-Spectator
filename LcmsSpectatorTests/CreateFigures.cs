@@ -16,70 +16,138 @@ namespace LcmsSpectatorTests
     [TestFixture]
     public class CreateFigures
     {
-        private const string datasetDir = @"D:\Data\TopDownTraining\UVPD_Yeast";
+        private const string datasetDir = @"\\proto-2\unitTest_Files\InformedProteomics_TestFiles\TopDownTraining";
 
-        private const string outputFile = @"D:\Data\TopDownTraining\UVPD_Yeast\plotFiles\results.tsv";
+        private const string outputFileDir = @"\\proto-2\unitTest_Files\InformedProteomics_TestFiles\TopDownTraining\plotFiles";
 
         [Test]
+        [Category("PNL_Domain")]
         public void WritePlots()
         {
-            var results = new List<ResultLine>();
-            foreach (var line in File.ReadLines(outputFile))
-            {
-                var parts = line.Split('\t');
-                if (parts.Length < 5) continue;
+            var plotFileDir = new DirectoryInfo(outputFileDir);
 
-                results.Add(new ResultLine
-                                {
-                                    Corr = Convert.ToDouble(parts[0]),
-                                    Cosine = Convert.ToDouble(parts[1]),
-                                    Error = Convert.ToDouble(parts[2]),
-                                    Intensity = Convert.ToDouble(parts[3]),
-                                    IsTarget = Convert.ToInt32(parts[4]) == 1 ? true : false,
-                                });
+            if (!plotFileDir.Exists)
+            {
+                Assert.Ignore("Skipping, directory not found: " + outputFileDir);
             }
 
-            // Corr Histogram
-            var corrHistTar = new Dictionary<int, int>();
-            var corrHistDec = new Dictionary<int, int>();
-            foreach (var result in results)
+            var resultFiles = plotFileDir.GetFiles("result*.tsv");
+            if (resultFiles.Length == 0)
             {
-                var corrHist = result.IsTarget ? corrHistTar : corrHistDec;
-                var roundedCorr = (int)Math.Round(result.Corr, 1) * 10;
-                if (!corrHist.ContainsKey(roundedCorr))
+                Assert.Ignore("Skipping, result .tsv files not found in " + outputFileDir);
+            }
+
+            foreach (var resultFile in resultFiles)
+            {
+
+                var results = new List<ResultLine>();
+                foreach (var line in File.ReadLines(resultFile.FullName))
                 {
-                    corrHist.Add(roundedCorr, 0);
+                    var parts = line.Split('\t');
+                    if (parts.Length < 5) continue;
+
+                    results.Add(new ResultLine
+                    {
+                        Corr = Convert.ToDouble(parts[0]),
+                        Cosine = Convert.ToDouble(parts[1]),
+                        Error = Convert.ToDouble(parts[2]),
+                        Intensity = Convert.ToDouble(parts[3]),
+                        IsTarget = Convert.ToInt32(parts[4]) == 1 ? true : false,
+                    });
                 }
 
-                corrHist[roundedCorr]++;
-            }
-
-            // Corr roc
-            var corrRoc = new Dictionary<int, double>();
-            for (var i = 0; i < 10; i++)
-            {
-                var fpr = (int) Math.Round(100.0*corrHistDec[i] / (corrHistDec[i] + corrHistTar[i]));
-                var tpr = 100.0 * corrHistTar[i] / (corrHistDec[i] + corrHistTar[i]);
-                //corrRoc.Add();
-            }
-
-            // Error Histogram
-            var errHistTar = new Dictionary<int, int>();
-            var errHistDec = new Dictionary<int, int>();
-            foreach (var result in results)
-            {
-                var errHist = result.IsTarget ? errHistTar : errHistDec;
-                var roundedErr = (int)Math.Round(result.Error);
-                if (!errHist.ContainsKey(roundedErr))
+                // Corr Histogram
+                var corrHistTarget = new Dictionary<int, int>();
+                var corrHistDecoy = new Dictionary<int, int>();
+                foreach (var result in results)
                 {
-                    errHist.Add(roundedErr, 0);
+                    var corrHist = result.IsTarget ? corrHistTarget : corrHistDecoy;
+                    var roundedCorr = (int)(Math.Round(result.Corr, 1) * 10);
+                    if (!corrHist.ContainsKey(roundedCorr))
+                    {
+                        corrHist.Add(roundedCorr, 0);
+                    }
+
+                    corrHist[roundedCorr]++;
                 }
 
-                errHist[roundedErr]++;
+                // Corr roc
+                var corrRoc = new Dictionary<int, List<double>>();
+                for (var i = 0; i < 10; i++)
+                {
+                    if (!corrHistTarget.TryGetValue(i, out var targetCount))
+                        targetCount = 0;
+
+                    if (!corrHistDecoy.TryGetValue(i, out var decoyCount))
+                        decoyCount = 0;
+
+                    var divisor = decoyCount + targetCount;
+                    if (divisor == 0)
+                        continue;
+
+                    var fpr = (int)Math.Round(decoyCount / (double)divisor * 100);
+                    var tpr = targetCount / (double)divisor * 100;
+
+                    if (corrRoc.TryGetValue(fpr, out var tprList))
+                    {
+                        tprList.Add(tpr);
+                    }
+                    else
+                    {
+                        tprList = new List<double>() {tpr};
+                        corrRoc.Add(fpr, tprList);
+                    }
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("ROC Curve data for " + resultFile.Name);
+                Console.WriteLine("{0}\t{1}", "FPR", "TPR");
+
+                foreach (var fpr in (from item in corrRoc.Keys orderby item select item))
+                {
+                    foreach (var tpr in (from item in corrRoc[fpr] orderby item select item))
+                    {
+                        Console.WriteLine("{0}\t{1:F1}", fpr, tpr);
+                    }
+                }
+
+                // Error Histogram
+                var errHistTarget = new Dictionary<int, int>();
+                var errHistDecoy = new Dictionary<int, int>();
+                foreach (var result in results)
+                {
+                    var errHist = result.IsTarget ? errHistTarget : errHistDecoy;
+                    var roundedErr = (int)Math.Round(result.Error);
+                    if (!errHist.ContainsKey(roundedErr))
+                    {
+                        errHist.Add(roundedErr, 0);
+                    }
+
+                    errHist[roundedErr]++;
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("Target PSMs Error Histogram");
+                Console.WriteLine("{0}\t{1}", "Error", "Count");
+
+                foreach (var roundedError in (from item in errHistTarget.Keys orderby item select item))
+                {
+                    Console.WriteLine("{0}\t{1}", roundedError, errHistTarget[roundedError]);
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("Decoy PSMs Error Histogram");
+                Console.WriteLine("{0}\t{1}", "Error", "Count");
+
+                foreach (var roundedError in (from item in errHistDecoy.Keys orderby item select item))
+                {
+                    Console.WriteLine("{0}\t{1}", roundedError, errHistDecoy[roundedError]);
+                }
             }
         }
 
         [Test]
+        [Category("PNL_Domain")]
         public void CalcFeatures()
         {
             var files = Directory.GetFiles(datasetDir);
@@ -89,14 +157,37 @@ namespace LcmsSpectatorTests
 
             var results = new ConcurrentBag<ResultLine>();
 
-            foreach (var rawFile in rawFiles)
+            var datasetsProcessed = 0;
+            foreach (var rawFilePath in rawFiles)
             {
-                var scans = new Dictionary<int, DeconvolutedSpectrum>();
-                var pbfRun = (PbfLcMsRun) PbfLcMsRun.GetLcMsRun(rawFile);
+                var rawFile = new FileInfo(rawFilePath);
+                if (rawFile.Length / 1024.0 / 1024 / 1024 > 1)
+                {
+                    Console.WriteLine("Skipping, {0} since over 1 GB", rawFile.FullName);
+                    continue;
+                }
 
-                var idName = $"{Path.GetFileNameWithoutExtension(rawFile)}_IcTda";
+                var idName = $"{Path.GetFileNameWithoutExtension(rawFile.Name)}_IcTda";
+                var decoyName = $"{Path.GetFileNameWithoutExtension(rawFile.Name)}_IcDecoy";
+
+                if (!targetFiles.ContainsKey(idName))
+                {
+                    Console.WriteLine("Skipping, _IcTda.tsv file not found for " + rawFile.FullName);
+                    continue;
+                }
+
+                if (!decoyFiles.ContainsKey(decoyName))
+                {
+                    Console.WriteLine("Skipping, _IcDecoy.tsv file not found for " + rawFile.FullName);
+                    continue;
+                }
+
+                Console.WriteLine("Processing " + rawFile.FullName);
+
+                var scans = new Dictionary<int, DeconvolutedSpectrum>();
+                var pbfRun = (PbfLcMsRun)PbfLcMsRun.GetLcMsRun(rawFile.FullName);
+
                 var ids = ParseIdFile(targetFiles[idName], true);
-                var decoyName = $"{Path.GetFileNameWithoutExtension(rawFile)}_IcDecoy";
                 var decoys = ParseIdFile(decoyFiles[decoyName], false);
                 ids.AddRange(decoys);
 
@@ -143,7 +234,17 @@ namespace LcmsSpectatorTests
                         }
                     }
                 }
-                using (var writer = new StreamWriter(outputFile))
+
+                datasetsProcessed++;
+
+                var plotFileDir = new DirectoryInfo(outputFileDir);
+                if (!plotFileDir.Exists)
+                    plotFileDir.Create();
+
+                var outputFilePath = Path.Combine(plotFileDir.FullName,
+                                                  string.Format("result_{0}.tsv", Path.GetFileNameWithoutExtension(rawFile.Name)));
+
+                using (var writer = new StreamWriter(new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)))
                 {
                     foreach (var result in results)
                     {
@@ -151,7 +252,11 @@ namespace LcmsSpectatorTests
                         writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", result.Corr, result.Cosine, result.Error, result.Intensity, isTarget);
                     }
                 }
-            }
+
+            } //foreach
+
+            if (datasetsProcessed == 0)
+                Assert.Ignore("Did not find any valid datasets in " + datasetDir);
         }
 
         private DeconvolutedSpectrum GetDeconvolutedSpectrum(int scan, PbfLcMsRun pbfLcMsRun)
@@ -174,7 +279,7 @@ namespace LcmsSpectatorTests
             foreach (var line in File.ReadLines(filePath))
             {
                 var parts = line.Split('\t');
-                if (parts.Length < 18)
+                if (parts.Length < 15)
                 {
                     continue;
                 }
@@ -207,7 +312,6 @@ namespace LcmsSpectatorTests
                     var index = Math.Min(Convert.ToInt32(modParts[1]), cleanSeq.Count - 1);
                     cleanSeq[index] = new ModifiedAminoAcid(cleanSeq[index], Modification.Get(name));
                 }
-
 
                 var sequence = new Sequence(cleanSeq);
                 psms.Add(new Psm(scan, charge, sequence, isTarget));

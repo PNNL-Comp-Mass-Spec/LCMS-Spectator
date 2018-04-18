@@ -66,6 +66,7 @@ namespace LcmsSpectatorTests
         }
 
         [Test]
+        [Ignore("Missing data files")]
         public void TestHideUnidentifedScans()
         {
             // init test data

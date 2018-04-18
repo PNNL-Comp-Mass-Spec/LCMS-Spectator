@@ -58,23 +58,22 @@ namespace LcmsSpectatorTests
         [Ignore("Missing data file")]
         public void TestIanCidData()
         {
-            const string specFilePath =
-                @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID\9 pep mix 365 mTorr with ims 45V CID.UIMF";
-            const string fastaFilePath = @"\\protoapps\userdata\Wilkins\UIMF Files\melittin.fasta";
-            const string outputDirectory =
-                @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID";
+            const string specFilePath = @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID\9 pep mix 365 mTorr with ims 45V CID.UIMF";
+            // const string fastaFilePath = @"\\protoapps\userdata\Wilkins\UIMF Files\melittin.fasta";
+            // const string outputDirectory = @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID";
 
-            const double correlationThreshold = 0.7;
+            // const double correlationThreshold = 0.7;
 
             // Add missing modifications
 
             // Initialize search modifications
-            var searchModifications = new List<SearchModification> { };
-            var aminoAcidSet = new AminoAcidSet(searchModifications, 1);
+            // var searchModifications = new List<SearchModification> { };
+            // var aminoAcidSet = new AminoAcidSet(searchModifications, 1);
 
             // Initialize spectrum file
             var lcmsRun = PbfLcMsRun.GetLcMsRun(specFilePath);
             var scanNumbers = lcmsRun.GetScanNumbers(2);
+            Console.WriteLine("MS2 scan count: " + scanNumbers.Count);
 
             // Initialize MSPathFinder
             //var launcher = new IcTopDownLauncher(
