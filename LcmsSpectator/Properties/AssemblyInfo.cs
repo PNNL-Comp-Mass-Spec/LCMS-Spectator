@@ -6,11 +6,13 @@ using System.Windows;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("LcmsSpectator")]
-[assembly: AssemblyDescription("Authors: Chris Wilkins, Sangtae Kim, and Jungkap Park \n\nVisualization tool for LC-MS data. \n\nhttp://omics.pnl.gov/")]
+[assembly: AssemblyDescription("Visualization tool for LC-MS data.\n\n" +
+                               "Authors: Chris Wilkins, Sangtae Kim, Jungkap Park, Bryson Gibbons, and Matthew Monroe\n\n" +
+                               "https://omics.pnl.gov/")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pacific Northwest National Laboratory")]
 [assembly: AssemblyProduct("LcmsSpectator")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -46,8 +48,4 @@ using System.Windows;
 //      Build Number
 //      Revision
 //
-// You can specify all the values or you can default the Build and Revision Numbers
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.1.*")]
-//[assembly: AssemblyFileVersion("1.0.0.0")]
