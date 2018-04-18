@@ -336,7 +336,7 @@ namespace LcmsSpectator.ViewModels.Dms
 
             var jobDir = Directory.GetFiles(SelectedJob.JobFolderPath);
             return (from idFp in jobDir
-                           let ext = Path.GetExtension(idFp)
+                           let ext = Path.GetExtension(idFp).ToLower()
                            where ext == ".mzid" || ext == ".gz" || ext == ".zip"
                            select idFp).FirstOrDefault();
         }
@@ -361,7 +361,10 @@ namespace LcmsSpectator.ViewModels.Dms
 
             var promexDirFiles = Directory.GetFiles(promexDir);
 
-            return (from idFp in promexDirFiles let ext = Path.GetExtension(idFp) where ext == ".ms1ft" select idFp).FirstOrDefault();
+            return (from idFp in promexDirFiles
+                    let ext = Path.GetExtension(idFp).ToLower()
+                    where ext == ".ms1ft"
+                    select idFp).FirstOrDefault();
         }
 
         /// <summary>
