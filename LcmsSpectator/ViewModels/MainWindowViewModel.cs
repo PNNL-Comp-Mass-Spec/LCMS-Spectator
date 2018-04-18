@@ -486,6 +486,13 @@ namespace LcmsSpectator.ViewModels
         {
             var resultFileName = Path.GetFileNameWithoutExtension(resultFilePath);
             var resultFileExtension = Path.GetExtension(resultFilePath);
+            if (string.Equals(resultFileExtension, ".gz", StringComparison.OrdinalIgnoreCase))
+            {
+                // This is a gzip file, e.g. .mzid.gz
+                // Determine the extension before .gz
+                resultFileExtension = Path.GetExtension(Path.GetFileNameWithoutExtension(resultFilePath)) + ".gz";
+            }
+
             var dataSetViewModel = this.DataSets.FirstOrDefault(ds => ds.Title == resultFileName);
             string rawFilePath;
             if (dataSetViewModel == null)
