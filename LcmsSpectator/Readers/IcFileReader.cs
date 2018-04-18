@@ -360,6 +360,12 @@ namespace LcmsSpectator.Readers
             /// position than the right modification.</returns>
             public int Compare(Tuple<int, Modification> x, Tuple<int, Modification> y)
             {
+                if (x == null)
+                    return -1;
+
+                if (y == null)
+                    return 1;
+
                 return y.Item1.CompareTo(x.Item1);
             }
         }

@@ -157,6 +157,12 @@ namespace LcmsSpectator.Models
             /// </returns>
             public int Compare(ChargeStateId x, ChargeStateId y)
             {
+                if (x == null)
+                    return -1;
+
+                if (y == null)
+                    return 1;
+
                 return x.Charge.CompareTo(y.Charge);
             }
         }

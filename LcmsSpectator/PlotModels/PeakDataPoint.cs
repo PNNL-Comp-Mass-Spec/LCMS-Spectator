@@ -107,6 +107,12 @@ namespace LcmsSpectator.PlotModels
             /// </returns>
             public int Compare(PeakDataPoint x, PeakDataPoint y)
             {
+                if (x == null)
+                    return -1;
+
+                if (y == null)
+                    return 1;
+
                 return x.X.CompareTo(y.X);
             }
         }

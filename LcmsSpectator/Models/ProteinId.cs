@@ -175,6 +175,12 @@ namespace LcmsSpectator.Models
             /// </returns>
             public int Compare(ProteinId x, ProteinId y)
             {
+                if (x == null)
+                    return -1;
+
+                if (y == null)
+                    return 1;
+
                 return string.Compare(x.ProteinName, y.ProteinName, StringComparison.Ordinal);
             }
         }

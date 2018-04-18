@@ -472,6 +472,12 @@ namespace LcmsSpectator.Models
             /// <returns>Integer indicating if the left PRSM is greater than the right PRSM.</returns>
             public int Compare(PrSm x, PrSm y)
             {
+                if (x == null)
+                    return -1;
+
+                if (y == null)
+                    return 1;
+
                 var comp = x.UseGolfScoring ? x.Score.CompareTo(y.Score) : y.Score.CompareTo(x.Score);
                 return comp;
             }
@@ -490,6 +496,12 @@ namespace LcmsSpectator.Models
             /// <returns>Integer indicating if the left PRSM is greater than the right PRSM.</returns>
             public int Compare(PrSm x, PrSm y)
             {
+                if (x == null)
+                    return -1;
+
+                if (y == null)
+                    return 1;
+
                 return x.Scan.CompareTo(y.Scan);
             }
         }

@@ -309,6 +309,12 @@ namespace LcmsSpectator.Models
             /// </returns>
             public int Compare(ProteoformId x, ProteoformId y)
             {
+                if (x == null)
+                    return -1;
+
+                if (y == null)
+                    return 1;
+
                 return string.Compare(x.SequenceText, y.SequenceText, StringComparison.Ordinal);
             }
         }
