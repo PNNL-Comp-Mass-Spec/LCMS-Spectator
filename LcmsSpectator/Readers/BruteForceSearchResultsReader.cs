@@ -79,8 +79,10 @@ namespace LcmsSpectator.Readers
             IEnumerable<PrSm> prsms;
             if (string.Equals(ext, ".tsv", StringComparison.OrdinalIgnoreCase))
             {
-                var file = new StreamReader(File.Open(this.filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                prsms = await this.ReadTsv(file, modIgnoreList, progress);
+                var fileInfo = new FileInfo(filePath);
+                var reader = new StreamReader(File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                prsms = await ReadTsv(reader, modIgnoreList, fileInfo.Length, progress);
+                return prsms;
             }
 
             if (string.Equals(ext, ".zip", StringComparison.OrdinalIgnoreCase))
@@ -98,19 +100,28 @@ namespace LcmsSpectator.Readers
         /// </summary>
         /// <param name="stream">The stream for an open TSV file.</param>
         /// <param name="modIgnoreList">Ignores modifications contained in this list. </param>
+        /// <param name="fileSizeBytes">Size of the source file, in bytes</param>
+        /// <param name="progress">Progress</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadTsv(StreamReader stream, List<string> modIgnoreList, IProgress<double> progress)
+        private async Task<IEnumerable<PrSm>> ReadTsv(StreamReader stream, List<string> modIgnoreList, long fileSizeBytes, IProgress<double> progress)
         {
 
             var prsms = new List<PrSm>();
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
+            long bytesRead = 0;
+
             while (!stream.EndOfStream)
             {
                 var line = await stream.ReadLineAsync();
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
                 lineCount++;
-                if (lineCount == 1 && line != null)
-                { // first line
+                bytesRead += line.Length + 2;
+
+                if (lineCount == 1)
+                {
                     // first line
                     var parts = line.Split('\t');
                     for (var i = 0; i < parts.Length; i++)
@@ -126,6 +137,8 @@ namespace LcmsSpectator.Readers
                 {
                     prsms.AddRange(idData);
                 }
+
+                progress.Report(bytesRead / (double)fileSizeBytes * 100);
             }
 
             stream.Close();
@@ -155,7 +168,7 @@ namespace LcmsSpectator.Readers
             {
                 using (var fileStream = new StreamReader(entry.Open()))
                 {
-                    return await this.ReadTsv(fileStream, modIgnoreList, progress);
+                    return await ReadTsv(fileStream, modIgnoreList, entry.Length, progress);
                 }
             }
 

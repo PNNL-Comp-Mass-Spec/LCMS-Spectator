@@ -53,27 +53,25 @@ namespace LcmsSpectator.Writers.Exporters
 
         public async Task ExportAsync(IList<PrSm> ids, IProgress<ProgressData> progress = null)
         {
-            progress = progress ?? new Progress<ProgressData>();
-            var progressData = new ProgressData();
-            int i = 1;
+            var progressData = new ProgressData(progress);
+            var i = 1;
             foreach (var id in ids)
             {
-                var outPath = Path.Combine(this.outputFile, string.Format("Scan_{0}.png", id.Scan));
-                await this.ExportAsync(id, outPath);
-                progress.Report(progressData.UpdatePercent((100.0 * i++) / ids.Count));
+                var outPath = Path.Combine(outputFile, string.Format("Scan_{0}.png", id.Scan));
+                await ExportAsync(id, outPath);
+                progressData.Report(i++ / (double)ids.Count * 100);
             }
         }
 
         public void Export(IList<PrSm> ids, IProgress<ProgressData> progress = null)
         {
-            progress = progress ?? new Progress<ProgressData>();
-            var progressData = new ProgressData();
+            var progressData = new ProgressData(progress);
             var i = 1;
             foreach (var id in ids)
             {
-                progress.Report(progressData.UpdatePercent((100.0 * i++) / ids.Count));
                 var outPath = Path.Combine(outputFile, string.Format("Scan_{0}.png", id.Scan));
                 Export(id, outPath);
+                progressData.Report(i++ / (double)ids.Count * 100);
             }
         }
 
