@@ -119,73 +119,111 @@ namespace LcmsSpectator.Readers
             try
             {
                 var sql = " SELECT Dataset_ID, Dataset, Experiment, Organism, Instrument, Created, Folder" +
-                                " FROM V_Mage_Dataset_List " +
-                                " WHERE Instrument <> 'DMS_Pipeline_Data'";
+                          " FROM V_Mage_Dataset_List " +
+                          " WHERE Instrument <> 'DMS_Pipeline_Data'" +
+                          " AND Created >= '" + dateThreshold.ToString("yyyy-MM-dd") + "' ";
 
-                sql += " AND Created >= '" + dateThreshold.ToString("yyyy-MM-dd") + "' ";
+                string whereEquals;
+                string whereLike;
 
-                if (!string.IsNullOrWhiteSpace(datasetNameFilter))
+                if (string.IsNullOrWhiteSpace(datasetNameFilter))
                 {
-                    sql += " AND Dataset Like '" + CheckFilter(datasetNameFilter) + "'";
+                    whereEquals = string.Empty;
+                    whereLike = string.Empty;
+                }
+                else
+                {
+                    if (datasetNameFilter.Contains("*") || datasetNameFilter.Contains("%"))
+                        whereEquals = string.Empty;
+                    else
+                        whereEquals = " AND Dataset = '" + datasetNameFilter + "'";
+
+                    whereLike = " AND Dataset Like '" + CheckFilter(datasetNameFilter) + "'";
                 }
 
-                var retryCount = MaxRetries;
-                if (retryCount < 1)
+                using (var connection = new SqlConnection(connectionString))
                 {
-                    retryCount = 1;
-                }
+                    connection.Open();
 
-                while (retryCount > 0)
-                {
-                    try
+                    // On the first iteration try an exact dataset match (provided whereEquals is not blank)
+                    // On the second use a Like clause
+
+                    for (var iteration = 1; iteration <= 2; iteration++)
                     {
-                        using (var connection = new SqlConnection(connectionString))
+                        if (iteration == 1 && string.IsNullOrWhiteSpace(whereEquals))
+                            continue;
+
+                        var retryCount = MaxRetries;
+                        if (retryCount < 1)
                         {
-                            connection.Open();
-
-                            var cmd = new SqlCommand(sql, connection);
-                            var reader = cmd.ExecuteReader();
-
-                            while (reader.Read())
-                            {
-                                // Note: using GetDBString to convert null strings to empty strings
-                                // Numeric values could possibly be null, but shouldn't be in this query
-                                var datasetInfo = new UdtDatasetInfo
-                                {
-                                    DatasetId = reader.GetInt32(0),
-                                    Dataset = GetDBString(reader, 1),
-                                    Experiment = GetDBString(reader, 2),
-                                    Organism = GetDBString(reader, 3),
-                                    Instrument = GetDBString(reader, 4),
-                                    Created = reader.IsDBNull(5) ? DateTime.MinValue : reader.GetDateTime(5),
-                                    DatasetFolderPath = GetDBString(reader, 6)
-                                };
-
-                                // Purged datasets that were archived prior to ~August 2013 will have DatasetFolderPath of the form
-                                // \\agate.emsl.pnl.gov\dmsarch\LTQ_Orb_2\2014_1\LNA_CF_Replete_vitro_B1_INH_peri_25Feb14_Leopard_14-02-01
-
-                                // Newer purged datasetes will have DatasetFolderPath shown as
-                                // \\MyEMSL\IMS04_AgTOF05\2014_3\TB_UR_38_14Jul14_Methow_13-10-14
-
-                                // Retrieving datasets from MyEMSL is doable using MyEMSLReader.dll but is not yet supported
-                                dctDatasets.Add(datasetInfo.DatasetId, datasetInfo);
-                            }
+                            retryCount = 1;
                         }
 
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        retryCount -= 1;
-                        var msg = "Exception querying database in GetDatasets: " + ex.Message;
-                        msg += ", RetryCount = " + retryCount;
+                        while (retryCount > 0)
+                        {
+                            try
+                            {
 
-                        Console.WriteLine(msg);
+                                string sqlWithFilter;
+                                if (iteration == 1)
+                                {
+                                    sqlWithFilter = sql + whereEquals;
+                                }
+                                else
+                                {
+                                    sqlWithFilter = sql + whereLike;
+                                }
 
-                        // Delay for 3 second before trying again
-                        System.Threading.Thread.Sleep(3000);
-                    }
-                }
+                                var cmd = new SqlCommand(sqlWithFilter, connection);
+                                using (var reader = cmd.ExecuteReader())
+                                {
+                                    while (reader.Read())
+                                    {
+                                        // Note: using GetDBString to convert null strings to empty strings
+                                        // Numeric values could possibly be null, but shouldn't be in this query
+                                        var datasetInfo = new UdtDatasetInfo
+                                        {
+                                            DatasetId = reader.GetInt32(0),
+                                            Dataset = GetDBString(reader, 1),
+                                            Experiment = GetDBString(reader, 2),
+                                            Organism = GetDBString(reader, 3),
+                                            Instrument = GetDBString(reader, 4),
+                                            Created = reader.IsDBNull(5) ? DateTime.MinValue : reader.GetDateTime(5),
+                                            DatasetFolderPath = GetDBString(reader, 6)
+                                        };
+
+                                        // Purged datasets that were archived prior to ~August 2013 will have DatasetFolderPath of the form
+                                        // \\agate.emsl.pnl.gov\dmsarch\LTQ_Orb_2\2014_1\LNA_CF_Replete_vitro_B1_INH_peri_25Feb14_Leopard_14-02-01
+
+                                        // Newer purged datasetes will have DatasetFolderPath shown as
+                                        // \\MyEMSL\IMS04_AgTOF05\2014_3\TB_UR_38_14Jul14_Methow_13-10-14
+
+                                        // Retrieving datasets from MyEMSL is doable using MyEMSLReader.dll but is not yet supported
+                                        dctDatasets.Add(datasetInfo.DatasetId, datasetInfo);
+                                    }
+                                }
+
+                                break;
+                            }
+                            catch (Exception ex)
+                            {
+                                retryCount -= 1;
+                                var msg = "Exception querying database in GetDatasets: " + ex.Message;
+                                msg += ", RetryCount = " + retryCount;
+
+                                Console.WriteLine(msg);
+
+                                // Delay for 3 second before trying again
+                                System.Threading.Thread.Sleep(3000);
+                            }
+                        } // while
+
+                        if (dctDatasets.Count > 0)
+                            break;
+
+                    } // for
+
+                } // using
             }
             catch (Exception ex)
             {
@@ -278,6 +316,12 @@ namespace LcmsSpectator.Readers
                     datasetIdList.Append(dataset.DatasetId);
                 }
 
+                if (datasetIdList.ToString() == "0")
+                {
+                    // datasets only contains one item, and it has dataset ID 0; no point in querying the database
+                    return dctJobs;
+                }
+
                 var sql = " SELECT Job, Dataset_ID, Tool, Job_Finish, Folder," +
                                     " Parameter_File, Settings_File," +
                                     " [Protein Collection List], [Organism DB]" +
@@ -289,68 +333,72 @@ namespace LcmsSpectator.Readers
                     sql += " AND Tool Like '" + CheckFilter(toolNameFilter) + "'";
                 }
 
-                var retryCount = MaxRetries;
-                if (retryCount < 1)
+                using (var connection = new SqlConnection(connectionString))
                 {
-                    retryCount = 1;
-                }
+                    connection.Open();
 
-                while (retryCount > 0)
-                {
-                    try
+                    var retryCount = MaxRetries;
+                    if (retryCount < 1)
                     {
-                        using (var connection = new SqlConnection(connectionString))
+                        retryCount = 1;
+                    }
+
+                    while (retryCount > 0)
+                    {
+                        try
                         {
-                            connection.Open();
 
                             var cmd = new SqlCommand(sql, connection);
-                            var reader = cmd.ExecuteReader();
-
-                            while (reader.Read())
+                            using (var reader = cmd.ExecuteReader())
                             {
-                                // "Job, Dataset_ID, Tool, Job_Finish, Folder," +
-                                // " Parameter_File, Settings_File," +
-                                // " [Organism DB], [Protein Collection List]" +
-                                var jobInfo = new UdtJobInfo
+
+                                while (reader.Read())
                                 {
-                                    Job = reader.GetInt32(0),
-                                    DatasetId = reader.GetInt32(1),
-                                    Tool = GetDBString(reader, 2),
-                                    Completed = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3),
-                                    JobFolderPath = GetDBString(reader, 4),
-                                    ParameterFile = GetDBString(reader, 5),
-                                    SettingsFile = GetDBString(reader, 6),
-                                    ProteinCollection = GetDBString(reader, 7),
-                                    OrganismDb = GetDBString(reader, 8)
-                                };
+                                    // "Job, Dataset_ID, Tool, Job_Finish, Folder," +
+                                    // " Parameter_File, Settings_File," +
+                                    // " [Organism DB], [Protein Collection List]" +
+                                    var jobInfo = new UdtJobInfo
+                                    {
+                                        Job = reader.GetInt32(0),
+                                        DatasetId = reader.GetInt32(1),
+                                        Tool = GetDBString(reader, 2),
+                                        Completed = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3),
+                                        JobFolderPath = GetDBString(reader, 4),
+                                        ParameterFile = GetDBString(reader, 5),
+                                        SettingsFile = GetDBString(reader, 6),
+                                        ProteinCollection = GetDBString(reader, 7),
+                                        OrganismDb = GetDBString(reader, 8)
+                                    };
 
 
-                                if (dctJobs.TryGetValue(jobInfo.DatasetId, out var jobsForDataset))
-                                {
-                                    jobsForDataset.Add(jobInfo);
-                                }
-                                else
-                                {
-                                    jobsForDataset = new List<UdtJobInfo> { jobInfo };
-                                    dctJobs.Add(jobInfo.DatasetId, jobsForDataset);
+                                    if (dctJobs.TryGetValue(jobInfo.DatasetId, out var jobsForDataset))
+                                    {
+                                        jobsForDataset.Add(jobInfo);
+                                    }
+                                    else
+                                    {
+                                        jobsForDataset = new List<UdtJobInfo> {jobInfo};
+                                        dctJobs.Add(jobInfo.DatasetId, jobsForDataset);
+                                    }
                                 }
                             }
+
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            retryCount -= 1;
+                            var msg = "Exception querying database in GetJobs: " + ex.Message;
+                            msg += ", RetryCount = " + retryCount;
+
+                            Console.WriteLine(msg);
+
+                            // Delay for 3 second before trying again
+                            System.Threading.Thread.Sleep(3000);
                         }
 
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        retryCount -= 1;
-                        var msg = "Exception querying database in GetJobs: " + ex.Message;
-                        msg += ", RetryCount = " + retryCount;
-
-                        Console.WriteLine(msg);
-
-                        // Delay for 3 second before trying again
-                        System.Threading.Thread.Sleep(3000);
-                    }
-                }
+                    } // while
+                } // using
             }
             catch (Exception ex)
             {
