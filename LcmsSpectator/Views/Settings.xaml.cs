@@ -11,7 +11,7 @@
 namespace LcmsSpectator.Views
 {
     using System.Windows;
-   
+
     /// <summary>
     /// Interaction logic for Settings.xaml
     /// </summary>
@@ -22,7 +22,7 @@ namespace LcmsSpectator.Views
         /// </summary>
         public Settings()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

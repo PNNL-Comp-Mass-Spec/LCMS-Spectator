@@ -74,12 +74,12 @@ namespace LcmsSpectator.Models
         /// <returns>A scorer.</returns>
         public IScorer GetScorer(ProductSpectrum productSpectrum)
         {
-            if (this.model == null)
+            if (model == null)
             {
-                return new CorrMatchedPeakCounter(productSpectrum, this.tolerance, this.minCharge, this.maxCharge, this.corrScoreThreshold);
+                return new CorrMatchedPeakCounter(productSpectrum, tolerance, minCharge, maxCharge, corrScoreThreshold);
             }
 
-            return new LikelihoodScorer(this.model, productSpectrum, this.tolerance, this.minCharge, this.maxCharge);
+            return new LikelihoodScorer(model, productSpectrum, tolerance, minCharge, maxCharge);
         }
     }
 }

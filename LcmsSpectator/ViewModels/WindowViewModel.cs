@@ -29,26 +29,23 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         protected WindowViewModel()
         {
-            this.SuccessCommand = ReactiveCommand.Create();
-            this.SuccessCommand.Select(_ => this.Validate()).Subscribe(
+            SuccessCommand = ReactiveCommand.Create();
+            SuccessCommand.Select(_ => Validate()).Subscribe(
             status =>
             {
-                this.Status = status;
-                if (status && this.ReadyToClose != null)
+                Status = status;
+                if (status)
                 {
-                    this.ReadyToClose(this, EventArgs.Empty);
+                    ReadyToClose?.Invoke(this, EventArgs.Empty);
                 }
             });
 
-            this.CancelCommand = ReactiveCommand.Create();
-            this.CancelCommand.Subscribe(
+            CancelCommand = ReactiveCommand.Create();
+            CancelCommand.Subscribe(
             status =>
             {
-                this.Status = false;
-                if (this.ReadyToClose != null)
-                {
-                    this.ReadyToClose(this, EventArgs.Empty);
-                }
+                Status = false;
+                ReadyToClose?.Invoke(this, EventArgs.Empty);
             });
         }
 
@@ -62,19 +59,19 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool Status
         {
-            get { return this.status; }
-            set { this.RaiseAndSetIfChanged(ref this.status, value); }
+            get => status;
+            set => this.RaiseAndSetIfChanged(ref status, value);
         }
 
         /// <summary>
         /// Gets a command for success.
         /// </summary>
-        public ReactiveCommand<object> SuccessCommand { get; private set; }
+        public ReactiveCommand<object> SuccessCommand { get; }
 
         /// <summary>
         /// Gets a command for canceling the operation.
         /// </summary>
-        public ReactiveCommand<object> CancelCommand { get; private set; }
+        public ReactiveCommand<object> CancelCommand { get; }
 
         /// <summary>
         /// Gets an observable that determines whether or not  the Success command is executable.

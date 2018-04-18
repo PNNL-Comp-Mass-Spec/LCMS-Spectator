@@ -15,11 +15,11 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.PlotModels.ColorDicionaries;
-    using LcmsSpectator.Utils;
+    using Config;
+    using DialogServices;
+    using Models;
+    using PlotModels.ColorDicionaries;
+    using Utils;
     using OxyPlot;
     using OxyPlot.Annotations;
     using OxyPlot.Axes;
@@ -182,155 +182,155 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             this.dialogService = dialogService ?? new DialogService();
 
-            this.ms2SeriesDictionary = new Dictionary<string, ScatterSeries>();
+            ms2SeriesDictionary = new Dictionary<string, ScatterSeries>();
 
-            this.ShowFoundIdMs2 = false;
-            this.ShowFoundUnIdMs2 = false;
+            ShowFoundIdMs2 = false;
+            ShowFoundUnIdMs2 = false;
 
-            this.IsLinearAbundanceAxis = false;
-            this.IsLogarithmicAbundanceAxis = true;
-            this.FeatureSize = 0.1;
+            IsLinearAbundanceAxis = false;
+            IsLogarithmicAbundanceAxis = true;
+            FeatureSize = 0.1;
 
             var featureSelectedCommand = ReactiveCommand.Create();
-            featureSelectedCommand.Subscribe(_ => this.FeatureSelectedImplementation());
-            this.FeatureSelectedCommand = featureSelectedCommand;
+            featureSelectedCommand.Subscribe(_ => FeatureSelectedImplementation());
+            FeatureSelectedCommand = featureSelectedCommand;
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
             var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => this.SaveAsImageImplementation());
-            this.SaveAsImageCommand = saveAsImageCommand;
+            saveAsImageCommand.Subscribe(_ => SaveAsImageImplementation());
+            SaveAsImageCommand = saveAsImageCommand;
 
             var buildPlotCommand = ReactiveCommand.Create();
             buildPlotCommand.Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Subscribe(_ => this.BuildPlot());
-            this.BuildPlotCommand = buildPlotCommand;
+                .Subscribe(_ => BuildPlot());
+            BuildPlotCommand = buildPlotCommand;
 
             // Initialize color axes.
             const int NumColors = 5000;
-            this.featureColorAxis = new LinearColorAxis     // Color axis for features
+            featureColorAxis = new LinearColorAxis     // Color axis for features
             {
                 Title = "Abundance",
                 Position = AxisPosition.Right,
                 Palette = OxyPalette.Interpolate(NumColors, IcParameters.Instance.FeatureColors),
             };
 
-            this.colorDictionary = new ProteinColorDictionary();
-            this.ms2ColorAxis = new LinearColorAxis      // Color axis for ms2s
+            colorDictionary = new ProteinColorDictionary();
+            ms2ColorAxis = new LinearColorAxis      // Color axis for ms2s
             {
                 Key = "ms2s",
                 Position = AxisPosition.None,
-                Palette = this.colorDictionary.OxyPalette,
+                Palette = colorDictionary.OxyPalette,
                 Minimum = 1,
-                Maximum = this.colorDictionary.OxyPalette.Colors.Count,
+                Maximum = colorDictionary.OxyPalette.Colors.Count,
                 AxisTitleDistance = 1
             };
 
             // Initialize x and y axes.
-            this.yaxis = new LinearAxis { Position = AxisPosition.Left, Title = "Monoisotopic Mass", StringFormat = "0.###" };
-            this.xaxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time", StringFormat = "0.###", };
+            yaxis = new LinearAxis { Position = AxisPosition.Left, Title = "Monoisotopic Mass", StringFormat = "0.###" };
+            xaxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Retention Time", StringFormat = "0.###", };
 
             // Change size of scan highlight annotation when feature map x and y axes are zoomed or panned.
-            bool isInternalChange = false;
-            this.xaxis.AxisChanged += (o, e) =>
+            var isInternalChange = false;
+            xaxis.AxisChanged += (o, e) =>
             {
-                this.XMinimum = Math.Round(this.xaxis.ActualMinimum, 3);
-                this.XMaximum = Math.Round(this.xaxis.ActualMaximum, 3);
-                if (!isInternalChange && this.highlight != null &&
-                    this.highlight.TextPosition.X >= this.xaxis.ActualMinimum && this.highlight.TextPosition.X <= this.xaxis.ActualMaximum &&
-                   this.highlight.TextPosition.Y >= this.yaxis.ActualMinimum && this.highlight.TextPosition.Y <= this.yaxis.ActualMaximum)
+                XMinimum = Math.Round(xaxis.ActualMinimum, 3);
+                XMaximum = Math.Round(xaxis.ActualMaximum, 3);
+                if (!isInternalChange && highlight != null &&
+                    highlight.TextPosition.X >= xaxis.ActualMinimum && highlight.TextPosition.X <= xaxis.ActualMaximum &&
+                   highlight.TextPosition.Y >= yaxis.ActualMinimum && highlight.TextPosition.Y <= yaxis.ActualMaximum)
                 {
-                    var x = this.highlight.TextPosition.X;
+                    var x = highlight.TextPosition.X;
                     isInternalChange = true;
-                    this.highlight.MinimumX = x - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5);
-                    this.highlight.MaximumX = x + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5);
+                    highlight.MinimumX = x - ((xaxis.ActualMaximum - xaxis.ActualMinimum) * HighlightScale * 0.5);
+                    highlight.MaximumX = x + ((xaxis.ActualMaximum - xaxis.ActualMinimum) * HighlightScale * 0.5);
                 }
 
                 isInternalChange = false;
             };
-            this.yaxis.AxisChanged += (o, e) =>
+            yaxis.AxisChanged += (o, e) =>
             {
-                this.YMinimum = Math.Round(this.yaxis.ActualMinimum, 3);
-                this.YMaximum = Math.Round(this.yaxis.ActualMaximum, 3);
-                if (!isInternalChange && this.highlight != null &&
-                    this.highlight.TextPosition.X >= this.xaxis.ActualMinimum && this.highlight.TextPosition.X <= this.xaxis.ActualMaximum &&
-                    this.highlight.TextPosition.Y >= this.yaxis.ActualMinimum && this.highlight.TextPosition.Y <= this.yaxis.ActualMaximum)
+                YMinimum = Math.Round(yaxis.ActualMinimum, 3);
+                YMaximum = Math.Round(yaxis.ActualMaximum, 3);
+                if (!isInternalChange && highlight != null &&
+                    highlight.TextPosition.X >= xaxis.ActualMinimum && highlight.TextPosition.X <= xaxis.ActualMaximum &&
+                    highlight.TextPosition.Y >= yaxis.ActualMinimum && highlight.TextPosition.Y <= yaxis.ActualMaximum)
                 {
-                    var y = this.highlight.TextPosition.Y;
+                    var y = highlight.TextPosition.Y;
                     isInternalChange = true;
-                    this.highlight.MinimumY = y - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale);
-                    this.highlight.MaximumY = y + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale);
+                    highlight.MinimumY = y - ((yaxis.ActualMaximum - yaxis.ActualMinimum) * HighlightScale);
+                    highlight.MaximumY = y + ((yaxis.ActualMaximum - yaxis.ActualMinimum) * HighlightScale);
                 }
 
                 isInternalChange = false;
             };
 
             // Initialize feature map.
-            this.FeatureMap = new PlotModel { Title = "Feature Map" };
-            this.FeatureMap.MouseDown += this.FeatureMapMouseDown;
-            this.FeatureMap.Axes.Add(this.featureColorAxis);
-            this.FeatureMap.Axes.Add(this.ms2ColorAxis);
-            this.FeatureMap.Axes.Add(this.xaxis);
-            this.FeatureMap.Axes.Add(this.yaxis);
+            FeatureMap = new PlotModel { Title = "Feature Map" };
+            FeatureMap.MouseDown += FeatureMapMouseDown;
+            FeatureMap.Axes.Add(featureColorAxis);
+            FeatureMap.Axes.Add(ms2ColorAxis);
+            FeatureMap.Axes.Add(xaxis);
+            FeatureMap.Axes.Add(yaxis);
 
             // When ShowNotFoundMs2 changes, update the NotFoundMs2 series
             this.WhenAnyValue(x => x.ShowFoundUnIdMs2)
-                .Where(_ => this.FeatureMap != null && this.ms2SeriesDictionary.ContainsKey(string.Empty))
+                .Where(_ => FeatureMap != null && ms2SeriesDictionary.ContainsKey(string.Empty))
                 .Subscribe(showFoundUnIdMs2 =>
                 {
-                    this.ms2SeriesDictionary[string.Empty].IsVisible = showFoundUnIdMs2;
-                    this.FeatureMap.InvalidatePlot(true);
+                    ms2SeriesDictionary[string.Empty].IsVisible = showFoundUnIdMs2;
+                    FeatureMap.InvalidatePlot(true);
                 });
 
             // When ShowFoundIdMs2 changes, update all ms2 series
             this.WhenAnyValue(x => x.ShowFoundIdMs2)
-                .Where(_ => this.FeatureMap != null)
+                .Where(_ => FeatureMap != null)
                 .Subscribe(showFoundMs2 =>
                 {
-                    foreach (var protein in this.ms2SeriesDictionary.Keys.Where(key => !string.IsNullOrWhiteSpace(key)))
+                    foreach (var protein in ms2SeriesDictionary.Keys.Where(key => !string.IsNullOrWhiteSpace(key)))
                     {
-                        this.ms2SeriesDictionary[protein].IsVisible = showFoundMs2;
+                        ms2SeriesDictionary[protein].IsVisible = showFoundMs2;
                     }
 
-                    this.FeatureMap.InvalidatePlot(true);
+                    FeatureMap.InvalidatePlot(true);
                 });
 
             this.WhenAnyValue(x => x.IsLinearAbundanceAxis)
-                .Subscribe(isLinearAbundanceAxis => this.IsLogarithmicAbundanceAxis = !isLinearAbundanceAxis);
+                .Subscribe(isLinearAbundanceAxis => IsLogarithmicAbundanceAxis = !isLinearAbundanceAxis);
 
             this.WhenAnyValue(x => x.IsLogarithmicAbundanceAxis)
-                .Subscribe(isLogarithmicAbundanceAxis => this.IsLinearAbundanceAxis = !isLogarithmicAbundanceAxis);
+                .Subscribe(isLogarithmicAbundanceAxis => IsLinearAbundanceAxis = !isLogarithmicAbundanceAxis);
 
             this.WhenAnyValue(x => x.IsLinearAbundanceAxis)
                 .Subscribe(
                     isLinear =>
                         {
-                            this.featureColorAxis.Title = isLinear ? "Abundance" : "Abundance (Log10)";
-                            this.BuildPlotCommand.Execute(null);
+                            featureColorAxis.Title = isLinear ? "Abundance" : "Abundance (Log10)";
+                            BuildPlotCommand.Execute(null);
                         });
 
             this.WhenAnyValue(x => x.FeatureSize)
-                .Subscribe(_ => this.BuildPlotCommand.Execute(null));
+                .Subscribe(_ => BuildPlotCommand.Execute(null));
 
-            this.WhenAnyValue(x => x.Features).Subscribe(_ => this.BuildPlotCommand.Execute(null));
+            this.WhenAnyValue(x => x.Features).Subscribe(_ => BuildPlotCommand.Execute(null));
 
             // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
             this.WhenAnyValue(x => x.XMinimum, x => x.XMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Where(x => !this.xaxis.ActualMinimum.Equals(x.Item1) || !this.xaxis.ActualMaximum.Equals(x.Item2))
+                .Where(x => !xaxis.ActualMinimum.Equals(x.Item1) || !xaxis.ActualMaximum.Equals(x.Item2))
                 .Subscribe(
                     x =>
                     {
-                        this.xaxis.Zoom(x.Item1, x.Item2);
-                        this.FeatureMap.InvalidatePlot(false);
+                        xaxis.Zoom(x.Item1, x.Item2);
+                        FeatureMap.InvalidatePlot(false);
                     });
             this.WhenAnyValue(y => y.YMinimum, x => x.YMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Where(y => !this.yaxis.ActualMinimum.Equals(y.Item1) || !this.yaxis.ActualMaximum.Equals(y.Item2))
+                .Where(y => !yaxis.ActualMinimum.Equals(y.Item1) || !yaxis.ActualMaximum.Equals(y.Item2))
                 .Subscribe(
                     y =>
                     {
-                        this.yaxis.Zoom(y.Item1, y.Item2);
-                        this.FeatureMap.InvalidatePlot(false);
+                        yaxis.Zoom(y.Item1, y.Item2);
+                        FeatureMap.InvalidatePlot(false);
                     });
 
             // When SelectedPrSm is changed, update highlighted prsm on plot
@@ -338,13 +338,13 @@ namespace LcmsSpectator.ViewModels.Plots
                 .Where(selectedPrSm => selectedPrSm != null)
                 .Subscribe(selectedPrSm =>
                 {
-                    this.SetHighlight(selectedPrSm);
-                    this.FeatureMap.InvalidatePlot(true);
-                    this.SelectedPrSm.WhenAnyValue(x => x.Scan)
+                    SetHighlight(selectedPrSm);
+                    FeatureMap.InvalidatePlot(true);
+                    SelectedPrSm.WhenAnyValue(x => x.Scan)
                         .Subscribe(scan =>
                         {
-                            this.SetHighlight(selectedPrSm);
-                            this.FeatureMap.InvalidatePlot(true);
+                            SetHighlight(selectedPrSm);
+                            FeatureMap.InvalidatePlot(true);
                         });
                 });
 
@@ -352,8 +352,8 @@ namespace LcmsSpectator.ViewModels.Plots
                         .Select(colors => OxyPalette.Interpolate(NumColors, colors))
                         .Subscribe(palette =>
                         {
-                            this.featureColorAxis.Palette = palette;
-                            this.BuildPlotCommand.Execute(null);
+                            featureColorAxis.Palette = palette;
+                            BuildPlotCommand.Execute(null);
                         });
             IcParameters.Instance.WhenAnyValue(x => x.IdColors, x => x.Ms2ScanColor)
                 .Subscribe(x =>
@@ -361,40 +361,40 @@ namespace LcmsSpectator.ViewModels.Plots
                     var colorList = new List<OxyColor> { Capacity = x.Item1.Length + 1 };
                     colorList.Add(x.Item2);
                     colorList.AddRange(x.Item1);
-                    this.colorDictionary.SetColors(colorList);
-                    this.ms2ColorAxis.Palette = this.colorDictionary.OxyPalette;
-                    this.BuildPlotCommand.Execute(null);
+                    colorDictionary.SetColors(colorList);
+                    ms2ColorAxis.Palette = colorDictionary.OxyPalette;
+                    BuildPlotCommand.Execute(null);
                 });
         }
 
         /// <summary>
         /// Gets a command that saves the feature map as a PNG image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; private set; }
+        public IReactiveCommand SaveAsImageCommand { get; }
 
         /// <summary>
         /// Gets a command activated when a feature is selected (double clicked) on the
         /// feature map plot.
         /// </summary>
-        public IReactiveCommand FeatureSelectedCommand { get; private set; }
+        public IReactiveCommand FeatureSelectedCommand { get; }
 
         /// <summary>
         /// Gets a command for building the feature map plot.
         /// </summary>
-        public IReactiveCommand BuildPlotCommand { get; private set; }
-        
+        public IReactiveCommand BuildPlotCommand { get; }
+
         /// <summary>
         /// Gets the Plot model for the feature map.
         /// </summary>
-        public PlotModel FeatureMap { get; private set; }
+        public PlotModel FeatureMap { get; }
 
         /// <summary>
         /// Gets or sets the minimum for the X axis of the feature map.
         /// </summary>
         public double XMinimum
         {
-            get { return this.xminimum; }
-            set { this.RaiseAndSetIfChanged(ref this.xminimum, value); }
+            get => xminimum;
+            set => this.RaiseAndSetIfChanged(ref xminimum, value);
         }
 
         /// <summary>
@@ -402,8 +402,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double XMaximum
         {
-            get { return this.xmaximum; }
-            set { this.RaiseAndSetIfChanged(ref this.xmaximum, value); }
+            get => xmaximum;
+            set => this.RaiseAndSetIfChanged(ref xmaximum, value);
         }
 
         /// <summary>
@@ -411,8 +411,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double YMinimum
         {
-            get { return this.yminimum; }
-            set { this.RaiseAndSetIfChanged(ref this.yminimum, value); }
+            get => yminimum;
+            set => this.RaiseAndSetIfChanged(ref yminimum, value);
         }
 
         /// <summary>
@@ -420,8 +420,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double YMaximum
         {
-            get { return this.ymaximum; }
-            set { this.RaiseAndSetIfChanged(ref this.ymaximum, value); }
+            get => ymaximum;
+            set => this.RaiseAndSetIfChanged(ref ymaximum, value);
         }
 
         /// <summary>
@@ -429,8 +429,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double AbundanceMinimum
         {
-            get { return this.abundanceMinimum; }
-            set { this.RaiseAndSetIfChanged(ref this.abundanceMinimum, value); }
+            get => abundanceMinimum;
+            set => this.RaiseAndSetIfChanged(ref abundanceMinimum, value);
         }
 
         /// <summary>
@@ -438,8 +438,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double AbundanceMaximum
         {
-            get { return this.abundanceMaximum; }
-            set { this.RaiseAndSetIfChanged(ref this.abundanceMaximum, value); }
+            get => abundanceMaximum;
+            set => this.RaiseAndSetIfChanged(ref abundanceMaximum, value);
         }
 
         /// <summary>
@@ -447,8 +447,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool IsLinearAbundanceAxis
         {
-            get { return this.isLinearAbundanceAxis; }
-            set { this.RaiseAndSetIfChanged(ref this.isLinearAbundanceAxis, value); }
+            get => isLinearAbundanceAxis;
+            set => this.RaiseAndSetIfChanged(ref isLinearAbundanceAxis, value);
         }
 
         /// <summary>
@@ -456,8 +456,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool IsLogarithmicAbundanceAxis
         {
-            get { return this.isLogarithmicAbundanceAxis; }
-            set { this.RaiseAndSetIfChanged(ref this.isLogarithmicAbundanceAxis, value); }
+            get => isLogarithmicAbundanceAxis;
+            set => this.RaiseAndSetIfChanged(ref isLogarithmicAbundanceAxis, value);
         }
 
         /// <summary>
@@ -465,8 +465,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double FeatureSize
         {
-            get { return this.featureSize; }
-            set { this.RaiseAndSetIfChanged(ref this.featureSize, value); }
+            get => featureSize;
+            set => this.RaiseAndSetIfChanged(ref featureSize, value);
         }
 
         /// <summary>
@@ -475,8 +475,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowFoundIdMs2
         {
-            get { return this.showFoundIdMs2; }
-            set { this.RaiseAndSetIfChanged(ref this.showFoundIdMs2, value); }
+            get => showFoundIdMs2;
+            set => this.RaiseAndSetIfChanged(ref showFoundIdMs2, value);
         }
 
         /// <summary>
@@ -485,8 +485,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowFoundUnIdMs2
         {
-            get { return this.showFoundUnIdMs2; }
-            set { this.RaiseAndSetIfChanged(ref this.showFoundUnIdMs2, value); }
+            get => showFoundUnIdMs2;
+            set => this.RaiseAndSetIfChanged(ref showFoundUnIdMs2, value);
         }
 
         /// <summary>
@@ -494,8 +494,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowManualAdjustment
         {
-            get { return this.showManualAdjustment; }
-            set { this.RaiseAndSetIfChanged(ref this.showManualAdjustment, value); }
+            get => showManualAdjustment;
+            set => this.RaiseAndSetIfChanged(ref showManualAdjustment, value);
         }
 
         /// <summary>
@@ -504,8 +504,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public PrSm SelectedPrSm
         {
-            get { return this.selectedPrSm; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedPrSm, value); }
+            get => selectedPrSm;
+            set => this.RaiseAndSetIfChanged(ref selectedPrSm, value);
         }
 
         /// <summary>
@@ -513,8 +513,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public Feature.FeaturePoint SelectedFeature
         {
-            get { return this.selectedFeature; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedFeature, value); }
+            get => selectedFeature;
+            set => this.RaiseAndSetIfChanged(ref selectedFeature, value);
         }
 
         /// <summary>
@@ -522,8 +522,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public List<Feature> Features
         {
-            get { return this.features; }
-            set { this.RaiseAndSetIfChanged(ref this.features, value); }
+            get => features;
+            set => this.RaiseAndSetIfChanged(ref features, value);
         }
 
         /// <summary>
@@ -531,52 +531,52 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public void BuildPlot()
         {
-            this.ResetFeaturePlot(); // clear existing plot
+            ResetFeaturePlot(); // clear existing plot
 
             // Calculate min/max abundance and min/max score
-            if (this.features == null || this.features.Count == 0)
+            if (features == null || features.Count == 0)
             {
                 return;
             }
 
-            var minAbundance = this.features.Min(f => f.MinPoint.Abundance);
-            var maxAbundance = this.features.Max(f => f.MaxPoint.Abundance);
+            var minAbundance = features.Min(f => f.MinPoint.Abundance);
+            var maxAbundance = features.Max(f => f.MaxPoint.Abundance);
 
-            if (!this.IsLinearAbundanceAxis)
+            if (!IsLinearAbundanceAxis)
             {
                 minAbundance = Math.Log10(minAbundance);
                 maxAbundance = Math.Log10(maxAbundance);
             }
 
-            this.featureColorAxis.StringFormat = this.IsLinearAbundanceAxis ? "0.###E0" : "0.#";
+            featureColorAxis.StringFormat = IsLinearAbundanceAxis ? "0.###E0" : "0.#";
 
             // Set bounds for color axis for features
-            this.featureColorAxis.AbsoluteMinimum = minAbundance;
-            this.featureColorAxis.Minimum = minAbundance;
-            this.featureColorAxis.Maximum = maxAbundance;
-            this.featureColorAxis.AbsoluteMaximum = maxAbundance;
+            featureColorAxis.AbsoluteMinimum = minAbundance;
+            featureColorAxis.Minimum = minAbundance;
+            featureColorAxis.Maximum = maxAbundance;
+            featureColorAxis.AbsoluteMaximum = maxAbundance;
 
             var idPrSms = new List<PrSm>();
 
-            foreach (var feature in this.features)
+            foreach (var feature in features)
             {
                 // Identified MS/MS scans associated with feature
                 idPrSms.AddRange(feature.AssociatedPrSms);
 
                 // Create and add feature
-                this.FeatureMap.Series.Add(this.CreateFeatureSeries(feature, this.featureColorAxis.Palette.Colors, this.FeatureSize, minAbundance, maxAbundance));
+                FeatureMap.Series.Add(CreateFeatureSeries(feature, featureColorAxis.Palette.Colors, FeatureSize, minAbundance, maxAbundance));
             }
 
-            this.AddIdentificationPoints(idPrSms);
-            foreach (var series in this.ms2SeriesDictionary)
+            AddIdentificationPoints(idPrSms);
+            foreach (var series in ms2SeriesDictionary)
             {
-                this.FeatureMap.Series.Add(series.Value);
+                FeatureMap.Series.Add(series.Value);
             }
 
             // Highlight selected identification.
-            this.SetHighlight(this.SelectedPrSm);
-            this.FeatureMap.IsLegendVisible = false;
-            this.FeatureMap.InvalidatePlot(true);
+            SetHighlight(SelectedPrSm);
+            FeatureMap.IsLegendVisible = false;
+            FeatureMap.InvalidatePlot(true);
         }
 
         /// <summary>
@@ -584,10 +584,10 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void ResetFeaturePlot()
         {
-            if (this.FeatureMap != null)
+            if (FeatureMap != null)
             {
-                this.FeatureMap.Series.Clear();
-                this.FeatureMap.InvalidatePlot(true);   
+                FeatureMap.Series.Clear();
+                FeatureMap.InvalidatePlot(true);
             }
         }
 
@@ -603,7 +603,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private LineSeries CreateFeatureSeries(Feature feature, IList<OxyColor> colors, double size, double minAbundance, double maxAbundance)
         {
             var abundance = feature.MinPoint.Abundance;
-            if (!this.IsLinearAbundanceAxis)
+            if (!IsLinearAbundanceAxis)
             {
                 abundance = Math.Log10(abundance);
             }
@@ -615,7 +615,7 @@ namespace LcmsSpectator.ViewModels.Plots
             colorIndex = Math.Max(1, Math.Min(colorIndex, colors.Count - 1));
 
             var c = colors[colorIndex];
-            string trackerString = "{0} (ID: {Id:0})" + Environment.NewLine +
+            var trackerString = "{0} (ID: {Id:0})" + Environment.NewLine +
                                    "{1}: {2:0.###} (Scan: {Scan:0})" + Environment.NewLine +
                                    "{3}: {4:0.###}" + Environment.NewLine +
                                    "Abundance: {Abundance:0.###E0}" + Environment.NewLine +
@@ -640,7 +640,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="prsms">The IDs.</param>
         private void AddIdentificationPoints(IEnumerable<PrSm> prsms)
         {
-            this.ms2SeriesDictionary.Clear();
+            ms2SeriesDictionary.Clear();
             var prsmByProtein = new Dictionary<string, List<PrSm>>();
 
             foreach (var prsm in prsms)
@@ -655,27 +655,27 @@ namespace LcmsSpectator.ViewModels.Plots
 
             foreach (var proteinName in prsmByProtein.Keys)
             {
-                string name = proteinName;
+                var name = proteinName;
                 var scatterSeries = new ScatterSeries
                 {
                     ItemsSource = prsmByProtein[proteinName],
                     Mapping = p =>
                     {
                         var prsm = (PrSm)p;
-                        var size = prsm.Sequence.Count > 0 ? Math.Min((this.featureSize * 4) + 2, 4) : Math.Min(this.featureSize * 2, 4);
-                        return new ScatterPoint(prsm.RetentionTime, prsm.Mass, size, this.colorDictionary.GetColorCode(name));
+                        var size = prsm.Sequence.Count > 0 ? Math.Min((featureSize * 4) + 2, 4) : Math.Min(featureSize * 2, 4);
+                        return new ScatterPoint(prsm.RetentionTime, prsm.Mass, size, colorDictionary.GetColorCode(name));
                     },
                     Title = proteinName,
                     MarkerType = MarkerType.Cross,
-                    ColorAxisKey = this.ms2ColorAxis.Key,
+                    ColorAxisKey = ms2ColorAxis.Key,
                     TrackerFormatString =
                         "{0}" + Environment.NewLine +
                         "{1}: {2:0.###}" + Environment.NewLine +
                         "{3}: {4:0.###E0}",
-                    IsVisible = proteinName == string.Empty ? this.showFoundUnIdMs2 : this.showFoundIdMs2,
+                    IsVisible = proteinName == string.Empty ? showFoundUnIdMs2 : showFoundIdMs2,
                 };
 
-                this.ms2SeriesDictionary.Add(proteinName, scatterSeries);
+                ms2SeriesDictionary.Add(proteinName, scatterSeries);
             }
         }
 
@@ -686,36 +686,36 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="args">The event arguments.</param>
         private void FeatureMapMouseDown(object sender, OxyMouseEventArgs args)
         {
-            this.selectedFeaturePoint = null;
-            this.selectedPrSmPoint = null;
-            var series = this.FeatureMap.GetSeriesFromPoint(args.Position, 10);
+            selectedFeaturePoint = null;
+            selectedPrSmPoint = null;
+            var series = FeatureMap.GetSeriesFromPoint(args.Position, 10);
             if (series is LineSeries)
-            { // Was a feature clicked?
+            {
+                // Was a feature clicked?
                 var result = series.GetNearestPoint(args.Position, false);
                 if (result == null)
                 {
                     return;
                 }
 
-                var featurePoint = result.Item as Feature.FeaturePoint;
-                if (featurePoint != null)
+                if (result.Item is Feature.FeaturePoint featurePoint)
                 {
                     // See if there is a ms2 point closer than this feature point
                     PrSm closestPrSm = null;
-                    if (this.showFoundIdMs2 || this.showFoundUnIdMs2)
+                    if (showFoundIdMs2 || showFoundUnIdMs2)
                     {
                         var feature = featurePoint.Feature;
                         var prsms = feature.AssociatedPrSms;
                         var minDist = result.Position.DistanceToSquared(args.Position);
                         foreach (var prsm in prsms)
                         {
-                            if ((prsm.Sequence.Count == 0 && !this.showFoundUnIdMs2)
-                                || (prsm.Sequence.Count > 0 && !this.showFoundIdMs2))
+                            if ((prsm.Sequence.Count == 0 && !showFoundUnIdMs2)
+                                || (prsm.Sequence.Count > 0 && !showFoundIdMs2))
                             {
                                 continue;
                             }
 
-                            var sp = this.xaxis.Transform(prsm.RetentionTime, featurePoint.Mass, this.yaxis);
+                            var sp = xaxis.Transform(prsm.RetentionTime, featurePoint.Mass, yaxis);
                             var distSq = sp.DistanceToSquared(args.Position);
                             if (closestPrSm == null || distSq < minDist)
                             {
@@ -727,21 +727,22 @@ namespace LcmsSpectator.ViewModels.Plots
 
                     if (closestPrSm != null)
                     {
-                        this.selectedPrSmPoint = closestPrSm;
+                        selectedPrSmPoint = closestPrSm;
                     }
 
-                    this.selectedFeaturePoint = featurePoint;
+                    selectedFeaturePoint = featurePoint;
                 }
             }
             else if (series is ScatterSeries)
-            { // Was a ms2 cross clicked?
+            {
+                // Was a ms2 cross clicked?
                 var result = series.GetNearestPoint(args.Position, false);
                 if (result == null)
                 {
                     return;
                 }
 
-                this.selectedPrSmPoint = result.Item as PrSm;
+                selectedPrSmPoint = result.Item as PrSm;
             }
         }
 
@@ -759,29 +760,29 @@ namespace LcmsSpectator.ViewModels.Plots
             ////prsm.LcMs = this.lcms;
             var rt = prsm.RetentionTime;
             var mass = prsm.Mass;
-            if (this.highlight == null)
+            if (highlight == null)
             {
-                this.highlight = new RectangleAnnotation
+                highlight = new RectangleAnnotation
                 {
                     TextPosition = new DataPoint(rt, mass),
                     Fill = OxyColor.FromArgb(100, 255, 255, 0),
                     Stroke = OxyColor.FromRgb(0, 255, 0),
                     StrokeThickness = 2,
-                    MinimumX = rt - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5),
-                    MaximumX = rt + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5),
-                    MinimumY = mass - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale),
-                    MaximumY = mass + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale),
+                    MinimumX = rt - ((xaxis.ActualMaximum - xaxis.ActualMinimum) * HighlightScale * 0.5),
+                    MaximumX = rt + ((xaxis.ActualMaximum - xaxis.ActualMinimum) * HighlightScale * 0.5),
+                    MinimumY = mass - ((yaxis.ActualMaximum - yaxis.ActualMinimum) * HighlightScale),
+                    MaximumY = mass + ((yaxis.ActualMaximum - yaxis.ActualMinimum) * HighlightScale),
                 };
 
-                this.FeatureMap.Annotations.Add(this.highlight);
+                FeatureMap.Annotations.Add(highlight);
             }
             else
             {
-                this.highlight.TextPosition = new DataPoint(rt, mass);
-                this.highlight.MinimumX = rt - ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5);
-                this.highlight.MaximumX = rt + ((this.xaxis.ActualMaximum - this.xaxis.ActualMinimum) * HighlightScale * 0.5);
-                this.highlight.MinimumY = mass - ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale);
-                this.highlight.MaximumY = mass + ((this.yaxis.ActualMaximum - this.yaxis.ActualMinimum) * HighlightScale);
+                highlight.TextPosition = new DataPoint(rt, mass);
+                highlight.MinimumX = rt - ((xaxis.ActualMaximum - xaxis.ActualMinimum) * HighlightScale * 0.5);
+                highlight.MaximumX = rt + ((xaxis.ActualMaximum - xaxis.ActualMinimum) * HighlightScale * 0.5);
+                highlight.MinimumY = mass - ((yaxis.ActualMaximum - yaxis.ActualMinimum) * HighlightScale);
+                highlight.MaximumY = mass + ((yaxis.ActualMaximum - yaxis.ActualMinimum) * HighlightScale);
             }
         }
 
@@ -792,11 +793,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void FeatureSelectedImplementation()
         {
-            this.SelectedFeature = this.selectedFeaturePoint;
+            SelectedFeature = selectedFeaturePoint;
 
-            if (this.selectedPrSmPoint != null)
+            if (selectedPrSmPoint != null)
             {
-                this.SelectedPrSm = this.selectedPrSmPoint;
+                SelectedPrSm = selectedPrSmPoint;
             }
         }
 
@@ -806,7 +807,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveAsImageImplementation()
         {
-            var filePath = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            var filePath = dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
@@ -822,16 +823,16 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 DynamicResolutionPngExporter.Export(
-                    this.FeatureMap,
+                    FeatureMap,
                     filePath,
-                    (int)this.FeatureMap.Width,
-                    (int)this.FeatureMap.Height,
+                    (int)FeatureMap.Width,
+                    (int)FeatureMap.Height,
                     OxyColors.White,
                     IcParameters.Instance.ExportImageDpi);
             }
             catch (Exception e)
             {
-                this.dialogService.ExceptionAlert(e);
+                dialogService.ExceptionAlert(e);
             }
         }
     }

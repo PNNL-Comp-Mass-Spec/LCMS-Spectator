@@ -18,11 +18,11 @@ namespace LcmsSpectator.Readers
 
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels;
-    using LcmsSpectator.ViewModels.Data;
+    using Config;
+    using Models;
+    using Utils;
+    using ViewModels;
+    using ViewModels.Data;
     using ReactiveUI;
 
     /// <summary>
@@ -46,14 +46,14 @@ namespace LcmsSpectator.Readers
         private bool readingFeatureFiles;
 
         /// <summary>
-        /// Initializes a new instance of the DataReader class. 
+        /// Initializes a new instance of the DataReader class.
         /// </summary>
         public DataReader()
         {
-            this.ReadingRawFiles = false;
-            this.ReadingIdFiles = false;
-            this.ReadingFeatureFiles = false;
-            this.Modifications = new List<Modification>();
+            ReadingRawFiles = false;
+            ReadingIdFiles = false;
+            ReadingFeatureFiles = false;
+            Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -61,8 +61,8 @@ namespace LcmsSpectator.Readers
         /// </summary>
         public bool ReadingRawFiles
         {
-            get { return this.readingRawFiles; }
-            private set { this.RaiseAndSetIfChanged(ref this.readingRawFiles, value); }
+            get => readingRawFiles;
+            private set => this.RaiseAndSetIfChanged(ref readingRawFiles, value);
         }
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace LcmsSpectator.Readers
         /// </summary>
         public bool ReadingIdFiles
         {
-            get { return this.readingIdFiles; }
-            private set { this.RaiseAndSetIfChanged(ref this.readingIdFiles, value); }
+            get => readingIdFiles;
+            private set => this.RaiseAndSetIfChanged(ref readingIdFiles, value);
         }
 
         /// <summary>
@@ -79,8 +79,8 @@ namespace LcmsSpectator.Readers
         /// </summary>
         public bool ReadingFeatureFiles
         {
-            get { return this.readingFeatureFiles; }
-            private set { this.RaiseAndSetIfChanged(ref this.readingFeatureFiles, value); }
+            get => readingFeatureFiles;
+            private set => this.RaiseAndSetIfChanged(ref readingFeatureFiles, value);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace LcmsSpectator.Readers
                 id.LcMs = dataSetViewModel.LcMs;
             }
 
-            this.Modifications = reader.Modifications;
+            Modifications = reader.Modifications;
             dataSetViewModel.ScanViewModel.Data.AddRange(idList);
             dataSetViewModel.IdFileOpen = true;
         }
@@ -120,8 +120,8 @@ namespace LcmsSpectator.Readers
         public async Task OpenDataSet(
                                     DataSetViewModel dataSetViewModel,
                                     string rawFilePath,
-                                    string idFilePath = "", 
-                                    string featureFilePath = "", 
+                                    string idFilePath = "",
+                                    string featureFilePath = "",
                                     string paramFilePath = "",
                                     ToolType? toolType = ToolType.MsPathFinder,
                                     IEnumerable<string> modIgnoreList = null)
@@ -129,17 +129,16 @@ namespace LcmsSpectator.Readers
             // Open raw file, if not already open.
             if (!string.IsNullOrEmpty(rawFilePath) && dataSetViewModel.LcMs == null)
             {
-                this.ReadingRawFiles = true;
+                ReadingRawFiles = true;
                 await Task.Delay(20).ConfigureAwait(false);
                 await dataSetViewModel.InitializeAsync(rawFilePath).ConfigureAwait(false);
-                this.ReadingRawFiles = false;
+                ReadingRawFiles = false;
             }
 
             // Show neighboring charge state XICs by default for MSPathFinder results
             if (toolType != null && toolType == ToolType.MsPathFinder)
             {
-                var precFragSeq = dataSetViewModel.XicViewModel.PrecursorPlotViewModel.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
-                if (precFragSeq != null)
+                if (dataSetViewModel.XicViewModel.PrecursorPlotViewModel.FragmentationSequenceViewModel is PrecursorSequenceIonViewModel precFragSeq)
                 {
                     precFragSeq.PrecursorViewMode = PrecursorViewMode.Charges;
                 }
@@ -148,7 +147,7 @@ namespace LcmsSpectator.Readers
             // Open ID file
             if (!string.IsNullOrEmpty(idFilePath))
             {
-                this.ReadingIdFiles = true;
+                ReadingIdFiles = true;
 
                 if (dataSetViewModel.MsPfParameters == null)
                 {
@@ -161,17 +160,17 @@ namespace LcmsSpectator.Readers
                     IcParameters.Instance.PrecursorTolerancePpm = dataSetViewModel.MsPfParameters.PrecursorTolerancePpm;
                 }
 
-                await this.ReadIdFile(dataSetViewModel, idFilePath, modIgnoreList);
-                this.ReadingIdFiles = false;
+                await ReadIdFile(dataSetViewModel, idFilePath, modIgnoreList);
+                ReadingIdFiles = false;
             }
 
             // Open feature file
             if (!string.IsNullOrEmpty(featureFilePath))
             {
-                this.ReadingFeatureFiles = true;
+                ReadingFeatureFiles = true;
                 dataSetViewModel.FeatureMapViewModel.OpenFeatureFile(featureFilePath);
                 dataSetViewModel.FeatureMapViewModel.UpdateIds(dataSetViewModel.ScanViewModel.FilteredData);
-                this.ReadingRawFiles = false;
+                ReadingRawFiles = false;
             }
         }
 
@@ -193,8 +192,8 @@ namespace LcmsSpectator.Readers
             {
                 // Raw file in same directory as tsv file?
                 var fileName = Path.GetFileNameWithoutExtension(filePath);
-                rawFiles.AddRange(from extension in FileConstants.RawFileExtensions 
-                                  where fileName == datasetName && filePath.EndsWith(extension, true, CultureInfo.InvariantCulture) 
+                rawFiles.AddRange(from extension in FileConstants.RawFileExtensions
+                                  where fileName == datasetName && filePath.EndsWith(extension, true, CultureInfo.InvariantCulture)
                                   select filePath);
             }
 

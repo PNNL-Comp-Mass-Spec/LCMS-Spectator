@@ -15,7 +15,6 @@ namespace LcmsSpectator.ViewModels
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reactive.Linq;
@@ -25,15 +24,15 @@ namespace LcmsSpectator.ViewModels
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
     using InformedProteomics.TopDown.Execution;
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers;
-    using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels.Modifications;
+    using Config;
+    using DialogServices;
+    using Models;
+    using Readers;
+    using Utils;
+    using Modifications;
     using ReactiveUI;
 
-    using MsPfParameters = LcmsSpectator.Models.MsPfParameters;
+    using MsPfParameters = Models.MsPfParameters;
 
     /// <summary>
     /// View model for configuration settings for running an MSPathFinder Database search.
@@ -52,7 +51,7 @@ namespace LcmsSpectator.ViewModels
         {
             "Multiple internal cleavages", "Single internal cleavage",
             "No internal cleavage"
-        }; 
+        };
 
         /// <summary>
         /// Dialog service for opening dialogs from view model.
@@ -242,65 +241,65 @@ namespace LcmsSpectator.ViewModels
         private CancellationTokenSource runSearchCancellationToken;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SearchSettingsViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="SearchSettingsViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public SearchSettingsViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.SearchModes = new[] { InternalCleavageType.MultipleInternalCleavages, InternalCleavageType.SingleInternalCleavage, InternalCleavageType.NoInternalCleavage };
-            this.ToleranceUnits = new[] { ToleranceUnit.Ppm, ToleranceUnit.Th };
-            this.SelectedSequence = string.Empty;
-            this.FastaEntries = new ReactiveList<FastaEntry>();
-            this.SequenceProteins = new FastaEntry[0];
+            SearchModes = new[] { InternalCleavageType.MultipleInternalCleavages, InternalCleavageType.SingleInternalCleavage, InternalCleavageType.NoInternalCleavage };
+            ToleranceUnits = new[] { ToleranceUnit.Ppm, ToleranceUnit.Mz };
+            SelectedSequence = string.Empty;
+            FastaEntries = new ReactiveList<FastaEntry>();
+            SequenceProteins = new FastaEntry[0];
 
-            this.SearchRunning = false;
+            SearchRunning = false;
 
-            this.FromFastaEntry = true;
-            this.FromSequence = false;
+            FromFastaEntry = true;
+            FromSequence = false;
 
             // Browse Spectrum Files Command
             var browseRawFilesCommand = ReactiveCommand.Create();
-            browseRawFilesCommand.Subscribe(_ => this.BrowseSpectrumFilesImplementation());
-            this.BrowseSpectrumFilesCommand = browseRawFilesCommand;
+            browseRawFilesCommand.Subscribe(_ => BrowseSpectrumFilesImplementation());
+            BrowseSpectrumFilesCommand = browseRawFilesCommand;
 
             // Browse Feature Files Command
             var browseFeatureFilesCommand = ReactiveCommand.Create();
-            browseFeatureFilesCommand.Subscribe(_ => this.BrowseFeatureFilesImplementation());
-            this.BrowseFeatureFilesCommand = browseFeatureFilesCommand;
+            browseFeatureFilesCommand.Subscribe(_ => BrowseFeatureFilesImplementation());
+            BrowseFeatureFilesCommand = browseFeatureFilesCommand;
 
             // Browse Fasta DB Files Command
             var browseFastaDbFilesCommand = ReactiveCommand.Create();
-            browseFastaDbFilesCommand.Subscribe(_ => this.BrowseFastaDbFilesImplementation());
-            this.BrowseFastaDbFilesCommand = browseFastaDbFilesCommand;
+            browseFastaDbFilesCommand.Subscribe(_ => BrowseFastaDbFilesImplementation());
+            BrowseFastaDbFilesCommand = browseFastaDbFilesCommand;
 
             // Browse Output Directories Command
             var browseOutputDirectoriesCommand = ReactiveCommand.Create();
-            browseOutputDirectoriesCommand.Subscribe(_ => this.BrowseOutputDirectoriesImplementation());
-            this.BrowseOutputDirectoriesCommand = browseOutputDirectoriesCommand;
+            browseOutputDirectoriesCommand.Subscribe(_ => BrowseOutputDirectoriesImplementation());
+            BrowseOutputDirectoriesCommand = browseOutputDirectoriesCommand;
 
             // Select All Proteins Command
-            var selectAllProteinsCommand = ReactiveCommand.Create(this.FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
-            selectAllProteinsCommand.Subscribe(_ => this.SelectProteinsImplementation(true));
-            this.SelectAllProteinsCommand = selectAllProteinsCommand;
+            var selectAllProteinsCommand = ReactiveCommand.Create(FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
+            selectAllProteinsCommand.Subscribe(_ => SelectProteinsImplementation(true));
+            SelectAllProteinsCommand = selectAllProteinsCommand;
 
             // Select No Proteins Command
-            var selectNoProteins = ReactiveCommand.Create(this.FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
-            selectNoProteins.Subscribe(_ => this.SelectProteinsImplementation(false));
-            this.SelectNoProteinsCommand = selectNoProteins;
+            var selectNoProteins = ReactiveCommand.Create(FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
+            selectNoProteins.Subscribe(_ => SelectProteinsImplementation(false));
+            SelectNoProteinsCommand = selectNoProteins;
 
             // Manage Modifications Command
             var manageModificationsCommand = ReactiveCommand.Create();
-            manageModificationsCommand.Subscribe(_ => this.ManageModificationsImplementation());
-            this.ManageModificationsCommand = manageModificationsCommand;
+            manageModificationsCommand.Subscribe(_ => ManageModificationsImplementation());
+            ManageModificationsCommand = manageModificationsCommand;
 
             // Add Modifications Command
             var addModificationCommand = ReactiveCommand.Create();
-            addModificationCommand.Subscribe(_ => this.AddModificationImplementation());
-            this.AddModificationCommand = addModificationCommand;
+            addModificationCommand.Subscribe(_ => AddModificationImplementation());
+            AddModificationCommand = addModificationCommand;
 
             // Run Command - Disabled when there is no SpectrumFilePath, FastaDbFilePath, or OutputFilePath selected
-            this.RunCommand = ReactiveCommand.CreateAsyncTask(
+            RunCommand = ReactiveCommand.CreateAsyncTask(
                                                               this.WhenAnyValue(
                                                                                 x => x.SpectrumFilePath,
                                                                                 x => x.FastaDbFilePath,
@@ -308,7 +307,7 @@ namespace LcmsSpectator.ViewModels
                                                                   .Select(x => !string.IsNullOrWhiteSpace(x.Item1) &&
                                                                                !string.IsNullOrWhiteSpace(x.Item2) &&
                                                                                !string.IsNullOrWhiteSpace(x.Item3)),
-                                                              async _ => await this.RunImplementation());
+                                                              async _ => await RunImplementation());
 
             // Prev tab command
             var prevTabCommand = ReactiveCommand.Create(
@@ -316,10 +315,10 @@ namespace LcmsSpectator.ViewModels
                         new[]
                             {
                                 this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex > 0),
-                                this.RunCommand.IsExecuting.Select(exec => !exec)
+                                RunCommand.IsExecuting.Select(exec => !exec)
                             }));
-            prevTabCommand.Subscribe(_ => this.TabIndex--);
-            this.PrevTabCommand = prevTabCommand;
+            prevTabCommand.Subscribe(_ => TabIndex--);
+            PrevTabCommand = prevTabCommand;
 
             // Next tab command
             var nextTabCommand = ReactiveCommand.Create(
@@ -327,62 +326,62 @@ namespace LcmsSpectator.ViewModels
                         new[]
                             {
                                 this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex < MaxTabIndex),
-                                this.RunCommand.IsExecuting.Select(exec => !exec)
+                                RunCommand.IsExecuting.Select(exec => !exec)
                             }));
-            nextTabCommand.Subscribe(_ => this.TabIndex++);
-            this.NextTabCommand = nextTabCommand;
+            nextTabCommand.Subscribe(_ => TabIndex++);
+            NextTabCommand = nextTabCommand;
 
             // Cancel Command
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => this.CancelImplementation());
-            this.CancelCommand = cancelCommand;
+            cancelCommand.Subscribe(_ => CancelImplementation());
+            CancelCommand = cancelCommand;
 
             // Default values
-            this.SelectedSearchMode = InternalCleavageType.SingleInternalCleavage;
-            this.MinSequenceLength = 21;
-            this.MaxSequenceLength = 300;
-            this.MinPrecursorIonCharge = 2;
-            this.MaxPrecursorIonCharge = 30;
-            this.MinProductIonCharge = 1;
-            this.MaxProductIonCharge = 15;
-            this.MinSequenceMass = 3000.0;
-            this.MaxSequenceMass = 50000.0;
-            this.PrecursorIonToleranceValue = 10;
-            this.PrecursorIonToleranceUnit = ToleranceUnit.Ppm;
-            this.ProductIonToleranceValue = 10;
-            this.PrecursorIonToleranceUnit = ToleranceUnit.Ppm;
-            this.minScanNumber = 0;
-            this.maxScanNumber = 0;
-            this.maxDynamicModificationsPerSequence = 0;
-            this.FixedNTerm = true;
-            this.FixedCTerm = true;
-            this.NumMatchesPerSpectrum = 1;
+            SelectedSearchMode = InternalCleavageType.SingleInternalCleavage;
+            MinSequenceLength = 21;
+            MaxSequenceLength = 300;
+            MinPrecursorIonCharge = 2;
+            MaxPrecursorIonCharge = 30;
+            MinProductIonCharge = 1;
+            MaxProductIonCharge = 15;
+            MinSequenceMass = 3000.0;
+            MaxSequenceMass = 50000.0;
+            PrecursorIonToleranceValue = 10;
+            PrecursorIonToleranceUnit = ToleranceUnit.Ppm;
+            ProductIonToleranceValue = 10;
+            PrecursorIonToleranceUnit = ToleranceUnit.Ppm;
+            minScanNumber = 0;
+            maxScanNumber = 0;
+            maxDynamicModificationsPerSequence = 0;
+            FixedNTerm = true;
+            FixedCTerm = true;
+            NumMatchesPerSpectrum = 1;
 
             // When search mode is selected, display correct search mode description
             this.WhenAnyValue(x => x.SelectedSearchMode)
-                .Subscribe(searchMode => this.SearchModeDescription = this.searchModeDescriptions[(int)searchMode]);
+                .Subscribe(searchMode => SearchModeDescription = searchModeDescriptions[(int)searchMode]);
 
             // When Spectrum file path is selected, use its directory for the output path by default if a output path
             // has not already been selected.
             this.WhenAnyValue(x => x.SpectrumFilePath)
-                .Where(_ => string.IsNullOrWhiteSpace(this.OutputFilePath))
+                .Where(_ => string.IsNullOrWhiteSpace(OutputFilePath))
                 .Select(Path.GetDirectoryName)
-                .Subscribe(specDir => this.OutputFilePath = specDir);
+                .Subscribe(specDir => OutputFilePath = specDir);
 
-            this.SearchModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
+            SearchModifications = new ReactiveList<SearchModificationViewModel> { ChangeTrackingEnabled = true };
 
-            this.WhenAnyValue(x => x.FastaDbFilePath).Subscribe(_ => this.LoadFastaFile());
+            this.WhenAnyValue(x => x.FastaDbFilePath).Subscribe(_ => LoadFastaFile());
 
             this.WhenAnyValue(x => x.FastaEntries.Count, x => x.SelectedSequence)
-                .Select(x => this.FastaEntries.Where(entry => entry.ProteinSequenceText.Contains(x.Item2)).ToArray())
-                .Subscribe(entries => this.SequenceProteins = entries);
+                .Select(x => FastaEntries.Where(entry => entry.ProteinSequenceText.Contains(x.Item2)).ToArray())
+                .Subscribe(entries => SequenceProteins = entries);
 
             // Remove search modification when its Remove property is set to true.
-            this.SearchModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
+            SearchModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
                 .Select(x => x.Sender).Where(sender => sender.Remove)
-                .Subscribe(searchMod => this.SearchModifications.Remove(searchMod));
+                .Subscribe(searchMod => SearchModifications.Remove(searchMod));
 
-            this.ModificationsUpdated = false;
+            ModificationsUpdated = false;
         }
 
         /// <summary>
@@ -398,20 +397,20 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
 
-            this.SearchModifications.AddRange(
+            SearchModifications.AddRange(
                mspfParameters.Modifications.Select(
                     searchMod => new SearchModificationViewModel(this.dialogService) { SearchModification = searchMod }));
-            this.MinSequenceLength = mspfParameters.MinSequenceLength;
-            this.MaxSequenceLength = mspfParameters.MaxSequenceLength;
-            this.MinSequenceMass = mspfParameters.MinSequenceMass;
-            this.MaxSequenceMass = mspfParameters.MaxSequenceMass;
-            this.MinPrecursorIonCharge = mspfParameters.MinPrecursorIonCharge;
-            this.MaxPrecursorIonCharge = mspfParameters.MaxPrecursorIonCharge;
-            this.MinProductIonCharge = mspfParameters.MinProductIonCharge;
-            this.MaxProductIonCharge = mspfParameters.MaxPrecursorIonCharge;
-            this.PrecursorIonToleranceValue = mspfParameters.PrecursorTolerancePpm.GetValue();
-            this.ProductIonToleranceValue = mspfParameters.ProductIonTolerancePpm.GetValue();
-            this.MaxDynamicModificationsPerSequence =
+            MinSequenceLength = mspfParameters.MinSequenceLength;
+            MaxSequenceLength = mspfParameters.MaxSequenceLength;
+            MinSequenceMass = mspfParameters.MinSequenceMass;
+            MaxSequenceMass = mspfParameters.MaxSequenceMass;
+            MinPrecursorIonCharge = mspfParameters.MinPrecursorIonCharge;
+            MaxPrecursorIonCharge = mspfParameters.MaxPrecursorIonCharge;
+            MinProductIonCharge = mspfParameters.MinProductIonCharge;
+            MaxProductIonCharge = mspfParameters.MaxPrecursorIonCharge;
+            PrecursorIonToleranceValue = mspfParameters.PrecursorTolerancePpm.GetValue();
+            ProductIonToleranceValue = mspfParameters.ProductIonTolerancePpm.GetValue();
+            MaxDynamicModificationsPerSequence =
                 mspfParameters.MaxDynamicModificationsPerSequence;
         }
 
@@ -430,77 +429,77 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool SearchRunning
         {
-            get { return this.searchRunning; }
-            set { this.RaiseAndSetIfChanged(ref this.searchRunning, value); }
+            get => searchRunning;
+            set => this.RaiseAndSetIfChanged(ref searchRunning, value);
         }
 
         /// <summary>
         /// Gets a command that decrements the tab index.
         /// </summary>
-        public IReactiveCommand PrevTabCommand { get; private set; }
+        public IReactiveCommand PrevTabCommand { get; }
 
         /// <summary>
         /// Gets a command that increments the tab index.
         /// </summary>
-        public IReactiveCommand NextTabCommand { get; private set; }
+        public IReactiveCommand NextTabCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
         /// </summary>
-        public IReactiveCommand BrowseSpectrumFilesCommand { get; private set; }
+        public IReactiveCommand BrowseSpectrumFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a feature file path.
         /// </summary>
-        public IReactiveCommand BrowseFeatureFilesCommand { get; private set; }
+        public IReactiveCommand BrowseFeatureFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a FASTA file path.
         /// </summary>
-        public IReactiveCommand BrowseFastaDbFilesCommand { get; private set; }
+        public IReactiveCommand BrowseFastaDbFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts user for an output directory.
         /// </summary>
-        public IReactiveCommand BrowseOutputDirectoriesCommand { get; private set; }
+        public IReactiveCommand BrowseOutputDirectoriesCommand { get; }
 
         /// <summary>
         /// Gets a command that selects all proteins in the <see cref="FastaEntries" /> list.
         /// </summary>
-        public IReactiveCommand SelectAllProteinsCommand { get; private set; }
-        
+        public IReactiveCommand SelectAllProteinsCommand { get; }
+
         /// <summary>
         /// Gets a command that de-selects all proteins in the <see cref="FastaEntries" /> list.
         /// </summary>
-        public IReactiveCommand SelectNoProteinsCommand { get; private set; }
+        public IReactiveCommand SelectNoProteinsCommand { get; }
 
         /// <summary>
         /// Gets a command that manages the modification registered with the application.
         /// </summary>
-        public IReactiveCommand ManageModificationsCommand { get; private set; }
+        public IReactiveCommand ManageModificationsCommand { get; }
 
         /// <summary>
         /// Gets a command that adds a search modification.
         /// </summary>
-        public IReactiveCommand AddModificationCommand { get; private set; }
+        public IReactiveCommand AddModificationCommand { get; }
 
         /// <summary>
         /// Gets a command that validates search settings and closes the window.
         /// </summary>
-        public IReactiveCommand RunCommand { get; private set; }
+        public IReactiveCommand RunCommand { get; }
 
         /// <summary>
         /// Gets a command that closes the window.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; }
 
         /// <summary>
         /// Gets or sets the tab index for the tab control.
         /// </summary>
         public int TabIndex
         {
-            get { return this.tabIndex; }
-            set { this.RaiseAndSetIfChanged(ref this.tabIndex, value); }
+            get => tabIndex;
+            set => this.RaiseAndSetIfChanged(ref tabIndex, value);
         }
 
         /// <summary>
@@ -508,8 +507,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string SpectrumFilePath
         {
-            get { return this.spectrumFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.spectrumFilePath, value); }
+            get => spectrumFilePath;
+            set => this.RaiseAndSetIfChanged(ref spectrumFilePath, value);
         }
 
         /// <summary>
@@ -517,8 +516,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string FastaDbFilePath
         {
-            get { return this.fastaDbFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.fastaDbFilePath, value); }
+            get => fastaDbFilePath;
+            set => this.RaiseAndSetIfChanged(ref fastaDbFilePath, value);
         }
 
         /// <summary>
@@ -526,8 +525,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string FeatureFilePath
         {
-            get { return this.featureFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.featureFilePath, value); }
+            get => featureFilePath;
+            set => this.RaiseAndSetIfChanged(ref featureFilePath, value);
         }
 
         /// <summary>
@@ -535,32 +534,32 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string OutputFilePath
         {
-            get { return this.outputFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.outputFilePath, value); }
+            get => outputFilePath;
+            set => this.RaiseAndSetIfChanged(ref outputFilePath, value);
         }
 
         /// <summary>
         /// Gets the list of possible MSPathFinder search modes.
         /// </summary>
-        public InternalCleavageType[] SearchModes { get; private set; }
+        public InternalCleavageType[] SearchModes { get; }
 
         /// <summary>
         /// Gets the list of entries in the FASTA file.
         /// </summary>
-        public ReactiveList<FastaEntry> FastaEntries { get; private set; }
+        public ReactiveList<FastaEntry> FastaEntries { get; }
 
         /// <summary>
         /// Gets the list of possible tolerance units.
         /// </summary>
-        public ToleranceUnit[] ToleranceUnits { get; private set; }
+        public ToleranceUnit[] ToleranceUnits { get; }
 
         /// <summary>
         /// Gets or sets the search mode selected from <see cref="SearchModes" />.
         /// </summary>
         public InternalCleavageType SelectedSearchMode
         {
-            get { return this.selectedSearchMode; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedSearchMode, value); }
+            get => selectedSearchMode;
+            set => this.RaiseAndSetIfChanged(ref selectedSearchMode, value);
         }
 
         /// <summary>
@@ -568,8 +567,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string SearchModeDescription
         {
-            get { return this.searchModeDescription; }
-            private set { this.RaiseAndSetIfChanged(ref this.searchModeDescription, value); }
+            get => searchModeDescription;
+            private set => this.RaiseAndSetIfChanged(ref searchModeDescription, value);
         }
 
         /// <summary>
@@ -577,8 +576,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public double PrecursorIonToleranceValue
         {
-            get { return this.precursorIonToleranceValue; }
-            set { this.RaiseAndSetIfChanged(ref this.precursorIonToleranceValue, value); }
+            get => precursorIonToleranceValue;
+            set => this.RaiseAndSetIfChanged(ref precursorIonToleranceValue, value);
         }
 
         /// <summary>
@@ -586,8 +585,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public ToleranceUnit PrecursorIonToleranceUnit
         {
-            get { return this.precursorIonToleranceUnit; }
-            set { this.RaiseAndSetIfChanged(ref this.precursorIonToleranceUnit, value); }
+            get => precursorIonToleranceUnit;
+            set => this.RaiseAndSetIfChanged(ref precursorIonToleranceUnit, value);
         }
 
         /// <summary>
@@ -595,8 +594,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public double ProductIonToleranceValue
         {
-            get { return this.productIonToleranceValue; }
-            set { this.RaiseAndSetIfChanged(ref this.productIonToleranceValue, value); }
+            get => productIonToleranceValue;
+            set => this.RaiseAndSetIfChanged(ref productIonToleranceValue, value);
         }
 
         /// <summary>
@@ -604,8 +603,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public ToleranceUnit ProductIonToleranceUnit
         {
-            get { return this.productIonToleranceUnit; }
-            set { this.RaiseAndSetIfChanged(ref this.productIonToleranceUnit, value); }
+            get => productIonToleranceUnit;
+            set => this.RaiseAndSetIfChanged(ref productIonToleranceUnit, value);
         }
 
         /// <summary>
@@ -613,8 +612,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int MinSequenceLength
         {
-            get { return this.minSequenceLength; }
-            set { this.RaiseAndSetIfChanged(ref this.minSequenceLength, value); }
+            get => minSequenceLength;
+            set => this.RaiseAndSetIfChanged(ref minSequenceLength, value);
         }
 
         /// <summary>
@@ -622,8 +621,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int MaxSequenceLength
         {
-            get { return this.maxSequenceLength; }
-            set { this.RaiseAndSetIfChanged(ref this.maxSequenceLength, value); }
+            get => maxSequenceLength;
+            set => this.RaiseAndSetIfChanged(ref maxSequenceLength, value);
         }
 
         /// <summary>
@@ -631,8 +630,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int MinPrecursorIonCharge
         {
-            get { return this.minPrecursorIonCharge; }
-            set { this.RaiseAndSetIfChanged(ref this.minPrecursorIonCharge, value); }   
+            get => minPrecursorIonCharge;
+            set => this.RaiseAndSetIfChanged(ref minPrecursorIonCharge, value);
         }
 
         /// <summary>
@@ -640,8 +639,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int MaxPrecursorIonCharge
         {
-            get { return this.maxPrecursorIonCharge; }
-            set { this.RaiseAndSetIfChanged(ref this.maxPrecursorIonCharge, value); }
+            get => maxPrecursorIonCharge;
+            set => this.RaiseAndSetIfChanged(ref maxPrecursorIonCharge, value);
         }
 
         /// <summary>
@@ -649,8 +648,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int MinProductIonCharge
         {
-            get { return this.minProductIonCharge; }
-            set { this.RaiseAndSetIfChanged(ref this.minProductIonCharge, value); }
+            get => minProductIonCharge;
+            set => this.RaiseAndSetIfChanged(ref minProductIonCharge, value);
         }
 
         /// <summary>
@@ -658,8 +657,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int MaxProductIonCharge
         {
-            get { return this.maxProductIonCharge; }
-            set { this.RaiseAndSetIfChanged(ref this.maxProductIonCharge, value); }
+            get => maxProductIonCharge;
+            set => this.RaiseAndSetIfChanged(ref maxProductIonCharge, value);
         }
 
         /// <summary>
@@ -667,8 +666,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public double MinSequenceMass
         {
-            get { return this.minSequenceMass; }
-            set { this.RaiseAndSetIfChanged(ref this.minSequenceMass, value); }
+            get => minSequenceMass;
+            set => this.RaiseAndSetIfChanged(ref minSequenceMass, value);
         }
 
         /// <summary>
@@ -676,8 +675,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public double MaxSequenceMass
         {
-            get { return this.maxSequenceMass; }
-            set { this.RaiseAndSetIfChanged(ref this.maxSequenceMass, value); }
+            get => maxSequenceMass;
+            set => this.RaiseAndSetIfChanged(ref maxSequenceMass, value);
         }
 
         /// <summary>
@@ -685,8 +684,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int MaxDynamicModificationsPerSequence
         {
-            get { return this.maxDynamicModificationsPerSequence; }
-            set { this.RaiseAndSetIfChanged(ref this.maxDynamicModificationsPerSequence, value); }
+            get => maxDynamicModificationsPerSequence;
+            set => this.RaiseAndSetIfChanged(ref maxDynamicModificationsPerSequence, value);
         }
 
         /// <summary>
@@ -694,8 +693,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int MinScanNumber
         {
-            get { return this.minScanNumber; }
-            set { this.RaiseAndSetIfChanged(ref this.minScanNumber, value); }
+            get => minScanNumber;
+            set => this.RaiseAndSetIfChanged(ref minScanNumber, value);
         }
 
         /// <summary>
@@ -703,22 +702,22 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int MaxScanNumber
         {
-            get { return this.maxScanNumber; }
-            set { this.RaiseAndSetIfChanged(ref this.maxScanNumber, value); }
+            get => maxScanNumber;
+            set => this.RaiseAndSetIfChanged(ref maxScanNumber, value);
         }
 
         /// <summary>
         /// Gets the list of modifications to use in the search.
         /// </summary>
-        public ReactiveList<SearchModificationViewModel> SearchModifications { get; private set; }
+        public ReactiveList<SearchModificationViewModel> SearchModifications { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether application modifications were updated.
         /// </summary>
         public bool ModificationsUpdated
         {
-            get { return this.modificationsUpdated; }
-            set { this.RaiseAndSetIfChanged(ref this.modificationsUpdated, value); }
+            get => modificationsUpdated;
+            set => this.RaiseAndSetIfChanged(ref modificationsUpdated, value);
         }
 
         /// <summary>
@@ -726,8 +725,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string SelectedSequence
         {
-            get { return this.selectedSequence; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedSequence, value); }
+            get => selectedSequence;
+            set => this.RaiseAndSetIfChanged(ref selectedSequence, value);
         }
 
         /// <summary>
@@ -735,8 +734,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public FastaEntry[] SequenceProteins
         {
-            get { return this.sequenceProteins; }
-            private set { this.RaiseAndSetIfChanged(ref this.sequenceProteins, value); }
+            get => sequenceProteins;
+            private set => this.RaiseAndSetIfChanged(ref sequenceProteins, value);
         }
 
         /// <summary>
@@ -745,8 +744,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool FixedNTerm
         {
-            get { return this.fixedNTerm; }
-            set { this.RaiseAndSetIfChanged(ref this.fixedNTerm, value); }
+            get => fixedNTerm;
+            set => this.RaiseAndSetIfChanged(ref fixedNTerm, value);
         }
 
         /// <summary>
@@ -755,8 +754,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool FixedCTerm
         {
-            get { return this.fixedCTerm; }
-            set { this.RaiseAndSetIfChanged(ref this.fixedCTerm, value); }
+            get => fixedCTerm;
+            set => this.RaiseAndSetIfChanged(ref fixedCTerm, value);
         }
 
         /// <summary>
@@ -764,8 +763,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool FromFastaEntry
         {
-            get { return this.fromFastaEntry; }
-            set { this.RaiseAndSetIfChanged(ref this.fromFastaEntry, value); }
+            get => fromFastaEntry;
+            set => this.RaiseAndSetIfChanged(ref fromFastaEntry, value);
         }
 
         /// <summary>
@@ -773,8 +772,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool FromSequence
         {
-            get { return this.fromSequence; }
-            set { this.RaiseAndSetIfChanged(ref this.fromSequence, value); }
+            get => fromSequence;
+            set => this.RaiseAndSetIfChanged(ref fromSequence, value);
         }
 
         /// <summary>
@@ -782,8 +781,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public int NumMatchesPerSpectrum
         {
-            get { return this.numMatchesPerSpectrum; }
-            set { this.RaiseAndSetIfChanged(ref this.numMatchesPerSpectrum, value); }
+            get => numMatchesPerSpectrum;
+            set => this.RaiseAndSetIfChanged(ref numMatchesPerSpectrum, value);
         }
 
         /// <summary>
@@ -791,8 +790,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public double SearchProgressPercent
         {
-            get { return this.searchProgressPercent; }
-            set { this.RaiseAndSetIfChanged(ref this.searchProgressPercent, value); }
+            get => searchProgressPercent;
+            set => this.RaiseAndSetIfChanged(ref searchProgressPercent, value);
         }
 
         /// <summary>
@@ -800,8 +799,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string SearchProgressStatus
         {
-            get { return this.searchProgressStatus; }
-            set { this.RaiseAndSetIfChanged(ref this.searchProgressStatus, value); }
+            get => searchProgressStatus;
+            set => this.RaiseAndSetIfChanged(ref searchProgressStatus, value);
         }
 
         /// <summary>Get a launcher for TopDown MSPathFinder searches.</summary>
@@ -809,22 +808,22 @@ namespace LcmsSpectator.ViewModels
         /// <returns>The <see cref="IcTopDownLauncher"/>.</returns>
         public IcTopDownLauncher GetTopDownLauncher(IEnumerable<int> ms2ScanNums = null)
         {
-            var searchModifications = this.SearchModifications.Select(searchModification => searchModification.SearchModification).ToList();
-            var aminoAcidSet = new AminoAcidSet(searchModifications, this.maxDynamicModificationsPerSequence);
+            var searchModifications = SearchModifications.Select(searchModification => searchModification.SearchModification).ToList();
+            var aminoAcidSet = new AminoAcidSet(searchModifications, maxDynamicModificationsPerSequence);
             return
                 new IcTopDownLauncher(
                     new InformedProteomics.TopDown.Execution.MsPfParameters
                         {
-                            MinSequenceLength = this.MinSequenceLength,
-                            MaxSequenceLength = this.MaxSequenceLength,
+                            MinSequenceLength = MinSequenceLength,
+                            MaxSequenceLength = MaxSequenceLength,
                             //MaxNumNTermCleavages = 1,
                             //MaxNumCTermCleavages = 0,
-                            MinPrecursorIonCharge = this.MinPrecursorIonCharge,
-                            MaxPrecursorIonCharge = this.MaxPrecursorIonCharge,
-                            MinProductIonCharge = this.MinProductIonCharge,
-                            MaxProductIonCharge = this.MaxProductIonCharge,
-                            MinSequenceMass = this.MinSequenceMass,
-                            MaxSequenceMass = this.MaxSequenceMass,
+                            MinPrecursorIonCharge = MinPrecursorIonCharge,
+                            MaxPrecursorIonCharge = MaxPrecursorIonCharge,
+                            MinProductIonCharge = MinProductIonCharge,
+                            MaxProductIonCharge = MaxProductIonCharge,
+                            MinSequenceMass = MinSequenceMass,
+                            MaxSequenceMass = MaxSequenceMass,
                            // PrecursorIonTolerancePpm = this.PrecursorIonToleranceValue,
                             //ProductIonTolerancePpm = this.ProductIonToleranceValue,
                             //RunTargetDecoyAnalysis = DatabaseSearchMode.Both,
@@ -841,10 +840,10 @@ namespace LcmsSpectator.ViewModels
         /// <returns>Path to feature file as a string.</returns>
         public string GetFeatureFilePath()
         {
-            var dataSetName = Path.GetFileNameWithoutExtension(this.SpectrumFilePath);
-            return string.IsNullOrWhiteSpace(this.FeatureFilePath) ? 
-                   string.Format("{0}\\{1}.ms1ft", this.OutputFilePath, dataSetName) : 
-                   this.FeatureFilePath;
+            var dataSetName = Path.GetFileNameWithoutExtension(SpectrumFilePath);
+            return string.IsNullOrWhiteSpace(FeatureFilePath) ?
+                   string.Format("{0}\\{1}.ms1ft", OutputFilePath, dataSetName) :
+                   FeatureFilePath;
         }
 
         /// <summary>
@@ -853,8 +852,8 @@ namespace LcmsSpectator.ViewModels
         /// <returns>Path to ID file as a string.</returns>
         public string GetIdFilePath()
         {
-            var dataSetName = Path.GetFileNameWithoutExtension(this.SpectrumFilePath);
-            return string.Format("{0}\\{1}_IcTda.tsv", this.OutputFilePath, dataSetName);
+            var dataSetName = Path.GetFileNameWithoutExtension(SpectrumFilePath);
+            return string.Format("{0}\\{1}_IcTda.tsv", OutputFilePath, dataSetName);
         }
 
         /// <summary>
@@ -862,18 +861,18 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void LoadFastaFile()
         {
-            this.FastaEntries.Clear();
+            FastaEntries.Clear();
 
-            if (!string.IsNullOrEmpty(this.FastaDbFilePath) && File.Exists(this.FastaDbFilePath))
+            if (!string.IsNullOrEmpty(FastaDbFilePath) && File.Exists(FastaDbFilePath))
             {
                 try
                 {
-                    this.FastaEntries.AddRange(FastaReaderWriter.ReadFastaFile(this.FastaDbFilePath));
+                    FastaEntries.AddRange(FastaReaderWriter.ReadFastaFile(FastaDbFilePath));
                 }
                 catch (FormatException e)
                 {
-                    this.dialogService.ExceptionAlert(e);
-                    this.FastaEntries.Clear();
+                    dialogService.ExceptionAlert(e);
+                    FastaEntries.Clear();
                 }
             }
         }
@@ -884,10 +883,10 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void BrowseSpectrumFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(".raw", FileConstants.RawFileFormatString);
+            var path = dialogService.OpenFile(".raw", FileConstants.RawFileFormatString);
             if (!string.IsNullOrWhiteSpace(path))
             {
-                this.SpectrumFilePath = path;
+                SpectrumFilePath = path;
             }
         }
 
@@ -897,10 +896,10 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void BrowseFeatureFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(".ms1ft", FileConstants.FeatureFileFormatString);
+            var path = dialogService.OpenFile(".ms1ft", FileConstants.FeatureFileFormatString);
             if (!string.IsNullOrWhiteSpace(path))
             {
-                this.FeatureFilePath = path;
+                FeatureFilePath = path;
             }
         }
 
@@ -910,10 +909,10 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void BrowseFastaDbFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(".fasta", FileConstants.FastaFileFormatString);
+            var path = dialogService.OpenFile(".fasta", FileConstants.FastaFileFormatString);
             if (!string.IsNullOrWhiteSpace(path))
             {
-                this.FastaDbFilePath = path;
+                FastaDbFilePath = path;
             }
         }
 
@@ -923,10 +922,10 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void BrowseOutputDirectoriesImplementation()
         {
-            var path = this.dialogService.OpenFolder();
+            var path = dialogService.OpenFolder();
             if (!string.IsNullOrWhiteSpace(path))
             {
-                this.OutputFilePath = path;
+                OutputFilePath = path;
             }
         }
 
@@ -936,7 +935,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void AddModificationImplementation()
         {
-            this.SearchModifications.Add(new SearchModificationViewModel(this.dialogService));
+            SearchModifications.Add(new SearchModificationViewModel(dialogService));
         }
 
         /// <summary>
@@ -949,7 +948,7 @@ namespace LcmsSpectator.ViewModels
         /// </param>
         private void SelectProteinsImplementation(bool selected)
         {
-            foreach (var entry in this.FastaEntries)
+            foreach (var entry in FastaEntries)
             {
                 entry.Selected = selected;
             }
@@ -961,11 +960,11 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void ManageModificationsImplementation()
         {
-            var manageModificationsViewModel = new ManageModificationsViewModel(this.dialogService);
+            var manageModificationsViewModel = new ManageModificationsViewModel(dialogService);
             manageModificationsViewModel.Modifications.AddRange(IcParameters.Instance.RegisteredModifications);
-            this.dialogService.OpenManageModifications(manageModificationsViewModel);
+            dialogService.OpenManageModifications(manageModificationsViewModel);
 
-            this.ModificationsUpdated = true;
+            ModificationsUpdated = true;
         }
 
         /// <summary>
@@ -975,53 +974,50 @@ namespace LcmsSpectator.ViewModels
         /// <returns>The <see cref="Task"/>.</returns>
         private async Task RunImplementation()
         {
-            this.SearchRunning = true;
+            SearchRunning = true;
 
-            this.runSearchCancellationToken = new CancellationTokenSource();
+            runSearchCancellationToken = new CancellationTokenSource();
 
             // Read spectrum file
-            var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(this.SpectrumFilePath, 0, 0), this.runSearchCancellationToken.Token);
-            
+            var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(SpectrumFilePath, 0, 0), runSearchCancellationToken.Token);
+
             // Get MS/MS scan numbers
             IEnumerable<int> ms2Scans = null;
-            if (this.MaxScanNumber > 0 && (this.MaxScanNumber - this.MinScanNumber) >= 0)
+            if (MaxScanNumber > 0 && (MaxScanNumber - MinScanNumber) >= 0)
             {
                 var allMs2Scans = lcms.GetScanNumbers(2);
-                ms2Scans = allMs2Scans.Where(scan => scan >= this.MinScanNumber && scan <= this.MaxScanNumber);   
+                ms2Scans = allMs2Scans.Where(scan => scan >= MinScanNumber && scan <= MaxScanNumber);
             }
-            
+
             // Create truncated FASTA
-            this.truncatedFastaDbFilePath = this.CreateTruncatedFastaFile();
-            
+            truncatedFastaDbFilePath = CreateTruncatedFastaFile();
+
             // Progress updater
-            this.SearchProgressPercent = 0.0;
-            this.SearchProgressStatus = "Searching...";
+            SearchProgressPercent = 0.0;
+            SearchProgressStatus = "Searching...";
             var progress = new Progress<ProgressData>(progressData =>
             {
-                this.SearchProgressPercent = progressData.Percent;
-                this.SearchProgressStatus = progressData.Status;
+                SearchProgressPercent = progressData.Percent;
+                SearchProgressStatus = progressData.Status;
             });
 
             // Run Search
-            var topDownLauncher = this.GetTopDownLauncher(ms2Scans);
-            this.runSearchTask = Task.Run(
+            var topDownLauncher = GetTopDownLauncher(ms2Scans);
+            runSearchTask = Task.Run(
                                           () => topDownLauncher.RunSearch(
                                                                           IcParameters.Instance.IonCorrelationThreshold,
-                                                                          this.runSearchCancellationToken.Token,
+                                                                          runSearchCancellationToken.Token,
                                                                           progress),
-                                                this.runSearchCancellationToken.Token);
-            await this.runSearchTask;
+                                                runSearchCancellationToken.Token);
+            await runSearchTask;
             ////topDownLauncher.RunSearch(IcParameters.Instance.IonCorrelationThreshold);
-            this.SearchRunning = false;
+            SearchRunning = false;
 
-            this.runSearchCancellationToken = null;
+            runSearchCancellationToken = null;
 
             // Results delivered on close
-            this.Status = true;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = true;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -1030,28 +1026,22 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void CancelImplementation()
         {
-            if (this.SearchRunning)
+            if (SearchRunning)
             {
-                if (this.dialogService.ConfirmationBox(
+                if (dialogService.ConfirmationBox(
                     "Are you sure you would like to cancel the search?",
                     "Cancel Search"))
                 {
-                    if (this.runSearchCancellationToken != null)
-                    {
-                        this.runSearchCancellationToken.Cancel();
-                    }
+                    runSearchCancellationToken?.Cancel();
 
-                    this.SearchRunning = false;   
+                    SearchRunning = false;
                 }
 
                 return;
             }
 
-            this.Status = false;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = false;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -1060,19 +1050,19 @@ namespace LcmsSpectator.ViewModels
         /// <returns>The path to the truncated FASTA database file.</returns>
         private string CreateTruncatedFastaFile()
         {
-            var fastaFileName = Path.GetFileNameWithoutExtension(this.FastaDbFilePath);
-            var filePath = string.Format("{0}\\{1}_truncated.fasta", this.OutputFilePath, fastaFileName);
+            var fastaFileName = Path.GetFileNameWithoutExtension(FastaDbFilePath);
+            var filePath = string.Format("{0}\\{1}_truncated.fasta", OutputFilePath, fastaFileName);
 
             IEnumerable<FastaEntry> entries = new FastaEntry[0];
 
-            if (this.FromFastaEntry)
+            if (FromFastaEntry)
             {
-                entries = this.FastaEntries.Where(entry => entry.Selected);
+                entries = FastaEntries.Where(entry => entry.Selected);
             }
-            else if (this.FromSequence)
+            else if (FromSequence)
             {
-                var selectedEntries = this.SequenceProteins.Where(entry => entry.Selected).ToArray();
-                if (this.FixedNTerm && this.FixedCTerm)
+                var selectedEntries = SequenceProteins.Where(entry => entry.Selected).ToArray();
+                if (FixedNTerm && FixedCTerm)
                 {   // Just use the selected sequence for every protein.
                     entries = selectedEntries.Select(
                                 entry =>
@@ -1080,17 +1070,17 @@ namespace LcmsSpectator.ViewModels
                                     {
                                         ProteinName = entry.ProteinName,
                                         ProteinDescription = entry.ProteinDescription,
-                                        ProteinSequenceText = this.SelectedSequence,
+                                        ProteinSequenceText = SelectedSequence,
                                         Selected = true
                                     });
                     entries = new List<FastaEntry> { entries.FirstOrDefault() };
                 }
-                else if (this.FixedNTerm)
+                else if (FixedNTerm)
                 {
-                    entries = from entry in selectedEntries 
-                              let startIndex = entry.ProteinSequenceText.IndexOf(this.SelectedSequence, StringComparison.Ordinal) 
-                              where startIndex > -1 
-                              let sequence = entry.ProteinSequenceText.Substring(startIndex) 
+                    entries = from entry in selectedEntries
+                              let startIndex = entry.ProteinSequenceText.IndexOf(SelectedSequence, StringComparison.Ordinal)
+                              where startIndex > -1
+                              let sequence = entry.ProteinSequenceText.Substring(startIndex)
                               select new FastaEntry
                                   {
                                       ProteinName = entry.ProteinName,
@@ -1098,12 +1088,12 @@ namespace LcmsSpectator.ViewModels
                                       ProteinSequenceText = sequence
                                   };
                 }
-                else if (this.FixedCTerm)
+                else if (FixedCTerm)
                 {
                     entries = from entry in selectedEntries
-                              let startIndex = entry.ProteinSequenceText.IndexOf(this.SelectedSequence, StringComparison.Ordinal)
+                              let startIndex = entry.ProteinSequenceText.IndexOf(SelectedSequence, StringComparison.Ordinal)
                               where startIndex > -1
-                              let sequence = entry.ProteinSequenceText.Substring(0, startIndex + this.SelectedSequence.Length)
+                              let sequence = entry.ProteinSequenceText.Substring(0, startIndex + SelectedSequence.Length)
                               select new FastaEntry
                               {
                                   ProteinName = entry.ProteinName,

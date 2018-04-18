@@ -12,8 +12,8 @@ namespace LcmsSpectator.ViewModels.Modifications
 {
     using System;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
+    using Config;
+    using DialogServices;
 
     using ReactiveUI;
 
@@ -28,17 +28,17 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public HeavyModificationsWindowViewModel(IDialogService dialogService)
         {
-            this.HeavyModificationsViewModel = new HeavyModificationsViewModel(dialogService);
+            HeavyModificationsViewModel = new HeavyModificationsViewModel(dialogService);
 
             var saveCommand = ReactiveCommand.Create();
-            saveCommand.Subscribe(_ => this.SaveImplementation());
-            this.SaveCommand = saveCommand;
+            saveCommand.Subscribe(_ => SaveImplementation());
+            SaveCommand = saveCommand;
 
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => this.CancelImplementation());
-            this.CancelCommand = cancelCommand;
+            cancelCommand.Subscribe(_ => CancelImplementation());
+            CancelCommand = cancelCommand;
 
-            this.Status = false;
+            Status = false;
         }
 
         /// <summary>
@@ -49,18 +49,18 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Gets the HeavyModificationsViewModel for selecting heavy modifications.
         /// </summary>
-        public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
+        public HeavyModificationsViewModel HeavyModificationsViewModel { get; }
 
         /// <summary>
-        /// Gets a command that sets status to true, 
+        /// Gets a command that sets status to true,
         /// saves the selected heavy modifications, and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand SaveCommand { get; private set; }
+        public IReactiveCommand SaveCommand { get; }
 
         /// <summary>
         /// Gets a command that sets status to false and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether the modifications should be saved.
@@ -73,13 +73,10 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public void SaveImplementation()
         {
-            this.HeavyModificationsViewModel.Save();
-            this.Status = true;
+            HeavyModificationsViewModel.Save();
+            Status = true;
             IcParameters.Instance.Update();
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -88,11 +85,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public void CancelImplementation()
         {
-            this.Status = false;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = false;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
     }
 }

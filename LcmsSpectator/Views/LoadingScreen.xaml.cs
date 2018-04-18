@@ -11,7 +11,7 @@
 namespace LcmsSpectator.Views
 {
     using System.Windows.Controls;
-    
+
     /// <summary>
     /// Interaction logic for LoadingScreen.xaml
     /// </summary>
@@ -22,7 +22,7 @@ namespace LcmsSpectator.Views
         /// </summary>
         public LoadingScreen()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

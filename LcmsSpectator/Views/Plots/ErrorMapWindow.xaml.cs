@@ -22,7 +22,7 @@ namespace LcmsSpectator.Views.Plots
         /// </summary>
         public ErrorMapWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

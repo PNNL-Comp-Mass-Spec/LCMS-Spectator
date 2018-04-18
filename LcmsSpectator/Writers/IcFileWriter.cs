@@ -14,7 +14,7 @@ namespace LcmsSpectator.Writers
     using System.IO;
     using System.Text;
     using InformedProteomics.Backend.Data.Sequence;
-    using LcmsSpectator.Models;
+    using Models;
 
     /// <summary>
     /// Writer for MSPathFinder TSV result format.
@@ -39,7 +39,7 @@ namespace LcmsSpectator.Writers
         /// <param name="ids">The IDs to write to a file.</param>
         public void Write(IEnumerable<PrSm> ids)
         {
-            using (var writer = new StreamWriter(this.filePath))
+            using (var writer = new StreamWriter(filePath))
             {
                 // Print headers
                 writer.WriteLine(
@@ -66,11 +66,10 @@ namespace LcmsSpectator.Writers
 
                     var sequenceStringBuilder = new StringBuilder(prsm.Sequence.Count);
                     var modStringBuilder = new StringBuilder();
-                    for (int i = 0; i < prsm.Sequence.Count; i++)
+                    for (var i = 0; i < prsm.Sequence.Count; i++)
                     {
                         sequenceStringBuilder.Append(prsm.Sequence[i].Residue);
-                        var modAa = prsm.Sequence[i] as ModifiedAminoAcid;
-                        if (modAa != null)
+                        if (prsm.Sequence[i] is ModifiedAminoAcid modAa)
                         {
                             if (modStringBuilder.Length > 0)
                             {

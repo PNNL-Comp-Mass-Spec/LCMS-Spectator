@@ -26,12 +26,12 @@ namespace LcmsSpectator.Views
         /// </summary>
         public MainWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
-            this.ProgressRow.Height = new GridLength(0, GridUnitType.Pixel);
-            this.FileLoadProgress.IsVisibleChanged += (s, e) =>
+            ProgressRow.Height = new GridLength(0, GridUnitType.Pixel);
+            FileLoadProgress.IsVisibleChanged += (s, e) =>
                 {
-                    this.ProgressRow.Height = this.FileLoadProgress.IsVisible ? 
+                    ProgressRow.Height = FileLoadProgress.IsVisible ? 
                                                     new GridLength(30, GridUnitType.Pixel) : 
                                                     new GridLength(0, GridUnitType.Pixel);
                 };
@@ -48,7 +48,7 @@ namespace LcmsSpectator.Views
             var fileName = "layout.xml";
             if (File.Exists(fileName))
             {
-                this.LoadLayout(fileName);
+                LoadLayout(fileName);
             }
             else
             {
@@ -65,7 +65,7 @@ namespace LcmsSpectator.Views
                     if (openResult == true)
                     {
                         fileName = dialog.FileName;
-                        this.LoadLayout(fileName);
+                        LoadLayout(fileName);
                     }
                     else
                     {

@@ -38,28 +38,28 @@
         /// <param name="defaultProportion"></param>
         public IsotopeProportionViewModel(bool isSelectable, double defaultProportion)
         {
-            this.DefaultProportion = defaultProportion;
-            this.Proportion = defaultProportion;
-            this.IsSelectable = isSelectable;
+            DefaultProportion = defaultProportion;
+            Proportion = defaultProportion;
+            IsSelectable = isSelectable;
 
             // When this isotope is deselected, change proportion back to original value.
             this.WhenAnyValue(x => x.IsSelected)
                 .Where(isSelected => !isSelected)
-                .Subscribe(_ => this.Reset());
+                .Subscribe(_ => Reset());
         }
 
         /// <summary>
         /// Gets a value indicating whether this isotope can be selected.
         /// </summary>
-        public bool IsSelectable { get; private set; }
+        public bool IsSelectable { get; }
 
         /// <summary>
         /// Gets or sets the isotope index. 0 is the monoisotope.
         /// </summary>
         public int IsotopeIndex
         {
-            get { return this.isotopeIndex; }
-            set { this.RaiseAndSetIfChanged(ref this.isotopeIndex, value); }
+            get => isotopeIndex;
+            set => this.RaiseAndSetIfChanged(ref isotopeIndex, value);
         }
 
         /// <summary>
@@ -67,22 +67,22 @@
         /// </summary>
         public int NominalMass
         {
-            get { return this.nominalMass; }
-            set { this.RaiseAndSetIfChanged(ref this.nominalMass, value); }
+            get => nominalMass;
+            set => this.RaiseAndSetIfChanged(ref nominalMass, value);
         }
 
         /// <summary>
         /// Gets the default and minimum proportion.
         /// </summary>
-        public double DefaultProportion { get; private set; }
+        public double DefaultProportion { get; }
 
         /// <summary>
         /// Gets or sets the proportion of this isotope of all isotopes of the element.
         /// </summary>
         public double Proportion
         {
-            get { return this.proportion; }
-            set { this.RaiseAndSetIfChanged(ref this.proportion, value); } 
+            get => proportion;
+            set => this.RaiseAndSetIfChanged(ref proportion, value);
         }
 
         /// <summary>
@@ -90,21 +90,21 @@
         /// </summary>
         public bool IsSelected
         {
-            get { return this.isSelected; }
-            set { this.RaiseAndSetIfChanged(ref this.isSelected, value); }
+            get => isSelected;
+            set => this.RaiseAndSetIfChanged(ref isSelected, value);
         }
 
         /// <summary>
         /// Gets the different between the proportion and the original, default proportion.
         /// </summary>
-        public double Delta { get { return this.Proportion - this.DefaultProportion; } }
+        public double Delta => Proportion - DefaultProportion;
 
         /// <summary>
         /// Reset the proportion back to its default value.
         /// </summary>
         public void Reset()
         {
-            this.Proportion = this.DefaultProportion;
+            Proportion = DefaultProportion;
         }
     }
 }

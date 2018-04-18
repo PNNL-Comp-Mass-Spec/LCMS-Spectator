@@ -29,8 +29,8 @@ namespace LcmsSpectator.PlotModels
         /// </summary>
         public XicPointSeries()
         {
-            this.plotModelLock = new ReaderWriterLockSlim();
-            this.Index = 0;
+            plotModelLock = new ReaderWriterLockSlim();
+            Index = 0;
         }
 
         /// <summary>
@@ -46,19 +46,19 @@ namespace LcmsSpectator.PlotModels
         /// <returns>Area under the curve.</returns>
         public double GetArea(double min, double max)
         {
-            if (this.ItemsSource != null)
+            if (ItemsSource != null)
             {
-                return this.GetAreaItemsSource(min, max);
+                return GetAreaItemsSource(min, max);
             }
 
-            if (this.ActualPoints == null)
+            if (ActualPoints == null)
             {
                 return 0;
             }
 
-            this.plotModelLock.EnterReadLock();
+            plotModelLock.EnterReadLock();
             var area = ActualPoints.Where(point => point.X >= min && point.X <= max).Sum(point => point.Y);
-            this.plotModelLock.ExitReadLock();
+            plotModelLock.ExitReadLock();
             return area;
         }
 
@@ -70,26 +70,26 @@ namespace LcmsSpectator.PlotModels
         /// <returns>Maximum Y value.</returns>
         public double GetMaxYInRange(double minX, double maxX)
         {
-            if (this.ItemsSource != null)
+            if (ItemsSource != null)
             {
-                return this.GetMaxYInRangeItemsSource(minX, maxX);
+                return GetMaxYInRangeItemsSource(minX, maxX);
             }
 
-            double maxY = 0.0;
+            var maxY = 0.0;
             var dataPoints = ActualPoints;
-            this.plotModelLock.EnterReadLock();
-            if (dataPoints != null && dataPoints.Count > 0 && this.IsVisible)
+            plotModelLock.EnterReadLock();
+            if (dataPoints != null && dataPoints.Count > 0 && IsVisible)
             {
                 foreach (var point in dataPoints)
                 {
                     if (point.X >= minX && point.X <= maxX && point.Y >= maxY)
                     {
-                        maxY = point.Y;   
+                        maxY = point.Y;
                     }
                 }
             }
 
-            this.plotModelLock.ExitReadLock();
+            plotModelLock.ExitReadLock();
             return maxY;
         }
 
@@ -98,9 +98,9 @@ namespace LcmsSpectator.PlotModels
         /// </summary>
         protected override void UpdateAxisMaxMin()
         {
-            this.plotModelLock.EnterWriteLock();
+            plotModelLock.EnterWriteLock();
             base.UpdateAxisMaxMin();
-            this.plotModelLock.ExitWriteLock();
+            plotModelLock.ExitWriteLock();
         }
 
         /// <summary>
@@ -108,9 +108,9 @@ namespace LcmsSpectator.PlotModels
         /// </summary>
         protected override void UpdateData()
         {
-            this.plotModelLock.EnterWriteLock();
+            plotModelLock.EnterWriteLock();
             base.UpdateData();
-            this.plotModelLock.ExitWriteLock();
+            plotModelLock.ExitWriteLock();
         }
 
         /// <summary>
@@ -121,9 +121,9 @@ namespace LcmsSpectator.PlotModels
         /// <returns>Area under the curve.</returns>
         private double GetAreaItemsSource(double minX, double maxX)
         {
-            return (from object item in ItemsSource 
-                           select item as IDataPoint into point 
-                           where point != null && point.X >= minX && point.X <= maxX 
+            return (from object item in ItemsSource
+                           select item as IDataPoint into point
+                           where point != null && point.X >= minX && point.X <= maxX
                            select point.Y).Sum();
         }
 
@@ -135,11 +135,10 @@ namespace LcmsSpectator.PlotModels
         /// <returns>Maximum Y value.</returns>
         private double GetMaxYInRangeItemsSource(double minX, double maxX)
         {
-            double maxY = 0.0;
-            foreach (var item in this.ItemsSource)
+            var maxY = 0.0;
+            foreach (var item in ItemsSource)
             {
-                var point = item as IDataPoint;
-                if (point != null && point.X >= minX && point.X <= maxX && point.Y >= maxY)
+                if (item is IDataPoint point && point.X >= minX && point.X <= maxX && point.Y >= maxY)
                 {
                     maxY = point.Y;
                 }

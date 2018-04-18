@@ -16,7 +16,7 @@ namespace LcmsSpectator.Models
     using System.Linq;
     using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.MassSpecData;
-    using LcmsSpectator.Readers;
+    using Readers;
 
     using QuadTreeLib;
 
@@ -36,14 +36,9 @@ namespace LcmsSpectator.Models
         private Dictionary<Feature.FeaturePoint, Feature> featurePointToFeature;
 
         /// <summary>
-        /// Maps IDs to features.
-        /// </summary>
-        private Dictionary<PrSm, Feature> prsmToFeature; 
-
-        /// <summary>
         /// Spatial representation of features.
         /// </summary>
-        private QuadTree<Feature> featureTree; 
+        private QuadTree<Feature> featureTree;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProMexModel"/> class.
@@ -80,9 +75,9 @@ namespace LcmsSpectator.Models
         /// <param name="featureFilePath">The feature file path.</param>
         public void ReadFeatures(string featureFilePath)
         {
-            this.Features = FeatureReader.Read(featureFilePath).ToArray();
-            this.FeatureFilePath = featureFilePath;
-            this.SetFeatures();
+            Features = FeatureReader.Read(featureFilePath).ToArray();
+            FeatureFilePath = featureFilePath;
+            SetFeatures();
         }
 
         /// <summary>
@@ -94,13 +89,13 @@ namespace LcmsSpectator.Models
         public IEnumerable<Feature> GetFeatures(double abundanceThreshold, int maxPoints)
         {
             var maxAbundance = Math.Pow(abundanceThreshold, 10);
-            if (this.Features == null)
+            if (Features == null)
             {
                 return new List<Feature>();
             }
 
             var filteredFeatures =
-                this.Features.Where(feature => feature.MinPoint.Abundance <= maxAbundance) ////&& feature.MinPoint.Score >= scoreThreshold)
+                Features.Where(feature => feature.MinPoint.Abundance <= maxAbundance) ////&& feature.MinPoint.Score >= scoreThreshold)
                          .OrderByDescending(feature => feature.MinPoint.Abundance).ToList();
             var numDisplayed = Math.Min(maxPoints, filteredFeatures.Count);
             var topNPoints = filteredFeatures.GetRange(0, numDisplayed);
@@ -114,7 +109,7 @@ namespace LcmsSpectator.Models
         /// <param name="massTolerance">Mass tolerance.</param>
         public void SetIds(IEnumerable<PrSm> ids, double massTolerance = 0.1)
         {
-            if (this.Features == null || this.Features.Length == 0)
+            if (Features == null || Features.Length == 0)
             {
                 return;
             }
@@ -124,7 +119,7 @@ namespace LcmsSpectator.Models
             idList.Sort(prsmScanComp);
             var minPrSm = new PrSm();
             var maxPrSm = new PrSm();
-            foreach (var feature in this.Features.Where(feature => feature.AssociatedMs2.Count > 0))
+            foreach (var feature in Features.Where(feature => feature.AssociatedMs2.Count > 0))
             {   // Associate IDs with features
                 minPrSm.Scan = feature.AssociatedMs2[0];
                 maxPrSm.Scan = feature.AssociatedMs2[feature.AssociatedMs2.Count - 1];
@@ -138,7 +133,7 @@ namespace LcmsSpectator.Models
                 // Find identified MS/MS scans associated with the feature
                 var explainedMs2Scans = new HashSet<int>();
                 feature.AssociatedPrSms.Clear();
-                for (int i = minIdIndex; i < maxIdIndex; i++)
+                for (var i = minIdIndex; i < maxIdIndex; i++)
                 {
                     if (Math.Abs(idList[i].Mass - feature.MinPoint.Mass) < massTolerance)
                     {
@@ -155,7 +150,7 @@ namespace LcmsSpectator.Models
                 {
                     if (!explainedMs2Scans.Contains(scan))
                     {
-                        feature.AssociatedPrSms.Add(new PrSm { LcMs = this.lcms, Scan = scan, Mass = feature.MinPoint.Mass });
+                        feature.AssociatedPrSms.Add(new PrSm { LcMs = lcms, Scan = scan, Mass = feature.MinPoint.Mass });
                     }
                 }
             }
@@ -169,9 +164,9 @@ namespace LcmsSpectator.Models
         public Feature GetFeatureFromPoint(Feature.FeaturePoint featurePoint)
         {
             Feature feature = null;
-            if (this.featurePointToFeature.ContainsKey(featurePoint))
+            if (featurePointToFeature.ContainsKey(featurePoint))
             {
-                feature = this.featurePointToFeature[featurePoint];
+                feature = featurePointToFeature[featurePoint];
             }
 
             return feature;
@@ -182,28 +177,28 @@ namespace LcmsSpectator.Models
         /// </summary>
         private void SetFeatures()
         {
-            this.featurePointToFeature = new Dictionary<Feature.FeaturePoint, Feature>();
-            foreach (var feature in this.Features)
+            featurePointToFeature = new Dictionary<Feature.FeaturePoint, Feature>();
+            foreach (var feature in Features)
             {
-                this.featurePointToFeature.Add(feature.MinPoint, feature);
-                this.featurePointToFeature.Add(feature.MaxPoint, feature);
-                feature.MinPoint.RetentionTime = this.lcms.GetElutionTime(feature.MinPoint.Scan);
-                feature.MaxPoint.RetentionTime = this.lcms.GetElutionTime(feature.MaxPoint.Scan);
+                featurePointToFeature.Add(feature.MinPoint, feature);
+                featurePointToFeature.Add(feature.MaxPoint, feature);
+                feature.MinPoint.RetentionTime = lcms.GetElutionTime(feature.MinPoint.Scan);
+                feature.MaxPoint.RetentionTime = lcms.GetElutionTime(feature.MaxPoint.Scan);
 
-                for (int c = feature.MinPoint.Charge; c <= feature.MaxPoint.Charge; c++)
+                for (var c = feature.MinPoint.Charge; c <= feature.MaxPoint.Charge; c++)
                 {
                     var mz = (feature.MinPoint.Mass + (c * Constants.Proton)) / c;
-                    feature.AssociatedMs2.AddRange(this.lcms.GetFragmentationSpectraScanNums(mz)
+                    feature.AssociatedMs2.AddRange(lcms.GetFragmentationSpectraScanNums(mz)
                                            .Where(s => s >= feature.MinPoint.Scan && s <= feature.MaxPoint.Scan));
                 }
 
                 feature.AssociatedMs2.Sort();
             }
 
-            this.AbsoluteAbundanceMaximum = this.Features.Max(f => f.MinPoint.Abundance);
-            this.AbsoluteAbundanceMinimum = this.Features.Min(f => f.MinPoint.Abundance);
+            AbsoluteAbundanceMaximum = Features.Max(f => f.MinPoint.Abundance);
+            AbsoluteAbundanceMinimum = Features.Min(f => f.MinPoint.Abundance);
 
-            this.InitFeatureTree();
+            InitFeatureTree();
         }
 
         /// <summary>
@@ -211,22 +206,22 @@ namespace LcmsSpectator.Models
         /// </summary>
         private void InitFeatureTree()
         {
-            var minRt = (float)this.lcms.GetElutionTime(this.lcms.MinLcScan);
-            var maxRt = (float)this.lcms.GetElutionTime(this.lcms.MaxLcScan);
+            var minRt = (float)lcms.GetElutionTime(lcms.MinLcScan);
+            var maxRt = (float)lcms.GetElutionTime(lcms.MaxLcScan);
 
             var rectangle = new RectangleF
             {
                 X = minRt,
                 Width = maxRt - minRt,
                 Y = 0,
-                Height = (float)this.Features.Max(feature => feature.MinPoint.Abundance)
+                Height = (float)Features.Max(feature => feature.MinPoint.Abundance)
             };
 
-            this.featureTree = new QuadTree<Feature>(rectangle);
+            featureTree = new QuadTree<Feature>(rectangle);
 
-            foreach (var feature in this.Features)
+            foreach (var feature in Features)
             {
-                this.featureTree.Insert(feature);
+                featureTree.Insert(feature);
             }
         }
     }

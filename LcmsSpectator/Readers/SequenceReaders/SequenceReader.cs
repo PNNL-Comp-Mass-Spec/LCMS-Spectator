@@ -43,11 +43,11 @@ namespace LcmsSpectator.Readers.SequenceReaders
             ISequenceReader reader;
             if (!sequence.Contains("["))
             {
-                reader = new MsgfPlusSequenceReader(this.trimAnnotations);
+                reader = new MsgfPlusSequenceReader(trimAnnotations);
             }
             else
             {
-                reader = new LcmsSpectatorSequenceReader(this.trimAnnotations);
+                reader = new LcmsSpectatorSequenceReader(trimAnnotations);
             }
 
             return reader.Read(sequence);

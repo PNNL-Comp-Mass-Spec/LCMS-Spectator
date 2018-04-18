@@ -88,34 +88,34 @@
         {
             if (msLevel < 1)
             {
-                throw new ArgumentOutOfRangeException("msLevel", msLevel, @"MSLevel must be greater than 0.");
+                throw new ArgumentOutOfRangeException(nameof(msLevel), msLevel, @"MSLevel must be greater than 0.");
             }
 
-            this.MsLevel = msLevel;
+            MsLevel = msLevel;
             this.possibleScanNumbers = new HashSet<int>(possibleScanNumbers);
-            this.ScanNumbers = new ReactiveList<int> { ChangeTrackingEnabled = true };
+            ScanNumbers = new ReactiveList<int> { ChangeTrackingEnabled = true };
 
-            this.AddScanRangeCommand = ReactiveCommand.Create();
-            this.AddScanRangeCommand.Subscribe(_ => this.InsertScans());
+            AddScanRangeCommand = ReactiveCommand.Create();
+            AddScanRangeCommand.Subscribe(_ => InsertScans());
 
-            this.RemoveSelectedScanCommand = ReactiveCommand.Create();
-            this.RemoveSelectedScanCommand
-                .Where(_ => this.ScanNumbers.Contains(this.SelectedScanNumber))
-                .Subscribe(_ => this.ScanNumbers.Remove(this.SelectedScanNumber));
+            RemoveSelectedScanCommand = ReactiveCommand.Create();
+            RemoveSelectedScanCommand
+                .Where(_ => ScanNumbers.Contains(SelectedScanNumber))
+                .Subscribe(_ => ScanNumbers.Remove(SelectedScanNumber));
 
-            this.ClearScansCommand = ReactiveCommand.Create();
-            this.ClearScansCommand.Subscribe(_ => this.ScanNumbers.Clear());
+            ClearScansCommand = ReactiveCommand.Create();
+            ClearScansCommand.Subscribe(_ => ScanNumbers.Clear());
 
-            this.AbsoluteMaxScanNumber = this.possibleScanNumbers.Max();
+            AbsoluteMaxScanNumber = this.possibleScanNumbers.Max();
 
-            var msLevelStr = this.MsLevel == 1 ? "MS1" : "MS/MS";
-            this.ScanRangeDescription = string.Format("Select {0} range", msLevelStr);
+            var msLevelStr = MsLevel == 1 ? "MS1" : "MS/MS";
+            ScanRangeDescription = string.Format("Select {0} range", msLevelStr);
 
             // When UseScanRange changes, toggle UseScanOffset.
-            this.WhenAnyValue(x => x.UseScanRange).Subscribe(value => { this.UseScanOffset = !value; });
+            this.WhenAnyValue(x => x.UseScanRange).Subscribe(value => { UseScanOffset = !value; });
 
             // When UseScanOffset changes, toggle UseScanRange
-            this.WhenAnyValue(x => x.UseScanOffset).Subscribe(value => { this.UseScanRange = !value; });
+            this.WhenAnyValue(x => x.UseScanOffset).Subscribe(value => { UseScanRange = !value; });
         }
 
         /// <summary>
@@ -124,37 +124,37 @@
         /// </summary>
         public ScanSelectionViewModel()
         {
-            this.MsLevel = 1;
-            this.possibleScanNumbers = new HashSet<int>();
-            this.ScanNumbers = new ReactiveList<int>();
-            this.ScanRangeDescription = "Select MS1 range.";
+            MsLevel = 1;
+            possibleScanNumbers = new HashSet<int>();
+            ScanNumbers = new ReactiveList<int>();
+            ScanRangeDescription = "Select MS1 range.";
         }
 
         /// <summary>
         /// Gets a command that selects scan numbers from the scan number range
         /// and adds them to the <see cref="ScanNumbers" /> list.
         /// </summary>
-        public ReactiveCommand<object> AddScanRangeCommand { get; private set; }
+        public ReactiveCommand<object> AddScanRangeCommand { get; }
 
         /// <summary>
         /// Gets a command that removes the <see cref="SelectedScanNumber" /> from the
         /// <see cref="ScanNumbers" /> list.
         /// </summary>
-        public ReactiveCommand<object> RemoveSelectedScanCommand { get; private set; }
+        public ReactiveCommand<object> RemoveSelectedScanCommand { get; }
 
         /// <summary>
         /// Gets a command that removes all of the scan numbers from the
         /// <see cref="ScanNumbers" /> list.
         /// </summary>
-        public ReactiveCommand<object> ClearScansCommand { get; private set; }
+        public ReactiveCommand<object> ClearScansCommand { get; }
 
         /// <summary>
         /// Gets or sets the MS level of scan numbers to select from.
         /// </summary>
         public int MsLevel
         {
-            get { return this.msLevel; }
-            private set { this.RaiseAndSetIfChanged(ref this.msLevel, value); }
+            get => msLevel;
+            private set => this.RaiseAndSetIfChanged(ref msLevel, value);
         }
 
         /// <summary>
@@ -162,8 +162,8 @@
         /// </summary>
         public int MinScanNumber
         {
-            get { return this.minScanNumber; }
-            set { this.RaiseAndSetIfChanged(ref this.minScanNumber, value); }
+            get => minScanNumber;
+            set => this.RaiseAndSetIfChanged(ref minScanNumber, value);
         }
 
         /// <summary>
@@ -171,8 +171,8 @@
         /// </summary>
         public int MaxScanNumber
         {
-            get { return this.maxScanNumber; }
-            set { this.RaiseAndSetIfChanged(ref this.maxScanNumber, value); }
+            get => maxScanNumber;
+            set => this.RaiseAndSetIfChanged(ref maxScanNumber, value);
         }
 
         /// <summary>
@@ -180,8 +180,8 @@
         /// </summary>
         public int AbsoluteMaxScanNumber
         {
-            get { return this.absoluteMaxScanNumber; }
-            private set { this.RaiseAndSetIfChanged(ref this. absoluteMaxScanNumber, value); }
+            get => absoluteMaxScanNumber;
+            private set => this.RaiseAndSetIfChanged(ref absoluteMaxScanNumber, value);
         }
 
         /// <summary>
@@ -190,8 +190,8 @@
         /// </summary>
         public int NegativeScanOffset
         {
-            get { return this.negativeScanOffset; }
-            set { this.RaiseAndSetIfChanged(ref this.negativeScanOffset, value); }
+            get => negativeScanOffset;
+            set => this.RaiseAndSetIfChanged(ref negativeScanOffset, value);
         }
 
         /// <summary>
@@ -200,8 +200,8 @@
         /// </summary>
         public int PositiveScanOffset
         {
-            get { return this.positiveScanOffset; }
-            set { this.RaiseAndSetIfChanged(ref this.positiveScanOffset, value); }
+            get => positiveScanOffset;
+            set => this.RaiseAndSetIfChanged(ref positiveScanOffset, value);
         }
 
         /// <summary>
@@ -209,8 +209,8 @@
         /// </summary>
         public int BaseScan
         {
-            get { return this.baseScan; }
-            set { this.RaiseAndSetIfChanged(ref this.baseScan, value); }
+            get => baseScan;
+            set => this.RaiseAndSetIfChanged(ref baseScan, value);
         }
 
         /// <summary>
@@ -219,8 +219,8 @@
         /// </summary>
         public bool UseScanRange
         {
-            get { return this.useScanRange; }
-            set { this.RaiseAndSetIfChanged(ref this.useScanRange, value); }
+            get => useScanRange;
+            set => this.RaiseAndSetIfChanged(ref useScanRange, value);
         }
 
         /// <summary>
@@ -229,8 +229,8 @@
         /// </summary>
         public bool UseScanOffset
         {
-            get { return this.useScanOffset; }
-            set { this.RaiseAndSetIfChanged(ref this.useScanOffset, value); }
+            get => useScanOffset;
+            set => this.RaiseAndSetIfChanged(ref useScanOffset, value);
         }
 
         /// <summary>
@@ -238,26 +238,26 @@
         /// </summary>
         public int SelectedScanNumber
         {
-            get { return this.selectedScanNumber; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedScanNumber, value); }
+            get => selectedScanNumber;
+            set => this.RaiseAndSetIfChanged(ref selectedScanNumber, value);
         }
 
         /// <summary>
         /// Gets the selected scan numbers.
         /// </summary>
-        public ReactiveList<int> ScanNumbers { get; private set; }
+        public ReactiveList<int> ScanNumbers { get; }
 
         /// <summary>
         /// Gets or sets the text describing the type of scans to select.
         /// </summary>
         public string ScanRangeDescription
         {
-            get { return this.scanRangeDescription; }
-            set { this.RaiseAndSetIfChanged(ref this.scanRangeDescription, value); }
+            get => scanRangeDescription;
+            set => this.RaiseAndSetIfChanged(ref scanRangeDescription, value);
         }
 
         /// <summary>
-        /// Set the scan range based on a base scan, and subtracting a 
+        /// Set the scan range based on a base scan, and subtracting a
         /// certain number of scans and adding a certain number of scans.
         /// </summary>
         /// <param name="baseScanNum">The base scan to subtract or add scans to.</param>
@@ -265,10 +265,10 @@
         /// <param name="plus">The maximum of the scan range defined relative to the base scan.</param>
         public void SetScanRange(int baseScanNum, int minus, int plus)
         {
-            this.BaseScan = baseScanNum;
-            this.NegativeScanOffset = minus;
-            this.PositiveScanOffset = plus;
-            this.InsertScanRange();
+            BaseScan = baseScanNum;
+            NegativeScanOffset = minus;
+            PositiveScanOffset = plus;
+            InsertScanRange();
         }
 
         /// <summary>
@@ -279,28 +279,28 @@
         /// <param name="maxScan">The maximum scan number in the range.</param>
         public void SetScanRange(int minScan, int maxScan)
         {
-            this.MinScanNumber = minScan;
-            this.MaxScanNumber = maxScan;
-            this.InsertScanRange();
+            MinScanNumber = minScan;
+            MaxScanNumber = maxScan;
+            InsertScanRange();
         }
 
         /// <summary>
-        /// Gets the spectrum selected in the <see cref="ScanNumbers" /> list if there is a single  
+        /// Gets the spectrum selected in the <see cref="ScanNumbers" /> list if there is a single
         /// scan, or sums multiple scans if there is more than one.
         /// </summary>
         /// <returns></returns>
         public Spectrum GetSelectedSpectrum(LcMsRun lcms)
         {
             Spectrum spectrum = null;
-            if (this.ScanNumbers.Count == 1)
+            if (ScanNumbers.Count == 1)
             {   // Single spectrum selected.
-                spectrum = lcms.GetSpectrum(this.ScanNumbers[0]);
+                spectrum = lcms.GetSpectrum(ScanNumbers[0]);
             }
-            else if (this.ScanNumbers.Count > 1)
+            else if (ScanNumbers.Count > 1)
             {   // Multiple spectra selected. Need to sum.
-                var summedScanNumbers = this.ScanNumbers.Sum();
-                var summedSpectrum = lcms.GetSummedSpectrum(this.ScanNumbers);
-                spectrum = this.MsLevel == 1
+                var summedScanNumbers = ScanNumbers.Sum();
+                var summedSpectrum = lcms.GetSummedSpectrum(ScanNumbers);
+                spectrum = MsLevel == 1
                                ? new Spectrum(summedSpectrum.Peaks, 0)
                                : new ProductSpectrum(summedSpectrum.Peaks, summedScanNumbers);
             }
@@ -316,7 +316,7 @@
         /// <returns>A value indicating whether the scan range contains the provided scan number.</returns>
         public bool Contains(int scanNum)
         {
-            return this.ScanNumbers.Contains(scanNum) || this.ScanNumbers.Sum() == scanNum;
+            return ScanNumbers.Contains(scanNum) || ScanNumbers.Sum() == scanNum;
         }
 
         /// <summary>
@@ -324,7 +324,7 @@
         /// </summary>
         protected override IObservable<bool> CanSucceed
         {
-            get { return this.WhenAnyValue(x => x.ScanNumbers.Count).Select(_ => this.Validate()); }
+            get { return this.WhenAnyValue(x => x.ScanNumbers.Count).Select(_ => Validate()); }
         }
 
         /// <summary>
@@ -333,7 +333,7 @@
         /// <returns>A value indicating whether or not valid scans have been selected.</returns>
         protected override bool Validate()
         {
-            return this.ScanNumbers.Count > 0;
+            return ScanNumbers.Count > 0;
         }
 
         /// <summary>
@@ -341,13 +341,13 @@
         /// </summary>
         private void InsertScans()
         {
-            if (this.UseScanOffset)
+            if (UseScanOffset)
             {
-                this.InsertScanOffset();
+                InsertScanOffset();
             }
             else
             {
-                this.InsertScanRange();
+                InsertScanRange();
             }
         }
 
@@ -357,15 +357,15 @@
         /// </summary>
         private void InsertScanRange()
         {
-            for (int scan = this.MinScanNumber; scan <= this.MaxScanNumber; scan++)
+            for (var scan = MinScanNumber; scan <= MaxScanNumber; scan++)
             {
-                if (this.possibleScanNumbers.Contains(scan) && !this.ScanNumbers.Contains(scan))
+                if (possibleScanNumbers.Contains(scan) && !ScanNumbers.Contains(scan))
                 {
-                    this.ScanNumbers.Add(scan);
+                    ScanNumbers.Add(scan);
                 }
             }
 
-            this.ScanNumbers.Sort();
+            ScanNumbers.Sort();
         }
 
         /// <summary>
@@ -377,46 +377,46 @@
         private void InsertScanOffset()
         {
             // Move backward
-            int negativeScansSeen = 0;
-            for (int scan = this.BaseScan; scan >= 0; scan--)
+            var negativeScansSeen = 0;
+            for (var scan = BaseScan; scan >= 0; scan--)
             {
-                if (!this.possibleScanNumbers.Contains(scan))
+                if (!possibleScanNumbers.Contains(scan))
                 {
                     continue;
                 }
 
-                if (negativeScansSeen++ > this.NegativeScanOffset)
+                if (negativeScansSeen++ > NegativeScanOffset)
                 {
                     break;
                 }
 
-                if (!this.ScanNumbers.Contains(scan))
+                if (!ScanNumbers.Contains(scan))
                 {
-                    this.ScanNumbers.Add(scan);
+                    ScanNumbers.Add(scan);
                 }
             }
 
             // Move forward
-            int positiveScansSeen = 0;
-            for (int scan = this.BaseScan; scan <= this.AbsoluteMaxScanNumber; scan++)
+            var positiveScansSeen = 0;
+            for (var scan = BaseScan; scan <= AbsoluteMaxScanNumber; scan++)
             {
-                if (!this.possibleScanNumbers.Contains(scan))
+                if (!possibleScanNumbers.Contains(scan))
                 {
                     continue;
                 }
 
-                if (positiveScansSeen++ > this.PositiveScanOffset)
+                if (positiveScansSeen++ > PositiveScanOffset)
                 {
                     break;
                 }
 
-                if (!this.ScanNumbers.Contains(scan))
+                if (!ScanNumbers.Contains(scan))
                 {
-                    this.ScanNumbers.Add(scan);
+                    ScanNumbers.Add(scan);
                 }
             }
 
-            this.ScanNumbers.Sort();
+            ScanNumbers.Sort();
         }
     }
 }

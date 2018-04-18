@@ -17,9 +17,9 @@ namespace LcmsSpectator.ViewModels.Data
 
     using InformedProteomics.Backend.Data.Spectrometry;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Utils;
+    using Config;
+    using DialogServices;
+    using Utils;
 
     using ReactiveUI;
 
@@ -90,75 +90,75 @@ namespace LcmsSpectator.ViewModels.Data
         public IonTypeSelectorViewModel(IDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.minSelectedCharge = 1;
-            this.minSelectedCharge = 2;
-            this.MinCharge = 2;
-            this.AbsoluteMaxCharge = 50;
+            minSelectedCharge = 1;
+            minSelectedCharge = 2;
+            MinCharge = 2;
+            AbsoluteMaxCharge = 50;
             var setIonChargesCommand = ReactiveCommand.Create();
-            setIonChargesCommand.Subscribe(_ => this.SetIonChargesImplementation());
-            this.SetIonChargesCommand = setIonChargesCommand;
+            setIonChargesCommand.Subscribe(_ => SetIonChargesImplementation());
+            SetIonChargesCommand = setIonChargesCommand;
 
-            this.BaseIonTypes = new List<BaseIonType>
+            BaseIonTypes = new List<BaseIonType>
             {
                 BaseIonType.A, BaseIonType.B, BaseIonType.C,
                 BaseIonType.X, BaseIonType.Y, BaseIonType.Z
             };
 
-            this.selectedBaseIonTypes = new List<BaseIonType>
+            selectedBaseIonTypes = new List<BaseIonType>
             {
                 BaseIonType.B,
                 BaseIonType.Y
             };
 
-            this.NeutralLosses = NeutralLoss.CommonNeutralLosses.ToList();
-            this.SelectedNeutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
+            NeutralLosses = NeutralLoss.CommonNeutralLosses.ToList();
+            SelectedNeutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
 
-            this.UpdateIonTypes();
+            UpdateIonTypes();
 
             this.WhenAnyValue(x => x.SelectedCharge)
                 .Subscribe(charge =>
                 {
-                    this.MinCharge = 1;
+                    MinCharge = 1;
                     var max = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
-                    this.MaxCharge = max;
-                    this.UpdateIonTypes();
+                    MaxCharge = max;
+                    UpdateIonTypes();
                 });
 
             this.WhenAnyValue(x => x.SelectedBaseIonTypes, x => x.SelectedNeutralLosses)
-                .Subscribe(_ => this.UpdateIonTypes());
+                .Subscribe(_ => UpdateIonTypes());
 
             this.WhenAnyValue(x => x.MinCharge, x => x.MaxCharge)
-                .Subscribe(_ => this.SetIonChargesImplementation());
+                .Subscribe(_ => SetIonChargesImplementation());
 
             this.WhenAnyValue(x => x.ActivationMethod)
-                .Subscribe(this.SetActivationMethod);
+                .Subscribe(SetActivationMethod);
 
             IcParameters.Instance.WhenAnyValue(x => x.CidHcdIonTypes, x => x.EtdIonTypes)
-                .Subscribe(_ => this.SetActivationMethod(this.ActivationMethod));
+                .Subscribe(_ => SetActivationMethod(ActivationMethod));
         }
 
         /// <summary>
         /// Gets a list of all possible base ion types (A,B,C,X,Y,Z)
         /// </summary>
-        public List<BaseIonType> BaseIonTypes { get; private set; }
+        public List<BaseIonType> BaseIonTypes { get; }
 
         /// <summary>
         /// Gets a list of all possible neutral losses (-H2O, -NH3, No Loss)
         /// </summary>
-        public List<NeutralLoss> NeutralLosses { get; private set; }
+        public List<NeutralLoss> NeutralLosses { get; }
 
         /// <summary>
         /// Gets a command that calculates new ion types when the charge range changes.
         /// </summary>
-        public IReactiveCommand SetIonChargesCommand { get; private set; }
+        public IReactiveCommand SetIonChargesCommand { get; }
 
         /// <summary>
         /// Gets all ion types currently selected
         /// </summary>
         public ReactiveList<IonType> IonTypes
         {
-            get { return this.ionTypes; }
-            private set { this.RaiseAndSetIfChanged(ref this.ionTypes, value); }
+            get => ionTypes;
+            private set => this.RaiseAndSetIfChanged(ref ionTypes, value);
         }
 
         /// <summary>
@@ -166,8 +166,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public IList SelectedBaseIonTypes
         {
-            get { return this.selectedBaseIonTypes; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedBaseIonTypes, value); }
+            get => selectedBaseIonTypes;
+            set => this.RaiseAndSetIfChanged(ref selectedBaseIonTypes, value);
         }
 
         /// <summary>
@@ -175,8 +175,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public IList SelectedNeutralLosses
         {
-            get { return this.selectedNeutralLosses; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedNeutralLosses, value); }
+            get => selectedNeutralLosses;
+            set => this.RaiseAndSetIfChanged(ref selectedNeutralLosses, value);
         }
 
         /// <summary>
@@ -184,8 +184,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public int SelectedCharge
         {
-            get { return this.selectedCharge; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedCharge, value); }
+            get => selectedCharge;
+            set => this.RaiseAndSetIfChanged(ref selectedCharge, value);
         }
 
         /// <summary>
@@ -193,8 +193,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public int MinCharge
         {
-            get { return this.minCharge; }
-            set { this.RaiseAndSetIfChanged(ref this.minCharge, value); }
+            get => minCharge;
+            set => this.RaiseAndSetIfChanged(ref minCharge, value);
         }
 
         /// <summary>
@@ -202,8 +202,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public int MaxCharge
         {
-            get { return this.maxCharge; }
-            set { this.RaiseAndSetIfChanged(ref this.maxCharge, value); }
+            get => maxCharge;
+            set => this.RaiseAndSetIfChanged(ref maxCharge, value);
         }
 
         /// <summary>
@@ -211,8 +211,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public int AbsoluteMaxCharge
         {
-            get { return this.absoluteMaxCharge; }
-            set { this.RaiseAndSetIfChanged(ref this.absoluteMaxCharge, value); }
+            get => absoluteMaxCharge;
+            set => this.RaiseAndSetIfChanged(ref absoluteMaxCharge, value);
         }
 
         /// <summary>
@@ -220,8 +220,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public ActivationMethod ActivationMethod
         {
-            get { return this.activationMethod; }
-            set { this.RaiseAndSetIfChanged(ref this.activationMethod, value); }
+            get => activationMethod;
+            set => this.RaiseAndSetIfChanged(ref activationMethod, value);
         }
 
         /// <summary>
@@ -232,30 +232,30 @@ namespace LcmsSpectator.ViewModels.Data
         {
             try
             {
-                if (this.MinCharge < 1)
+                if (MinCharge < 1)
                 {
                     throw new FormatException("Min charge must be greater than 1.");
                 }
 
-                if (this.MaxCharge > this.absoluteMaxCharge)
+                if (MaxCharge > absoluteMaxCharge)
                 {
-                    throw new FormatException(string.Format("Max charge must be {0} or less.", this.absoluteMaxCharge));
+                    throw new FormatException(string.Format("Max charge must be {0} or less.", absoluteMaxCharge));
                 }
 
-                if (this.MinCharge > this.MaxCharge)
+                if (MinCharge > MaxCharge)
                 {
                     throw new FormatException("Max charge cannot be less than min charge.");
                 }
 
-                this.minSelectedCharge = this.MinCharge;
-                this.maxSelectedCharge = this.MaxCharge;
-                this.UpdateIonTypes();
+                minSelectedCharge = MinCharge;
+                maxSelectedCharge = MaxCharge;
+                UpdateIonTypes();
             }
             catch (FormatException f)
             {
-                this.dialogService.ExceptionAlert(f);
-                this.MinCharge = this.minSelectedCharge;
-                this.MaxCharge = this.maxSelectedCharge;
+                dialogService.ExceptionAlert(f);
+                MinCharge = minSelectedCharge;
+                MaxCharge = maxSelectedCharge;
             }
         }
 
@@ -265,16 +265,16 @@ namespace LcmsSpectator.ViewModels.Data
         private void UpdateIonTypes()
         {
             // set ion types
-            var selectedBase = this.SelectedBaseIonTypes.Cast<BaseIonType>().ToList();
-            var selectedLosses = this.SelectedNeutralLosses.Cast<NeutralLoss>().ToList();
-            this.IonTypes =
+            var selectedBase = SelectedBaseIonTypes.Cast<BaseIonType>().ToList();
+            var selectedLosses = SelectedNeutralLosses.Cast<NeutralLoss>().ToList();
+            IonTypes =
                 new ReactiveList<IonType>(
                     IonUtils.GetIonTypes(
                         IcParameters.Instance.IonTypeFactory,
                         selectedBase,
                         selectedLosses, 
-                        this.MinCharge,
-                        this.MaxCharge));
+                        MinCharge,
+                        MaxCharge));
         }
 
         /// <summary>
@@ -289,14 +289,14 @@ namespace LcmsSpectator.ViewModels.Data
             }
 
             if (selectedActivationMethod == ActivationMethod.ETD
-                && !Equals(this.SelectedBaseIonTypes, IcParameters.Instance.EtdIonTypes))
+                && !Equals(SelectedBaseIonTypes, IcParameters.Instance.EtdIonTypes))
             {
-                this.SelectedBaseIonTypes = IcParameters.Instance.EtdIonTypes;
+                SelectedBaseIonTypes = IcParameters.Instance.EtdIonTypes;
             }
             else if (selectedActivationMethod != ActivationMethod.ETD
-                     && !Equals(this.SelectedBaseIonTypes, IcParameters.Instance.CidHcdIonTypes))
+                     && !Equals(SelectedBaseIonTypes, IcParameters.Instance.CidHcdIonTypes))
             {
-                this.SelectedBaseIonTypes = IcParameters.Instance.CidHcdIonTypes;
+                SelectedBaseIonTypes = IcParameters.Instance.CidHcdIonTypes;
             }
         }
     }

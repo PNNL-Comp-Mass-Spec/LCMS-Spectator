@@ -15,9 +15,9 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Linq;
     using System.Reactive.Linq;
     using InformedProteomics.Backend.MassSpecData;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Utils;
+    using DialogServices;
+    using Models;
+    using Utils;
     using ReactiveUI;
 
     /// <summary>
@@ -90,54 +90,54 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             this.dialogService = dialogService ?? new DialogService();
 
-            this.FeatureMapViewModel = new FeatureMapViewModel(this.dialogService);
+            FeatureMapViewModel = new FeatureMapViewModel(this.dialogService);
 
-            this.proMexModel = new ProMexModel(lcms);
+            proMexModel = new ProMexModel(lcms);
 
-            this.MinimumAbundance = 0.0;
-            this.MaximumAbundance = 0.0;
+            MinimumAbundance = 0.0;
+            MaximumAbundance = 0.0;
 
             // Initialize isotopic envelope plot.
-            this.IsotopicEnvelope = new IsotopicEnvelopePlotViewModel();
-            this.IsotopicEnvelopeExpanded = false;
-            this.PointsDisplayed = 5000;
+            IsotopicEnvelope = new IsotopicEnvelopePlotViewModel();
+            IsotopicEnvelopeExpanded = false;
+            PointsDisplayed = 5000;
 
-            this.FeatureMapViewModel.WhenAnyValue(x => x.SelectedFeature).Subscribe(this.BuildIsotopePlots);
+            FeatureMapViewModel.WhenAnyValue(x => x.SelectedFeature).Subscribe(BuildIsotopePlots);
 
             // Update plot if abundance threshold, or points displayed changes
             this.WhenAnyValue(x => x.AbundanceThreshold, x => x.PointsDisplayed)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
-                .Select(x => this.proMexModel.GetFeatures(x.Item1, x.Item2).ToList())
+                .Select(x => proMexModel.GetFeatures(x.Item1, x.Item2).ToList())
                 .Where(filteredFeatures => filteredFeatures.Count > 0)
                 .Subscribe(filteredFeatures =>
                         {
-                            this.MinimumAbundance = filteredFeatures.Min(feature => feature.MinPoint.Abundance);
-                            this.MaximumAbundance = filteredFeatures.Max(feature => feature.MinPoint.Abundance);
-                            this.FeatureMapViewModel.Features = filteredFeatures.ToList();
+                            MinimumAbundance = filteredFeatures.Min(feature => feature.MinPoint.Abundance);
+                            MaximumAbundance = filteredFeatures.Max(feature => feature.MinPoint.Abundance);
+                            FeatureMapViewModel.Features = filteredFeatures.ToList();
                         });
 
             var openFeatureFileCommand = ReactiveCommand.Create();
-            openFeatureFileCommand.Subscribe(_ => this.OpenFeatureFileImplementation());
-            this.OpenFeatureFileCommand = openFeatureFileCommand;
+            openFeatureFileCommand.Subscribe(_ => OpenFeatureFileImplementation());
+            OpenFeatureFileCommand = openFeatureFileCommand;
         }
 
         /// <summary>
         /// Gets a command that displays open file dialog to select feature file and then read and display features.
         /// </summary>
-        public IReactiveCommand OpenFeatureFileCommand { get; private set; }
+        public IReactiveCommand OpenFeatureFileCommand { get; }
 
         /// <summary>
         /// Gets the view model for the Feature Map plot.
         /// </summary>
-        public FeatureMapViewModel FeatureMapViewModel { get; private set; }
+        public FeatureMapViewModel FeatureMapViewModel { get; }
 
         /// <summary>
         /// Gets the view model for the isotopic envelope spectrum.
         /// </summary>
         public IsotopicEnvelopePlotViewModel IsotopicEnvelope
         {
-            get { return this.isotopicEnvelope; }
-            private set { this.RaiseAndSetIfChanged(ref this.isotopicEnvelope, value); }
+            get => isotopicEnvelope;
+            private set => this.RaiseAndSetIfChanged(ref isotopicEnvelope, value);
         }
 
         /// <summary>
@@ -145,8 +145,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool IsotopicEnvelopeExpanded
         {
-            get { return this.isotopicEnvelopeExpanded; }
-            set { this.RaiseAndSetIfChanged(ref this.isotopicEnvelopeExpanded, value); }
+            get => isotopicEnvelopeExpanded;
+            set => this.RaiseAndSetIfChanged(ref isotopicEnvelopeExpanded, value);
         }
 
         /// <summary>
@@ -154,8 +154,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double MinimumAbundance
         {
-            get { return this.minimumAbundance; }
-            private set { this.RaiseAndSetIfChanged(ref this.minimumAbundance, value); }
+            get => minimumAbundance;
+            private set => this.RaiseAndSetIfChanged(ref minimumAbundance, value);
         }
 
         /// <summary>
@@ -163,8 +163,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double MaximumAbundance
         {
-            get { return this.maximumAbundance; }
-            private set { this.RaiseAndSetIfChanged(ref this.maximumAbundance, value); }
+            get => maximumAbundance;
+            private set => this.RaiseAndSetIfChanged(ref maximumAbundance, value);
         }
 
         /// <summary>
@@ -172,8 +172,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double MinimumAbundanceThreshold
         {
-            get { return this.minimumAbundanceThreshold; }
-            set { this.RaiseAndSetIfChanged(ref this.minimumAbundanceThreshold, value); }
+            get => minimumAbundanceThreshold;
+            set => this.RaiseAndSetIfChanged(ref minimumAbundanceThreshold, value);
         }
 
         /// <summary>
@@ -181,8 +181,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double MaximumAbundanceThreshold
         {
-            get { return this.maximumAbundanceThreshold; }
-            set { this.RaiseAndSetIfChanged(ref this.maximumAbundanceThreshold, value); }
+            get => maximumAbundanceThreshold;
+            set => this.RaiseAndSetIfChanged(ref maximumAbundanceThreshold, value);
         }
 
         /// <summary>
@@ -190,8 +190,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public int PointsDisplayed
         {
-            get { return this.pointsDisplayed; }
-            set { this.RaiseAndSetIfChanged(ref this.pointsDisplayed, value); }
+            get => pointsDisplayed;
+            set => this.RaiseAndSetIfChanged(ref pointsDisplayed, value);
         }
 
         /// <summary>
@@ -200,8 +200,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double AbundanceThreshold
         {
-            get { return this.abundanceThreshold; }
-            set { this.RaiseAndSetIfChanged(ref this.abundanceThreshold, value); }
+            get => abundanceThreshold;
+            set => this.RaiseAndSetIfChanged(ref abundanceThreshold, value);
         }
 
         /// <summary>
@@ -209,17 +209,14 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowSplash
         {
-            get { return this.showSplash; }
-            set { this.RaiseAndSetIfChanged(ref this.showSplash, value); }
+            get => showSplash;
+            set => this.RaiseAndSetIfChanged(ref showSplash, value);
         }
 
         /// <summary>
         /// Gets the PROMEX feature file path for this dataset.
         /// </summary>
-        public string FeatureFilePath
-        {
-            get { return this.proMexModel.FeatureFilePath; }
-        }
+        public string FeatureFilePath => proMexModel.FeatureFilePath;
 
         /// <summary>
         /// Read features and display feature map for this data set.
@@ -229,18 +226,18 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             try
             {
-                this.proMexModel.ReadFeatures(filePath);
-                this.MaximumAbundanceThreshold = Math.Log10(this.proMexModel.AbsoluteAbundanceMaximum);
-                this.MinimumAbundanceThreshold = Math.Log10(this.proMexModel.AbsoluteAbundanceMinimum);
-                this.AbundanceThreshold = Math.Max(this.maximumAbundanceThreshold, this.minimumAbundance);
-                this.FeatureMapViewModel.Features = this.proMexModel.GetFeatures(
-                    this.AbundanceThreshold,
-                    this.PointsDisplayed).ToList();
-                this.ShowSplash = false;
+                proMexModel.ReadFeatures(filePath);
+                MaximumAbundanceThreshold = Math.Log10(proMexModel.AbsoluteAbundanceMaximum);
+                MinimumAbundanceThreshold = Math.Log10(proMexModel.AbsoluteAbundanceMinimum);
+                AbundanceThreshold = Math.Max(maximumAbundanceThreshold, minimumAbundance);
+                FeatureMapViewModel.Features = proMexModel.GetFeatures(
+                    AbundanceThreshold,
+                    PointsDisplayed).ToList();
+                ShowSplash = false;
             }
             catch (InvalidCastException)
             {
-                this.dialogService.MessageBox("Cannot open features for this type of data set.");
+                dialogService.MessageBox("Cannot open features for this type of data set.");
             }
         }
 
@@ -249,11 +246,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public void OpenFeatureFileImplementation()
         {
-            var tsvFileName = this.dialogService.OpenFile(FileConstants.FeatureFileExtensions[0], FileConstants.FeatureFileFormatString);
+            var tsvFileName = dialogService.OpenFile(FileConstants.FeatureFileExtensions[0], FileConstants.FeatureFileFormatString);
             if (!string.IsNullOrEmpty(tsvFileName))
             {
-                this.ShowSplash = false;
-                this.OpenFeatureFile(tsvFileName);
+                ShowSplash = false;
+                OpenFeatureFile(tsvFileName);
             }
         }
 
@@ -265,10 +262,10 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="updatePlot">Should the plot be updated after setting ids?</param>
         public void UpdateIds(IEnumerable<PrSm> idList, bool updatePlot = true)
         {
-            this.proMexModel.SetIds(idList);
+            proMexModel.SetIds(idList);
             if (updatePlot)
             {
-                this.FeatureMapViewModel.BuildPlot();
+                FeatureMapViewModel.BuildPlot();
             }
         }
 
@@ -283,11 +280,11 @@ namespace LcmsSpectator.ViewModels.Plots
                 return;
             }
 
-            this.IsotopicEnvelope.BuildPlot(
+            IsotopicEnvelope.BuildPlot(
                 selectedFeaturePoint.Isotopes,
                 selectedFeaturePoint.Mass,
                 selectedFeaturePoint.Charge);
-            this.IsotopicEnvelopeExpanded = true;
+            IsotopicEnvelopeExpanded = true;
         }
     }
 }

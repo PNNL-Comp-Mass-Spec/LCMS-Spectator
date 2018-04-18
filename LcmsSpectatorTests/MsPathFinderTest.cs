@@ -1,27 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace LcmsSpectatorTests
 {
-    using System.IO;
-
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.Database;
     using InformedProteomics.Backend.MassSpecData;
 
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers;
-    using LcmsSpectator.Utils;
-
     using NUnit.Framework;
-
-    using MsPfParameters = LcmsSpectator.Models.MsPfParameters;
 
     [TestFixture]
     public class MsPathFinderTest
@@ -42,7 +29,7 @@ namespace LcmsSpectatorTests
             // Initialize search modifications
             var searchModifications = new List<SearchModification> { };
             var aminoAcidSet = new AminoAcidSet(searchModifications, 1);
-            
+
             // Initialize spectrum file
             var lcmsRun = PbfLcMsRun.GetLcMsRun(specFilePath);
             var scanNumbers = lcmsRun.GetScanNumbers(2);
@@ -100,7 +87,7 @@ namespace LcmsSpectatorTests
             };
 
             var aminoAcidSet = new AminoAcidSet(searchModifications, 1);
-            var sequence = this.LoadSequence(sequenceStr, aminoAcidSet);
+            var sequence = LoadSequence(sequenceStr, aminoAcidSet);
 
             //var scorerFactory = new ScorerFactory(new Tolerance(30, ToleranceUnit.Ppm), 1, 5);
             //var scorer = scorerFactory.GetScorer(productSpectrum);
@@ -217,7 +204,7 @@ namespace LcmsSpectatorTests
 
         private string GetSequenceString(Sequence sequence)
         {
-            string sequenceStr = string.Empty;
+            var sequenceStr = string.Empty;
             foreach (var aa in sequence)
             {
                 sequenceStr += aa.Residue;
@@ -234,7 +221,7 @@ namespace LcmsSpectatorTests
         private Sequence LoadSequence(string sequenceStr, AminoAcidSet aminoAcidSet)
         {
             var sequence = new List<AminoAcid>();
-            for (int i = 0; i < sequenceStr.Length; i++)
+            for (var i = 0; i < sequenceStr.Length; i++)
             {
                 SequenceLocation location;
                 if (i == 0)

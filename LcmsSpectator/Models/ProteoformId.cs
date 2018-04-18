@@ -32,13 +32,13 @@ namespace LcmsSpectator.Models
         /// <param name="proteinSequence">The protein sequence.</param>
         public ProteoformId(Sequence sequence, string sequenceText, string modLocations, Sequence proteinSequence)
         {
-            this.Sequence = sequence;
-            this.SequenceText = sequenceText;
-            this.PreSequence = string.Empty;
-            this.PostSequence = string.Empty;
-            this.ChargeStates = new Dictionary<int, ChargeStateId>();
-            this.GenerateAnnotation(sequence, proteinSequence, modLocations);
-            this.FormatSequences();
+            Sequence = sequence;
+            SequenceText = sequenceText;
+            PreSequence = string.Empty;
+            PostSequence = string.Empty;
+            ChargeStates = new Dictionary<int, ChargeStateId>();
+            GenerateAnnotation(sequence, proteinSequence, modLocations);
+            FormatSequences();
         }
 
         /// <summary>
@@ -49,32 +49,32 @@ namespace LcmsSpectator.Models
         /// <param name="proteinSequence">The sequence of the protein that this Proteoform is associated with.</param>
         public ProteoformId(PrSm prsm, Sequence proteinSequence)
         {
-            this.ProteinName = prsm.ProteinName;
-            this.ProteinDesc = prsm.ProteinDesc;
-            this.Mass = prsm.Mass;
-            this.Sequence = prsm.Sequence;
-            this.SequenceText = prsm.SequenceText;
-            this.PreSequence = string.Empty;
-            this.PostSequence = string.Empty;
-            this.ChargeStates = new Dictionary<int, ChargeStateId>();
-            this.GenerateAnnotation(prsm.Sequence, proteinSequence, prsm.ModificationLocations);
-            this.FormatSequences();
+            ProteinName = prsm.ProteinName;
+            ProteinDesc = prsm.ProteinDesc;
+            Mass = prsm.Mass;
+            Sequence = prsm.Sequence;
+            SequenceText = prsm.SequenceText;
+            PreSequence = string.Empty;
+            PostSequence = string.Empty;
+            ChargeStates = new Dictionary<int, ChargeStateId>();
+            GenerateAnnotation(prsm.Sequence, proteinSequence, prsm.ModificationLocations);
+            FormatSequences();
         }
 
         /// <summary>
         /// The name of the protein.
         /// </summary>
-        public string ProteinName { get; private set; }
+        public string ProteinName { get; }
 
         /// <summary>
         /// The description of the protein.
         /// </summary>
-        public string ProteinDesc { get; private set; }
+        public string ProteinDesc { get; }
 
         /// <summary>
         /// The mass of the proteoform sequence.
         /// </summary>
-        public double Mass { get; private set; }
+        public double Mass { get; }
 
         /// <summary>
         /// The sequence before the proteoform.
@@ -84,7 +84,7 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// The proteoform sequence.
         /// </summary>
-        public Sequence Sequence { get; private set; }
+        public Sequence Sequence { get; }
 
         /// <summary>
         /// Gets the proteoform's sequence text.
@@ -112,12 +112,12 @@ namespace LcmsSpectator.Models
         /// <param name="id">Protein-Spectrum-Math to add</param>
         public void Add(PrSm id)
         {
-            if (!this.ChargeStates.ContainsKey(id.Charge))
+            if (!ChargeStates.ContainsKey(id.Charge))
             {
-                this.ChargeStates.Add(id.Charge, new ChargeStateId(id));
+                ChargeStates.Add(id.Charge, new ChargeStateId(id));
             }
 
-            var chargeState = this.ChargeStates[id.Charge];
+            var chargeState = ChargeStates[id.Charge];
             chargeState.Add(id);
         }
 
@@ -127,9 +127,9 @@ namespace LcmsSpectator.Models
         /// <param name="id">Protein-Spectrum-Match to remove.</param>
         public void Remove(PrSm id)
         {
-            if (this.ChargeStates.ContainsKey(id.Charge))
+            if (ChargeStates.ContainsKey(id.Charge))
             {
-                this.ChargeStates[id.Charge].Remove(id);
+                ChargeStates[id.Charge].Remove(id);
             }
         }
 
@@ -140,7 +140,7 @@ namespace LcmsSpectator.Models
         /// <param name="dataSetName">Name of the data this for the LCMSRun.</param>
         public void SetLcmsRun(ILcMsRun lcms, string dataSetName)
         {
-            foreach (var chargeState in this.ChargeStates.Values)
+            foreach (var chargeState in ChargeStates.Values)
             {
                 chargeState.SetLcmsRun(lcms, dataSetName);
             }
@@ -153,7 +153,7 @@ namespace LcmsSpectator.Models
         /// <returns>A value indicating whether the item contains the identification.</returns>
         public bool Contains(PrSm id)
         {
-            return this.ChargeStates.Values.Any(chargeState => chargeState.Contains(id));
+            return ChargeStates.Values.Any(chargeState => chargeState.Contains(id));
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace LcmsSpectator.Models
         public PrSm GetHighestScoringPrSm()
         {
             PrSm highest = null;
-            foreach (var chargeState in this.ChargeStates.Values)
+            foreach (var chargeState in ChargeStates.Values)
             {
                 var chargeStateHighest = chargeState.GetHighestScoringPrSm();
                 if (highest == null || chargeStateHighest.CompareTo(highest) >= 0)
@@ -182,7 +182,7 @@ namespace LcmsSpectator.Models
         public void RemovePrSmsFromRawFile(string rawFileName)
         {
             var newChargeStates = new Dictionary<int, ChargeStateId>();
-            foreach (var chargeState in this.ChargeStates)
+            foreach (var chargeState in ChargeStates)
             {
                 chargeState.Value.RemovePrSmsFromRawFile(rawFileName);
                 if (chargeState.Value.PrSms.Count > 0)
@@ -191,7 +191,7 @@ namespace LcmsSpectator.Models
                 }
             }
 
-            this.ChargeStates = newChargeStates;
+            ChargeStates = newChargeStates;
         }
 
         /// <summary>
@@ -205,8 +205,8 @@ namespace LcmsSpectator.Models
             var cleanSequenceStr = sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue);
             var proteinSequenceStr = proteinSequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue);
 
-            int prevResidueIndex = -1;
-            int nextResidueIndex = sequence.Count;
+            var prevResidueIndex = -1;
+            var nextResidueIndex = sequence.Count;
 
             var index = proteinSequenceStr.IndexOf(cleanSequenceStr, StringComparison.Ordinal);
 
@@ -227,7 +227,7 @@ namespace LcmsSpectator.Models
             if (prevResidueIndex >= 0)
             {
                 labelBuilder.AppendFormat("{0}{1}.", proteinSequenceStr[prevResidueIndex], prevResidueIndex);
-                this.PreSequence = proteinSequenceStr.Substring(0, prevResidueIndex + 1);
+                PreSequence = proteinSequenceStr.Substring(0, prevResidueIndex + 1);
             }
 
             labelBuilder.AppendFormat("({0})", modLocations.Length == 0 ? (cleanSequenceStr.Length < 30 ? cleanSequenceStr : "...") : modLocations);
@@ -235,10 +235,10 @@ namespace LcmsSpectator.Models
             if (nextResidueIndex < proteinSequenceStr.Length)
             {
                 labelBuilder.AppendFormat(".{0}{1}", proteinSequenceStr[nextResidueIndex], nextResidueIndex);
-                this.PostSequence = proteinSequenceStr.Substring(nextResidueIndex);
+                PostSequence = proteinSequenceStr.Substring(nextResidueIndex);
             }
 
-            this.Annotation = labelBuilder.ToString();
+            Annotation = labelBuilder.ToString();
         }
 
         /// <summary>
@@ -248,10 +248,10 @@ namespace LcmsSpectator.Models
         /// <param name="lineLength">The target length of a line.</param>
         private void FormatSequences(int lineLength = 60)
         {
-            int pos = 0;
-            this.PreSequence = this.FormatSequenceText(this.PreSequence, ref pos, lineLength);
-            this.SequenceText = this.FormatSequenceText(this.SequenceText, ref pos, lineLength);
-            this.PostSequence = this.FormatSequenceText(this.PostSequence, ref pos, lineLength);
+            var pos = 0;
+            PreSequence = FormatSequenceText(PreSequence, ref pos, lineLength);
+            SequenceText = FormatSequenceText(SequenceText, ref pos, lineLength);
+            PostSequence = FormatSequenceText(PostSequence, ref pos, lineLength);
         }
 
         /// <summary>Insert line breaks into sequence every [lineLength] characters.</summary>
@@ -262,7 +262,7 @@ namespace LcmsSpectator.Models
         private string FormatSequenceText(string sequenceText, ref int pos, int lineLength)
         {
             var seqBuilder = new StringBuilder();
-            bool inMod = false;
+            var inMod = false;
             foreach (var c in sequenceText)
             {
                 if (c == '[')
@@ -304,7 +304,7 @@ namespace LcmsSpectator.Models
             /// <param name="x">Left proteoform.</param>
             /// <param name="y">Right proteoform.</param>
             /// <returns>
-            /// Integer value indicating whether the left proteoform sequence is 
+            /// Integer value indicating whether the left proteoform sequence is
             /// less than, equal to, or greater than right proteoform sequence.
             /// </returns>
             public int Compare(ProteoformId x, ProteoformId y)

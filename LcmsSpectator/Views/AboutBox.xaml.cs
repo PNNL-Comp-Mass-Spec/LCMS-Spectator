@@ -15,7 +15,7 @@ namespace LcmsSpectator.Views
     using System.Windows;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
-    
+
     /// <summary>
     /// Interaction logic for AboutBox.xaml
     /// </summary>
@@ -26,14 +26,14 @@ namespace LcmsSpectator.Views
         /// </summary>
         public AboutBox()
         {
-            this.InitializeComponent();
-            this.LogoPictureBox.Source = this.CompanyLogo();
-            this.WindowAboutBox.Title = string.Format("About {0}", this.AssemblyTitle);
-            this.LabelProductName.Content = this.AssemblyProduct;
-            this.LabelVersion.Content = string.Format("Version {0}", this.AssemblyVersion);
-            this.LabelCopyright.Content = this.AssemblyCopyright;
-            this.LabelCompanyName.Content = this.AssemblyCompany;
-            this.TextBoxDescription.Text = this.AssemblyDescription;
+            InitializeComponent();
+            LogoPictureBox.Source = CompanyLogo();
+            WindowAboutBox.Title = string.Format("About {0}", AssemblyTitle);
+            LabelProductName.Content = AssemblyProduct;
+            LabelVersion.Content = string.Format("Version {0}", AssemblyVersion);
+            LabelCopyright.Content = AssemblyCopyright;
+            LabelCompanyName.Content = AssemblyCompany;
+            TextBoxDescription.Text = AssemblyDescription;
         }
 
         /// <summary>
@@ -43,10 +43,10 @@ namespace LcmsSpectator.Views
         {
             get
             {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
+                var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
                 if (attributes.Length > 0)
                 {
-                    AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)attributes[0];
+                    var titleAttribute = (AssemblyTitleAttribute)attributes[0];
                     if (titleAttribute.Title != string.Empty)
                     {
                         return titleAttribute.Title;
@@ -60,13 +60,7 @@ namespace LcmsSpectator.Views
         /// <summary>
         /// Gets the version.
         /// </summary>
-        public string AssemblyVersion
-        {
-            get
-            {
-                return Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            }
-        }
+        public string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         /// <summary>
         /// Gets the assembly description.
@@ -75,7 +69,7 @@ namespace LcmsSpectator.Views
         {
             get
             {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
+                var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false);
                 if (attributes.Length == 0)
                 {
                     return string.Empty;
@@ -92,7 +86,7 @@ namespace LcmsSpectator.Views
         {
             get
             {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
+                var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
                 if (attributes.Length == 0)
                 {
                     return string.Empty;
@@ -109,7 +103,7 @@ namespace LcmsSpectator.Views
         {
             get
             {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
+                var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false);
                 if (attributes.Length == 0)
                 {
                     return string.Empty;
@@ -126,7 +120,7 @@ namespace LcmsSpectator.Views
         {
             get
             {
-                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
+                var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyCompanyAttribute), false);
                 if (attributes.Length == 0)
                 {
                     return string.Empty;
@@ -143,7 +137,7 @@ namespace LcmsSpectator.Views
         public ImageSource CompanyLogo()
         {
             ImageSource img = null;
-            using (Stream image = Assembly.GetExecutingAssembly().GetManifestResourceStream("LcmsSpectator.Resources.PNNL_Logo.jpg"))
+            using (var image = Assembly.GetExecutingAssembly().GetManifestResourceStream("LcmsSpectator.Resources.PNNL_Logo.jpg"))
             {
                 if (image != null)
                 {

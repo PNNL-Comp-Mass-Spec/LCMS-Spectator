@@ -42,31 +42,25 @@ namespace LcmsSpectator.Controls
         /// </summary>
         public MultiSelectListBox()
         {
-            this.internalChange = false;
-            this.SelectionMode = SelectionMode.Extended;
-            this.SelectedItemsSource = SelectedItems.OfType<object>().ToList();
-            this.SelectionChanged += this.SelectedItemsChanged;
+            internalChange = false;
+            SelectionMode = SelectionMode.Extended;
+            SelectedItemsSource = SelectedItems.OfType<object>().ToList();
+            SelectionChanged += SelectedItemsChanged;
         }
 
         /// <summary>
         /// Gets the dependency property that exposes the selected items list for view model binding.
         /// </summary>
-        public static DependencyProperty SelectedItemsSourceProperty { get; private set; }
+        public static DependencyProperty SelectedItemsSourceProperty { get; }
 
         /// <summary>
         /// Gets or sets the source list for the selected items for this ListBox.
         /// </summary>
         public IList SelectedItemsSource
         {
-            get
-            {
-                return (IList)this.GetValue(SelectedItemsSourceProperty);
-            }
+            get => (IList)GetValue(SelectedItemsSourceProperty);
 
-            set
-            {
-                this.SetCurrentValue(SelectedItemsSourceProperty, value);
-            }
+            set => SetCurrentValue(SelectedItemsSourceProperty, value);
         }
 
         /// <summary>
@@ -99,15 +93,14 @@ namespace LcmsSpectator.Controls
         /// <param name="e">The event arguments.</param>
         private void SelectedItemsChanged(object sender, SelectionChangedEventArgs e)
         {
-            var listBox = sender as MultiSelectListBox;
-            if (listBox == null)
+            if (!(sender is MultiSelectListBox listBox))
             {
                 return;
             }
 
             if (!listBox.internalChange)
             {
-                this.SelectedItemsSource = listBox.SelectedItems.OfType<object>().ToList();
+                SelectedItemsSource = listBox.SelectedItems.OfType<object>().ToList();
             }
         }
     }

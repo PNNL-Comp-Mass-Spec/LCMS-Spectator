@@ -33,8 +33,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public BaseIonType BaseIonType
         {
-            get { return this.baseIonType; }
-            set { this.RaiseAndSetIfChanged(ref this.baseIonType, value); }
+            get => baseIonType;
+            set => this.RaiseAndSetIfChanged(ref baseIonType, value);
         }
 
         /// <summary>
@@ -42,8 +42,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public bool IsSelected
         {
-            get { return this.isSelected; }
-            set { this.RaiseAndSetIfChanged(ref this.isSelected, value); }
+            get => isSelected;
+            set => this.RaiseAndSetIfChanged(ref isSelected, value);
         }
     }
 }

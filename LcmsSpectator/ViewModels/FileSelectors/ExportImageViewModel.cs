@@ -12,7 +12,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
 {
     using System;
     using System.Reactive.Linq;
-    using LcmsSpectator.DialogServices;
+    using DialogServices;
     using OxyPlot;
     using OxyPlot.Wpf;
     using ReactiveUI;
@@ -26,11 +26,6 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// Dialog service for opening dialogs from view model.
         /// </summary>
         private readonly IDialogService dialogService;
-
-        /// <summary>
-        /// The plot model to export.
-        /// </summary>
-        private readonly PlotModel plotModel;
 
         /// <summary>
         /// The file path to export to.
@@ -63,25 +58,24 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         public ExportImageViewModel(IDialogService dialogService, int height = 0, int width = 0, int dpi = 0, PlotModel plotModel = null)
         {
             this.dialogService = dialogService;
-            this.Height = height;
-            this.Width = width;
-            this.Dpi = dpi;
-            this.plotModel = plotModel;
+            Height = height;
+            Width = width;
+            Dpi = dpi;
 
             var exportCommand = ReactiveCommand.Create(
                                     this.WhenAnyValue(x => x.FilePath, x => x.Height, x => x.Width, x => x.Dpi)
                                         .Select(
                                             x => !string.IsNullOrWhiteSpace(x.Item1) &&
                                             x.Item2 >= 0 && x.Item3 >= 0 && x.Item4 >= 0));
-            exportCommand.Subscribe(_ => this.SuccessCommand.Execute(null));
-            this.ExportCommand = exportCommand;
+            exportCommand.Subscribe(_ => SuccessCommand.Execute(null));
+            ExportCommand = exportCommand;
 
             var browseFilesCommand = ReactiveCommand.Create();
             browseFilesCommand.Select(_ => this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png"))
-                .Subscribe(filePath => this.FilePath = filePath);
-            this.BrowseFilesCommand = browseFilesCommand;
+                .Subscribe(filePath => FilePath = filePath);
+            BrowseFilesCommand = browseFilesCommand;
 
-            this.SuccessCommand.Where(_ => this.plotModel != null).Subscribe(_ => this.ExportPlotModel(this.plotModel));
+            SuccessCommand.Where(_ => plotModel != null).Subscribe(_ => ExportPlotModel(plotModel));
         }
 
         /// <summary>
@@ -89,8 +83,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public string FilePath
         {
-            get { return this.filePath; }
-            set { this.RaiseAndSetIfChanged(ref this.filePath, value); }
+            get => filePath;
+            set => this.RaiseAndSetIfChanged(ref filePath, value);
         }
 
         /// <summary>
@@ -98,8 +92,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public int Height
         {
-            get { return this.height; }
-            set { this.RaiseAndSetIfChanged(ref this.height, value); }
+            get => height;
+            set => this.RaiseAndSetIfChanged(ref height, value);
         }
 
         /// <summary>
@@ -107,8 +101,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public int Width
         {
-            get { return this.width; }
-            set { this.RaiseAndSetIfChanged(ref this.width, value); }
+            get => width;
+            set => this.RaiseAndSetIfChanged(ref width, value);
         }
 
         /// <summary>
@@ -116,19 +110,19 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public int Dpi
         {
-            get { return this.dpi; }
-            set { this.RaiseAndSetIfChanged(ref this.dpi, value); }
+            get => dpi;
+            set => this.RaiseAndSetIfChanged(ref dpi, value);
         }
 
         /// <summary>
         /// Gets a command that browses image file paths.
         /// </summary>
-        public IReactiveCommand BrowseFilesCommand { get; private set; }
+        public IReactiveCommand BrowseFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that triggers the export.
         /// </summary>
-        public IReactiveCommand ExportCommand { get; private set; }
+        public IReactiveCommand ExportCommand { get; }
 
         /// <summary>
         /// Exports a plot model to an image with the given settings.
@@ -138,11 +132,11 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         {
             PngExporter.Export(
                             pm,
-                            this.FilePath,
-                            this.Width,
-                            this.Height,
+                            FilePath,
+                            Width,
+                            Height,
                             OxyColors.White,
-                            this.Dpi);
+                            Dpi);
         }
 
         /// <summary>
@@ -150,7 +144,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         protected override IObservable<bool> CanSucceed
         {
-            get { return this.WhenAnyValue(x => x.FilePath).Select(_ => this.Validate()); }
+            get { return this.WhenAnyValue(x => x.FilePath).Select(_ => Validate()); }
         }
 
         /// <summary>
@@ -159,9 +153,9 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <returns>A value indicating whether the input to this window is valid.</returns>
         protected override bool Validate()
         {
-            if (string.IsNullOrWhiteSpace(this.FilePath))
+            if (string.IsNullOrWhiteSpace(FilePath))
             {
-                this.dialogService.MessageBox("Invalid file path.");
+                dialogService.MessageBox("Invalid file path.");
                 return false;
             }
 

@@ -44,7 +44,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
         /// <returns>The parsed sequence.</returns>
         public Sequence Read(string sequence)
         {
-            if (this.trimAnnotations)
+            if (trimAnnotations)
             {
                 var firstIndex = sequence.IndexOf('.');
                 if (firstIndex >= 0)

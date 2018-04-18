@@ -16,9 +16,9 @@ namespace LcmsSpectator.ViewModels.Dms
     using System.Linq;
     using System.Reactive.Linq;
 
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers;
+    using DialogServices;
+    using Models;
+    using Readers;
 
     using ReactiveUI;
 
@@ -57,7 +57,7 @@ namespace LcmsSpectator.ViewModels.Dms
         /// Set to true when a search has been performed that yielded 0 results.
         /// </summary>
         private bool isNoResultsShown;
-        
+
         /// <summary>
         /// The selected DMS dataset.
         /// </summary>
@@ -94,77 +94,73 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public DmsLookupViewModel(IDialogService dialogService)
         {
-            this.IsFirstSearch = true;
-            this.Status = false;
+            IsFirstSearch = true;
+            Status = false;
             this.dialogService = dialogService;
-            this.previousResultsList = new List<Tuple<string, int>>();
-            this.NumberOfWeeks = 10;
-            this.PreviousDatasets = new Dictionary<string, int>();
-            this.Datasets = new ReactiveList<DmsDatasetViewModel>();
-            this.Jobs = new ReactiveList<DmsJobViewModel>();
-            this.dmsLookupUtility = new DmsLookupUtility();
+            previousResultsList = new List<Tuple<string, int>>();
+            NumberOfWeeks = 10;
+            PreviousDatasets = new Dictionary<string, int>();
+            Datasets = new ReactiveList<DmsDatasetViewModel>();
+            Jobs = new ReactiveList<DmsJobViewModel>();
+            dmsLookupUtility = new DmsLookupUtility();
 
             var lookUpCommand = ReactiveCommand.Create();
-            lookUpCommand.Subscribe(_ => this.Lookup());
-            this.LookupCommand = lookUpCommand;
+            lookUpCommand.Subscribe(_ => Lookup());
+            LookupCommand = lookUpCommand;
 
             // If there is no data set selected or there is no job selected, disable open button
             var openCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedDataset, x => x.SelectedJob)
-                                                     .Select(x => x.Item1 != null
-                                                               && !string.IsNullOrEmpty(x.Item1.DatasetFolderPath) 
-                                                               && x.Item2 != null
-                                                               && !string.IsNullOrEmpty(x.Item2.JobFolderPath)));
-            openCommand.Subscribe(_ => this.OpenImplementation());
-            this.OpenCommand = openCommand;
+                                                     .Select(x => !string.IsNullOrEmpty(x.Item1?.DatasetFolderPath) && !string.IsNullOrEmpty(x.Item2?.JobFolderPath)));
+            openCommand.Subscribe(_ => OpenImplementation());
+            OpenCommand = openCommand;
 
             var closeCommand = ReactiveCommand.Create();
-            closeCommand.Subscribe(_ => this.CloseImplementation());
-            this.CloseCommand = closeCommand;
+            closeCommand.Subscribe(_ => CloseImplementation());
+            CloseCommand = closeCommand;
 
-            this.SelectedDataset = new DmsDatasetViewModel();
-            this.SelectedJob = new DmsJobViewModel();
+            SelectedDataset = new DmsDatasetViewModel();
+            SelectedJob = new DmsJobViewModel();
 
             // When a data set is selected, find jobs for the data set
             this.WhenAnyValue(x => x.SelectedDataset)
                 .Subscribe(x =>
                 {
-                    this.Jobs.Clear();
-                    if (this.selectedDataset == null)
+                    Jobs.Clear();
+                    if (selectedDataset == null)
                     {
                         return;
                     }
 
                     var jobMap =
-                        this.dmsLookupUtility.GetJobsByDataset(
-                            new List<DmsLookupUtility.UdtDatasetInfo> { this.selectedDataset.UdtDatasetInfo });
-                    List<DmsLookupUtility.UdtJobInfo> jobs;
-                    if (jobMap.TryGetValue(this.selectedDataset.DatasetId, out jobs))
+                        dmsLookupUtility.GetJobsByDataset(
+                            new List<DmsLookupUtility.UdtDatasetInfo> { selectedDataset.UdtDatasetInfo });
+                    if (jobMap.TryGetValue(selectedDataset.DatasetId, out var jobs))
                     {
                         foreach (var job in jobs)
                         {
-                            this.Jobs.Add(new DmsJobViewModel(job));
+                            Jobs.Add(new DmsJobViewModel(job));
                         }
                     }
 
-                    if (this.Jobs.Count > 0)
+                    if (Jobs.Count > 0)
                     {
-                        this.SelectedJob = this.Jobs[0];
+                        SelectedJob = Jobs[0];
                     }
                 });
 
             // When a null data set is selected and a search has ocurred, show no results screen
             this.WhenAnyValue(x => x.Datasets.Count, x => x.IsFirstSearch)
                 .Select(x => x.Item1 == 0 && !x.Item2)
-                .Subscribe(noResults => this.IsNoResultsShown = noResults);
+                .Subscribe(noResults => IsNoResultsShown = noResults);
 
             // When the dataset filter changes, find the number of weeks previously selected for the filter
             this.WhenAnyValue(x => x.DatasetFilter)
                 .Where(filter => !string.IsNullOrEmpty(filter))
-                .Where(filter => this.PreviousDatasets.ContainsKey(filter))
-                .Select(filter => this.PreviousDatasets[filter])
-                .Subscribe(numWeeks => this.NumberOfWeeks = numWeeks);
+                .Where(filter => PreviousDatasets.ContainsKey(filter))
+                .Select(filter => PreviousDatasets[filter])
+                .Subscribe(numWeeks => NumberOfWeeks = numWeeks);
 
-            this.OpenPreviousResultFile();
+            OpenPreviousResultFile();
         }
 
         /// <summary>
@@ -175,27 +171,27 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <summary>
         /// Gets the list of data sets found through searching DMS.
         /// </summary>
-        public ReactiveList<DmsDatasetViewModel> Datasets { get; private set; }
+        public ReactiveList<DmsDatasetViewModel> Datasets { get; }
 
         /// <summary>
         /// Gets the list of jobs associated with the selected dataset.
         /// </summary>
-        public ReactiveList<DmsJobViewModel> Jobs { get; private set; }
+        public ReactiveList<DmsJobViewModel> Jobs { get; }
 
         /// <summary>
         /// Gets a command that searches DMS for data sets.
         /// </summary>
-        public IReactiveCommand LookupCommand { get; private set; }
+        public IReactiveCommand LookupCommand { get; }
 
         /// <summary>
         /// Gets a command that opens the selected data set and job.
         /// </summary>
-        public IReactiveCommand OpenCommand { get; private set; }
+        public IReactiveCommand OpenCommand { get; }
 
         /// <summary>
         /// Gets a command that closes the search without opening a data set or job.
         /// </summary>
-        public IReactiveCommand CloseCommand { get; private set; }
+        public IReactiveCommand CloseCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid data set has been selected.
@@ -207,8 +203,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public DmsDatasetViewModel SelectedDataset
         {
-            get { return this.selectedDataset; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedDataset, value); }
+            get => selectedDataset;
+            set => this.RaiseAndSetIfChanged(ref selectedDataset, value);
         }
 
         /// <summary>
@@ -216,8 +212,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public DmsJobViewModel SelectedJob
         {
-            get { return this.selectedJob; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedJob, value); }
+            get => selectedJob;
+            set => this.RaiseAndSetIfChanged(ref selectedJob, value);
         }
 
         /// <summary>
@@ -226,8 +222,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public bool IsNoResultsShown
         {
-            get { return this.isNoResultsShown; }
-            private set { this.RaiseAndSetIfChanged(ref this.isNoResultsShown, value); }
+            get => isNoResultsShown;
+            private set => this.RaiseAndSetIfChanged(ref isNoResultsShown, value);
         }
 
         /// <summary>
@@ -235,8 +231,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public int NumberOfWeeks
         {
-            get { return this.numberOfWeeks; }
-            set { this.RaiseAndSetIfChanged(ref this.numberOfWeeks, value); }
+            get => numberOfWeeks;
+            set => this.RaiseAndSetIfChanged(ref numberOfWeeks, value);
         }
 
         /// <summary>
@@ -244,8 +240,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string DatasetFilter
         {
-            get { return this.dataSetFilter; }
-            set { this.RaiseAndSetIfChanged(ref this.dataSetFilter, value); }
+            get => dataSetFilter;
+            set => this.RaiseAndSetIfChanged(ref dataSetFilter, value);
         }
 
         /// <summary>
@@ -253,8 +249,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public Dictionary<string, int> PreviousDatasets
         {
-            get { return this.previousDatasets; }
-            private set { this.RaiseAndSetIfChanged(ref this.previousDatasets, value); }
+            get => previousDatasets;
+            private set => this.RaiseAndSetIfChanged(ref previousDatasets, value);
         }
 
         /// <summary>
@@ -262,8 +258,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         private bool IsFirstSearch
         {
-            get { return this.isFirstSearch; }
-            set { this.RaiseAndSetIfChanged(ref this.isFirstSearch, value); }
+            get => isFirstSearch;
+            set => this.RaiseAndSetIfChanged(ref isFirstSearch, value);
         }
 
         /// <summary>
@@ -272,8 +268,7 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <returns>A value indicating whether the data set selected is valid.</returns>
         public bool ValidateDataSet()
         {
-            return this.SelectedDataset != null && !string.IsNullOrEmpty(this.SelectedDataset.DatasetFolderPath)
-                    && Directory.Exists(this.SelectedDataset.DatasetFolderPath);
+            return !string.IsNullOrEmpty(SelectedDataset?.DatasetFolderPath) && Directory.Exists(SelectedDataset.DatasetFolderPath);
         }
 
         /// <summary>
@@ -282,8 +277,7 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <returns>A value indicating whether the job selected is valid.</returns>
         public bool ValidateJob()
         {
-            return this.SelectedJob != null
-                    && !string.IsNullOrEmpty(this.SelectedJob.JobFolderPath) && Directory.Exists(this.SelectedJob.JobFolderPath);
+            return !string.IsNullOrEmpty(SelectedJob?.JobFolderPath) && Directory.Exists(SelectedJob.JobFolderPath);
         }
 
         /// <summary>
@@ -292,21 +286,21 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <returns>List containing full paths associated with the selected data set.</returns>
         public List<string> GetRawFileNames()
         {
-            if (!this.ValidateDataSet())
+            if (!ValidateDataSet())
             {
                 return new List<string>();
             }
 
-            var dataSetDirFiles = Directory.GetFiles(this.SelectedDataset.DatasetFolderPath);
+            var dataSetDirFiles = Directory.GetFiles(SelectedDataset.DatasetFolderPath);
             var rawFileNames = (from filePath in dataSetDirFiles
                             let ext = Path.GetExtension(filePath)
                             where !string.IsNullOrEmpty(ext)
                             let extL = ext.ToLower()
                             where (extL == ".raw" || extL == ".mzml" || extL == ".gz")
                             select filePath).ToList();
-            for (int i = 0; i < rawFileNames.Count; i++)
+            for (var i = 0; i < rawFileNames.Count; i++)
             {
-                var pbfFile = this.GetPbfFileName(rawFileNames[i]);
+                var pbfFile = GetPbfFileName(rawFileNames[i]);
                 if (!string.IsNullOrEmpty(pbfFile))
                 {
                     rawFileNames[i] = pbfFile;
@@ -322,12 +316,12 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <returns>Full path of the ID file associated with the selected job.</returns>
         public string GetIdFileName()
         {
-            if (!this.ValidateJob())
+            if (!ValidateJob())
             {
                 return null;
             }
 
-            var jobDir = Directory.GetFiles(this.SelectedJob.JobFolderPath);
+            var jobDir = Directory.GetFiles(SelectedJob.JobFolderPath);
             return (from idFp in jobDir
                            let ext = Path.GetExtension(idFp)
                            where ext == ".mzid" || ext == ".gz" || ext == ".zip"
@@ -340,13 +334,13 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <returns>Full path of the feature file associated with the selected job.</returns>
         public string GetFeatureFileName()
         {
-            if (!this.ValidateJob())
+            if (!ValidateJob())
             {
                 return null;
             }
 
             // Find promex folder
-            var promexDir = Directory.GetDirectories(this.SelectedDataset.DatasetFolderPath).FirstOrDefault(d => d.Contains("ProMex"));
+            var promexDir = Directory.GetDirectories(SelectedDataset.DatasetFolderPath).FirstOrDefault(d => d.Contains("ProMex"));
             if (string.IsNullOrEmpty(promexDir))
             {
                 return null;
@@ -363,13 +357,13 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <returns>The tool type used for the selected job.</returns>
         public ToolType? GetTool()
         {
-            if (!this.ValidateJob())
+            if (!ValidateJob())
             {
                 return null;
             }
 
             ToolType toolType;
-            switch (this.SelectedJob.Tool)
+            switch (SelectedJob.Tool)
             {
                 case "MS-GF+":
                     toolType = ToolType.MsgfPlus;
@@ -390,30 +384,30 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         private void Lookup()
         {
-            this.Datasets.Clear();
-            if (this.NumberOfWeeks < 1)
+            Datasets.Clear();
+            if (NumberOfWeeks < 1)
             {
-                this.dialogService.MessageBox("Number of weeks must be greater than 0.");
+                dialogService.MessageBox("Number of weeks must be greater than 0.");
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(this.DatasetFilter))
+            if (string.IsNullOrWhiteSpace(DatasetFilter))
             {
-                this.dialogService.MessageBox("Please enter a dataset filter.");
+                dialogService.MessageBox("Please enter a dataset filter.");
                 return;
             }
 
-            this.IsFirstSearch = false;
+            IsFirstSearch = false;
 
-            var dataSets = this.dmsLookupUtility.GetDatasets(this.NumberOfWeeks, this.DatasetFilter.Trim());
+            var dataSets = dmsLookupUtility.GetDatasets(NumberOfWeeks, DatasetFilter.Trim());
             foreach (var dataset in dataSets)
             {
-                this.Datasets.Add(new DmsDatasetViewModel(dataset.Value));
+                Datasets.Add(new DmsDatasetViewModel(dataset.Value));
             }
 
-            if (this.Datasets.Count > 0)
+            if (Datasets.Count > 0)
             {
-                this.SelectedDataset = this.Datasets[0];
+                SelectedDataset = Datasets[0];
             }
         }
 
@@ -423,13 +417,12 @@ namespace LcmsSpectator.ViewModels.Dms
         private void OpenPreviousResultFile()
         {
             var prevResults = new Dictionary<string, int>();
-            var previousResultFilePath = this.GetOrCreatePreviousSearchPath();
+            var previousResultFilePath = GetOrCreatePreviousSearchPath();
             if (File.Exists(previousResultFilePath))
             {
                 var file = File.ReadAllLines(previousResultFilePath);
                 foreach (var line in file)
                 {
-                    int numWeeks;
                     var parts = line.Split('\t');
                     if (parts.Length < 2)
                     {
@@ -437,12 +430,12 @@ namespace LcmsSpectator.ViewModels.Dms
                     }
 
                     var dataSetName = parts[0];
-                    if (!int.TryParse(parts[1], out numWeeks))
+                    if (!int.TryParse(parts[1], out var numWeeks))
                     {
                         continue;
                     }
 
-                    this.previousResultsList.Add(new Tuple<string, int>(dataSetName, numWeeks));
+                    previousResultsList.Add(new Tuple<string, int>(dataSetName, numWeeks));
                     if (!prevResults.ContainsKey(dataSetName))
                     {
                         prevResults.Add(dataSetName, numWeeks);
@@ -450,7 +443,7 @@ namespace LcmsSpectator.ViewModels.Dms
                 }
             }
 
-            this.PreviousDatasets = prevResults;
+            PreviousDatasets = prevResults;
         }
 
         /// <summary>
@@ -458,13 +451,13 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         private void WritePreviousResultFile()
         {
-            var previousResults = this.previousResultsList;
-            if (this.previousResultsList.Count > 30)
+            var previousResults = previousResultsList;
+            if (previousResultsList.Count > 30)
             {
-                previousResults = this.previousResultsList.GetRange(0, Math.Min(30, this.previousResultsList.Count - 1));
+                previousResults = previousResultsList.GetRange(0, Math.Min(30, previousResultsList.Count - 1));
             }
 
-            using (var outFile = new StreamWriter(this.GetOrCreatePreviousSearchPath()))
+            using (var outFile = new StreamWriter(GetOrCreatePreviousSearchPath()))
             {
                 foreach (var item in previousResults)
                 {
@@ -481,12 +474,12 @@ namespace LcmsSpectator.ViewModels.Dms
         private string GetPbfFileName(string rawFilePath)
         {
             string pbfFilePath = null;
-            if (!this.ValidateDataSet())
+            if (!ValidateDataSet())
             {
                 return null;
             }
 
-            var dataSetDirDirectories = Directory.GetDirectories(this.SelectedDataset.DatasetFolderPath);
+            var dataSetDirDirectories = Directory.GetDirectories(SelectedDataset.DatasetFolderPath);
             var pbfFolderPath = (from folderPath in dataSetDirDirectories
                                  let folderName = Path.GetFileNameWithoutExtension(folderPath)
                                  where folderName.StartsWith("PBF_Gen")
@@ -513,13 +506,10 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         private void OpenImplementation()
         {
-            this.Status = true;
-            this.previousResultsList.Insert(0, new Tuple<string, int>(this.DatasetFilter.Trim(), this.NumberOfWeeks));
-            this.WritePreviousResultFile();
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = true;
+            previousResultsList.Insert(0, new Tuple<string, int>(DatasetFilter.Trim(), NumberOfWeeks));
+            WritePreviousResultFile();
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -528,11 +518,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         private void CloseImplementation()
         {
-            this.Status = false;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = false;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -545,7 +532,7 @@ namespace LcmsSpectator.ViewModels.Dms
             var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var filePath = Path.Combine(appDataPath, PreviousResultsFile);
             var directory = Path.GetDirectoryName(filePath);
-            if (!Directory.Exists(directory))
+            if (!string.IsNullOrWhiteSpace(directory) && !Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }

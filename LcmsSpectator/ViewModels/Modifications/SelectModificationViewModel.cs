@@ -3,13 +3,13 @@
     using System;
 
     using System.Collections.Generic;
-    
+
     using System.Reactive.Linq;
 
     using ReactiveUI;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class SelectModificationViewModel : WindowViewModel
     {
@@ -24,21 +24,21 @@
         /// <param name="modifications">The modifications to select from.</param>
         public SelectModificationViewModel(IEnumerable<ModificationViewModel> modifications)
         {
-            this.Modifications = new ReactiveList<ModificationViewModel>(modifications);
+            Modifications = new ReactiveList<ModificationViewModel>(modifications);
         }
 
         /// <summary>
         /// The modifications to select from.
         /// </summary>
-        public ReactiveList<ModificationViewModel> Modifications { get; private set; }
+        public ReactiveList<ModificationViewModel> Modifications { get; }
 
         /// <summary>
         /// Gets or sets the modification from the <see cref="Modifications" /> list.
         /// </summary>
         public ModificationViewModel SelectedModification
         {
-            get { return this.modificationViewModel; }
-            set { this.RaiseAndSetIfChanged(ref this.modificationViewModel, value); }
+            get => modificationViewModel;
+            set => this.RaiseAndSetIfChanged(ref modificationViewModel, value);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@
         /// </summary>
         protected override IObservable<bool> CanSucceed
         {
-            get { return this.WhenAnyValue(x => x.SelectedModification).Select(_ => this.Validate()); }
+            get { return this.WhenAnyValue(x => x.SelectedModification).Select(_ => Validate()); }
         }
 
         /// <summary>
@@ -55,7 +55,7 @@
         /// <returns>A value indicating whether the input to this window is valid.</returns>
         protected override bool Validate()
         {
-            return this.SelectedModification != null;
+            return SelectedModification != null;
         }
     }
 }

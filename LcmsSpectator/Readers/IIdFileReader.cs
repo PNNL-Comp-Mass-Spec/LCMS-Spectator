@@ -16,8 +16,8 @@ namespace LcmsSpectator.Readers
 
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Models;
-    
+    using Models;
+
     /// <summary>
     /// Interface for database search results readers.
     /// </summary>

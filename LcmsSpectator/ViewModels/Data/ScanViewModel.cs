@@ -18,16 +18,14 @@ namespace LcmsSpectator.ViewModels.Data
     using System.Reactive;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels.Filters;
-    using LcmsSpectator.Writers.Exporters;
+    using Config;
+    using DialogServices;
+    using Models;
+    using Utils;
+    using Filters;
+    using Writers.Exporters;
 
     using ReactiveUI;
 
@@ -79,117 +77,117 @@ namespace LcmsSpectator.ViewModels.Data
         public ScanViewModel(IMainDialogService dialogService, IEnumerable<PrSm> ids)
         {
             var clearFiltersCommand = ReactiveCommand.Create();
-            clearFiltersCommand.Subscribe(_ => this.ClearFilters());
-            this.ClearFiltersCommand = clearFiltersCommand;
+            clearFiltersCommand.Subscribe(_ => ClearFilters());
+            ClearFiltersCommand = clearFiltersCommand;
             this.dialogService = dialogService;
 
-            this.FilteredData = new PrSm[0];
-            this.FilteredProteins = new ReactiveList<ProteinId>();
+            FilteredData = new PrSm[0];
+            FilteredProteins = new ReactiveList<ProteinId>();
 
-            this.Filters = new ReactiveList<IFilter> { ChangeTrackingEnabled = true };
+            Filters = new ReactiveList<IFilter> { ChangeTrackingEnabled = true };
 
-            this.Data = new ReactiveList<PrSm> { ChangeTrackingEnabled = true };
-            this.InitializeDefaultFilters();
-            this.Data.AddRange(ids);
+            Data = new ReactiveList<PrSm> { ChangeTrackingEnabled = true };
+            InitializeDefaultFilters();
+            Data.AddRange(ids);
 
-            this.IdTree = new IdentificationTree();
+            IdTree = new IdentificationTree();
 
-            // When a filter is selected/uselected, request a filter value if selected, then filter data
-            this.Filters.ItemChanged.Where(x => x.PropertyName == "Selected")
+            // When a filter is selected/unselected, request a filter value if selected, then filter data
+            Filters.ItemChanged.Where(x => x.PropertyName == "Selected")
                 .Select(x => x.Sender)
                 .Where(sender => !sender.Selected || sender.Name == "Hide Unidentified Scans" || this.dialogService.FilterBox(sender))
-                .SelectMany(async _ => await this.FilterDataAsync(this.Data))
-                .Subscribe(fd => this.FilteredData = fd);
+                .SelectMany(async _ => await FilterDataAsync(Data))
+                .Subscribe(fd => FilteredData = fd);
 
             // Data changes when items are added or removed
-            this.Data.CountChanged.Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
-                .SelectMany(async _ => await this.FilterDataAsync(this.Data))
-                .Subscribe(fd => this.FilteredData = fd);
+            Data.CountChanged.Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
+                .SelectMany(async _ => await FilterDataAsync(Data))
+                .Subscribe(fd => FilteredData = fd);
 
             // When data is filtered, group it by protein name
             this.WhenAnyValue(x => x.FilteredData).ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(async filteredData =>
             {
-                this.IdTree.ClearIds();
-                await this.IdTree.BuildIdTree(filteredData);
-                this.FilteredProteins.Clear();
-                foreach (var protein in this.IdTree.ProteinIds)
+                IdTree.ClearIds();
+                await IdTree.BuildIdTree(filteredData);
+                FilteredProteins.Clear();
+                foreach (var protein in IdTree.ProteinIds)
                 {
-                    this.FilteredProteins.Add(protein);
+                    FilteredProteins.Add(protein);
                 }
             });
 
             // When data is filtered and a PRSM has not been selected yet, select the first PRSM
             this.WhenAnyValue(x => x.FilteredData)
                 .Where(fd => fd.Length > 0)
-                .Where(_ => this.SelectedPrSm == null)
-                .Subscribe(fd => this.SelectedPrSm = fd[0]);
+                .Where(_ => SelectedPrSm == null)
+                .Subscribe(fd => SelectedPrSm = fd[0]);
 
             // When a tree object is selected and it is a PRSM, set the selected PRSM
             this.WhenAnyValue(x => x.TreeViewSelectedItem)
                 .Select(x => x as PrSm)
                 .Where(p => p != null)
-                .Subscribe(p => this.SelectedPrSm = p);
+                .Subscribe(p => SelectedPrSm = p);
 
             // When a tree object is selected and it is an IIdData, set the selected PRSM
             this.WhenAnyValue(x => x.TreeViewSelectedItem)
                 .Select(x => x as IIdData)
                 .Where(p => p != null)
-                .Subscribe(p => this.SelectedPrSm = p.GetHighestScoringPrSm());
+                .Subscribe(p => SelectedPrSm = p.GetHighestScoringPrSm());
 
             // When a PrSm's sequence changes, update its score.
-            this.Data.ItemChanged.Where(x => x.PropertyName == "Sequence")
+            Data.ItemChanged.Where(x => x.PropertyName == "Sequence")
                 .Select(x => x.Sender)
                 .Where(sender => sender.Sequence.Count > 0)
-                .Subscribe(this.UpdatePrSmScore);
+                .Subscribe(UpdatePrSmScore);
 
-            this.ExportSpectraCommand = ReactiveCommand.CreateAsyncTask(_ => this.ExportSpectraImplementation());
-            this.ExportPeaksCommand = ReactiveCommand.CreateAsyncTask(_ => this.ExportPeaksImplementation());
-            this.ExportProteinTreeCommand = ReactiveCommand.Create();
-            this.ExportProteinTreeCommand.Subscribe(_ => this.ExportProteinTreeImplentation());
+            ExportSpectraCommand = ReactiveCommand.CreateAsyncTask(_ => ExportSpectraImplementation());
+            ExportPeaksCommand = ReactiveCommand.CreateAsyncTask(_ => ExportPeaksImplementation());
+            ExportProteinTreeCommand = ReactiveCommand.Create();
+            ExportProteinTreeCommand.Subscribe(_ => ExportProteinTreeImplentation());
 
-            this.ExportProteinTreeAsTsvCommand = ReactiveCommand.Create();
-            this.ExportProteinTreeAsTsvCommand.Subscribe(_ => this.ExportProteinTreeAsTsvImplentation());
+            ExportProteinTreeAsTsvCommand = ReactiveCommand.Create();
+            ExportProteinTreeAsTsvCommand.Subscribe(_ => ExportProteinTreeAsTsvImplentation());
 
         }
 
         /// <summary>
         /// Gets a command that clears all the filters.
         /// </summary>
-        public IReactiveCommand ClearFiltersCommand { get; private set; }
+        public IReactiveCommand ClearFiltersCommand { get; }
 
         /// <summary>
         /// Gets a command that exports the spectra plots for the selected identifications.
         /// </summary>
-        public ReactiveCommand<Unit> ExportSpectraCommand { get; private set; }
+        public ReactiveCommand<Unit> ExportSpectraCommand { get; }
 
         /// <summary>
         /// Gets a command that exports the spectra peaks to TSV for the selected identifications.
         /// </summary>
-        public ReactiveCommand<Unit> ExportPeaksCommand { get; private set; }
+        public ReactiveCommand<Unit> ExportPeaksCommand { get; }
 
         /// <summary>
         /// Gets a command that exports the protein tree as a hierarchy.
         /// </summary>
-        public ReactiveCommand<object> ExportProteinTreeCommand { get; private set; }
-        
+        public ReactiveCommand<object> ExportProteinTreeCommand { get; }
+
         /// <summary>
         /// Gets a command that exports the protein tree as a tab separated value file.
         /// </summary>
-        public ReactiveCommand<object> ExportProteinTreeAsTsvCommand { get; private set; }
+        public ReactiveCommand<object> ExportProteinTreeAsTsvCommand { get; }
 
         /// <summary>
         /// Gets the list of possible filters.
         /// </summary>
-        public ReactiveList<IFilter> Filters { get; private set; } 
+        public ReactiveList<IFilter> Filters { get; }
 
         /// <summary>
         /// Gets all unfiltered data.
         /// </summary>
         public ReactiveList<PrSm> Data
         {
-            get { return this.data; }
-            private set { this.RaiseAndSetIfChanged(ref this.data, value); }
+            get => data;
+            private set => this.RaiseAndSetIfChanged(ref data, value);
         }
 
         /// <summary>
@@ -197,8 +195,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public PrSm[] FilteredData
         {
-            get { return this.filteredData; }
-            private set { this.RaiseAndSetIfChanged(ref this.filteredData, value); }
+            get => filteredData;
+            private set => this.RaiseAndSetIfChanged(ref filteredData, value);
         }
 
         /// <summary>
@@ -206,8 +204,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public ReactiveList<ProteinId> FilteredProteins
         {
-            get { return this.filteredProteins; }
-            private set { this.RaiseAndSetIfChanged(ref this.filteredProteins, value); }
+            get => filteredProteins;
+            private set => this.RaiseAndSetIfChanged(ref filteredProteins, value);
         }
 
         /// <summary>
@@ -215,8 +213,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public IdentificationTree IdTree
         {
-            get { return this.idTree; }
-            private set { this.RaiseAndSetIfChanged(ref this.idTree, value); }
+            get => idTree;
+            private set => this.RaiseAndSetIfChanged(ref idTree, value);
         }
 
         /// <summary>
@@ -224,8 +222,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public PrSm SelectedPrSm
         {
-            get { return this.selectedPrSm; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedPrSm, value); }
+            get => selectedPrSm;
+            set => this.RaiseAndSetIfChanged(ref selectedPrSm, value);
         }
 
         /// <summary>
@@ -233,8 +231,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public object TreeViewSelectedItem
         {
-            get { return this.treeViewSelectedItem; }
-            set { this.RaiseAndSetIfChanged(ref this.treeViewSelectedItem, value); }
+            get => treeViewSelectedItem;
+            set => this.RaiseAndSetIfChanged(ref treeViewSelectedItem, value);
         }
 
         /// <summary>
@@ -247,7 +245,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public void ClearFilters()
         {
-            foreach (var filter in this.Filters)
+            foreach (var filter in Filters)
             {
                 filter.Selected = false;
             }
@@ -259,14 +257,14 @@ namespace LcmsSpectator.ViewModels.Data
         /// <param name="rawFileName">Name of raw file</param>
         public void RemovePrSmsFromRawFile(string rawFileName)
         {
-            var newData = this.Data.Where(prsm => prsm.RawFileName != rawFileName).ToList();
-            if (!newData.Contains(this.SelectedPrSm))
+            var newData = Data.Where(prsm => prsm.RawFileName != rawFileName).ToList();
+            if (!newData.Contains(SelectedPrSm))
             {
-                this.SelectedPrSm = null;
+                SelectedPrSm = null;
             }
 
-            this.Data.Clear();
-            this.Data.AddRange(newData);
+            Data.Clear();
+            Data.AddRange(newData);
         }
 
         /// <summary>
@@ -282,11 +280,11 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 if (pbfLcmsRun != null)
                 {
-                    var scans = this.Data;
+                    var scans = Data;
                     foreach (var scan in scans.Where(scan => scan.Sequence.Count == 0))
                     {
-                        PrSm scan1 = scan;
-                        IsolationWindow isolationWindow = await Task.Run(() => pbfLcmsRun.GetIsolationWindow(scan1.Scan));
+                        var scan1 = scan;
+                        var isolationWindow = await Task.Run(() => pbfLcmsRun.GetIsolationWindow(scan1.Scan));
                         scan.PrecursorMz = isolationWindow.MonoisotopicMz ?? double.NaN;
                         scan.Charge = isolationWindow.Charge ?? 0;
                         scan.Mass = isolationWindow.MonoisotopicMass ?? double.NaN;
@@ -295,7 +293,7 @@ namespace LcmsSpectator.ViewModels.Data
             }
             else
             {
-                var scans = this.Data;
+                var scans = Data;
                 foreach (var scan in scans.Where(scan => scan.Sequence.Count == 0))
                 {
                     scan.PrecursorMz = double.NaN;
@@ -310,7 +308,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public void ClearIds()
         {
-            this.Data.Clear();
+            Data.Clear();
         }
 
         /// <summary>
@@ -320,7 +318,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns>The filtered data.</returns>
         private Task<PrSm[]> FilterDataAsync(IEnumerable<PrSm> da)
         {
-            return Task.Run(() => this.FilterData(da));
+            return Task.Run(() => FilterData(da));
         }
 
         /// <summary>
@@ -331,7 +329,7 @@ namespace LcmsSpectator.ViewModels.Data
         private PrSm[] FilterData(IEnumerable<PrSm> da)
         {
             IEnumerable<object> filtered = new List<PrSm>(da);
-            var selectedFilters = this.Filters.Where(f => f.Selected);
+            var selectedFilters = Filters.Where(f => f.Selected);
             filtered = selectedFilters.Aggregate(filtered, (current, filter) => filter.Filter(current));
             var filteredPrSms = filtered.Cast<PrSm>();
 
@@ -365,92 +363,88 @@ namespace LcmsSpectator.ViewModels.Data
         private void InitializeDefaultFilters()
         {
             // Filter by scan #
-            this.Filters.Add(new MultiValueFilterViewModel(
+            Filters.Add(new MultiValueFilterViewModel(
                 "Scan",
                 "Filter by Scan number",
                 "Enter scan numbers to filter by separated by a comma",
                 (d, v) => d.Where(p => v.Any(val => ((PrSm)p).Scan == Convert.ToInt32(val))),
                 o =>
                 {
-                    int conv;
                     var str = o as string;
-                    return Int32.TryParse(str, out conv);
+                    return Int32.TryParse(str, out _);
                 },
-                this.dialogService,
+                dialogService,
                 null,
                 ','));
 
             // Filter by subsequence
-            this.Filters.Add(new MultiValueFilterViewModel(
-                    "Sequence", 
-                    "Filter by Sequence", 
+            Filters.Add(new MultiValueFilterViewModel(
+                    "Sequence",
+                    "Filter by Sequence",
                     "Enter Sequence to filter by:",
-                    (d, v) => d.Where(p => v.Any(val => ((PrSm)p).SequenceText.Contains(val))), 
+                    (d, v) => d.Where(p => v.Any(val => ((PrSm)p).SequenceText.Contains(val))),
                     o => true,
-                    this.dialogService,
-                    (from prsm in this.Data where prsm.SequenceText.Length > 0 select prsm.SequenceText).Distinct()));
+                    dialogService,
+                    (from prsm in Data where prsm.SequenceText.Length > 0 select prsm.SequenceText).Distinct()));
 
             // Filter by protein name
-            this.Filters.Add(new MultiValueFilterViewModel(
-                    "Protein Name", 
-                    "Filter by Protein Name", 
-                    "Enter protein name to filter by:", 
-                    (d, v) => d.Where(p => v.Any(val => ((PrSm)p).ProteinName.Contains(val))), 
-                    o => true, 
-                    this.dialogService,
-                    (from prsm in this.Data where prsm.ProteinName.Length > 0 select prsm.ProteinName).Distinct()));
+            Filters.Add(new MultiValueFilterViewModel(
+                    "Protein Name",
+                    "Filter by Protein Name",
+                    "Enter protein name to filter by:",
+                    (d, v) => d.Where(p => v.Any(val => ((PrSm)p).ProteinName.Contains(val))),
+                    o => true,
+                    dialogService,
+                    (from prsm in Data where prsm.ProteinName.Length > 0 select prsm.ProteinName).Distinct()));
 
             // Filter by mass
-            this.Filters.Add(new FilterViewModel(
-                    "Mass", 
-                    "Filter by Mass", 
-                    "Enter minimum Mass to display:", 
-                    (d, v) => d.Where(datum => ((PrSm)datum).Mass >= Convert.ToDouble(v)), 
+            Filters.Add(new FilterViewModel(
+                    "Mass",
+                    "Filter by Mass",
+                    "Enter minimum Mass to display:",
+                    (d, v) => d.Where(datum => ((PrSm)datum).Mass >= Convert.ToDouble(v)),
                     o =>
                         {
-                            double conv;
                             var str = o as string;
-                            return double.TryParse(str, out conv);
-                        }, 
-                    this.dialogService));
+                            return double.TryParse(str, out _);
+                        },
+                    dialogService));
 
             // Filter by most abundant isotope m/z
-            this.Filters.Add(new FilterViewModel(
-                    "Most Abundant Isotope m/z", 
-                    "Filter by Most Abundant Isotope M/Z", 
-                    "Enter minimum M/Z to display:", 
-                    (d, v) => d.Where(datum => ((PrSm)datum).PrecursorMz >= Convert.ToDouble(v)), 
+            Filters.Add(new FilterViewModel(
+                    "Most Abundant Isotope m/z",
+                    "Filter by Most Abundant Isotope M/Z",
+                    "Enter minimum M/Z to display:",
+                    (d, v) => d.Where(datum => ((PrSm)datum).PrecursorMz >= Convert.ToDouble(v)),
                     o =>
                         {
-                            double conv;
                             var str = o as string;
-                            return double.TryParse(str, out conv);
-                        }, 
-                    this.dialogService));
+                            return double.TryParse(str, out _);
+                        },
+                    dialogService));
 
             // Filter by charge state
-            this.Filters.Add(new MultiValueFilterViewModel(
-                    "Charge", 
-                    "Filter by Charge", 
-                    "Enter Charge to filter by:", 
+            Filters.Add(new MultiValueFilterViewModel(
+                    "Charge",
+                    "Filter by Charge",
+                    "Enter Charge to filter by:",
                     (d, v) => d.Where(p => v.Any(val => ((PrSm)p).Charge == Convert.ToInt32(val))),
                     o =>
                         {
-                            int conv;
                             var str = o as string;
-                            return int.TryParse(str, out conv);
-                        }, 
-                    this.dialogService,
-                    (from prsm in this.Data where prsm.Charge > 0 select prsm.Charge.ToString(CultureInfo.InvariantCulture)).Distinct()));
+                            return int.TryParse(str, out _);
+                        },
+                    dialogService,
+                    (from prsm in Data where prsm.Charge > 0 select prsm.Charge.ToString(CultureInfo.InvariantCulture)).Distinct()));
 
             // Filter by score
-            this.Filters.Add(new FilterViewModel(
-                    "Score", 
-                    "Filter by Score", 
-                    "Enter minimum score to display:", 
+            Filters.Add(new FilterViewModel(
+                    "Score",
+                    "Filter by Score",
+                    "Enter minimum score to display:",
                     (d, v) =>
                        {
-                            double score = Convert.ToDouble(v);
+                            var score = Convert.ToDouble(v);
                             return d.Where(
                                 datum =>
                                     {
@@ -458,49 +452,47 @@ namespace LcmsSpectator.ViewModels.Data
                                         return (prsm.UseGolfScoring && prsm.Score <= score)
                                                || (!prsm.UseGolfScoring && prsm.Score >= score);
                                     });
-                        }, 
+                        },
                     o =>
                         {
-                            double conv;
                             var str = o as string;
-                            return double.TryParse(str, out conv);
-                        }, 
-                    this.dialogService));
+                            return double.TryParse(str, out _);
+                        },
+                    dialogService));
 
             // Filter by QValue
-            this.Filters.Add(new FilterViewModel(
-                    "QValue", 
-                    "Filter by QValue", 
-                    "Enter minimum QValue to display:", 
-                    (d, v) => d.Where(datum => ((PrSm)datum).QValue <= Convert.ToDouble(v)), 
+            Filters.Add(new FilterViewModel(
+                    "QValue",
+                    "Filter by QValue",
+                    "Enter minimum QValue to display:",
+                    (d, v) => d.Where(datum => ((PrSm)datum).QValue <= Convert.ToDouble(v)),
                     o =>
                         {
-                            double conv;
                             var str = o as string;
-                            return double.TryParse(str, out conv);
-                        }, 
-                    this.dialogService, 
-                    null, 
+                            return double.TryParse(str, out _);
+                        },
+                    dialogService,
+                    null,
                     "0.01") { Selected = true });
 
             // Remove unidentified scans
-            this.Filters.Add(new FilterViewModel(
-                    "Hide Unidentified Scans", 
-                    string.Empty, 
-                    string.Empty, 
-                    (d, v) => d.Where(datum => ((PrSm)datum).Sequence.Count > 0), 
-                    o => true, 
-                    this.dialogService));
+            Filters.Add(new FilterViewModel(
+                    "Hide Unidentified Scans",
+                    string.Empty,
+                    string.Empty,
+                    (d, v) => d.Where(datum => ((PrSm)datum).Sequence.Count > 0),
+                    o => true,
+                    dialogService));
 
             // Filter by raw file name
-            this.Filters.Add(new FilterViewModel(
-                    "Raw File Name", 
-                    "Filter by data set name", 
-                    "Enter data set to filter by:", 
-                    (d, v) => d.Where(datum => ((PrSm)datum).RawFileName.Contains((string)v)), 
-                    o => true, 
-                    this.dialogService,
-                    (from prsm in this.Data where prsm.RawFileName.Length > 0 select prsm.RawFileName).Distinct()));
+            Filters.Add(new FilterViewModel(
+                    "Raw File Name",
+                    "Filter by data set name",
+                    "Enter data set to filter by:",
+                    (d, v) => d.Where(datum => ((PrSm)datum).RawFileName.Contains((string)v)),
+                    o => true,
+                    dialogService,
+                    (from prsm in Data where prsm.RawFileName.Length > 0 select prsm.RawFileName).Distinct()));
         }
 
         /// <summary>
@@ -509,7 +501,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <param name="prsm">The <see cref="PrSm" /> to score.</param>
         private void UpdatePrSmScore(PrSm prsm)
         {
-            if (this.ScorerFactory == null)
+            if (ScorerFactory == null)
             {
                 return;
             }
@@ -520,7 +512,7 @@ namespace LcmsSpectator.ViewModels.Data
                 return;
             }
 
-            var scorer = this.ScorerFactory.GetScorer(prsm.Ms2Spectrum);
+            var scorer = ScorerFactory.GetScorer(prsm.Ms2Spectrum);
             prsm.Score = IonUtils.ScoreSequence(scorer, prsm.Sequence);
         }
 
@@ -530,11 +522,11 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns>Task that asynchronously exports plots.</returns>
         private async Task ExportSpectraImplementation()
         {
-            var folderPath = this.dialogService.OpenFolder();
+            var folderPath = dialogService.OpenFolder();
             if (!string.IsNullOrEmpty(folderPath))
             {
                 var exporter = new SpectrumPlotExporter(folderPath, null, IcParameters.Instance.ExportImageDpi);
-                await exporter.ExportAsync(this.FilteredData);
+                await exporter.ExportAsync(FilteredData);
             }
         }
 
@@ -544,22 +536,22 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns>Task that asynchronously exports plots.</returns>
         private async Task ExportPeaksImplementation()
         {
-            var folderPath = this.dialogService.OpenFolder();
+            var folderPath = dialogService.OpenFolder();
             if (!string.IsNullOrEmpty(folderPath))
             {
                 var exporter = new SpectrumPeakExporter(folderPath);
-                await exporter.ExportAsync(this.FilteredData);
+                await exporter.ExportAsync(FilteredData);
             }
         }
 
         private void ExportProteinTreeImplentation()
         {
-            var path = this.dialogService.SaveFile(".txt", "Text Files|*.txt");
+            var path = dialogService.SaveFile(".txt", "Text Files|*.txt");
             if (!string.IsNullOrEmpty(path))
             {
                 using (var writer = new StreamWriter(path))
                 {
-                    foreach (var prot in this.IdTree.ProteinIds)
+                    foreach (var prot in IdTree.ProteinIds)
                     {
                         writer.WriteLine(prot.ProteinName);
                         foreach (var proteoform in prot.Proteoforms)
@@ -581,13 +573,13 @@ namespace LcmsSpectator.ViewModels.Data
 
         private void ExportProteinTreeAsTsvImplentation()
         {
-            var path = this.dialogService.SaveFile(".tsv", "Tab-separated values|*.tsv");
+            var path = dialogService.SaveFile(".tsv", "Tab-separated values|*.tsv");
             if (!string.IsNullOrEmpty(path))
             {
                 using (var writer = new StreamWriter(path))
                 {
                     writer.WriteLine("Scan\tProtein\tProteoform\tCharge\tScore");
-                    foreach (var prot in this.IdTree.Proteins)
+                    foreach (var prot in IdTree.Proteins)
                     {
                         foreach (var proteoform in prot.Value.Proteoforms)
                         {

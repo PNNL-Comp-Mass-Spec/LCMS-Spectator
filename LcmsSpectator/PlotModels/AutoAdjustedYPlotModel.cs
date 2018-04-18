@@ -13,7 +13,7 @@ namespace LcmsSpectator.PlotModels
 {
     using OxyPlot;
     using OxyPlot.Axes;
-    
+
     /// <summary>
     /// Plot model that automatically adjusts the visible range of the Y Axis based on the
     /// tallest point in the range visible on the X Axis.
@@ -32,11 +32,11 @@ namespace LcmsSpectator.PlotModels
         /// <param name="multiplier">Multiplier that determines how much space to leave about tallest point.</param>
         public AutoAdjustedYPlotModel(Axis xaxis, double multiplier)
         {
-            this.seriesLock = new object();
-            this.Multiplier = multiplier;
+            seriesLock = new object();
+            Multiplier = multiplier;
             Axes.Add(xaxis);
-            this.XAxis = xaxis;
-            this.YAxis = new LinearAxis
+            XAxis = xaxis;
+            YAxis = new LinearAxis
             {
                 IsZoomEnabled = false,
                 IsPanEnabled = false,
@@ -44,11 +44,11 @@ namespace LcmsSpectator.PlotModels
                 Minimum = 0,
                 AbsoluteMinimum = 0
             };
-            this.AutoAdjustYAxis = true;
-            Axes.Add(this.YAxis);
+            AutoAdjustYAxis = true;
+            Axes.Add(YAxis);
             if (xaxis != null)
             {
-                xaxis.AxisChanged += this.XAxisChanged;
+                xaxis.AxisChanged += XAxisChanged;
             }
         }
 
@@ -71,16 +71,16 @@ namespace LcmsSpectator.PlotModels
         /// <summary>
         /// Gets a multiplier that determines how much space to leave about tallest point.
         /// </summary>
-        protected double Multiplier { get; private set; }
+        protected double Multiplier { get; }
 
         /// <summary>
         /// Update Y axis for current x axis.
         /// </summary>
         public void AdjustForZoom()
         {
-            var minX = this.XAxis.ActualMinimum;
-            var maxX = this.XAxis.ActualMaximum;
-            this.SetBounds(minX, maxX);
+            var minX = XAxis.ActualMinimum;
+            var maxX = XAxis.ActualMaximum;
+            SetBounds(minX, maxX);
         }
 
         /// <summary>
@@ -88,9 +88,9 @@ namespace LcmsSpectator.PlotModels
         /// </summary>
         public void ClearSeries()
         {
-            lock (this.seriesLock)
+            lock (seriesLock)
             {
-                this.ClearAllSeries();
+                ClearAllSeries();
             }
         }
 
@@ -102,10 +102,10 @@ namespace LcmsSpectator.PlotModels
         /// <param name="maxX">Max visible x</param>
         protected virtual void SetBounds(double minX, double maxX)
         {
-            var maxY = this.GetMaxYInRange(minX, maxX);
-            var yaxis = DefaultYAxis ?? this.YAxis;
-            yaxis.Maximum = maxY * this.Multiplier;
-            this.InvalidatePlot(false);
+            var maxY = GetMaxYInRange(minX, maxX);
+            var yaxis = DefaultYAxis ?? YAxis;
+            yaxis.Maximum = maxY * Multiplier;
+            InvalidatePlot(false);
         }
 
         /// <summary>
@@ -124,13 +124,12 @@ namespace LcmsSpectator.PlotModels
         /// <returns>The value of the tallest point in the range.</returns>
         protected virtual double GetMaxYInRange(double minX, double maxX)
         {
-            lock (this.seriesLock)
+            lock (seriesLock)
             {
-                double maxY = 0.0;
-                foreach (var series in this.Series)
+                var maxY = 0.0;
+                foreach (var series in Series)
                 {
-                    var dataPointSeries = series as IDataPointSeries;
-                    if (dataPointSeries != null)
+                    if (series is IDataPointSeries dataPointSeries)
                     {
                         var seriesMaxY = dataPointSeries.GetMaxYInRange(minX, maxX);
                         if (seriesMaxY >= maxY)
@@ -152,9 +151,9 @@ namespace LcmsSpectator.PlotModels
         /// <param name="e">The event arguments</param>
         private void XAxisChanged(object sender, AxisChangedEventArgs e)
         {
-            if (this.AutoAdjustYAxis)
+            if (AutoAdjustYAxis)
             {   // Y axis is zoomed based on the the maximum visible point in the range selected by the X axis.
-                this.AdjustForZoom();
+                AdjustForZoom();
             }
         }
     }

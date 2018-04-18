@@ -8,17 +8,17 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace LcmsSpectator.Views
+using System;
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using InformedProteomics.Backend.Data.Sequence;
+using Microsoft.Win32;
+using Xceed.Wpf.AvalonDock.Layout.Serialization;
+
+namespace LcmsSpectator.Views.Data
 {
-    using System;
-    using System.IO;
-    using System.Windows;
-    using System.Windows.Controls;
-    using System.Windows.Input;
-    using InformedProteomics.Backend.Data.Sequence;
-    using Microsoft.Win32;
-    using Xceed.Wpf.AvalonDock.Layout.Serialization;
-    
     /// <summary>
     /// Interaction logic for DataSetView.xaml
     /// </summary>
@@ -34,11 +34,11 @@ namespace LcmsSpectator.Views
         /// </summary>
         public DataSetView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
             ScanDataGrid.SelectionChanged += (o, e) =>
             {
-                object item = ScanDataGrid.SelectedItem;
+                var item = ScanDataGrid.SelectedItem;
                 if (ScanDataGrid.SelectedItem == null && selectedItem != null)
                 {
                     item = selectedItem;
@@ -49,9 +49,9 @@ namespace LcmsSpectator.Views
                 ScanDataGrid.UpdateLayout();
             };
 
-            this.DataContextChanged += (o, e) =>
+            DataContextChanged += (o, e) =>
             {
-                this.SpectrumView.StartMsPfSearch.DataContext = this.DataContext;    
+                SpectrumView.StartMsPfSearch.DataContext = DataContext;
             };
         }
 
@@ -66,7 +66,7 @@ namespace LcmsSpectator.Views
             var fileName = "layoutdoc.xml";
             if (File.Exists(fileName))
             {
-                this.LoadLayout(fileName);
+                LoadLayout(fileName);
             }
             else
             {
@@ -83,7 +83,7 @@ namespace LcmsSpectator.Views
                     if (openResult == true)
                     {
                         fileName = dialog.FileName;
-                        this.LoadLayout(fileName);
+                        LoadLayout(fileName);
                     }
                     else
                     {
@@ -116,7 +116,7 @@ namespace LcmsSpectator.Views
             {
                 serializer.LayoutSerializationCallback += (s, args) =>
                 {
-                    args.Content = this.FindName(args.Model.ContentId);
+                    args.Content = FindName(args.Model.ContentId);
                 };
                 serializer.Deserialize(stream);
             }
@@ -145,7 +145,7 @@ namespace LcmsSpectator.Views
         /// <param name="e">The event arguments.</param>
         private void InsertModButton_OnClick(object sender, RoutedEventArgs e)
         {
-            this.InsertModification();
+            InsertModification();
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace LcmsSpectator.Views
         /// </summary>
         private void InsertModification()
         {
-            var selectedMod = ModificationList.SelectedItem as Modification;
+            var selectedMod = (Modification)ModificationList.SelectedItem;
             if (selectedMod == null)
             {
                 MessageBox.Show("Invalid modification.");
@@ -194,7 +194,7 @@ namespace LcmsSpectator.Views
             var key = e.Key;
             if (key == Key.Enter)
             {
-                this.InsertModification();
+                InsertModification();
             }
         }
     }

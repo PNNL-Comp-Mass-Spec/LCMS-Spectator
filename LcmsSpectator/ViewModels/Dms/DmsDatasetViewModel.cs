@@ -12,7 +12,7 @@ namespace LcmsSpectator.ViewModels.Dms
 {
     using System;
 
-    using LcmsSpectator.Readers;
+    using Readers;
 
     using ReactiveUI;
 
@@ -66,7 +66,7 @@ namespace LcmsSpectator.ViewModels.Dms
         {
             if (datasetInfo != null)
             {
-                this.UdtDatasetInfo = datasetInfo.Value;   
+                UdtDatasetInfo = datasetInfo.Value;   
             }
         }
 
@@ -78,26 +78,26 @@ namespace LcmsSpectator.ViewModels.Dms
             get
             {
                 DmsLookupUtility.UdtDatasetInfo udtDatasetInfo;
-                udtDatasetInfo.DatasetId = this.DatasetId;
-                udtDatasetInfo.Dataset = this.Dataset;
-                udtDatasetInfo.Experiment = this.Experiment;
-                udtDatasetInfo.Organism = this.Organism;
-                udtDatasetInfo.Instrument = this.Instrument;
-                udtDatasetInfo.Created = this.Created;
-                udtDatasetInfo.DatasetFolderPath = this.DatasetFolderPath;
+                udtDatasetInfo.DatasetId = DatasetId;
+                udtDatasetInfo.Dataset = Dataset;
+                udtDatasetInfo.Experiment = Experiment;
+                udtDatasetInfo.Organism = Organism;
+                udtDatasetInfo.Instrument = Instrument;
+                udtDatasetInfo.Created = Created;
+                udtDatasetInfo.DatasetFolderPath = DatasetFolderPath;
                 return udtDatasetInfo;
             }
 
             set
             {
-                DmsLookupUtility.UdtDatasetInfo datasetInfo = value;
-                this.DatasetId = datasetInfo.DatasetId;
-                this.Dataset = datasetInfo.Dataset;
-                this.Experiment = datasetInfo.Experiment;
-                this.Organism = datasetInfo.Organism;
-                this.Instrument = datasetInfo.Instrument;
-                this.Created = datasetInfo.Created;
-                this.DatasetFolderPath = datasetInfo.DatasetFolderPath;
+                var datasetInfo = value;
+                DatasetId = datasetInfo.DatasetId;
+                Dataset = datasetInfo.Dataset;
+                Experiment = datasetInfo.Experiment;
+                Organism = datasetInfo.Organism;
+                Instrument = datasetInfo.Instrument;
+                Created = datasetInfo.Created;
+                DatasetFolderPath = datasetInfo.DatasetFolderPath;
                 this.RaisePropertyChanged();
             }
         }
@@ -107,8 +107,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public int DatasetId
         {
-            get { return this.datasetId; }
-            set { this.RaiseAndSetIfChanged(ref this.datasetId, value); }
+            get => datasetId;
+            set => this.RaiseAndSetIfChanged(ref datasetId, value);
         }
 
         /// <summary>
@@ -116,8 +116,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string Dataset
         {
-            get { return this.dataset; }
-            set { this.RaiseAndSetIfChanged(ref this.dataset, value); }
+            get => dataset;
+            set => this.RaiseAndSetIfChanged(ref dataset, value);
         }
 
         /// <summary>
@@ -125,8 +125,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string Experiment
         {
-            get { return this.experiment; }
-            set { this.RaiseAndSetIfChanged(ref this.experiment, value); }
+            get => experiment;
+            set => this.RaiseAndSetIfChanged(ref experiment, value);
         }
 
         /// <summary>
@@ -134,8 +134,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string Organism
         {
-            get { return this.organism; }
-            set { this.RaiseAndSetIfChanged(ref this.organism, value); }
+            get => organism;
+            set => this.RaiseAndSetIfChanged(ref organism, value);
         }
 
         /// <summary>
@@ -143,8 +143,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string Instrument
         {
-            get { return this.instrument; }
-            set { this.RaiseAndSetIfChanged(ref this.instrument, value); }
+            get => instrument;
+            set => this.RaiseAndSetIfChanged(ref instrument, value);
         }
 
         /// <summary>
@@ -152,8 +152,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public DateTime Created
         {
-            get { return this.created; }
-            set { this.RaiseAndSetIfChanged(ref this.created, value); }
+            get => created;
+            set => this.RaiseAndSetIfChanged(ref created, value);
         }
 
         /// <summary>
@@ -161,8 +161,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string DatasetFolderPath
         {
-            get { return this.datasetFolderPath; }
-            set { this.RaiseAndSetIfChanged(ref this.datasetFolderPath, value); }
+            get => datasetFolderPath;
+            set => this.RaiseAndSetIfChanged(ref datasetFolderPath, value);
         }
     }
 }

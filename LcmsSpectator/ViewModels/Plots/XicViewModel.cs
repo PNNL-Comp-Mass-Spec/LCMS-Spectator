@@ -17,11 +17,11 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Reactive.Linq;
     using InformedProteomics.Backend.MassSpecData;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.ViewModels.Data;
-    using LcmsSpectator.ViewModels.Modifications;
+    using Config;
+    using DialogServices;
+    using Models;
+    using Data;
+    using Modifications;
     using OxyPlot.Axes;
     using ReactiveUI;
 
@@ -111,22 +111,22 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             this.dialogService = dialogService;
             this.lcms = lcms;
-            this.fragmentXAxis = new LinearAxis
+            fragmentXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
                 Position = AxisPosition.Bottom, Title = "Retention Time",
                 AbsoluteMinimum = lcms.MinLcScan,
                 AbsoluteMaximum = lcms.MaxLcScan + 1
             };
-            this.fragmentXAxis.AxisChanged += this.XAxisChanged;
-            this.FragmentPlotViewModel = new XicPlotViewModel(
+            fragmentXAxis.AxisChanged += XAxisChanged;
+            FragmentPlotViewModel = new XicPlotViewModel(
                                         this.dialogService,
                                         new FragmentationSequenceViewModel { AddPrecursorIons = false },
                                         lcms,
                                         "Fragment XIC",
-                                        this.fragmentXAxis,
+                                        fragmentXAxis,
                                         false);
-            this.heavyFragmentXAxis = new LinearAxis
+            heavyFragmentXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
@@ -134,16 +134,16 @@ namespace LcmsSpectator.ViewModels.Plots
                 AbsoluteMinimum = lcms.MinLcScan,
                 AbsoluteMaximum = lcms.MaxLcScan + 1
             };
-            this.heavyFragmentXAxis.AxisChanged += this.XAxisChanged;
-            this.HeavyFragmentPlotViewModel = new XicPlotViewModel(
+            heavyFragmentXAxis.AxisChanged += XAxisChanged;
+            HeavyFragmentPlotViewModel = new XicPlotViewModel(
                 this.dialogService,
                 new FragmentationSequenceViewModel { AddPrecursorIons = false },
                 lcms,
                 "Heavy Fragment XIC",
-                this.heavyFragmentXAxis,
+                heavyFragmentXAxis,
                 false,
                 AxisPosition.Right);
-            this.precursorXAxis = new LinearAxis
+            precursorXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
@@ -151,13 +151,13 @@ namespace LcmsSpectator.ViewModels.Plots
                 AbsoluteMinimum = lcms.MinLcScan,
                 AbsoluteMaximum = lcms.MaxLcScan + 1
             };
-            this.precursorXAxis.AxisChanged += this.XAxisChanged;
-            this.PrecursorPlotViewModel = new XicPlotViewModel(this.dialogService, new PrecursorSequenceIonViewModel(), lcms, "Precursor XIC", this.precursorXAxis)
+            precursorXAxis.AxisChanged += XAxisChanged;
+            PrecursorPlotViewModel = new XicPlotViewModel(this.dialogService, new PrecursorSequenceIonViewModel(), lcms, "Precursor XIC", precursorXAxis)
             {
                 IsPlotUpdating = true,
             };
 
-            this.heavyPrecursorXAxis = new LinearAxis
+            heavyPrecursorXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
@@ -165,135 +165,135 @@ namespace LcmsSpectator.ViewModels.Plots
                 AbsoluteMinimum = lcms.MinLcScan,
                 AbsoluteMaximum = lcms.MaxLcScan + 1
             };
-            this.heavyPrecursorXAxis.AxisChanged += this.XAxisChanged;
-            this.HeavyPrecursorPlotViewModel = new XicPlotViewModel(
+            heavyPrecursorXAxis.AxisChanged += XAxisChanged;
+            HeavyPrecursorPlotViewModel = new XicPlotViewModel(
                 this.dialogService,
                 new PrecursorSequenceIonViewModel(),
                 lcms,
                 "Heavy Precursor XIC",
-                this.heavyPrecursorXAxis,
+                heavyPrecursorXAxis,
                 vertAxes: AxisPosition.Right);
 
-            this.showHeavy = false;
-            this.showFragmentXic = false;
+            showHeavy = false;
+            showFragmentXic = false;
             var openHeavyModificationsCommand = ReactiveCommand.Create();
-            openHeavyModificationsCommand.Subscribe(_ => this.OpenHeavyModificationsImplentation());
-            this.OpenHeavyModificationsCommand = openHeavyModificationsCommand;
+            openHeavyModificationsCommand.Subscribe(_ => OpenHeavyModificationsImplentation());
+            OpenHeavyModificationsCommand = openHeavyModificationsCommand;
 
-            this.PrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
-            this.FragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
-            this.HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
-            this.HeavyFragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
+            PrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
+            FragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
+            HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
+            HeavyFragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
 
-            this.linkedAxes = new Dictionary<LinearAxis, List<LinearAxis>>
+            linkedAxes = new Dictionary<LinearAxis, List<LinearAxis>>
             {
-                { this.precursorXAxis, new List<LinearAxis>() },
-                { this.fragmentXAxis, new List<LinearAxis>() },
-                { this.heavyPrecursorXAxis, new List<LinearAxis>() },
-                { this.heavyFragmentXAxis, new List<LinearAxis>() }
+                { precursorXAxis, new List<LinearAxis>() },
+                { fragmentXAxis, new List<LinearAxis>() },
+                { heavyPrecursorXAxis, new List<LinearAxis>() },
+                { heavyFragmentXAxis, new List<LinearAxis>() }
             };
 
-            this.plotLinkageTracker = new HashSet<Tuple<LinearAxis, LinearAxis>>();
-            this.TogglePlotLinks(this.fragmentXAxis, this.heavyFragmentXAxis);
-            this.TogglePlotLinks(this.precursorXAxis, this.heavyPrecursorXAxis);
-            this.TogglePlotLinks(this.precursorXAxis, this.fragmentXAxis);
-            this.TogglePlotLinks(this.heavyPrecursorXAxis, this.heavyFragmentXAxis);
+            plotLinkageTracker = new HashSet<Tuple<LinearAxis, LinearAxis>>();
+            TogglePlotLinks(fragmentXAxis, heavyFragmentXAxis);
+            TogglePlotLinks(precursorXAxis, heavyPrecursorXAxis);
+            TogglePlotLinks(precursorXAxis, fragmentXAxis);
+            TogglePlotLinks(heavyPrecursorXAxis, heavyFragmentXAxis);
 
             // Update area ratios when the area of any of the plots changes
             this.WhenAny(x => x.FragmentPlotViewModel.Area, x => x.HeavyFragmentPlotViewModel.Area, (x, y) => x.Value / y.Value)
-                .Select(this.FormatRatio)
-                .ToProperty(this, x => x.FragmentAreaRatioLabel, out this.fragmentAreaRatioLabel);
+                .Select(FormatRatio)
+                .ToProperty(this, x => x.FragmentAreaRatioLabel, out fragmentAreaRatioLabel);
             this.WhenAny(x => x.PrecursorPlotViewModel.Area, x => x.HeavyPrecursorPlotViewModel.Area, (x, y) => x.Value / y.Value)
-                .Select(this.FormatRatio)
-                .ToProperty(this, x => x.PrecursorAreaRatioLabel, out this.precursorAreaRatioLabel);
+                .Select(FormatRatio)
+                .ToProperty(this, x => x.PrecursorAreaRatioLabel, out precursorAreaRatioLabel);
             this.WhenAnyValue(x => x.ShowFragmentXic, x => x.ShowHeavy)
                 .Subscribe(x =>
                 {
-                    this.FragmentPlotViewModel.IsPlotUpdating = x.Item1;
-                    this.HeavyFragmentPlotViewModel.IsPlotUpdating = x.Item1 && x.Item2;
-                    this.HeavyPrecursorPlotViewModel.IsPlotUpdating = x.Item2;
+                    FragmentPlotViewModel.IsPlotUpdating = x.Item1;
+                    HeavyFragmentPlotViewModel.IsPlotUpdating = x.Item1 && x.Item2;
+                    HeavyPrecursorPlotViewModel.IsPlotUpdating = x.Item2;
                 });
             this.WhenAnyValue(x => x.FragmentationSequence)
                 .Where(fragSeq => fragSeq != null)
                 .Subscribe(fragSeq =>
                 {
-                    this.FragmentPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
-                    this.HeavyFragmentPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
-                    this.PrecursorPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
-                    this.HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                    FragmentPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                    HeavyFragmentPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                    PrecursorPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
+                    HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.FragmentationSequence = fragSeq;
                 });
 
-            this.PrecursorToFragmentLinkLabel = "L";
-            this.LightToHeavyLinkLabel = "L";
+            PrecursorToFragmentLinkLabel = "L";
+            LightToHeavyLinkLabel = "L";
 
-            this.LinkLightToHeavyCommand = ReactiveCommand.Create();
-            this.LinkLightToHeavyCommand.Subscribe(
+            LinkLightToHeavyCommand = ReactiveCommand.Create();
+            LinkLightToHeavyCommand.Subscribe(
                 _ =>
                     {
-                        this.TogglePlotLinks(this.fragmentXAxis, this.heavyFragmentXAxis);
-                        this.TogglePlotLinks(this.precursorXAxis, this.heavyPrecursorXAxis);
-                        this.LightToHeavyLinkLabel = this.LightToHeavyLinkLabel == "L" ? "U" : "L";
+                        TogglePlotLinks(fragmentXAxis, heavyFragmentXAxis);
+                        TogglePlotLinks(precursorXAxis, heavyPrecursorXAxis);
+                        LightToHeavyLinkLabel = LightToHeavyLinkLabel == "L" ? "U" : "L";
                     });
 
-            this.LinkPrecursorToFragmentCommand = ReactiveCommand.Create();
-            this.LinkPrecursorToFragmentCommand.Subscribe(
+            LinkPrecursorToFragmentCommand = ReactiveCommand.Create();
+            LinkPrecursorToFragmentCommand.Subscribe(
                 _ =>
                     {
-                        this.TogglePlotLinks(this.precursorXAxis, this.fragmentXAxis);
-                        this.TogglePlotLinks(this.heavyPrecursorXAxis, this.heavyFragmentXAxis);
-                        this.PrecursorToFragmentLinkLabel = this.PrecursorToFragmentLinkLabel == "L" ? "U" : "L";
+                        TogglePlotLinks(precursorXAxis, fragmentXAxis);
+                        TogglePlotLinks(heavyPrecursorXAxis, heavyFragmentXAxis);
+                        PrecursorToFragmentLinkLabel = PrecursorToFragmentLinkLabel == "L" ? "U" : "L";
                     });
         }
 
         /// <summary>
         /// Gets view model for fragment XIC plot.
         /// </summary>
-        public XicPlotViewModel FragmentPlotViewModel { get; private set; }
+        public XicPlotViewModel FragmentPlotViewModel { get; }
 
         /// <summary>
         /// Gets view model for heavy fragment XIC plot.
         /// </summary>
-        public XicPlotViewModel HeavyFragmentPlotViewModel { get; private set; }
+        public XicPlotViewModel HeavyFragmentPlotViewModel { get; }
 
         /// <summary>
         /// Gets view model for precursor XIC plot.
         /// </summary>
-        public XicPlotViewModel PrecursorPlotViewModel { get; private set; }
+        public XicPlotViewModel PrecursorPlotViewModel { get; }
 
         /// <summary>
         /// Gets view model for heavy precursor XIC plot.
         /// </summary>
-        public XicPlotViewModel HeavyPrecursorPlotViewModel { get; private set; }
+        public XicPlotViewModel HeavyPrecursorPlotViewModel { get; }
 
         /// <summary>
         /// Gets command that opens window for selecting heavy modifications for light and heavy peptides.
         /// </summary>
-        public ReactiveCommand<object> OpenHeavyModificationsCommand { get; private set; }
+        public ReactiveCommand<object> OpenHeavyModificationsCommand { get; }
 
         /// <summary>
         /// Gets a command that links the Precursor XIC axes to the Fragment XIC axes.
         /// </summary>
-        public ReactiveCommand<object> LinkLightToHeavyCommand { get; private set; }
+        public ReactiveCommand<object> LinkLightToHeavyCommand { get; }
 
         /// <summary>
         /// Gets a command that links the precursor XIC axes to the Heavy Precursor XIC axes.
         /// </summary>
-        public ReactiveCommand<object> LinkPrecursorToFragmentCommand { get; private set; }
+        public ReactiveCommand<object> LinkPrecursorToFragmentCommand { get; }
 
         private string lightToHeavyLinkLabel;
 
         public string LightToHeavyLinkLabel
         {
-            get { return this.lightToHeavyLinkLabel; }
-            private set { this.RaiseAndSetIfChanged(ref this.lightToHeavyLinkLabel, value); }
+            get => lightToHeavyLinkLabel;
+            private set => this.RaiseAndSetIfChanged(ref lightToHeavyLinkLabel, value);
         }
 
         private string precursorToFragmentLinkLabel;
 
         public string PrecursorToFragmentLinkLabel
         {
-            get { return this.precursorToFragmentLinkLabel; }
-            private set { this.RaiseAndSetIfChanged(ref this.precursorToFragmentLinkLabel, value); }
+            get => precursorToFragmentLinkLabel;
+            private set => this.RaiseAndSetIfChanged(ref precursorToFragmentLinkLabel, value);
         }
 
         /// <summary>
@@ -301,8 +301,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowFragmentXic
         {
-            get { return this.showFragmentXic; }
-            set { this.RaiseAndSetIfChanged(ref this.showFragmentXic, value); }
+            get => showFragmentXic;
+            set => this.RaiseAndSetIfChanged(ref showFragmentXic, value);
         }
 
         /// <summary>
@@ -311,33 +311,27 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowHeavy
         {
-            get { return this.showHeavy; }
-            set { this.RaiseAndSetIfChanged(ref this.showHeavy, value); }
+            get => showHeavy;
+            set => this.RaiseAndSetIfChanged(ref showHeavy, value);
         }
 
         /// <summary>
         /// Gets the ratio of area under the curve for fragment XICs (light / heavy).
         /// </summary>
-        public string FragmentAreaRatioLabel
-        {
-            get { return this.fragmentAreaRatioLabel.Value; }
-        }
+        public string FragmentAreaRatioLabel => fragmentAreaRatioLabel.Value;
 
         /// <summary>
         /// Gets the ratio of area under the curve for precursor XICs (light / heavy).
         /// </summary>
-        public string PrecursorAreaRatioLabel
-        {
-            get { return this.precursorAreaRatioLabel.Value; }
-        }
+        public string PrecursorAreaRatioLabel => precursorAreaRatioLabel.Value;
 
         /// <summary>
         /// Gets or sets the fragmentation sequence (fragment/precursor ion generator)
         /// </summary>
         public FragmentationSequence FragmentationSequence
         {
-            get { return this.fragmentationSequence; }
-            set { this.RaiseAndSetIfChanged(ref this.fragmentationSequence, value); }
+            get => fragmentationSequence;
+            set => this.RaiseAndSetIfChanged(ref fragmentationSequence, value);
         }
 
         /// <summary>
@@ -345,10 +339,10 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public void ClearAll()
         {
-            this.FragmentPlotViewModel.ClearPlot();
-            this.PrecursorPlotViewModel.ClearPlot();
-            this.HeavyFragmentPlotViewModel.ClearPlot();
-            this.HeavyPrecursorPlotViewModel.ClearPlot();
+            FragmentPlotViewModel.ClearPlot();
+            PrecursorPlotViewModel.ClearPlot();
+            HeavyFragmentPlotViewModel.ClearPlot();
+            HeavyPrecursorPlotViewModel.ClearPlot();
         }
 
         /// <summary>
@@ -357,14 +351,14 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="scanNum">Scan number to zoom to.</param>
         public void ZoomToScan(int scanNum)
         {
-            var rt = this.lcms.GetElutionTime(scanNum);
-            var range = this.lcms.GetElutionTime(this.lcms.MaxLcScan) - this.lcms.GetElutionTime(this.lcms.MinLcScan);
+            var rt = lcms.GetElutionTime(scanNum);
+            var range = lcms.GetElutionTime(lcms.MaxLcScan) - lcms.GetElutionTime(lcms.MinLcScan);
             var offset = range * 0.03;
             var min = Math.Max(rt - offset, 0);
-            var max = Math.Min(rt + offset, this.lcms.MaxLcScan);
-            this.precursorXAxis.Minimum = min;
-            this.precursorXAxis.Maximum = max;
-            this.precursorXAxis.Zoom(min, max);
+            var max = Math.Min(rt + offset, lcms.MaxLcScan);
+            precursorXAxis.Minimum = min;
+            precursorXAxis.Maximum = max;
+            precursorXAxis.Zoom(min, max);
         }
 
         /// <summary>
@@ -373,10 +367,10 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="scan">Scan number to put marker at</param>
         public void SetSelectedScan(int scan)
         {
-            this.FragmentPlotViewModel.SelectedScan = scan;
-            this.PrecursorPlotViewModel.SelectedScan = scan;
-            this.HeavyFragmentPlotViewModel.SelectedScan = scan;
-            this.HeavyPrecursorPlotViewModel.SelectedScan = scan;
+            FragmentPlotViewModel.SelectedScan = scan;
+            PrecursorPlotViewModel.SelectedScan = scan;
+            HeavyFragmentPlotViewModel.SelectedScan = scan;
+            HeavyPrecursorPlotViewModel.SelectedScan = scan;
         }
 
         /// <summary>
@@ -386,10 +380,10 @@ namespace LcmsSpectator.ViewModels.Plots
         public IObservable<int> SelectedScanUpdated()
         {
             return Observable.Merge(
-                 this.FragmentPlotViewModel.WhenAnyValue(x => x.SelectedScan),
-                 this.PrecursorPlotViewModel.WhenAnyValue(x => x.SelectedScan),
-                 this.HeavyFragmentPlotViewModel.WhenAnyValue(x => x.SelectedScan),
-                 this.HeavyPrecursorPlotViewModel.WhenAnyValue(x => x.SelectedScan));
+                 FragmentPlotViewModel.WhenAnyValue(x => x.SelectedScan),
+                 PrecursorPlotViewModel.WhenAnyValue(x => x.SelectedScan),
+                 HeavyFragmentPlotViewModel.WhenAnyValue(x => x.SelectedScan),
+                 HeavyPrecursorPlotViewModel.WhenAnyValue(x => x.SelectedScan));
         }
 
         /// <summary>
@@ -399,22 +393,21 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="e">The event arguments</param>
         private void XAxisChanged(object sender, AxisChangedEventArgs e)
         {
-            if (!this.axisInternalChange)
+            if (!axisInternalChange)
             {
-                this.axisInternalChange = true;
-                this.axisInternalChange = true;
-                var axis = sender as LinearAxis;
-                if (axis == null)
+                axisInternalChange = true;
+                axisInternalChange = true;
+                if (!(sender is LinearAxis axis))
                 {
                     return;
                 }
 
-                this.UpdateAxesRecursive(axis, new HashSet<LinearAxis>());
-                this.axisInternalChange = false;
+                UpdateAxesRecursive(axis, new HashSet<LinearAxis>());
+                axisInternalChange = false;
             }
         }
 
-        private void UpdateAxesRecursive(LinearAxis sender, HashSet<LinearAxis> alreadyUpdated)
+        private void UpdateAxesRecursive(LinearAxis sender, ISet<LinearAxis> alreadyUpdated)
         {
             if (alreadyUpdated.Contains(sender))
             {
@@ -422,13 +415,13 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             alreadyUpdated.Add(sender);
-            if (this.linkedAxes.ContainsKey(sender))
+            if (linkedAxes.ContainsKey(sender))
             {
-                var links = this.linkedAxes[sender];
+                var links = linkedAxes[sender];
                 foreach (var link in links)
                 {
                     link.Zoom(sender.ActualMinimum, sender.ActualMaximum);
-                    this.UpdateAxesRecursive(link, alreadyUpdated);
+                    UpdateAxesRecursive(link, alreadyUpdated);
                 }
             }
         }
@@ -441,15 +434,15 @@ namespace LcmsSpectator.ViewModels.Plots
         private void TogglePlotLinks(LinearAxis axis1, LinearAxis axis2)
         {
             var key = new Tuple<LinearAxis, LinearAxis>(axis1, axis2);
-            if (this.plotLinkageTracker.Contains(key))
+            if (plotLinkageTracker.Contains(key))
             {
-                this.RemoveLinks(axis1, axis2);
-                this.plotLinkageTracker.Remove(key);
+                RemoveLinks(axis1, axis2);
+                plotLinkageTracker.Remove(key);
             }
             else
             {
-                this.AddLinks(axis1, axis2);
-                this.plotLinkageTracker.Add(key);
+                AddLinks(axis1, axis2);
+                plotLinkageTracker.Add(key);
             }
         }
 
@@ -460,8 +453,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="axis2">Second axis to link.</param>
         private void AddLinks(LinearAxis axis1, LinearAxis axis2)
         {
-            this.AddLink(axis1, axis2);
-            this.AddLink(axis2, axis1);
+            AddLink(axis1, axis2);
+            AddLink(axis2, axis1);
         }
 
         /// <summary>
@@ -471,9 +464,9 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="axis2">The second axis.</param>
         private void AddLink(LinearAxis axis1, LinearAxis axis2)
         {
-            if (this.linkedAxes.ContainsKey(axis1))
+            if (linkedAxes.ContainsKey(axis1))
             {
-                var links = this.linkedAxes[axis1];
+                var links = linkedAxes[axis1];
                 if (!links.Contains(axis2))
                 {
                     links.Add(axis2);
@@ -488,8 +481,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="axis2">Second axis to unlink.</param>
         private void RemoveLinks(LinearAxis axis1, LinearAxis axis2)
         {
-            this.RemoveLink(axis1, axis2);
-            this.RemoveLink(axis2, axis1);
+            RemoveLink(axis1, axis2);
+            RemoveLink(axis2, axis1);
         }
 
         /// <summary>
@@ -499,9 +492,9 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="axis2">The second axis.</param>
         private void RemoveLink(LinearAxis axis1, LinearAxis axis2)
         {
-            if (this.linkedAxes.ContainsKey(axis1))
+            if (linkedAxes.ContainsKey(axis1))
             {
-                var links = this.linkedAxes[axis1];
+                var links = linkedAxes[axis1];
                 if (links.Contains(axis2))
                 {
                     links.Remove(axis2);
@@ -515,12 +508,12 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void OpenHeavyModificationsImplentation()
         {
-            var heavyModificationsWindowVm = new HeavyModificationsWindowViewModel(this.dialogService);
-            this.dialogService.OpenHeavyModifications(heavyModificationsWindowVm);
-            this.PrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
-            this.FragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
-            this.HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
-            this.HeavyFragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
+            var heavyModificationsWindowVm = new HeavyModificationsWindowViewModel(dialogService);
+            dialogService.OpenHeavyModifications(heavyModificationsWindowVm);
+            PrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
+            FragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
+            HeavyPrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
+            HeavyFragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.HeavyModifications.ToArray();
         }
 
         /// <summary>

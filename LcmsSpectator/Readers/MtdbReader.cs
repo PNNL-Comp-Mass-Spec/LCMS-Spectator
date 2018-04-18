@@ -16,10 +16,9 @@ namespace LcmsSpectator.Readers
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
-    using LcmsSpectator.Config;
-    using LcmsSpectator.Models;
+    using Config;
+    using Models;
     using MTDBFramework;
-    using MTDBFramework.Database;
 
     /// <summary>
     /// Reader for MTDB file.
@@ -38,7 +37,7 @@ namespace LcmsSpectator.Readers
         public MtdbReader(string filePath)
         {
             this.filePath = filePath;
-            this.Modifications = new List<Modification>();
+            Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -49,7 +48,7 @@ namespace LcmsSpectator.Readers
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
         public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
-            return this.ReadAsync().Result;
+            return ReadAsync().Result;
         }
 
         /// <summary>
@@ -62,12 +61,12 @@ namespace LcmsSpectator.Readers
         {
             var prsms = new List<PrSm>();
 
-            if (!File.Exists(this.filePath))
+            if (!File.Exists(filePath))
             {
                 return prsms;
             }
 
-            TargetDatabase database = await Task.Run(() => MtdbCreator.LoadDB(this.filePath));
+            var database = await Task.Run(() => MtdbCreator.LoadDB(filePath));
 
             foreach (var target in database.ConsensusTargets)
             {
@@ -76,19 +75,19 @@ namespace LcmsSpectator.Readers
                     // Degan: attempting to make it recognize the proteins from .mtdb format
                     foreach (var prot in id.Proteins)
                     {
-                        string strippedSequence = target.Sequence;
+                        var strippedSequence = target.Sequence;
                         strippedSequence = strippedSequence.Remove(0, 2);
                         strippedSequence = strippedSequence.Remove(strippedSequence.Length - 2, 2);
-                        PrSm entry = new PrSm { Sequence = new Sequence(strippedSequence, new AminoAcidSet()) };
+                        var entry = new PrSm { Sequence = new Sequence(strippedSequence, new AminoAcidSet()) };
 
-                        string rawSequence = target.Sequence;
-                        int offset = target.Sequence.IndexOf('.');
-                        int length = target.Sequence.Length;
+                        var rawSequence = target.Sequence;
+                        var offset = target.Sequence.IndexOf('.');
+                        var length = target.Sequence.Length;
 
                         foreach (var ptm in id.Ptms)
                         {
                             var position = rawSequence.Length - (length - (ptm.Location + offset));
-                            string symbol = string.Empty;
+                            var symbol = string.Empty;
 
                             // We only need to add the sign on positive values - the '-' is automatic on negative values
                             if (ptm.Mass >= 0)
@@ -98,8 +97,8 @@ namespace LcmsSpectator.Readers
 
                             rawSequence = rawSequence.Insert(position + 1, symbol + ptm.Mass);
 
-                            Composition modComposition = Composition.ParseFromPlainString(ptm.Formula);
-                            Modification mod = IcParameters.Instance.RegisterModification(ptm.Name, modComposition);
+                            var modComposition = Composition.ParseFromPlainString(ptm.Formula);
+                            var mod = IcParameters.Instance.RegisterModification(ptm.Name, modComposition);
                             entry.Sequence[ptm.Location - 1] = new ModifiedAminoAcid(entry.Sequence[ptm.Location - 1], mod);
                         }
 
@@ -118,6 +117,6 @@ namespace LcmsSpectator.Readers
             return prsms;
         }
 
-        public IList<Modification> Modifications { get; private set; }
+        public IList<Modification> Modifications { get; }
     }
 }

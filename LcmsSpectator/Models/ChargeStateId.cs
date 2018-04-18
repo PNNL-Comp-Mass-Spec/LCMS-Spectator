@@ -14,7 +14,7 @@ namespace LcmsSpectator.Models
     using System.Collections.Generic;
     using System.Linq;
     using InformedProteomics.Backend.MassSpecData;
-    
+
     /// <summary>
     /// This class is a container for PRSMs that have the same charge state.
     /// </summary>
@@ -26,38 +26,38 @@ namespace LcmsSpectator.Models
         /// <param name="charge">The charge state.</param>
         public ChargeStateId(int charge)
         {
-            this.Charge = charge;
-            this.PrSms = new Dictionary<Tuple<int, string>, PrSm>();
+            Charge = charge;
+            PrSms = new Dictionary<Tuple<int, string>, PrSm>();
         }
 
         public ChargeStateId(PrSm prsm)
         {
-            this.Charge = prsm.Charge;
-            this.ProteinName = prsm.ProteinName;
-            this.ProteinDesc = prsm.ProteinDesc;
-            this.Mass = prsm.Mass;
-            this.Mz = prsm.PrecursorMz;
-            this.PrSms = new Dictionary<Tuple<int, string>, PrSm>();
+            Charge = prsm.Charge;
+            ProteinName = prsm.ProteinName;
+            ProteinDesc = prsm.ProteinDesc;
+            Mass = prsm.Mass;
+            Mz = prsm.PrecursorMz;
+            PrSms = new Dictionary<Tuple<int, string>, PrSm>();
         }
 
-        public string ProteinName { get; private set; }
+        public string ProteinName { get; }
 
-        public string ProteinDesc { get; private set; }
+        public string ProteinDesc { get; }
 
-        public double Mass { get; private set; }
+        public double Mass { get; }
 
-        public double Mz { get; private set; }
+        public double Mz { get; }
 
         /// <summary>
         /// Gets the charge for this charge state.
         /// </summary>
-        public int Charge { get; private set; }
+        public int Charge { get; }
 
         /// <summary>
         /// Gets a dictionary mapping scan number and data set name to a PRSM.
         /// </summary>
         public Dictionary<Tuple<int, string>, PrSm> PrSms { get; private set; }
-        
+
         /// <summary>
         /// Add a Protein-Spectrum-Match identification.
         /// </summary>
@@ -65,13 +65,13 @@ namespace LcmsSpectator.Models
         public void Add(PrSm id)
         {
             var key = new Tuple<int, string>(id.Scan, id.RawFileName);
-            if (!this.PrSms.ContainsKey(key))
+            if (!PrSms.ContainsKey(key))
             {
-                this.PrSms.Add(key, id);
+                PrSms.Add(key, id);
             }
             else
             {
-                this.PrSms[key] = id;
+                PrSms[key] = id;
             }
         }
 
@@ -82,9 +82,9 @@ namespace LcmsSpectator.Models
         public void Remove(PrSm id)
         {
             var key = new Tuple<int, string>(id.Scan, id.RawFileName);
-            if (this.PrSms.ContainsKey(key))
+            if (PrSms.ContainsKey(key))
             {
-                this.PrSms.Remove(key);
+                PrSms.Remove(key);
             }
         }
 
@@ -95,7 +95,7 @@ namespace LcmsSpectator.Models
         public PrSm GetHighestScoringPrSm()
         {
             PrSm highest = null;
-            foreach (var prsm in this.PrSms.Values)
+            foreach (var prsm in PrSms.Values)
             {
                 if (!prsm.Score.Equals(double.NaN) && (highest == null || prsm.CompareTo(highest) >= 0))
                 {
@@ -113,7 +113,7 @@ namespace LcmsSpectator.Models
         /// <param name="dataSetName">Name of the data this for the LCMSRun.</param>
         public void SetLcmsRun(ILcMsRun lcms, string dataSetName)
         {
-            foreach (var prsm in this.PrSms.Values)
+            foreach (var prsm in PrSms.Values)
             {
                 prsm.RawFileName = dataSetName;
                 prsm.LcMs = lcms;
@@ -128,7 +128,7 @@ namespace LcmsSpectator.Models
         public bool Contains(PrSm id)
         {
             var key = new Tuple<int, string>(id.Scan, id.RawFileName);
-            return this.PrSms.ContainsKey(key);
+            return PrSms.ContainsKey(key);
         }
 
         /// <summary>
@@ -137,8 +137,8 @@ namespace LcmsSpectator.Models
         /// <param name="rawFileName">Name of the data set.</param>
         public void RemovePrSmsFromRawFile(string rawFileName)
         {
-            var newPrsms = this.PrSms.Where(prsm => prsm.Value.RawFileName != rawFileName).ToDictionary(prsm => prsm.Key, prsm => prsm.Value);
-            this.PrSms = newPrsms;
+            var newPrsms = PrSms.Where(prsm => prsm.Value.RawFileName != rawFileName).ToDictionary(prsm => prsm.Key, prsm => prsm.Value);
+            PrSms = newPrsms;
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace LcmsSpectator.Models
             /// <param name="x">Left charge state.</param>
             /// <param name="y">Right charge state.</param>
             /// <returns>
-            /// Integer value indicating whether the left charge state is 
+            /// Integer value indicating whether the left charge state is
             /// less than, equal to, or greater than right charge state.
             /// </returns>
             public int Compare(ChargeStateId x, ChargeStateId y)

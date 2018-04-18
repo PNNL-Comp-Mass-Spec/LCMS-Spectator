@@ -12,7 +12,7 @@ namespace LcmsSpectator.PlotModels
 {
     using InformedProteomics.Backend.Data.Spectrometry;
     using OxyPlot;
-    
+
     /// <summary>
     /// Data point for a XIC point. (Retention Time vs Intensity)
     /// </summary>
@@ -28,11 +28,11 @@ namespace LcmsSpectator.PlotModels
         /// <param name="title">The title.</param>
         public XicDataPoint(double x, int scanNum, double y, int index, string title)
         {
-            this.X = x;
-            this.Y = y;
-            this.ScanNum = scanNum;
-            this.Index = index;
-            this.Title = title;
+            X = x;
+            Y = y;
+            ScanNum = scanNum;
+            Index = index;
+            Title = title;
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace LcmsSpectator.PlotModels
         /// <returns>OxyPlot data point.</returns>
         public DataPoint GetDataPoint()
         {
-            return new DataPoint(this.X, this.Y);
+            return new DataPoint(X, Y);
         }
     }
 }

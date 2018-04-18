@@ -13,9 +13,8 @@ namespace LcmsSpectator.Views
     using System.Collections.Generic;
     using System.Windows;
     using System.Windows.Controls;
-    using System.Windows.Data;
     using System.Windows.Input;
-    
+
     /// <summary>
     /// Interaction logic for FilterView.xaml
     /// </summary>
@@ -26,9 +25,9 @@ namespace LcmsSpectator.Views
         /// </summary>
         public FilterView()
         {
-            EventManager.RegisterClassHandler(typeof(TextBox), UIElement.PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(SelectivelyHandleMouseButton), true); 
-            EventManager.RegisterClassHandler(typeof(TextBox), UIElement.GotKeyboardFocusEvent, new RoutedEventHandler(SelectAllText), true);
-            this.Loaded += (o, e) =>
+            EventManager.RegisterClassHandler(typeof(TextBox), PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(SelectivelyHandleMouseButton), true);
+            EventManager.RegisterClassHandler(typeof(TextBox), GotKeyboardFocusEvent, new RoutedEventHandler(SelectAllText), true);
+            Loaded += (o, e) =>
             {
                 var element = FindName("FilterValue");
                 var comboBox = element as ComboBox;
@@ -37,8 +36,7 @@ namespace LcmsSpectator.Views
                 var distinctItems = new HashSet<string>();
                 foreach (var item in FilterValue.ItemsSource)
                 {
-                    var filterValue = item as string;
-                    if (filterValue != null && !distinctItems.Contains(filterValue))
+                    if (item is string filterValue && !distinctItems.Contains(filterValue))
                     {
                         distinctItems.Add(filterValue);
                     }
@@ -47,7 +45,7 @@ namespace LcmsSpectator.Views
                 FilterValue.ItemsSource = distinctItems;
             };
 
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         /// <summary>
@@ -58,8 +56,7 @@ namespace LcmsSpectator.Views
         /// <param name="e">The event arguments.</param>
         private static void SelectivelyHandleMouseButton(object sender, MouseButtonEventArgs e)
         {
-            var textbox = sender as TextBox; 
-            if (textbox != null && !textbox.IsKeyboardFocusWithin)
+            if (sender is TextBox textbox && !textbox.IsKeyboardFocusWithin)
             {
                 if (e.OriginalSource.GetType().Name == "FilterValue")
                 {
@@ -77,8 +74,7 @@ namespace LcmsSpectator.Views
         /// <param name="e">The event arguments.</param>
         private static void SelectAllText(object sender, RoutedEventArgs e)
         {
-            var textBox = e.OriginalSource as TextBox;
-            if (textBox != null)
+            if (e.OriginalSource is TextBox textBox)
             {
                 textBox.SelectAll();
             }

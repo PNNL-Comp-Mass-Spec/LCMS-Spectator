@@ -10,11 +10,10 @@
 
 namespace LcmsSpectator.Views
 {
-    using System;
     using System.Windows;
     using System.Windows.Controls;
 
-    using LcmsSpectator.Models;
+    using Models;
 
     /// <summary>
     /// Interaction logic for PrSmView.xaml
@@ -26,13 +25,12 @@ namespace LcmsSpectator.Views
         /// </summary>
         public PrSmView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
-            this.DataContextChanged += (o, e) =>
+            DataContextChanged += (o, e) =>
                 {
-                    var textBox = this.ModificationLocationBox;
-                    var prsm = this.DataContext as PrSm;
-                    if (prsm != null)
+                    var textBox = ModificationLocationBox;
+                    if (DataContext is PrSm prsm)
                     {
                         var text = prsm.ModificationLocations;
                         textBox.Visibility = !string.IsNullOrWhiteSpace(text) ? Visibility.Visible : Visibility.Collapsed;

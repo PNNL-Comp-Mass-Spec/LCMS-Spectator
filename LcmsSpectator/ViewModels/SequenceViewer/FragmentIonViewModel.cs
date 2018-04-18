@@ -2,7 +2,7 @@
 {
     using System.Windows.Media;
 
-    using LcmsSpectator.ViewModels.Data;
+    using Data;
 
     using ReactiveUI;
 
@@ -14,15 +14,9 @@
             set;
         }
 
-        public string ChargeSymbol
-        {
-            get
-            { 
-                return this.LabeledIonViewModel == null || this.LabeledIonViewModel.IonType.Charge < 2 ? 
-                       string.Empty : 
-                       string.Format("{0}+", this.LabeledIonViewModel.IonType.Charge);
-            }
-        }
+        public string ChargeSymbol => LabeledIonViewModel == null || LabeledIonViewModel.IonType.Charge < 2 ?
+                                          string.Empty :
+                                          string.Format("{0}+", LabeledIonViewModel.IonType.Charge);
 
         /// <summary>
         /// The color assigned to this fragment ion.
@@ -34,8 +28,8 @@
         /// </summary>
         public Brush Color
         {
-            get { return this.color; }
-            set { this.RaiseAndSetIfChanged(ref this.color, value); }
+            get => color;
+            set => this.RaiseAndSetIfChanged(ref color, value);
         }
     }
 }

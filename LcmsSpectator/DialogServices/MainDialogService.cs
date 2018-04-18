@@ -15,23 +15,23 @@ namespace LcmsSpectator.DialogServices
     using System;
     using System.Windows;
 
-    using LcmsSpectator.ViewModels;
-    using LcmsSpectator.ViewModels.Data;
-    using LcmsSpectator.ViewModels.Dms;
-    using LcmsSpectator.ViewModels.FileSelectors;
-    using LcmsSpectator.ViewModels.Filters;
-    using LcmsSpectator.ViewModels.Modifications;
-    using LcmsSpectator.ViewModels.Plots;
-    using LcmsSpectator.ViewModels.SequenceViewer;
-    using LcmsSpectator.ViewModels.StableIsotopeViewer;
-    using LcmsSpectator.Views;
-    using LcmsSpectator.Views.Data;
-    using LcmsSpectator.Views.FileSelectors;
-    using LcmsSpectator.Views.Filters;
-    using LcmsSpectator.Views.Modifications;
-    using LcmsSpectator.Views.Plots;
-    using LcmsSpectator.Views.SequenceViewer;
-    using LcmsSpectator.Views.StableIsotopeViewer;
+    using ViewModels;
+    using ViewModels.Data;
+    using ViewModels.Dms;
+    using ViewModels.FileSelectors;
+    using ViewModels.Filters;
+    using ViewModels.Modifications;
+    using ViewModels.Plots;
+    using ViewModels.SequenceViewer;
+    using ViewModels.StableIsotopeViewer;
+    using Views;
+    using Views.Data;
+    using Views.FileSelectors;
+    using Views.Filters;
+    using Views.Modifications;
+    using Views.Plots;
+    using Views.SequenceViewer;
+    using Views.StableIsotopeViewer;
 
     //using LcmsSpectator.Views.StableIsotopeViewer;
 

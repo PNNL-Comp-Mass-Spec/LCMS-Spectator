@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace LcmsSpectator.Utils
 {
@@ -31,14 +28,14 @@ namespace LcmsSpectator.Utils
         /// <returns>Converted value.</returns>
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string formatted = string.Empty;
+            var formatted = string.Empty;
             var sequence = value as Sequence;
 
             var stringBuilder = new StringBuilder();
 
             if (sequence != null)
             {
-                int pos = 0;
+                var pos = 0;
                 foreach (var aa in sequence)
                 {
                     if (pos > 0 && pos % LineLength == 0)
@@ -48,8 +45,7 @@ namespace LcmsSpectator.Utils
 
                     pos++;
 
-                    var modAa = aa as ModifiedAminoAcid;
-                    var aminoAcidText = modAa == null
+                    var aminoAcidText = !(aa is ModifiedAminoAcid modAa)
                                      ? aa.Residue.ToString()
                                      : string.Format("{0}[{1}]", modAa.Residue, modAa.Modification.Name);
                     stringBuilder.Append(aminoAcidText);

@@ -6,36 +6,32 @@ using System.Threading.Tasks;
 
 namespace LcmsSpectator.Readers
 {
-    using System.Windows;
-
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers.SequenceReaders;
-
-    using MTDBFramework.IO;
+    using Models;
+    using SequenceReaders;
 
     using PHRPReader;
 
     public class MsgfSynopsisReader : IIdFileReader
     {
-        private string filePath;
+        private readonly string filePath;
 
         public MsgfSynopsisReader(string filePath)
         {
             this.filePath = filePath;
-            this.Modifications = new List<Modification>();
+            Modifications = new List<Modification>();
         }
 
         /// <summary>
         /// Gets a list of modifications that potentially need to be registered after reading.
         /// </summary>
-        public IList<Modification> Modifications { get; private set; }
+        public IList<Modification> Modifications { get; }
 
         public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             var oStartupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = true };
-            var phrpReader = new clsPHRPReader(this.filePath, oStartupOptions);
+            var phrpReader = new clsPHRPReader(filePath, oStartupOptions);
 
             if (!string.IsNullOrEmpty(phrpReader.ErrorMessage))
             {
@@ -49,7 +45,7 @@ namespace LcmsSpectator.Readers
                 var psm = phrpReader.CurrentPSM;
                 var proteins = psm.Proteins;
 
-                var parsedSequence = this.ParseSequence(psm.PeptideCleanSequence, psm.ModifiedResidues);
+                var parsedSequence = ParseSequence(psm.PeptideCleanSequence, psm.ModifiedResidues);
                 foreach (var protein in proteins)
                 {
                     var prsm = new PrSm
@@ -65,7 +61,7 @@ namespace LcmsSpectator.Readers
                         QValue = 0,
                     };
 
-                    prsm.SetSequence(this.GetSequenceText(parsedSequence), parsedSequence);
+                    prsm.SetSequence(GetSequenceText(parsedSequence), parsedSequence);
 
                     identifications.Add(prsm);
                 }
@@ -77,7 +73,7 @@ namespace LcmsSpectator.Readers
         public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             var oStartupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = true };
-            var phrpReader = new clsPHRPReader(this.filePath, oStartupOptions);
+            var phrpReader = new clsPHRPReader(filePath, oStartupOptions);
 
             if (!string.IsNullOrEmpty(phrpReader.ErrorMessage))
             {
@@ -94,7 +90,7 @@ namespace LcmsSpectator.Readers
                             var psm = phrpReader.CurrentPSM;
                             var proteins = psm.Proteins;
 
-                            var parsedSequence = this.ParseSequence(psm.PeptideCleanSequence, psm.ModifiedResidues);
+                            var parsedSequence = ParseSequence(psm.PeptideCleanSequence, psm.ModifiedResidues);
                             foreach (var protein in proteins)
                             {
                                 var prsm = new PrSm
@@ -110,7 +106,7 @@ namespace LcmsSpectator.Readers
                                                    QValue = 0,
                                                };
 
-                                prsm.SetSequence(this.GetSequenceText(parsedSequence), parsedSequence);
+                                prsm.SetSequence(GetSequenceText(parsedSequence), parsedSequence);
 
                                 ids.Add(prsm);
                             }
@@ -134,23 +130,22 @@ namespace LcmsSpectator.Readers
             var sequence = sequenceReader.Read(sequenceText);
             foreach (var mod in modInfo)
             {
-                if (!mod.AmbiguousMod)
-                {
-                    var def = mod.ModDefinition;
-                    var location = mod.ResidueLocInPeptide - 1;
-                    var aminoAcid = sequence[location];
-                    var modification = this.TryGetExistingModification(
-                        mod.ModDefinition.MassCorrectionTag,
-                        mod.ModDefinition.ModificationMass);
+                if (mod.AmbiguousMod)
+                    continue;
 
-                    if (modification == null)
-                    {   // could not find existing modification
-                        modification = new Modification(0, mod.ModDefinition.ModificationMass, mod.ModDefinition.MassCorrectionTag);
-                        this.Modifications.Add(modification);
-                    }
+                var location = mod.ResidueLocInPeptide - 1;
+                var aminoAcid = sequence[location];
+                var modification = TryGetExistingModification(
+                    mod.ModDefinition.MassCorrectionTag,
+                    mod.ModDefinition.ModificationMass);
 
-                    sequence[location] = new ModifiedAminoAcid(aminoAcid, modification);
+                if (modification == null)
+                {   // could not find existing modification
+                    modification = new Modification(0, mod.ModDefinition.ModificationMass, mod.ModDefinition.MassCorrectionTag);
+                    Modifications.Add(modification);
                 }
+
+                sequence[location] = new ModifiedAminoAcid(aminoAcid, modification);
             }
 
             // Force it to recalculate mass now that the modifications have been added.
@@ -165,8 +160,7 @@ namespace LcmsSpectator.Readers
             foreach (var aminoAcid in sequence)
             {
                 stringBuilder.Append(aminoAcid.Residue);
-                var modifiedAminoAcid = aminoAcid as ModifiedAminoAcid;
-                if (modifiedAminoAcid != null)
+                if (aminoAcid is ModifiedAminoAcid modifiedAminoAcid)
                 {
                     stringBuilder.AppendFormat("[{0}]", modifiedAminoAcid.Modification.Name);
                 }

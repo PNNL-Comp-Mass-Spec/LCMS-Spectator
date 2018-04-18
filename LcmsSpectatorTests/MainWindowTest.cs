@@ -1,13 +1,7 @@
 ﻿namespace LcmsSpectatorTests
 {
-    using System.IO;
-    using InformedProteomics.Backend.MassSpecData;
     using InformedProteomics.Backend.Results;
 
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers;
-    using LcmsSpectator.ViewModels;
-    using LcmsSpectatorTests.DialogServices;
     using NUnit.Framework;
 
     using PSI_Interface.IdentData;
@@ -18,19 +12,19 @@
         [Test]
         public void TestRegisterModification()
         {
-            
+
         }
 
         [Test]
         public void TestUnregisterModification()
         {
-            
+
         }
 
         [Test]
         public void TestUpdateModification()
         {
-            
+
         }
 
         [Test]

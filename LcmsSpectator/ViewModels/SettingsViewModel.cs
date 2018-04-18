@@ -15,9 +15,9 @@ namespace LcmsSpectator.ViewModels
     using System.Windows.Media;
 
     using InformedProteomics.Backend.Data.Spectrometry;
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.ViewModels.Modifications;
+    using Config;
+    using DialogServices;
+    using Modifications;
 
     using OxyPlot.Wpf;
 
@@ -46,63 +46,63 @@ namespace LcmsSpectator.ViewModels
         public SettingsViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.ToleranceUnits = new ReactiveList<ToleranceUnit> { ToleranceUnit.Ppm, ToleranceUnit.Th };
-            this.PrecursorIonTolerance = IcParameters.Instance.PrecursorTolerancePpm.GetValue();
-            this.PrecursorIonToleranceUnit = IcParameters.Instance.PrecursorTolerancePpm.GetUnit();
-            this.ProductIonTolerance = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
-            this.ProductIonToleranceUnit = IcParameters.Instance.ProductIonTolerancePpm.GetUnit();
-            this.IonCorrelationThreshold = IcParameters.Instance.IonCorrelationThreshold;
-            this.PointsToSmooth = IcParameters.Instance.PointsToSmooth;
-            this.PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
-            this.ShowInstrumentData = IcParameters.Instance.ShowInstrumentData;
-            this.AutomaticallySelectIonTypes = IcParameters.Instance.AutomaticallySelectIonTypes;
-            this.CidHcdIonTypes = IcParameters.Instance.GetCidHcdIonTypes();
-            this.EtdIonTypes = IcParameters.Instance.GetEtdIonTypes();
-            this.ExportImageDpi = IcParameters.Instance.ExportImageDpi;
+            ToleranceUnits = new ReactiveList<ToleranceUnit> { ToleranceUnit.Ppm, ToleranceUnit.Mz };
+            PrecursorIonTolerance = IcParameters.Instance.PrecursorTolerancePpm.GetValue();
+            PrecursorIonToleranceUnit = IcParameters.Instance.PrecursorTolerancePpm.GetUnit();
+            ProductIonTolerance = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+            ProductIonToleranceUnit = IcParameters.Instance.ProductIonTolerancePpm.GetUnit();
+            IonCorrelationThreshold = IcParameters.Instance.IonCorrelationThreshold;
+            PointsToSmooth = IcParameters.Instance.PointsToSmooth;
+            PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
+            ShowInstrumentData = IcParameters.Instance.ShowInstrumentData;
+            AutomaticallySelectIonTypes = IcParameters.Instance.AutomaticallySelectIonTypes;
+            CidHcdIonTypes = IcParameters.Instance.GetCidHcdIonTypes();
+            EtdIonTypes = IcParameters.Instance.GetEtdIonTypes();
+            ExportImageDpi = IcParameters.Instance.ExportImageDpi;
 
-            this.FeatureColors = new ColorListViewModel();
-            this.IdColors = new ColorListViewModel();
+            FeatureColors = new ColorListViewModel();
+            IdColors = new ColorListViewModel();
 
             var oxyScanCol = IcParameters.Instance.Ms2ScanColor;
-            this.Ms2ScanColor = new Color { A = oxyScanCol.A, R = oxyScanCol.R, G = oxyScanCol.G, B = oxyScanCol.B };
+            Ms2ScanColor = new Color { A = oxyScanCol.A, R = oxyScanCol.R, G = oxyScanCol.G, B = oxyScanCol.B };
 
             foreach (var color in IcParameters.Instance.FeatureColors)
             {
-                this.FeatureColors.ColorViewModels.Add(new ColorViewModel { SelectedColor = new Color { A = color.A, R = color.R, B = color.B, G = color.G } });
+                FeatureColors.ColorViewModels.Add(new ColorViewModel { SelectedColor = new Color { A = color.A, R = color.R, B = color.B, G = color.G } });
             }
 
             foreach (var color in IcParameters.Instance.IdColors)
             {
-                this.IdColors.ColorViewModels.Add(new ColorViewModel { SelectedColor = new Color { A = color.A, R = color.R, B = color.B, G = color.G } });
+                IdColors.ColorViewModels.Add(new ColorViewModel { SelectedColor = new Color { A = color.A, R = color.R, B = color.B, G = color.G } });
             }
 
-            this.Modifications = new ReactiveList<SearchModificationViewModel>();
+            Modifications = new ReactiveList<SearchModificationViewModel>();
             foreach (var searchModification in IcParameters.Instance.SearchModifications)
             {
                 var modificationVm = new SearchModificationViewModel(searchModification, this.dialogService);
                 ////modificationVm.RemoveModificationCommand.Subscribe(_ => this.RemoveModification(modificationVm));
-                this.Modifications.Add(modificationVm);
+                Modifications.Add(modificationVm);
             }
 
             var addModificationCommand = ReactiveCommand.Create();
-            addModificationCommand.Subscribe(_ => this.AddModificationImplementation());
-            this.AddModificationCommand = addModificationCommand;
+            addModificationCommand.Subscribe(_ => AddModificationImplementation());
+            AddModificationCommand = addModificationCommand;
 
             var createNewModificationCommand = ReactiveCommand.Create();
-            createNewModificationCommand.Subscribe(_ => this.CreateNewModificationImplementation());
-            this.CreateNewModificationCommand = createNewModificationCommand;
+            createNewModificationCommand.Subscribe(_ => CreateNewModificationImplementation());
+            CreateNewModificationCommand = createNewModificationCommand;
 
             var saveCommand = ReactiveCommand.Create();
-            saveCommand.Subscribe(_ => this.SaveImplementation());
-            this.SaveCommand = saveCommand;
+            saveCommand.Subscribe(_ => SaveImplementation());
+            SaveCommand = saveCommand;
 
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => this.CancelImplementation());
-            this.CancelCommand = cancelCommand;
+            cancelCommand.Subscribe(_ => CancelImplementation());
+            CancelCommand = cancelCommand;
 
             HeavyModificationsViewModel = new HeavyModificationsViewModel(dialogService);
 
-            this.Status = false;
+            Status = false;
         }
 
         /// <summary>
@@ -113,27 +113,27 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets a command that adds a search modification to the modification selector list.
         /// </summary>
-        public IReactiveCommand AddModificationCommand { get; private set; }
+        public IReactiveCommand AddModificationCommand { get; }
 
         /// <summary>
         /// Gets a command that creates and register a new modification.
         /// </summary>
-        public IReactiveCommand CreateNewModificationCommand { get; private set; }
+        public IReactiveCommand CreateNewModificationCommand { get; }
 
         /// <summary>
         /// Gets a command that validates all settings and saves them.
         /// </summary>
-        public IReactiveCommand SaveCommand { get; private set; }
+        public IReactiveCommand SaveCommand { get; }
 
         /// <summary>
         /// Gets a command that closes settings without saving.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; }
 
         /// <summary>
         /// Gets the view Model for light/heavy modification selector
         /// </summary>
-        public HeavyModificationsViewModel HeavyModificationsViewModel { get; private set; }
+        public HeavyModificationsViewModel HeavyModificationsViewModel { get; }
 
         /// <summary>
         /// Gets or sets a list of possible tolerance units.
@@ -194,12 +194,12 @@ namespace LcmsSpectator.ViewModels
         /// Gets a value indicating whether the instrument data (instrument reported mass, instrument reported charge) is
         /// displayed in the identifications data grid?
         /// </summary>
-        public bool ShowInstrumentData { get; private set; }
+        public bool ShowInstrumentData { get; }
 
         /// <summary>
         /// Gets the modifications displayed in the application.
         /// </summary>
-        public ReactiveList<SearchModificationViewModel> Modifications { get; private set; }
+        public ReactiveList<SearchModificationViewModel> Modifications { get; }
 
         /// <summary>
         /// Gets a value indicating whether the settings should be saved.
@@ -224,8 +224,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool AutomaticallySelectIonTypes
         {
-            get { return this.automaticallySelectIonTypes; }
-            set { this.RaiseAndSetIfChanged(ref this.automaticallySelectIonTypes, value); }
+            get => automaticallySelectIonTypes;
+            set => this.RaiseAndSetIfChanged(ref automaticallySelectIonTypes, value);
         }
 
         /// <summary>
@@ -236,12 +236,12 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets the view model for the feature color list.
         /// </summary>
-        public ColorListViewModel FeatureColors { get; private set; }
+        public ColorListViewModel FeatureColors { get; }
 
         /// <summary>
         /// Gets the view model for the id color list.
         /// </summary>
-        public ColorListViewModel IdColors { get; private set; }
+        public ColorListViewModel IdColors { get; }
 
         /// <summary>
         /// Gets or sets the color for the MS/MS scans on the feature map.
@@ -254,9 +254,9 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void AddModificationImplementation()
         {
-            var modVm = new SearchModificationViewModel(this.dialogService);
+            var modVm = new SearchModificationViewModel(dialogService);
             ////modVm.RemoveModificationCommand.Subscribe(_ => this.RemoveModification(modVm));
-            this.Modifications.Add(modVm);
+            Modifications.Add(modVm);
         }
 
         /// <summary>
@@ -265,8 +265,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void CreateNewModificationImplementation()
         {
-            var customModVm = new CustomModificationViewModel(string.Empty, false, this.dialogService);
-            if (this.dialogService.OpenCustomModification(customModVm))
+            var customModVm = new CustomModificationViewModel(string.Empty, false, dialogService);
+            if (dialogService.OpenCustomModification(customModVm))
             {
                 IcParameters.Instance.RegisterModification(customModVm.ModificationName, customModVm.Composition);
             }
@@ -278,34 +278,34 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void SaveImplementation()
         {
-            if (this.PointsToSmooth != 0 && (this.PointsToSmooth % 2 == 0 || this.PointsToSmooth < 3))
+            if (PointsToSmooth != 0 && (PointsToSmooth % 2 == 0 || PointsToSmooth < 3))
             {
-                this.dialogService.MessageBox("Points To Smooth must be an odd number of at least 3. 0 = No smoothing.");
+                dialogService.MessageBox("Points To Smooth must be an odd number of at least 3. 0 = No smoothing.");
                 return;
             }
 
-            if (this.ExportImageDpi < 1)
+            if (ExportImageDpi < 1)
             {
-                this.dialogService.MessageBox("Export Image DPI must be at least 1.");
+                dialogService.MessageBox("Export Image DPI must be at least 1.");
                 return;
             }
 
-            IcParameters.Instance.PrecursorTolerancePpm = new Tolerance(this.PrecursorIonTolerance, this.PrecursorIonToleranceUnit);
-            IcParameters.Instance.ProductIonTolerancePpm = new Tolerance(this.ProductIonTolerance, this.ProductIonToleranceUnit);
-            IcParameters.Instance.IonCorrelationThreshold = this.IonCorrelationThreshold;
-            IcParameters.Instance.PointsToSmooth = this.PointsToSmooth;
-            IcParameters.Instance.PrecursorRelativeIntensityThreshold = this.PrecursorRelativeIntensityThreshold;
-            IcParameters.Instance.ShowInstrumentData = this.ShowInstrumentData;
-            IcParameters.Instance.AutomaticallySelectIonTypes = this.AutomaticallySelectIonTypes;
-            IcParameters.Instance.CidHcdIonTypes = IcParameters.IonTypeStringParse(this.CidHcdIonTypes);
-            IcParameters.Instance.EtdIonTypes = IcParameters.IonTypeStringParse(this.EtdIonTypes);
-            IcParameters.Instance.ExportImageDpi = this.ExportImageDpi;
+            IcParameters.Instance.PrecursorTolerancePpm = new Tolerance(PrecursorIonTolerance, PrecursorIonToleranceUnit);
+            IcParameters.Instance.ProductIonTolerancePpm = new Tolerance(ProductIonTolerance, ProductIonToleranceUnit);
+            IcParameters.Instance.IonCorrelationThreshold = IonCorrelationThreshold;
+            IcParameters.Instance.PointsToSmooth = PointsToSmooth;
+            IcParameters.Instance.PrecursorRelativeIntensityThreshold = PrecursorRelativeIntensityThreshold;
+            IcParameters.Instance.ShowInstrumentData = ShowInstrumentData;
+            IcParameters.Instance.AutomaticallySelectIonTypes = AutomaticallySelectIonTypes;
+            IcParameters.Instance.CidHcdIonTypes = IcParameters.IonTypeStringParse(CidHcdIonTypes);
+            IcParameters.Instance.EtdIonTypes = IcParameters.IonTypeStringParse(EtdIonTypes);
+            IcParameters.Instance.ExportImageDpi = ExportImageDpi;
 
-            IcParameters.Instance.FeatureColors = this.FeatureColors.GetOxyColors();
-            IcParameters.Instance.IdColors = this.IdColors.GetOxyColors();
-            IcParameters.Instance.Ms2ScanColor = this.Ms2ScanColor.ToOxyColor();
+            IcParameters.Instance.FeatureColors = FeatureColors.GetOxyColors();
+            IcParameters.Instance.IdColors = IdColors.GetOxyColors();
+            IcParameters.Instance.Ms2ScanColor = Ms2ScanColor.ToOxyColor();
 
-            var modificationList = this.Modifications.Select(searchModificationVm => searchModificationVm.SearchModification)
+            var modificationList = Modifications.Select(searchModificationVm => searchModificationVm.SearchModification)
                                                 .Where(searchModification => searchModification != null).ToList();
             IcParameters.Instance.SearchModifications = modificationList;
 
@@ -313,11 +313,8 @@ namespace LcmsSpectator.ViewModels
 
             IcParameters.Instance.Update();
 
-            this.Status = true;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, null);
-            }
+            Status = true;
+            ReadyToClose?.Invoke(this, null);
         }
 
         /// <summary>
@@ -326,10 +323,7 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private void CancelImplementation()
         {
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, null);
-            }
+            ReadyToClose?.Invoke(this, null);
         }
 
         /// <summary>
@@ -340,7 +334,7 @@ namespace LcmsSpectator.ViewModels
         {
             if (modVm != null)
             {
-                this.Modifications.Remove(modVm);
+                Modifications.Remove(modVm);
             }
         }
     }

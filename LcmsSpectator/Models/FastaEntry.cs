@@ -62,10 +62,10 @@ namespace LcmsSpectator.Models
             ////    .Select(Sequence.GetSequenceFromMsGfPlusPeptideStr)
             ////    .Subscribe(sequence => this.ProteinSequence = sequence);
 
-            this.ProteinName = string.Empty;
-            this.ProteinSequenceText = string.Empty;
-            this.proteinDescription = string.Empty;
-            this.Selected = true;
+            ProteinName = string.Empty;
+            ProteinSequenceText = string.Empty;
+            proteinDescription = string.Empty;
+            Selected = true;
         }
 
         /// <summary>
@@ -73,8 +73,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public string ProteinName
         {
-            get { return this.proteinName; }
-            set { this.RaiseAndSetIfChanged(ref this.proteinName, value); }
+            get => proteinName;
+            set => this.RaiseAndSetIfChanged(ref proteinName, value);
         }
 
         /// <summary>
@@ -82,8 +82,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public string ProteinDescription
         {
-            get { return this.proteinDescription; }
-            set { this.RaiseAndSetIfChanged(ref this.proteinDescription, value); }
+            get => proteinDescription;
+            set => this.RaiseAndSetIfChanged(ref proteinDescription, value);
         }
 
         /// <summary>
@@ -91,8 +91,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public string ProteinSequenceText
         {
-            get { return this.proteinSequenceText; }
-            set { this.RaiseAndSetIfChanged(ref this.proteinSequenceText, value); }
+            get => proteinSequenceText;
+            set => this.RaiseAndSetIfChanged(ref proteinSequenceText, value);
         }
 
         /// <summary>
@@ -100,8 +100,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public bool Selected
         {
-            get { return this.selected; }
-            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
+            get => selected;
+            set => this.RaiseAndSetIfChanged(ref selected, value);
         }
 
         /// <summary>
@@ -109,8 +109,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public Sequence ProteinSequence
         {
-            get { return this.proteinSequence; }
-            set { this.RaiseAndSetIfChanged(ref this.proteinSequence, value); }
+            get => proteinSequence;
+            set => this.RaiseAndSetIfChanged(ref proteinSequence, value);
         }
 
         /// <summary>
@@ -121,29 +121,29 @@ namespace LcmsSpectator.Models
             get
             {
                 var startIndex = 0;
-                var endIndex = Math.Min(MaxLineLength, this.ProteinSequenceText.Length - startIndex);
+                var endIndex = Math.Min(MaxLineLength, ProteinSequenceText.Length - startIndex);
                 var strbuilder =
                     new StringBuilder(
-                        this.ProteinSequenceText.Length + (this.ProteinSequenceText.Length / MaxLineLength));
+                        ProteinSequenceText.Length + (ProteinSequenceText.Length / MaxLineLength));
 
-                while (endIndex <= this.ProteinSequenceText.Length)
+                while (endIndex <= ProteinSequenceText.Length)
                 {
                     var length = endIndex - startIndex;
-                    strbuilder.Append(this.ProteinSequenceText.Substring(startIndex, length));
+                    strbuilder.Append(ProteinSequenceText.Substring(startIndex, length));
                     strbuilder.Append('\n');
                     startIndex += MaxLineLength;
-                    if (endIndex == this.ProteinSequenceText.Length)
+                    if (endIndex == ProteinSequenceText.Length)
                     {
                         break;
                     }
 
-                    endIndex = Math.Min(endIndex + MaxLineLength, this.ProteinSequenceText.Length);
+                    endIndex = Math.Min(endIndex + MaxLineLength, ProteinSequenceText.Length);
                 }
 
                 return string.Format(
                     ">{0} {1}\n{2}",
-                    this.ProteinName,
-                    this.ProteinDescription,
+                    ProteinName,
+                    ProteinDescription,
                     strbuilder);
             }
         }

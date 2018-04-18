@@ -12,7 +12,7 @@ namespace LcmsSpectator.ViewModels.Dms
 {
     using System;
 
-    using LcmsSpectator.Readers;
+    using Readers;
 
     using ReactiveUI;
 
@@ -67,7 +67,7 @@ namespace LcmsSpectator.ViewModels.Dms
         private string organismDb;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DmsJobViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="DmsJobViewModel"/> class.
         /// </summary>
         /// <param name="jobInfo">
         /// Existing job to edit.
@@ -76,7 +76,7 @@ namespace LcmsSpectator.ViewModels.Dms
         {
             if (jobInfo != null)
             {
-                this.UdtJobInfo = jobInfo.Value;   
+                UdtJobInfo = jobInfo.Value;
             }
         }
 
@@ -88,30 +88,30 @@ namespace LcmsSpectator.ViewModels.Dms
             get
             {
                 DmsLookupUtility.UdtJobInfo jobInfo;
-                jobInfo.Job = this.Job;
-                jobInfo.DatasetId = this.DatasetId;
-                jobInfo.Tool = this.Tool;
-                jobInfo.Completed = this.Completed;
-                jobInfo.JobFolderPath = this.JobFolderPath;
-                jobInfo.ParameterFile = this.ParameterFile;
-                jobInfo.SettingsFile = this.SettingsFile;
-                jobInfo.ProteinCollection = this.ProteinCollection;
-                jobInfo.OrganismDb = this.OrganismDb;
+                jobInfo.Job = Job;
+                jobInfo.DatasetId = DatasetId;
+                jobInfo.Tool = Tool;
+                jobInfo.Completed = Completed;
+                jobInfo.JobFolderPath = JobFolderPath;
+                jobInfo.ParameterFile = ParameterFile;
+                jobInfo.SettingsFile = SettingsFile;
+                jobInfo.ProteinCollection = ProteinCollection;
+                jobInfo.OrganismDb = OrganismDb;
                 return jobInfo;
             }
 
             set
             {
-                DmsLookupUtility.UdtJobInfo jobInfo = value;
-                this.Job = jobInfo.Job;
-                this.DatasetId = jobInfo.DatasetId;
-                this.Tool = jobInfo.Tool;
-                this.Completed = jobInfo.Completed;
-                this.JobFolderPath = jobInfo.JobFolderPath;
-                this.ParameterFile = jobInfo.ParameterFile;
-                this.SettingsFile = jobInfo.SettingsFile;
-                this.ProteinCollection = jobInfo.ProteinCollection;
-                this.OrganismDb = jobInfo.OrganismDb;
+                var jobInfo = value;
+                Job = jobInfo.Job;
+                DatasetId = jobInfo.DatasetId;
+                Tool = jobInfo.Tool;
+                Completed = jobInfo.Completed;
+                JobFolderPath = jobInfo.JobFolderPath;
+                ParameterFile = jobInfo.ParameterFile;
+                SettingsFile = jobInfo.SettingsFile;
+                ProteinCollection = jobInfo.ProteinCollection;
+                OrganismDb = jobInfo.OrganismDb;
                 this.RaisePropertyChanged();
             }
         }
@@ -121,8 +121,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public int Job
         {
-            get { return this.job; }
-            set { this.RaiseAndSetIfChanged(ref this.job, value); }
+            get => job;
+            set => this.RaiseAndSetIfChanged(ref job, value);
         }
 
         /// <summary>
@@ -130,8 +130,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public int DatasetId
         {
-            get { return this.datasetId; }
-            set { this.RaiseAndSetIfChanged(ref this.datasetId, value); }
+            get => datasetId;
+            set => this.RaiseAndSetIfChanged(ref datasetId, value);
         }
 
         /// <summary>
@@ -139,8 +139,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string Tool
         {
-            get { return this.tool; }
-            set { this.RaiseAndSetIfChanged(ref this.tool, value); }
+            get => tool;
+            set => this.RaiseAndSetIfChanged(ref tool, value);
         }
 
         /// <summary>
@@ -148,8 +148,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public DateTime Completed
         {
-            get { return this.completed; }
-            set { this.RaiseAndSetIfChanged(ref this.completed, value); }
+            get => completed;
+            set => this.RaiseAndSetIfChanged(ref completed, value);
         }
 
         /// <summary>
@@ -157,8 +157,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string JobFolderPath
         {
-            get { return this.jobFolderPath; }
-            set { this.RaiseAndSetIfChanged(ref this.jobFolderPath, value); }
+            get => jobFolderPath;
+            set => this.RaiseAndSetIfChanged(ref jobFolderPath, value);
         }
 
         /// <summary>
@@ -166,8 +166,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string ParameterFile
         {
-            get { return this.parameterFile; }
-            set { this.RaiseAndSetIfChanged(ref this.parameterFile, value); }
+            get => parameterFile;
+            set => this.RaiseAndSetIfChanged(ref parameterFile, value);
         }
 
         /// <summary>
@@ -175,8 +175,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string SettingsFile
         {
-            get { return this.settingsFile; }
-            set { this.RaiseAndSetIfChanged(ref this.settingsFile, value); }
+            get => settingsFile;
+            set => this.RaiseAndSetIfChanged(ref settingsFile, value);
         }
 
         /// <summary>
@@ -184,8 +184,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string ProteinCollection
         {
-            get { return this.proteinCollection; }
-            set { this.RaiseAndSetIfChanged(ref this.proteinCollection, value); }
+            get => proteinCollection;
+            set => this.RaiseAndSetIfChanged(ref proteinCollection, value);
         }
 
         /// <summary>
@@ -193,8 +193,8 @@ namespace LcmsSpectator.ViewModels.Dms
         /// </summary>
         public string OrganismDb
         {
-            get { return this.organismDb; }
-            set { this.RaiseAndSetIfChanged(ref this.organismDb, value); }
+            get => organismDb;
+            set => this.RaiseAndSetIfChanged(ref organismDb, value);
         }
     }
 }

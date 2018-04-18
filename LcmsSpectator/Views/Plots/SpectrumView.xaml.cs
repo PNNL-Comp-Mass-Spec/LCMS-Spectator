@@ -24,35 +24,35 @@ namespace LcmsSpectator.Views.Plots
         /// </summary>
         public SpectrumView()
         {
-            this.InitializeComponent();
-            this.Ms2Spectrum.Loaded += (o, e) => { this.Ms2Spectrum.ContextMenu.DataContext = this.Ms2Spectrum.DataContext; };
-            this.PreviousMs1.Loaded += (o, e) => { this.PreviousMs1.ContextMenu.DataContext = this.PreviousMs1.DataContext; };
-            this.NextMs1.Loaded += (o, e) => { this.NextMs1.ContextMenu.DataContext = this.NextMs1.DataContext; };
+            InitializeComponent();
+            Ms2Spectrum.Loaded += (o, e) => { Ms2Spectrum.ContextMenu.DataContext = Ms2Spectrum.DataContext; };
+            PreviousMs1.Loaded += (o, e) => { PreviousMs1.ContextMenu.DataContext = PreviousMs1.DataContext; };
+            NextMs1.Loaded += (o, e) => { NextMs1.ContextMenu.DataContext = NextMs1.DataContext; };
 
-            this.Ms2Spectrum.DataContextChanged += (o, e) =>
+            Ms2Spectrum.DataContextChanged += (o, e) =>
             {
-                this.Ms2Spectrum.ContextMenu.DataContext = this.Ms2Spectrum.DataContext;
+                Ms2Spectrum.ContextMenu.DataContext = Ms2Spectrum.DataContext;
             };
-            this.PreviousMs1.DataContextChanged += (o, e) =>
+            PreviousMs1.DataContextChanged += (o, e) =>
             {
-                this.PreviousMs1.ContextMenu.DataContext = this.PreviousMs1.DataContext;
+                PreviousMs1.ContextMenu.DataContext = PreviousMs1.DataContext;
             };
-            this.NextMs1.DataContextChanged += (o, e) =>
+            NextMs1.DataContextChanged += (o, e) =>
             {
-                this.NextMs1.ContextMenu.DataContext = this.NextMs1.DataContext;
+                NextMs1.ContextMenu.DataContext = NextMs1.DataContext;
             };
 
-            this.AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
-            this.AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
-            this.XMin.Visibility = Visibility.Collapsed;
-            this.XMax.Visibility = Visibility.Collapsed;
-            this.YMin.Visibility = Visibility.Collapsed;
-            this.YMax.Visibility = Visibility.Collapsed;
+            AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
+            AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
+            XMin.Visibility = Visibility.Collapsed;
+            XMax.Visibility = Visibility.Collapsed;
+            YMin.Visibility = Visibility.Collapsed;
+            YMax.Visibility = Visibility.Collapsed;
 
-            this.AutoAdjustYCheck.Checked += this.ManualAdjustmentChecked;
-            this.AutoAdjustYCheck.Unchecked += this.ManualAdjustmentChecked;
-            this.ManualAdjustmentCheck.Checked += this.ManualAdjustmentChecked;
-            this.ManualAdjustmentCheck.Unchecked += this.ManualAdjustmentChecked;
+            AutoAdjustYCheck.Checked += ManualAdjustmentChecked;
+            AutoAdjustYCheck.Unchecked += ManualAdjustmentChecked;
+            ManualAdjustmentCheck.Checked += ManualAdjustmentChecked;
+            ManualAdjustmentCheck.Unchecked += ManualAdjustmentChecked;
         }
 
         /// <summary>
@@ -62,35 +62,35 @@ namespace LcmsSpectator.Views.Plots
         /// <param name="args">The event arguments.</param>
         public void ManualAdjustmentChecked(object sender, EventArgs args)
         {
-            if (this.ManualAdjustmentCheck.IsChecked)
+            if (ManualAdjustmentCheck.IsChecked)
             {
-                this.AdjustXRow.Height = new GridLength(25, GridUnitType.Pixel);
-                this.XMin.Visibility = Visibility.Visible;
-                this.XMax.Visibility = Visibility.Visible;
-                if (!this.AutoAdjustYCheck.IsChecked)
+                AdjustXRow.Height = new GridLength(25, GridUnitType.Pixel);
+                XMin.Visibility = Visibility.Visible;
+                XMax.Visibility = Visibility.Visible;
+                if (!AutoAdjustYCheck.IsChecked)
                 {
-                    this.AdjustYColumn.Width = new GridLength(25, GridUnitType.Pixel);
-                    this.YMin.Visibility = Visibility.Visible;
-                    this.YMax.Visibility = Visibility.Visible;
+                    AdjustYColumn.Width = new GridLength(25, GridUnitType.Pixel);
+                    YMin.Visibility = Visibility.Visible;
+                    YMax.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    this.AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
-                    this.YMin.Visibility = Visibility.Collapsed;
-                    this.YMax.Visibility = Visibility.Collapsed;
+                    AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
+                    YMin.Visibility = Visibility.Collapsed;
+                    YMax.Visibility = Visibility.Collapsed;
                 }
 
-                this.InvalidateVisual();
+                InvalidateVisual();
             }
             else
             {
-                this.AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
-                this.AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
-                this.XMin.Visibility = Visibility.Collapsed;
-                this.XMax.Visibility = Visibility.Collapsed;
-                this.YMin.Visibility = Visibility.Collapsed;
-                this.YMax.Visibility = Visibility.Collapsed;
-                this.InvalidateVisual();
+                AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
+                AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
+                XMin.Visibility = Visibility.Collapsed;
+                XMax.Visibility = Visibility.Collapsed;
+                YMin.Visibility = Visibility.Collapsed;
+                YMax.Visibility = Visibility.Collapsed;
+                InvalidateVisual();
             }
         }
     }

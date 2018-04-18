@@ -10,10 +10,10 @@ namespace LcmsSpectator.Writers.Exporters
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Utils;
 
-    using LcmsSpectator.Models;
-    using LcmsSpectator.PlotModels;
-    using LcmsSpectator.PlotModels.ColorDicionaries;
-    using LcmsSpectator.Utils;
+    using Models;
+    using PlotModels;
+    using PlotModels.ColorDicionaries;
+    using Utils;
 
     using OxyPlot;
     using OxyPlot.Annotations;
@@ -25,8 +25,6 @@ namespace LcmsSpectator.Writers.Exporters
         private readonly IEnumerable<IonType> ionTypes;
 
         private readonly string outputFile;
-
-        private readonly HashSet<BaseIonType> baseIonTypes;
 
         private readonly int dpi;
 
@@ -60,42 +58,42 @@ namespace LcmsSpectator.Writers.Exporters
         {
             progress = progress ?? new Progress<ProgressData>();
             var progressData = new ProgressData();
-            int i = 1;
+            var i = 1;
             foreach (var id in ids)
             {
-                var outPath = Path.Combine(this.outputFile, string.Format("Scan_{0}.png", id.Scan));
-                this.Export(id, outPath);
                 progress.Report(progressData.UpdatePercent((100.0 * i++) / ids.Count));
+                var outPath = Path.Combine(outputFile, string.Format("Scan_{0}.png", id.Scan));
+                Export(id, outPath);
             }
         }
 
         public async Task ExportAsync(PrSm id, string outputPath)
         {
-            var plotModel = await this.GetPlotModelAsync(id);
+            var plotModel = await GetPlotModelAsync(id);
             DynamicResolutionPngExporter.Export(
                         plotModel,
                         outputPath,
                         1280,
                         1024,
                         OxyColors.White,
-                        this.dpi);
+                        dpi);
         }
 
         public void Export(PrSm id, string outputPath)
         {
-            var plotModel = this.GetPlotModel(id);
+            var plotModel = GetPlotModel(id);
             DynamicResolutionPngExporter.Export(
                 plotModel,
                 outputPath,
                 1280,
                 1024,
                 OxyColors.White,
-                this.dpi);
+                dpi);
         }
 
         private Task<PlotModel> GetPlotModelAsync(PrSm id)
         {
-            return Task.Run(() => this.GetPlotModel(id));
+            return Task.Run(() => GetPlotModel(id));
         }
 
         private PlotModel GetPlotModel(PrSm id)
@@ -104,7 +102,7 @@ namespace LcmsSpectator.Writers.Exporters
             var fragSequence = id.GetFragmentationSequence();
             var msLevel = lcms.GetMsLevel(id.Scan);
             var fragments = msLevel == 2 ?
-                            fragSequence.GetFragmentLabels(this.ionTypes.Where(ionType => ionType.Charge <= id.Charge).ToList()) :
+                            fragSequence.GetFragmentLabels(ionTypes.Where(ionType => ionType.Charge <= id.Charge).ToList()) :
                             fragSequence.GetChargePrecursorLabels();
             var spectrum = lcms.GetSpectrum(id.Scan, true);
 

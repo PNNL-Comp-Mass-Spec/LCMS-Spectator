@@ -35,8 +35,8 @@ namespace LcmsSpectator.Utils
                                     int dpi)
         {
             var upscaleFactor = dpi / 96.0;
-            int width = (int)Math.Ceiling(suggestedWidth * upscaleFactor);
-            int height = (int)Math.Ceiling(suggestedHeight * upscaleFactor);
+            var width = (int)Math.Ceiling(suggestedWidth * upscaleFactor);
+            var height = (int)Math.Ceiling(suggestedHeight * upscaleFactor);
 
             PngExporter.Export(plotModel, filePath, width, height, backgroundColor, dpi);
         }

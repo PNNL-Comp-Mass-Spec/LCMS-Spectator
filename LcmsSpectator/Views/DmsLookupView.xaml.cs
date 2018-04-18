@@ -11,7 +11,7 @@
 namespace LcmsSpectator.Views
 {
     using System.Windows;
-    
+
     /// <summary>
     /// Interaction logic for DmsLookupView.xaml
     /// </summary>
@@ -22,7 +22,7 @@ namespace LcmsSpectator.Views
         /// </summary>
         public DmsLookupView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

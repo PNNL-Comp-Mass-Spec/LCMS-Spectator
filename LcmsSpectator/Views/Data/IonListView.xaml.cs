@@ -22,7 +22,7 @@ namespace LcmsSpectator.Views.Data
         /// </summary>
         public IonListView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

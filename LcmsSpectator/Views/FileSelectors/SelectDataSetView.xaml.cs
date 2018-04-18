@@ -22,7 +22,7 @@ namespace LcmsSpectator.Views.FileSelectors
         /// </summary>
         public SelectDataSetView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

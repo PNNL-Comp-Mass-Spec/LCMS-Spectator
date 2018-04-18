@@ -16,7 +16,7 @@ namespace LcmsSpectator.Readers
     using System.Linq;
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using LcmsSpectator.Models;
+    using Models;
 
     /// <summary>
     /// The reader for MS1 feature files.
@@ -41,7 +41,7 @@ namespace LcmsSpectator.Readers
                 if (lineCount == 1 && line != null)
                 { // first line
                     var parts = line.Split(delimeter);
-                    for (int i = 0; i < parts.Length; i++)
+                    for (var i = 0; i < parts.Length; i++)
                     {
                         headers.Add(parts[i], i);
                     }
@@ -83,7 +83,7 @@ namespace LcmsSpectator.Readers
                 "MaxScan"
             };
 
-            string likelihoodVarHeader = "LikelihoodRatio";
+            var likelihoodVarHeader = "LikelihoodRatio";
 
             foreach (var header in expectedHeaders.Where(header => !headers.ContainsKey(header)))
             {
@@ -104,7 +104,7 @@ namespace LcmsSpectator.Readers
             var isotopes = ReadIsotopicEnvelope(parts[headers["Envelope"]]);
             var minCharge = Convert.ToInt32(parts[headers["MinCharge"]]);
             var maxCharge = Convert.ToInt32(parts[headers["MaxCharge"]]);
-            int id = -1;
+            var id = -1;
             if (headers.ContainsKey("FeatureID"))
             {
                 id = Convert.ToInt32(parts[headers["FeatureID"]]);
@@ -112,9 +112,9 @@ namespace LcmsSpectator.Readers
 
             var summedCorr = headers.ContainsKey("SummedCorr") ? Convert.ToDouble(parts[headers["SummedCorr"]]) : 0.0;
 
-            int mostAbundantIsotopeIndex = Averagine.GetIsotopomerEnvelope(mass).MostAbundantIsotopeIndex;
-            List<Peak> minIsotopicProfile = Averagine.GetTheoreticalIsotopeProfile(mass, minCharge, 0);
-            List<Peak> maxIsotopicProfile = Averagine.GetTheoreticalIsotopeProfile(mass, maxCharge, 0);
+            var mostAbundantIsotopeIndex = Averagine.GetIsotopomerEnvelope(mass).MostAbundantIsotopeIndex;
+            var minIsotopicProfile = Averagine.GetTheoreticalIsotopeProfile(mass, minCharge, 0);
+            var maxIsotopicProfile = Averagine.GetTheoreticalIsotopeProfile(mass, maxCharge, 0);
 
             var minPoint = new Feature.FeaturePoint
             {
@@ -157,17 +157,14 @@ namespace LcmsSpectator.Readers
             }
 
             var isotopes = new Isotope[isotopePeaks.Length];
-            for (int i = 0; i < isotopePeaks.Length; i++)
+            for (var i = 0; i < isotopePeaks.Length; i++)
             {
                 var parts = isotopePeaks[i].Split(',');
                 if (parts.Length < 2)
                 {
                     continue;
                 }
-
-                int index;
-                double relativeIntensity;
-                if (!int.TryParse(parts[0], out index) || !double.TryParse(parts[1], out relativeIntensity))
+                if (!int.TryParse(parts[0], out var index) || !double.TryParse(parts[1], out var relativeIntensity))
                 {
                     continue;
                 }

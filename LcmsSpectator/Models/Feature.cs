@@ -40,16 +40,16 @@ namespace LcmsSpectator.Models
         /// <param name="maxPoint">The point for the highest retention time of the feature.</param>
         public Feature(FeaturePoint minPoint, FeaturePoint maxPoint)
         {
-            this.MinPoint = minPoint;
-            this.MaxPoint = maxPoint;
-            this.AssociatedPrSms = new List<PrSm>();
-            this.AssociatedMs2 = new List<int>();
-            this.Rectangle = new RectangleF
+            MinPoint = minPoint;
+            MaxPoint = maxPoint;
+            AssociatedPrSms = new List<PrSm>();
+            AssociatedMs2 = new List<int>();
+            Rectangle = new RectangleF
             {
-                X = (float)this.MinPoint.RetentionTime,
-                Y = (float)this.MinPoint.Mass,
+                X = (float)MinPoint.RetentionTime,
+                Y = (float)MinPoint.Mass,
                 Height = 1,
-                Width = (float)(this.MaxPoint.RetentionTime - this.MinPoint.RetentionTime)
+                Width = (float)(MaxPoint.RetentionTime - MinPoint.RetentionTime)
             };
         }
 
@@ -58,15 +58,12 @@ namespace LcmsSpectator.Models
         /// </summary>
         public FeaturePoint MinPoint
         {
-            get
-            {
-                return this.minPoint;
-            }
+            get => minPoint;
 
             private set
             {
-                this.minPoint = value;
-                this.minPoint.Feature = this;
+                minPoint = value;
+                minPoint.Feature = this;
             }
         }
 
@@ -75,15 +72,12 @@ namespace LcmsSpectator.Models
         /// </summary>
         public FeaturePoint MaxPoint
         {
-            get
-            {
-                return this.maxPoint;
-            }
+            get => maxPoint;
 
             private set
             {
-                this.maxPoint = value;
-                this.maxPoint.Feature = this;
+                maxPoint = value;
+                maxPoint.Feature = this;
             }
         }
 
@@ -95,17 +89,17 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Gets the list of MS/MS IDs associated with this feature.
         /// </summary>
-        public List<PrSm> AssociatedPrSms { get; private set; }
+        public List<PrSm> AssociatedPrSms { get; }
 
         /// <summary>
         /// Gets the list of MS/MS scan number associated with this feature.
         /// </summary>
-        public List<int> AssociatedMs2 { get; private set; }
+        public List<int> AssociatedMs2 { get; }
 
         /// <summary>
         /// Gets the geometric rectangle representation for this feature.
         /// </summary>
-        public RectangleF Rectangle { get; private set; }
+        public RectangleF Rectangle { get; }
         
         /// <summary>
         /// Represents a single LC retention time point for a MS1 feature.

@@ -55,7 +55,7 @@ namespace LcmsSpectator.DialogServices
             var dialog = new OpenFileDialog { DefaultExt = defaultExt, Filter = filter };
 
             var result = dialog.ShowDialog();
-            string fileName = string.Empty;
+            var fileName = string.Empty;
             if (result == true)
             {
                 fileName = dialog.FileName;
@@ -97,7 +97,7 @@ namespace LcmsSpectator.DialogServices
         {
             var dialog = new SaveFileDialog { DefaultExt = defaultExt, Filter = filter };
             var result = dialog.ShowDialog();
-            string fileName = string.Empty;
+            var fileName = string.Empty;
             if (result == true)
             {
                 fileName = dialog.FileName;

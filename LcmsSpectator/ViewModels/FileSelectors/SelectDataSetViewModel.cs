@@ -13,8 +13,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
     using System;
     using System.Reactive.Linq;
 
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.ViewModels.Data;
+    using DialogServices;
+    using Data;
 
     using ReactiveUI;
 
@@ -27,7 +27,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// Dialog service for opening dialogs from view model.
         /// </summary>
         private readonly IDialogService dialogService;
-        
+
         /// <summary>
         /// The selected dataset.
         /// </summary>
@@ -56,31 +56,31 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         public SelectDataSetViewModel(IDialogService dialogService, ReactiveList<DataSetViewModel> dataSets)
         {
             this.dialogService = dialogService;
-            this.DataSets = dataSets;
+            DataSets = dataSets;
 
             var browseRawFilesCommand = ReactiveCommand.Create();
-            browseRawFilesCommand.Subscribe(_ => this.BrowseRawFilesImplementation());
-            this.BrowseRawFilesCommand = browseRawFilesCommand;
+            browseRawFilesCommand.Subscribe(_ => BrowseRawFilesImplementation());
+            BrowseRawFilesCommand = browseRawFilesCommand;
 
             var clearRawFilesCommand = ReactiveCommand.Create();
-            clearRawFilesCommand.Subscribe(_ => this.ClearRawFilesImplementation());
-            this.ClearRawFilesCommand = clearRawFilesCommand;
-            
+            clearRawFilesCommand.Subscribe(_ => ClearRawFilesImplementation());
+            ClearRawFilesCommand = clearRawFilesCommand;
+
             // Ok command is only available if RawFilePath isn't empty or SelectedDataSet isn't null
             var okCommand = ReactiveCommand.Create(
                         this.WhenAnyValue(x => x.RawFilePath, x => x.SelectedDataSet, x => x.RawPathSelected, x => x.DatasetSelected)
                             .Select(p => ((p.Item3 && !string.IsNullOrEmpty(p.Item1)) || (p.Item4 && p.Item2 != null))));
-            okCommand.Subscribe(_ => this.OkImplementation());
-            this.OkCommand = okCommand;
+            okCommand.Subscribe(_ => OkImplementation());
+            OkCommand = okCommand;
 
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => this.CancelImplementation());
-            this.CancelCommand = cancelCommand;
+            cancelCommand.Subscribe(_ => CancelImplementation());
+            CancelCommand = cancelCommand;
 
-            this.RawPathSelected = true;
-            this.DatasetSelected = false;
+            RawPathSelected = true;
+            DatasetSelected = false;
 
-            this.Status = false;
+            Status = false;
         }
 
         /// <summary>
@@ -91,27 +91,27 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// Gets a list of all currently open datasets.
         /// </summary>
-        public ReactiveList<DataSetViewModel> DataSets { get; private set; }
+        public ReactiveList<DataSetViewModel> DataSets { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
         /// </summary>
-        public IReactiveCommand BrowseRawFilesCommand { get; private set; }
+        public IReactiveCommand BrowseRawFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that clears the currently selected raw file path.
         /// </summary>
-        public IReactiveCommand ClearRawFilesCommand { get; private set; }
+        public IReactiveCommand ClearRawFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that validates the selected raw file path and trigger ReadyToClose.
         /// </summary>
-        public IReactiveCommand OkCommand { get; private set; }
+        public IReactiveCommand OkCommand { get; }
 
         /// <summary>
         /// Gets a command that triggers ReadyToClose
         /// </summary>
-        public IReactiveCommand CancelCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid dataset or raw file path was selected.
@@ -123,8 +123,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public DataSetViewModel SelectedDataSet
         {
-            get { return this.selectedDataSet; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedDataSet, value); }
+            get => selectedDataSet;
+            set => this.RaiseAndSetIfChanged(ref selectedDataSet, value);
         }
 
         /// <summary>
@@ -132,8 +132,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public string RawFilePath
         {
-            get { return this.rawFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.rawFilePath, value); }
+            get => rawFilePath;
+            set => this.RaiseAndSetIfChanged(ref rawFilePath, value);
         }
 
         /// <summary>
@@ -141,8 +141,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public bool DatasetSelected
         {
-            get { return this.datasetSelected; }
-            set { this.RaiseAndSetIfChanged(ref this.datasetSelected, value); }
+            get => datasetSelected;
+            set => this.RaiseAndSetIfChanged(ref datasetSelected, value);
         }
 
         /// <summary>
@@ -150,8 +150,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public bool RawPathSelected
         {
-            get { return this.rawPathSelected; }
-            set { this.RaiseAndSetIfChanged(ref this.rawPathSelected, value); }
+            get => rawPathSelected;
+            set => this.RaiseAndSetIfChanged(ref rawPathSelected, value);
         }
 
         /// <summary>
@@ -160,12 +160,12 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void BrowseRawFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(
+            var path = dialogService.OpenFile(
                 ".raw",
                 @"Supported Files|*.raw;*.mzML;*.mzML.gz|Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl[.gz])|*.mzMl;*.mzML.gz");
             if (!string.IsNullOrEmpty(path))
             {
-                this.RawFilePath = path;
+                RawFilePath = path;
             }
         }
 
@@ -175,7 +175,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void ClearRawFilesImplementation()
         {
-            this.RawFilePath = string.Empty;
+            RawFilePath = string.Empty;
         }
 
         /// <summary>
@@ -184,17 +184,14 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void OkImplementation()
         {
-            if (string.IsNullOrEmpty(this.RawFilePath) && this.SelectedDataSet == null)
+            if (string.IsNullOrEmpty(RawFilePath) && SelectedDataSet == null)
             {
-                this.dialogService.MessageBox("Please select data set or new raw/mzml file to open.");
+                dialogService.MessageBox("Please select data set or new raw/mzml file to open.");
                 return;
             }
 
-            this.Status = true;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = true;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -203,11 +200,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void CancelImplementation()
         {
-            this.Status = false;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = false;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
     }
 }

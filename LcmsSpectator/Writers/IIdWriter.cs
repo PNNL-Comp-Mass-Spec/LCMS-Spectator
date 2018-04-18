@@ -11,7 +11,7 @@
 namespace LcmsSpectator.Writers
 {
     using System.Collections.Generic;
-    using LcmsSpectator.Models;
+    using Models;
 
     /// <summary>
     /// The IdWriter interface.

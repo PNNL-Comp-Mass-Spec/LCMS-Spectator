@@ -14,7 +14,7 @@ namespace LcmsSpectator.Controls
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
-    
+
     /// <summary>
     /// DataGrid that exposes the SelectedItems as a dependency property for use with MultiSelection.
     /// </summary>
@@ -42,30 +42,24 @@ namespace LcmsSpectator.Controls
         /// </summary>
         public MultiSelectDataGrid()
         {
-            this.internalChange = false;
-            this.SelectedItemsSource = SelectedItems.OfType<object>().ToList();
-            this.SelectionChanged += this.SelectedItemsChanged;
+            internalChange = false;
+            SelectedItemsSource = SelectedItems.OfType<object>().ToList();
+            SelectionChanged += SelectedItemsChanged;
         }
 
         /// <summary>
         /// Gets the dependency property that exposes the selected items list for view model binding.
         /// </summary>
-        public static DependencyProperty SelectedItemsSourceProperty { get; private set; }
+        public static DependencyProperty SelectedItemsSourceProperty { get; }
 
         /// <summary>
         /// Gets or sets the source list for the selected items for this DataGrid.
         /// </summary>
         public IList SelectedItemsSource
         {
-            get
-            {
-                return (IList)this.GetValue(SelectedItemsSourceProperty);
-            }
+            get => (IList)GetValue(SelectedItemsSourceProperty);
 
-            set
-            {
-                this.SetCurrentValue(SelectedItemsSourceProperty, value);
-            }
+            set => SetCurrentValue(SelectedItemsSourceProperty, value);
         }
 
         /// <summary>
@@ -98,15 +92,14 @@ namespace LcmsSpectator.Controls
         /// <param name="e">The event arguments.</param>
         private void SelectedItemsChanged(object sender, SelectionChangedEventArgs e)
         {
-            var dataGrid = sender as MultiSelectDataGrid;
-            if (dataGrid == null)
+            if (!(sender is MultiSelectDataGrid dataGrid))
             {
                 return;
             }
 
             if (!dataGrid.internalChange)
             {
-                this.SelectedItemsSource = dataGrid.SelectedItems.OfType<object>().ToList();
+                SelectedItemsSource = dataGrid.SelectedItems.OfType<object>().ToList();
             }
         }
     }

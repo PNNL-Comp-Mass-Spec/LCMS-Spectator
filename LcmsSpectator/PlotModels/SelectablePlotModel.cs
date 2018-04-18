@@ -14,7 +14,7 @@ namespace LcmsSpectator.PlotModels
     using OxyPlot;
     using OxyPlot.Axes;
     using OxyPlot.Series;
-    
+
     /// <summary>
     /// This class is an AutoAdjustedYPlotModel that shows a stem marker at a given DataPoint X value.
     /// </summary>
@@ -37,19 +37,19 @@ namespace LcmsSpectator.PlotModels
         /// <param name="multiplier">Multiplier that determines how much space to leave about tallest point.</param>
         public SelectablePlotModel(Axis xaxis, double multiplier) : base(xaxis, multiplier)
         {
-            this.MouseDown += this.SelectablePlotModelMouseDown;
-            this.PrimaryColor = OxyColors.Black;
-            this.SecondaryColor = OxyColors.LightGray;
-            this.pointMarkers = this.pointMarkers = new StemSeries
+            MouseDown += SelectablePlotModelMouseDown;
+            PrimaryColor = OxyColors.Black;
+            SecondaryColor = OxyColors.LightGray;
+            pointMarkers = pointMarkers = new StemSeries
             {
-                Color = this.SecondaryColor,
+                Color = SecondaryColor,
                 StrokeThickness = 3,
                 LineStyle = LineStyle.Dash,
                 TrackerFormatString =
                         "{0}" + Environment.NewLine +
                         "{1}: {2}" + Environment.NewLine
             };
-            Series.Add(this.pointMarkers);
+            Series.Add(pointMarkers);
         }
 
         /// <summary>
@@ -73,8 +73,8 @@ namespace LcmsSpectator.PlotModels
         /// <param name="x">x value to set marker at</param>
         public void SetPrimaryPointMarker(double x)
         {
-            this.primaryHighlight = true;
-            this.SetPointMarker(x, this.GetMarkerColor());
+            primaryHighlight = true;
+            SetPointMarker(x, GetMarkerColor());
         }
 
         /// <summary>
@@ -83,8 +83,8 @@ namespace LcmsSpectator.PlotModels
         /// <param name="x">x value to set marker at</param>
         public void SetSecondaryPointMarker(double x)
         {
-            this.primaryHighlight = false;
-            this.SetPointMarker(x, this.GetMarkerColor());
+            primaryHighlight = false;
+            SetPointMarker(x, GetMarkerColor());
         }
 
         /// <summary>
@@ -94,9 +94,9 @@ namespace LcmsSpectator.PlotModels
         public DataPoint GetPointMarker()
         {
             var point = new DataPoint();
-            if (this.pointMarkers != null && this.pointMarkers.Points.Count > 0)
+            if (pointMarkers != null && pointMarkers.Points.Count > 0)
             {
-                point = this.pointMarkers.Points[0];   
+                point = pointMarkers.Points[0];
             }
 
             return point;
@@ -110,18 +110,18 @@ namespace LcmsSpectator.PlotModels
         /// <param name="maxX">Max visible x</param>
         protected override void SetBounds(double minX, double maxX)
         {
-            var maxY = this.GetMaxYInRange(minX, maxX);
-            var yaxis = DefaultYAxis ?? this.YAxis;
-            yaxis.Maximum = maxY * this.Multiplier;
+            var maxY = GetMaxYInRange(minX, maxX);
+            var yaxis = DefaultYAxis ?? YAxis;
+            yaxis.Maximum = maxY * Multiplier;
 
-            if (this.pointMarkers.Points.Count > 0)
+            if (pointMarkers.Points.Count > 0)
             {
-                this.SetPointMarker(this.pointMarkers.Points[0].X, this.GetMarkerColor());
+                SetPointMarker(pointMarkers.Points[0].X, GetMarkerColor());
             }
 
-            this.InvalidatePlot(true);
+            InvalidatePlot(true);
         }
-        
+
         /// <summary>
         /// Clear all series from the plot without removing marker, thread-safe.
         /// </summary>
@@ -129,9 +129,9 @@ namespace LcmsSpectator.PlotModels
         {
             while (Series.Count > 1)
             {
-                if (this.Series[0] != this.pointMarkers)
+                if (Series[0] != pointMarkers)
                 {
-                    this.Series.RemoveAt(0);
+                    Series.RemoveAt(0);
                 }
             }
         }
@@ -145,15 +145,15 @@ namespace LcmsSpectator.PlotModels
         {
             ////if (color == null) color = OxyColors.Black;
             var y = YAxis.Maximum;
-            this.pointMarkers.Points.Clear();
+            pointMarkers.Points.Clear();
             if (x.Equals(0))
             {
                 return;
             }
 
-            this.pointMarkers.Color = color;
-            this.pointMarkers.Points.Add(new DataPoint(x, y));
-            this.InvalidatePlot(true);
+            pointMarkers.Color = color;
+            pointMarkers.Points.Add(new DataPoint(x, y));
+            InvalidatePlot(true);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace LcmsSpectator.PlotModels
                     return;
                 }
 
-                this.SelectedDataPoint = result.Item as IDataPoint;
+                SelectedDataPoint = result.Item as IDataPoint;
             }
         }
 
@@ -182,7 +182,7 @@ namespace LcmsSpectator.PlotModels
         /// <returns>The marker highlight color.</returns>
         private OxyColor GetMarkerColor()
         {
-            return this.primaryHighlight ? this.PrimaryColor : this.SecondaryColor;
+            return primaryHighlight ? PrimaryColor : SecondaryColor;
         }
     }
 }

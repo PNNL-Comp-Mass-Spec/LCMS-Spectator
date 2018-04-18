@@ -17,8 +17,8 @@ namespace LcmsSpectator.Readers
     using System.Linq;
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Sequence;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers.SequenceReaders;
+    using Models;
+    using SequenceReaders;
 
     /// <summary>
     /// Reader for MSPathFinder results file.
@@ -37,7 +37,7 @@ namespace LcmsSpectator.Readers
         public BruteForceSearchResultsReader(string filePath)
         {
             this.filePath = filePath;
-            this.Modifications = new List<Modification>();
+            Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace LcmsSpectator.Readers
         public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             var modIgnore = modIgnoreList == null ? new List<string>() : new List<string>(modIgnoreList);
-            return this.ReadFile(modIgnore).Result;
+            return ReadFile(modIgnore).Result;
         }
 
         /// <summary>
@@ -61,10 +61,10 @@ namespace LcmsSpectator.Readers
         public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             var modIgnore = modIgnoreList == null ? new List<string>() : new List<string>(modIgnoreList);
-            return await this.ReadFile(modIgnore);
+            return await ReadFile(modIgnore);
         }
 
-        public IList<Modification> Modifications { get; private set; }
+        public IList<Modification> Modifications { get; }
 
         /// <summary>
         /// Read a MSPathFinder results file.
@@ -75,23 +75,22 @@ namespace LcmsSpectator.Readers
         private async Task<IEnumerable<PrSm>> ReadFile(List<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             progress = progress ?? new Progress<double>();
-            var ext = Path.GetExtension(this.filePath);
+            var ext = Path.GetExtension(filePath);
             IEnumerable<PrSm> prsms;
-            if (ext == ".tsv")
+            if (string.Equals(ext, ".tsv", StringComparison.OrdinalIgnoreCase))
             {
                 var file = new StreamReader(File.Open(this.filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                 prsms = await this.ReadTsv(file, modIgnoreList, progress);
             }
-            else if (ext == ".zip")
+
+            if (string.Equals(ext, ".zip", StringComparison.OrdinalIgnoreCase))
             {
-                prsms = await this.ReadZip(modIgnoreList, progress);
-            }
-            else
-            {
-                throw new ArgumentException(string.Format("Cannot read file with extension \"{0}\"", ext));
+                prsms = await ReadZip(modIgnoreList, progress);
+                return prsms;
             }
 
-            return prsms;
+            throw new ArgumentException(string.Format("Cannot read file with extension \"{0}\"", ext));
+
         }
 
         /// <summary>
@@ -102,7 +101,7 @@ namespace LcmsSpectator.Readers
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
         private async Task<IEnumerable<PrSm>> ReadTsv(StreamReader stream, List<string> modIgnoreList, IProgress<double> progress)
         {
-            ////var file = File.ReadLines(_tsvFile);
+
             var prsms = new List<PrSm>();
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
@@ -112,8 +111,9 @@ namespace LcmsSpectator.Readers
                 lineCount++;
                 if (lineCount == 1 && line != null)
                 { // first line
+                    // first line
                     var parts = line.Split('\t');
-                    for (int i = 0; i < parts.Length; i++)
+                    for (var i = 0; i < parts.Length; i++)
                     {
                         headers.Add(parts[i], i);
                     }
@@ -121,7 +121,7 @@ namespace LcmsSpectator.Readers
                     continue;
                 }
 
-                var idData = this.CreatePrSms(line, headers, modIgnoreList);
+                var idData = CreatePrSms(line, headers, modIgnoreList);
                 if (idData != null)
                 {
                     prsms.AddRange(idData);
@@ -140,7 +140,7 @@ namespace LcmsSpectator.Readers
         /// <returns>Task that creates an identification tree of MSPathFinder identifications.</returns>
         private async Task<IEnumerable<PrSm>> ReadZip(List<string> modIgnoreList, IProgress<double> progress)
         {
-            var zipFilePath = this.filePath;
+            var zipFilePath = filePath;
             var fileName = Path.GetFileNameWithoutExtension(zipFilePath);
             if (fileName != null && fileName.EndsWith("_IcTsv"))
             {
@@ -228,20 +228,20 @@ namespace LcmsSpectator.Readers
         public class InvalidModificationNameException : Exception
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="LcmsSpectator.Readers.IcFileReader.InvalidModificationNameException"/> class. 
+            /// Initializes a new instance of the <see cref="LcmsSpectator.Readers.IcFileReader.InvalidModificationNameException"/> class.
             /// </summary>
             /// <param name="message">Exception message.</param>
             /// <param name="modificationName">The name of the invalid modification.</param>
             public InvalidModificationNameException(string message, string modificationName)
                 : base(message)
             {
-                this.ModificationName = modificationName;
+                ModificationName = modificationName;
             }
 
             /// <summary>
             /// Gets the name of the invalid modification.
             /// </summary>
-            public string ModificationName { get; private set; }
+            public string ModificationName { get; }
         }
     }
 }

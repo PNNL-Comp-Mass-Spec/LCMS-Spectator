@@ -1,4 +1,6 @@
-﻿namespace LcmsSpectator.ViewModels.StableIsotopeViewer
+﻿using System.Collections.Generic;
+
+namespace LcmsSpectator.ViewModels.StableIsotopeViewer
 {
     using System;
     using System.Linq;
@@ -16,18 +18,18 @@
         /// <summary>
         /// Initializes new instance of the <see cref="IsotopeProportionSelectorViewModel" /> class.
         /// </summary>
-        public IsotopeProportionSelectorViewModel(Atom atom, double[] defaultIsotopeRatios)
+        public IsotopeProportionSelectorViewModel(Atom atom, IReadOnlyList<double> defaultIsotopeRatios)
         {
-            this.Atom = atom;
-            this.IsotopeRatios = new ReactiveList<IsotopeProportionViewModel> { ChangeTrackingEnabled = true };
+            Atom = atom;
+            IsotopeRatios = new ReactiveList<IsotopeProportionViewModel> { ChangeTrackingEnabled = true };
 
             // When an isotope ratio is selected, deselect all others.
-            this.IsotopeRatios.ItemChanged.Where(i => i.PropertyName == "IsSelected")
+            IsotopeRatios.ItemChanged.Where(i => i.PropertyName == "IsSelected")
                 .Where(i => i.Sender.IsSelected)
                 .Subscribe(
                     i =>
                         {
-                            foreach (var ratio in this.IsotopeRatios)
+                            foreach (var ratio in IsotopeRatios)
                             {
                                 if (i.Sender != ratio)
                                 {
@@ -37,9 +39,9 @@
                         });
 
             var nominalMass = atom.NominalMass;
-            for (int i = 0; i < defaultIsotopeRatios.Length; i++)
+            for (var i = 0; i < defaultIsotopeRatios.Count; i++)
             {
-                this.IsotopeRatios.Add(new IsotopeProportionViewModel(i > 0, defaultIsotopeRatios[i])
+                IsotopeRatios.Add(new IsotopeProportionViewModel(i > 0, defaultIsotopeRatios[i])
                 {
                     IsSelected = i == 1,    // Automatically select the first isotope that isn't monoisotope
                     IsotopeIndex = i,
@@ -48,13 +50,13 @@
             }
 
             // When selected isotope proportion changes, decrease monoisotope
-            this.IsotopeRatios.ItemChanged.Where(i => i.PropertyName == "Proportion")
+            IsotopeRatios.ItemChanged.Where(i => i.PropertyName == "Proportion")
                 .Where(i => i.Sender.IsotopeIndex > 0)  // Do not want to do anything if the monoisotope changes,
                 .Subscribe(                             // because that can give us an infinite loop.
                     i =>
                         {
                             var isotope = i.Sender;
-                            var monoisotope = this.IsotopeRatios.FirstOrDefault(ir => ir.IsotopeIndex == 0);
+                            var monoisotope = IsotopeRatios.FirstOrDefault(ir => ir.IsotopeIndex == 0);
                             if (monoisotope == null)
                             {
                                 return;
@@ -66,21 +68,21 @@
                         });
 
             // Track changing so we know if we can use the default isotope profile predictor.
-            this.IsotopeRatios.ItemChanged.Where(i => i.PropertyName == "Proportion")
-                .Subscribe(_ => this.ProportionChanged = true);
+            IsotopeRatios.ItemChanged.Where(i => i.PropertyName == "Proportion")
+                .Subscribe(_ => ProportionChanged = true);
 
-            this.ProportionChanged = false;
+            ProportionChanged = false;
         }
 
         /// <summary>
-        /// Gets the atom that this 
+        /// Gets the atom that this
         /// </summary>
-        public Atom Atom { get; private set; }
+        public Atom Atom { get; }
 
         /// <summary>
         /// Gets the isotope ratio for each isotope index.
         /// </summary>
-        public ReactiveList<IsotopeProportionViewModel> IsotopeRatios { get; private set; }
+        public ReactiveList<IsotopeProportionViewModel> IsotopeRatios { get; }
 
         /// <summary>
         /// Gets a value indicating whether any of the proportions have been changed.
@@ -95,10 +97,10 @@
         /// </returns>
         public double[] GetProportions()
         {
-            var proportions = new double[this.IsotopeRatios.Count];
-            for (int i = 0; i < proportions.Length; i++)
+            var proportions = new double[IsotopeRatios.Count];
+            for (var i = 0; i < proportions.Length; i++)
             {
-                proportions[i] = this.IsotopeRatios[i].Proportion;
+                proportions[i] = IsotopeRatios[i].Proportion;
             }
 
             return proportions;
@@ -109,12 +111,12 @@
         /// </summary>
         public void Reset()
         {
-            foreach (var isotopeRatio in this.IsotopeRatios)
+            foreach (var isotopeRatio in IsotopeRatios)
             {
                 isotopeRatio.Reset();
             }
 
-            this.ProportionChanged = false;
+            ProportionChanged = false;
         }
     }
 }

@@ -2,18 +2,10 @@
 {
     using System.Windows;
 
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassSpecData;
-
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers;
-    using LcmsSpectator.ViewModels;
-    using LcmsSpectator.ViewModels.Data;
-    using LcmsSpectator.ViewModels.SequenceViewer;
-    using LcmsSpectator.Views;
-    using LcmsSpectator.Views.SequenceViewer;
+    using DialogServices;
+    using Readers;
+    using ViewModels;
+    using Views;
 
     /// <summary>
     /// Interaction logic for App.xaml

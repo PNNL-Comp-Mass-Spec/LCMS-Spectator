@@ -16,9 +16,9 @@ namespace LcmsSpectator.Models
     using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using LcmsSpectator.Config;
+    using Config;
     using ReactiveUI;
-    
+
     /// <summary>
     /// A class representing a parsed MSPathFinder parameter file.
     /// </summary>
@@ -29,7 +29,7 @@ namespace LcmsSpectator.Models
         /// </summary>
         public MsPfParameters()
         {
-            this.Modifications = new ReactiveList<SearchModification>();
+            Modifications = new ReactiveList<SearchModification>();
         }
 
         /// <summary>
@@ -132,9 +132,9 @@ namespace LcmsSpectator.Models
         /// </returns>
         public static MsPfParameters ReadFromFile(string filePath)
         {
-            var extension = Path.GetExtension(filePath).ToLower();
+            var extension = Path.GetExtension(filePath);
 
-            if (!string.IsNullOrEmpty(extension) && extension == ".param")
+            if (!string.IsNullOrEmpty(extension) && string.Equals(extension, ".param", StringComparison.OrdinalIgnoreCase))
             {
                 return ReadFromParameterFile(filePath);
             }
@@ -259,7 +259,7 @@ namespace LcmsSpectator.Models
                 return null;
             }
 
-            string dataSetName = fileName;
+            var dataSetName = fileName;
             if (fileName.EndsWith("_IcTsv") || fileName.EndsWith("_IcTda"))
             {
                 dataSetName = fileName.Substring(0, fileName.Length - 6);
@@ -302,7 +302,7 @@ namespace LcmsSpectator.Models
 
             var name = parts[4];
 
-            Modification modification = Modification.Get(name) ??
+            var modification = Modification.Get(name) ??
                                         IcParameters.Instance.RegisterModification(name, composition);
 
             return new SearchModification(modification, aminoAcid, sequenceLocation, isFixed);

@@ -17,14 +17,13 @@ namespace LcmsSpectator.ViewModels.Data
 
     using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
     using InformedProteomics.Backend.Utils;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.PlotModels;
-    using LcmsSpectator.Utils;
+    using Config;
+    using PlotModels;
+    using Utils;
 
     using ReactiveUI;
 
@@ -80,24 +79,24 @@ namespace LcmsSpectator.ViewModels.Data
         /// <param name="index">The index of this ion.</param>
         public LabeledIonViewModel(Composition composition, IonType ionType, bool isFragmentIon, ILcMsRun lcms, Ion precursorIon = null, bool isChargeState = false, int index = 0)
         {
-            this.Composition = composition;
-            this.PrecursorIon = precursorIon;
-            this.Index = index;
-            this.IonType = ionType;
-            this.IsFragmentIon = isFragmentIon;
-            this.IsChargeState = isChargeState;
-            this.selected = true;
-            this.xicCacheLock = new object();
-            this.peakCacheLock = new object();
-            this.peakCache = new MemoizingMRUCache<Tuple<Spectrum, bool>, IList<PeakDataPoint>>(this.GetPeakDataPoints, 5);
-            this.xicCache = new MemoizingMRUCache<int, IList<XicDataPoint>>(this.GetXic, 10);
-            this.Lcms = lcms;
+            Composition = composition;
+            PrecursorIon = precursorIon;
+            Index = index;
+            IonType = ionType;
+            IsFragmentIon = isFragmentIon;
+            IsChargeState = isChargeState;
+            selected = true;
+            xicCacheLock = new object();
+            peakCacheLock = new object();
+            peakCache = new MemoizingMRUCache<Tuple<Spectrum, bool>, IList<PeakDataPoint>>(GetPeakDataPoints, 5);
+            xicCache = new MemoizingMRUCache<int, IList<XicDataPoint>>(GetXic, 10);
+            Lcms = lcms;
         }
 
         /// <summary>
         /// Gets the empirical formula for this ion.
         /// </summary>
-        public Composition Composition { get; private set; }
+        public Composition Composition { get; }
 
         /// <summary>
         /// Gets or sets the precursor ion if this is a fragment ion.
@@ -112,40 +111,37 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Gets the fragment IonType for this ion.
         /// </summary>
-        public IonType IonType { get; private set; }
+        public IonType IonType { get; }
 
         /// <summary>
         /// Gets a value indicating whether this ion is a fragment ion.
         /// </summary>
-        public bool IsFragmentIon { get; private set; }
+        public bool IsFragmentIon { get; }
 
         /// <summary>
         /// Gets a value indicating whether this ion is a neighboring charge state to another
         /// precursor ion.
         /// </summary>
-        public bool IsChargeState { get; private set; }
+        public bool IsChargeState { get; }
 
         /// <summary>
         /// Gets the LCMSRun for the data set that the ion is part of.
         /// </summary>
-        public ILcMsRun Lcms { get; private set; }
+        public ILcMsRun Lcms { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this LabeledIon has been selected or unselected.
         /// </summary>
         public bool Selected
         {
-            get { return this.selected; }
-            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
+            get => selected;
+            set => this.RaiseAndSetIfChanged(ref selected, value);
         }
 
         /// <summary>
         /// Gets the ion for this LabeledIon.
         /// </summary>
-        public Ion Ion
-        {
-            get { return new Ion(this.Composition + (this.IsFragmentIon ? Composition.Zero : Composition.H2O), this.IonType.Charge); }
-        }
+        public Ion Ion => new Ion(Composition + (IsFragmentIon ? Composition.Zero : Composition.H2O), IonType.Charge);
 
         /// <summary>
         /// Gets the text label for this LabeledIon.
@@ -155,31 +151,31 @@ namespace LcmsSpectator.ViewModels.Data
             get
             {
                 var annotation = string.Empty;
-                if (this.IsFragmentIon)
+                if (IsFragmentIon)
                 {
-                    var baseIonTypeName = this.IonType.BaseIonType.Symbol;
-                    var neutralLoss = this.IonType.NeutralLoss.Name;
-                    annotation = string.Format("{0}{1}{2}({3}+)", baseIonTypeName, this.Index, neutralLoss, this.IonType.Charge);
+                    var baseIonTypeName = IonType.BaseIonType.Symbol;
+                    var neutralLoss = IonType.NeutralLoss.Name;
+                    annotation = string.Format("{0}{1}{2}({3}+)", baseIonTypeName, Index, neutralLoss, IonType.Charge);
                 }
                 else
                 {
-                    if (this.IsChargeState)
+                    if (IsChargeState)
                     {
-                        annotation = string.Format("Precursor ({0}+)", this.IonType.Charge);
+                        annotation = string.Format("Precursor ({0}+)", IonType.Charge);
                     }
                     else
                     {
-                        if (this.Index < 0)
+                        if (Index < 0)
                         {
-                            annotation = string.Format("Precursor [M{0}] ({1}+)", this.Index, this.IonType.Charge);
+                            annotation = string.Format("Precursor [M{0}] ({1}+)", Index, IonType.Charge);
                         }
-                        else if (this.Index == 0)
+                        else if (Index == 0)
                         {
-                            annotation = string.Format("Precursor ({0}+)", this.IonType.Charge);
+                            annotation = string.Format("Precursor ({0}+)", IonType.Charge);
                         }
-                        else if (this.Index > 0)
+                        else if (Index > 0)
                         {
-                            annotation = string.Format("Precursor [M+{0}] ({1}+)", this.Index, this.IonType.Charge);
+                            annotation = string.Format("Precursor [M+{0}] ({1}+)", Index, IonType.Charge);
                         }
                     }
                 }
@@ -193,12 +189,12 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         /// <param name="other">The LabeledIon to compare to.</param>
         /// <returns>
-        /// A value indicating whether this LabeledIon is 
+        /// A value indicating whether this LabeledIon is
         /// equal to, greater than, or less than the other LabeledIon.
         /// </returns>
         public int CompareTo(LabeledIonViewModel other)
         {
-            return string.Compare(this.Label, other.Label, StringComparison.Ordinal);
+            return string.Compare(Label, other.Label, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -208,7 +204,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns>A value indicating whether this LabeledIon is equal to the other LabeledIon.</returns>
         public bool Equals(LabeledIonViewModel other)
         {
-            return this.Label.Equals(other.Label);
+            return Label.Equals(other.Label);
         }
 
         /// <summary>
@@ -220,7 +216,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns>A task that creates and returns the peaks for the ion.</returns>
         public Task<IList<PeakDataPoint>> GetPeaksAsync(Spectrum spectrum, bool deconvoluted, bool useCache = true)
         {
-            return Task.Run(() => this.GetPeaks(spectrum, deconvoluted, useCache));
+            return Task.Run(() => GetPeaks(spectrum, deconvoluted, useCache));
         }
 
         /// <summary>
@@ -233,17 +229,17 @@ namespace LcmsSpectator.ViewModels.Data
         public IList<PeakDataPoint> GetPeaks(Spectrum spectrum, bool deconvoluted, bool useCache = true)
         {
             IList<PeakDataPoint> peaks;
-            lock (this.peakCacheLock)
+            lock (peakCacheLock)
             {
                 // MemoizingMRUCache isn't threadsafe. Shouldn't matter for my purposes,
                 // but I'm putting a lock around it just in case.
                 var key = new Tuple<Spectrum, bool>(spectrum, deconvoluted);
                 if (!useCache)
                 {
-                    this.peakCache.Invalidate(key);
+                    peakCache.Invalidate(key);
                 }
 
-                peaks = this.peakCache.Get(key, useCache);
+                peaks = peakCache.Get(key, useCache);
             }
 
             return peaks;
@@ -257,7 +253,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns>Task that creates and returns the XICs for this ion</returns>
         public Task<IList<XicDataPoint>> GetXicAsync(int pointsToSmooth, bool useCache = true)
         {
-            return Task.Run(() => this.GetXic(pointsToSmooth, useCache));
+            return Task.Run(() => GetXic(pointsToSmooth, useCache));
         }
 
         /// <summary>
@@ -269,16 +265,16 @@ namespace LcmsSpectator.ViewModels.Data
         public IList<XicDataPoint> GetXic(int pointsToSmooth, bool useCache = true)
         {
             IList<XicDataPoint> x;
-            lock (this.xicCacheLock)
+            lock (xicCacheLock)
             {
                 // MemoizingMRUCache isn't threadsafe. Shouldn't matter for my purposes,
                 // but I'm putting a lock around it just in case.
                 if (!useCache)
                 {
-                    this.xicCache.Invalidate(pointsToSmooth);
+                    xicCache.Invalidate(pointsToSmooth);
                 }
 
-                x = this.xicCache.Get(pointsToSmooth, useCache);
+                x = xicCache.Get(pointsToSmooth, useCache);
             }
 
             return x;
@@ -292,48 +288,48 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns>The peaks for the ion.</returns>
         private IList<PeakDataPoint> GetPeakDataPoints(Tuple<Spectrum, bool> spectrum, object o)
         {
-            var tolerance = this.IsFragmentIon
+            var tolerance = IsFragmentIon
                             ? IcParameters.Instance.ProductIonTolerancePpm
                             : IcParameters.Instance.PrecursorTolerancePpm;
             var noPeaks = new List<PeakDataPoint>
             {
-                new PeakDataPoint(double.NaN, double.NaN, double.NaN, double.NaN, this.Label)
+                new PeakDataPoint(double.NaN, double.NaN, double.NaN, double.NaN, Label)
                 {
-                    TheoMonoisotopicMass = this.Ion.Composition.Mass,
-                    IonType = this.IonType,
-                    Index = this.Index
+                    TheoMonoisotopicMass = Ion.Composition.Mass,
+                    IonType = IonType,
+                    Index = Index
                 }
             };
             var peakDataPoints = new List<PeakDataPoint>();
             IonType ionType = null;
-            if (this.IsFragmentIon)
+            if (IsFragmentIon)
             {
-                ionType = this.IonType;
+                ionType = IonType;
             }
 
             var deconvoluted = spectrum.Item2;
             Ion ion;
             if (deconvoluted)
             {
-                if (this.IonType.Charge > 1)
+                if (IonType.Charge > 1)
                 {
                     return peakDataPoints; // Deconvoluted spectrum means decharged (only charge 1 ions shown)
                 }
 
-                if (!this.IsFragmentIon)
+                if (!IsFragmentIon)
                 {
-                    ion = new Ion(this.Composition, 1);
+                    ion = new Ion(Composition, 1);
                 }
                 else
                 {
                     var ionTypeFactory = IcParameters.Instance.DeconvolutedIonTypeFactory;
-                    var ionTypeName = this.IonType.Name.Insert(1, @"'");
-                    ion = ionTypeFactory.GetIonType(ionTypeName).GetIon(this.Composition);
+                    var ionTypeName = IonType.Name.Insert(1, @"'");
+                    ion = ionTypeFactory.GetIonType(ionTypeName).GetIon(Composition);
                 }
             }
             else
             {
-                ion = this.Ion;
+                ion = Ion;
             }
 
             var labeledIonPeaks = IonUtils.GetIonPeaks(ion, spectrum.Item1, tolerance, deconvoluted);
@@ -351,15 +347,15 @@ namespace LcmsSpectator.ViewModels.Data
 
             var errors = IonUtils.GetIsotopePpmError(peaks, ion, 0.1, deconvoluted);
             peakDataPoints = new List<PeakDataPoint> { Capacity = errors.Length };
-            for (int i = 0; i < errors.Length; i++)
+            for (var i = 0; i < errors.Length; i++)
             {
                 if (errors[i] != null)
                 {
-                    peakDataPoints.Add(new PeakDataPoint(peaks[i].Mz, peaks[i].Intensity, errors[i].Value, correlation, this.Label)
+                    peakDataPoints.Add(new PeakDataPoint(peaks[i].Mz, peaks[i].Intensity, errors[i].Value, correlation, Label)
                     {
-                        MonoisotopicMass = (peaks[i].Mz * this.Ion.Charge) - InformedProteomics.Backend.Data.Biology.Constants.Proton * this.Ion.Charge,
-                        TheoMonoisotopicMass = this.Ion.Composition.Mass,
-                        Index = this.Index,
+                        MonoisotopicMass = (peaks[i].Mz * Ion.Charge) - InformedProteomics.Backend.Data.Biology.Constants.Proton * Ion.Charge,
+                        TheoMonoisotopicMass = Ion.Composition.Mass,
+                        Index = Index,
                         IonType = ionType,
                     });
                 }
@@ -377,64 +373,64 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns>The XICs for this ion</returns>
         private IList<XicDataPoint> GetXic(int pointsToSmooth, object o)
         {
-            if (this.xic == null)
+            if (xic == null)
             {
-                this.xic = this.GetXic();
+                xic = GetXic();
             }
 
-            var x = this.xic;
+            var x = xic;
             IonType ionType = null;
-            if (this.IsFragmentIon)
+            if (IsFragmentIon)
             {
-                ionType = this.IonType;
+                ionType = IonType;
             }
 
             // smooth
             if (pointsToSmooth > 2)
             {
                 var smoother = new SavitzkyGolaySmoother(pointsToSmooth, 2);
-                x = IonUtils.SmoothXic(smoother, x);   
+                x = IonUtils.SmoothXic(smoother, x);
             }
 
             return x.Where((t, i) => i <= 1 || i >= x.Count - 1 ||
-                            !this.xic[i - 1].Intensity.Equals(t.Intensity) ||
-                            !this.xic[i + 1].Intensity.Equals(t.Intensity))
+                            !xic[i - 1].Intensity.Equals(t.Intensity) ||
+                            !xic[i + 1].Intensity.Equals(t.Intensity))
                        .Select(
                            t => new XicDataPoint(
-                                        this.Lcms.GetElutionTime(t.ScanNum),
-                                        t.ScanNum, 
-                                        t.Intensity, 
-                                        this.Index, 
-                                        this.Label)
+                                        Lcms.GetElutionTime(t.ScanNum),
+                                        t.ScanNum,
+                                        t.Intensity,
+                                        Index,
+                                        Label)
                                     {
                                         IonType = ionType
                                     }).ToList();
         }
 
         /// <summary>
-        /// Get a raw XIC from the LCMSRun. 
+        /// Get a raw XIC from the LCMSRun.
         /// </summary>
         /// <returns>The raw XIC.</returns>
         private Xic GetXic()
         {
             Xic x;
-            if (this.IsFragmentIon)
+            if (IsFragmentIon)
             {
-                x = this.Lcms.GetFullProductExtractedIonChromatogram(
-                    this.Ion.GetMostAbundantIsotopeMz(),
+                x = Lcms.GetFullProductExtractedIonChromatogram(
+                    Ion.GetMostAbundantIsotopeMz(),
                     IcParameters.Instance.ProductIonTolerancePpm,
-                    this.PrecursorIon.GetMostAbundantIsotopeMz());   
+                    PrecursorIon.GetMostAbundantIsotopeMz());
             }
-            else if (this.IsChargeState)
+            else if (IsChargeState)
             {
-                x = this.Lcms.GetFullPrecursorIonExtractedIonChromatogram(
-                   this.Ion.GetMostAbundantIsotopeMz(),
-                   IcParameters.Instance.PrecursorTolerancePpm);   
+                x = Lcms.GetFullPrecursorIonExtractedIonChromatogram(
+                   Ion.GetMostAbundantIsotopeMz(),
+                   IcParameters.Instance.PrecursorTolerancePpm);
             }
             else
             {
-                x = this.Lcms.GetFullPrecursorIonExtractedIonChromatogram(
-                    this.Ion.GetIsotopeMz(this.Index),
+                x = Lcms.GetFullPrecursorIonExtractedIonChromatogram(
+                    Ion.GetIsotopeMz(Index),
                     IcParameters.Instance.PrecursorTolerancePpm);
             }
 

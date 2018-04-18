@@ -24,9 +24,9 @@ namespace LcmsSpectator.Views.Modifications
         /// </summary>
         public CustomModificationView()
         {
-            EventManager.RegisterClassHandler(typeof(TextBox), UIElement.PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(SelectivelyHandleMouseButton), true);
-            EventManager.RegisterClassHandler(typeof(TextBox), UIElement.GotKeyboardFocusEvent, new RoutedEventHandler(SelectAllText), true);
-            this.InitializeComponent();
+            EventManager.RegisterClassHandler(typeof(TextBox), PreviewMouseLeftButtonDownEvent, new MouseButtonEventHandler(SelectivelyHandleMouseButton), true);
+            EventManager.RegisterClassHandler(typeof(TextBox), GotKeyboardFocusEvent, new RoutedEventHandler(SelectAllText), true);
+            InitializeComponent();
         }
 
         /// <summary>
@@ -37,8 +37,7 @@ namespace LcmsSpectator.Views.Modifications
         /// <param name="e">The event arguments.</param>
         private static void SelectivelyHandleMouseButton(object sender, MouseButtonEventArgs e)
         {
-            var textbox = sender as TextBox;
-            if (textbox != null && !textbox.IsKeyboardFocusWithin)
+            if (sender is TextBox textbox && !textbox.IsKeyboardFocusWithin)
             {
                 e.Handled = true; // disable default behavior.
                 textbox.Focus();
@@ -53,8 +52,7 @@ namespace LcmsSpectator.Views.Modifications
         /// <param name="e">The event arguments.</param>
         private static void SelectAllText(object sender, RoutedEventArgs e)
         {
-            var textBox = e.OriginalSource as TextBox;
-            if (textBox != null)
+            if (e.OriginalSource is TextBox textBox)
             {
                 textBox.SelectAll();
             }

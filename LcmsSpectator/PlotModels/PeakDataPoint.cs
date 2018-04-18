@@ -14,7 +14,7 @@ namespace LcmsSpectator.PlotModels
 
     using InformedProteomics.Backend.Data.Spectrometry;
     using OxyPlot;
-    
+
     /// <summary>
     /// Data point for a Spectrum point. (M/Z vs Intensity)
     /// </summary>
@@ -30,11 +30,11 @@ namespace LcmsSpectator.PlotModels
         /// <param name="title">The title of this point.</param>
         public PeakDataPoint(double x, double y, double error, double correlation, string title)
         {
-            this.X = x;
-            this.Y = y;
-            this.Error = error;
-            this.Correlation = correlation;
-            this.Title = title;
+            X = x;
+            Y = y;
+            Error = error;
+            Correlation = correlation;
+            Title = title;
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace LcmsSpectator.PlotModels
         /// <returns>OxyPlot data point.</returns>
         public DataPoint GetDataPoint()
         {
-            return new DataPoint(this.X, this.Y);
+            return new DataPoint(X, Y);
         }
 
         /// <summary>

@@ -33,17 +33,17 @@ namespace LcmsSpectator.SequenceGraph
         /// <summary>
         /// The vertices selected in the sequence graph.
         /// </summary>
-        private List<List<DataVertex>> selectedVertices; 
+        private List<List<DataVertex>> selectedVertices;
 
         public SequenceGraph()
         {
-            this.InitializeComponent();
-            this.Graph = new DataGraph();
-            this.BuildSequenceGraphLogicCore();
-            this.SelectedSequence = new Sequence(new List<AminoAcid>());
-            this.SelectedVertices = new List<List<DataVertex>>();
-            this.SequenceGraphArea.Loaded += this.SequenceGraphArea_Loaded;
-            this.SequenceGraphArea.VertexSelected += this.VertexSelectedEvent;
+            InitializeComponent();
+            Graph = new DataGraph();
+            BuildSequenceGraphLogicCore();
+            SelectedSequence = new Sequence(new List<AminoAcid>());
+            SelectedVertices = new List<List<DataVertex>>();
+            SequenceGraphArea.Loaded += SequenceGraphArea_Loaded;
+            SequenceGraphArea.VertexSelected += VertexSelectedEvent;
         }
 
         public DataGraph Graph { get; private set; }
@@ -53,20 +53,20 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         private void GenerateSequenceGraph()
         {
-            this.sequenceGraph = GraphXSequenceGraph.Create(
-                                    new AminoAcidSet(this.SearchModifications, this.MaxDynamicModifications),
+            sequenceGraph = GraphXSequenceGraph.Create(
+                                    new AminoAcidSet(SearchModifications, MaxDynamicModifications),
                                     string.Empty,
-                                    this.SearchModifications.ToList());
-            if (this.sequenceGraph == null)
+                                    SearchModifications.ToList());
+            if (sequenceGraph == null)
             {
                 return;
             }
 
-            var graph = this.sequenceGraph.DataGraph;
-            this.Graph = graph;
-            this.SequenceGraphArea.LogicCore.Graph = graph;
-            this.SequenceGraphArea.ShowAllEdgesLabels();
-            this.SequenceGraphArea.GenerateGraph(true);
+            var graph = sequenceGraph.DataGraph;
+            Graph = graph;
+            SequenceGraphArea.LogicCore.Graph = graph;
+            SequenceGraphArea.ShowAllEdgesLabels();
+            SequenceGraphArea.GenerateGraph(true);
         }
 
         /// <summary>
@@ -76,8 +76,8 @@ namespace LcmsSpectator.SequenceGraph
         /// <param name="e">The event arguments.</param>
         private void SequenceGraphArea_Loaded(object sender, RoutedEventArgs e)
         {
-            this.SequenceGraphArea.ShowAllEdgesLabels();
-            this.SequenceGraphArea.GenerateGraph(true);
+            SequenceGraphArea.ShowAllEdgesLabels();
+            SequenceGraphArea.GenerateGraph(true);
         }
 
         /// <summary>
@@ -87,15 +87,14 @@ namespace LcmsSpectator.SequenceGraph
         /// <param name="args">The event arguments.</param>
         private void VertexSelectedEvent(object sender, VertexSelectedEventArgs args)
         {
-            var sequenceGraph = this.sequenceGraph as GraphXSequenceGraph;
-            if (sequenceGraph == null)
+            if (!(sequenceGraph is GraphXSequenceGraph seqGraph))
             {
                 return;
             }
 
-            var graph = (DataGraph)this.SequenceGraphArea.LogicCore.Graph;
+            var graph = (DataGraph)SequenceGraphArea.LogicCore.Graph;
             var vertex = (DataVertex)args.VertexControl.Vertex;
-            this.SelectedVertices = graph.GetAllSequencePaths(vertex, sequenceGraph.EndPoint);
+            SelectedVertices = graph.GetAllSequencePaths(vertex, seqGraph.EndPoint);
         }
 
         /// <summary>
@@ -103,10 +102,7 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         private List<List<DataVertex>> SelectedVertices
         {
-            get
-            {
-                return this.selectedVertices;
-            }
+            get => selectedVertices;
 
             set
             {
@@ -148,13 +144,13 @@ namespace LcmsSpectator.SequenceGraph
             logicCore.DefaultEdgeRoutingAlgorithm = EdgeRoutingAlgorithmTypeEnum.None;
             logicCore.AsyncAlgorithmCompute = false;
 
-            if (this.SequenceGraphArea.LogicCore != null && this.SequenceGraphArea.LogicCore.Graph != null)
+            if (SequenceGraphArea.LogicCore?.Graph != null)
             {
-                logicCore.Graph = this.SequenceGraphArea.LogicCore.Graph;
+                logicCore.Graph = SequenceGraphArea.LogicCore.Graph;
             }
 
-            this.SequenceGraphArea.LogicCore = logicCore;
-            this.SequenceGraphArea.GenerateGraph(true);
+            SequenceGraphArea.LogicCore = logicCore;
+            SequenceGraphArea.GenerateGraph(true);
         }
 
         #region SelectedSequence Dependency Property (Output Property)
@@ -163,8 +159,8 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         public Sequence SelectedSequence
         {
-            get { return (Sequence)this.GetValue(SelectedSequenceProperty); }
-            private set { this.SetValue(SelectedSequenceProperty, value); }
+            get => (Sequence)GetValue(SelectedSequenceProperty);
+            private set => SetValue(SelectedSequenceProperty, value);
         }
 
         /// <summary>
@@ -180,8 +176,8 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         public Sequence ProteinSequence
         {
-            get { return (Sequence)this.GetValue(ProteinSequenceProperty); }
-            set { this.SetValue(ProteinSequenceProperty, value); }
+            get => (Sequence)GetValue(ProteinSequenceProperty);
+            set => SetValue(ProteinSequenceProperty, value);
         }
 
         /// <summary>
@@ -207,8 +203,8 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         public IEnumerable<SearchModification> SearchModifications
         {
-            get { return (IEnumerable<SearchModification>)this.GetValue(SearchModificationsProperty); }
-            set { this.SetValue(SearchModificationsProperty, value); }
+            get => (IEnumerable<SearchModification>)GetValue(SearchModificationsProperty);
+            set => SetValue(SearchModificationsProperty, value);
         }
 
         /// <summary>
@@ -232,8 +228,8 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         public int MaxDynamicModifications
         {
-            get { return (int)this.GetValue(MaxDynamicModificationsProperty); }
-            set { this.SetValue(MaxDynamicModificationsProperty, value); }
+            get => (int)GetValue(MaxDynamicModificationsProperty);
+            set => SetValue(MaxDynamicModificationsProperty, value);
         }
 
         /// <summary>

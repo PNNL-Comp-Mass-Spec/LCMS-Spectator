@@ -15,7 +15,7 @@ namespace LcmsSpectator.ViewModels.Filters
     using System.Linq;
     using System.Reactive.Linq;
 
-    using LcmsSpectator.DialogServices;
+    using DialogServices;
     using ReactiveUI;
 
     /// <summary>
@@ -57,7 +57,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// The deliimeter to use for parsing a string containing a list.
         /// 0 = no delimiter.
         /// </summary>
-        private char delimiter;
+        private readonly char delimiter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MultiValueFilterViewModel"/> class. 
@@ -91,38 +91,38 @@ namespace LcmsSpectator.ViewModels.Filters
                 values = new ReactiveList<string>();
             }
 
-            this.Name = name;
-            this.Title = title;
-            this.Description = description;
-            this.DefaultValues = values;
+            Name = name;
+            Title = title;
+            Description = description;
+            DefaultValues = values;
             this.filter = filter;
             this.validator = validator;
 
             var filterCommand = ReactiveCommand.Create();
-            filterCommand.Subscribe(_ => this.FilterImplementation());
-            this.FilterCommand = filterCommand;
+            filterCommand.Subscribe(_ => FilterImplementation());
+            FilterCommand = filterCommand;
 
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => this.CancelImplementation());
-            this.CancelCommand = cancelCommand;
+            cancelCommand.Subscribe(_ => CancelImplementation());
+            CancelCommand = cancelCommand;
 
             var selectValueCommand = ReactiveCommand.Create(
                                          this.WhenAnyValue(x => x.Value)
-                                             .Select(value => this.ParseValues(value))
+                                             .Select(ParseValues)
                                              .Select(vals => vals.Any()));
 
-            selectValueCommand.Subscribe(_ => this.SelectValueImplementation());
-            this.SelectValueCommand = selectValueCommand;
+            selectValueCommand.Subscribe(_ => SelectValueImplementation());
+            SelectValueCommand = selectValueCommand;
 
             var removeValueCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedValue).Select(v => v != null));
-            removeValueCommand.Subscribe(_ => this.RemoveValueImplementation());
-            this.RemoveValueCommand = removeValueCommand;
+            removeValueCommand.Subscribe(_ => RemoveValueImplementation());
+            RemoveValueCommand = removeValueCommand;
 
-            this.Value = defaultValue;
-            this.Values = new ReactiveList<string>();
+            Value = defaultValue;
+            Values = new ReactiveList<string>();
             this.delimiter = delimiter;
             this.dialogService = dialogService;
-            this.Status = false;
+            Status = false;
         }
 
         /// <summary>
@@ -148,39 +148,39 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <summary>
         /// Gets the name of the filter.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the title text of the filter.
         /// </summary>
-        public string Title { get; private set; }
+        public string Title { get; }
 
         /// <summary>
         /// Gets the description text for the filter
         /// </summary>
-        public string Description { get; private set; }
+        public string Description { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this item is selected.
         /// </summary>
         public bool Selected
         {
-            get { return this.selected; }
-            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
+            get => selected;
+            set => this.RaiseAndSetIfChanged(ref selected, value);
         }
 
         /// <summary>
         /// Gets the default possible values to filter by.
         /// </summary>
-        public IEnumerable<object> DefaultValues { get; private set; }
+        public IEnumerable<object> DefaultValues { get; }
 
         /// <summary>
         /// Gets or sets the selected value for the filter.
         /// </summary>
         public string Value
         {
-            get { return this.value; }
-            set { this.RaiseAndSetIfChanged(ref this.value, value); }
+            get => value;
+            set => this.RaiseAndSetIfChanged(ref this.value, value);
         }
 
         /// <summary>
@@ -188,35 +188,35 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         public string SelectedValue
         {
-            get { return this.selectedValue; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedValue, value); }
+            get => selectedValue;
+            set => this.RaiseAndSetIfChanged(ref selectedValue, value);
         }
 
         /// <summary>
         /// Gets the selected values for the filter.
         /// </summary>
-        public ReactiveList<string> Values { get; private set; }
+        public ReactiveList<string> Values { get; }
 
         /// <summary>
         /// Gets a command that sets status to true if a valid filter has been selected
         /// and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand FilterCommand { get; private set; }
+        public IReactiveCommand FilterCommand { get; }
 
         /// <summary>
         /// Gets a command that sets status to false and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; }
 
         /// <summary>
         /// Gets a command that inserts the selected value into the selected values list.
         /// </summary>
-        public IReactiveCommand SelectValueCommand { get; private set; }
+        public IReactiveCommand SelectValueCommand { get; }
 
         /// <summary>
         /// Gets a command that removes the selected value into the selected values list.
         /// </summary>
-        public IReactiveCommand RemoveValueCommand { get; private set; }
+        public IReactiveCommand RemoveValueCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid filter has been selected.
@@ -230,7 +230,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <returns>The filtered data.</returns>
         public IEnumerable<object> Filter(IEnumerable<object> data)
         {
-            return this.filter(data, this.Values);
+            return filter(data, Values);
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         public void ResetStatus()
         {
-            this.Status = false;
+            Status = false;
         }
 
         /// <summary>
@@ -248,17 +248,14 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         private void FilterImplementation()
         {
-            if (this.Values.Any(v => !this.validator(v)))
+            if (Values.Any(v => !validator(v)))
             {
-                this.dialogService.MessageBox("Invalid filter value.");
+                dialogService.MessageBox("Invalid filter value.");
             }
             else
             {
-                this.Status = true;
-                if (this.ReadyToClose != null)
-                {
-                    this.ReadyToClose(this, EventArgs.Empty);
-                }
+                Status = true;
+                ReadyToClose?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -268,12 +265,9 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         private void CancelImplementation()
         {
-            this.Status = false;
-            this.Selected = false;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = false;
+            Selected = false;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -282,18 +276,18 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         private void SelectValueImplementation()
         {
-            var values = this.ParseValues(this.Value);
-            values = values.Where(val => this.validator(val)).Where(val => !this.Values.Contains(val));
+            var values = ParseValues(Value);
+            values = values.Where(val => validator(val)).Where(val => !Values.Contains(val));
             if (value.Any())
             {
                 foreach (var v in values)
                 {
-                    this.Values.Add(v);
+                    Values.Add(v);
                 }
             }
             else
             {
-                this.dialogService.MessageBox("No valid filter values selected.");
+                dialogService.MessageBox("No valid filter values selected.");
             }
         }
 
@@ -303,9 +297,9 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         private void RemoveValueImplementation()
         {
-            if (this.Values.Contains(this.SelectedValue))
+            if (Values.Contains(SelectedValue))
             {
-                this.Values.Remove(this.SelectedValue);
+                Values.Remove(SelectedValue);
             }
         }
 
@@ -318,9 +312,9 @@ namespace LcmsSpectator.ViewModels.Filters
         {
             IEnumerable<string> parsedValues;
 
-            if (this.delimiter != '\0')
+            if (delimiter != '\0')
             {
-                parsedValues = valueList.Split(this.delimiter).Select(val => val.Trim());
+                parsedValues = valueList.Split(delimiter).Select(val => val.Trim());
             }
             else
             {
@@ -329,7 +323,7 @@ namespace LcmsSpectator.ViewModels.Filters
 
             // Get only values that are not in value list.
             parsedValues = parsedValues.Where(val => !string.IsNullOrWhiteSpace(val))
-                                       .Where(val => !this.Values.Contains(val));
+                                       .Where(val => !Values.Contains(val));
 
             return parsedValues;
         }

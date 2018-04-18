@@ -19,13 +19,12 @@ namespace LcmsSpectator.ViewModels.Data
     using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassSpecData;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers.SequenceReaders;
-    using LcmsSpectator.Utils;
+    using Config;
+    using DialogServices;
+    using Models;
+    using Readers.SequenceReaders;
+    using Utils;
 
     using ReactiveUI;
 
@@ -66,51 +65,51 @@ namespace LcmsSpectator.ViewModels.Data
         private DataSetViewModel selectedDataSetViewModel;
 
         /// <summary>
-        /// Initializes a new instance of the CreateSequenceViewModel class. 
+        /// Initializes a new instance of the CreateSequenceViewModel class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public CreateSequenceViewModel(IDialogService dialogService)
         {
-            this.Targets = new ReactiveList<Target>();
+            Targets = new ReactiveList<Target>();
             this.dialogService = dialogService;
-            this.SequenceText = string.Empty;
+            SequenceText = string.Empty;
 
             var createPrSmCommand = ReactiveCommand.Create();
-            createPrSmCommand.Subscribe(_ => this.CreatePrSmImplementation());
-            this.CreatePrSmCommand = createPrSmCommand;
+            createPrSmCommand.Subscribe(_ => CreatePrSmImplementation());
+            CreatePrSmCommand = createPrSmCommand;
 
-            this.CreateAndAddPrSmCommand = ReactiveCommand.Create();
-            this.CreateAndAddPrSmCommand.Subscribe(_ => this.CreatePrSmImplementation());
+            CreateAndAddPrSmCommand = ReactiveCommand.Create();
+            CreateAndAddPrSmCommand.Subscribe(_ => CreatePrSmImplementation());
 
             var insertStaticModificationsCommand = ReactiveCommand.Create();
-            insertStaticModificationsCommand.Subscribe(_ => this.InsertStaticModifications());
-            this.InsertStaticModificationsCommand = insertStaticModificationsCommand;
+            insertStaticModificationsCommand.Subscribe(_ => InsertStaticModifications());
+            InsertStaticModificationsCommand = insertStaticModificationsCommand;
 
-            this.SelectedCharge = 2;
-            this.SelectedScan = 0;
+            SelectedCharge = 2;
+            SelectedScan = 0;
 
             // When PrSm changes, update scan, sequence text, and charge
             this.WhenAnyValue(x => x.SelectedPrSm)
                 .Where(prsm => prsm != null)
                 .Subscribe(prsm =>
             {
-                this.SelectedScan = prsm.Scan;
-                this.SequenceText = prsm.SequenceText;
-                this.SelectedCharge = Math.Max(prsm.Charge, 1);
+                SelectedScan = prsm.Scan;
+                SequenceText = prsm.SequenceText;
+                SelectedCharge = Math.Max(prsm.Charge, 1);
             });
 
-            this.Modifications = IcParameters.Instance.RegisteredModifications;
+            Modifications = IcParameters.Instance.RegisteredModifications;
         }
 
         /// <summary>
         /// Gets the list of target sequences and charges.
         /// </summary>
-        public ReactiveList<Target> Targets { get; private set; }
+        public ReactiveList<Target> Targets { get; }
 
         /// <summary>
         /// Gets a list of modifications registered with LCMSSpectator.
         /// </summary>
-        public ReactiveList<Modification> Modifications { get; private set; }
+        public ReactiveList<Modification> Modifications { get; }
 
         /// <summary>
         /// Gets or sets the modification selected for insertion into the sequence.
@@ -118,31 +117,31 @@ namespace LcmsSpectator.ViewModels.Data
         public Modification SelectedModification { get; set; }
 
         /// <summary>
-        /// Gets a command that when executed creates a new protein-spectrum match from the 
+        /// Gets a command that when executed creates a new protein-spectrum match from the
         /// selected sequence, charge, scan number, and data set.
         /// </summary>
-        public IReactiveCommand CreatePrSmCommand { get; private set; }
+        public IReactiveCommand CreatePrSmCommand { get; }
 
         /// <summary>
-        /// Gets a command that when executed creates a new protein-spectrum match from the 
+        /// Gets a command that when executed creates a new protein-spectrum match from the
         /// selected sequence, charge, scan number, and data set. It also signals the parent
         /// data set that it should be added to the Scan View.
         /// </summary>
-        public ReactiveCommand<object> CreateAndAddPrSmCommand { get; private set; } 
+        public ReactiveCommand<object> CreateAndAddPrSmCommand { get; }
 
         /// <summary>
         /// Gets a command that when executed inserts the modifications into the sequence
         /// that are marked as static for a certain residue.
         /// </summary>
-        public IReactiveCommand InsertStaticModificationsCommand { get; private set; }
+        public IReactiveCommand InsertStaticModificationsCommand { get; }
 
         /// <summary>
         /// Gets or sets the selected protein-spectrum match.
         /// </summary>
         public PrSm SelectedPrSm
         {
-            get { return this.selectedPrSm; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedPrSm, value); }
+            get => selectedPrSm;
+            set => this.RaiseAndSetIfChanged(ref selectedPrSm, value);
         }
 
         /// <summary>
@@ -150,8 +149,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public int SelectedScan
         {
-            get { return this.selectedScan; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedScan, value); }
+            get => selectedScan;
+            set => this.RaiseAndSetIfChanged(ref selectedScan, value);
         }
 
         /// <summary>
@@ -159,8 +158,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public int SelectedCharge
         {
-            get { return this.selectedCharge; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedCharge, value); }
+            get => selectedCharge;
+            set => this.RaiseAndSetIfChanged(ref selectedCharge, value);
         }
 
         /// <summary>
@@ -168,8 +167,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public string SequenceText
         {
-            get { return this.sequenceText; }
-            set { this.RaiseAndSetIfChanged(ref this.sequenceText, value); }
+            get => sequenceText;
+            set => this.RaiseAndSetIfChanged(ref sequenceText, value);
         }
 
         /// <summary>
@@ -177,8 +176,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public DataSetViewModel SelectedDataSetViewModel
         {
-            get { return this.selectedDataSetViewModel; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedDataSetViewModel, value); }
+            get => selectedDataSetViewModel;
+            set => this.RaiseAndSetIfChanged(ref selectedDataSetViewModel, value);
         }
 
         /// <summary>
@@ -197,7 +196,7 @@ namespace LcmsSpectator.ViewModels.Data
             Sequence sequence = null;
             try
             {
-                sequence = sequenceReader.Read(this.SequenceText);
+                sequence = sequenceReader.Read(SequenceText);
                 if (sequence == null)
                 {
                     throw new FormatException("Invalid Sequence.");
@@ -205,7 +204,7 @@ namespace LcmsSpectator.ViewModels.Data
             }
             catch (FormatException e)
             {
-                this.dialogService.MessageBox(e.Message);
+                dialogService.MessageBox(e.Message);
                 return;
             }
             finally
@@ -216,46 +215,46 @@ namespace LcmsSpectator.ViewModels.Data
                 }
             }
 
-            if (sequence.Count > 0 && this.SelectedCharge == 0)
+            if (sequence.Count > 0 && SelectedCharge == 0)
             {
-                this.dialogService.MessageBox("Invalid Charge state.");
+                dialogService.MessageBox("Invalid Charge state.");
                     return;
             }
 
-            if (sequence.Count == 0 && this.SelectedScan < 0)
+            if (sequence.Count == 0 && SelectedScan < 0)
             {
-                this.dialogService.MessageBox("Invalid scan number.");
+                dialogService.MessageBox("Invalid scan number.");
                 return;
             }
 
-            ILcMsRun lcms = this.SelectedDataSetViewModel.LcMs;
-            
-            double score = -1.0;
-            if (lcms != null && this.SelectedScan > 0 && this.ScorerFactory != null && sequence.Count > 0)
+            var lcms = SelectedDataSetViewModel.LcMs;
+
+            var score = -1.0;
+            if (lcms != null && SelectedScan > 0 && ScorerFactory != null && sequence.Count > 0)
             {
-                var spectrum = lcms.GetSpectrum(this.SelectedScan) as ProductSpectrum;
-                if (spectrum != null)
+
+                if (lcms.GetSpectrum(SelectedScan) is ProductSpectrum spectrum)
                 {
-                    var scorer = this.ScorerFactory.GetScorer(spectrum);
+                    var scorer = ScorerFactory.GetScorer(spectrum);
                     score = IonUtils.ScoreSequence(scorer, sequence);
                 }
             }
 
-            string rawFileName = this.SelectedDataSetViewModel.Title;
+            var rawFileName = SelectedDataSetViewModel.Title;
             var prsm = new PrSm
             {
                 Heavy = false,
                 RawFileName = rawFileName,
                 ProteinName = string.Empty,
                 ProteinDesc = string.Empty,
-                Scan = Math.Min(Math.Max(this.SelectedScan, 0), lcms.MaxLcScan),
+                Scan = Math.Min(Math.Max(SelectedScan, 0), lcms?.MaxLcScan ?? 1),
                 LcMs = lcms,
-                Charge = this.SelectedCharge,
+                Charge = SelectedCharge,
                 Sequence = sequence,
-                SequenceText = this.SequenceText,
+                SequenceText = SequenceText,
                 Score = score,
             };
-            this.SelectedPrSm = prsm;
+            SelectedPrSm = prsm;
         }
 
         /// <summary>
@@ -265,18 +264,18 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void InsertStaticModifications()
         {
-            if (this.SequenceText == string.Empty || IcParameters.Instance.SearchModifications.Count == 0)
+            if (SequenceText == string.Empty || IcParameters.Instance.SearchModifications.Count == 0)
             {
                 return;
             }
 
-            if (this.SequenceText.Contains("+"))
+            if (SequenceText.Contains("+"))
             {
-                this.InsertStaticMsgfPlusModifications();
+                InsertStaticMsgfPlusModifications();
             }
             else
             {
-                this.InsertStaticLcmsSpectatorModifications();
+                InsertStaticLcmsSpectatorModifications();
             }
         }
 
@@ -287,7 +286,7 @@ namespace LcmsSpectator.ViewModels.Data
         {
             const string Pattern = @"[A-Z](\+[0-9]+\.[0-9]+)*";
 
-            var matches = Regex.Matches(this.SequenceText, Pattern);
+            var matches = Regex.Matches(SequenceText, Pattern);
 
             var newSequence = new List<string>();
 
@@ -297,7 +296,7 @@ namespace LcmsSpectator.ViewModels.Data
                 var residue = matchStr[0];
                 foreach (var searchModification in IcParameters.Instance.SearchModifications)
                 {
-                    if (searchModification.IsFixedModification && 
+                    if (searchModification.IsFixedModification &&
                         searchModification.Location == SequenceLocation.Everywhere &&
                         searchModification.TargetResidue == residue)
                     {
@@ -312,10 +311,10 @@ namespace LcmsSpectator.ViewModels.Data
                 newSequence.Add(matchStr);
             }
 
-            this.SequenceText = string.Empty;
+            SequenceText = string.Empty;
             foreach (var aa in newSequence)
             {
-                this.SequenceText += aa;
+                SequenceText += aa;
             }
         }
 
@@ -326,7 +325,7 @@ namespace LcmsSpectator.ViewModels.Data
         {
             const string Pattern = @"[A-Z](\[[A-Z][a-z]+\])*";
 
-            var matches = Regex.Matches(this.SequenceText, Pattern);
+            var matches = Regex.Matches(SequenceText, Pattern);
 
             var newSequence = new List<string>();
 
@@ -351,10 +350,10 @@ namespace LcmsSpectator.ViewModels.Data
                 newSequence.Add(matchStr);
             }
 
-            this.SequenceText = string.Empty;
+            SequenceText = string.Empty;
             foreach (var aa in newSequence)
             {
-                this.SequenceText += aa;
+                SequenceText += aa;
             }
         }
     }

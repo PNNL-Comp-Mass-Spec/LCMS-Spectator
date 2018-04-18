@@ -49,10 +49,13 @@ namespace LcmsSpectator.SequenceGraph
         protected GraphXSequenceGraph(AminoAcidSet aminoAcidSet, AminoAcid nterm, string sequence, AminoAcid cterm, IEnumerable<SearchModification> mods) :
                                           base(aminoAcidSet, nterm, sequence, cterm)
         {
-            var ntermMods = (from m in mods
+            var modList = mods.ToList();
+
+            var ntermMods = (from m in modList
                              where (m.IsFixedModification && (m.Location == SequenceLocation.ProteinNTerm || m.Location == SequenceLocation.PeptideNTerm))
                              select m).ToList();
-            var ctermMods = (from m in mods
+
+            var ctermMods = (from m in modList
                              where (m.IsFixedModification && (m.Location == SequenceLocation.ProteinCTerm || m.Location == SequenceLocation.PeptideCTerm))
                              select m).ToList();
 
@@ -76,34 +79,31 @@ namespace LcmsSpectator.SequenceGraph
                 }
             }
 
-            this.nterminal = null;
-            this.cterminal = null;
+            nterminal = null;
+            cterminal = null;
             if (ntermMod != null)
             {
-                this.nterminal = new ModifiedAminoAcid(new AminoAcid('(', "NTerm", Composition.Zero), ntermMod);
+                nterminal = new ModifiedAminoAcid(new AminoAcid('(', "NTerm", Composition.Zero), ntermMod);
             }
 
             if (ctermMod != null)
             {
-                this.cterminal = new ModifiedAminoAcid(new AminoAcid(')', "CTerm", Composition.Zero), ctermMod);
+                cterminal = new ModifiedAminoAcid(new AminoAcid(')', "CTerm", Composition.Zero), ctermMod);
             }
 
-            this.DataGraph = new DataGraph();
-            this.BuildGraph();
+            DataGraph = new DataGraph();
+            BuildGraph();
         }
 
         /// <summary>
         /// Gets the data graph for the given sequence graph.
         /// </summary>
-        public DataGraph DataGraph { get; private set; }
+        public DataGraph DataGraph { get; }
 
         /// <summary>
         /// Gets the end point of the entire sequence graph.
         /// </summary>
-        public DataVertex EndPoint
-        {
-            get { return this.vertices[0][0]; }
-        }
+        public DataVertex EndPoint => vertices[0][0];
 
         /// <summary>
         /// Create an instance of a GraphXSequenceGraph for a particular sequence and set of search modifications.
@@ -137,51 +137,51 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         private void BuildGraph()
         {
-            var sequenceRev = this._sequence.Reverse();
+            var sequenceRev = _sequence.Reverse();
             var sequence = sequenceRev.Aggregate(string.Empty, (current, aa) => current + aa);
             sequence = "\0" + sequence;
-            this.vertices = new DataVertex[this._maxSeqIndex][];
-            var mods = this.AminoAcidSet.GetModificationParams();
-            int id = 0;
-            int ntermIndex = 0;
-            int start = this._maxSeqIndex - 2;
-            int end = 0;
-            int offset = 1;
-            if (this.nterminal != null)
+            vertices = new DataVertex[_maxSeqIndex][];
+            var mods = AminoAcidSet.GetModificationParams();
+            var id = 0;
+            var ntermIndex = 0;
+            var start = _maxSeqIndex - 2;
+            var end = 0;
+            var offset = 1;
+            if (nterminal != null)
             {
                 start++;
-                sequence += this.nterminal.Residue;
+                sequence += nterminal.Residue;
             }
 
-            if (this.cterminal != null)
+            if (cterminal != null)
             {
                 end--;
                 offset = 0;
-                sequence = sequence.Insert(1, this.cterminal.Residue.ToString(CultureInfo.InvariantCulture));
+                sequence = sequence.Insert(1, cterminal.Residue.ToString(CultureInfo.InvariantCulture));
             }
 
             // create vertices
             for (var si = start; si > end; si--)
             {
                 var graphSi = si - offset;
-                this.vertices[graphSi] = new DataVertex[this._graph[si].Length];
-                for (var mi = 0; mi < this._graph[si].Length; mi++)
+                vertices[graphSi] = new DataVertex[_graph[si].Length];
+                for (var mi = 0; mi < _graph[si].Length; mi++)
                 {
-                    var node = this._graph[si][mi];
+                    var node = _graph[si][mi];
                     var mod = mods.GetModificationCombination(node.ModificationCombinationIndex);
-                    this.SetSink(mi);
-                    this.vertices[graphSi][mi] = new DataVertex
+                    SetSink(mi);
+                    vertices[graphSi][mi] = new DataVertex
                     {
                         ID = id++,
                         NTermIndex = ntermIndex,
                         ModIndex = mi,
-                        PrefixComposition = this.GetComplementaryComposition(si, mi),
-                        SuffixComposition = this.GetComposition(si, mi),
+                        PrefixComposition = GetComplementaryComposition(si, mi),
+                        SuffixComposition = GetComposition(si, mi),
                         ModificationCombination = mod,
                         Text = string.Empty
                     };
-                    var vertex = this.vertices[graphSi][mi];
-                    this.DataGraph.AddVertex(vertex);
+                    var vertex = vertices[graphSi][mi];
+                    DataGraph.AddVertex(vertex);
                 }
 
                 ntermIndex++;
@@ -191,13 +191,13 @@ namespace LcmsSpectator.SequenceGraph
             for (var si = start; si > (end + 1); si--)
             {
                 var graphSi = si - offset;
-                for (int mi = 0; mi < this._graph[si].Length; mi++)
+                for (var mi = 0; mi < _graph[si].Length; mi++)
                 {
-                    var node = this._graph[si][mi];
-                    var currVertex = this.vertices[graphSi][mi];
+                    var node = _graph[si][mi];
+                    var currVertex = vertices[graphSi][mi];
                     foreach (var nextModIndex in node.GetPrevNodeIndices())
                     {
-                        var nextVertex = this.vertices[graphSi - 1][nextModIndex];
+                        var nextVertex = vertices[graphSi - 1][nextModIndex];
                         var currVertexMods = currVertex.ModificationCombination.Modifications;
                         var nextVertexMods = nextVertex.ModificationCombination.Modifications;
                         var result = new List<Modification>(currVertexMods);
@@ -210,17 +210,17 @@ namespace LcmsSpectator.SequenceGraph
                         }
 
                         AminoAcid aminoAcid;
-                        if (si == start && this.nterminal != null)
+                        if (si == start && nterminal != null)
                         {
-                            aminoAcid = this.nterminal;
+                            aminoAcid = nterminal;
                         }
-                        else if (si == end + 2 && this.cterminal != null)
+                        else if (si == end + 2 && cterminal != null)
                         {
-                            aminoAcid = this.cterminal;
+                            aminoAcid = cterminal;
                         }
                         else
                         {
-                            aminoAcid = this.AminoAcidSet.GetAminoAcid(sequence[graphSi]);
+                            aminoAcid = AminoAcidSet.GetAminoAcid(sequence[graphSi]);
                         }
 
                         var modAa = aminoAcid as ModifiedAminoAcid;
@@ -243,7 +243,7 @@ namespace LcmsSpectator.SequenceGraph
                             Modifications = edgeModifications
                         };
 
-                        this.DataGraph.AddEdge(edge);
+                        DataGraph.AddEdge(edge);
                     }
                 }
             }

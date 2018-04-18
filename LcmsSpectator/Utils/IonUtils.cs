@@ -21,8 +21,8 @@ namespace LcmsSpectator.Utils
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Utils;
 
-    using LcmsSpectator.PlotModels;
-    using LcmsSpectator.ViewModels.Data;
+    using PlotModels;
+    using ViewModels.Data;
 
     /// <summary>
     /// This is a utility class for containing methods for performing common calculations on sequences and ions.
@@ -42,7 +42,7 @@ namespace LcmsSpectator.Utils
         public static List<Composition> GetCompositions(Sequence sequence, bool prefix)
         {
             var compositions = new List<Composition>();
-            for (int i = 1; i < sequence.Count; i++)
+            for (var i = 1; i < sequence.Count; i++)
             {
                 compositions.Add(prefix
                     ? sequence.GetComposition(0, i)
@@ -88,7 +88,7 @@ namespace LcmsSpectator.Utils
         /// <returns>Number of neighboring charge states.</returns>
         public static int GetNumNeighboringChargeStates(int charge)
         {
-            int chargeStates = 1;
+            var chargeStates = 1;
             if (charge >= 2 && charge <= 4)
             {
                 chargeStates = 1;
@@ -134,14 +134,14 @@ namespace LcmsSpectator.Utils
             {
                 foreach (var neutralLoss in neutralLosses)
                 {
-                    for (int i = minCharge; i <= maxCharge; i++)
+                    for (var i = minCharge; i <= maxCharge; i++)
                     {
                         IonType ionType;
                         try
                         {
                             ionType = GetIonType(ionTypeFactory, baseIonType, neutralLoss, i);
                         }
-                        catch (KeyNotFoundException ex)
+                        catch (KeyNotFoundException)
                         {
                             continue;
                         }
@@ -212,7 +212,7 @@ namespace LcmsSpectator.Utils
         public static List<LabeledIonViewModel> GetPrecursorIonLabels(Sequence sequence, int charge, int minIsotopeIndex, int maxIsotopeIndex)
         {
             var ions = new List<LabeledIonViewModel>();
-            for (int i = minIsotopeIndex; i <= maxIsotopeIndex; i++)
+            for (var i = minIsotopeIndex; i <= maxIsotopeIndex; i++)
             {
                 ions.Add(GetLabeledPrecursorIon(sequence, charge, i));
             }
@@ -232,7 +232,7 @@ namespace LcmsSpectator.Utils
         /// </returns>
         public static Tuple<Peak[], double> GetIonPeaks(Ion ion, Spectrum spectrum, Tolerance tolerance, bool decharged = false)
         {
-            double ionCorrelation = 0.0;
+            var ionCorrelation = 0.0;
             Peak[] isotopePeaks = null;
 
             if (!decharged)
@@ -280,6 +280,7 @@ namespace LcmsSpectator.Utils
         /// <param name="peaks">The peaks to calculate error for.</param>
         /// <param name="ion">The ion to calculate theoretical isotope envelope for.</param>
         /// <param name="relativeIntensityThreshold">Relative intensity threshold for calculating isotopes</param>
+        /// <param name="deconvoluted"></param>
         /// <returns>Array of ppm errors for each peak.</returns>
         public static double?[] GetIsotopePpmError(Peak[] peaks, Ion ion, double relativeIntensityThreshold, bool deconvoluted = false)
         {
@@ -288,7 +289,7 @@ namespace LcmsSpectator.Utils
             {
                 var isotopes = ion.GetIsotopes(relativeIntensityThreshold).ToArray();
                 ppmErrors = new double?[isotopes.Max(i => i.Index) + 1];
-                foreach (Isotope isotope in isotopes)
+                foreach (var isotope in isotopes)
                 {
                     var isotopeIndex = isotope.Index;
                     if (peaks[isotopeIndex] == null)
@@ -335,8 +336,8 @@ namespace LcmsSpectator.Utils
             var suffixCompositions = GetCompositions(sequence, false);
             suffixCompositions.Reverse();
 
-            double score = 0.0;
-            for (int i = 0; i < prefixCompositions.Count; i++)
+            var score = 0.0;
+            for (var i = 0; i < prefixCompositions.Count; i++)
             {
                 score += scorer.GetFragmentScore(prefixCompositions[i], suffixCompositions[i]);
             }
@@ -353,7 +354,7 @@ namespace LcmsSpectator.Utils
         public static XicPoint[] SmoothXic(SavitzkyGolaySmoother smoother, IList<XicPoint> xic)
         {
             var xicP = new double[xic.Count];
-            for (int i = 0; i < xic.Count; i++)
+            for (var i = 0; i < xic.Count; i++)
             {
                 xicP[i] = xic[i].Intensity;
             }
@@ -369,7 +370,7 @@ namespace LcmsSpectator.Utils
             }
 
             var smoothedXic = new XicPoint[xicP.Length];
-            for (int i = 0; i < xicP.Length; i++)
+            for (var i = 0; i < xicP.Length; i++)
             {
                 smoothedXic[i] = new XicPoint(xic[i].ScanNum, xic[i].Mz, smoothedPoints[i]);
             }
@@ -403,7 +404,7 @@ namespace LcmsSpectator.Utils
                 }
                 else
                 {
-                    for (int i = 0; i < sequence.Count; i++)
+                    for (var i = 0; i < sequence.Count; i++)
                     {
                         if (sequence[i].Residue == mod.TargetResidue)
                         {
@@ -454,8 +455,8 @@ namespace LcmsSpectator.Utils
                 cutIndexToPeak[cutIndex].Add(peak);
             }
 
-            int counter = 0;
-            for (int i = 1; i < sequenceLength; i++)
+            var counter = 0;
+            for (var i = 1; i < sequenceLength; i++)
             {
                 if (cutIndexToPeak.ContainsKey(i))
                 {

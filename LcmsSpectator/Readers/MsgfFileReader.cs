@@ -18,8 +18,8 @@ namespace LcmsSpectator.Readers
 
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers.SequenceReaders;
+    using Models;
+    using SequenceReaders;
 
     /// <summary>
     /// Reader for MS-GF+ results file.
@@ -38,7 +38,7 @@ namespace LcmsSpectator.Readers
         public MsgfFileReader(string filePath)
         {
             this.filePath = filePath;
-            this.Modifications = new List<Modification>();
+            Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace LcmsSpectator.Readers
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
         public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
-            return this.ReadFromTsvFile().Result;
+            return ReadFromTsvFile().Result;
         }
 
         /// <summary>
@@ -60,10 +60,10 @@ namespace LcmsSpectator.Readers
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
         public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
-            return await this.ReadFromTsvFile();
+            return await ReadFromTsvFile();
         }
 
-        public IList<Modification> Modifications { get; private set; }
+        public IList<Modification> Modifications { get; }
 
         /// <summary>
         /// Read a MS-GF+ results from TSV file.
@@ -72,7 +72,7 @@ namespace LcmsSpectator.Readers
         private async Task<IEnumerable<PrSm>> ReadFromTsvFile()
         {
             var prsms = new List<PrSm>();
-            var file = new StreamReader(File.Open(this.filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            var file = new StreamReader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
             while (!file.EndOfStream)
@@ -82,7 +82,7 @@ namespace LcmsSpectator.Readers
                 if (lineCount == 1 && line != null)
                 { // first line
                     var parts = line.Split('\t');
-                    for (int i = 0; i < parts.Length; i++)
+                    for (var i = 0; i < parts.Length; i++)
                     {
                         headers.Add(parts[i], i);
                     }
@@ -90,7 +90,7 @@ namespace LcmsSpectator.Readers
                     continue;
                 }
 
-                var idData = this.CreatePrSms(line, headers);
+                var idData = CreatePrSms(line, headers);
                 prsms.AddRange(idData);
             }
 
@@ -104,7 +104,7 @@ namespace LcmsSpectator.Readers
         /// <param name="headers">Headers of the TSV file.</param>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <returns>List of Protein-Spectrum-Match identifications.</returns>
-        private IEnumerable<PrSm> CreatePrSms(string line, Dictionary<string, int> headers, IEnumerable<string> modIgnoreList = null)
+        private IEnumerable<PrSm> CreatePrSms(string line, IReadOnlyDictionary<string, int> headers, IEnumerable<string> modIgnoreList = null)
         {
             var expectedHeaders = new List<string>
             {
@@ -121,9 +121,8 @@ namespace LcmsSpectator.Readers
 
             var parts = line.Split('\t');
 
-            int scoreIndex;
             double score = 0;
-            if (headers.TryGetValue("SpecEValue", out scoreIndex))
+            if (headers.TryGetValue("SpecEValue", out var scoreIndex))
             {
                 score = Convert.ToDouble(parts[scoreIndex]);
             }
@@ -132,8 +131,8 @@ namespace LcmsSpectator.Readers
                 score = Convert.ToDouble(parts[scoreIndex]);
             }
 
-            int scanIndex, scan = 0;
-            if (headers.TryGetValue("ScanNum", out scanIndex))
+            var scan = 0;
+            if (headers.TryGetValue("ScanNum", out var scanIndex))
             {
                 scan = Convert.ToInt32(parts[scanIndex]);
             }
@@ -155,7 +154,7 @@ namespace LcmsSpectator.Readers
                 }
             }
 
-            var sequenceReader = new SequenceReader(this.filePath.Contains("_syn"));
+            var sequenceReader = new SequenceReader(filePath.Contains("_syn"));
 
             foreach (var protein in proteinNames)
             {

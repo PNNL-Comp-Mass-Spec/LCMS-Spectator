@@ -17,8 +17,6 @@ namespace LcmsSpectatorTests
 
     using LcmsSpectator.Readers;
 
-    using ReactiveUI;
-
     [TestFixture]
     class ComparisonTests
     {
@@ -35,7 +33,7 @@ namespace LcmsSpectatorTests
             //var mzids = this.ParseMzid(mzidFile);
             //var infengids = this.ParseInferenceEngineResults(infengineResults);
 
-            //var missingIds = new List<Tuple<int, string>>(); 
+            //var missingIds = new List<Tuple<int, string>>();
 
             //int totalMatched = 0;
             //foreach (var mzid in mzids)
@@ -69,14 +67,14 @@ namespace LcmsSpectatorTests
         public void TestCountMissingIds(string flashFile, string mclfFile, string missingIdsFile)
         {
             // Resolve full file paths
-            string directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
+            var directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
             flashFile = Path.Combine(directoryPath, flashFile);
             mclfFile = Path.Combine(directoryPath, mclfFile);
             missingIdsFile = Path.Combine(directoryPath, missingIdsFile);
 
             // Parse Flash File
             // mapping between query matrix index and BSF score
-            Dictionary<int, int> flashResults = File.ReadLines(flashFile)
+            var flashResults = File.ReadLines(flashFile)
                                                     .Select(line => line.Split(','))
                                                     .GroupBy(t => t[0])
                                                     .ToDictionary(
@@ -86,7 +84,7 @@ namespace LcmsSpectatorTests
 
             // Parse MclfFile
             // mapping between scan and BSF score
-            Dictionary<int, int> mclfMap = File.ReadLines(mclfFile)
+            var mclfMap = File.ReadLines(mclfFile)
                                                .Where(line => line.StartsWith("Biodiversity"))
                                                .Select(line => line.Split('\t'))
                                                .Select(l => new Tuple<int, int>(Convert.ToInt32(l[1]), Convert.ToInt32(l[2])))
@@ -95,12 +93,12 @@ namespace LcmsSpectatorTests
 
             // Parse missing ids file
             // mapping between scan and sequence
-            Dictionary<int, string> missingIds = File.ReadLines(missingIdsFile)
+            var missingIds = File.ReadLines(missingIdsFile)
                                                      .Select(line => line.Split('\t'))
                                                      .ToDictionary(t => Convert.ToInt32(t[0]), t => t[1]);
 
             // Count missing IDS with BSF score > 15
-            int count = missingIds.Count(id => !mclfMap.ContainsKey(id.Key) || mclfMap[id.Key] >= 15);
+            var count = missingIds.Count(id => !mclfMap.ContainsKey(id.Key) || mclfMap[id.Key] >= 15);
 
             Console.WriteLine(count);
         }
@@ -109,14 +107,14 @@ namespace LcmsSpectatorTests
         [TestCase(@"BC v BioDiv_uniqueFlashIds.tsv", @"Bacillus_cereus_ATCC14579_NCBI_06132016.fasta")]
         public void CountFlashIdsInFasta(string uniqueIdFile, string fastaFile)
         {
-            string directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
+            var directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
             uniqueIdFile = Path.Combine(directoryPath, uniqueIdFile);
             fastaFile = Path.Combine(directoryPath, fastaFile);
 
             var sequences = File.ReadLines(uniqueIdFile).Select(line => line.Split('\t')).Select(p => p[1]).ToList();
-            var fastas = FastaReaderWriter.ReadFastaFile(fastaFile);
+            var fastas = FastaReaderWriter.ReadFastaFile(fastaFile).ToList();
 
-            int numUniqueInFasta = 0;
+            var numUniqueInFasta = 0;
             foreach (var sequence in sequences)
             {
                 if (fastas.Any(fasta => fasta.ProteinSequenceText.Contains(sequence)))
@@ -132,12 +130,12 @@ namespace LcmsSpectatorTests
         [TestCase(@"BC v BioDiv_missingIds.tsv", @"Bacillus_cereus_ATCC14579_NCBI_06132016.fasta")]
         public void CountMissingIdsInFasta(string missingIdsFile, string fastaFile)
         {
-            string directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
+            var directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
             missingIdsFile = Path.Combine(directoryPath, missingIdsFile);
             fastaFile = Path.Combine(directoryPath, fastaFile);
 
             // Parse missing ids file
-            List<string[]> missingProteins = new List<string[]>(); // each element of the list corresponds to an ID. Each element of the array corresponds to a protein accession
+            var missingProteins = new List<string[]>(); // each element of the list corresponds to an ID. Each element of the array corresponds to a protein accession
             foreach (var line in File.ReadLines(missingIdsFile))
             {
                 var parts = line.Split('\t');
@@ -180,12 +178,12 @@ namespace LcmsSpectatorTests
             var deconvoluter = new Deconvoluter(1, 20, 2, 0.1, new Tolerance(10, ToleranceUnit.Ppm));
             var lcmsRunDecon = new LcmsRunDeconvoluter(pbfLcmsRun, deconvoluter, 2, 6);
             var dlcms = new DPbfLcMsRun(file, lcmsRunDecon, keepDataReaderOpen: true);
-            int count = 0;
+            var count = 0;
             var scans = pbfLcmsRun.GetScanNumbers(2);
             foreach (var scan in scans)
             {
-                var spectrum = pbfLcmsRun.GetSpectrum(scan) as ProductSpectrum;
-                if (spectrum.Peaks.Length < 50 || spectrum.IsolationWindow.Charge == null)
+                if (pbfLcmsRun.GetSpectrum(scan) is ProductSpectrum spectrum &&
+                    (spectrum.Peaks.Length < 50 || spectrum.IsolationWindow.Charge == null))
                 {
                     continue;
                 }
@@ -205,13 +203,13 @@ namespace LcmsSpectatorTests
         [TestCase("Human v BioDiv", @"CPTAC3_harmonization_P33_07_18Apr17_Samwise_REP_17-02-02_msgfplus.mzid.gz", @"6_HUMAN_VS_BIODIV_infeng.tsv", @"CPTAC3_harmonization_P33_07_18Apr17_Samwise_REP_17-02-02.mzML")]
         public void TestFlashSpectrumBased(string testCaseTitle, string mzidFile, string infengineResults, string mzmlFile)
         {
-            string directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
+            var directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
             mzidFile = Path.Combine(directoryPath, mzidFile);
             infengineResults = Path.Combine(directoryPath, infengineResults);
             mzmlFile = Path.Combine(directoryPath, mzmlFile);
 
-            var mzids = this.ParseMzid(mzidFile);
-            var infengids = this.ParseInferenceEngineResults(infengineResults);
+            var mzids = ParseMzid(mzidFile);
+            var infengids = ParseInferenceEngineResults(infengineResults);
 
             var idsInBoth = new HashSet<int>();
             var idsWithDifferentAnnotation = new HashSet<int>();
@@ -239,7 +237,7 @@ namespace LcmsSpectatorTests
             }
 
             // Calculate infeng ids that aren't in mzid
-            int infEngOnlyCount = 0;
+            var infEngOnlyCount = 0;
             var infEngUniqueIds = new Dictionary<int, HashSet<string>>();
             foreach (var id in infengids)
             {
@@ -250,14 +248,14 @@ namespace LcmsSpectatorTests
                 }
             }
 
-            var filteredMsgfIds = this.FilterByPpm(msgfUniqueIds, mzmlFile);
-            string fileName = string.Format("{0}_missingIds.tsv", testCaseTitle);
-            string filePath = Path.Combine(directoryPath, fileName);
-            this.WriteMissingIds(filteredMsgfIds, filePath);
+            var filteredMsgfIds = FilterByPpm(msgfUniqueIds, mzmlFile);
+            var fileName = string.Format("{0}_missingIds.tsv", testCaseTitle);
+            var filePath = Path.Combine(directoryPath, fileName);
+            WriteMissingIds(filteredMsgfIds, filePath);
 
             var flashOnlyIdFile = string.Format("{0}_uniqueFlashIds.tsv", testCaseTitle);
-            string uniqueIdFilePath = Path.Combine(directoryPath, flashOnlyIdFile);
-            this.WriteUniqueFlashEntries(infEngUniqueIds, uniqueIdFilePath);
+            var uniqueIdFilePath = Path.Combine(directoryPath, flashOnlyIdFile);
+            WriteUniqueFlashEntries(infEngUniqueIds, uniqueIdFilePath);
 
             Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", testCaseTitle, filteredMsgfIds.Count, idsInBoth.Count, idsWithDifferentAnnotation.Count, infEngOnlyCount);
         }
@@ -269,8 +267,7 @@ namespace LcmsSpectatorTests
             var lcmsRun = PbfLcMsRun.GetLcMsRun(mzmlPath);
             foreach (var id in ids)
             {
-                var spectrum = lcmsRun.GetSpectrum(id.Item1) as ProductSpectrum;
-                if (spectrum == null)
+                if (!(lcmsRun.GetSpectrum(id.Item1) is ProductSpectrum spectrum))
                 {
                     notProductSpectrum++;
                     continue;
@@ -303,7 +300,7 @@ namespace LcmsSpectatorTests
 
         private void WriteMissingIds(List<SimpleMZIdentMLReader.SpectrumIdItem> mzids, string filePath)
         {
-            int count = 0;
+            var count = 0;
             using (var writer = new StreamWriter(filePath))
             {
                 foreach (var id in mzids)
@@ -330,7 +327,7 @@ namespace LcmsSpectatorTests
                         file.WriteLine($"{entry.Key}\t{sequence}");
                     }
                 }
-            }         
+            }
         }
 
         private Dictionary<int, SimpleMZIdentMLReader.SpectrumIdItem> ParseMzid(string mzid)
@@ -362,7 +359,7 @@ namespace LcmsSpectatorTests
         private Dictionary<int, HashSet<string>> ParseInferenceEngineResults(string infengine)
         {
             var results = new Dictionary<int, HashSet<string>>();
-            int count = 0;
+            var count = 0;
             foreach (var line in File.ReadLines(infengine))
             {
                 if (count++ == 0)
@@ -376,8 +373,8 @@ namespace LcmsSpectatorTests
                     continue;
                 }
 
-                int scan = Convert.ToInt32(parts[2]);
-                string annotation = parts[3];
+                var scan = Convert.ToInt32(parts[2]);
+                var annotation = parts[3];
 
                 if (!results.ContainsKey(scan))
                 {

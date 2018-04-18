@@ -22,12 +22,12 @@ namespace LcmsSpectator.ViewModels.Data
     using InformedProteomics.Backend.MassSpecData;
     using InformedProteomics.Backend.Utils;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers;
-    using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels.Plots;
+    using Config;
+    using DialogServices;
+    using Models;
+    using Readers;
+    using Utils;
+    using Plots;
 
     using ReactiveUI;
 
@@ -108,32 +108,32 @@ namespace LcmsSpectator.ViewModels.Data
         public DataSetViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.ReadyToClose = false;
-            this.IdFileOpen = false;
-            this.SelectedPrSm = new PrSm();
-            this.ScanViewModel = new ScanViewModel(dialogService, new List<PrSm>());
-            this.CreateSequenceViewModel = new CreateSequenceViewModel(dialogService)
+            ReadyToClose = false;
+            IdFileOpen = false;
+            SelectedPrSm = new PrSm();
+            ScanViewModel = new ScanViewModel(dialogService, new List<PrSm>());
+            CreateSequenceViewModel = new CreateSequenceViewModel(dialogService)
             {
                 SelectedDataSetViewModel = this
             };
 
-            this.CreateSequenceViewModel.CreateAndAddPrSmCommand.Subscribe(
-                _ => this.ScanViewModel.Data.Add(this.CreateSequenceViewModel.SelectedPrSm));
+            CreateSequenceViewModel.CreateAndAddPrSmCommand.Subscribe(
+                _ => ScanViewModel.Data.Add(CreateSequenceViewModel.SelectedPrSm));
 
             // Remove filter by raw file name from ScanViewModel filters
-            this.ScanViewModel.Filters.Remove(this.ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Raw File Name"));
+            ScanViewModel.Filters.Remove(ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Raw File Name"));
 
             // When a PrSm is selected from the ScanViewModel, update the SelectedPrSm for this data set
-            this.ScanViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(x => this.SelectedPrSm = x);
+            ScanViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(x => SelectedPrSm = x);
 
             // When the scan number in the selected prsm changes, the selected scan in the xic plots should update
             this.WhenAnyValue(x => x.SelectedPrSm)
-            .Where(_ => this.SelectedPrSm != null && this.SpectrumViewModel != null && this.XicViewModel != null)
+            .Where(_ => SelectedPrSm != null && SpectrumViewModel != null && XicViewModel != null)
             .Subscribe(prsm =>
             {
-                this.SpectrumViewModel.UpdateSpectra(prsm.Scan, this.SelectedPrSm.PrecursorMz);
-                this.XicViewModel.SetSelectedScan(prsm.Scan);
-                this.XicViewModel.ZoomToScan(prsm.Scan);
+                SpectrumViewModel.UpdateSpectra(prsm.Scan, SelectedPrSm.PrecursorMz);
+                XicViewModel.SetSelectedScan(prsm.Scan);
+                XicViewModel.ZoomToScan(prsm.Scan);
             });
 
             var prsmObservable = this.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null);
@@ -142,37 +142,37 @@ namespace LcmsSpectator.ViewModels.Data
                 .Select(prsm => prsm.GetFragmentationSequence()).Where(fragSeq => fragSeq != null)
                 .Subscribe(fragSeq =>
                     {
-                        this.SpectrumViewModel.FragmentationSequence = fragSeq;
-                        this.XicViewModel.FragmentationSequence = fragSeq;
+                        SpectrumViewModel.FragmentationSequence = fragSeq;
+                        XicViewModel.FragmentationSequence = fragSeq;
                     });
 
             // When the prsm changes, update the Scan View Model.
-            prsmObservable.Subscribe(prsm => this.ScanViewModel.SelectedPrSm = prsm);
+            prsmObservable.Subscribe(prsm => ScanViewModel.SelectedPrSm = prsm);
 
             // When the prsm updates, update the prsm in the sequence creator
-            prsmObservable.Subscribe(prsm => this.CreateSequenceViewModel.SelectedPrSm = prsm);
+            prsmObservable.Subscribe(prsm => CreateSequenceViewModel.SelectedPrSm = prsm);
 
             // When the prsm updates, update the feature map
-            prsmObservable.Where(_ => this.FeatureMapViewModel != null).Subscribe(prsm => this.FeatureMapViewModel.FeatureMapViewModel.SelectedPrSm = prsm);
+            prsmObservable.Where(_ => FeatureMapViewModel != null).Subscribe(prsm => FeatureMapViewModel.FeatureMapViewModel.SelectedPrSm = prsm);
 
             // When prsm updates, subscribe to scan updates
             prsmObservable.Subscribe(prsm =>
             {
                 prsm.WhenAnyValue(x => x.Scan, x => x.PrecursorMz)
-                    .Where(x => x.Item1 > 0 && x.Item2 > 0 && this.SpectrumViewModel != null)
-                    .Subscribe(x => this.SpectrumViewModel.UpdateSpectra(x.Item1, x.Item2));
-                prsm.WhenAnyValue(x => x.Scan).Where(scan => scan > 0 && this.XicViewModel != null)
-                    .Subscribe(scan => this.XicViewModel.SetSelectedScan(scan));
+                    .Where(x => x.Item1 > 0 && x.Item2 > 0 && SpectrumViewModel != null)
+                    .Subscribe(x => SpectrumViewModel.UpdateSpectra(x.Item1, x.Item2));
+                prsm.WhenAnyValue(x => x.Scan).Where(scan => scan > 0 && XicViewModel != null)
+                    .Subscribe(scan => XicViewModel.SetSelectedScan(scan));
             });
 
             // When a new prsm is created by CreateSequenceViewModel, update SelectedPrSm
-            this.CreateSequenceViewModel.WhenAnyValue(x => x.SelectedPrSm).Subscribe(prsm => this.SelectedPrSm = prsm);
+            CreateSequenceViewModel.WhenAnyValue(x => x.SelectedPrSm).Subscribe(prsm => SelectedPrSm = prsm);
 
             // When IDs are filtered in the ScanViewModel, update feature map with new IDs
-            this.ScanViewModel.WhenAnyValue(x => x.FilteredData).Where(_ => this.FeatureMapViewModel != null).Subscribe(data => this.FeatureMapViewModel.UpdateIds(data));
+            ScanViewModel.WhenAnyValue(x => x.FilteredData).Where(_ => FeatureMapViewModel != null).Subscribe(data => FeatureMapViewModel.UpdateIds(data));
 
             // Toggle instrument data when ShowInstrumentData setting is changed.
-            IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Select(async x => await this.ScanViewModel.ToggleShowInstrumentDataAsync(x, (PbfLcMsRun)this.LcMs)).Subscribe();
+            IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Select(async x => await ScanViewModel.ToggleShowInstrumentDataAsync(x, (PbfLcMsRun)LcMs)).Subscribe();
 
             // When product ion tolerance or ion correlation threshold change, update scorer factory
             IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
@@ -180,53 +180,53 @@ namespace LcmsSpectator.ViewModels.Data
                 x =>
                 {
                     var scorer = new ScorerFactory(x.Item1, Constants.MinCharge, Constants.MaxCharge, x.Item2);
-                    this.CreateSequenceViewModel.ScorerFactory = scorer;
-                    this.ScanViewModel.ScorerFactory = scorer;
+                    CreateSequenceViewModel.ScorerFactory = scorer;
+                    ScanViewModel.ScorerFactory = scorer;
                 });
 
             // When an ID file has been opened, turn on the unidentified scan filter
             this.WhenAnyValue(x => x.IdFileOpen)
                 .Where(idFileOpen => idFileOpen)
-                .Select(_ => this.ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Hide Unidentified Scans"))
+                .Select(_ => ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Hide Unidentified Scans"))
                 .Where(f => f != null)
                 .Subscribe(f => f.Selected = true);
 
             // Start MsPf Search Command
             var startMsPfSearchCommand = ReactiveCommand.Create();
-            startMsPfSearchCommand.Subscribe(_ => this.StartMsPfSearchImplementation());
-            this.StartMsPfSearchCommand = startMsPfSearchCommand;
+            startMsPfSearchCommand.Subscribe(_ => StartMsPfSearchImplementation());
+            StartMsPfSearchCommand = startMsPfSearchCommand;
 
             // Close command verifies that the user wants to close the dataset, then sets ReadyToClose to true if they are
             var closeCommand = ReactiveCommand.Create();
             closeCommand.Subscribe(_ =>
             {
-                this.ReadyToClose =
+                ReadyToClose =
                     dialogService.ConfirmationBox(
-                        string.Format("Are you sure you would like to close {0}?", this.Title), string.Empty);
+                        string.Format("Are you sure you would like to close {0}?", Title), string.Empty);
             });
-            this.CloseCommand = closeCommand;
+            CloseCommand = closeCommand;
         }
 
         /// <summary>
         /// Gets ScanViewModel that contains a list of identifications for this data set.
         /// </summary>
-        public ScanViewModel ScanViewModel { get; private set; }
+        public ScanViewModel ScanViewModel { get; }
 
         /// <summary>
         /// Gets the create sequence view model.
         /// </summary>
-        public CreateSequenceViewModel CreateSequenceViewModel { get; private set; }
+        public CreateSequenceViewModel CreateSequenceViewModel { get; }
 
         /// <summary>
         /// Gets a command that starts an MSPathFinder with this data set.
         /// </summary>
-        public IReactiveCommand StartMsPfSearchCommand { get; private set; }
+        public IReactiveCommand StartMsPfSearchCommand { get; }
 
         /// <summary>
         /// Gets a command that is activated when the close button is clicked on a dataset.
         /// Initiates a close request for the main view model
         /// </summary>
-        public IReactiveCommand CloseCommand { get; private set; }
+        public IReactiveCommand CloseCommand { get; }
 
         /// <summary>
         /// Gets the LCMSRun representing the raw file for this dataset.
@@ -238,8 +238,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public MsPfParameters MsPfParameters
         {
-            get { return this.mspfParameters; }
-            set { this.RaiseAndSetIfChanged(ref this.mspfParameters, value); }
+            get => mspfParameters;
+            set => this.RaiseAndSetIfChanged(ref mspfParameters, value);
         }
 
         /// <summary>
@@ -257,8 +257,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public XicViewModel XicViewModel
         {
-            get { return this.xicViewModel; }
-            private set { this.RaiseAndSetIfChanged(ref this.xicViewModel, value); }
+            get => xicViewModel;
+            private set => this.RaiseAndSetIfChanged(ref xicViewModel, value);
         }
 
         /// <summary>
@@ -266,8 +266,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public SpectrumViewModel SpectrumViewModel
         {
-            get { return this.spectrumViewModel; }
-            private set { this.RaiseAndSetIfChanged(ref this.spectrumViewModel, value); }
+            get => spectrumViewModel;
+            private set => this.RaiseAndSetIfChanged(ref spectrumViewModel, value);
         }
 
         /// <summary>
@@ -275,8 +275,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public FeatureViewerViewModel FeatureMapViewModel
         {
-            get { return this.featureMapViewModel; }
-            private set { this.RaiseAndSetIfChanged(ref this.featureMapViewModel, value); }
+            get => featureMapViewModel;
+            private set => this.RaiseAndSetIfChanged(ref featureMapViewModel, value);
         }
 
         /// <summary>
@@ -284,8 +284,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public string Title
         {
-            get { return this.title; }
-            private set { this.RaiseAndSetIfChanged(ref this.title, value); }
+            get => title;
+            private set => this.RaiseAndSetIfChanged(ref title, value);
         }
 
         /// <summary>
@@ -293,8 +293,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public bool ReadyToClose
         {
-            get { return this.readyToClose; }
-            set { this.RaiseAndSetIfChanged(ref this.readyToClose, value); }
+            get => readyToClose;
+            set => this.RaiseAndSetIfChanged(ref readyToClose, value);
         }
 
         /// <summary>
@@ -302,8 +302,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public PrSm SelectedPrSm
         {
-            get { return this.selectedPrSm; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedPrSm, value); }
+            get => selectedPrSm;
+            set => this.RaiseAndSetIfChanged(ref selectedPrSm, value);
         }
 
         /// <summary>
@@ -311,8 +311,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public bool IdFileOpen
         {
-            get { return this.idFileOpen; }
-            set { this.RaiseAndSetIfChanged(ref this.idFileOpen, value); }
+            get => idFileOpen;
+            set => this.RaiseAndSetIfChanged(ref idFileOpen, value);
         }
 
         /// <summary>
@@ -320,8 +320,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public bool IsLoading
         {
-            get { return this.isLoading; }
-            set { this.RaiseAndSetIfChanged(ref this.isLoading, value); }
+            get => isLoading;
+            set => this.RaiseAndSetIfChanged(ref isLoading, value);
         }
 
         /// <summary>
@@ -329,8 +329,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public double LoadProgressPercent
         {
-            get { return this.loadProgressPercent; }
-            set { this.RaiseAndSetIfChanged(ref this.loadProgressPercent, value); }
+            get => loadProgressPercent;
+            set => this.RaiseAndSetIfChanged(ref loadProgressPercent, value);
         }
 
         /// <summary>
@@ -338,8 +338,8 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         public string LoadProgressStatus
         {
-            get { return this.loadProgressStatus; }
-            set { this.RaiseAndSetIfChanged(ref this.loadProgressStatus, value); }
+            get => loadProgressStatus;
+            set => this.RaiseAndSetIfChanged(ref loadProgressStatus, value);
         }
 
         /// <summary>
@@ -350,11 +350,11 @@ namespace LcmsSpectator.ViewModels.Data
         {
             try
             {
-                this.MsPfParameters = MsPfParameters.ReadFromFile(idFilePath);
+                MsPfParameters = MsPfParameters.ReadFromFile(idFilePath);
             }
             catch (FormatException)
             {
-                this.dialogService.MessageBox("MsPathFinder Parameters are not properly formatted.");
+                dialogService.MessageBox("MsPathFinder Parameters are not properly formatted.");
             }
         }
 
@@ -368,42 +368,42 @@ namespace LcmsSpectator.ViewModels.Data
         public async Task InitializeAsync(string filePath)
         {
             filePath = MassSpecDataReaderFactory.NormalizeDatasetPath(filePath);
-            this.IsLoading = true; // Show animated loading screen
-            this.Title = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(filePath));
-            this.rawFilePath = filePath;
+            IsLoading = true; // Show animated loading screen
+            Title = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(filePath));
+            rawFilePath = filePath;
 
-            this.LoadProgressPercent = 0.0;
-            this.LoadProgressStatus = "Loading...";
+            LoadProgressPercent = 0.0;
+            LoadProgressStatus = "Loading...";
             var progress = new Progress<ProgressData>(progressData =>
             {
                 progressData.UpdateFrequencySeconds = 2;
                 if (progressData.ShouldUpdate())
                 {
-                    this.LoadProgressPercent = progressData.Percent;
-                    this.LoadProgressStatus = progressData.Status;
+                    LoadProgressPercent = progressData.Percent;
+                    LoadProgressStatus = progressData.Status;
                 }
             });
 
             // load raw file
-            this.LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, 0, 0, progress));
+            LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, 0, 0, progress));
 
             // Now that we have an LcMsRun, initialize viewmodels that require it
-            this.XicViewModel = new XicViewModel(this.dialogService, this.LcMs);
-            this.SpectrumViewModel = new SpectrumViewModel(this.dialogService, this.LcMs);
-            this.FeatureMapViewModel = new FeatureViewerViewModel((LcMsRun)this.LcMs, this.dialogService);
+            XicViewModel = new XicViewModel(dialogService, LcMs);
+            SpectrumViewModel = new SpectrumViewModel(dialogService, LcMs);
+            FeatureMapViewModel = new FeatureViewerViewModel((LcMsRun)LcMs, dialogService);
 
             // When the selected scan changes in the xic plots, the selected scan for the prsm should update
-            this.XicViewModel.SelectedScanUpdated().Subscribe(scan => this.SelectedPrSm.Scan = scan);
+            XicViewModel.SelectedScanUpdated().Subscribe(scan => SelectedPrSm.Scan = scan);
 
             // When an ID is selected on FeatureMap, update selectedPrSm
-            this.FeatureMapViewModel.FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => this.SelectedPrSm = prsm);
+            FeatureMapViewModel.FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => SelectedPrSm = prsm);
 
             // Create prsms for scan numbers (unidentified)
-            await this.LoadScans();
+            await LoadScans();
             ////await this.ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun)this.LcMs);
-            this.SelectedPrSm.LcMs = this.LcMs; // For the selected PrSm, we should always use the LcMsRun for this dataset.
+            SelectedPrSm.LcMs = LcMs; // For the selected PrSm, we should always use the LcMsRun for this dataset.
 
-            this.IsLoading = false; // Hide animated loading screen
+            IsLoading = false; // Hide animated loading screen
         }
 
         /// <summary>
@@ -416,18 +416,18 @@ namespace LcmsSpectator.ViewModels.Data
         {
             return Task.Run(() =>
             {
-                var scans = this.LcMs.GetScanNumbers(1).ToList();
-                scans.AddRange(this.LcMs.GetScanNumbers(2));
+                var scans = LcMs.GetScanNumbers(1).ToList();
+                scans.AddRange(LcMs.GetScanNumbers(2));
                 scans.Sort();
                 var prsmScans = scans.Select(scan => new PrSm
                 {
                     Scan = scan,
-                    RawFileName = this.Title,
-                    LcMs = this.LcMs,
+                    RawFileName = Title,
+                    LcMs = LcMs,
                     QValue = -1.0,
                     Score = double.NaN,
                 });
-                this.ScanViewModel.Data.AddRange(prsmScans);
+                ScanViewModel.Data.AddRange(prsmScans);
             });
         }
 
@@ -437,19 +437,19 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void StartMsPfSearchImplementation()
         {
-            var searchSettings = new SearchSettingsViewModel(this.dialogService, this.MsPfParameters)
+            var searchSettings = new SearchSettingsViewModel(dialogService, MsPfParameters)
             {
-                SpectrumFilePath = this.rawFilePath,
+                SpectrumFilePath = rawFilePath,
                 SelectedSearchMode = InternalCleavageType.SingleInternalCleavage,
-                FastaDbFilePath = this.FastaDbFilePath,
-                OutputFilePath = string.Format("{0}\\{1}", Directory.GetCurrentDirectory(), this.Title),
-                SelectedSequence = this.SelectedPrSm.Sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue)
+                FastaDbFilePath = FastaDbFilePath,
+                OutputFilePath = string.Format("{0}\\{1}", Directory.GetCurrentDirectory(), Title),
+                SelectedSequence = SelectedPrSm.Sequence.Aggregate(string.Empty, (current, aa) => current + aa.Residue)
             };
 
             // Set feature file path.
-            if (this.FeatureMapViewModel != null)
+            if (FeatureMapViewModel != null)
             {
-                searchSettings.FeatureFilePath = this.FeatureMapViewModel.FeatureFilePath;
+                searchSettings.FeatureFilePath = FeatureMapViewModel.FeatureFilePath;
             }
 
             // Select the correct protein
@@ -457,15 +457,15 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 foreach (var entry in searchSettings.FastaEntries)
                 {
-                    entry.Selected = entry.ProteinName == this.SelectedPrSm.ProteinName;
+                    entry.Selected = entry.ProteinName == SelectedPrSm.ProteinName;
                 }
             }
 
             // Set scan number of selected spectrum
             var scanNum = 0;
-            if (this.SpectrumViewModel.Ms2SpectrumViewModel.Spectrum != null)
+            if (SpectrumViewModel.Ms2SpectrumViewModel.Spectrum != null)
             {
-                scanNum = this.SpectrumViewModel.Ms2SpectrumViewModel.Spectrum.ScanNum;
+                scanNum = SpectrumViewModel.Ms2SpectrumViewModel.Spectrum.ScanNum;
                 searchSettings.MinScanNumber = scanNum;
                 searchSettings.MaxScanNumber = scanNum;
             }
@@ -480,25 +480,25 @@ namespace LcmsSpectator.ViewModels.Data
                     var prsmList = prsms.ToList();
                     foreach (var prsm in prsmList)
                     {
-                        prsm.LcMs = this.LcMs;
+                        prsm.LcMs = LcMs;
                     }
 
                     prsmList.Sort(new PrSm.PrSmScoreComparer());
-                    this.ScanViewModel.Data.AddRange(prsmList);
+                    ScanViewModel.Data.AddRange(prsmList);
 
                     var scanPrsms = prsmList.Where(prsm => prsm.Scan == scanNum).ToList();
                     if (scanNum > 0 && scanPrsms.Count > 0)
                     {
-                        this.SelectedPrSm = scanPrsms[0];
+                        SelectedPrSm = scanPrsms[0];
                     }
                     else if (prsmList.Count > 0)
                     {
-                        this.SelectedPrSm = prsmList[0];
+                        SelectedPrSm = prsmList[0];
                     }
                 }
             };
 
-            this.dialogService.SearchSettingsWindow(searchSettings);
+            dialogService.SearchSettingsWindow(searchSettings);
         }
     }
 }

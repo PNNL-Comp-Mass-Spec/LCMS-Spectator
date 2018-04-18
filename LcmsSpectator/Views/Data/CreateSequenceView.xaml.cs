@@ -26,7 +26,7 @@ namespace LcmsSpectator.Views.Data
         /// </summary>
         public CreateSequenceView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace LcmsSpectator.Views.Data
         /// <param name="e">The event arguments.</param>
         private void InsertModButton_OnClick(object sender, RoutedEventArgs e)
         {
-            this.InsertModification();
+            InsertModification();
         }
 
         /// <summary>
@@ -44,16 +44,15 @@ namespace LcmsSpectator.Views.Data
         /// </summary>
         private void InsertModification()
         {
-            var selectedMod = this.ModificationList.SelectedItem as Modification;
-            if (selectedMod == null)
+            if (!(ModificationList.SelectedItem is Modification selectedMod))
             {
                 MessageBox.Show("Invalid modification.");
                 return;
             }
 
-            var position = this.Sequence.CaretIndex;
+            var position = Sequence.CaretIndex;
             var modStr = string.Format("[{0}]", selectedMod.Name);
-            this.Sequence.Text = this.Sequence.Text.Insert(position, modStr);
+            Sequence.Text = Sequence.Text.Insert(position, modStr);
         }
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace LcmsSpectator.Views.Data
             var key = e.Key;
             if (key == Key.Enter)
             {
-                this.InsertModification();
+                InsertModification();
             }
         }
     }

@@ -22,7 +22,7 @@ namespace LcmsSpectator.Views
         /// </summary>
         public SearchSettingsWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

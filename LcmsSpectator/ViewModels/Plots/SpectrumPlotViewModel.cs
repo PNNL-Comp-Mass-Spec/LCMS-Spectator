@@ -14,20 +14,18 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reactive;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
-    using InformedProteomics.TopDown.Scoring;
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.PlotModels;
-    using LcmsSpectator.PlotModels.ColorDicionaries;
-    using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels.Data;
-    using LcmsSpectator.ViewModels.SequenceViewer;
-    using LcmsSpectator.Writers.Exporters;
+    using Config;
+    using DialogServices;
+    using PlotModels;
+    using PlotModels.ColorDicionaries;
+    using Utils;
+    using Data;
+    using SequenceViewer;
+    using Writers.Exporters;
 
     using OxyPlot;
     using OxyPlot.Annotations;
@@ -179,7 +177,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private ScanSelectionViewModel scanSelectionViewModel;
 
         /// <summary>
-        /// Initializes a new instance of the SpectrumPlotViewModel class. 
+        /// Initializes a new instance of the SpectrumPlotViewModel class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from ViewModel.</param>
         /// <param name="fragSeqVm">Gets or sets the view model for the fragmentation sequence (fragment ion generator)</param>
@@ -188,21 +186,21 @@ namespace LcmsSpectator.ViewModels.Plots
         public SpectrumPlotViewModel(IMainDialogService dialogService, IFragmentationSequenceViewModel fragSeqVm, double multiplier, bool autoZoomXAxis = true)
         {
             this.dialogService = dialogService;
-            this.FragmentationSequenceViewModel = fragSeqVm;
+            FragmentationSequenceViewModel = fragSeqVm;
             this.autoZoomXAxis = autoZoomXAxis;
-            this.errorMapViewModel = new ErrorMapViewModel(dialogService);
-            this.ShowUnexplainedPeaks = true;
-            this.ShowFilteredSpectrum = false;
-            this.ShowDeconvolutedSpectrum = false;
-            this.AutoAdjustYAxis = true;
-            this.Title = string.Empty;
-            this.XAxis = new LinearAxis
+            errorMapViewModel = new ErrorMapViewModel(dialogService);
+            ShowUnexplainedPeaks = true;
+            ShowFilteredSpectrum = false;
+            ShowDeconvolutedSpectrum = false;
+            AutoAdjustYAxis = true;
+            Title = string.Empty;
+            XAxis = new LinearAxis
             {
                 Title = "m/z",
                 StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
             };
-            this.PlotModel = new AutoAdjustedYPlotModel(this.XAxis, multiplier)
+            PlotModel = new AutoAdjustedYPlotModel(XAxis, multiplier)
             {
                 IsLegendVisible = false,
                 YAxis =
@@ -212,23 +210,23 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
             };
 
-            this.SequenceViewerViewModel = new SequenceViewerViewModel();
+            SequenceViewerViewModel = new SequenceViewerViewModel();
 
-            this.ions = new LabeledIonViewModel[0];
+            ions = new LabeledIonViewModel[0];
 
             // When Spectrum updates, clear the filtered spectrum, deconvoluted spectrum, and filtered+deconvoluted spectrum
             this.WhenAnyValue(x => x.Spectrum)
                 .Subscribe(spectrum =>
                 {
-                    this.spectrumDirty = true;
-                    this.filteredSpectrum = null;
-                    this.deconvolutedSpectrum = null;
-                    this.filteredDeconvolutedSpectrum = null;
+                    spectrumDirty = true;
+                    filteredSpectrum = null;
+                    deconvolutedSpectrum = null;
+                    filteredDeconvolutedSpectrum = null;
                 });
 
             // If deconvolution option has changed, the X Axis should change.
             this.WhenAnyValue(x => x.ShowDeconvolutedSpectrum)
-                .Subscribe(_ => this.spectrumDirty = true);
+                .Subscribe(_ => spectrumDirty = true);
 
             // When Spectrum or ions change, or deconvoluted or filtered spectrum are selected, update spectrum plot
             this.WhenAnyValue(
@@ -243,40 +241,39 @@ namespace LcmsSpectator.ViewModels.Plots
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
                 .SelectMany(async x =>
                 {
-                    var vms = await this.FragmentationSequenceViewModel.GetLabeledIonViewModels();
+                    var vms = await FragmentationSequenceViewModel.GetLabeledIonViewModels();
                     return  await
                             Task.WhenAll(
                                 vms.Select(
                                     ion =>
-                                        ion.GetPeaksAsync(this.GetSpectrum(),
-                                            this.ShowDeconvolutedSpectrum || this.ShowDeconvolutedIons)));
+                                        ion.GetPeaksAsync(GetSpectrum(),
+                                            ShowDeconvolutedSpectrum || ShowDeconvolutedIons)));
                 })
                 .Subscribe(peakDataPoints =>
                 {
-                    this.ions = this.FragmentationSequenceViewModel.LabeledIonViewModels;
-                    this.SetTerminalResidues(peakDataPoints);
-                    this.UpdatePlotModel(peakDataPoints);
+                    ions = FragmentationSequenceViewModel.LabeledIonViewModels;
+                    SetTerminalResidues(peakDataPoints);
+                    UpdatePlotModel(peakDataPoints);
 
-                    if (this.FragmentationSequenceViewModel is FragmentationSequenceViewModel)
+                    if (FragmentationSequenceViewModel is FragmentationSequenceViewModel model)
                     {
-                        this.SequenceViewerViewModel.FragmentationSequence = this.FragmentationSequenceViewModel as FragmentationSequenceViewModel;
-                        this.SequenceViewerViewModel.SelectedSpectrum = this.Spectrum as ProductSpectrum;
+                        SequenceViewerViewModel.FragmentationSequence = model;
+                        SequenceViewerViewModel.SelectedSpectrum = Spectrum as ProductSpectrum;
                     }
                 });       // Update plot when data changes
 
             this.WhenAnyValue(x => x.Spectrum).Where(spectrum => spectrum == null).Subscribe(
                 _ =>
                     {
-                        this.PlotModel.Annotations.Clear();
-                        this.PlotModel.ClearSeries();
-                        this.PlotModel.InvalidatePlot(true);
+                        PlotModel.Annotations.Clear();
+                        PlotModel.ClearSeries();
+                        PlotModel.InvalidatePlot(true);
                     });
 
             // Update ions when relative intensity threshold changes.
             IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
             {
-                var precFragVm = this.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
-                if (precFragVm != null)
+                if (FragmentationSequenceViewModel is PrecursorSequenceIonViewModel precFragVm)
                 {
                     precFragVm.RelativeIntensityThreshold = precRelInt;
                 }
@@ -285,76 +282,76 @@ namespace LcmsSpectator.ViewModels.Plots
             // Update plot when settings change
             IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
                         .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                        .SelectMany(async x => await Task.WhenAll(this.ions.Select(ion => ion.GetPeaksAsync(this.GetSpectrum(), this.ShowDeconvolutedSpectrum, false))))
-                        .Subscribe(this.UpdatePlotModel);
+                        .SelectMany(async x => await Task.WhenAll(ions.Select(ion => ion.GetPeaksAsync(GetSpectrum(), ShowDeconvolutedSpectrum, false))))
+                        .Subscribe(UpdatePlotModel);
 
             // When AutoAdjustYAxis changes, update value in plot model.
             this.WhenAnyValue(x => x.AutoAdjustYAxis)
                 .Subscribe(autoAdjust =>
                 {
-                    this.PlotModel.AutoAdjustYAxis = autoAdjust;
-                    this.PlotModel.YAxis.IsZoomEnabled = !autoAdjust;
-                    this.PlotModel.YAxis.IsPanEnabled = !autoAdjust;
+                    PlotModel.AutoAdjustYAxis = autoAdjust;
+                    PlotModel.YAxis.IsZoomEnabled = !autoAdjust;
+                    PlotModel.YAxis.IsPanEnabled = !autoAdjust;
 
                     if (autoAdjust)
                     {
-                        this.PlotModel.XAxis.Reset();
-                        this.PlotModel.YAxis.Reset();
+                        PlotModel.XAxis.Reset();
+                        PlotModel.YAxis.Reset();
                     }
                 });
-            
+
             // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
             this.WhenAnyValue(x => x.XMinimum, x => x.XMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Where(x => !this.xaxis.ActualMinimum.Equals(x.Item1) || !this.xaxis.ActualMaximum.Equals(x.Item2))
+                .Where(x => !xaxis.ActualMinimum.Equals(x.Item1) || !xaxis.ActualMaximum.Equals(x.Item2))
                 .Subscribe(x =>
                 {
-                    this.xaxis.Zoom(x.Item1, x.Item2);
-                    this.PlotModel.InvalidatePlot(false);
+                    xaxis.Zoom(x.Item1, x.Item2);
+                    PlotModel.InvalidatePlot(false);
                 });
             this.WhenAnyValue(y => y.YMinimum, y => y.YMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Where(y => !this.PlotModel.YAxis.ActualMinimum.Equals(y.Item1) || !this.PlotModel.YAxis.ActualMaximum.Equals(y.Item2))
+                .Where(y => !PlotModel.YAxis.ActualMinimum.Equals(y.Item1) || !PlotModel.YAxis.ActualMaximum.Equals(y.Item2))
                 .Subscribe(
                     y =>
                     {
-                        this.PlotModel.YAxis.Zoom(y.Item1, y.Item2);
-                        this.PlotModel.InvalidatePlot(false);
+                        PlotModel.YAxis.Zoom(y.Item1, y.Item2);
+                        PlotModel.InvalidatePlot(false);
                     });
 
             // Update X min and max properties when x axis is panned or zoomed
-            this.xaxis.AxisChanged += (o, e) =>
+            xaxis.AxisChanged += (o, e) =>
             {
-                this.XMinimum = Math.Round(this.xaxis.ActualMinimum, 3);
-                this.XMaximum = Math.Round(this.xaxis.ActualMaximum, 3);
+                XMinimum = Math.Round(xaxis.ActualMinimum, 3);
+                XMaximum = Math.Round(xaxis.ActualMaximum, 3);
             };
 
             // Update Y min and max properties when Y axis is panned or zoomed
-            this.PlotModel.YAxis.AxisChanged += (o, e) =>
+            PlotModel.YAxis.AxisChanged += (o, e) =>
             {
-                this.YMinimum = Math.Round(this.PlotModel.YAxis.ActualMinimum, 3);
-                this.YMaximum = Math.Round(this.PlotModel.YAxis.ActualMaximum, 3);
+                YMinimum = Math.Round(PlotModel.YAxis.ActualMinimum, 3);
+                YMaximum = Math.Round(PlotModel.YAxis.ActualMaximum, 3);
             };
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
             var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => this.SaveAsImageImplementation());
-            this.SaveAsImageCommand = saveAsImageCommand;
+            saveAsImageCommand.Subscribe(_ => SaveAsImageImplementation());
+            SaveAsImageCommand = saveAsImageCommand;
 
             // Error map command opens a new error map window and passes it the most abundant isotope peak data points
             // and the current sequence.
             var openErrorMapCommand = ReactiveCommand.Create();
-            openErrorMapCommand.Subscribe(_ => dialogService.OpenErrorMapWindow(this.errorMapViewModel));
-            this.OpenErrorMapCommand = openErrorMapCommand;
+            openErrorMapCommand.Subscribe(_ => dialogService.OpenErrorMapWindow(errorMapViewModel));
+            OpenErrorMapCommand = openErrorMapCommand;
 
-            this.OpenScanSelectionCommand = ReactiveCommand.Create();
-            this.OpenScanSelectionCommand.Subscribe(_ => this.OpenScanSelectionImplementation());
+            OpenScanSelectionCommand = ReactiveCommand.Create();
+            OpenScanSelectionCommand.Subscribe(_ => OpenScanSelectionImplementation());
 
-            this.SaveAsTsvCommand = ReactiveCommand.Create();
-            this.SaveAsTsvCommand.Subscribe(_ => this.SaveAsTsvImplementation());
+            SaveAsTsvCommand = ReactiveCommand.Create();
+            SaveAsTsvCommand.Subscribe(_ => SaveAsTsvImplementation());
 
-            this.SaveToClipboardCommand = ReactiveCommand.Create();
-            this.SaveToClipboardCommand.Subscribe(_ => this.SaveToClipboardImplementation());
+            SaveToClipboardCommand = ReactiveCommand.Create();
+            SaveToClipboardCommand.Subscribe(_ => SaveToClipboardImplementation());
         }
 
         /// <summary>
@@ -362,8 +359,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public AutoAdjustedYPlotModel PlotModel
         {
-            get { return this.plotModel; }
-            private set { this.RaiseAndSetIfChanged(ref this.plotModel, value); }
+            get => plotModel;
+            private set => this.RaiseAndSetIfChanged(ref plotModel, value);
         }
 
         /// <summary>
@@ -371,8 +368,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public string Title
         {
-            get { return this.title; }
-            set { this.RaiseAndSetIfChanged(ref this.title, value); }
+            get => title;
+            set => this.RaiseAndSetIfChanged(ref title, value);
         }
 
         /// <summary>
@@ -381,8 +378,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowUnexplainedPeaks
         {
-            get { return this.showUnexplainedPeaks; }
-            set { this.RaiseAndSetIfChanged(ref this.showUnexplainedPeaks, value); }
+            get => showUnexplainedPeaks;
+            set => this.RaiseAndSetIfChanged(ref showUnexplainedPeaks, value);
         }
 
         /// <summary>
@@ -390,8 +387,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowOnlyTop20Peaks
         {
-            get { return this.showOnlyTop20Peaks; }
-            set { this.RaiseAndSetIfChanged(ref this.showOnlyTop20Peaks, value); }
+            get => showOnlyTop20Peaks;
+            set => this.RaiseAndSetIfChanged(ref showOnlyTop20Peaks, value);
         }
 
         /// <summary>
@@ -399,8 +396,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowFilteredSpectrum
         {
-            get { return this.showFilteredSpectrum; }
-            set { this.RaiseAndSetIfChanged(ref this.showFilteredSpectrum, value); }
+            get => showFilteredSpectrum;
+            set => this.RaiseAndSetIfChanged(ref showFilteredSpectrum, value);
         }
 
         /// <summary>
@@ -408,8 +405,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowDeconvolutedSpectrum
         {
-            get { return this.showDeconvolutedSpectrum; }
-            set { this.RaiseAndSetIfChanged(ref this.showDeconvolutedSpectrum, value); }
+            get => showDeconvolutedSpectrum;
+            set => this.RaiseAndSetIfChanged(ref showDeconvolutedSpectrum, value);
         }
 
         /// <summary>
@@ -417,8 +414,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowDeconvolutedIons
         {
-            get { return this.showDeconvolutedIons; }
-            set { this.RaiseAndSetIfChanged(ref this.showDeconvolutedIons, value); }
+            get => showDeconvolutedIons;
+            set => this.RaiseAndSetIfChanged(ref showDeconvolutedIons, value);
         }
 
         /// <summary>
@@ -426,8 +423,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double XMinimum
         {
-            get { return this.xminimum; }
-            set { this.RaiseAndSetIfChanged(ref this.xminimum, value); }
+            get => xminimum;
+            set => this.RaiseAndSetIfChanged(ref xminimum, value);
         }
 
         /// <summary>
@@ -435,8 +432,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double XMaximum
         {
-            get { return this.xmaximum; }
-            set { this.RaiseAndSetIfChanged(ref this.xmaximum, value); }
+            get => xmaximum;
+            set => this.RaiseAndSetIfChanged(ref xmaximum, value);
         }
 
         /// <summary>
@@ -444,8 +441,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double YMinimum
         {
-            get { return this.yminimum; }
-            set { this.RaiseAndSetIfChanged(ref this.yminimum, value); }
+            get => yminimum;
+            set => this.RaiseAndSetIfChanged(ref yminimum, value);
         }
 
         /// <summary>
@@ -453,8 +450,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double YMaximum
         {
-            get { return this.ymaximum; }
-            set { this.RaiseAndSetIfChanged(ref this.ymaximum, value); }
+            get => ymaximum;
+            set => this.RaiseAndSetIfChanged(ref ymaximum, value);
         }
 
         /// <summary>
@@ -463,8 +460,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool AutoAdjustYAxis
         {
-            get { return this.autoAdjustYAxis; }
-            set { this.RaiseAndSetIfChanged(ref this.autoAdjustYAxis, value); }
+            get => autoAdjustYAxis;
+            set => this.RaiseAndSetIfChanged(ref autoAdjustYAxis, value);
         }
 
         /// <summary>
@@ -472,8 +469,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowManualAdjustment
         {
-            get { return this.showManualAdjustment; }
-            set { this.RaiseAndSetIfChanged(ref this.showManualAdjustment, value); }
+            get => showManualAdjustment;
+            set => this.RaiseAndSetIfChanged(ref showManualAdjustment, value);
         }
 
         /// <summary>
@@ -481,8 +478,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public LinearAxis XAxis
         {
-            get { return this.xaxis; }
-            private set { this.RaiseAndSetIfChanged(ref this.xaxis, value); }
+            get => xaxis;
+            private set => this.RaiseAndSetIfChanged(ref xaxis, value);
         }
 
         /// <summary>
@@ -490,8 +487,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public Spectrum Spectrum
         {
-            get { return this.spectrum; }
-            set { this.RaiseAndSetIfChanged(ref this.spectrum, value); }
+            get => spectrum;
+            set => this.RaiseAndSetIfChanged(ref spectrum, value);
         }
 
         /// <summary>
@@ -499,56 +496,56 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public IFragmentationSequenceViewModel FragmentationSequenceViewModel
         {
-            get { return this.fragmentationSequenceViewModel; }
-            set { this.RaiseAndSetIfChanged(ref this.fragmentationSequenceViewModel, value); }
+            get => fragmentationSequenceViewModel;
+            set => this.RaiseAndSetIfChanged(ref fragmentationSequenceViewModel, value);
         }
 
         /// <summary>
         /// Gets or sets the sequence viewer.
         /// </summary>
-        public SequenceViewerViewModel SequenceViewerViewModel { get; private set; }
+        public SequenceViewerViewModel SequenceViewerViewModel { get; }
 
         /// <summary>
         /// Gets a command that prompts user for file path and save plot as image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; private set; }
+        public IReactiveCommand SaveAsImageCommand { get; }
 
         /// <summary>
         /// Gets a command that opens error heat map and table for this spectrum and ions
         /// </summary>
-        public IReactiveCommand OpenErrorMapCommand { get; private set; }
+        public IReactiveCommand OpenErrorMapCommand { get; }
 
         /// <summary>
         /// Gets a command that opens the scan selection view model
         /// </summary>
-        public ReactiveCommand<object> OpenScanSelectionCommand { get; private set; }
+        public ReactiveCommand<object> OpenScanSelectionCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts user for file path and save spectrum as TSV to that path.
         /// </summary>
-        public ReactiveCommand<object> SaveAsTsvCommand { get; private set; }
+        public ReactiveCommand<object> SaveAsTsvCommand { get; }
 
         /// <summary>
         /// Gets a command that copies the peaks in view to the user's clipboard.
         /// </summary>
-        public ReactiveCommand<object> SaveToClipboardCommand { get; private set; }
+        public ReactiveCommand<object> SaveToClipboardCommand { get; }
 
         /// <summary>
         /// Build spectrum plot model.
         /// </summary>
-        /// <param name="peakDataPoints">Ion peaks to highlight and annotate on spectrum plot.</param>
-        private void UpdatePlotModel(IList<PeakDataPoint>[] peakDataPoints)
+        /// <param name="dataPoints">Ion peaks to highlight and annotate on spectrum plot.</param>
+        private void UpdatePlotModel(IList<PeakDataPoint>[] dataPoints)
         {
-            if (this.Spectrum == null)
+            if (Spectrum == null)
             {
                 return;
             }
 
-            this.errorMapViewModel.SetData(this.FragmentationSequenceViewModel.FragmentationSequence.Sequence, peakDataPoints);
-            this.PlotModel.Series.Clear();
-            this.PlotModel.Annotations.Clear();
-            this.currentSpectrum = this.GetSpectrum();
-            this.peakDataPoints = peakDataPoints;
+            errorMapViewModel.SetData(FragmentationSequenceViewModel.FragmentationSequence.Sequence, dataPoints);
+            PlotModel.Series.Clear();
+            PlotModel.Annotations.Clear();
+            currentSpectrum = GetSpectrum();
+            peakDataPoints = dataPoints;
             var spectrumPeaks = currentSpectrum.Peaks.Select(peak => new PeakDataPoint(peak.Mz, peak.Intensity, 0.0, 0.0, string.Empty));
             var spectrumSeries = new PeakPointSeries
             {
@@ -560,12 +557,12 @@ namespace LcmsSpectator.ViewModels.Plots
                     "{1}: {2:0.###}" + Environment.NewLine +
                     "{3}: {4:0.##E0}"
             };
-            if (this.ShowUnexplainedPeaks)
+            if (ShowUnexplainedPeaks)
             {
-                this.PlotModel.Series.Add(spectrumSeries);
+                PlotModel.Series.Add(spectrumSeries);
             }
 
-            if (this.autoZoomXAxis && this.spectrumDirty)
+            if (autoZoomXAxis && spectrumDirty)
             {
                 // zoom spectrum if this plot is supposed to be auto zoomed, and only if spectrum has changed
                 var peaks = currentSpectrum.Peaks;
@@ -575,13 +572,13 @@ namespace LcmsSpectator.ViewModels.Plots
                     ms2MaxMz = peaks.Max().Mz * 1.1;
                 }
 
-                this.XAxis.AbsoluteMinimum = 0;
-                this.XAxis.AbsoluteMaximum = ms2MaxMz;
-                this.XAxis.Zoom(0, ms2MaxMz);
-                this.spectrumDirty = false;
+                XAxis.AbsoluteMinimum = 0;
+                XAxis.AbsoluteMaximum = ms2MaxMz;
+                XAxis.Zoom(0, ms2MaxMz);
+                spectrumDirty = false;
             }
 
-            var maxCharge = peakDataPoints.Length > 0 ? this.ions.Max(x => x.IonType.Charge) : 2;
+            var maxCharge = peakDataPoints.Length > 0 ? ions.Max(x => x.IonType.Charge) : 2;
             maxCharge = Math.Max(maxCharge, 2);
             var colors = new IonColorDictionary(maxCharge);
             foreach (var points in peakDataPoints)
@@ -628,13 +625,13 @@ namespace LcmsSpectator.ViewModels.Plots
                     StrokeThickness = 0
                 };
 
-                this.PlotModel.Series.Add(ionSeries);
-                this.PlotModel.Annotations.Add(annotation);
+                PlotModel.Series.Add(ionSeries);
+                PlotModel.Annotations.Add(annotation);
             }
 
-            this.PlotModel.Title = this.Title;
-            this.PlotModel.InvalidatePlot(true);
-            this.PlotModel.AdjustForZoom();
+            PlotModel.Title = Title;
+            PlotModel.InvalidatePlot(true);
+            PlotModel.AdjustForZoom();
         }
 
         /// <summary>
@@ -644,89 +641,89 @@ namespace LcmsSpectator.ViewModels.Plots
         private Spectrum GetSpectrum()
         {
             // Filtered/Deconvoluted Spectrum?
-            var currentSpectrum = this.Spectrum;
-            var tolerance = (currentSpectrum is ProductSpectrum)
+            var spectrumToReturn = Spectrum;
+            var tolerance = (spectrumToReturn is ProductSpectrum)
                                 ? IcParameters.Instance.ProductIonTolerancePpm
                                 : IcParameters.Instance.PrecursorTolerancePpm;
-            if (this.ShowFilteredSpectrum && this.ShowDeconvolutedSpectrum)
+            if (ShowFilteredSpectrum && ShowDeconvolutedSpectrum)
             {
-                if (this.filteredDeconvolutedSpectrum == null)
+                if (filteredDeconvolutedSpectrum == null)
                 {
-                    this.filteredDeconvolutedSpectrum = new Spectrum(currentSpectrum.Peaks, currentSpectrum.ScanNum);
-                    this.filteredDeconvolutedSpectrum.FilterNosieByIntensityHistogram();
-                    this.deconvolutedSpectrum = Deconvoluter.GetCombinedDeconvolutedSpectrum(
-                            currentSpectrum,
+                    filteredDeconvolutedSpectrum = new Spectrum(spectrumToReturn.Peaks, spectrumToReturn.ScanNum);
+                    filteredDeconvolutedSpectrum.FilterNosieByIntensityHistogram();
+                    deconvolutedSpectrum = Deconvoluter.GetCombinedDeconvolutedSpectrum(
+                        spectrumToReturn,
                             Constants.MinCharge,
                             Constants.MaxCharge,
                             Constants.IsotopeOffsetTolerance,
                             tolerance,
                             IcParameters.Instance.IonCorrelationThreshold);
                     //this.deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
-                    //    currentSpectrum,
+                    //    spectrumToReturn,
                     //    Constants.MinCharge,
                     //    Constants.MaxCharge,
                     //    tolerance,
-                    //    IcParameters.Instance.IonCorrelationThreshold, 
+                    //    IcParameters.Instance.IonCorrelationThreshold,
                     //    Constants.IsotopeOffsetTolerance);
                 }
 
-                currentSpectrum = this.filteredDeconvolutedSpectrum;
+                spectrumToReturn = filteredDeconvolutedSpectrum;
             }
-            else if (this.ShowFilteredSpectrum)
+            else if (ShowFilteredSpectrum)
             {
-                if (this.filteredSpectrum == null) 
+                if (filteredSpectrum == null)
                 {
-                    this.filteredSpectrum = new Spectrum(currentSpectrum.Peaks, currentSpectrum.ScanNum);
-                    this.filteredSpectrum.FilterNosieByIntensityHistogram(); 
+                    filteredSpectrum = new Spectrum(spectrumToReturn.Peaks, spectrumToReturn.ScanNum);
+                    filteredSpectrum.FilterNosieByIntensityHistogram();
                 }
 
-                currentSpectrum = this.filteredSpectrum;
+                spectrumToReturn = filteredSpectrum;
             }
-            else if (this.ShowDeconvolutedSpectrum)
+            else if (ShowDeconvolutedSpectrum)
             {
-                if (this.deconvolutedSpectrum == null)
+                if (deconvolutedSpectrum == null)
                 {
-                    this.deconvolutedSpectrum = Deconvoluter.GetCombinedDeconvolutedSpectrum(
-                        currentSpectrum,
+                    deconvolutedSpectrum = Deconvoluter.GetCombinedDeconvolutedSpectrum(
+                        spectrumToReturn,
                         Constants.MinCharge,
                         Constants.MaxCharge,
                         Constants.IsotopeOffsetTolerance,
                         tolerance,
                         IcParameters.Instance.IonCorrelationThreshold);
                     //this.deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
-                    //    currentSpectrum,
+                    //    spectrumToReturn,
                     //    Constants.MinCharge,
                     //    Constants.MaxCharge,
                     //    tolerance,
                     //    IcParameters.Instance.IonCorrelationThreshold,
-                    //    Constants.IsotopeOffsetTolerance);   
+                    //    Constants.IsotopeOffsetTolerance);
                 }
 
-                currentSpectrum = this.deconvolutedSpectrum;
+                spectrumToReturn = deconvolutedSpectrum;
             }
 
-            if (this.ShowOnlyTop20Peaks)
+            if (ShowOnlyTop20Peaks)
             {
-                var top20Peaks = currentSpectrum.Peaks.OrderByDescending(p => p.Intensity).Take(20).OrderBy(p => p.Mz).ToList();
-                currentSpectrum = new Spectrum(top20Peaks, currentSpectrum.ScanNum);
+                var top20Peaks = spectrumToReturn.Peaks.OrderByDescending(p => p.Intensity).Take(20).OrderBy(p => p.Mz).ToList();
+                spectrumToReturn = new Spectrum(top20Peaks, spectrumToReturn.ScanNum);
             }
 
-            return currentSpectrum;
+            return spectrumToReturn;
         }
 
-        private void SetTerminalResidues(IList<PeakDataPoint>[] peakDataPoints)
+        private void SetTerminalResidues(IList<PeakDataPoint>[] dataPoints)
         {
-            var sequence = this.FragmentationSequenceViewModel.FragmentationSequence.Sequence;
-            foreach (var peakDataPoint in peakDataPoints.SelectMany(x => x))
+            var sequence = FragmentationSequenceViewModel.FragmentationSequence.Sequence;
+            foreach (var dataPoint in dataPoints.SelectMany(x => x))
             {
-                if (peakDataPoint.IonType != null && peakDataPoint.IonType.Name != "Precursor")
+                if (dataPoint.IonType != null && dataPoint.IonType.Name != "Precursor")
                 {
-                    int index = peakDataPoint.IonType.IsPrefixIon
-                        ? peakDataPoint.Index - 1
-                        : sequence.Count - peakDataPoint.Index;
+                    var index = dataPoint.IonType.IsPrefixIon
+                        ? dataPoint.Index - 1
+                        : sequence.Count - dataPoint.Index;
                     //if (index < 0 || index > sequence.Count - 1) continue;
 
-                    peakDataPoint.Residue = sequence[index].Residue;
+                    dataPoint.Residue = sequence[index].Residue;
                 }
             }
         }
@@ -736,24 +733,24 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveAsTsvImplementation()
         {
-            if (this.currentSpectrum == null)
+            if (currentSpectrum == null)
             {
                 return;
             }
 
-            if (this.peakDataPoints == null)
+            if (peakDataPoints == null)
             {
-                this.peakDataPoints = new IList<PeakDataPoint>[0];
+                peakDataPoints = new IList<PeakDataPoint>[0];
             }
 
-            var filePath = this.dialogService.SaveFile(".tsv", @"TSV Files (*.tsv)|*.tsv");
+            var filePath = dialogService.SaveFile(".tsv", @"TSV Files (*.tsv)|*.tsv");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
             }
 
             var fragmentPeaks =
-                this.peakDataPoints.SelectMany(peaks => peaks)
+                peakDataPoints.SelectMany(peaks => peaks)
                     .Where(peak => !peak.X.Equals(double.NaN))
                     .Where(peak => !peak.Y.Equals(double.NaN))
                     .OrderBy(peak => peak.X)
@@ -761,7 +758,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             var peakExporter = new SpectrumPeakExporter(string.Empty, null, IcParameters.Instance.ProductIonTolerancePpm);
             peakExporter.Export(
-                    this.currentSpectrum,
+                    currentSpectrum,
                     fragmentPeaks,
                     filePath);
         }
@@ -771,18 +768,18 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveToClipboardImplementation()
         {
-            if (this.currentSpectrum == null)
+            if (currentSpectrum == null)
             {
                 return;
             }
 
-            if (this.peakDataPoints == null)
+            if (peakDataPoints == null)
             {
-                this.peakDataPoints = new IList<PeakDataPoint>[0];
+                peakDataPoints = new IList<PeakDataPoint>[0];
             }
 
             var fragmentPeaks =
-                this.peakDataPoints.SelectMany(peaks => peaks)
+                peakDataPoints.SelectMany(peaks => peaks)
                     .Where(peak => !peak.X.Equals(double.NaN))
                     .Where(peak => !peak.Y.Equals(double.NaN))
                     .OrderBy(peak => peak.X)
@@ -790,10 +787,10 @@ namespace LcmsSpectator.ViewModels.Plots
 
             var peakExporter = new SpectrumPeakExporter(string.Empty, null, IcParameters.Instance.ProductIonTolerancePpm);
             peakExporter.ExportToClipBoard(
-                    this.currentSpectrum,
+                    currentSpectrum,
                     fragmentPeaks,
-                    this.PlotModel.XAxis.ActualMinimum,
-                    this.PlotModel.XAxis.ActualMaximum);
+                    PlotModel.XAxis.ActualMinimum,
+                    PlotModel.XAxis.ActualMaximum);
         }
 
         /// <summary>
@@ -803,37 +800,39 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void OpenScanSelectionImplementation()
         {
-            var lcms = this.FragmentationSequenceViewModel.FragmentationSequence.LcMsRun as LcMsRun;
-            var msLevel = this.Spectrum is ProductSpectrum ? 2 : 1;
-            if (this.scanSelectionViewModel == null || !this.scanSelectionViewModel.Contains(this.Spectrum.ScanNum))
+            if (!(FragmentationSequenceViewModel.FragmentationSequence.LcMsRun is LcMsRun lcms))
+                return;
+
+            var msLevel = Spectrum is ProductSpectrum ? 2 : 1;
+            if (scanSelectionViewModel == null || !scanSelectionViewModel.Contains(Spectrum.ScanNum))
             {
                 var scans = lcms.GetScanNumbers(msLevel);
-                int minScan = 0;
-                int maxScan = 0;
-                if (this.Spectrum != null)
+                var minScan = 0;
+                var maxScan = 0;
+                if (Spectrum != null)
                 {
-                    minScan = this.Spectrum.ScanNum;
-                    maxScan = this.Spectrum.ScanNum;
+                    minScan = Spectrum.ScanNum;
+                    maxScan = Spectrum.ScanNum;
                 }
 
-                this.scanSelectionViewModel = new ScanSelectionViewModel(this.Spectrum.MsLevel, scans)
+                scanSelectionViewModel = new ScanSelectionViewModel(Spectrum?.MsLevel ?? 1, scans)
                 {
                     MinScanNumber = minScan,
                     MaxScanNumber = maxScan,
                     BaseScan = minScan
-                };   
+                };
             }
 
-            if (this.dialogService.OpenScanSelectionWindow(this.scanSelectionViewModel))
+            if (dialogService.OpenScanSelectionWindow(scanSelectionViewModel))
             {
-                this.Spectrum = this.scanSelectionViewModel.GetSelectedSpectrum(lcms);
-                this.Title = this.scanSelectionViewModel.ScanNumbers.Count > 1 ? 
+                Spectrum = scanSelectionViewModel.GetSelectedSpectrum(lcms);
+                Title = scanSelectionViewModel.ScanNumbers.Count > 1 ?
                             string.Format(
                                 "Summed MS{0} Spectra (Scans {1}-{2})",
                                 msLevel,
-                                this.scanSelectionViewModel.ScanNumbers.Min(),
-                                this.scanSelectionViewModel.ScanNumbers.Max()) :
-                             string.Format("MS{0} Spectrum (Scan: {1})", msLevel, this.Spectrum.ScanNum);
+                                scanSelectionViewModel.ScanNumbers.Min(),
+                                scanSelectionViewModel.ScanNumbers.Max()) :
+                             string.Format("MS{0} Spectrum (Scan: {1})", msLevel, Spectrum.ScanNum);
             }
         }
 
@@ -842,7 +841,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveAsImageImplementation()
         {
-            var filePath = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            var filePath = dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
@@ -858,16 +857,16 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 DynamicResolutionPngExporter.Export(
-                    this.PlotModel,
+                    PlotModel,
                     filePath,
-                    (int)this.PlotModel.Width,
-                    (int)this.PlotModel.Height,
+                    (int)PlotModel.Width,
+                    (int)PlotModel.Height,
                     OxyColors.White,
                     IcParameters.Instance.ExportImageDpi);
             }
             catch (Exception e)
             {
-                this.dialogService.ExceptionAlert(e);
+                dialogService.ExceptionAlert(e);
             }
         }
     }

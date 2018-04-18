@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using NUnit.Framework;
 
@@ -47,7 +45,7 @@ namespace LcmsSpectatorTests
             foreach (var result in results)
             {
                 var corrHist = result.IsTarget ? corrHistTar : corrHistDec;
-                int roundedCorr = (int)Math.Round(result.Corr, 1) * 10;
+                var roundedCorr = (int)Math.Round(result.Corr, 1) * 10;
                 if (!corrHist.ContainsKey(roundedCorr))
                 {
                     corrHist.Add(roundedCorr, 0);
@@ -58,7 +56,7 @@ namespace LcmsSpectatorTests
 
             // Corr roc
             var corrRoc = new Dictionary<int, double>();
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 var fpr = (int) Math.Round(100.0*corrHistDec[i] / (corrHistDec[i] + corrHistTar[i]));
                 var tpr = 100.0 * corrHistTar[i] / (corrHistDec[i] + corrHistTar[i]);
@@ -71,7 +69,7 @@ namespace LcmsSpectatorTests
             foreach (var result in results)
             {
                 var errHist = result.IsTarget ? errHistTar : errHistDec;
-                int roundedErr = (int)Math.Round(result.Error);
+                var roundedErr = (int)Math.Round(result.Error);
                 if (!errHist.ContainsKey(roundedErr))
                 {
                     errHist.Add(roundedErr, 0);
@@ -94,12 +92,12 @@ namespace LcmsSpectatorTests
             foreach (var rawFile in rawFiles)
             {
                 var scans = new Dictionary<int, DeconvolutedSpectrum>();
-                PbfLcMsRun pbfRun = (PbfLcMsRun) PbfLcMsRun.GetLcMsRun(rawFile);
+                var pbfRun = (PbfLcMsRun) PbfLcMsRun.GetLcMsRun(rawFile);
 
                 var idName = $"{Path.GetFileNameWithoutExtension(rawFile)}_IcTda";
-                var ids = this.ParseIdFile(targetFiles[idName], true);
+                var ids = ParseIdFile(targetFiles[idName], true);
                 var decoyName = $"{Path.GetFileNameWithoutExtension(rawFile)}_IcDecoy";
-                var decoys = this.ParseIdFile(decoyFiles[decoyName], false);
+                var decoys = ParseIdFile(decoyFiles[decoyName], false);
                 ids.AddRange(decoys);
 
                 foreach (var id in ids)
@@ -111,7 +109,7 @@ namespace LcmsSpectatorTests
                     }
                     else
                     {
-                        spectrum = this.GetDeconvolutedSpectrum(id.Scan, pbfRun);
+                        spectrum = GetDeconvolutedSpectrum(id.Scan, pbfRun);
                         scans.Add(id.Scan, spectrum);
                     }
 
@@ -149,7 +147,7 @@ namespace LcmsSpectatorTests
                 {
                     foreach (var result in results)
                     {
-                        int isTarget = result.IsTarget ? 1 : 0;
+                        var isTarget = result.IsTarget ? 1 : 0;
                         writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", result.Corr, result.Cosine, result.Error, result.Intensity, isTarget);
                     }
                 }
@@ -172,7 +170,7 @@ namespace LcmsSpectatorTests
             var aminoAcidSet = new AminoAcidSet();
             var psms = new List<Psm>();
             var headers = new Dictionary<string, int>();
-            int count = 0;
+            var count = 0;
             foreach (var line in File.ReadLines(filePath))
             {
                 var parts = line.Split('\t');
@@ -183,7 +181,7 @@ namespace LcmsSpectatorTests
 
                 if (count++ == 0)
                 {
-                    for (int i = 0; i < parts.Length; i++)
+                    for (var i = 0; i < parts.Length; i++)
                     {
                         headers.Add(parts[i], i);
                     }
@@ -191,10 +189,10 @@ namespace LcmsSpectatorTests
                     continue;
                 }
 
-                int scan = Convert.ToInt32(parts[headers["Scan"]]);
-                int charge = Convert.ToInt32(parts[headers["Charge"]]);
-                Sequence cleanSeq = new Sequence(parts[headers["Sequence"]], aminoAcidSet);
-                string modsString = parts[headers["Modifications"]];
+                var scan = Convert.ToInt32(parts[headers["Scan"]]);
+                var charge = Convert.ToInt32(parts[headers["Charge"]]);
+                var cleanSeq = new Sequence(parts[headers["Sequence"]], aminoAcidSet);
+                var modsString = parts[headers["Modifications"]];
                 var mods = modsString.Split(',');
 
                 foreach (var mod in mods)
@@ -205,8 +203,8 @@ namespace LcmsSpectatorTests
                         continue;
                     }
 
-                    string name = modParts[0];
-                    int index = Math.Min(Convert.ToInt32(modParts[1]), cleanSeq.Count - 1);
+                    var name = modParts[0];
+                    var index = Math.Min(Convert.ToInt32(modParts[1]), cleanSeq.Count - 1);
                     cleanSeq[index] = new ModifiedAminoAcid(cleanSeq[index], Modification.Get(name));
                 }
 
@@ -222,10 +220,10 @@ namespace LcmsSpectatorTests
         {
             public Psm(int scan, int charge, Sequence sequence, bool isTarget)
             {
-                this.Scan = scan;
-                this.Charge = charge;
-                this.Sequence = sequence;
-                this.IsTarget = isTarget;
+                Scan = scan;
+                Charge = charge;
+                Sequence = sequence;
+                IsTarget = isTarget;
             }
 
             public int Scan { get; set; }

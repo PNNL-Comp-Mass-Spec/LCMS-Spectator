@@ -18,12 +18,12 @@ namespace LcmsSpectator.ViewModels.Plots
     using System.Reactive.Linq;
     using System.Threading.Tasks;
     using InformedProteomics.Backend.MassSpecData;
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.PlotModels;
-    using LcmsSpectator.PlotModels.ColorDicionaries;
-    using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels.Data;
+    using Config;
+    using DialogServices;
+    using PlotModels;
+    using PlotModels.ColorDicionaries;
+    using Utils;
+    using Data;
     using OxyPlot;
     using OxyPlot.Axes;
     using OxyPlot.Series;
@@ -100,7 +100,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showPointMarkers;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="XicPlotViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="XicPlotViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service </param>
         /// <param name="fragSeqVm">The view model for the fragmentation sequence (fragment ion generator)</param>
@@ -108,16 +108,17 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="title">Title of XIC plot </param>
         /// <param name="xaxis">XAxis for XIC plot. </param>
         /// <param name="showLegend">Should a legend be shown on the plot by default? </param>
+        /// <param name="vertAxes">Y axis position</param>
         public XicPlotViewModel(IDialogService dialogService, IFragmentationSequenceViewModel fragSeqVm, ILcMsRun lcms, string title, LinearAxis xaxis, bool showLegend = true, AxisPosition vertAxes = AxisPosition.Left)
         {
             this.dialogService = dialogService;
-            this.FragmentationSequenceViewModel = fragSeqVm;
+            FragmentationSequenceViewModel = fragSeqVm;
             this.lcms = lcms;
             this.showLegend = showLegend;
             this.xaxis = xaxis;
-            this.pointsToSmooth = IcParameters.Instance.PointsToSmooth;
-            this.PlotTitle = title;
-            this.PlotModel = new SelectablePlotModel(xaxis, 1.05)
+            pointsToSmooth = IcParameters.Instance.PointsToSmooth;
+            PlotTitle = title;
+            PlotModel = new SelectablePlotModel(xaxis, 1.05)
             {
                 YAxis =
                 {
@@ -127,44 +128,44 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
             };
 
-            this.ions = new LabeledIonViewModel[0];
+            ions = new LabeledIonViewModel[0];
 
             var retentionTimeSelectedCommand = ReactiveCommand.Create();
             retentionTimeSelectedCommand
-            .Select(_ => this.PlotModel.SelectedDataPoint as XicDataPoint)
+            .Select(_ => PlotModel.SelectedDataPoint as XicDataPoint)
             .Where(dp => dp != null)
-            .Subscribe(dp => this.SelectedScan = dp.ScanNum);
-            this.RetentionTimeSelectedCommand = retentionTimeSelectedCommand;
+            .Subscribe(dp => SelectedScan = dp.ScanNum);
+            RetentionTimeSelectedCommand = retentionTimeSelectedCommand;
 
             var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => this.SaveAsImage());
-            this.SaveAsImageCommand = saveAsImageCommand;
+            saveAsImageCommand.Subscribe(_ => SaveAsImage());
+            SaveAsImageCommand = saveAsImageCommand;
 
             // When ShowLegend is updated, IsLegendVisible on the plot should be updated
             this.WhenAnyValue(x => x.ShowLegend).Subscribe(v =>
             {
-                this.PlotModel.IsLegendVisible = v;
-                this.PlotModel.InvalidatePlot(true);
+                PlotModel.IsLegendVisible = v;
+                PlotModel.InvalidatePlot(true);
             });
 
             // When area updates, plot title should update
             this.WhenAnyValue(x => x.Area).Subscribe(area =>
             {
                 var areaStr = string.Format(CultureInfo.InvariantCulture, "{0:0.##E0}", area);
-                this.PlotTitle = string.Format("{0} (Area: {1})", title, areaStr);
+                PlotTitle = string.Format("{0} (Area: {1})", title, areaStr);
             });
 
             // Update area when x Axis is zoomed/panned
             this.xaxis.AxisChanged += async (o, e) =>
             {
-                this.Area = await this.GetCurrentAreaAsync();
+                Area = await GetCurrentAreaAsync();
             };
 
             // Update point marker when selected scan changes
             this.WhenAnyValue(x => x.SelectedScan, x => x.IsPlotUpdating)
                 .Where(x => x.Item2)
                 .Throttle(TimeSpan.FromMilliseconds(50), RxApp.TaskpoolScheduler)
-                .Subscribe(x => this.PlotModel.SetPrimaryPointMarker(this.lcms.GetElutionTime(x.Item1)));
+                .Subscribe(x => PlotModel.SetPrimaryPointMarker(this.lcms.GetElutionTime(x.Item1)));
 
             // When point markers are toggled, change the marker type on each series
             this.WhenAnyValue(x => x.ShowPointMarkers)
@@ -172,12 +173,12 @@ namespace LcmsSpectator.ViewModels.Plots
                 .Subscribe(
                     markerType =>
                         {
-                            foreach (var lineSeries in this.PlotModel.Series.OfType<LineSeries>())
+                            foreach (var lineSeries in PlotModel.Series.OfType<LineSeries>())
                             {
                                 lineSeries.MarkerType = markerType;
                             }
 
-                            this.PlotModel.InvalidatePlot(true);
+                            PlotModel.InvalidatePlot(true);
                         });
 
             this.WhenAnyValue(
@@ -185,18 +186,17 @@ namespace LcmsSpectator.ViewModels.Plots
                     x => x.PointsToSmooth,
                     x => x.IsPlotUpdating)
                 .Where(x => x.Item3 && x.Item1 != null)
-                .SelectMany(async x => await this.GetXicDataPointsAsync(x.Item1, this.PointsToSmooth))
+                .SelectMany(async x => await GetXicDataPointsAsync(x.Item1, PointsToSmooth))
                 .Subscribe(xicPoints =>
                 {
-                    this.ions = this.FragmentationSequenceViewModel.LabeledIonViewModels;
-                    this.UpdatePlotModel(xicPoints);
+                    ions = FragmentationSequenceViewModel.LabeledIonViewModels;
+                    UpdatePlotModel(xicPoints);
                 });
 
             // Update ions when relative intensity threshold changes.
             IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
             {
-                var precFragVm = this.FragmentationSequenceViewModel as PrecursorSequenceIonViewModel;
-                if (precFragVm != null)
+                if (FragmentationSequenceViewModel is PrecursorSequenceIonViewModel precFragVm)
                 {
                     precFragVm.RelativeIntensityThreshold = precRelInt;
                 }
@@ -204,29 +204,29 @@ namespace LcmsSpectator.ViewModels.Plots
 
             // Update plot when settings change
             IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm)
-                .Where(_ => this.ions != null)
+                .Where(_ => ions != null)
                 .Throttle(TimeSpan.FromMilliseconds(250), RxApp.TaskpoolScheduler)
-                .SelectMany(async x => await this.GetXicDataPointsAsync(this.ions, this.PointsToSmooth, false))
-                .Subscribe(this.UpdatePlotModel);
+                .SelectMany(async x => await GetXicDataPointsAsync(ions, PointsToSmooth, false))
+                .Subscribe(UpdatePlotModel);
         }
 
         /// <summary>
         /// Gets command triggered when new scan is selected (double clicked) on XIC.
         /// </summary>
-        public IReactiveCommand RetentionTimeSelectedCommand { get; private set; }
+        public IReactiveCommand RetentionTimeSelectedCommand { get; }
 
         /// <summary>
         /// Gets command for exporting XIC plot as an image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; private set; }
+        public IReactiveCommand SaveAsImageCommand { get; }
 
         /// <summary>
         /// Gets the plot model for the extracted ion chromatogram plot.
         /// </summary>
         public SelectablePlotModel PlotModel
         {
-            get { return this.plotModel; }
-            private set { this.RaiseAndSetIfChanged(ref this.plotModel, value); }
+            get => plotModel;
+            private set => this.RaiseAndSetIfChanged(ref plotModel, value);
         }
 
         /// <summary>
@@ -234,8 +234,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool IsPlotUpdating
         {
-            get { return this.isPlotUpdating; }
-            set { this.RaiseAndSetIfChanged(ref this.isPlotUpdating, value); }
+            get => isPlotUpdating;
+            set => this.RaiseAndSetIfChanged(ref isPlotUpdating, value);
         }
 
         /// <summary>
@@ -243,8 +243,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowLegend
         {
-            get { return this.showLegend; }
-            set { this.RaiseAndSetIfChanged(ref this.showLegend, value); }
+            get => showLegend;
+            set => this.RaiseAndSetIfChanged(ref showLegend, value);
         }
 
         /// <summary>
@@ -252,8 +252,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public int PointsToSmooth
         {
-            get { return this.pointsToSmooth; }
-            set { this.RaiseAndSetIfChanged(ref this.pointsToSmooth, value); }
+            get => pointsToSmooth;
+            set => this.RaiseAndSetIfChanged(ref pointsToSmooth, value);
         }
 
         /// <summary>
@@ -261,8 +261,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public IFragmentationSequenceViewModel FragmentationSequenceViewModel
         {
-            get { return this.fragmentationSequenceViewModel; }
-            private set { this.RaiseAndSetIfChanged(ref this.fragmentationSequenceViewModel, value); }
+            get => fragmentationSequenceViewModel;
+            private set => this.RaiseAndSetIfChanged(ref fragmentationSequenceViewModel, value);
         }
 
         /// <summary>
@@ -270,8 +270,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public int SelectedScan
         {
-            get { return this.selectedScan; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedScan, value); }
+            get => selectedScan;
+            set => this.RaiseAndSetIfChanged(ref selectedScan, value);
         }
 
         /// <summary>
@@ -279,8 +279,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double Area
         {
-            get { return this.area; }
-            private set { this.RaiseAndSetIfChanged(ref this.area, value); }
+            get => area;
+            private set => this.RaiseAndSetIfChanged(ref area, value);
         }
 
         /// <summary>
@@ -288,8 +288,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public string PlotTitle
         {
-            get { return this.plotTitle; }
-            private set { this.RaiseAndSetIfChanged(ref this.plotTitle, value); }
+            get => plotTitle;
+            private set => this.RaiseAndSetIfChanged(ref plotTitle, value);
         }
 
         /// <summary>
@@ -297,8 +297,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShowPointMarkers
         {
-            get { return this.showPointMarkers; }
-            set { this.RaiseAndSetIfChanged(ref this.showPointMarkers, value); }
+            get => showPointMarkers;
+            set => this.RaiseAndSetIfChanged(ref showPointMarkers, value);
         }
 
         /// <summary>
@@ -306,17 +306,17 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public void ClearPlot()
         {
-            this.PlotModel.ClearSeries();
+            PlotModel.ClearSeries();
         }
 
         /// <summary>
         /// Calculates area under the curve of the XIC plot.
         /// </summary>
-        /// <returns>Area under the curve of the XIC plot.</returns> 
+        /// <returns>Area under the curve of the XIC plot.</returns>
         public double GetCurrentArea()
         {
-            return this.PlotModel.Series.OfType<XicPointSeries>().Where(xicPointSeries => xicPointSeries.IsVisible && xicPointSeries.Index >= 0)
-                .Sum(xicPointSeries => xicPointSeries.GetArea(this.xaxis.ActualMinimum, this.xaxis.ActualMaximum));
+            return PlotModel.Series.OfType<XicPointSeries>().Where(xicPointSeries => xicPointSeries.IsVisible && xicPointSeries.Index >= 0)
+                .Sum(xicPointSeries => xicPointSeries.GetArea(xaxis.ActualMinimum, xaxis.ActualMaximum));
         }
 
         /// <summary>
@@ -325,7 +325,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <returns>Task that calculates the area under the curve of the XIC plot.</returns>
         public Task<double> GetCurrentAreaAsync()
         {
-            return Task.Run(() => this.GetCurrentArea());
+            return Task.Run(() => GetCurrentArea());
         }
 
         /// <summary>
@@ -335,17 +335,17 @@ namespace LcmsSpectator.ViewModels.Plots
         public void UpdatePlotModel(IList<XicDataPoint>[] xicPoints)
         {
             // add XICs
-            this.PlotModel.ClearSeries();
+            PlotModel.ClearSeries();
             if (xicPoints == null)
             {
                 return;
             }
 
             var seriesstore =
-                this.ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, IList<XicDataPoint>>>(
+                ions.ToDictionary<LabeledIonViewModel, string, Tuple<LineSeries, IList<XicDataPoint>>>(
                     ion => ion.Label,
                     ion => null);
-            var maxCharge = (this.ions.Length > 0) ? this.ions.Max(ion => ion.IonType.Charge) : 2;
+            var maxCharge = (ions.Length > 0) ? ions.Max(ion => ion.IonType.Charge) : 2;
             maxCharge = Math.Max(maxCharge, 2);
             var colors = new IonColorDictionary(maxCharge);
             foreach (var xic in xicPoints)
@@ -358,7 +358,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 var firstPoint = xic[0];
                 var color = firstPoint.IonType != null ? colors.GetColor(firstPoint.IonType.BaseIonType, firstPoint.IonType.Charge)
                                                            : colors.GetColor(firstPoint.Index);
-                
+
                 // create line series for xic
                 var series = new XicPointSeries
                 {
@@ -372,7 +372,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     MarkerStroke = color,
                     MarkerStrokeThickness = 1,
                     MarkerFill = OxyColors.White,
-                    MarkerType = this.ShowPointMarkers ? MarkerType.Circle : MarkerType.None,
+                    MarkerType = ShowPointMarkers ? MarkerType.Circle : MarkerType.None,
                     TrackerFormatString =
                         "{0}" + Environment.NewLine +
                         "{1}: {2:0.###}" + Environment.NewLine +
@@ -380,14 +380,14 @@ namespace LcmsSpectator.ViewModels.Plots
                         "{3}: {4:0.##E0}"
                 };
                 seriesstore[xic[0].Title] = new Tuple<LineSeries, IList<XicDataPoint>>(series, xic);
-                this.PlotModel.Series.Insert(0, series);
+                PlotModel.Series.Insert(0, series);
             }
 
-            this.PlotModel.IsLegendVisible = this.showLegend;
-            this.PlotModel.InvalidatePlot(true);
-            this.PlotModel.AdjustForZoom();
-            this.PlotModel.SetPrimaryPointMarker(this.lcms.GetElutionTime(this.SelectedScan));
-            this.Area = this.GetCurrentArea();
+            PlotModel.IsLegendVisible = showLegend;
+            PlotModel.InvalidatePlot(true);
+            PlotModel.AdjustForZoom();
+            PlotModel.SetPrimaryPointMarker(lcms.GetElutionTime(SelectedScan));
+            Area = GetCurrentArea();
         }
 
         /// <summary>
@@ -395,7 +395,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public void SaveAsImage()
         {
-            var filePath = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            var filePath = dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
@@ -411,16 +411,16 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 DynamicResolutionPngExporter.Export(
-                    this.PlotModel,
+                    PlotModel,
                     filePath,
-                    (int)this.PlotModel.Width,
-                    (int)this.PlotModel.Height,
+                    (int)PlotModel.Width,
+                    (int)PlotModel.Height,
                     OxyColors.White,
                     IcParameters.Instance.ExportImageDpi);
             }
             catch (Exception e)
             {
-                this.dialogService.ExceptionAlert(e);
+                dialogService.ExceptionAlert(e);
             }
         }
 

@@ -10,12 +10,12 @@
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
 
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.PlotModels;
-    using LcmsSpectator.PlotModels.ColorDicionaries;
-    using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels.Data;
+    using DialogServices;
+    using Models;
+    using PlotModels;
+    using PlotModels.ColorDicionaries;
+    using Utils;
+    using Data;
 
     using OxyPlot.Wpf;
 
@@ -26,7 +26,7 @@
         /// <summary>
         /// Service for opening LCMSSpectator dialogs.
         /// </summary>
-        private IMainDialogService dialogService;
+        private readonly IMainDialogService dialogService;
 
         /// <summary>
         /// The currently selected MS/MS spectrum.
@@ -55,9 +55,9 @@
         public SequenceViewerViewModel(IMainDialogService dialogService = null)
         {
             this.dialogService = dialogService ?? new MainDialogService();
-            this.SequenceFragments = new ReactiveList<FragmentViewModel> { ChangeTrackingEnabled = true };
+            SequenceFragments = new ReactiveList<FragmentViewModel> { ChangeTrackingEnabled = true };
 
-            this.IonColorDictionary = new IonColorDictionary(2);
+            IonColorDictionary = new IonColorDictionary(2);
 
             // Update the sequence displayed when the fragmentation sequence or spectrum changes.
             this.WhenAnyValue(
@@ -66,10 +66,10 @@
                               x => x.FragmentationSequence.LabeledIonViewModels)
                 .Throttle(TimeSpan.FromMilliseconds(500), RxApp.TaskpoolScheduler)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(_ => this.ParseFragmentationSequence());
+                .Subscribe(_ => ParseFragmentationSequence());
 
-            this.SequenceFragments.ItemChanged.Where(x => x.PropertyName == "AminoAcid")
-                .Subscribe(x => this.UpdateSequence(x.Sender.AminoAcid, x.Sender.Index));
+            SequenceFragments.ItemChanged.Where(x => x.PropertyName == "AminoAcid")
+                .Subscribe(x => UpdateSequence(x.Sender.AminoAcid, x.Sender.Index));
 
         }
 
@@ -78,8 +78,8 @@
         /// </summary>
         public ProductSpectrum SelectedSpectrum
         {
-            get { return this.selectedSpectrum; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedSpectrum, value); }
+            get => selectedSpectrum;
+            set => this.RaiseAndSetIfChanged(ref selectedSpectrum, value);
         }
 
         /// <summary>
@@ -87,8 +87,8 @@
         /// </summary>
         public FragmentationSequenceViewModel FragmentationSequence
         {
-            get { return this.fragmentationSequence; }
-            set { this.RaiseAndSetIfChanged(ref this.fragmentationSequence, value); }
+            get => fragmentationSequence;
+            set => this.RaiseAndSetIfChanged(ref fragmentationSequence, value);
         }
 
         /// <summary>
@@ -96,22 +96,22 @@
         /// </summary>
         public IonColorDictionary IonColorDictionary
         {
-            get { return this.ionColorDictionary; }
-            private set { this.RaiseAndSetIfChanged(ref this.ionColorDictionary, value); }
+            get => ionColorDictionary;
+            private set => this.RaiseAndSetIfChanged(ref ionColorDictionary, value);
         }
 
         /// <summary>
         /// Gets the list of fragments formatted to be displayed.
         /// </summary>
-        public ReactiveList<FragmentViewModel> SequenceFragments { get; private set; }
+        public ReactiveList<FragmentViewModel> SequenceFragments { get; }
 
         /// <summary>
         /// Gets the percentage of fragments found in the spectrum.
         /// </summary>
         public double SequenceCoverage
         {
-            get { return this.sequenceCoverage; }
-            private set { this.RaiseAndSetIfChanged(ref this.sequenceCoverage, value); }
+            get => sequenceCoverage;
+            private set => this.RaiseAndSetIfChanged(ref sequenceCoverage, value);
         }
 
         /// <summary>
@@ -119,30 +119,30 @@
         /// </summary>
         private void ParseFragmentationSequence()
         {
-            if (this.SequenceFragments.Count > 0)
+            if (SequenceFragments.Count > 0)
             {
-                this.SequenceFragments.Clear();
+                SequenceFragments.Clear();
             }
 
-            if (this.FragmentationSequence == null)
+            if (FragmentationSequence == null)
             {
                 // Invalid fragmentation sequence: Just show nothing.
-                this.SequenceFragments.Clear();
+                SequenceFragments.Clear();
                 return;
             }
 
-            if (this.SelectedSpectrum == null)
+            if (SelectedSpectrum == null)
             {
                 // Invalid spectrum: clear all ions while retaining the sequence displayed.
-                this.ClearSequenceFragments();
+                ClearSequenceFragments();
             }
 
-            var labeledIonViewModels = this.FragmentationSequence.LabeledIonViewModels.Where(l => l.IsFragmentIon);
-            var sequence = this.FragmentationSequence.FragmentationSequence.Sequence;
+            var labeledIonViewModels = FragmentationSequence.LabeledIonViewModels.Where(l => l.IsFragmentIon);
+            var sequence = FragmentationSequence.FragmentationSequence.Sequence;
             var sequenceFragments = new FragmentViewModel[sequence.Count]; // sorted by sequence index
-            for (int i = 0; i < sequence.Count; i++)
+            for (var i = 0; i < sequence.Count; i++)
             {
-                sequenceFragments[i] = new FragmentViewModel(sequence[i], i, this.dialogService);
+                sequenceFragments[i] = new FragmentViewModel(sequence[i], i, dialogService);
             }
 
             var allPeakDataPoints = new List<PeakDataPoint>();
@@ -153,7 +153,7 @@
                                 ? labeledIonViewModel.Index - 1
                                 : sequence.Count - labeledIonViewModel.Index;
 
-                var peakDataPoints = labeledIonViewModel.GetPeaks(this.SelectedSpectrum, false);
+                var peakDataPoints = labeledIonViewModel.GetPeaks(SelectedSpectrum, false);
                 if (peakDataPoints.Count == 1 && peakDataPoints[0].X.Equals(double.NaN))
                 {
                     // Not observed, nothing to add.
@@ -172,7 +172,7 @@
                 {
                     // This a fragment ion has already been marked for this cleavage, select the one that is higher intensity.
                     var label = fragmentIon.LabeledIonViewModel;
-                    var newPeakDataPoints = label.GetPeaks(this.SelectedSpectrum, false);
+                    var newPeakDataPoints = label.GetPeaks(SelectedSpectrum, false);
                     var currentMaxAbundance = peakDataPoints.Max(pd => pd.Y);
                     var newMaxAbundance = newPeakDataPoints.Count == 0 ? 0 : newPeakDataPoints.Max(pd => pd.Y);
                     ionToAdd = newMaxAbundance > currentMaxAbundance ? label : labeledIonViewModel;
@@ -180,9 +180,9 @@
 
                 // Determine the color of the ion.
                 Brush brush = null;
-                if (this.IonColorDictionary != null)
+                if (IonColorDictionary != null)
                 {
-                    var oxyColor = this.IonColorDictionary.GetColor(ionToAdd.IonType.BaseIonType, 1);
+                    var oxyColor = IonColorDictionary.GetColor(ionToAdd.IonType.BaseIonType, 1);
                     brush = oxyColor.ToBrush();
                 }
 
@@ -207,12 +207,12 @@
 
             foreach (var sequenceFragment in sequenceFragments)
             {
-                this.SequenceFragments.Add(sequenceFragment);
+                SequenceFragments.Add(sequenceFragment);
             }
 
-            this.SequenceCoverage = Math.Round(IonUtils.CalculateSequenceCoverage(
+            SequenceCoverage = Math.Round(IonUtils.CalculateSequenceCoverage(
                 allPeakDataPoints,
-                this.FragmentationSequence.FragmentationSequence.Sequence.Count), 3);
+                FragmentationSequence.FragmentationSequence.Sequence.Count), 3);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@
         /// </summary>
         private void ClearSequenceFragments()
         {
-            foreach (var sequenceFragment in this.SequenceFragments)
+            foreach (var sequenceFragment in SequenceFragments)
             {
                 sequenceFragment.PrefixIon = null;
                 sequenceFragment.SuffixIon = null;
@@ -232,10 +232,12 @@
         /// </summary>
         private void UpdateSequence(AminoAcid aminoAcid, int index)
         {
-            var fragSeq = this.FragmentationSequence.FragmentationSequence;
-            var newSequence = new Sequence(this.FragmentationSequence.FragmentationSequence.Sequence);
-            newSequence[index] = aminoAcid;
-            this.FragmentationSequence.FragmentationSequence = 
+            var fragSeq = FragmentationSequence.FragmentationSequence;
+            var newSequence = new Sequence(FragmentationSequence.FragmentationSequence.Sequence) {
+                [index] = aminoAcid
+            };
+
+            FragmentationSequence.FragmentationSequence =
                 new FragmentationSequence(newSequence, fragSeq.Charge, fragSeq.LcMsRun, fragSeq.ActivationMethod);
         }
     }

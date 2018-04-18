@@ -13,8 +13,8 @@ namespace LcmsSpectator.Readers
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using LcmsSpectator.Models;
-    
+    using Models;
+
     /// <summary>
     /// Reader for list of targets containing target sequence and charge state.
     /// </summary>
@@ -33,7 +33,7 @@ namespace LcmsSpectator.Readers
         /// </param>
         public TargetFileReader(string targetFileName)
         {
-            this.TargetFilePath = targetFileName;
+            TargetFilePath = targetFileName;
         }
 
         /// <summary>
@@ -50,20 +50,20 @@ namespace LcmsSpectator.Readers
         /// <summary>
         /// Gets the path to the target list file.
         /// </summary>
-        public string TargetFilePath { get; private set; }
-        
+        public string TargetFilePath { get; }
+
         /// <summary>
         /// Reads a target list file.
         /// </summary>
         /// <returns>Returns list of targets.</returns>
         public List<Target> Read()
         {
-            if (string.IsNullOrEmpty(this.TargetFilePath))
+            if (string.IsNullOrEmpty(TargetFilePath))
             {
-                return this.ReadStream();
+                return ReadStream();
             }
 
-            return this.ReadFile();
+            return ReadFile();
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace LcmsSpectator.Readers
         public List<Target> ReadStream()
         {
             var targetList = new List<Target>();
-            var reader = new StreamReader(this.inputStream);
+            var reader = new StreamReader(inputStream);
             while (!reader.EndOfStream)
             {
                 var line = reader.ReadLine();
@@ -108,7 +108,7 @@ namespace LcmsSpectator.Readers
         public List<Target> ReadFile()
         {
             var targetList = new List<Target>();
-            var file = File.ReadLines(this.TargetFilePath);
+            var file = File.ReadLines(TargetFilePath);
             foreach (var line in file)
             {
                 var parts = line.Split('\t');

@@ -10,10 +10,6 @@
 
 namespace LcmsSpectator.ViewModels
 {
-    using System;
-    using System.Reactive.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
     using ReactiveUI;
 
     /// <summary>
@@ -46,8 +42,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string Text
         {
-            get { return this.text; }
-            private set { this.RaiseAndSetIfChanged(ref this.text, value); }
+            get => text;
+            private set => this.RaiseAndSetIfChanged(ref text, value);
         }
 
         /// <summary>
@@ -55,13 +51,13 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool IsLoading
         {
-            get { return this.isLoading; }
-            set { this.RaiseAndSetIfChanged(ref this.isLoading, value); }
+            get => isLoading;
+            set => this.RaiseAndSetIfChanged(ref isLoading, value);
         }
 
-        /// <summary>
-        /// Starts and runs the thread that animates the loading screen text.
-        /// </summary>
+        // <summary>
+        // Starts and runs the thread that animates the loading screen text.
+        // </summary>
         ////private void StartLoading()
         ////{
         ////    string[] loadingStrings =

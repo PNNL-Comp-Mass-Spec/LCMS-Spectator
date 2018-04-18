@@ -12,8 +12,8 @@ namespace LcmsSpectator.Models
 {
     using System;
     using InformedProteomics.Backend.Data.Sequence;
-    using LcmsSpectator.Readers.SequenceReaders;
-    
+    using Readers.SequenceReaders;
+
     /// <summary>
     /// Class for target sequence and charge state.
     /// </summary>
@@ -31,8 +31,8 @@ namespace LcmsSpectator.Models
         /// <param name="charge">The charge state.</param>
         public Target(string sequence, int charge = 0)
         {
-            this.SequenceText = sequence;
-            this.Charge = charge;
+            SequenceText = sequence;
+            Charge = charge;
         }
 
         /// <summary>
@@ -51,10 +51,7 @@ namespace LcmsSpectator.Models
         /// </summary>
         public string SequenceText
         {
-            get
-            {
-                return this.sequenceText;
-            }
+            get => sequenceText;
 
             set
             {
@@ -62,8 +59,8 @@ namespace LcmsSpectator.Models
                 var seq = Sequence;
                 try
                 {
-                    this.Sequence = seqReader.Read(value);
-                    this.sequenceText = value;
+                    Sequence = seqReader.Read(value);
+                    sequenceText = value;
                 }
                 catch (Exception)
                 {

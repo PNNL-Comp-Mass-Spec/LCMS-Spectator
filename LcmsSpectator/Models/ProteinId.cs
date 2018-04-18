@@ -29,37 +29,37 @@ namespace LcmsSpectator.Models
         public ProteinId(Sequence sequence, string proteinName)
         {
             Sequence = sequence;
-            this.ProteinName = proteinName;
-            this.Proteoforms = new Dictionary<string, ProteoformId>();
+            ProteinName = proteinName;
+            Proteoforms = new Dictionary<string, ProteoformId>();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProteinId"/> class. 
+        /// Initializes a new instance of the <see cref="ProteinId"/> class.
         /// Constructor for creating a ProteinId from a FASTA Entry.
         /// </summary>
         /// <param name="fastaEntry">The FASTA Entry.</param>
         public ProteinId(FastaEntry fastaEntry)
         {
-            this.Proteoforms = new Dictionary<string, ProteoformId>();
-            this.Sequence = new Sequence(fastaEntry.ProteinSequenceText, new AminoAcidSet());
-            this.ProteinName = fastaEntry.ProteinName;
-            this.ProteinDescription = fastaEntry.ProteinDescription;
+            Proteoforms = new Dictionary<string, ProteoformId>();
+            Sequence = new Sequence(fastaEntry.ProteinSequenceText, new AminoAcidSet());
+            ProteinName = fastaEntry.ProteinName;
+            ProteinDescription = fastaEntry.ProteinDescription;
         }
 
         /// <summary>
         /// Gets the unmodified complete protein sequence.
         /// </summary>
-        public Sequence Sequence { get; private set; }
+        public Sequence Sequence { get; }
 
         /// <summary>
         /// Gets the protein name.
         /// </summary>
-        public string ProteinName { get; private set; }
+        public string ProteinName { get; }
 
         /// <summary>
         /// Gets the description of the protein.
         /// </summary>
-        public string ProteinDescription { get; private set; }
+        public string ProteinDescription { get; }
 
         /// <summary>
         /// Gets a dictionary that maps a protein name to a ProteinID.
@@ -72,12 +72,12 @@ namespace LcmsSpectator.Models
         /// <param name="id">Protein-Spectrum-Match to add</param>
         public void Add(PrSm id)
         {
-            if (!this.Proteoforms.ContainsKey(id.SequenceText))
+            if (!Proteoforms.ContainsKey(id.SequenceText))
             {
-                this.Proteoforms.Add(id.SequenceText, new ProteoformId(id, this.Sequence));
+                Proteoforms.Add(id.SequenceText, new ProteoformId(id, Sequence));
             }
 
-            var proteoform = this.Proteoforms[id.SequenceText];
+            var proteoform = Proteoforms[id.SequenceText];
             proteoform.Add(id);
         }
 
@@ -87,15 +87,15 @@ namespace LcmsSpectator.Models
         /// <param name="id">Protein-Spectrum-Match to remove.</param>
         public void Remove(PrSm id)
         {
-            if (this.Proteoforms.ContainsKey(id.SequenceText))
+            if (Proteoforms.ContainsKey(id.SequenceText))
             {
-                this.Proteoforms[id.SequenceText].Remove(id);
+                Proteoforms[id.SequenceText].Remove(id);
             }
         }
 
         public void ClearIds()
         {
-            this.Proteoforms.Clear();
+            Proteoforms.Clear();
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace LcmsSpectator.Models
         public PrSm GetHighestScoringPrSm()
         {
             PrSm highest = null;
-            foreach (var proteoform in this.Proteoforms.Values)
+            foreach (var proteoform in Proteoforms.Values)
             {
                 var highestProtein = proteoform.GetHighestScoringPrSm();
                 if (highest == null || highestProtein.CompareTo(highest) >= 0)
@@ -124,7 +124,7 @@ namespace LcmsSpectator.Models
         /// <param name="dataSetName">Name of the data this for the LCMSRun.</param>
         public void SetLcmsRun(ILcMsRun lcms, string dataSetName)
         {
-            foreach (var proteoform in this.Proteoforms.Values)
+            foreach (var proteoform in Proteoforms.Values)
             {
                 proteoform.SetLcmsRun(lcms, dataSetName);
             }
@@ -137,7 +137,7 @@ namespace LcmsSpectator.Models
         /// <returns>A value indicating whether the item contains the identification.</returns>
         public bool Contains(PrSm id)
         {
-            return this.Proteoforms.Values.Any(proteoform => proteoform.Contains(id));
+            return Proteoforms.Values.Any(proteoform => proteoform.Contains(id));
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace LcmsSpectator.Models
         public void RemovePrSmsFromRawFile(string rawFileName)
         {
             var newProteoforms = new Dictionary<string, ProteoformId>();
-            foreach (var proteoform in this.Proteoforms)
+            foreach (var proteoform in Proteoforms)
             {
                 proteoform.Value.RemovePrSmsFromRawFile(rawFileName);
                 if (proteoform.Value.ChargeStates.Count > 0)
@@ -156,21 +156,21 @@ namespace LcmsSpectator.Models
                 }
             }
 
-            this.Proteoforms = newProteoforms;
+            Proteoforms = newProteoforms;
         }
 
         /// <summary>
         /// Comparison class for comparing ProteinID by protein name.
         /// </summary>
         public class ProteinIdNameDescComparer : IComparer<ProteinId>
-        {            
+        {
             /// <summary>
             /// Compare two ProteinIDs by protein name.
             /// </summary>
             /// <param name="x">Left protein.</param>
             /// <param name="y">Right protein.</param>
             /// <returns>
-            /// Integer value indicating whether the left protein is 
+            /// Integer value indicating whether the left protein is
             /// less than, equal to, or greater than right protein.
             /// </returns>
             public int Compare(ProteinId x, ProteinId y)

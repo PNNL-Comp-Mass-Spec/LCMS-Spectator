@@ -16,8 +16,8 @@ namespace LcmsSpectator.ViewModels.Modifications
 
     using InformedProteomics.Backend.Data.Enum;
     using InformedProteomics.Backend.Data.Sequence;
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
+    using Config;
+    using DialogServices;
 
     using ReactiveUI;
 
@@ -42,44 +42,44 @@ namespace LcmsSpectator.ViewModels.Modifications
         private bool remove;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SearchModificationViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="SearchModificationViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         public SearchModificationViewModel(IDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.Modifications = new ReactiveList<Modification>(Modification.CommonModifications);
-            this.AminoAcidResidues = new ReactiveList<char>(AminoAcid.StandardAminoAcidCharacters) { '*' };
-            this.SequenceLocations = new ReactiveList<SequenceLocation>
+            Modifications = new ReactiveList<Modification>(Modification.CommonModifications);
+            AminoAcidResidues = new ReactiveList<char>(AminoAcid.StandardAminoAcidCharacters) { '*' };
+            SequenceLocations = new ReactiveList<SequenceLocation>
             {
                 SequenceLocation.Everywhere, SequenceLocation.PeptideNTerm, SequenceLocation.PeptideCTerm,
                 SequenceLocation.ProteinNTerm, SequenceLocation.ProteinCTerm
             };
-            this.SelectedSequenceLocation = SequenceLocation.Everywhere;
-            this.IsFixed = new ReactiveList<string> { "Fixed", "Optional" };
-            this.FixedSelection = "Fixed";
+            SelectedSequenceLocation = SequenceLocation.Everywhere;
+            IsFixed = new ReactiveList<string> { "Fixed", "Optional" };
+            FixedSelection = "Fixed";
 
-            this.Modifications = IcParameters.Instance.RegisteredModifications;
+            Modifications = IcParameters.Instance.RegisteredModifications;
 
-            this.SelectedModification = this.Modifications[0];
-            this.SelectedResidue = this.AminoAcidResidues[0];
+            SelectedModification = Modifications[0];
+            SelectedResidue = AminoAcidResidues[0];
 
-            this.Remove = false;
+            Remove = false;
 
             var removeModificationCommand = ReactiveCommand.Create();
             removeModificationCommand
                 .Where(_ => this.dialogService.ConfirmationBox(
                     string.Format(
                         "Are you sure you would like to remove {0}[{1}]?",
-                        this.SelectedResidue,
-                        this.SelectedModification.Name),
+                        SelectedResidue,
+                        SelectedModification.Name),
                     "Remove Search Modification"))
-                .Subscribe(_ => this.Remove = true);
-            this.RemoveModificationCommand = removeModificationCommand;
+                .Subscribe(_ => Remove = true);
+            RemoveModificationCommand = removeModificationCommand;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SearchModificationViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="SearchModificationViewModel"/> class.
         /// Create new ModificationViewModel from searchModification
         /// </summary>
         /// <param name="searchModification">Search modification to create the SelectModificationViewModel from.</param>
@@ -87,7 +87,7 @@ namespace LcmsSpectator.ViewModels.Modifications
         public SearchModificationViewModel(SearchModification searchModification, IDialogService dialogService)
             : this(dialogService)
         {
-            this.SearchModification = searchModification;
+            SearchModification = searchModification;
         }
 
         /// <summary>
@@ -95,24 +95,24 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public ReactiveList<Modification> Modifications
         {
-            get { return this.modifications; }
-            set { this.RaiseAndSetIfChanged(ref this.modifications, value); }
+            get => modifications;
+            set => this.RaiseAndSetIfChanged(ref modifications, value);
         }
 
         /// <summary>
         /// Gets a list of all possible amino acid residues.
         /// </summary>
-        public ReactiveList<char> AminoAcidResidues { get; private set; }
+        public ReactiveList<char> AminoAcidResidues { get; }
 
         /// <summary>
         /// Gets a list of all possible sequence locations.
         /// </summary>
-        public ReactiveList<SequenceLocation> SequenceLocations { get; private set; }
+        public ReactiveList<SequenceLocation> SequenceLocations { get; }
 
         /// <summary>
         /// Gets a list of all possible fixed values.
         /// </summary>
-        public ReactiveList<string> IsFixed { get; private set; }
+        public ReactiveList<string> IsFixed { get; }
 
         /// <summary>
         /// Gets or sets the modification selected from modification list.
@@ -137,15 +137,15 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Gets a command that removes this modification from the list.
         /// </summary>
-        public IReactiveCommand RemoveModificationCommand { get; private set; }
+        public IReactiveCommand RemoveModificationCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether this modification should be removed.
         /// </summary>
         public bool Remove
         {
-            get { return this.remove; }
-            private set { this.RaiseAndSetIfChanged(ref this.remove, value); }
+            get => remove;
+            private set => this.RaiseAndSetIfChanged(ref remove, value);
         }
 
         /// <summary>
@@ -155,28 +155,28 @@ namespace LcmsSpectator.ViewModels.Modifications
         {
             get
             {
-                if (this.SelectedModification == null)
+                if (SelectedModification == null)
                 {
                     return null;
                 }
 
                 if (
                     !AminoAcid.StandardAminoAcidCharacters.Contains(
-                        this.SelectedResidue.ToString(CultureInfo.InvariantCulture)) && this.SelectedResidue != '*')
+                        SelectedResidue.ToString(CultureInfo.InvariantCulture)) && SelectedResidue != '*')
                 {
                     return null;
                 }
 
-                var isFixed = this.FixedSelection == "Fixed";
-                return new SearchModification(this.SelectedModification, this.SelectedResidue, this.SelectedSequenceLocation, isFixed);
+                var isFixed = FixedSelection == "Fixed";
+                return new SearchModification(SelectedModification, SelectedResidue, SelectedSequenceLocation, isFixed);
             }
 
             set
             {
-                this.SelectedModification = value.Modification;
-                this.SelectedResidue = value.TargetResidue;
-                this.SelectedSequenceLocation = value.Location;
-                this.FixedSelection = value.IsFixedModification ? "Fixed" : "Optional";
+                SelectedModification = value.Modification;
+                SelectedResidue = value.TargetResidue;
+                SelectedSequenceLocation = value.Location;
+                FixedSelection = value.IsFixedModification ? "Fixed" : "Optional";
             }
         }
     }

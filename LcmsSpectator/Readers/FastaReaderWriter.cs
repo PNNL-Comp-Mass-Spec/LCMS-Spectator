@@ -4,12 +4,10 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Models;
+    using Models;
 
     public class FastaReaderWriter
     {
@@ -17,11 +15,12 @@
         /// Read FASTA db file.
         /// </summary>
         /// <param name="filePath">The path to the FASTA DB file.</param>
+        /// <param name="parseSequence"></param>
         /// <returns>Enumerable of entries in the file.</returns>
         public static IEnumerable<FastaEntry> ReadFastaFile(string filePath, bool parseSequence = false)
         {
             FastaEntry fastaEntry = null;
-            List<FastaEntry> entries = new List<FastaEntry>();
+            var entries = new List<FastaEntry>();
             foreach (var line in File.ReadLines(filePath))
             {
                 if (line.Length == 0)
@@ -92,7 +91,7 @@
             {
                 foreach (var entry in entries.Where(entry => entry != null))
                 {
-                    writer.Write(entry.FormattedEntry);   
+                    writer.Write(entry.FormattedEntry);
                 }
             }
         }

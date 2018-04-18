@@ -18,8 +18,8 @@ namespace LcmsSpectator.Readers
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Results;
 
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Readers.SequenceReaders;
+    using Models;
+    using SequenceReaders;
 
     using PSI_Interface.IdentData;
 
@@ -45,8 +45,8 @@ namespace LcmsSpectator.Readers
         public MzIdentMlReader(string filePath)
         {
             this.filePath = filePath;
-            this.mzIdentMlReader = new SimpleMZIdentMLReader();
-            this.Modifications = new List<Modification>();
+            mzIdentMlReader = new SimpleMZIdentMLReader();
+            Modifications = new List<Modification>();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace LcmsSpectator.Readers
         /// <returns>Identification tree of identifications.</returns>
         public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
-            return this.ReadAsync(modIgnoreList).Result;
+            return ReadAsync(modIgnoreList).Result;
         }
 
         /// <summary>
@@ -68,14 +68,14 @@ namespace LcmsSpectator.Readers
         /// <returns>Identification tree of MZID identifications.</returns>
         public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
-            var dataset = await Task.Run(() => this.mzIdentMlReader.Read(this.filePath));
+            var dataset = await Task.Run(() => mzIdentMlReader.Read(filePath));
             var prsms = new List<PrSm>();
             var sequenceReader = new SequenceReader();
 
             foreach (var evidence in dataset.Identifications)
             {
                 var sequence = evidence.Peptide.GetIpSequence();
-                var sequenceStr = this.GetSequenceStr(sequence);
+                var sequenceStr = GetSequenceStr(sequence);
 
                 foreach (var pepEv in evidence.PepEvidence)
                 {
@@ -125,6 +125,6 @@ namespace LcmsSpectator.Readers
             return sequenceStr.ToString();
         }
 
-        public IList<Modification> Modifications { get; private set; }
+        public IList<Modification> Modifications { get; }
     }
 }

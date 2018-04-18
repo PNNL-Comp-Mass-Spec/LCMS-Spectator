@@ -11,14 +11,12 @@
 namespace LcmsSpectator.Readers
 {
     using System.Collections.Generic;
-    using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
 
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Models;
-    using LcmsSpectator.ViewModels;
-    using LcmsSpectator.ViewModels.Data;
+    using Models;
+    using ViewModels.Data;
 
     /// <summary>
     /// The DataReader is an interface for reading raw files, ID files, and feature files.
@@ -88,6 +86,6 @@ namespace LcmsSpectator.Readers
         /// <returns>Task that returns IEnumerable of FASTA entries.</returns>
         Task<IEnumerable<FastaEntry>> ReadFastaFile(string filePath);
 
-        IList<Modification> Modifications { get; } 
+        IList<Modification> Modifications { get; }
     }
 }

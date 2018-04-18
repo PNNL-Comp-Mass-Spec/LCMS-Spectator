@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LcmsSpectator.Writers
 {
-    using System.IO.Packaging;
-    using System.Reflection;
 
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Models;
+    using Models;
 
     using PSI_Interface.CV;
     using PSI_Interface.IdentData;
-    using PSI_Interface.IdentData.mzIdentML;
 
+    [Obsolete("This class is not functional")]
     public class MzIdWriter : IIdWriter
     {
         /// <summary>
@@ -27,25 +23,25 @@ namespace LcmsSpectator.Writers
         /// <summary>
         /// Maps modification numbers to accessions.
         /// </summary>
-        private Dictionary<int, CV.TermInfo> accessionModMap; 
+        private Dictionary<int, CV.TermInfo> accessionModMap;
 
         public MzIdWriter(string filePath)
         {
-            this.accessionModMap = new Dictionary<int, CV.TermInfo>();
-            this.PopulateAccessionModMap();   
+            accessionModMap = new Dictionary<int, CV.TermInfo>();
+            PopulateAccessionModMap();
         }
 
 
         public void Write(IEnumerable<PrSm> ids)
         {
             var first = ids.FirstOrDefault();
-            string name = string.Empty;
+            var name = string.Empty;
 
             if (first != null)
             {
                 name = first.RawFileName;
             }
-           
+
         }
 
         /// <summary>
@@ -57,11 +53,9 @@ namespace LcmsSpectator.Writers
         {
             var modList = new List<Modification>();
 
-            for (int i = 0; i < sequence.Count; i++)
+            foreach (var residue in sequence)
             {
-                var modAa = sequence[i] as ModifiedAminoAcid;
-
-                if (modAa == null)
+                if (!(residue is ModifiedAminoAcid modAa))
                 {
                     continue;
                 }
@@ -84,13 +78,12 @@ namespace LcmsSpectator.Writers
                 if (cv.Value.CVRef == @"UNIMOD")
                 {
                     var accStr = cv.Value.Id.Split(':');
-                    int accession;
-                    if (accStr.Length < 2 || int.TryParse(accStr[1], out accession))
+                    if (accStr.Length < 2 || int.TryParse(accStr[1], out var accession))
                     {
                         continue;
                     }
 
-                    this.accessionModMap.Add(accession, cv.Value);
+                    accessionModMap.Add(accession, cv.Value);
                 }
             }
         }

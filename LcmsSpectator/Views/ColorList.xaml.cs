@@ -11,7 +11,7 @@
 namespace LcmsSpectator.Views
 {
     using System.Windows.Controls;
-    
+
     /// <summary>
     /// Interaction logic for ColorList.xaml
     /// </summary>
@@ -22,12 +22,13 @@ namespace LcmsSpectator.Views
         /// </summary>
         public ColorList()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
-            this.SelectPaletteButton.Click += (o, e) =>
-                {
-                    this.SelectPaletteButton.ContextMenu.IsOpen = true;
-                };
+            SelectPaletteButton.Click += (o, e) =>
+            {
+                if (SelectPaletteButton.ContextMenu != null)
+                    SelectPaletteButton.ContextMenu.IsOpen = true;
+            };
         }
     }
 }

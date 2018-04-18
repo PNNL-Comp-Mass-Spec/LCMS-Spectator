@@ -23,49 +23,49 @@ namespace LcmsSpectator.Views.Plots
         /// </summary>
         public XicView()
         {
-            this.InitializeComponent();
-            this.FragmentIonXic.Loaded += (o, e) => { this.FragmentIonXic.ContextMenu.DataContext = this.FragmentIonXic.DataContext; };
-            this.HeavyFragmentIonXic.Loaded += (o, e) => { this.HeavyFragmentIonXic.ContextMenu.DataContext = this.HeavyFragmentIonXic.DataContext; };
-            this.PrecursorIonXic.Loaded += (o, e) => { this.PrecursorIonXic.ContextMenu.DataContext = this.PrecursorIonXic.DataContext; };
-            this.HeavyPrecursorIonXic.Loaded += (o, e) => { this.HeavyPrecursorIonXic.ContextMenu.DataContext = this.HeavyPrecursorIonXic.DataContext; };
-            if (this.ShowHeavy.IsChecked == true)
+            InitializeComponent();
+            FragmentIonXic.Loaded += (o, e) => { FragmentIonXic.ContextMenu.DataContext = FragmentIonXic.DataContext; };
+            HeavyFragmentIonXic.Loaded += (o, e) => { HeavyFragmentIonXic.ContextMenu.DataContext = HeavyFragmentIonXic.DataContext; };
+            PrecursorIonXic.Loaded += (o, e) => { PrecursorIonXic.ContextMenu.DataContext = PrecursorIonXic.DataContext; };
+            HeavyPrecursorIonXic.Loaded += (o, e) => { HeavyPrecursorIonXic.ContextMenu.DataContext = HeavyPrecursorIonXic.DataContext; };
+            if (ShowHeavy.IsChecked == true)
             {
-                this.LightColumn.Width = new GridLength(50, GridUnitType.Star);
-                this.HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
-                this.LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
-                if (this.ShowFragment.IsChecked == true)
+                LightColumn.Width = new GridLength(50, GridUnitType.Star);
+                HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
+                LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
+                if (ShowFragment.IsChecked == true)
                 {
-                    this.FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
-                    this.FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
+                    FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                    FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
                 }
             }
             else
             {
-                this.LightColumn.Width = new GridLength(100, GridUnitType.Star);
-                this.HeavyColumn.Width = new GridLength(0, GridUnitType.Star);
-                this.FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
-                this.LinkColumn.Width = new GridLength(0, GridUnitType.Pixel);
+                LightColumn.Width = new GridLength(100, GridUnitType.Star);
+                HeavyColumn.Width = new GridLength(0, GridUnitType.Star);
+                FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
+                LinkColumn.Width = new GridLength(0, GridUnitType.Pixel);
             }
 
-            if (this.ShowFragment.IsChecked == true)
+            if (ShowFragment.IsChecked == true)
             {
-                this.FragmentPlotRow.Height = new GridLength(60, GridUnitType.Star);
-                this.FragmentTitleRow.Height = new GridLength(4, GridUnitType.Star);
-                this.PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
-                this.FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
-                if (this.ShowHeavy.IsChecked == true)
+                FragmentPlotRow.Height = new GridLength(60, GridUnitType.Star);
+                FragmentTitleRow.Height = new GridLength(4, GridUnitType.Star);
+                PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
+                FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
+                if (ShowHeavy.IsChecked == true)
                 {
-                    this.FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
-                    this.LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
+                    FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                    LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
                 }
             }
             else
             {
-                this.FragmentPlotRow.Height = new GridLength(0, GridUnitType.Pixel);
-                this.FragmentTitleRow.Height = new GridLength(0, GridUnitType.Pixel);
-                this.PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
-                this.FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
-                this.FragmentLinkRow.Height = new GridLength(0, GridUnitType.Pixel);
+                FragmentPlotRow.Height = new GridLength(0, GridUnitType.Pixel);
+                FragmentTitleRow.Height = new GridLength(0, GridUnitType.Pixel);
+                PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
+                FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
+                FragmentLinkRow.Height = new GridLength(0, GridUnitType.Pixel);
             }
         }
 
@@ -77,18 +77,18 @@ namespace LcmsSpectator.Views.Plots
         /// <param name="e">The e.</param>
         private void ShowFragment_OnChecked(object sender, RoutedEventArgs e)
         {
-            this.FragmentPlotRow.Height = new GridLength(60, GridUnitType.Star);
-            this.FragmentTitleRow.Height = new GridLength(4, GridUnitType.Star);
-            this.FragmentIonXic.Visibility = Visibility.Visible;
-            this.FragmentIonXic.UpdateLayout();
-            this.PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
-            this.FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
-            if (this.ShowHeavy.IsChecked == true)
+            FragmentPlotRow.Height = new GridLength(60, GridUnitType.Star);
+            FragmentTitleRow.Height = new GridLength(4, GridUnitType.Star);
+            FragmentIonXic.Visibility = Visibility.Visible;
+            FragmentIonXic.UpdateLayout();
+            PrecursorPlotRow.Height = new GridLength(40, GridUnitType.Star);
+            FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
+            if (ShowHeavy.IsChecked == true)
             {
-                this.HeavyFragmentIonXic.Visibility = Visibility.Visible;
-                this.FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
-                this.HeavyFragmentIonXic.UpdateLayout();
-                this.LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
+                HeavyFragmentIonXic.Visibility = Visibility.Visible;
+                FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                HeavyFragmentIonXic.UpdateLayout();
+                LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
             }
         }
 
@@ -100,15 +100,15 @@ namespace LcmsSpectator.Views.Plots
         /// <param name="e">The e.</param>
         private void ShowFragment_OnUnChecked(object sender, RoutedEventArgs e)
         {
-            this.FragmentPlotRow.Height = new GridLength(0, GridUnitType.Pixel);
-            this.FragmentTitleRow.Height = new GridLength(0, GridUnitType.Pixel);
-            this.PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
-            this.FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
-            this.FragmentLinkRow.Height = new GridLength(0, GridUnitType.Pixel);
-            this.FragmentIonXic.Visibility = Visibility.Collapsed;
-            this.FragmentIonXic.UpdateLayout();
-            this.HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
-            this.HeavyFragmentIonXic.UpdateLayout();
+            FragmentPlotRow.Height = new GridLength(0, GridUnitType.Pixel);
+            FragmentTitleRow.Height = new GridLength(0, GridUnitType.Pixel);
+            PrecursorPlotRow.Height = new GridLength(100, GridUnitType.Star);
+            FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
+            FragmentLinkRow.Height = new GridLength(0, GridUnitType.Pixel);
+            FragmentIonXic.Visibility = Visibility.Collapsed;
+            FragmentIonXic.UpdateLayout();
+            HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
+            HeavyFragmentIonXic.UpdateLayout();
         }
 
         /// <summary>
@@ -119,17 +119,17 @@ namespace LcmsSpectator.Views.Plots
         /// <param name="e">The e.</param>
         private void ShowHeavy_OnChecked(object sender, RoutedEventArgs e)
         {
-            this.LightColumn.Width = new GridLength(50, GridUnitType.Star);
-            this.HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
-            this.PrecursorIonXic.Visibility = Visibility.Visible;
-            this.PrecursorIonXic.UpdateLayout();
-            this.LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
-            if (this.ShowFragment.IsChecked == true)
+            LightColumn.Width = new GridLength(50, GridUnitType.Star);
+            HeavyColumn.Width = new GridLength(50, GridUnitType.Star);
+            PrecursorIonXic.Visibility = Visibility.Visible;
+            PrecursorIonXic.UpdateLayout();
+            LinkColumn.Width = new GridLength(30, GridUnitType.Pixel);
+            if (ShowFragment.IsChecked == true)
             {
-                this.HeavyFragmentIonXic.Visibility = Visibility.Visible;
-                this.HeavyFragmentIonXic.UpdateLayout();
-                this.FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
-                this.FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
+                HeavyFragmentIonXic.Visibility = Visibility.Visible;
+                HeavyFragmentIonXic.UpdateLayout();
+                FragmentAreaRow.Height = new GridLength(20, GridUnitType.Pixel);
+                FragmentLinkRow.Height = new GridLength(30, GridUnitType.Pixel);
             }
         }
 
@@ -141,13 +141,13 @@ namespace LcmsSpectator.Views.Plots
         /// <param name="e">The e.</param>
         private void ShowHeavy_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            this.LightColumn.Width = new GridLength(100, GridUnitType.Star);
-            this.HeavyColumn.Width = new GridLength(0, GridUnitType.Star);
-            this.FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
+            LightColumn.Width = new GridLength(100, GridUnitType.Star);
+            HeavyColumn.Width = new GridLength(0, GridUnitType.Star);
+            FragmentAreaRow.Height = new GridLength(0, GridUnitType.Pixel);
 
-            this.HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
-            this.HeavyFragmentIonXic.UpdateLayout();
-            this.LinkColumn.Width = new GridLength(0, GridUnitType.Pixel);
+            HeavyFragmentIonXic.Visibility = Visibility.Collapsed;
+            HeavyFragmentIonXic.UpdateLayout();
+            LinkColumn.Width = new GridLength(0, GridUnitType.Pixel);
         }
     }
 }

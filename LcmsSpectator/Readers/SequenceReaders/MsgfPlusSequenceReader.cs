@@ -16,7 +16,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
     using System.Linq;
     using System.Text.RegularExpressions;
     using InformedProteomics.Backend.Data.Sequence;
-    using LcmsSpectator.Config;
+    using Config;
 
     /// <summary>
     /// Reader for protein/peptide sequences in the MS-GF+ style.
@@ -59,7 +59,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
         /// <returns>The parsed sequence.</returns>
         public Sequence Read(string msgfPlusPeptideStr)
         {
-            if (this.trimAnnotations)
+            if (trimAnnotations)
             {
                 var firstIndex = msgfPlusPeptideStr.IndexOf('.');
                 if (firstIndex >= 0)

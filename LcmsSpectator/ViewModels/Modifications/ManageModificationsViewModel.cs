@@ -17,8 +17,8 @@ namespace LcmsSpectator.ViewModels.Modifications
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
+    using Config;
+    using DialogServices;
 
     using ReactiveUI;
 
@@ -44,48 +44,48 @@ namespace LcmsSpectator.ViewModels.Modifications
         public ManageModificationsViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.Modifications = new ReactiveList<Modification>();
+            Modifications = new ReactiveList<Modification>();
 
             var addCommand = ReactiveCommand.Create();
-            addCommand.Subscribe(_ => this.AddImplementation());
-            this.AddCommand = addCommand;
+            addCommand.Subscribe(_ => AddImplementation());
+            AddCommand = addCommand;
 
             var editCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedModification).Select(m => m != null));
-            editCommand.Subscribe(_ => this.EditImplementation());
-            this.EditCommand = editCommand;
+            editCommand.Subscribe(_ => EditImplementation());
+            EditCommand = editCommand;
 
             var removeCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedModification).Select(m => m != null));
-            removeCommand.Subscribe(_ => this.RemoveImplementation());
-            this.RemoveCommand = removeCommand;
+            removeCommand.Subscribe(_ => RemoveImplementation());
+            RemoveCommand = removeCommand;
         }
 
         /// <summary>
         /// Gets a command that adds a new modification to the modification list.
         /// </summary>
-        public IReactiveCommand AddCommand { get; private set; }
+        public IReactiveCommand AddCommand { get; }
 
         /// <summary>
         /// Gets a command for editing the selected modification.
         /// </summary>
-        public IReactiveCommand EditCommand { get; private set; }
+        public IReactiveCommand EditCommand { get; }
 
         /// <summary>
         /// Gets a command that removes the selected modification from the modification list.
         /// </summary>
-        public IReactiveCommand RemoveCommand { get; private set; }
+        public IReactiveCommand RemoveCommand { get; }
 
         /// <summary>
         /// Gets the list of modifications.
         /// </summary>
-        public ReactiveList<Modification> Modifications { get; private set; }
+        public ReactiveList<Modification> Modifications { get; }
 
         /// <summary>
         /// Gets or sets the modification selected from the list of modifications.
         /// </summary>
         public Modification SelectedModification
         {
-            get { return this.selectedModification; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedModification, value); }
+            get => selectedModification;
+            set => this.RaiseAndSetIfChanged(ref selectedModification, value);
         }
 
         /// <summary>
@@ -94,8 +94,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         private void AddImplementation()
         {
-            var customModVm = new CustomModificationViewModel(string.Empty, false, this.dialogService);
-            if (this.dialogService.OpenCustomModification(customModVm))
+            var customModVm = new CustomModificationViewModel(string.Empty, false, dialogService);
+            if (dialogService.OpenCustomModification(customModVm))
             {
                 Modification modification = null;
                 if (customModVm.FromFormulaChecked)
@@ -113,7 +113,7 @@ namespace LcmsSpectator.ViewModels.Modifications
 
                 if (modification != null)
                 {
-                    this.Modifications.Add(modification);
+                    Modifications.Add(modification);
                 }
             }
         }
@@ -124,27 +124,27 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         private void EditImplementation()
         {
-            if (this.SelectedModification == null)
+            if (SelectedModification == null)
             {
                 return;
             }
 
             // Set the composition or mass for the modification editor
-            var customModVm = new CustomModificationViewModel(this.SelectedModification.Name, true, this.dialogService);
-            if (this.SelectedModification.Composition is CompositionWithDeltaMass)
+            var customModVm = new CustomModificationViewModel(SelectedModification.Name, true, dialogService);
+            if (SelectedModification.Composition is CompositionWithDeltaMass)
             {   // Modification with mass shift
                 customModVm.FromFormulaChecked = false;
                 customModVm.FromMassChecked = true;
-                customModVm.Mass = this.SelectedModification.Mass;
+                customModVm.Mass = SelectedModification.Mass;
             }
             else
             {   // Modification with formula
                 customModVm.FromMassChecked = false;
                 customModVm.FromFormulaChecked = true;
-                customModVm.Composition = this.SelectedModification.Composition;
+                customModVm.Composition = SelectedModification.Composition;
             }
 
-            if (this.dialogService.OpenCustomModification(customModVm))
+            if (dialogService.OpenCustomModification(customModVm))
             {
                 Modification modification = null;
                 if (customModVm.FromFormulaChecked)
@@ -163,12 +163,12 @@ namespace LcmsSpectator.ViewModels.Modifications
                 if (modification != null)
                 {
                     // Replace old modification in the list
-                    for (int i = 0; i < this.Modifications.Count; i++)
+                    for (var i = 0; i < Modifications.Count; i++)
                     {
-                        if (modification.Name == this.Modifications[i].Name)
+                        if (modification.Name == Modifications[i].Name)
                         {
-                            this.Modifications[i] = modification;
-                            this.SelectedModification = modification;
+                            Modifications[i] = modification;
+                            SelectedModification = modification;
                         }
                     }
                 }
@@ -181,16 +181,16 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         private void RemoveImplementation()
         {
-            if (this.Modifications.Contains(this.SelectedModification) &&
-                this.dialogService.ConfirmationBox(
+            if (Modifications.Contains(SelectedModification) &&
+                dialogService.ConfirmationBox(
                                     string.Format(
                                         "Are you sure you would like to delete {0}?",
-                                        this.SelectedModification.Name),
+                                        SelectedModification.Name),
                                         "Delete Modification"))
             {
-                IcParameters.Instance.UnregisterModification(this.SelectedModification);
-                this.Modifications.Remove(this.SelectedModification);
-                this.SelectedModification = this.Modifications.FirstOrDefault();
+                IcParameters.Instance.UnregisterModification(SelectedModification);
+                Modifications.Remove(SelectedModification);
+                SelectedModification = Modifications.FirstOrDefault();
             }
         }
     }

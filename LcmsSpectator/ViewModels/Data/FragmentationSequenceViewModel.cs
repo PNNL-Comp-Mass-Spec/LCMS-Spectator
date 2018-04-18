@@ -9,9 +9,9 @@
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Utils;
+    using Config;
+    using Models;
+    using Utils;
     using ReactiveUI;
 
     public class FragmentationSequenceViewModel : ReactiveObject, IFragmentationSequenceViewModel
@@ -46,7 +46,7 @@
         /// </summary>
         public FragmentationSequenceViewModel()
         {
-            this.FragmentationSequence = new FragmentationSequence(
+            FragmentationSequence = new FragmentationSequence(
                 new Sequence(new List<AminoAcid>()),
                 1,
                 null,
@@ -60,75 +60,75 @@
                         IsSelected = bit == BaseIonType.B || bit == BaseIonType.Y
                     });
 
-            this.BaseIonTypes = new ReactiveList<BaseIonTypeViewModel>(baseIonTypes) { ChangeTrackingEnabled = true };
+            BaseIonTypes = new ReactiveList<BaseIonTypeViewModel>(baseIonTypes) { ChangeTrackingEnabled = true };
 
-            this.NeutralLosses = new ReactiveList<NeutralLossViewModel>
+            NeutralLosses = new ReactiveList<NeutralLossViewModel>
             {
                 new NeutralLossViewModel { NeutralLoss = NeutralLoss.NoLoss, IsSelected = true },
                 new NeutralLossViewModel { NeutralLoss = NeutralLoss.H2O },
                 new NeutralLossViewModel { NeutralLoss = NeutralLoss.NH3 }
             };
 
-            this.NeutralLosses.ChangeTrackingEnabled = true;
+            NeutralLosses.ChangeTrackingEnabled = true;
 
-            this.HeavyModifications = new SearchModification[0];
-            this.LabeledIonViewModels = new LabeledIonViewModel[0];
-            this.SelectedIonTypes = new IonType[0];
+            HeavyModifications = new SearchModification[0];
+            LabeledIonViewModels = new LabeledIonViewModel[0];
+            SelectedIonTypes = new IonType[0];
 
-            this.AddPrecursorIons = true;
+            AddPrecursorIons = true;
 
             // HideAllIonsCommand deselects all ion types and neutral losses.
             var hideAllIonsCommand = ReactiveCommand.Create();
             hideAllIonsCommand.Subscribe(_ =>
             {
-                this.AddPrecursorIons = false;
-                foreach (var baseIonType in this.BaseIonTypes)
+                AddPrecursorIons = false;
+                foreach (var baseIonType in BaseIonTypes)
                 {
                     baseIonType.IsSelected = false;
                 }
 
-                foreach (var neutralLoss in this.NeutralLosses)
+                foreach (var neutralLoss in NeutralLosses)
                 {
                     neutralLoss.IsSelected = neutralLoss.NeutralLoss == NeutralLoss.NoLoss && neutralLoss.IsSelected;
                 }
             });
-            this.HideAllIonsCommand = hideAllIonsCommand;
+            HideAllIonsCommand = hideAllIonsCommand;
 
             // When Base Ion Types are selected/deselected, update ion types.
-            this.BaseIonTypes.ItemChanged.Where(x => x.PropertyName == "IsSelected")
-                .Select(_ => this.GetIonTypes())
-                .Subscribe(ionTypes => this.SelectedIonTypes = ionTypes);
+            BaseIonTypes.ItemChanged.Where(x => x.PropertyName == "IsSelected")
+                .Select(_ => GetIonTypes())
+                .Subscribe(ionTypes => SelectedIonTypes = ionTypes);
 
             // When Neutral Losses are selected/deselected, update ion types
-            this.NeutralLosses.ItemChanged.Where(x => x.PropertyName == "IsSelected")
-                .Select(_ => this.GetIonTypes())
-                .Subscribe(ionTypes => this.SelectedIonTypes = ionTypes);
+            NeutralLosses.ItemChanged.Where(x => x.PropertyName == "IsSelected")
+                .Select(_ => GetIonTypes())
+                .Subscribe(ionTypes => SelectedIonTypes = ionTypes);
 
             // When FragmentationSequence is set, select IonTypes for ActivationMethod.
             this.WhenAnyValue(x => x.FragmentationSequence)
                 .Where(fragSeq => fragSeq != null)
-                .Subscribe(fragSeq => this.SetActivationMethod(fragSeq.ActivationMethod));
+                .Subscribe(fragSeq => SetActivationMethod(fragSeq.ActivationMethod));
 
             // When fragmentation sequence changes, update labeled ions
             this.WhenAnyValue(x => x.FragmentationSequence, x => x.SelectedIonTypes, x => x.HeavyModifications, x => x.AddPrecursorIons)
-                .SelectMany(async _ => await this.GetLabeledIonViewModels())
-                .Subscribe(livms => this.LabeledIonViewModels = livms);
+                .SelectMany(async _ => await GetLabeledIonViewModels())
+                .Subscribe(livms => LabeledIonViewModels = livms);
 
-            this.SelectAllIonsCommand = ReactiveCommand.Create();
-            this.SelectAllIonsCommand.Subscribe(_ =>
+            SelectAllIonsCommand = ReactiveCommand.Create();
+            SelectAllIonsCommand.Subscribe(_ =>
             {
-                foreach (var ion in this.BaseIonTypes)
+                foreach (var ion in BaseIonTypes)
                 {
                     ion.IsSelected = true;
                 }
 
-                this.AddPrecursorIons = true;
+                AddPrecursorIons = true;
             });
 
             IcParameters.Instance.WhenAnyValue(x => x.CidHcdIonTypes, x => x.EtdIonTypes)
                                  .Throttle(TimeSpan.FromMilliseconds(50), RxApp.TaskpoolScheduler)
-                                 .Where(_ => this.FragmentationSequence != null)
-                                 .Subscribe(_ => this.SetActivationMethod(this.FragmentationSequence.ActivationMethod));
+                                 .Where(_ => FragmentationSequence != null)
+                                 .Subscribe(_ => SetActivationMethod(FragmentationSequence.ActivationMethod));
         }
 
         /// <summary>
@@ -136,37 +136,37 @@
         /// </summary>
         public FragmentationSequence FragmentationSequence
         {
-            get { return this.fragmentationSequence; }
-            set { this.RaiseAndSetIfChanged(ref this.fragmentationSequence, value); }
+            get => fragmentationSequence;
+            set => this.RaiseAndSetIfChanged(ref fragmentationSequence, value);
         }
 
         /// <summary>
         /// Gets a command that deselects all ion types.
         /// </summary>
-        public IReactiveCommand HideAllIonsCommand { get; private set; }
+        public IReactiveCommand HideAllIonsCommand { get; }
 
         /// <summary>
         /// Gets a command that selects all ion types.
         /// </summary>
-        public ReactiveCommand<object> SelectAllIonsCommand { get; private set; }
+        public ReactiveCommand<object> SelectAllIonsCommand { get; }
 
         /// <summary>
         /// Gets the list of possible base ion types.
         /// </summary>
-        public ReactiveList<BaseIonTypeViewModel> BaseIonTypes { get; private set; }
+        public ReactiveList<BaseIonTypeViewModel> BaseIonTypes { get; }
         
         /// <summary>
         /// Gets the list of possible neutral losses.
         /// </summary>
-        public ReactiveList<NeutralLossViewModel> NeutralLosses { get; private set; }
+        public ReactiveList<NeutralLossViewModel> NeutralLosses { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to add precursor ions to labeled ion lists.
         /// </summary>
         public bool AddPrecursorIons
         {
-            get { return this.addPrecursorIons; }
-            set { this.RaiseAndSetIfChanged(ref this.addPrecursorIons, value); }
+            get => addPrecursorIons;
+            set => this.RaiseAndSetIfChanged(ref addPrecursorIons, value);
         }
 
         /// <summary>
@@ -174,8 +174,8 @@
         /// </summary>
         public SearchModification[] HeavyModifications
         {
-            get { return this.heavyModifications; }
-            set { this.RaiseAndSetIfChanged(ref this.heavyModifications, value); }
+            get => heavyModifications;
+            set => this.RaiseAndSetIfChanged(ref heavyModifications, value);
         }
 
         /// <summary>
@@ -183,8 +183,8 @@
         /// </summary>
         public LabeledIonViewModel[] LabeledIonViewModels
         {
-            get { return this.labeledIonViewModels; }
-            private set { this.RaiseAndSetIfChanged(ref this.labeledIonViewModels, value); }
+            get => labeledIonViewModels;
+            private set => this.RaiseAndSetIfChanged(ref labeledIonViewModels, value);
         }
 
         /// <summary>
@@ -192,8 +192,8 @@
         /// </summary>
         public IonType[] SelectedIonTypes
         {
-            get { return this.selectedIonTypes; }
-            private set { this.RaiseAndSetIfChanged(ref this.selectedIonTypes, value); }
+            get => selectedIonTypes;
+            private set => this.RaiseAndSetIfChanged(ref selectedIonTypes, value);
         }
 
         /// <summary>
@@ -202,18 +202,18 @@
         /// <returns>Task that returns the labeled ion view models for the sequence.</returns>
         private async Task<LabeledIonViewModel[]> GetLabeledIonViewModels()
         {
-            var ionTypes = this.SelectedIonTypes;
-            if (this.SelectedIonTypes == null || this.SelectedIonTypes.Length == 0)
+            var ionTypes = SelectedIonTypes;
+            if (SelectedIonTypes == null || SelectedIonTypes.Length == 0)
             {
-                ionTypes = this.GetIonTypes();
+                ionTypes = GetIonTypes();
             }
 
             var fragmentIons =
-                await this.fragmentationSequence.GetFragmentLabelsAsync(ionTypes, this.HeavyModifications);
+                await fragmentationSequence.GetFragmentLabelsAsync(ionTypes, HeavyModifications);
 
-            if (this.AddPrecursorIons)
+            if (AddPrecursorIons)
             {
-                var precursorIons = await this.FragmentationSequence.GetChargePrecursorLabelsAsync(this.HeavyModifications);
+                var precursorIons = await FragmentationSequence.GetChargePrecursorLabelsAsync(HeavyModifications);
                 fragmentIons.AddRange(precursorIons);   
             }
 
@@ -235,7 +235,7 @@
                                            ? IcParameters.Instance.EtdIonTypes
                                            : IcParameters.Instance.CidHcdIonTypes;
 
-            foreach (var baseIonType in this.BaseIonTypes)
+            foreach (var baseIonType in BaseIonTypes)
             {
                 baseIonType.IsSelected = selectedBaseIonTypes.Contains(baseIonType.BaseIonType);
             }
@@ -247,13 +247,13 @@
         /// <returns>Array of IonTypes.</returns>
         private IonType[] GetIonTypes()
         {
-            var charge = Math.Min(this.fragmentationSequence.Charge - 1, 100);
+            var charge = Math.Min(fragmentationSequence.Charge - 1, 100);
             charge = Math.Max(charge, 1);
 
             return IonUtils.GetIonTypes(
                 IcParameters.Instance.IonTypeFactory,
-                this.BaseIonTypes.Where(bit => bit.IsSelected).Select(bit => bit.BaseIonType).ToList(),
-                this.NeutralLosses.Where(nl => nl.IsSelected).Select(nl => nl.NeutralLoss).ToList(),
+                BaseIonTypes.Where(bit => bit.IsSelected).Select(bit => bit.BaseIonType).ToList(),
+                NeutralLosses.Where(nl => nl.IsSelected).Select(nl => nl.NeutralLoss).ToList(),
                 1,
                 charge).ToArray();
         }

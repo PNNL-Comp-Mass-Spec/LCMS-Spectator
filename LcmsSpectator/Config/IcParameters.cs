@@ -66,7 +66,7 @@ namespace LcmsSpectator.Config
         private double ionCorrelationThreshold;
 
         /// <summary>
-        /// The default value to use for the <see cref="SavitzkyGolaySmoother" /> in XIC plot smoothing slider.
+        /// The default value to use for the <see cref="InformedProteomics.Backend.Utils.SavitzkyGolaySmoother" /> in XIC plot smoothing slider.
         /// </summary>
         private int pointsToSmooth;
 
@@ -76,7 +76,7 @@ namespace LcmsSpectator.Config
         private double precursorRelativeIntensityThreshold;
 
         /// <summary>
-        /// A value indicating whether the charge and mass reported by the instrument be stored in the <see cref="PrSm" />s.
+        /// A value indicating whether the charge and mass reported by the instrument be stored in the <see cref="LcmsSpectator.Models.PrSm" />s.
         /// </summary>
         private bool showInstrumentData;
 
@@ -149,49 +149,49 @@ namespace LcmsSpectator.Config
         /// </summary>
         private IcParameters()
         {
-            this.PrecursorTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
-            this.ProductIonTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
-            this.IonCorrelationThreshold = 0.7;
-            this.PointsToSmooth = 9;
-            this.PrecursorRelativeIntensityThreshold = 0.1;
-            this.ShowInstrumentData = false;
+            PrecursorTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
+            ProductIonTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
+            IonCorrelationThreshold = 0.7;
+            PointsToSmooth = 9;
+            PrecursorRelativeIntensityThreshold = 0.1;
+            ShowInstrumentData = false;
             PrecursorViewMode = PrecursorViewMode.Isotopes;
-            this.SearchModifications = new List<SearchModification>
+            SearchModifications = new List<SearchModification>
             {
                 new SearchModification(Modification.Carbamidomethylation, 'C', SequenceLocation.Everywhere, true)
             };
 
-            this.LightModifications = new ReactiveList<SearchModification>();
-            this.HeavyModifications = new ReactiveList<SearchModification>
+            LightModifications = new ReactiveList<SearchModification>();
+            HeavyModifications = new ReactiveList<SearchModification>
             {
                 new SearchModification(Modification.LysToHeavyLys, 'K', SequenceLocation.PeptideCTerm, true),
                 new SearchModification(Modification.ArgToHeavyArg, 'R', SequenceLocation.PeptideCTerm, true)
             };
             IonTypeFactory = new IonTypeFactory(100);
-            this.DeconvolutedIonTypeFactory = IonTypeFactory.GetDeconvolutedIonTypeFactory(
+            DeconvolutedIonTypeFactory = IonTypeFactory.GetDeconvolutedIonTypeFactory(
                                                                                       BaseIonType.AllBaseIonTypes,
                                                                                       NeutralLoss.CommonNeutralLosses);
-            this.AutomaticallySelectIonTypes = true;
-            this.CidHcdIonTypes = new List<BaseIonType> { BaseIonType.B, BaseIonType.Y };
-            this.EtdIonTypes = new List<BaseIonType> { BaseIonType.C, BaseIonType.Z };
+            AutomaticallySelectIonTypes = true;
+            CidHcdIonTypes = new List<BaseIonType> { BaseIonType.B, BaseIonType.Y };
+            EtdIonTypes = new List<BaseIonType> { BaseIonType.C, BaseIonType.Z };
 
-            this.RegisteredModifications = new ReactiveList<Modification>(Modification.CommonModifications)
+            RegisteredModifications = new ReactiveList<Modification>(Modification.CommonModifications)
             {
                 Modification.LysToHeavyLys,
                 Modification.ArgToHeavyArg
             };
 
-            this.ExportImageDpi = 96;
+            ExportImageDpi = 96;
 
-            this.FeatureColors = new[] { OxyColors.Black, OxyColors.Blue, OxyColors.Orange, OxyColors.Red };
-            this.IdColors = new[]
+            FeatureColors = new[] { OxyColors.Black, OxyColors.Blue, OxyColors.Orange, OxyColors.Red };
+            IdColors = new[]
             {
                 OxyColors.LightGreen, OxyColors.LightBlue, OxyColors.Turquoise, OxyColors.Olive,
                 OxyColors.Brown, OxyColors.Cyan, OxyColors.Gray, OxyColors.Pink, OxyColors.LightSeaGreen,
                 OxyColors.Beige
             };
 
-            this.Ms2ScanColor = OxyColors.OliveDrab;
+            Ms2ScanColor = OxyColors.OliveDrab;
         }
 
         /// <summary>
@@ -202,18 +202,15 @@ namespace LcmsSpectator.Config
         /// <summary>
         /// Gets the singleton object instance of the <see cref="IcParameters" /> class.
         /// </summary>
-        public static IcParameters Instance
-        {
-            get { return instance ?? (instance = new IcParameters()); }
-        }
+        public static IcParameters Instance => instance ?? (instance = new IcParameters());
 
         /// <summary>
         /// Gets or sets the Tolerance value used for finding precursor ions in the application.
         /// </summary>
         public Tolerance PrecursorTolerancePpm
         {
-            get { return this.precursorTolerancePpm; }
-            set { this.RaiseAndSetIfChanged(ref this.precursorTolerancePpm, value); }
+            get => precursorTolerancePpm;
+            set => this.RaiseAndSetIfChanged(ref precursorTolerancePpm, value);
         }
 
         /// <summary>
@@ -221,8 +218,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public Tolerance ProductIonTolerancePpm
         {
-            get { return this.productIonTolerance; }
-            set { this.RaiseAndSetIfChanged(ref this.productIonTolerance, value); }
+            get => productIonTolerance;
+            set => this.RaiseAndSetIfChanged(ref productIonTolerance, value);
         }
 
         /// <summary>
@@ -230,17 +227,17 @@ namespace LcmsSpectator.Config
         /// </summary>
         public double IonCorrelationThreshold
         {
-            get { return this.ionCorrelationThreshold; }
-            set { this.RaiseAndSetIfChanged(ref this.ionCorrelationThreshold, value); }
+            get => ionCorrelationThreshold;
+            set => this.RaiseAndSetIfChanged(ref ionCorrelationThreshold, value);
         }
 
         /// <summary>
-        /// Gets or sets the default value to use for the <see cref="SavitzkyGolaySmoother" /> in XIC plot smoothing slider.
+        /// Gets or sets the default value to use for the <see cref="InformedProteomics.Backend.Utils.SavitzkyGolaySmoother" /> in XIC plot smoothing slider.
         /// </summary>
         public int PointsToSmooth
         {
-            get { return this.pointsToSmooth; }
-            set { this.RaiseAndSetIfChanged(ref this.pointsToSmooth, value); }
+            get => pointsToSmooth;
+            set => this.RaiseAndSetIfChanged(ref pointsToSmooth, value);
         }
 
         /// <summary>
@@ -248,17 +245,17 @@ namespace LcmsSpectator.Config
         /// </summary>
         public double PrecursorRelativeIntensityThreshold
         {
-            get { return this.precursorRelativeIntensityThreshold; }
-            set { this.RaiseAndSetIfChanged(ref this.precursorRelativeIntensityThreshold, value); }
+            get => precursorRelativeIntensityThreshold;
+            set => this.RaiseAndSetIfChanged(ref precursorRelativeIntensityThreshold, value);
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the charge and mass reported by the instrument be stored in the <see cref="PrSm" />s.
+        /// Gets or sets a value indicating whether the charge and mass reported by the instrument be stored in the <see cref="LcmsSpectator.Models.PrSm" />s.
         /// </summary>
         public bool ShowInstrumentData
         {
-            get { return this.showInstrumentData; }
-            set { this.RaiseAndSetIfChanged(ref this.showInstrumentData, value); }
+            get => showInstrumentData;
+            set => this.RaiseAndSetIfChanged(ref showInstrumentData, value);
         }
 
         /// <summary>
@@ -266,8 +263,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public PrecursorViewMode PrecursorViewMode
         {
-            get { return this.precursorViewMode; }
-            set { this.RaiseAndSetIfChanged(ref this.precursorViewMode, value); }
+            get => precursorViewMode;
+            set => this.RaiseAndSetIfChanged(ref precursorViewMode, value);
         }
 
         /// <summary>
@@ -275,8 +272,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public List<SearchModification> SearchModifications
         {
-            get { return this.searchModifications; }
-            set { this.RaiseAndSetIfChanged(ref this.searchModifications, value); }
+            get => searchModifications;
+            set => this.RaiseAndSetIfChanged(ref searchModifications, value);
         }
 
         /// <summary>
@@ -284,8 +281,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public ReactiveList<SearchModification> LightModifications
         {
-            get { return this.lightModifications; }
-            set { this.RaiseAndSetIfChanged(ref this.lightModifications, value); }
+            get => lightModifications;
+            set => this.RaiseAndSetIfChanged(ref lightModifications, value);
         }
 
         /// <summary>
@@ -293,8 +290,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public ReactiveList<SearchModification> HeavyModifications
         {
-            get { return this.heavyModifications; }
-            set { this.RaiseAndSetIfChanged(ref this.heavyModifications, value); }
+            get => heavyModifications;
+            set => this.RaiseAndSetIfChanged(ref heavyModifications, value);
         }
 
         /// <summary>
@@ -302,8 +299,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public IonTypeFactory IonTypeFactory
         {
-            get { return this.ionTypeFactory; }
-            private set { this.RaiseAndSetIfChanged(ref this.ionTypeFactory, value); }
+            get => ionTypeFactory;
+            private set => this.RaiseAndSetIfChanged(ref ionTypeFactory, value);
         }
 
         /// <summary>
@@ -311,8 +308,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public IonTypeFactory DeconvolutedIonTypeFactory
         {
-            get { return this.deconvolutedIonTypeFactory; }
-            private set { this.RaiseAndSetIfChanged(ref this.deconvolutedIonTypeFactory, value); }
+            get => deconvolutedIonTypeFactory;
+            private set => this.RaiseAndSetIfChanged(ref deconvolutedIonTypeFactory, value);
         }
 
         /// <summary>
@@ -321,8 +318,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public bool AutomaticallySelectIonTypes
         {
-            get { return this.automaticallySelectIonTypes; }
-            set { this.RaiseAndSetIfChanged(ref this.automaticallySelectIonTypes, value); }
+            get => automaticallySelectIonTypes;
+            set => this.RaiseAndSetIfChanged(ref automaticallySelectIonTypes, value);
         }
 
         /// <summary>
@@ -331,8 +328,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public List<BaseIonType> CidHcdIonTypes
         {
-            get { return this.cidBaseIonTypes; }
-            set { this.RaiseAndSetIfChanged(ref this.cidBaseIonTypes, value); }
+            get => cidBaseIonTypes;
+            set => this.RaiseAndSetIfChanged(ref cidBaseIonTypes, value);
         }
 
         /// <summary>
@@ -341,8 +338,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public List<BaseIonType> EtdIonTypes
         {
-            get { return this.etdIonTypes; }
-            set { this.RaiseAndSetIfChanged(ref this.etdIonTypes, value); }
+            get => etdIonTypes;
+            set => this.RaiseAndSetIfChanged(ref etdIonTypes, value);
         }
 
         /// <summary>
@@ -355,8 +352,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public OxyColor[] FeatureColors
         {
-            get { return this.featureColors; }
-            set { this.RaiseAndSetIfChanged(ref this.featureColors, value); }
+            get => featureColors;
+            set => this.RaiseAndSetIfChanged(ref featureColors, value);
         }
 
         /// <summary>
@@ -364,8 +361,8 @@ namespace LcmsSpectator.Config
         /// </summary>
         public OxyColor[] IdColors
         {
-            get { return this.idColors; }
-            set { this.RaiseAndSetIfChanged(ref this.idColors, value); }
+            get => idColors;
+            set => this.RaiseAndSetIfChanged(ref idColors, value);
         }
 
         /// <summary>
@@ -373,14 +370,14 @@ namespace LcmsSpectator.Config
         /// </summary>
         public OxyColor Ms2ScanColor
         {
-            get { return this.ms2ScanColor; }
-            set { this.RaiseAndSetIfChanged(ref this.ms2ScanColor, value); }
+            get => ms2ScanColor;
+            set => this.RaiseAndSetIfChanged(ref ms2ScanColor, value);
         }
 
         /// <summary>
         /// Gets the modifications that are registered with LCMSSpectator.
         /// </summary>
-        public ReactiveList<Modification> RegisteredModifications { get; private set; }
+        public ReactiveList<Modification> RegisteredModifications { get; }
 
         /// <summary>
         /// Parse a list of base ion type symbols separated by spaces.
@@ -424,10 +421,7 @@ namespace LcmsSpectator.Config
         /// </summary>
         public void Update()
         {
-            if (this.IcParametersUpdated != null)
-            {
-                this.IcParametersUpdated();
-            }
+            IcParametersUpdated?.Invoke();
         }
 
         /// <summary>
@@ -436,12 +430,12 @@ namespace LcmsSpectator.Config
         /// <returns>String containing ion type symbols separated by spaces.</returns>
         public string GetCidHcdIonTypes()
         {
-            if (this.CidHcdIonTypes.Count == BaseIonType.AllBaseIonTypes.Count())
+            if (CidHcdIonTypes.Count == BaseIonType.AllBaseIonTypes.Count())
             {
                 return "*";
             }
 
-            return this.CidHcdIonTypes.Aggregate(string.Empty, (current, ionType) => current + ionType.Symbol + " ");
+            return CidHcdIonTypes.Aggregate(string.Empty, (current, ionType) => current + ionType.Symbol + " ");
         }
 
         /// <summary>
@@ -450,12 +444,12 @@ namespace LcmsSpectator.Config
         /// <returns>String containing ion type symbols separated by spaces.</returns>
         public string GetEtdIonTypes()
         {
-            if (this.EtdIonTypes.Count == BaseIonType.AllBaseIonTypes.Count())
+            if (EtdIonTypes.Count == BaseIonType.AllBaseIonTypes.Count())
             {
                 return "*";
             }
 
-            return this.EtdIonTypes.Aggregate(string.Empty, (current, ionType) => current + ionType.Symbol + " ");
+            return EtdIonTypes.Aggregate(string.Empty, (current, ionType) => current + ionType.Symbol + " ");
         }
 
         /// <summary>
@@ -467,7 +461,7 @@ namespace LcmsSpectator.Config
         public Modification RegisterModification(string modName, Composition composition)
         {
             var mod = Modification.RegisterAndGetModification(modName, composition);
-            this.RegisteredModifications.Add(mod);
+            RegisteredModifications.Add(mod);
             return mod;
         }
 
@@ -480,7 +474,7 @@ namespace LcmsSpectator.Config
         public Modification RegisterModification(string modName, double mass)
         {
             var mod = Modification.RegisterAndGetModification(modName, mass);
-            this.RegisteredModifications.Add(mod);
+            RegisteredModifications.Add(mod);
             return mod;
         }
 
@@ -493,13 +487,13 @@ namespace LcmsSpectator.Config
         public Modification UpdateOrRegisterModification(string modName, Composition composition)
         {
             var mod = Modification.UpdateAndGetModification(modName, composition);
-            var regMod = this.RegisteredModifications.FirstOrDefault(m => m.Name == modName);
+            var regMod = RegisteredModifications.FirstOrDefault(m => m.Name == modName);
             if (regMod != null)
             {
-                this.RegisteredModifications.Remove(regMod);
+                RegisteredModifications.Remove(regMod);
             }
 
-            this.RegisteredModifications.Add(mod);
+            RegisteredModifications.Add(mod);
             return mod;
         }
 
@@ -512,13 +506,13 @@ namespace LcmsSpectator.Config
         public Modification UpdateOrRegisterModification(string modName, double mass)
         {
             var mod = Modification.UpdateAndGetModification(modName, mass);
-            var regMod = this.RegisteredModifications.FirstOrDefault(m => m.Name == modName);
+            var regMod = RegisteredModifications.FirstOrDefault(m => m.Name == modName);
             if (regMod != null)
             {
-                this.RegisteredModifications.Remove(regMod);
+                RegisteredModifications.Remove(regMod);
             }
 
-            this.RegisteredModifications.Add(mod);
+            RegisteredModifications.Add(mod);
             return mod;
         }
 
@@ -529,9 +523,9 @@ namespace LcmsSpectator.Config
         public void UnregisterModification(Modification modification)
         {
             Modification.UnregisterModification(modification);
-            if (this.RegisteredModifications.Contains(modification))
+            if (RegisteredModifications.Contains(modification))
             {
-                this.RegisteredModifications.Remove(modification);
+                RegisteredModifications.Remove(modification);
             }
         }
     }

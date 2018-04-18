@@ -1,47 +1,100 @@
-﻿<UserControl x:Class="LcmsSpectator.Views.PrSmView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:utils="clr-namespace:LcmsSpectator.Utils"
-             mc:Ignorable="d" 
-             d:DesignHeight="200" d:DesignWidth="900">
+﻿<UserControl
+    x:Class="LcmsSpectator.Views.PrSmView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+    d:DesignHeight="200"
+    d:DesignWidth="900"
+    mc:Ignorable="d">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:DoubleToStringConverter x:Key="MassFormatter" />
         <utils:DoubleToStringConverterSci x:Key="ScoreFormatter" />
         <utils:QValueToStringConverter x:Key="QValueFormatter" />
     </UserControl.Resources>
-    <ScrollViewer VerticalAlignment="Top" FontSize="11"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer
+        VerticalAlignment="Top"
+        FontSize="11"
+        HorizontalScrollBarVisibility="Disabled"
+        VerticalScrollBarVisibility="Auto">
         <StackPanel Visibility="{Binding FileOpen, Converter={StaticResource BoolToVis}}">
-            <TextBox Text="{Binding ProteinName}" FontWeight="Bold" FontSize="13"
-                     TextWrapping="Wrap" TextAlignment="Center"
-                     Background="Transparent" BorderThickness="0" IsReadOnly="True"/>
-            <TextBox Text="{Binding ProteinDesc}" FontWeight="Normal"
-                     TextWrapping="Wrap" TextAlignment="Center"
-                     Background="Transparent" BorderThickness="0" IsReadOnly="True"/>
-            <TextBox TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=SequenceText, Mode=OneWay}"
-                     Background="Transparent" BorderThickness="0" IsReadOnly="True" FontWeight="Bold" />
-            <TextBox TextAlignment="Center" TextWrapping="Wrap" Text="{Binding Path=ModificationLocations, Mode=OneWay}"
-                     Background="Transparent" BorderThickness="0" IsReadOnly="True" FontWeight="Normal" Name="ModificationLocationBox" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="Charge: " FontWeight="Bold" />
-                <TextBox Text="{Binding Path=Charge, Mode=OneWay}" Width="75"
-                                 Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap" />
-                <TextBlock Text="Mass: " FontWeight="Bold" />
-                <TextBox Text="{Binding Path=Mass, Converter={StaticResource MassFormatter}, Mode=OneWay}" Width="75"
-                         Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap" />
-                <TextBlock Text="Most Abundant Isotope m/z: " FontWeight="Bold" />
-                <TextBox Text="{Binding Path=PrecursorMz, Converter={StaticResource MassFormatter}, Mode=OneWay}" Width="75"
-                                 Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap" />
-                <TextBlock Text="Score: " FontWeight="Bold" />
-                <TextBox Text="{Binding Path=Score, Converter={StaticResource ScoreFormatter}, Mode=OneWay}" Width="75"
-                                 Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap" />
-                <TextBlock Text="QValue: " FontWeight="Bold" />
-                <TextBox Text="{Binding Path=QValue, Converter={StaticResource QValueFormatter}, Mode=OneWay}" Width="75"
-                                 Background="Transparent" BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap" />
+            <TextBox
+                Background="Transparent"
+                BorderThickness="0"
+                FontSize="13"
+                FontWeight="Bold"
+                IsReadOnly="True"
+                Text="{Binding ProteinName}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <TextBox
+                Background="Transparent"
+                BorderThickness="0"
+                FontWeight="Normal"
+                IsReadOnly="True"
+                Text="{Binding ProteinDesc}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <TextBox
+                Background="Transparent"
+                BorderThickness="0"
+                FontWeight="Bold"
+                IsReadOnly="True"
+                Text="{Binding Path=SequenceText, Mode=OneWay}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <TextBox
+                Name="ModificationLocationBox"
+                Background="Transparent"
+                BorderThickness="0"
+                FontWeight="Normal"
+                IsReadOnly="True"
+                Text="{Binding Path=ModificationLocations, Mode=OneWay}"
+                TextAlignment="Center"
+                TextWrapping="Wrap" />
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <TextBlock FontWeight="Bold" Text="Charge: " />
+                <TextBox
+                    Width="75"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    IsReadOnly="True"
+                    Text="{Binding Path=Charge, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+                <TextBlock FontWeight="Bold" Text="Mass: " />
+                <TextBox
+                    Width="75"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    IsReadOnly="True"
+                    Text="{Binding Path=Mass, Converter={StaticResource MassFormatter}, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+                <TextBlock FontWeight="Bold" Text="Most Abundant Isotope m/z: " />
+                <TextBox
+                    Width="75"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    IsReadOnly="True"
+                    Text="{Binding Path=PrecursorMz, Converter={StaticResource MassFormatter}, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+                <TextBlock FontWeight="Bold" Text="Score: " />
+                <TextBox
+                    Width="75"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    IsReadOnly="True"
+                    Text="{Binding Path=Score, Converter={StaticResource ScoreFormatter}, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+                <TextBlock FontWeight="Bold" Text="QValue: " />
+                <TextBox
+                    Width="75"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    IsReadOnly="True"
+                    Text="{Binding Path=QValue, Converter={StaticResource QValueFormatter}, Mode=OneWay}"
+                    TextWrapping="Wrap" />
             </StackPanel>
         </StackPanel>
     </ScrollViewer>

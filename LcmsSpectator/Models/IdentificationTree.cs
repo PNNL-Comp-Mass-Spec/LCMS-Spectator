@@ -17,7 +17,7 @@ namespace LcmsSpectator.Models
     using System.Threading.Tasks;
 
     using InformedProteomics.Backend.MassSpecData;
-    
+
     /// <summary>
     /// A class containing a hierarchy of Protein-Spectrum-Match identifications.
     /// The hierarchy is: Protein, Proteoform, Charge state, ID
@@ -27,7 +27,7 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// All possible proteins in the list.
         /// </summary>
-        private readonly Dictionary<string, ProteinId> allProteins; 
+        private readonly Dictionary<string, ProteinId> allProteins;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IdentificationTree"/> class.
@@ -35,9 +35,9 @@ namespace LcmsSpectator.Models
         /// <param name="tool">The type of tool used for the identifications.</param>
         public IdentificationTree(ToolType tool = ToolType.Other)
         {
-            this.Tool = tool;
-            this.Proteins = new Dictionary<string, ProteinId>();
-            this.allProteins = new Dictionary<string, ProteinId>();
+            Tool = tool;
+            Proteins = new Dictionary<string, ProteinId>();
+            allProteins = new Dictionary<string, ProteinId>();
         }
 
         /// <summary>
@@ -47,13 +47,13 @@ namespace LcmsSpectator.Models
         /// <param name="tool">The type of tool used for the identifications.</param>
         public IdentificationTree(IEnumerable<PrSm> ids, ToolType tool = ToolType.Other) : this(tool)
         {
-            this.Add(ids);
+            Add(ids);
         }
 
         /// <summary>
         /// Gets a dictionary mapping protein name to protein ID.
         /// </summary>
-        public Dictionary<string, ProteinId> Proteins { get; private set; }
+        public Dictionary<string, ProteinId> Proteins { get; }
 
         /// <summary>
         /// Gets or sets the type of tool used for the identifications.
@@ -63,46 +63,28 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Gets a list of all protein IDs.
         /// </summary>
-        public IEnumerable<ProteinId> ProteinIds
-        {
-            get
-            {
-                return from protein in this.Proteins.Values
-                            where protein.Sequence.Count != 0
-                            select protein;
-            }
-        }
+        public IEnumerable<ProteinId> ProteinIds => from protein in Proteins.Values
+                                                    where protein.Sequence.Count != 0
+                                                    select protein;
 
         /// <summary>
         /// Gets a list of all PRSMs
         /// </summary>
-        public List<PrSm> AllPrSms
-        {
-            get
-            {
-                return (from protein in this.Proteins.Values
-                        from proteoform in protein.Proteoforms.Values
-                        from charge in proteoform.ChargeStates.Values
-                        from prsm in charge.PrSms.Values
-                        select prsm).ToList();
-            }
-        }
+        public List<PrSm> AllPrSms => (from protein in Proteins.Values
+                                       from proteoform in protein.Proteoforms.Values
+                                       from charge in proteoform.ChargeStates.Values
+                                       from prsm in charge.PrSms.Values
+                                       select prsm).ToList();
 
         /// <summary>
         /// Gets a list of PRSMs that have a sequence identified
         /// </summary>
-        public List<PrSm> IdentifiedPrSms
-        {
-            get
-            {
-                return (from protein in this.Proteins.Values
-                        from proteoform in protein.Proteoforms.Values
-                        from charge in proteoform.ChargeStates.Values
-                        from prsm in charge.PrSms.Values
-                        where prsm.Sequence.Count > 0
-                        select prsm).ToList();
-            }
-        }
+        public List<PrSm> IdentifiedPrSms => (from protein in Proteins.Values
+                                              from proteoform in protein.Proteoforms.Values
+                                              from charge in proteoform.ChargeStates.Values
+                                              from prsm in charge.PrSms.Values
+                                              where prsm.Sequence.Count > 0
+                                              select prsm).ToList();
 
         /// <summary>
         /// Add a Protein-Spectrum-Match identification.
@@ -110,20 +92,20 @@ namespace LcmsSpectator.Models
         /// <param name="id">Protein-Spectrum-Math to add</param>
         public void Add(PrSm id)
         {
-            this.RemoveUnidentifiedScan(id);
+            RemoveUnidentifiedScan(id);
 
-            if (!this.allProteins.ContainsKey(id.ProteinName))
+            if (!allProteins.ContainsKey(id.ProteinName))
             {
                 return;
                 ////this.allProteins.Add(id.ProteinName, new ProteinId(id.Sequence, id.ProteinName));
             }
 
-            if (!this.Proteins.ContainsKey(id.ProteinName))
+            if (!Proteins.ContainsKey(id.ProteinName))
             {
-                this.Proteins.Add(id.ProteinName, this.allProteins[id.ProteinName]);
+                Proteins.Add(id.ProteinName, allProteins[id.ProteinName]);
             }
 
-            var protein = this.Proteins[id.ProteinName];
+            var protein = Proteins[id.ProteinName];
             protein.Add(id);
         }
 
@@ -135,7 +117,7 @@ namespace LcmsSpectator.Models
         {
             foreach (var prsm in prsms)
             {
-                this.Add(prsm);
+                Add(prsm);
             }
         }
 
@@ -146,7 +128,7 @@ namespace LcmsSpectator.Models
         /// <returns>The task to build tree.</returns>
         public Task BuildIdTree(IEnumerable<PrSm> prsms)
         {
-            return Task.Run(() => this.Add(prsms));
+            return Task.Run(() => Add(prsms));
         }
 
         /// <summary>
@@ -155,9 +137,9 @@ namespace LcmsSpectator.Models
         /// <param name="fastaEntry">The FASTA entry to add.</param>
         public void AddFastaEntry(FastaEntry fastaEntry)
         {
-            if (!this.allProteins.ContainsKey(fastaEntry.ProteinName))
+            if (!allProteins.ContainsKey(fastaEntry.ProteinName))
             {
-                this.allProteins.Add(fastaEntry.ProteinName, new ProteinId(fastaEntry));
+                allProteins.Add(fastaEntry.ProteinName, new ProteinId(fastaEntry));
             }
         }
 
@@ -169,7 +151,7 @@ namespace LcmsSpectator.Models
         {
             foreach (var entry in fastaEntry)
             {
-                this.AddFastaEntry(entry);
+                AddFastaEntry(entry);
             }
         }
 
@@ -180,7 +162,7 @@ namespace LcmsSpectator.Models
         /// <returns>The task.</returns>
         public Task AddFastaEntriesAsync(IEnumerable<FastaEntry> fastaEntries)
         {
-            return Task.Run(() => this.AddFastaEntries(fastaEntries));
+            return Task.Run(() => AddFastaEntries(fastaEntries));
         }
 
         /// <summary>
@@ -189,7 +171,7 @@ namespace LcmsSpectator.Models
         /// <param name="idTree">IDTree to insert</param>
         public void Add(IdentificationTree idTree)
         {
-            this.Add(idTree.AllPrSms);
+            Add(idTree.AllPrSms);
         }
 
         /// <summary>
@@ -198,9 +180,9 @@ namespace LcmsSpectator.Models
         /// <param name="id">Protein-Spectrum-Match to remove.</param>
         public void Remove(PrSm id)
         {
-            if (this.Proteins.ContainsKey(id.ProteinName))
+            if (Proteins.ContainsKey(id.ProteinName))
             {
-                this.Proteins[id.ProteinName].Remove(id);
+                Proteins[id.ProteinName].Remove(id);
             }
         }
 
@@ -211,7 +193,7 @@ namespace LcmsSpectator.Models
         /// <param name="dataSetName">Name of the data this for the LCMSRun.</param>
         public void SetLcmsRun(ILcMsRun lcms, string dataSetName)
         {
-            foreach (var protein in this.Proteins.Values)
+            foreach (var protein in Proteins.Values)
             {
                 protein.SetLcmsRun(lcms, dataSetName);
             }
@@ -223,12 +205,9 @@ namespace LcmsSpectator.Models
         /// <param name="data">PRSM to remove.</param>
         public void RemoveUnidentifiedScan(PrSm data)
         {
-            ProteinId protein;
-            ProteoformId proteoform;
-            ChargeStateId chargeState;
-            if (this.Proteins.TryGetValue(string.Empty, out protein)
-                && protein.Proteoforms.TryGetValue(string.Empty, out proteoform)
-                && proteoform.ChargeStates.TryGetValue(0, out chargeState))
+            if (Proteins.TryGetValue(string.Empty, out var protein)
+                && protein.Proteoforms.TryGetValue(string.Empty, out var proteoform)
+                && proteoform.ChargeStates.TryGetValue(0, out var chargeState))
             {
                 chargeState.Remove(data);
             }
@@ -239,12 +218,12 @@ namespace LcmsSpectator.Models
         /// </summary>
         public void ClearIds()
         {
-            foreach (var proteinId in this.allProteins)
+            foreach (var proteinId in allProteins)
             {
                 proteinId.Value.ClearIds();
             }
 
-            this.ClearEmptyProteins();
+            ClearEmptyProteins();
         }
 
         /// <summary>
@@ -252,12 +231,12 @@ namespace LcmsSpectator.Models
         /// </summary>
         public void ClearEmptyProteins()
         {
-            this.Proteins.Clear();
-            foreach (var protein in this.allProteins)
+            Proteins.Clear();
+            foreach (var protein in allProteins)
             {
                 if (protein.Value.Proteoforms.Count > 0)
                 {
-                    this.Proteins.Add(protein.Key, protein.Value);
+                    Proteins.Add(protein.Key, protein.Value);
                 }
             }
         }
@@ -269,7 +248,7 @@ namespace LcmsSpectator.Models
         /// <returns>A value indicating whether the IDTree contains the identification.</returns>
         public bool Contains(PrSm id)
         {
-            return this.Proteins.Values.Any(protein => protein.Contains(id));
+            return Proteins.Values.Any(protein => protein.Contains(id));
         }
 
         /// <summary>
@@ -279,7 +258,7 @@ namespace LcmsSpectator.Models
         public PrSm GetHighestScoringPrSm()
         {
             PrSm highest = null;
-            foreach (var protein in this.Proteins.Values)
+            foreach (var protein in Proteins.Values)
             {
                 var highestProtein = protein.GetHighestScoringPrSm();
                 if (highest == null || highestProtein.CompareTo(highest) >= 0)
@@ -299,9 +278,9 @@ namespace LcmsSpectator.Models
         public ProteinId GetProtein(PrSm id)
         {
             ProteinId protein = null;
-            if (this.Proteins.ContainsKey(id.ProteinName))
+            if (Proteins.ContainsKey(id.ProteinName))
             {
-                protein = this.Proteins[id.ProteinName];
+                protein = Proteins[id.ProteinName];
             }
 
             return protein;
@@ -314,7 +293,7 @@ namespace LcmsSpectator.Models
         /// <returns>The proteoform ID found.</returns>
         public ProteoformId GetProteoform(PrSm id)
         {
-            var protein = this.GetProtein(id);
+            var protein = GetProtein(id);
             if (protein == null)
             {
                 return null;
@@ -336,7 +315,7 @@ namespace LcmsSpectator.Models
         /// <returns>The charge state ID found.</returns>
         public ChargeStateId GetChargeState(PrSm id)
         {
-            var proteoform = this.GetProteoform(id);
+            var proteoform = GetProteoform(id);
             if (proteoform == null)
             {
                 return null;
@@ -358,7 +337,7 @@ namespace LcmsSpectator.Models
         /// <returns>PRSM found in tree with parameters specified by data</returns>
         public PrSm GetPrSm(PrSm id)
         {
-            var chargeState = this.GetChargeState(id);
+            var chargeState = GetChargeState(id);
             if (chargeState == null)
             {
                 return null;

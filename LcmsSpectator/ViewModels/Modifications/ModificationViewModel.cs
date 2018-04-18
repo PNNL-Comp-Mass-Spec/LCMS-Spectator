@@ -35,7 +35,7 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <param name="modification">The modification that this view model represents.</param>
         public ModificationViewModel(Modification modification)
         {
-            this.Modification = modification;
+            Modification = modification;
         }
 
         /// <summary>
@@ -43,8 +43,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public Modification Modification
         {
-            get { return this.modification; }
-            set { this.RaiseAndSetIfChanged(ref this.modification, value); }
+            get => modification;
+            set => this.RaiseAndSetIfChanged(ref modification, value);
         }
 
         /// <summary>
@@ -52,8 +52,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public bool Selected
         {
-            get { return this.selected; }
-            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
+            get => selected;
+            set => this.RaiseAndSetIfChanged(ref selected, value);
         }
     }
 }

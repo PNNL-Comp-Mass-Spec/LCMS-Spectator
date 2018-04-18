@@ -1,14 +1,10 @@
 ﻿namespace LcmsSpectator.ViewModels.Data
 {
-    using System.Collections.Generic;
-    using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
 
     using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
 
-    using LcmsSpectator.Models;
-    using LcmsSpectator.PlotModels.ColorDicionaries;
+    using Models;
 
     public interface IFragmentationSequenceViewModel
     {

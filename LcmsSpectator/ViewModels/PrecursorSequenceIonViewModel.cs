@@ -8,9 +8,9 @@
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.ViewModels.Data;
+    using Config;
+    using Models;
+    using Data;
 
     using ReactiveUI;
 
@@ -56,29 +56,29 @@
         /// </summary>
         public PrecursorSequenceIonViewModel()
         {
-            this.FragmentationSequence = new FragmentationSequence(
+            FragmentationSequence = new FragmentationSequence(
                     new Sequence(new List<AminoAcid>()),
                     1,
                     null,
                     ActivationMethod.HCD);
-            this.HeavyModifications = new SearchModification[0];
-            this.PrecursorViewMode = PrecursorViewMode.Isotopes;
-            this.LabeledIonViewModels = new LabeledIonViewModel[0];
+            HeavyModifications = new SearchModification[0];
+            PrecursorViewMode = PrecursorViewMode.Isotopes;
+            LabeledIonViewModels = new LabeledIonViewModel[0];
 
-            this.WhenAnyValue(x => x.ChargeViewMode).Subscribe(chargeViewMode => this.IsotopeViewMode = !chargeViewMode);
-            this.WhenAnyValue(x => x.IsotopeViewMode).Subscribe(isotopeViewMode => this.ChargeViewMode = !isotopeViewMode);
+            this.WhenAnyValue(x => x.ChargeViewMode).Subscribe(chargeViewMode => IsotopeViewMode = !chargeViewMode);
+            this.WhenAnyValue(x => x.IsotopeViewMode).Subscribe(isotopeViewMode => ChargeViewMode = !isotopeViewMode);
             this.WhenAnyValue(x => x.IsotopeViewMode).Subscribe(isotopeViewMode =>
-                    this.PrecursorViewMode = isotopeViewMode ? PrecursorViewMode.Isotopes : PrecursorViewMode.Charges);
+                    PrecursorViewMode = isotopeViewMode ? PrecursorViewMode.Isotopes : PrecursorViewMode.Charges);
             this.WhenAnyValue(x => x.PrecursorViewMode).Subscribe(
                 viewMode =>
                 {
-                    this.IsotopeViewMode = viewMode == PrecursorViewMode.Isotopes;
-                    this.ChargeViewMode = viewMode == PrecursorViewMode.Charges;
+                    IsotopeViewMode = viewMode == PrecursorViewMode.Isotopes;
+                    ChargeViewMode = viewMode == PrecursorViewMode.Charges;
                 });
 
             this.WhenAnyValue(x => x.PrecursorViewMode, x => x.RelativeIntensityThreshold, x => x.HeavyModifications, x => x.FragmentationSequence)
-                .SelectMany(async _ => await this.GetLabeledIonViewModels())
-                .Subscribe(livms => this.LabeledIonViewModels = livms);
+                .SelectMany(async _ => await GetLabeledIonViewModels())
+                .Subscribe(livms => LabeledIonViewModels = livms);
         }
 
         /// <summary>
@@ -86,8 +86,8 @@
         /// </summary>
         public FragmentationSequence FragmentationSequence
         {
-            get { return this.fragmentationSequence; }
-            set { this.RaiseAndSetIfChanged(ref this.fragmentationSequence, value); }
+            get => fragmentationSequence;
+            set => this.RaiseAndSetIfChanged(ref fragmentationSequence, value);
         }
 
         /// <summary>
@@ -95,8 +95,8 @@
         /// </summary>
         public PrecursorViewMode PrecursorViewMode
         {
-            get { return this.precursorViewMode; }
-            set { this.RaiseAndSetIfChanged(ref this.precursorViewMode, value); }
+            get => precursorViewMode;
+            set => this.RaiseAndSetIfChanged(ref precursorViewMode, value);
         }
 
         /// <summary>
@@ -104,8 +104,8 @@
         /// </summary>
         public double RelativeIntensityThreshold
         {
-            get { return this.relativeIntensityThreshold; }
-            set { this.RaiseAndSetIfChanged(ref this.relativeIntensityThreshold, value); }
+            get => relativeIntensityThreshold;
+            set => this.RaiseAndSetIfChanged(ref relativeIntensityThreshold, value);
         }
 
         /// <summary>
@@ -113,8 +113,8 @@
         /// </summary>
         public SearchModification[] HeavyModifications
         {
-            get { return this.heavyModifications; }
-            set { this.RaiseAndSetIfChanged(ref this.heavyModifications, value); }
+            get => heavyModifications;
+            set => this.RaiseAndSetIfChanged(ref heavyModifications, value);
         }
 
         /// <summary>
@@ -122,8 +122,8 @@
         /// </summary>
         public LabeledIonViewModel[] LabeledIonViewModels
         {
-            get { return this.labeledIonViewModels; }
-            private set { this.RaiseAndSetIfChanged(ref this.labeledIonViewModels, value); }
+            get => labeledIonViewModels;
+            private set => this.RaiseAndSetIfChanged(ref labeledIonViewModels, value);
         }
 
         /// <summary>
@@ -131,8 +131,8 @@
         /// </summary>
         public bool IsotopeViewMode
         {
-            get { return this.isotopeViewMode; }
-            set { this.RaiseAndSetIfChanged(ref this.isotopeViewMode, value); }
+            get => isotopeViewMode;
+            set => this.RaiseAndSetIfChanged(ref isotopeViewMode, value);
         }
 
         /// <summary>
@@ -140,8 +140,8 @@
         /// </summary>
         public bool ChargeViewMode
         {
-            get { return this.chargeViewMode; }
-            set { this.RaiseAndSetIfChanged(ref this.chargeViewMode, value); }
+            get => chargeViewMode;
+            set => this.RaiseAndSetIfChanged(ref chargeViewMode, value);
         }
 
         /// <summary>
@@ -150,16 +150,16 @@
         /// <returns>Task that creates LabeledIonViewModels.</returns>
         private async Task<LabeledIonViewModel[]> GetLabeledIonViewModels()
         {
-            return (this.PrecursorViewMode == PrecursorViewMode.Charges
-                       ? await this.fragmentationSequence.GetChargePrecursorLabelsAsync(this.HeavyModifications)
-                       : await this.fragmentationSequence.GetIsotopePrecursorLabelsAsync(
-                           this.RelativeIntensityThreshold,
-                           this.HeavyModifications)).ToArray();
+            return (PrecursorViewMode == PrecursorViewMode.Charges
+                       ? await fragmentationSequence.GetChargePrecursorLabelsAsync(HeavyModifications)
+                       : await fragmentationSequence.GetIsotopePrecursorLabelsAsync(
+                           RelativeIntensityThreshold,
+                           HeavyModifications)).ToArray();
         }
 
         Task<LabeledIonViewModel[]> IFragmentationSequenceViewModel.GetLabeledIonViewModels()
         {
-            return this.GetLabeledIonViewModels();
+            return GetLabeledIonViewModels();
         }
     }
 }

@@ -47,10 +47,10 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
         /// <param name="numInterpolatedColors">The maximum number of colors for OxyPalette.</param>
         public ProteinColorDictionary(int numInterpolatedColors = 5000)
         {
-            this.colorDictionary = new Dictionary<string, int> { { string.Empty, 0 } };
-            this.protIndex = 1;
-            this.offset = 0;
-            this.multiplier = 2;
+            colorDictionary = new Dictionary<string, int> { { string.Empty, 0 } };
+            protIndex = 1;
+            offset = 0;
+            multiplier = 2;
 
             var colors = new[]
                              {
@@ -59,8 +59,8 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
                                  OxyColors.Beige
                              };
 
-            this.OxyPalette = OxyPalette.Interpolate(numInterpolatedColors, colors);
-            this.MaxColors = colors.Length;
+            OxyPalette = OxyPalette.Interpolate(numInterpolatedColors, colors);
+            MaxColors = colors.Length;
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
         /// <returns>The OxyColor for the given protein.</returns>
         public OxyColor GetColor(string proteinName)
         {
-            return this.OxyPalette.Colors[this.GetColorCode(proteinName)];
+            return OxyPalette.Colors[GetColorCode(proteinName)];
         }
 
         /// <summary>
@@ -90,27 +90,27 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
         /// <returns>The index of the OxyColor from the OxyPalette for the given protein.</returns>
         public int GetColorCode(string proteinName)
         {
-            if (!this.colorDictionary.ContainsKey(proteinName))
+            if (!colorDictionary.ContainsKey(proteinName))
             {
                 int colorIndex;
                 do
                 {   // do not select the same color as unid color.
-                    var r = this.protIndex++ % this.MaxColors;
-                    colorIndex = Math.Min((r * (this.OxyPalette.Colors.Count / this.MaxColors)) + this.offset, this.OxyPalette.Colors.Count - 1);
+                    var r = protIndex++ % MaxColors;
+                    colorIndex = Math.Min((r * (OxyPalette.Colors.Count / MaxColors)) + offset, OxyPalette.Colors.Count - 1);
                 }
                 while (colorIndex == 0);
 
-                this.colorDictionary.Add(proteinName, colorIndex);
+                colorDictionary.Add(proteinName, colorIndex);
 
-                if (this.protIndex >= this.MaxColors)
+                if (protIndex >= MaxColors)
                 {
                     // When we've used up all the primary colors, use the colors midway in between
-                    this.offset = OxyPalette.Colors.Count / Math.Max(this.multiplier * this.MaxColors, 1);
-                    this.multiplier *= 2;
+                    offset = OxyPalette.Colors.Count / Math.Max(multiplier * MaxColors, 1);
+                    multiplier *= 2;
                 }
             }
 
-            return this.colorDictionary[proteinName];
+            return colorDictionary[proteinName];
         }
 
         /// <summary>
@@ -121,13 +121,13 @@ namespace LcmsSpectator.PlotModels.ColorDicionaries
         public void SetColors(IEnumerable<OxyColor> colors, int numInterpolatedColors = 5000)
         {
             var colorArr = colors.ToArray();
-            this.colorDictionary.Clear();
-            this.colorDictionary.Add(string.Empty, 0);
-            this.protIndex = 1;
-            this.offset = 0;
-            this.multiplier = 2;
-            this.OxyPalette = OxyPalette.Interpolate(numInterpolatedColors, colorArr);
-            this.MaxColors = colorArr.Length;
+            colorDictionary.Clear();
+            colorDictionary.Add(string.Empty, 0);
+            protIndex = 1;
+            offset = 0;
+            multiplier = 2;
+            OxyPalette = OxyPalette.Interpolate(numInterpolatedColors, colorArr);
+            MaxColors = colorArr.Length;
         }
     }
 }

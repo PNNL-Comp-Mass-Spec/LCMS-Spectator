@@ -12,7 +12,7 @@ namespace LcmsSpectator.ViewModels.Filters
 {
     using System;
     using System.Collections.Generic;
-    using LcmsSpectator.DialogServices;
+    using DialogServices;
     using ReactiveUI;
 
     /// <summary>
@@ -36,12 +36,12 @@ namespace LcmsSpectator.ViewModels.Filters
         private readonly Validate validator;
 
         /// <summary>
-        /// A value indicating whether this item is selected 
+        /// A value indicating whether this item is selected
         /// </summary>
         private bool selected;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LcmsSpectator.ViewModels.Filters.FilterViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="LcmsSpectator.ViewModels.Filters.FilterViewModel"/> class.
         /// Initializes instance of the Filter
         /// </summary>
         /// <param name="name">The name of the filter.</param>
@@ -67,21 +67,21 @@ namespace LcmsSpectator.ViewModels.Filters
                 values = new ReactiveList<string>();
             }
 
-            this.Name = name;
-            this.Title = title;
-            this.Description = description;
-            this.DefaultValues = values;
+            Name = name;
+            Title = title;
+            Description = description;
+            DefaultValues = values;
             this.filter = filter;
             this.validator = validator;
             var filterCommand = ReactiveCommand.Create();
-            filterCommand.Subscribe(_ => this.FilterImplementation());
-            this.FilterCommand = filterCommand;
+            filterCommand.Subscribe(_ => FilterImplementation());
+            FilterCommand = filterCommand;
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => this.CancelImplementation());
-            this.CancelCommand = cancelCommand;
-            this.Value = defaultValue;
+            cancelCommand.Subscribe(_ => CancelImplementation());
+            CancelCommand = cancelCommand;
+            Value = defaultValue;
             this.dialogService = dialogService;
-            this.Status = false;
+            Status = false;
         }
 
         /// <summary>
@@ -107,31 +107,31 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <summary>
         /// Gets the name of the filter.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the title text of the filter.
         /// </summary>
-        public string Title { get; private set; }
+        public string Title { get; }
 
         /// <summary>
         /// Gets the description text for the filter
         /// </summary>
-        public string Description { get; private set; }
+        public string Description { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this item is selected 
+        /// Gets or sets a value indicating whether this item is selected
         /// </summary>
         public bool Selected
         {
-            get { return this.selected; }
-            set { this.RaiseAndSetIfChanged(ref this.selected, value); }
+            get => selected;
+            set => this.RaiseAndSetIfChanged(ref selected, value);
         }
 
         /// <summary>
         /// Gets the default possible values to filter by.
         /// </summary>
-        public IEnumerable<object> DefaultValues { get; private set; }
+        public IEnumerable<object> DefaultValues { get; }
 
         /// <summary>
         /// Gets or sets the selected value for the filter.
@@ -142,12 +142,12 @@ namespace LcmsSpectator.ViewModels.Filters
         /// Gets a command that sets status to true if a valid filter has been selected
         /// and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand FilterCommand { get; private set; }
+        public IReactiveCommand FilterCommand { get; }
 
         /// <summary>
         /// Gets a command that sets status to false and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid filter has been selected.
@@ -161,7 +161,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <returns>The filtered data.</returns>
         public IEnumerable<object> Filter(IEnumerable<object> data)
         {
-            return this.filter(data, this.Value);
+            return filter(data, Value);
         }
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         public void ResetStatus()
         {
-            this.Status = false;
+            Status = false;
         }
 
         /// <summary>
@@ -179,17 +179,14 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         private void FilterImplementation()
         {
-            if (this.validator(this.Value))
+            if (validator(Value))
             {
-                this.Status = true;
-                if (this.ReadyToClose != null)
-                {
-                    this.ReadyToClose(this, EventArgs.Empty);
-                }
+                Status = true;
+                ReadyToClose?.Invoke(this, EventArgs.Empty);
             }
             else
             {
-                this.dialogService.MessageBox("Invalid filter value.");
+                dialogService.MessageBox("Invalid filter value.");
             }
         }
 
@@ -199,12 +196,9 @@ namespace LcmsSpectator.ViewModels.Filters
         /// </summary>
         private void CancelImplementation()
         {
-            this.Status = false;
-            this.Selected = false;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = false;
+            Selected = false;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
     }
 }

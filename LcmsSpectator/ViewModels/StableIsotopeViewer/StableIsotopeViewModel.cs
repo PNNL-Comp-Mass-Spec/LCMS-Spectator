@@ -11,10 +11,10 @@
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.Utils;
 
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.PlotModels;
-    using LcmsSpectator.ViewModels.Data;
-    using LcmsSpectator.ViewModels.Plots;
+    using DialogServices;
+    using PlotModels;
+    using Data;
+    using Plots;
 
     using ReactiveUI;
 
@@ -75,7 +75,7 @@
 
             // Initialize default values
 
-            this.IsotopeProportions = new Dictionary<string, IsotopeProportionSelectorViewModel>
+            IsotopeProportions = new Dictionary<string, IsotopeProportionSelectorViewModel>
             {
                 { "C", new IsotopeProportionSelectorViewModel(Atom.Get("C"), IsoProfilePredictor.Predictor.ProbC) },
                 { "H", new IsotopeProportionSelectorViewModel(Atom.Get("H"), IsoProfilePredictor.Predictor.ProbH) },
@@ -84,63 +84,63 @@
                 { "S", new IsotopeProportionSelectorViewModel(Atom.Get("S"), IsoProfilePredictor.Predictor.ProbS) }
             };
 
-            this.SelectedElement = this.IsotopeProportions["C"];
+            SelectedElement = IsotopeProportions["C"];
 
-            this.Mass = 0;
-            this.Charge = 1;
+            Mass = 0;
+            Charge = 1;
 
-            this.ToleranceUnits = new ReactiveList<ToleranceUnit> { ToleranceUnit.Ppm, ToleranceUnit.Th };
-            this.ToleranceValue = 10.0;
-            this.ToleranceUnit = ToleranceUnit.Ppm;
+            ToleranceUnits = new ReactiveList<ToleranceUnit> { ToleranceUnit.Ppm, ToleranceUnit.Mz };
+            ToleranceValue = 10.0;
+            ToleranceUnit = ToleranceUnit.Ppm;
 
-            this.RelativeIntensityThreshold = 0.1;
+            RelativeIntensityThreshold = 0.1;
 
-            this.ObservedPeaks = new ReactiveList<ListItemViewModel<PeakDataPoint>> { ChangeTrackingEnabled = true };
-            
+            ObservedPeaks = new ReactiveList<ListItemViewModel<PeakDataPoint>> { ChangeTrackingEnabled = true };
+
             // Add some empty peaks initialy to peak list
-            for (int i = 0; i < DefaultNumberOfPeakFields; i++)
+            for (var i = 0; i < DefaultNumberOfPeakFields; i++)
             {
-                this.ObservedPeaks.Add(new ListItemViewModel<PeakDataPoint>(new PeakDataPoint(0, 0, 0, 0, string.Empty)));
+                ObservedPeaks.Add(new ListItemViewModel<PeakDataPoint>(new PeakDataPoint(0, 0, 0, 0, string.Empty)));
             }
 
-            this.IsotopicEnvelopePlotViewModel = new IsotopicEnvelopePlotViewModel();
+            IsotopicEnvelopePlotViewModel = new IsotopicEnvelopePlotViewModel();
 
             // When selected element is changed, reset all values
             this.WhenAnyValue(x => x.SelectedElement).Subscribe(
                 el =>
                     {
-                        foreach (var element in this.IsotopeProportions.Values)
+                        foreach (var element in IsotopeProportions.Values)
                         {
                             element.Reset();
                         }
                     });
 
             // When a peak's ShouldBeRemoved flag is set, remove it
-            this.ObservedPeaks.ItemChanged.Where(i => i.PropertyName == "ShouldBeRemoved")
+            ObservedPeaks.ItemChanged.Where(i => i.PropertyName == "ShouldBeRemoved")
                 .Where(i => i.Sender.ShouldBeRemoved)
-                .Subscribe(i => this.ObservedPeaks.Remove(i.Sender));
+                .Subscribe(i => ObservedPeaks.Remove(i.Sender));
 
             // Commands
 
-            this.BuildPlotCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.Mass).Select(mass => mass > 0.0));
-            this.BuildPlotCommand.Subscribe(_ => this.BuildIsotopicProfilePlot());
+            BuildPlotCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.Mass).Select(mass => mass > 0.0));
+            BuildPlotCommand.Subscribe(_ => BuildIsotopicProfilePlot());
 
-            this.ResetToDefaultProportionsCommand = ReactiveCommand.Create();
-            this.ResetToDefaultProportionsCommand
-                .Where(_ => this.SelectedElement != null)
-                .Subscribe(_ => this.SelectedElement.Reset());
+            ResetToDefaultProportionsCommand = ReactiveCommand.Create();
+            ResetToDefaultProportionsCommand
+                .Where(_ => SelectedElement != null)
+                .Subscribe(_ => SelectedElement.Reset());
 
-            this.TuneConcentrationCommand = ReactiveCommand.Create();
-            this.TuneConcentrationCommand.Subscribe(_ => this.TuneConcentration());
+            TuneConcentrationCommand = ReactiveCommand.Create();
+            TuneConcentrationCommand.Subscribe(_ => TuneConcentration());
 
-            this.PastePeaksFromClipboardCommand = ReactiveCommand.Create();
-            this.PastePeaksFromClipboardCommand.Subscribe(_ => this.PastePeaksFromClipboard());
+            PastePeaksFromClipboardCommand = ReactiveCommand.Create();
+            PastePeaksFromClipboardCommand.Subscribe(_ => PastePeaksFromClipboard());
 
-            this.ClearObservedPeaksCommand = ReactiveCommand.Create();
-            this.ClearObservedPeaksCommand.Subscribe(_ => this.ObservedPeaks.Clear());
+            ClearObservedPeaksCommand = ReactiveCommand.Create();
+            ClearObservedPeaksCommand.Subscribe(_ => ObservedPeaks.Clear());
 
-            this.AddObservedPeakCommand = ReactiveCommand.Create();
-            this.AddObservedPeakCommand.Subscribe(_ => this.ObservedPeaks
+            AddObservedPeakCommand = ReactiveCommand.Create();
+            AddObservedPeakCommand.Subscribe(_ => ObservedPeaks
                                                            .Add(new ListItemViewModel<PeakDataPoint>(
                                                                 new PeakDataPoint(0.0, 0.0, 0.0, 0.0, string.Empty))));
         }
@@ -148,67 +148,67 @@
         /// <summary>
         /// Gets a command that builds the isotopic profile plot.
         /// </summary>
-        public ReactiveCommand<object> BuildPlotCommand { get; private set; }
+        public ReactiveCommand<object> BuildPlotCommand { get; }
 
         /// <summary>
         /// Gets a command that resets the proportions for the selected element back to their defaults.
         /// </summary>
-        public ReactiveCommand<object> ResetToDefaultProportionsCommand { get; private set; }
+        public ReactiveCommand<object> ResetToDefaultProportionsCommand { get; }
 
         /// <summary>
         /// Gets a command that opens a dialog for tuning the selected isotope concentration to find the
-        /// value that produces a theoretical isotopic distribution that best fits 
+        /// value that produces a theoretical isotopic distribution that best fits
         /// the observed peak list.
         /// </summary>
-        public ReactiveCommand<object> TuneConcentrationCommand { get; private set; }
+        public ReactiveCommand<object> TuneConcentrationCommand { get; }
 
         /// <summary>
         /// Gets a command that pastes a peak list from the clipboard.
         /// </summary>
-        public ReactiveCommand<object> PastePeaksFromClipboardCommand { get; private set; }
+        public ReactiveCommand<object> PastePeaksFromClipboardCommand { get; }
 
         /// <summary>
         /// Gets a command that clears the observed peak list.
         /// </summary>
-        public ReactiveCommand<object> ClearObservedPeaksCommand { get; private set; }
+        public ReactiveCommand<object> ClearObservedPeaksCommand { get; }
 
         /// <summary>
         /// Gets a command that adds a new, empty peak to the observed peak list.
         /// </summary>
-        public ReactiveCommand<object> AddObservedPeakCommand { get; private set; }
+        public ReactiveCommand<object> AddObservedPeakCommand { get; }
 
         /// <summary>
         /// Gets a mapping between the code for an element and the isotope proportions for that element.
         /// </summary>
-        public Dictionary<string, IsotopeProportionSelectorViewModel> IsotopeProportions { get; private set; }
+        public Dictionary<string, IsotopeProportionSelectorViewModel> IsotopeProportions { get; }
 
         /// <summary>
         /// Gets an enumerable that contains only a reference to this class.
         /// </summary>
         /// <remarks>This is a hack to allow the settings to be edited in a DataGrid.</remarks>
-        public IEnumerable<StableIsotopeViewModel> SettingsCollection { get { return new List<StableIsotopeViewModel> { this }; } }
+        public IEnumerable<StableIsotopeViewModel> SettingsCollection => new List<StableIsotopeViewModel> { this };
 
         /// <summary>
         /// Gets or sets the selected element for editing isotope ratios.
         /// </summary>
         public IsotopeProportionSelectorViewModel SelectedElement
         {
-            get { return this.selectedElement; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedElement, value); }
+            get => selectedElement;
+            set => this.RaiseAndSetIfChanged(ref selectedElement, value);
         }
 
         /// <summary>
         /// Gets the view model for the plot displaying the isotopic envelope comparison.
         /// </summary>
-        public IsotopicEnvelopePlotViewModel IsotopicEnvelopePlotViewModel { get; private set; }
+        public IsotopicEnvelopePlotViewModel IsotopicEnvelopePlotViewModel { get; }
 
         /// <summary>
         /// Gets or sets the monoisotopic mass to calculate the theoretical isotopic profile for.
         /// </summary>
         public double Mass
         {
-            get { return this.mass; }
-            set { this.RaiseAndSetIfChanged(ref this.mass, value);}
+            get => mass;
+            set => this.RaiseAndSetIfChanged(ref mass, value);
         }
 
         /// <summary>
@@ -216,8 +216,8 @@
         /// </summary>
         public int Charge
         {
-            get { return this.charge; }
-            set { this.RaiseAndSetIfChanged(ref this.charge, value); }
+            get => charge;
+            set => this.RaiseAndSetIfChanged(ref charge, value);
         }
 
         /// <summary>
@@ -225,8 +225,8 @@
         /// </summary>
         public double ToleranceValue
         {
-            get { return this.toleranceValue; }
-            set { this.RaiseAndSetIfChanged(ref this.toleranceValue, value); }
+            get => toleranceValue;
+            set => this.RaiseAndSetIfChanged(ref toleranceValue, value);
         }
 
         /// <summary>
@@ -234,36 +234,36 @@
         /// </summary>
         public ToleranceUnit ToleranceUnit
         {
-            get { return this.toleranceUnit; }
-            set { this.RaiseAndSetIfChanged(ref this.toleranceUnit, value); }
+            get => toleranceUnit;
+            set => this.RaiseAndSetIfChanged(ref toleranceUnit, value);
         }
 
         /// <summary>
         /// Gets a list of the possible tolerance units.
         /// </summary>
-        public ReactiveList<ToleranceUnit> ToleranceUnits { get; private set; }
+        public ReactiveList<ToleranceUnit> ToleranceUnits { get; }
 
         /// <summary>
         /// Gets or sets the least abundant theoretical isotope peak to consider, relative to the highest theoretical isotope peak.
         /// </summary>
         public double RelativeIntensityThreshold
         {
-            get { return this.relativeIntensityThreshold; }
-            set { this.RaiseAndSetIfChanged(ref this.relativeIntensityThreshold, value); }
+            get => relativeIntensityThreshold;
+            set => this.RaiseAndSetIfChanged(ref relativeIntensityThreshold, value);
         }
 
         /// <summary>
         /// Gets or sets the list of observed peaks.
         /// </summary>
-        public ReactiveList<ListItemViewModel<PeakDataPoint>> ObservedPeaks { get; private set; }
+        public ReactiveList<ListItemViewModel<PeakDataPoint>> ObservedPeaks { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the peak list is profile mode.
         /// </summary>
         public bool IsProfile
         {
-            get { return this.isProfile; }
-            set { this.RaiseAndSetIfChanged(ref this.isProfile, value); }
+            get => isProfile;
+            set => this.RaiseAndSetIfChanged(ref isProfile, value);
         }
 
         /// <summary>
@@ -271,67 +271,67 @@
         /// </summary>
         private void BuildIsotopicProfilePlot()
         {
-            if (this.Mass.Equals(0.0))
+            if (Mass.Equals(0.0))
             {   // Mass has not been set
                 return;
             }
 
             // Set up the concentration tuner if any of the proportions changed.
             var predictor = new IsoProfilePredictor(
-                            this.IsotopeProportions["C"].GetProportions(),
-                            this.IsotopeProportions["H"].GetProportions(),
-                            this.IsotopeProportions["N"].GetProportions(),
-                            this.IsotopeProportions["O"].GetProportions(),
-                            this.IsotopeProportions["S"].GetProportions(),
-                            this.RelativeIntensityThreshold
+                            IsotopeProportions["C"].GetProportions(),
+                            IsotopeProportions["H"].GetProportions(),
+                            IsotopeProportions["N"].GetProportions(),
+                            IsotopeProportions["O"].GetProportions(),
+                            IsotopeProportions["S"].GetProportions(),
+                            RelativeIntensityThreshold
                         );
             var averagine = new Averagine();
 
             var theoreticalPeaks = averagine.GetTheoreticalIsotopeProfileInst(
-                                                this.Mass,
-                                                this.Charge,
-                                                this.RelativeIntensityThreshold,
+                                                Mass,
+                                                Charge,
+                                                RelativeIntensityThreshold,
                                                 predictor);
 
             //var actualPeaks = isotopicConcentrationTuner.AlignObservedPeaks(
             //    this.ObservedPeaks.Select(peakDataPoint => new Peak(peakDataPoint.X, peakDataPoint.Y)).ToList(),
             //    theoreticalPeaks);
 
-            this.IsotopicEnvelopePlotViewModel.BuildPlot(
+            IsotopicEnvelopePlotViewModel.BuildPlot(
                                                          theoreticalPeaks,
-                                                         this.ObservedPeaks.Select(pd => new Peak(pd.Item.X, pd.Item.Y)).ToList(),
-                                                         this.IsProfile);
+                                                         ObservedPeaks.Select(pd => new Peak(pd.Item.X, pd.Item.Y)).ToList(),
+                                                         IsProfile);
         }
 
         /// <summary>
         /// Opens a dialog for tuning the selected isotope concentration to find the
-        /// value that produces a theoretical isotopic distribution that best fits 
+        /// value that produces a theoretical isotopic distribution that best fits
         /// the observed peak list.
         /// Implementation of <see cref="TuneConcentrationCommand" />.
         /// </summary>
         private void TuneConcentration()
         {
-            var selectedProportion = this.SelectedElement.IsotopeRatios.FirstOrDefault(ir => ir.IsSelected);
+            var selectedProportion = SelectedElement.IsotopeRatios.FirstOrDefault(ir => ir.IsSelected);
             if (selectedProportion == null)
             {   // There was not a selected isotope proportion.
-                this.dialogService.MessageBox("Please select an isotope proportion to manipulate.");
+                dialogService.MessageBox("Please select an isotope proportion to manipulate.");
                 return;
             }
 
             // Set up concentration tuner.
             var concentrationTuner = new IsotopicConcentrationTuner
             {
-                Mass = this.Mass,
-                Charge = this.Charge,
-                Element = this.SelectedElement.Atom,
+                Mass = Mass,
+                Charge = Charge,
+                Element = SelectedElement.Atom,
                 IsotopeIndex = selectedProportion.IsotopeIndex,
-                ObservedPeaks = this.ObservedPeaks.Select(peakDataPoint => new Peak(peakDataPoint.Item.X, peakDataPoint.Item.Y)).ToList(),
-                RelativeIntensityThreshold = this.RelativeIntensityThreshold,
-                Tolerance = new Tolerance(this.ToleranceValue, this.ToleranceUnit)
+                ObservedPeaks = ObservedPeaks.Select(peakDataPoint => new Peak(peakDataPoint.Item.X, peakDataPoint.Item.Y)).ToList(),
+                RelativeIntensityThreshold = RelativeIntensityThreshold,
+                Tolerance = new Tolerance(ToleranceValue, ToleranceUnit)
             };
 
             var concentrationTunerViewModel = new IsotopicConcentrationTunerViewModel(concentrationTuner);
-            this.dialogService.OpenIsotopicConcentrationTuner(concentrationTunerViewModel);
+            dialogService.OpenIsotopicConcentrationTuner(concentrationTunerViewModel);
         }
 
         /// <summary>
@@ -341,14 +341,14 @@
         /// </summary>
         private void PastePeaksFromClipboard()
         {
-            this.ObservedPeaks.Clear();
+            ObservedPeaks.Clear();
 
             var clipBoardText = System.Windows.Clipboard.GetText();
 
-            var peaks = this.ParseTextPeaks(clipBoardText);
+            var peaks = ParseTextPeaks(clipBoardText);
             foreach (var peak in peaks)
             {
-                this.ObservedPeaks.Add(new ListItemViewModel<PeakDataPoint>(peak));
+                ObservedPeaks.Add(new ListItemViewModel<PeakDataPoint>(peak));
             }
         }
 
@@ -370,8 +370,7 @@
                     continue;
                 }
 
-                double mz, intensity;
-                if (!double.TryParse(parts[0], out mz) || !double.TryParse(parts[1], out intensity))
+                if (!double.TryParse(parts[0], out var mz) || !double.TryParse(parts[1], out var intensity))
                 {
                     continue;
                 }

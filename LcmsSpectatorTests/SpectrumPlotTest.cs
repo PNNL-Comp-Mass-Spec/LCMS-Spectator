@@ -1,24 +1,14 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
-using LcmsSpectator.Config;
-using LcmsSpectator.PlotModels;
 using LcmsSpectator.Readers;
-using LcmsSpectator.Utils;
-using LcmsSpectator.ViewModels;
 using LcmsSpectatorTests.DialogServices;
 using NUnit.Framework;
-using OxyPlot.Annotations;
 using OxyPlot.Series;
 using ReactiveUI;
 
 namespace LcmsSpectatorTests
 {
-    using System;
-
-    using InformedProteomics.Backend.Data.Composition;
 
     using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels.Data;
@@ -86,7 +76,7 @@ namespace LcmsSpectatorTests
                 var spectrumSeries = specPlotVm.PlotModel.Series[0] as StemSeries;
                 Assert.False(spectrumSeries == null);
                 Assert.True(spectrumSeries.Points.Count == spectrum.Peaks.Length);  // should be the same length
-                for (int i = 0; i < spectrumSeries.Points.Count; i++)
+                for (var i = 0; i < spectrumSeries.Points.Count; i++)
                 {
                     // compare each peak in spectrum plot to actual spectrum
                     Assert.True(spectrumSeries.Points[i].X.Equals(spectrum.Peaks[i].Mz));
@@ -96,9 +86,9 @@ namespace LcmsSpectatorTests
                 // check filtered spectrum
                 specPlotVm.ShowFilteredSpectrum = true;
                 //if (!specPlotVm.PlotTask.IsCompleted) await specPlotVm.PlotTask;
-                var filteredSeries = specPlotVm.PlotModel.Series[0] as StemSeries;
+                var filteredSeries = (StemSeries)specPlotVm.PlotModel.Series[0];
                 Assert.True(filteredSeries.Points.Count == filteredSpectrum.Peaks.Length);   // should be the same length
-                for (int i = 0; i < filteredSeries.Points.Count; i++)
+                for (var i = 0; i < filteredSeries.Points.Count; i++)
                 {
                     // compare each peak in spectrum plot to actual filtered spectrum
                     Assert.True(filteredSeries.Points[i].X.Equals(filteredSpectrum.Peaks[i].Mz));
@@ -111,6 +101,7 @@ namespace LcmsSpectatorTests
         /// This test checks to see if the peak list exporter is working correctly.
         /// </summary>
         /// <param name="rawFile"></param>
+        /// <param name="idFile"></param>
         [TestCase(@"\\proto-2\UnitTest_Files\LcMsSpectator\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3.raw",
                   @"\\proto-2\UnitTest_Files\LcMsSpectator\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3_IcTda.tsv")]
         public void TestMassExportPeakLists(string rawFile, string idFile)
@@ -118,7 +109,7 @@ namespace LcmsSpectatorTests
             // Read files
             var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
             var idFileReader = IdFileReaderFactory.CreateReader(idFile);
-            var ids = idFileReader.Read();
+            var ids = idFileReader.Read().ToList();
             foreach (var id in ids)
             {
                 id.LcMs = lcms;

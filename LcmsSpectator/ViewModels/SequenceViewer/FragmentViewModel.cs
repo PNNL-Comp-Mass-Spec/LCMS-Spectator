@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LcmsSpectator.ViewModels.SequenceViewer
 {
     using InformedProteomics.Backend.Data.Sequence;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.ViewModels.Modifications;
+    using Config;
+    using DialogServices;
+    using Modifications;
 
     using ReactiveUI;
 
     /// <summary>
-    /// View model for representing a sequence cleavage on 
+    /// View model for representing a sequence cleavage on
     /// </summary>
     public class FragmentViewModel : ReactiveObject
     {
@@ -57,29 +54,29 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         /// <param name="dialogService">Dialog service for opening LCMSSpectator dialogs.</param>
         public FragmentViewModel(AminoAcid aminoAcid, int index = 0, IMainDialogService dialogService = null)
         {
-            this.AminoAcid = aminoAcid;
-            this.SetModSymbol(aminoAcid as ModifiedAminoAcid);
+            AminoAcid = aminoAcid;
+            SetModSymbol(aminoAcid as ModifiedAminoAcid);
 
             this.dialogService = dialogService ?? new MainDialogService();
-            this.SelectModificationCommand = ReactiveCommand.Create();
-            this.SelectModificationCommand.Subscribe(_ => this.SelectModificationImpl());
+            SelectModificationCommand = ReactiveCommand.Create();
+            SelectModificationCommand.Subscribe(_ => SelectModificationImpl());
 
             // Update the modification symbol when the amino acid changes.
-            this.WhenAnyValue(x => x.AminoAcid).Subscribe(aa => this.SetModSymbol(aa as ModifiedAminoAcid));
+            this.WhenAnyValue(x => x.AminoAcid).Subscribe(aa => SetModSymbol(aa as ModifiedAminoAcid));
         }
 
         /// <summary>
         /// Gets a command that opens a dialog that allows the user to change the selected modification.
         /// </summary>
-        public ReactiveCommand<object> SelectModificationCommand { get; private set; }
+        public ReactiveCommand<object> SelectModificationCommand { get; }
 
         /// <summary>
         /// Gets the selected amino acid.
         /// </summary>
         public AminoAcid AminoAcid
         {
-            get { return this.aminoAcid; }
-            private set { this.RaiseAndSetIfChanged(ref this.aminoAcid, value); }
+            get => aminoAcid;
+            private set => this.RaiseAndSetIfChanged(ref aminoAcid, value);
         }
 
         /// <summary>
@@ -87,8 +84,8 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         /// </summary>
         public int Index
         {
-            get { return this.index; }
-            private set { this.RaiseAndSetIfChanged(ref this.index, value); }
+            get => index;
+            private set => this.RaiseAndSetIfChanged(ref index, value);
         }
 
         /// <summary>
@@ -96,8 +93,8 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         /// </summary>
         public string ModificationSymbol
         {
-            get { return this.modificationSymbol; }
-            private set { this.RaiseAndSetIfChanged(ref this.modificationSymbol, value); }
+            get => modificationSymbol;
+            private set => this.RaiseAndSetIfChanged(ref modificationSymbol, value);
         }
 
         /// <summary>
@@ -105,8 +102,8 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         /// </summary>
         public FragmentIonViewModel PrefixIon
         {
-            get { return this.prefixIon; }
-            set { this.RaiseAndSetIfChanged(ref this.prefixIon, value); }
+            get => prefixIon;
+            set => this.RaiseAndSetIfChanged(ref prefixIon, value);
         }
 
         /// <summary>
@@ -114,8 +111,8 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         /// </summary>
         public FragmentIonViewModel SuffixIon
         {
-            get { return this.suffixIon; }
-            set { this.RaiseAndSetIfChanged(ref this.suffixIon, value); }
+            get => suffixIon;
+            set => this.RaiseAndSetIfChanged(ref suffixIon, value);
         }
 
         /// <summary>
@@ -129,7 +126,7 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
             if (modifiedAminoAcid != null)
             {
                 var modification = modifiedAminoAcid.Modification;
-                this.ModificationSymbol = modification.Name.Substring(0, Math.Min(2, modification.Name.Length));
+                ModificationSymbol = modification.Name.Substring(0, Math.Min(2, modification.Name.Length));
             }
         }
 
@@ -143,10 +140,10 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
                                                                 IcParameters.Instance
                                                                             .RegisteredModifications
                                                                             .Select(mod => new ModificationViewModel(mod)));
-            this.dialogService.OpenSelectModificationWindow(selectModificationViewModel);
+            dialogService.OpenSelectModificationWindow(selectModificationViewModel);
             if (selectModificationViewModel.Status)
             {
-                this.AminoAcid = new ModifiedAminoAcid(this.AminoAcid, selectModificationViewModel.SelectedModification.Modification);
+                AminoAcid = new ModifiedAminoAcid(AminoAcid, selectModificationViewModel.SelectedModification.Modification);
             }
         }
     }

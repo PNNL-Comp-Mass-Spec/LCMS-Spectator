@@ -19,11 +19,11 @@ namespace LcmsSpectator.ViewModels.Plots
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
 
-    using LcmsSpectator.Config;
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.PlotModels;
-    using LcmsSpectator.Utils;
-    using LcmsSpectator.Writers.Exporters;
+    using Config;
+    using DialogServices;
+    using PlotModels;
+    using Utils;
+    using Writers.Exporters;
 
     using OxyPlot;
     using OxyPlot.Axes;
@@ -98,7 +98,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool shouldCombineChargeStates;
 
         /// <summary>
-        /// Initializes a new instance of the ErrorMapViewModel class. 
+        /// Initializes a new instance of the ErrorMapViewModel class.
         /// </summary>
         /// <param name="dialogService">
         /// The dialog Service.
@@ -106,12 +106,12 @@ namespace LcmsSpectator.ViewModels.Plots
         public ErrorMapViewModel(IDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
-            this.selectedPeakDataPoints = new IList<PeakDataPoint>[0];
-            this.ShouldCombineChargeStates = true;
+            PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
+            selectedPeakDataPoints = new IList<PeakDataPoint>[0];
+            ShouldCombineChargeStates = true;
 
             // Init x axis
-            this.xaxis = new LinearAxis
+            xaxis = new LinearAxis
             {
                 Title = "Amino Acid",
                 Position = AxisPosition.Top,
@@ -124,10 +124,10 @@ namespace LcmsSpectator.ViewModels.Plots
                 MaximumPadding = 0,
                 FontSize = 10
             };
-            this.PlotModel.Axes.Add(this.xaxis);
+            PlotModel.Axes.Add(xaxis);
 
             // Init Y axis
-            this.yaxis = new LinearAxis
+            yaxis = new LinearAxis
             {
                 Title = "Ion Type",
                 Position = AxisPosition.Left,
@@ -140,12 +140,12 @@ namespace LcmsSpectator.ViewModels.Plots
                 MaximumPadding = 0,
                 FontSize = 10
             };
-            this.PlotModel.Axes.Add(this.yaxis);
+            PlotModel.Axes.Add(yaxis);
 
             // Init Color axis
             var minColor = OxyColor.FromRgb(127, 255, 0);
             var maxColor = OxyColor.FromRgb(255, 0, 0);
-            this.colorAxis = new LinearColorAxis
+            colorAxis = new LinearColorAxis
             {
                 Title = "Error",
                 Position = AxisPosition.Right,
@@ -157,41 +157,41 @@ namespace LcmsSpectator.ViewModels.Plots
                 AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
                 LowColor = OxyColors.Navy,
             };
-            this.PlotModel.Axes.Add(this.colorAxis);
+            PlotModel.Axes.Add(colorAxis);
 
-            this.WhenAnyValue(x => x.ShouldCombineChargeStates).Subscribe(_ => this.SetData(this.selectedSequence, this.selectedPeakDataPoints));
+            this.WhenAnyValue(x => x.ShouldCombineChargeStates).Subscribe(_ => SetData(selectedSequence, selectedPeakDataPoints));
 
             // Save As Image Command requests a file path from the user and then saves the error map as an image
             var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => this.SaveAsImageImpl());
-            this.SaveAsImageCommand = saveAsImageCommand;
+            saveAsImageCommand.Subscribe(_ => SaveAsImageImpl());
+            SaveAsImageCommand = saveAsImageCommand;
 
-            this.SaveDataTableCommand = ReactiveCommand.Create();
-            this.SaveDataTableCommand.Subscribe(_ => this.SaveDataTableImpl());
+            SaveDataTableCommand = ReactiveCommand.Create();
+            SaveDataTableCommand.Subscribe(_ => SaveDataTableImpl());
         }
 
         /// <summary>
         /// Gets the plot Model for error heat map
         /// </summary>
-        public PlotModel PlotModel { get; private set; }
+        public PlotModel PlotModel { get; }
 
         /// <summary>
         /// Gets a command that prompts user for file path and save plot as image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; private set; }
+        public IReactiveCommand SaveAsImageCommand { get; }
 
         /// <summary>
         /// Gets a command that prompt user for file path and save data table as list.
         /// </summary>
-        public ReactiveCommand<object> SaveDataTableCommand { get; private set; }
+        public ReactiveCommand<object> SaveDataTableCommand { get; }
 
         /// <summary>
         /// Gets or sets the data that is shown in the "Table" view. This excludes any fragments without data.
         /// </summary>
         public ReactiveList<PeakDataPoint> DataTable
         {
-            get { return this.dataTable; }
-            private set { this.RaiseAndSetIfChanged(ref this.dataTable, value); }
+            get => dataTable;
+            private set => this.RaiseAndSetIfChanged(ref dataTable, value);
         }
 
         /// <summary>
@@ -200,8 +200,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public bool ShouldCombineChargeStates
         {
-            get { return this.shouldCombineChargeStates; }
-            set { this.RaiseAndSetIfChanged(ref this.shouldCombineChargeStates, value); }
+            get => shouldCombineChargeStates;
+            set => this.RaiseAndSetIfChanged(ref shouldCombineChargeStates, value);
         }
 
         /// <summary>
@@ -209,8 +209,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public string SelectedIonType
         {
-            get { return this.selectedIonType; }
-            private set { this.RaiseAndSetIfChanged(ref this.selectedIonType, value); }
+            get => selectedIonType;
+            private set => this.RaiseAndSetIfChanged(ref selectedIonType, value);
         }
 
         /// <summary>
@@ -218,8 +218,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public string SelectedAminoAcid
         {
-            get { return this.selectedAminoAcid; }
-            private set { this.RaiseAndSetIfChanged(ref this.selectedAminoAcid, value); }
+            get => selectedAminoAcid;
+            private set => this.RaiseAndSetIfChanged(ref selectedAminoAcid, value);
         }
 
         /// <summary>
@@ -227,8 +227,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public string SelectedValue
         {
-            get { return this.selectedValue; }
-            private set { this.RaiseAndSetIfChanged(ref this.selectedValue, value); }
+            get => selectedValue;
+            private set => this.RaiseAndSetIfChanged(ref selectedValue, value);
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="peakDataPoints">The peak data points to extract error values from.</param>
         public void SetData(Sequence sequence, IEnumerable<IList<PeakDataPoint>> peakDataPoints)
         {
-            this.selectedSequence = sequence;
+            selectedSequence = sequence;
 
             if (sequence == null || peakDataPoints == null)
             {
@@ -246,23 +246,23 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             // Remove all points except for most abundant isotope peaks
-            var dataPoints = this.GetMostAbundantIsotopePeaks(peakDataPoints).ToArray();
+            var mostAbundantPeaks = GetMostAbundantIsotopePeaks(peakDataPoints).ToArray();
 
             // No data, nothing to do
-            if (dataPoints.Length == 0)
+            if (mostAbundantPeaks.Length == 0)
             {
                 return;
             }
 
-            this.selectedPeakDataPoints = peakDataPoints;
+            selectedPeakDataPoints = peakDataPoints;
 
             // Remove NaN values for data table (only showing fragment ions found in spectrum in data table)
-            //this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints.Where(dp => !dp.Error.Equals(double.NaN)));
-            this.DataTable = new ReactiveList<PeakDataPoint>(dataPoints);
+            //this.DataTable = new ReactiveList<PeakDataPoint>(mostAbundantPeaks.Where(dp => !dp.Error.Equals(double.NaN)));
+            DataTable = new ReactiveList<PeakDataPoint>(mostAbundantPeaks);
 
             // Build and invalidate erorr map plot display
-            this.BuildErrorPlotModel(sequence, this.GetErrorDataArray(dataPoints, sequence.Count));
-            this.PlotModel.MouseDown += this.MapMouseDown;
+            BuildErrorPlotModel(sequence, GetErrorDataArray(mostAbundantPeaks, sequence.Count));
+            PlotModel.MouseDown += MapMouseDown;
         }
 
         /// <summary>
@@ -278,11 +278,11 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             // initialize color axis
             ////var minColor = OxyColor.FromRgb(127, 255, 0);
-            this.colorAxis.Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue();
-            this.colorAxis.Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
-            this.colorAxis.AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+            colorAxis.Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+            colorAxis.Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+            colorAxis.AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
 
-            this.PlotModel.Series.Clear();
+            PlotModel.Series.Clear();
 
             // initialize heat map
             var heatMapSeries = new HeatMapSeries
@@ -293,25 +293,25 @@ namespace LcmsSpectator.ViewModels.Plots
                 X1 = data.GetLength(0),
                 Y0 = 1,
                 Y1 = data.GetLength(1),
-                TrackerFormatString = 
+                TrackerFormatString =
                         ////"{1}: {2:0}" + Environment.NewLine +
                         ////"{3}: {4:0}" + Environment.NewLine +
                         "{5}: {6:0.###}ppm",
             };
-            this.PlotModel.Series.Add(heatMapSeries);
+            PlotModel.Series.Add(heatMapSeries);
 
-            this.xaxis.AbsoluteMaximum = sequence.Count;
-            this.yaxis.AbsoluteMaximum = this.ionTypes.Length;
+            xaxis.AbsoluteMaximum = sequence.Count;
+            yaxis.AbsoluteMaximum = ionTypes.Length;
 
             // Set yAxis double -> string label converter function
-            this.yaxis.LabelFormatter = y =>
+            yaxis.LabelFormatter = y =>
             {
                 if (y.Equals(0))
                 {
                     return string.Empty;
                 }
 
-                var ionType = this.ionTypes[Math.Min((int)y - 1, this.ionTypes.Length - 1)];
+                var ionType = ionTypes[Math.Min((int)y - 1, ionTypes.Length - 1)];
                 var symbol = ionType.BaseIonType == null ? ionType.Name : ionType.BaseIonType.Symbol;
                 return ionType.Charge == 1 ?
                        symbol :
@@ -319,20 +319,20 @@ namespace LcmsSpectator.ViewModels.Plots
             };
 
             // Set xAxis double -> string label converter function
-            this.xaxis.LabelFormatter = x =>
+            xaxis.LabelFormatter = x =>
             {
                 if (x.Equals(0))
                 {
                     return string.Empty;
                 }
 
-                int sequenceIndex = Math.Max(Math.Min((int)x - 1, sequence.Count - 1), 0);
-                string residue = sequence[sequenceIndex].Residue.ToString(CultureInfo.InvariantCulture);
+                var sequenceIndex = Math.Max(Math.Min((int)x - 1, sequence.Count - 1), 0);
+                var residue = sequence[sequenceIndex].Residue.ToString(CultureInfo.InvariantCulture);
                 return string.Format("{0}{1}", residue, (int)x);
             };
 
             // Update plot
-            this.PlotModel.InvalidatePlot(true);
+            PlotModel.InvalidatePlot(true);
         }
 
         /// <summary>
@@ -345,19 +345,19 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </returns>
         private double[,] GetErrorDataArray(IEnumerable<PeakDataPoint> dataPoints, int sequenceLength)
         {
-            var dataDict = this.PartitionData(dataPoints, sequenceLength);
+            var dataDict = PartitionData(dataPoints, sequenceLength);
 
-            this.ionTypes = dataDict.Keys.ToArray();
+            ionTypes = dataDict.Keys.ToArray();
 
             var data = new double[sequenceLength, dataDict.Keys.Count];
 
             // create two dimensional array from partitioned data
-            for (int i = 0; i < sequenceLength; i++)
+            for (var i = 0; i < sequenceLength; i++)
             {
-                for (int j = 0; j < this.ionTypes.Length; j++)
+                for (var j = 0; j < ionTypes.Length; j++)
                 {
-                    var dataPoint = dataDict[this.ionTypes[j]][i];
-                    var value = dataPoint == null ? double.NaN : dataPoint.Error;
+                    var dataPoint = dataDict[ionTypes[j]][i];
+                    var value = dataPoint?.Error ?? double.NaN;
 
                     if (value.Equals(double.NaN))
                     {
@@ -386,7 +386,7 @@ namespace LcmsSpectator.ViewModels.Plots
             foreach (var dataPoint in dataPoints)
             {
                 var ionType = dataPoint.IonType;
-                if (this.ShouldCombineChargeStates)
+                if (ShouldCombineChargeStates)
                 {
                     ionType = new IonType(ionType.Name, ionType.OffsetComposition, 1, ionType.IsPrefixIon);
                 }
@@ -398,7 +398,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
                 var points = dataDict[ionType];
 
-                int index = dataPoint.Index - 1;
+                var index = dataPoint.Index - 1;
 
                 if (!dataPoint.IonType.IsPrefixIon)
                 {
@@ -406,7 +406,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 // If the ion type has multiple options, choose the best one.
-                if (points[index] == null || 
+                if (points[index] == null ||
                     double.IsNaN(points[index].Error) ||
                     (dataPoint.Y / Math.Abs(dataPoint.Error)) > (points[index].Y / Math.Abs(points[index].Error)))
                 {
@@ -429,7 +429,7 @@ namespace LcmsSpectator.ViewModels.Plots
             foreach (var peaks in peakDataPoints)
             {
                 var peak = peaks.OrderByDescending(p => p.Y).FirstOrDefault();
-                if (peak != null && peak.IonType != null && peak.IonType.Name != "Precursor")
+                if (peak?.IonType != null && peak.IonType.Name != "Precursor")
                 {
                     mostAbundantPeaks.Add(peak);
                 }
@@ -443,7 +443,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveAsImageImpl()
         {
-            var filePath = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            var filePath = dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
@@ -459,16 +459,16 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 DynamicResolutionPngExporter.Export(
-                    this.PlotModel,
+                    PlotModel,
                     filePath,
-                    (int)this.PlotModel.Width,
-                    (int)this.PlotModel.Height,
+                    (int)PlotModel.Width,
+                    (int)PlotModel.Height,
                     OxyColors.White,
                     IcParameters.Instance.ExportImageDpi);
             }
             catch (Exception e)
             {
-                this.dialogService.ExceptionAlert(e);
+                dialogService.ExceptionAlert(e);
             }
         }
 
@@ -477,7 +477,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveDataTableImpl()
         {
-            var filePath = this.dialogService.SaveFile(".tsv", @"Tab-separated value Files (*.tsv)|*.tsv");
+            var filePath = dialogService.SaveFile(".tsv", @"Tab-separated value Files (*.tsv)|*.tsv");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
@@ -493,11 +493,11 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 var peakExporter = new SpectrumPeakExporter(filePath);
-                peakExporter.Export(this.DataTable.Where(p => !p.X.Equals(double.NaN)).ToList());
+                peakExporter.Export(DataTable.Where(p => !p.X.Equals(double.NaN)).ToList());
             }
             catch (Exception e)
             {
-                this.dialogService.ExceptionAlert(e);
+                dialogService.ExceptionAlert(e);
             }
         }
 
@@ -508,38 +508,36 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="args">The event arguments.</param>
         private void MapMouseDown(object sender, OxyMouseEventArgs args)
         {
-            var series = this.PlotModel.GetSeriesFromPoint(args.Position);
-            var heatMap = series as HeatMapSeries;
-            if (heatMap != null)
+            var series = PlotModel.GetSeriesFromPoint(args.Position);
+            if (!(series is HeatMapSeries heatMap))
+                return;
+
+            var point = heatMap.GetNearestPoint(args.Position, true);
+            var dataPoint = point.DataPoint;
+
+            var ionType = ionTypes[((int)dataPoint.Y) - 1];
+            var seqIndex = ((int)dataPoint.X) - 1;
+            var ionIndex = ionType.IsPrefixIon ? seqIndex + 1 : selectedSequence.Count - seqIndex - 1;
+            var aminoAcid = selectedSequence[seqIndex];
+
+            var value = point.Text;
+
+            SelectedIonType = ionType.Name;
+            SelectedAminoAcid = string.Format("{0}{1}", aminoAcid.Residue, ionIndex);
+
+            if (value.Contains(" "))
             {
-                var point = heatMap.GetNearestPoint(args.Position, true);
-                var dataPoint = point.DataPoint;
+                var parts = value.Split(' ');
+                value = parts[1];
 
-                var ionType = this.ionTypes[((int)dataPoint.Y) - 1];
-                var seqIndex = ((int)dataPoint.X) - 1;
-                var ionIndex = ionType.IsPrefixIon ? seqIndex + 1 : this.selectedSequence.Count - seqIndex - 1;
-                var aminoAcid = this.selectedSequence[seqIndex];
-
-                var value = point.Text;
-
-                this.SelectedIonType = ionType.Name;
-                this.SelectedAminoAcid = string.Format("{0}{1}", aminoAcid.Residue, ionIndex);
-
-                if (value.Contains(" "))
+                var intPart = value.Split('p')[0];
+                if (Int32.TryParse(intPart, out var result) && result < -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue())
                 {
-                    var parts = value.Split(' ');
-                    value = parts[1];
-
-                    int result;
-                    var intPart = value.Split('p')[0];
-                    if (Int32.TryParse(intPart, out result) && result < -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue())
-                    {
-                        value = "N/A";
-                    }
+                    value = "N/A";
                 }
-
-                this.SelectedValue = value;
             }
+
+            SelectedValue = value;
         }
     }
 }

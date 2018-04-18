@@ -22,7 +22,7 @@ namespace LcmsSpectator.Views.Modifications
         /// </summary>
         public HeavyModificationsView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }

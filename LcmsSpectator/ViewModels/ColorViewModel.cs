@@ -34,11 +34,11 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public ColorViewModel()
         {
-            this.SelectedColor = new Color { A = 255, R = 0, G = 0, B = 0 };
+            SelectedColor = new Color { A = 255, R = 0, G = 0, B = 0 };
 
             var removeCommand = ReactiveCommand.Create();
-            removeCommand.Subscribe(_ => this.IsRemoveRequested = true);
-            this.RemoveCommand = removeCommand;
+            removeCommand.Subscribe(_ => IsRemoveRequested = true);
+            RemoveCommand = removeCommand;
         }
 
         /// <summary>
@@ -46,8 +46,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public Color SelectedColor
         {
-            get { return this.selectedColor; }
-            set { this.RaiseAndSetIfChanged(ref this.selectedColor, value); }
+            get => selectedColor;
+            set => this.RaiseAndSetIfChanged(ref selectedColor, value);
         }
 
         /// <summary>
@@ -55,13 +55,13 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool IsRemoveRequested
         {
-            get { return this.isRemoveRequested; }
-            set { this.RaiseAndSetIfChanged(ref this.isRemoveRequested, value); }
+            get => isRemoveRequested;
+            set => this.RaiseAndSetIfChanged(ref isRemoveRequested, value);
         }
 
         /// <summary>
         /// Gets a command for removing the color.
         /// </summary>
-        public IReactiveCommand RemoveCommand { get; private set; }
+        public IReactiveCommand RemoveCommand { get; }
     }
 }

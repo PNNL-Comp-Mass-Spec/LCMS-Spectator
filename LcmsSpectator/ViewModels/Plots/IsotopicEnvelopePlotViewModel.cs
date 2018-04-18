@@ -18,7 +18,7 @@ namespace LcmsSpectator.ViewModels.Plots
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Spectrometry;
 
-    using LcmsSpectator.PlotModels;
+    using PlotModels;
 
     using OxyPlot;
     using OxyPlot.Axes;
@@ -40,8 +40,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public IsotopicEnvelopePlotViewModel()
         {
-            this.xaxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Mass", StringFormat = "0.###" };
-            this.PlotModel = new AutoAdjustedYPlotModel(this.xaxis, 1.05)
+            xaxis = new LinearAxis { Position = AxisPosition.Bottom, Title = "Mass", StringFormat = "0.###" };
+            PlotModel = new AutoAdjustedYPlotModel(xaxis, 1.05)
             {
                 Title = "Isotopic Envelope",
                 YAxis =
@@ -55,7 +55,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets the plot displaying theoretical isotopic profile and actual isotopic profile.
         /// </summary>
-        public AutoAdjustedYPlotModel PlotModel { get; private set; }
+        public AutoAdjustedYPlotModel PlotModel { get; }
 
         /// <summary>
         /// Build the isotope plot showing theoretical isotopic profile and
@@ -83,7 +83,7 @@ namespace LcmsSpectator.ViewModels.Plots
             // Create peak data points from isotopes and calculate m/z values (actual)
             var observed = actual.Select(i => new PeakDataPoint(theoretical[i.Index].X, i.Ratio, 0.0, 0.0, string.Empty) { Index = i.Index }).ToArray();
 
-            this.BuildPlot(theoretical, observed, false);
+            BuildPlot(theoretical, observed, false);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="isProfile">A value indicating whether the peak list is profile mode.</param>
         public void BuildPlot(IList<Peak> theoretical, IList<Peak> observed, bool isProfile)
         {
-            this.BuildPlot(this.GetPeakDataPoints(theoretical), this.GetPeakDataPoints(observed), isProfile);
+            BuildPlot(GetPeakDataPoints(theoretical), GetPeakDataPoints(observed), isProfile);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="isProfile">A value indicating whether the peak list is profile mode.</param>
         public void BuildPlot(PeakDataPoint[] theoretical, PeakDataPoint[] observed, bool isProfile)
         {
-            this.PlotModel.Series.Clear();
+            PlotModel.Series.Clear();
 
             // Create series for theoretical isotope profile
             var theoSeries = new PeakPointSeries
@@ -122,7 +122,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 "{3}: {4:0.###}" + Environment.NewLine +
                 "Index: {Index:0.###}"
             };
-            this.PlotModel.Series.Add(theoSeries);
+            PlotModel.Series.Add(theoSeries);
 
             if (isProfile)
             {
@@ -139,7 +139,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     "{3}: {4:0.###}" + Environment.NewLine +
                     "Index: {Index:0.###}"
                 };
-                this.PlotModel.Series.Add(actSeries);  
+                PlotModel.Series.Add(actSeries);  
             }
             else
             {
@@ -156,7 +156,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     "{3}: {4:0.###}" + Environment.NewLine +
                     "Index: {Index:0.###}"
                 };
-                this.PlotModel.Series.Add(actSeries);  
+                PlotModel.Series.Add(actSeries);  
             }
 
             // Calculate min and max boundaries for plot
@@ -166,15 +166,15 @@ namespace LcmsSpectator.ViewModels.Plots
             var absMin = Math.Max(0, min - 10);
             max += (max - min) / 3;
             var absMax = max + 10;
-            this.xaxis.Minimum = min;
-            this.xaxis.AbsoluteMinimum = absMin;
-            this.xaxis.Maximum = max;
-            this.xaxis.AbsoluteMaximum = absMax;
-            this.xaxis.Zoom(min, max);
+            xaxis.Minimum = min;
+            xaxis.AbsoluteMinimum = absMin;
+            xaxis.Maximum = max;
+            xaxis.AbsoluteMaximum = absMax;
+            xaxis.Zoom(min, max);
 
-            this.PlotModel.IsLegendVisible = true;
-            this.PlotModel.InvalidatePlot(true);
-            this.PlotModel.AdjustForZoom();
+            PlotModel.IsLegendVisible = true;
+            PlotModel.InvalidatePlot(true);
+            PlotModel.AdjustForZoom();
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             var max = peaks.Max(p => p.Intensity);
             var peakDataPoints = new PeakDataPoint[peaks.Count];
-            for (int i = 0; i < peaks.Count; i++)
+            for (var i = 0; i < peaks.Count; i++)
             {
                 var peak = peaks[i];
                 peakDataPoints[i] = new PeakDataPoint(peak.Mz, peak.Intensity / max, 0.0, 0.0, string.Empty) { Index = i };

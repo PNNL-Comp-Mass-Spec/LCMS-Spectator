@@ -7,8 +7,6 @@
 
     using InformedProteomics.Backend.Utils;
 
-    using LcmsSpectator.Views.StableIsotopeViewer;
-
     using OxyPlot;
     using OxyPlot.Annotations;
     using OxyPlot.Axes;
@@ -64,13 +62,13 @@
         public IsotopicConcentrationTunerViewModel(IsotopicConcentrationTuner tuner = null)
         {
             this.tuner = tuner ?? new IsotopicConcentrationTuner();
-            this.RunTuningCommand = ReactiveCommand.CreateAsyncTask(async _ => await this.RunTuning());
+            RunTuningCommand = ReactiveCommand.CreateAsyncTask(async _ => await RunTuning());
 
             // Set default values
-            this.StatusMessage = "Running...";
-            this.StepSize = 0.2;
-            this.MaxConcentration = this.tuner.MaxConcentration;
-            this.Title = string.Format(
+            StatusMessage = "Running...";
+            StepSize = 0.2;
+            MaxConcentration = this.tuner.MaxConcentration;
+            Title = string.Format(
                                         "Tune {0}{1}",
                                         this.tuner.Element.Code,
                                         this.tuner.Element.NominalMass + this.tuner.IsotopeIndex);
@@ -79,7 +77,7 @@
         /// <summary>
         /// Gets an asynchonous command that runs the tuning process.
         /// </summary>
-        public ReactiveCommand<Unit> RunTuningCommand { get; private set; }
+        public ReactiveCommand<Unit> RunTuningCommand { get; }
 
         /// <summary>
         /// Gets the plot model that displays the result curve from the tuning.
@@ -91,8 +89,8 @@
         /// </summary>
         public bool ShouldShowProgress
         {
-            get { return this.shouldShowProgress; }
-            private set { this.RaiseAndSetIfChanged(ref this.shouldShowProgress, value); }
+            get => shouldShowProgress;
+            private set => this.RaiseAndSetIfChanged(ref shouldShowProgress, value);
         }
 
         /// <summary>
@@ -100,8 +98,8 @@
         /// </summary>
         public string StatusMessage
         {
-            get { return this.statusMessage; }
-            private set { this.RaiseAndSetIfChanged(ref this.statusMessage, value); }
+            get => statusMessage;
+            private set => this.RaiseAndSetIfChanged(ref statusMessage, value);
         }
 
         /// <summary>
@@ -109,8 +107,8 @@
         /// </summary>
         public double Progress
         {
-            get { return this.progress; }
-            private set { this.RaiseAndSetIfChanged(ref this.progress, value); }
+            get => progress;
+            private set => this.RaiseAndSetIfChanged(ref progress, value);
         }
 
         /// <summary>
@@ -118,8 +116,8 @@
         /// </summary>
         public double StepSize
         {
-            get { return this.stepSize;}
-            set { this.RaiseAndSetIfChanged(ref this.stepSize, value); }
+            get => stepSize;
+            set => this.RaiseAndSetIfChanged(ref stepSize, value);
         }
 
         /// <summary>
@@ -127,8 +125,8 @@
         /// </summary>
         public double MaxConcentration
         {
-            get { return this.maxConcentration; }
-            set { this.RaiseAndSetIfChanged(ref this.maxConcentration, value); }
+            get => maxConcentration;
+            set => this.RaiseAndSetIfChanged(ref maxConcentration, value);
         }
 
         /// <summary>
@@ -136,8 +134,8 @@
         /// </summary>
         public string Title
         {
-            get { return this.title; }
-            private set { this.RaiseAndSetIfChanged(ref this.title, value); }
+            get => title;
+            private set => this.RaiseAndSetIfChanged(ref title, value);
         }
 
         /// <summary>
@@ -146,7 +144,7 @@
         /// <param name="curve"></param>
         private void BuildResultPlot(IsotopicConcentrationTuner.IsotopeConcentrationCorrelationCurve curve)
         {
-            this.ResultPlot = new PlotModel { Title = "Tuning Results" };
+            ResultPlot = new PlotModel { Title = "Tuning Results" };
 
             // Axes
             var xAxis = new LinearAxis
@@ -182,11 +180,11 @@
                 LineStyle = LineStyle.Dash,
             };
 
-            this.ResultPlot.Axes.Add(xAxis);
-            this.ResultPlot.Axes.Add(yAxis);
-            this.ResultPlot.Series.Add(lineSeries);
-            this.ResultPlot.Annotations.Add(lineAnnotation);
-            this.ResultPlot.InvalidatePlot(true);
+            ResultPlot.Axes.Add(xAxis);
+            ResultPlot.Axes.Add(yAxis);
+            ResultPlot.Series.Add(lineSeries);
+            ResultPlot.Annotations.Add(lineAnnotation);
+            ResultPlot.InvalidatePlot(true);
         }
 
         /// <summary>
@@ -195,24 +193,24 @@
         /// <returns>Awaitable task.</returns>
         private async Task RunTuning()
         {
-            this.Progress = 0.0;
+            Progress = 0.0;
 
             // Set up progress reporter
-            var progressReporter = new Progress<ProgressData>(pd => this.Progress = pd.Percent);
+            var progressReporter = new Progress<ProgressData>(pd => Progress = pd.Percent);
 
-            this.ShouldShowProgress = true;
+            ShouldShowProgress = true;
 
             // Set up tuner
-            this.tuner.StepSize = this.StepSize;
-            this.tuner.MaxConcentration = this.MaxConcentration;
+            tuner.StepSize = StepSize;
+            tuner.MaxConcentration = MaxConcentration;
 
             // Run tuning
-            var results = await Task.Run(() => this.tuner.Tune(progressReporter));
+            var results = await Task.Run(() => tuner.Tune(progressReporter));
 
             // Build result plot
-            this.BuildResultPlot(results);
+            BuildResultPlot(results);
 
-            this.ShouldShowProgress = false;
+            ShouldShowProgress = false;
         }
     }
 }

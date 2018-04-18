@@ -16,9 +16,9 @@ namespace LcmsSpectator.ViewModels.FileSelectors
 
     using InformedProteomics.Backend.MassSpecData;
 
-    using LcmsSpectator.DialogServices;
-    using LcmsSpectator.Models;
-    using LcmsSpectator.Utils;
+    using DialogServices;
+    using Models;
+    using Utils;
 
     using ReactiveUI;
 
@@ -75,42 +75,42 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         {
             this.dialogService = dialogService;
 
-            this.WhenAnyValue(x => x.ParamFilePath).Subscribe(this.ReadParamFile);
+            this.WhenAnyValue(x => x.ParamFilePath).Subscribe(ReadParamFile);
 
             var browseParamFilesCommand = ReactiveCommand.Create();
-            browseParamFilesCommand.Subscribe(_ => this.BrowseParamFilesImplementation());
-            this.BrowseParamFilesCommand = browseParamFilesCommand;
+            browseParamFilesCommand.Subscribe(_ => BrowseParamFilesImplementation());
+            BrowseParamFilesCommand = browseParamFilesCommand;
 
             var browseRawFilesCommand = ReactiveCommand.Create();
-            browseRawFilesCommand.Subscribe(_ => this.BrowseRawFilesImplementation());
-            this.BrowseRawFilesCommand = browseRawFilesCommand;
+            browseRawFilesCommand.Subscribe(_ => BrowseRawFilesImplementation());
+            BrowseRawFilesCommand = browseRawFilesCommand;
 
             var browseFeatureFilesCommand = ReactiveCommand.Create();
-            browseFeatureFilesCommand.Subscribe(_ => this.BrowseFeatureFilesImplementation());
-            this.BrowseFeatureFilesCommand = browseFeatureFilesCommand;
+            browseFeatureFilesCommand.Subscribe(_ => BrowseFeatureFilesImplementation());
+            BrowseFeatureFilesCommand = browseFeatureFilesCommand;
 
             var browseIdFilesCommand = ReactiveCommand.Create();
-            browseIdFilesCommand.Subscribe(_ => this.BrowseIdFilesImplementation());
-            this.BrowseIdFilesCommand = browseIdFilesCommand;
+            browseIdFilesCommand.Subscribe(_ => BrowseIdFilesImplementation());
+            BrowseIdFilesCommand = browseIdFilesCommand;
 
             var browseFastaFilesCommand = ReactiveCommand.Create();
-            browseFastaFilesCommand.Subscribe(_ => this.BrowseFastaFilesImplementation());
-            this.BrowseFastaFilesCommand = browseFastaFilesCommand;
+            browseFastaFilesCommand.Subscribe(_ => BrowseFastaFilesImplementation());
+            BrowseFastaFilesCommand = browseFastaFilesCommand;
 
-            this.ParamFileSelected = true;
-            this.DatasetSelected = false;
+            ParamFileSelected = true;
+            DatasetSelected = false;
 
             // Ok button should be enabled if RawFilePath isn't null or empty
             var okCommand =
             ReactiveCommand.Create(this.WhenAnyValue(x => x.RawFilePath).Select(x => !string.IsNullOrWhiteSpace(x)));
-            okCommand.Subscribe(_ => this.OkImplementation());
-            this.OkCommand = okCommand;
+            okCommand.Subscribe(_ => OkImplementation());
+            OkCommand = okCommand;
 
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => this.CancelImplementation());
-            this.CancelCommand = cancelCommand;
+            cancelCommand.Subscribe(_ => CancelImplementation());
+            CancelCommand = cancelCommand;
 
-            this.Status = false;
+            Status = false;
         }
 
         /// <summary>
@@ -121,37 +121,37 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// Gets a command that prompts the user for a MSPF parameter file path.
         /// </summary>
-        public IReactiveCommand BrowseParamFilesCommand { get; private set; }
+        public IReactiveCommand BrowseParamFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
         /// </summary>
-        public IReactiveCommand BrowseRawFilesCommand { get; private set; }
+        public IReactiveCommand BrowseRawFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a feature file path.
         /// </summary>
-        public IReactiveCommand BrowseFeatureFilesCommand { get; private set; }
+        public IReactiveCommand BrowseFeatureFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for an ID file path.
         /// </summary>
-        public IReactiveCommand BrowseIdFilesCommand { get; private set; }
+        public IReactiveCommand BrowseIdFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a FASTA file path.
         /// </summary>
-        public IReactiveCommand BrowseFastaFilesCommand { get; private set; }
-        
+        public IReactiveCommand BrowseFastaFilesCommand { get; }
+
         /// <summary>
         /// Gets a command that validates the selected raw file path and trigger ReadyToClose.
         /// </summary>
-        public IReactiveCommand OkCommand { get; private set; }
+        public IReactiveCommand OkCommand { get; }
 
         /// <summary>
         /// Gets a command that triggers ReadyToClose
         /// </summary>
-        public IReactiveCommand CancelCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid dataset or raw file path was selected.
@@ -163,8 +163,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public string ParamFilePath
         {
-            get { return this.paramFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.paramFilePath, value); }
+            get => paramFilePath;
+            set => this.RaiseAndSetIfChanged(ref paramFilePath, value);
         }
 
         /// <summary>
@@ -172,8 +172,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public string RawFilePath
         {
-            get { return this.rawFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.rawFilePath, value); }
+            get => rawFilePath;
+            set => this.RaiseAndSetIfChanged(ref rawFilePath, value);
         }
 
         /// <summary>
@@ -181,8 +181,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public string FeatureFilePath
         {
-            get { return this.featureFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.featureFilePath, value); }
+            get => featureFilePath;
+            set => this.RaiseAndSetIfChanged(ref featureFilePath, value);
         }
 
         /// <summary>
@@ -190,8 +190,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public string IdFilePath
         {
-            get { return this.idFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.idFilePath, value); }
+            get => idFilePath;
+            set => this.RaiseAndSetIfChanged(ref idFilePath, value);
         }
 
         /// <summary>
@@ -199,8 +199,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public string FastaFilePath
         {
-            get { return this.fastaFilePath; }
-            set { this.RaiseAndSetIfChanged(ref this.fastaFilePath, value); }
+            get => fastaFilePath;
+            set => this.RaiseAndSetIfChanged(ref fastaFilePath, value);
         }
 
         /// <summary>
@@ -208,8 +208,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public bool ParamFileSelected
         {
-            get { return this.paramFileSelected; }
-            set { this.RaiseAndSetIfChanged(ref this.paramFileSelected, value); }
+            get => paramFileSelected;
+            set => this.RaiseAndSetIfChanged(ref paramFileSelected, value);
         }
 
         /// <summary>
@@ -217,8 +217,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         public bool DatasetSelected
         {
-            get { return this.datasetSelected; }
-            set { this.RaiseAndSetIfChanged(ref this.datasetSelected, value); }
+            get => datasetSelected;
+            set => this.RaiseAndSetIfChanged(ref datasetSelected, value);
         }
 
         /// <summary>
@@ -235,19 +235,19 @@ namespace LcmsSpectator.ViewModels.FileSelectors
                 var raw = string.Format("{0}\\{1}", dirPath, mspfParams.PuSpecFile);
                 if (!string.IsNullOrWhiteSpace(mspfParams.PuSpecFile) && File.Exists(raw))
                 {
-                    this.RawFilePath = raw; 
+                    RawFilePath = raw;
                 }
 
                 var feature = string.Format("{0}\\{1}", dirPath, mspfParams.FeatureFile);
                 if (!string.IsNullOrWhiteSpace(mspfParams.FeatureFile) && File.Exists(feature))
                 {
-                    this.FeatureFilePath = feature;
+                    FeatureFilePath = feature;
                 }
 
                 var fasta = string.Format("{0}\\{1}", dirPath, mspfParams.DatabaseFile);
                 if (!string.IsNullOrWhiteSpace(mspfParams.DatabaseFile) && File.Exists(fasta))
                 {
-                    this.FastaFilePath = fasta;
+                    FastaFilePath = fasta;
                 }
             }
         }
@@ -258,10 +258,10 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void BrowseParamFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(".param", FileConstants.ParamFileFormatString);
+            var path = dialogService.OpenFile(".param", FileConstants.ParamFileFormatString);
             if (!string.IsNullOrWhiteSpace(path))
             {
-                this.ParamFilePath = path;
+                ParamFilePath = path;
             }
         }
 
@@ -271,10 +271,10 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void BrowseRawFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(".raw", MassSpecDataReaderFactory.MassSpecDataTypeFilterString);
+            var path = dialogService.OpenFile(".raw", MassSpecDataReaderFactory.MassSpecDataTypeFilterString);
             if (!string.IsNullOrWhiteSpace(path))
             {
-                this.RawFilePath = path;
+                RawFilePath = path;
             }
         }
 
@@ -284,10 +284,10 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void BrowseFeatureFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(".ms1ft", FileConstants.FeatureFileFormatString);
+            var path = dialogService.OpenFile(".ms1ft", FileConstants.FeatureFileFormatString);
             if (!string.IsNullOrWhiteSpace(path))
             {
-                this.FeatureFilePath = path;
+                FeatureFilePath = path;
             }
         }
 
@@ -297,10 +297,10 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void BrowseIdFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(".txt", FileConstants.IdFileFormatString);
+            var path = dialogService.OpenFile(".txt", FileConstants.IdFileFormatString);
             if (!string.IsNullOrWhiteSpace(path))
             {
-                this.IdFilePath = path;
+                IdFilePath = path;
             }
         }
 
@@ -310,10 +310,10 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void BrowseFastaFilesImplementation()
         {
-            var path = this.dialogService.OpenFile(".fasta", FileConstants.FastaFileFormatString);
+            var path = dialogService.OpenFile(".fasta", FileConstants.FastaFileFormatString);
             if (!string.IsNullOrWhiteSpace(path))
             {
-                this.FastaFilePath = path;
+                FastaFilePath = path;
             }
         }
 
@@ -323,11 +323,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void OkImplementation()
         {
-            this.Status = true;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = true;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -336,11 +333,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// </summary>
         private void CancelImplementation()
         {
-            this.Status = false;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = false;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
     }
 }

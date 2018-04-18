@@ -36,16 +36,16 @@ namespace LcmsSpectator.ViewModels
         /// <param name="colors">The colors to initialize the palette with.</param>
         public ColorPaletteViewModel(IEnumerable<Color> colors = null)
         {
-            this.Colors = new ReactiveList<Color>();
+            Colors = new ReactiveList<Color>();
 
             if (colors != null)
             {
-                this.Colors.AddRange(colors);
+                Colors.AddRange(colors);
             }
 
             var paletteSelectedCommand = ReactiveCommand.Create();
-            paletteSelectedCommand.Subscribe(_ => this.IsSelected = true);
-            this.PaletteSelectedCommand = paletteSelectedCommand;
+            paletteSelectedCommand.Subscribe(_ => IsSelected = true);
+            PaletteSelectedCommand = paletteSelectedCommand;
         }
 
         /// <summary>
@@ -53,8 +53,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public string Title
         {
-            get { return this.title; }
-            set { this.RaiseAndSetIfChanged(ref this.title, value); }
+            get => title;
+            set => this.RaiseAndSetIfChanged(ref title, value);
         }
 
         /// <summary>
@@ -62,18 +62,18 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         public bool IsSelected
         {
-            get { return this.isSelected; }
-            set { this.RaiseAndSetIfChanged(ref this.isSelected, value); }
+            get => isSelected;
+            set => this.RaiseAndSetIfChanged(ref isSelected, value);
         }
 
         /// <summary>
         /// Gets the colors for the palette.
         /// </summary>
-        public ReactiveList<Color> Colors { get; private set; }
+        public ReactiveList<Color> Colors { get; }
 
         /// <summary>
         /// Gets a command that marks the palette as selected.
         /// </summary>
-        public IReactiveCommand PaletteSelectedCommand { get; private set; }
+        public IReactiveCommand PaletteSelectedCommand { get; }
     }
 }

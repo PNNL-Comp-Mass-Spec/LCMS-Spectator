@@ -17,7 +17,7 @@ namespace LcmsSpectator.Controls
 {
     using System.Windows;
     using System.Windows.Controls;
-    
+
     /// <summary>
     /// Microsoft has done everything in their power to make using WPF TreeViews a !@#$ING nightmare, especially
     /// with MVVM. The SelectedItem Dependency property of the TreeView control is readonly, which prevents conventionally
@@ -41,29 +41,23 @@ namespace LcmsSpectator.Controls
         /// </summary>
         public MvvmTreeView()
         {
-            this.SelectedItemChanged += this.MvvmTreeViewSelectedItemChanged;
+            SelectedItemChanged += MvvmTreeViewSelectedItemChanged;
         }
 
         /// <summary>
         /// Gets the dependency property that exposes the selected item of the tree view for binding to view model.
         /// </summary>
-        public static DependencyProperty SelectedItemTargetProperty { get; private set; }
+        public static DependencyProperty SelectedItemTargetProperty { get; }
 
         /// <summary>
         /// Gets or sets the item selected in the tree view.
         /// </summary>
         public object SelectedItemTarget
         {
-            get
-            {
-                return this.GetValue(SelectedItemTargetProperty);
-            }
+            get => GetValue(SelectedItemTargetProperty);
 
             // XAML binding requires this to be public even though it doesn't even use it
-            set
-            {
-                this.SetCurrentValue(SelectedItemTargetProperty, value);
-            }
+            set => SetCurrentValue(SelectedItemTargetProperty, value);
         }
 
         /// <summary>
@@ -73,14 +67,13 @@ namespace LcmsSpectator.Controls
         /// <param name="e">The event arguments.</param>
         private void MvvmTreeViewSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            var treeView = sender as MvvmTreeView;
-            if (treeView == null)
+            if (!(sender is MvvmTreeView treeView))
             {
                 return;
             }
 
             var selectedItem = treeView.SelectedItem;
-            this.SelectedItemTarget = selectedItem;
+            SelectedItemTarget = selectedItem;
         }
     }
 }

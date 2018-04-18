@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Data;
+
 namespace LcmsSpectator.Readers
 {
     using System;
@@ -67,18 +69,17 @@ namespace LcmsSpectator.Readers
         /// </summary>
         public void GetDemoDatasets()
         {
-            var lstDatasets = this.GetDatasets(5, "WSM419");
+            var lstDatasets = GetDatasets(5, "WSM419");
 
-            var lstMsgfPlusJobs = this.GetJobsByDataset(lstDatasets.Values.ToList());
+            var lstMsgfPlusJobs = GetJobsByDataset(lstDatasets.Values.ToList());
 
             // Alternatively, could use:
             //// var lstMSGFPlusJobs = GetJobsByDataset(5, "WSM419%");
 
             foreach (var dataset in lstDatasets)
             {
-                List<UdtJobInfo> lstJobsForDataset;
 
-                if (lstMsgfPlusJobs.TryGetValue(dataset.Key, out lstJobsForDataset))
+                if (lstMsgfPlusJobs.TryGetValue(dataset.Key, out var lstJobsForDataset))
                 {
                     foreach (var job in lstJobsForDataset)
                     {
@@ -99,8 +100,8 @@ namespace LcmsSpectator.Readers
         /// <returns>Dictionary where key is Dataset ID and value is dataset info</returns>
         public Dictionary<int, UdtDatasetInfo> GetDatasets(int mostRecentWeeks)
         {
-            string datasetNameFilter = string.Empty;
-            return this.GetDatasets(mostRecentWeeks, datasetNameFilter);
+            var datasetNameFilter = string.Empty;
+            return GetDatasets(mostRecentWeeks, datasetNameFilter);
         }
 
         /// <summary>
@@ -117,7 +118,7 @@ namespace LcmsSpectator.Readers
 
             try
             {
-                string sql = " SELECT Dataset_ID, Dataset, Experiment, Organism, Instrument, Created, Folder" +
+                var sql = " SELECT Dataset_ID, Dataset, Experiment, Organism, Instrument, Created, Folder" +
                                 " FROM V_Mage_Dataset_List " +
                                 " WHERE Instrument <> 'DMS_Pipeline_Data'";
 
@@ -125,10 +126,10 @@ namespace LcmsSpectator.Readers
 
                 if (!string.IsNullOrWhiteSpace(datasetNameFilter))
                 {
-                    sql += " AND Dataset Like '" + this.CheckFilter(datasetNameFilter) + "'";
+                    sql += " AND Dataset Like '" + CheckFilter(datasetNameFilter) + "'";
                 }
 
-                int retryCount = MaxRetries;
+                var retryCount = MaxRetries;
                 if (retryCount < 1)
                 {
                     retryCount = 1;
@@ -138,7 +139,7 @@ namespace LcmsSpectator.Readers
                 {
                     try
                     {
-                        using (var connection = new SqlConnection(this.connectionString))
+                        using (var connection = new SqlConnection(connectionString))
                         {
                             connection.Open();
 
@@ -152,12 +153,12 @@ namespace LcmsSpectator.Readers
                                 var datasetInfo = new UdtDatasetInfo
                                 {
                                     DatasetId = reader.GetInt32(0),
-                                    Dataset = this.GetDBString(reader, 1),
-                                    Experiment = this.GetDBString(reader, 2),
-                                    Organism = this.GetDBString(reader, 3),
-                                    Instrument = this.GetDBString(reader, 4),
+                                    Dataset = GetDBString(reader, 1),
+                                    Experiment = GetDBString(reader, 2),
+                                    Organism = GetDBString(reader, 3),
+                                    Instrument = GetDBString(reader, 4),
                                     Created = reader.IsDBNull(5) ? DateTime.MinValue : reader.GetDateTime(5),
-                                    DatasetFolderPath = this.GetDBString(reader, 6)
+                                    DatasetFolderPath = GetDBString(reader, 6)
                                 };
 
                                 // Purged datasets that were archived prior to ~August 2013 will have DatasetFolderPath of the form
@@ -176,7 +177,7 @@ namespace LcmsSpectator.Readers
                     catch (Exception ex)
                     {
                         retryCount -= 1;
-                        string msg = "Exception querying database in GetDatasets: " + ex.Message;
+                        var msg = "Exception querying database in GetDatasets: " + ex.Message;
                         msg += ", RetryCount = " + retryCount;
 
                         Console.WriteLine(msg);
@@ -188,7 +189,7 @@ namespace LcmsSpectator.Readers
             }
             catch (Exception ex)
             {
-                string msg = "Exception connecting to database in GetDatasets: " + ex.Message + "; ConnectionString: " + this.connectionString;
+                var msg = "Exception connecting to database in GetDatasets: " + ex.Message + "; ConnectionString: " + connectionString;
                 Console.WriteLine(msg);
             }
 
@@ -202,8 +203,8 @@ namespace LcmsSpectator.Readers
         /// <returns>Dictionary where key is Dataset ID and value is a list of jobs for the dataset</returns>
         public Dictionary<int, List<UdtJobInfo>> GetJobsByDataset(int mostRecentWeeks)
         {
-            string datasetNameFilter = string.Empty;
-            return this.GetJobsByDataset(mostRecentWeeks, datasetNameFilter);
+            var datasetNameFilter = string.Empty;
+            return GetJobsByDataset(mostRecentWeeks, datasetNameFilter);
         }
 
         /// <summary>
@@ -215,8 +216,8 @@ namespace LcmsSpectator.Readers
         /// <remarks>If datasetNameFilter does not have a % sign, then will auto-add % signs at the beginning and end to result in partial name matches</remarks>
         public Dictionary<int, List<UdtJobInfo>> GetJobsByDataset(int mostRecentWeeks, string datasetNameFilter)
         {
-            var msgfPlusJobs = this.GetJobsByDataset(mostRecentWeeks, datasetNameFilter, MsgfplusToolFilter);
-            var mspfJobs = this.GetJobsByDataset(mostRecentWeeks, datasetNameFilter, MsPathFinderToolFilter);
+            var msgfPlusJobs = GetJobsByDataset(mostRecentWeeks, datasetNameFilter, MsgfplusToolFilter);
+            var mspfJobs = GetJobsByDataset(mostRecentWeeks, datasetNameFilter, MsPathFinderToolFilter);
             var allJobs = msgfPlusJobs.Concat(mspfJobs).ToDictionary(x => x.Key, x => x.Value);
             return allJobs;
         }
@@ -231,10 +232,10 @@ namespace LcmsSpectator.Readers
         /// <remarks>If datasetNameFilter or toolNameFilter do not have a % sign, then will auto-add % signs at the beginning and end to result in partial name matches</remarks>
         public Dictionary<int, List<UdtJobInfo>> GetJobsByDataset(int mostRecentWeeks, string datasetNameFilter, string toolNameFilter)
         {
-            var datasets = this.GetDatasets(mostRecentWeeks, datasetNameFilter);
+            var datasets = GetDatasets(mostRecentWeeks, datasetNameFilter);
 
             // Find the MSGF+/MSPathFinder jobs for the datasets
-            var msgfPlusJobs = this.GetJobsByDataset(datasets.Values.ToList(), toolNameFilter);
+            var msgfPlusJobs = GetJobsByDataset(datasets.Values.ToList(), toolNameFilter);
 
             return msgfPlusJobs;
         }
@@ -247,8 +248,8 @@ namespace LcmsSpectator.Readers
         public Dictionary<int, List<UdtJobInfo>> GetJobsByDataset(IEnumerable<UdtDatasetInfo> datasets)
         {
             var udtDatasetInfos = datasets as UdtDatasetInfo[] ?? datasets.ToArray();
-            var msgfPlusJobs = this.GetJobsByDataset(udtDatasetInfos, MsgfplusToolFilter);
-            var mspfPathFinderJobs = this.GetJobsByDataset(udtDatasetInfos, MsPathFinderToolFilter);
+            var msgfPlusJobs = GetJobsByDataset(udtDatasetInfos, MsgfplusToolFilter);
+            var mspfPathFinderJobs = GetJobsByDataset(udtDatasetInfos, MsPathFinderToolFilter);
             var allJobs = msgfPlusJobs.Concat(mspfPathFinderJobs).ToDictionary(x => x.Key, x => x.Value);
             return allJobs;
         }
@@ -277,7 +278,7 @@ namespace LcmsSpectator.Readers
                     datasetIdList.Append(dataset.DatasetId);
                 }
 
-                string sql = " SELECT Job, Dataset_ID, Tool, Job_Finish, Folder," +
+                var sql = " SELECT Job, Dataset_ID, Tool, Job_Finish, Folder," +
                                     " Parameter_File, Settings_File," +
                                     " [Protein Collection List], [Organism DB]" +
                                 " FROM V_Mage_Analysis_Jobs" +
@@ -285,10 +286,10 @@ namespace LcmsSpectator.Readers
 
                 if (!string.IsNullOrWhiteSpace(toolNameFilter))
                 {
-                    sql += " AND Tool Like '" + this.CheckFilter(toolNameFilter) + "'";
+                    sql += " AND Tool Like '" + CheckFilter(toolNameFilter) + "'";
                 }
 
-                int retryCount = MaxRetries;
+                var retryCount = MaxRetries;
                 if (retryCount < 1)
                 {
                     retryCount = 1;
@@ -298,7 +299,7 @@ namespace LcmsSpectator.Readers
                 {
                     try
                     {
-                        using (var connection = new SqlConnection(this.connectionString))
+                        using (var connection = new SqlConnection(connectionString))
                         {
                             connection.Open();
 
@@ -314,18 +315,17 @@ namespace LcmsSpectator.Readers
                                 {
                                     Job = reader.GetInt32(0),
                                     DatasetId = reader.GetInt32(1),
-                                    Tool = this.GetDBString(reader, 2),
+                                    Tool = GetDBString(reader, 2),
                                     Completed = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3),
-                                    JobFolderPath = this.GetDBString(reader, 4),
-                                    ParameterFile = this.GetDBString(reader, 5),
-                                    SettingsFile = this.GetDBString(reader, 6),
-                                    ProteinCollection = this.GetDBString(reader, 7),
-                                    OrganismDb = this.GetDBString(reader, 8)
+                                    JobFolderPath = GetDBString(reader, 4),
+                                    ParameterFile = GetDBString(reader, 5),
+                                    SettingsFile = GetDBString(reader, 6),
+                                    ProteinCollection = GetDBString(reader, 7),
+                                    OrganismDb = GetDBString(reader, 8)
                                 };
 
-                                List<UdtJobInfo> jobsForDataset;
 
-                                if (dctJobs.TryGetValue(jobInfo.DatasetId, out jobsForDataset))
+                                if (dctJobs.TryGetValue(jobInfo.DatasetId, out var jobsForDataset))
                                 {
                                     jobsForDataset.Add(jobInfo);
                                 }
@@ -342,7 +342,7 @@ namespace LcmsSpectator.Readers
                     catch (Exception ex)
                     {
                         retryCount -= 1;
-                        string msg = "Exception querying database in GetJobs: " + ex.Message;
+                        var msg = "Exception querying database in GetJobs: " + ex.Message;
                         msg += ", RetryCount = " + retryCount;
 
                         Console.WriteLine(msg);
@@ -354,7 +354,7 @@ namespace LcmsSpectator.Readers
             }
             catch (Exception ex)
             {
-                string msg = "Exception connecting to database in GetJobs: " + ex.Message + "; ConnectionString: " + this.connectionString;
+                var msg = "Exception connecting to database in GetJobs: " + ex.Message + "; ConnectionString: " + connectionString;
                 Console.WriteLine(msg);
             }
 
@@ -385,7 +385,7 @@ namespace LcmsSpectator.Readers
         /// <param name="reader">The database reader.</param>
         /// <param name="columnIndex">The column index.</param>
         /// <returns>The <see cref="string"/>.</returns>
-        private string GetDBString(SqlDataReader reader, int columnIndex)
+        private string GetDBString(IDataRecord reader, int columnIndex)
         {
             if (!Convert.IsDBNull(reader.GetValue(columnIndex)))
             {

@@ -5,13 +5,12 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    using InformedProteomics.Backend.Data.Biology;
     using InformedProteomics.Backend.Data.Composition;
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
-    using LcmsSpectator.Utils;
-    using LcmsSpectator.ViewModels.Data;
+    using Utils;
+    using ViewModels.Data;
     using Splat;
 
     public class FragmentationSequence
@@ -35,34 +34,34 @@
         /// <param name="activationMethod">The Activation Method.</param>
         public FragmentationSequence(Sequence sequence, int charge, ILcMsRun lcms, ActivationMethod activationMethod)
         {
-            this.cacheLock = new object();
-            this.fragmentCache = new MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel>(this.GetLabeledIonViewModel, 1000);
+            cacheLock = new object();
+            fragmentCache = new MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel>(GetLabeledIonViewModel, 1000);
 
-            this.Sequence = sequence;
-            this.Charge = charge;
-            this.LcMsRun = lcms;
-            this.ActivationMethod = activationMethod;
+            Sequence = sequence;
+            Charge = charge;
+            LcMsRun = lcms;
+            ActivationMethod = activationMethod;
         }
 
         /// <summary>
         /// Gets the underlying sequence.
         /// </summary>
-        public Sequence Sequence { get; private set; }
+        public Sequence Sequence { get; }
 
         /// <summary>
         /// Gets the charge.
         /// </summary>
-        public int Charge { get; private set; }
+        public int Charge { get; }
 
         /// <summary>
         /// Gets the LCMSRun for the data set.
         /// </summary>
-        public ILcMsRun LcMsRun { get; private set; }
+        public ILcMsRun LcMsRun { get; }
 
         /// <summary>
         /// Gets the Activation Method.
         /// </summary>
-        public ActivationMethod ActivationMethod { get; private set; }
+        public ActivationMethod ActivationMethod { get; }
 
         /// <summary>
         /// Get fragment ion labels.
@@ -72,7 +71,7 @@
         /// <returns>A list of fragment labeled ions.</returns>
         public Task<List<LabeledIonViewModel>> GetFragmentLabelsAsync(IList<IonType> ionTypes, SearchModification[] labelModifications = null)
         {
-            return Task.Run(() => this.GetFragmentLabels(ionTypes, labelModifications));
+            return Task.Run(() => GetFragmentLabels(ionTypes, labelModifications));
         }
 
         /// <summary>
@@ -85,7 +84,7 @@
             double relativeIntensityThreshold = 0.1,
             IEnumerable<SearchModification> labelModifications = null)
         {
-            return Task.Run(() => this.GetIsotopePrecursorLabels(relativeIntensityThreshold, labelModifications));
+            return Task.Run(() => GetIsotopePrecursorLabels(relativeIntensityThreshold, labelModifications));
         }
 
         /// <summary>
@@ -96,7 +95,7 @@
         public Task<List<LabeledIonViewModel>> GetChargePrecursorLabelsAsync(
             IEnumerable<SearchModification> labelModifications = null)
         {
-            return Task.Run(() => this.GetChargePrecursorLabels(labelModifications));
+            return Task.Run(() => GetChargePrecursorLabels(labelModifications));
         }
 
         /// <summary>
@@ -107,30 +106,30 @@
         /// <returns>A list of fragment labeled ions.</returns>
         public List<LabeledIonViewModel> GetFragmentLabels(IList<IonType> ionTypes, SearchModification[] labelModifications = null)
         {
-            var fragmentLabelList = new List<LabeledIonViewModel> { Capacity = this.Sequence.Count * ionTypes.Count * this.Charge };
-            if (this.Sequence.Count < 1 || this.LcMsRun == null)
+            var fragmentLabelList = new List<LabeledIonViewModel> { Capacity = Sequence.Count * ionTypes.Count * Charge };
+            if (Sequence.Count < 1 || LcMsRun == null)
             {
                 return fragmentLabelList;
             }
 
-            var sequence = labelModifications == null ? this.Sequence : IonUtils.GetHeavySequence(this.Sequence, labelModifications);
+            var sequence = labelModifications == null ? Sequence : IonUtils.GetHeavySequence(Sequence, labelModifications);
 
-            var precursorIon = IonUtils.GetPrecursorIon(sequence, this.Charge);
-            lock (this.cacheLock)
+            var precursorIon = IonUtils.GetPrecursorIon(sequence, Charge);
+            lock (cacheLock)
             {
                 foreach (var ionType in ionTypes)
                 {
                     var ionFragments = new List<LabeledIonViewModel>();
-                    for (int i = 1; i < this.Sequence.Count; i++)
+                    for (var i = 1; i < Sequence.Count; i++)
                     {
                         var startIndex = ionType.IsPrefixIon ? 0 : i;
                         var length = ionType.IsPrefixIon ? i : sequence.Count - i;
-                        var fragment = new Sequence(this.Sequence.GetRange(startIndex, length));
+                        var fragment = new Sequence(Sequence.GetRange(startIndex, length));
                         var ions = ionType.GetPossibleIons(fragment);
 
                         foreach (var ion in ions)
                         {
-                            var labeledIonViewModel = this.fragmentCache.Get(new Tuple<Composition, IonType>(ion.Composition, ionType));
+                            var labeledIonViewModel = fragmentCache.Get(new Tuple<Composition, IonType>(ion.Composition, ionType));
                             labeledIonViewModel.Index = length;
                             labeledIonViewModel.PrecursorIon = precursorIon;
 
@@ -159,24 +158,24 @@
         public List<LabeledIonViewModel> GetIsotopePrecursorLabels(double relativeIntensityThreshold = 0.1, IEnumerable<SearchModification> labelModifications = null)
         {
             var ions = new List<LabeledIonViewModel>();
-            if (this.Sequence.Count == 0 || this.LcMsRun == null)
+            if (Sequence.Count == 0 || LcMsRun == null)
             {
                 return ions;
             }
 
-            var sequence = this.Sequence;
+            var sequence = Sequence;
             if (labelModifications != null)
             {
                 sequence = IonUtils.GetHeavySequence(sequence, labelModifications.ToArray());
             }
 
             #pragma warning disable 0618
-            var precursorIonType = new IonType("Precursor", Composition.H2O, this.Charge, false);
+            var precursorIonType = new IonType("Precursor", Composition.H2O, Charge, false);
             #pragma warning restore 0618
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             var relativeIntensities = composition.GetIsotopomerEnvelope();
             var indices = new List<int> { -1 };
-            for (int i = 0; i < relativeIntensities.Envelope.Length; i++)
+            for (var i = 0; i < relativeIntensities.Envelope.Length; i++)
             {
                 if (relativeIntensities.Envelope[i] >= relativeIntensityThreshold || i == 0)
                 {
@@ -184,7 +183,7 @@
                 }
             }
 
-            ions.AddRange(indices.Select(index => new LabeledIonViewModel(composition, precursorIonType, false, this.LcMsRun, null, false, index)));
+            ions.AddRange(indices.Select(index => new LabeledIonViewModel(composition, precursorIonType, false, LcMsRun, null, false, index)));
             return ions;
         }
 
@@ -196,31 +195,31 @@
         public List<LabeledIonViewModel> GetChargePrecursorLabels(IEnumerable<SearchModification> labelModifications = null)
         {
             var ions = new List<LabeledIonViewModel>();
-            var numChargeStates = IonUtils.GetNumNeighboringChargeStates(this.Charge);
-            if (this.Sequence.Count == 0 || this.LcMsRun == null)
+            var numChargeStates = IonUtils.GetNumNeighboringChargeStates(Charge);
+            if (Sequence.Count == 0 || LcMsRun == null)
             {
                 return ions;
             }
 
-            var sequence = this.Sequence;
+            var sequence = Sequence;
             if (labelModifications != null)
             {
                 sequence = IonUtils.GetHeavySequence(sequence, labelModifications.ToArray());
             }
 
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
-            var minCharge = Math.Max(1, this.Charge - numChargeStates);
-            var maxCharge = this.Charge + numChargeStates;
+            var minCharge = Math.Max(1, Charge - numChargeStates);
+            var maxCharge = Charge + numChargeStates;
 
-            for (int i = minCharge; i <= maxCharge; i++)
+            for (var i = minCharge; i <= maxCharge; i++)
             {
                 var index = i - minCharge;
                 if (index == 0)
                 {
-                    index = this.Charge - minCharge;
+                    index = Charge - minCharge;
                 }
 
-                if (i == this.Charge)
+                if (i == Charge)
                 {
                     index = 0;         // guarantee that actual charge is index 0
                 }
@@ -228,7 +227,7 @@
                 #pragma warning disable 0618
                 var precursorIonType = new IonType("Precursor", Composition.H2O, i, false);
                 #pragma warning restore 0618
-                ions.Add(new LabeledIonViewModel(composition, precursorIonType, false, this.LcMsRun, null, true, index));
+                ions.Add(new LabeledIonViewModel(composition, precursorIonType, false, LcMsRun, null, true, index));
             }
 
             return ions;
@@ -242,7 +241,7 @@
         /// <returns>A fragment labeled ion.</returns>
         private LabeledIonViewModel GetLabeledIonViewModel(Tuple<Composition, IonType> key, object ob)
         {
-            return new LabeledIonViewModel(key.Item1, key.Item2, true, this.LcMsRun);
+            return new LabeledIonViewModel(key.Item1, key.Item2, true, LcMsRun);
         }
     }
 }

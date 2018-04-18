@@ -15,7 +15,7 @@ namespace LcmsSpectator.ViewModels.Modifications
 
     using InformedProteomics.Backend.Data.Composition;
 
-    using LcmsSpectator.DialogServices;
+    using DialogServices;
 
     using ReactiveUI;
 
@@ -98,23 +98,23 @@ namespace LcmsSpectator.ViewModels.Modifications
         public CustomModificationViewModel(string modificationName, bool modificationNameReadOnly, IDialogService dialogService)
         {
             this.dialogService = dialogService;
-            this.ModificationName = modificationName;
-            this.ModificationNameReadOnly = modificationNameReadOnly;
-            this.Composition = new Composition(0, 0, 0, 0, 0);
-            this.Status = false;
+            ModificationName = modificationName;
+            ModificationNameReadOnly = modificationNameReadOnly;
+            Composition = new Composition(0, 0, 0, 0, 0);
+            Status = false;
 
-            this.FromFormulaChecked = true;
-            this.FromMassChecked = false;
+            FromFormulaChecked = true;
+            FromMassChecked = false;
 
             var saveCommand = ReactiveCommand.Create();
-            saveCommand.Subscribe(_ => this.SaveImplementation());
-            this.SaveCommand = saveCommand;
+            saveCommand.Subscribe(_ => SaveImplementation());
+            SaveCommand = saveCommand;
 
             var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => this.CancelImplementation());
-            this.CancelCommand = cancelCommand;
+            cancelCommand.Subscribe(_ => CancelImplementation());
+            CancelCommand = cancelCommand;
 
-            this.WhenAnyValue(x => x.Mass).Subscribe(mass => this.MassStr = mass.ToString(CultureInfo.InvariantCulture));
+            this.WhenAnyValue(x => x.Mass).Subscribe(mass => MassStr = mass.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace LcmsSpectator.ViewModels.Modifications
         public CustomModificationViewModel(string modificationName, bool modificationNameReadOnly, Composition composition, IDialogService dialogService)
             : this(modificationName, modificationNameReadOnly, dialogService)
         {
-            this.Composition = composition;
+            Composition = composition;
         }
 
         /// <summary>
@@ -143,20 +143,20 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Gets a command creates a modification from the values selected and sets the status.
         /// </summary>
-        public IReactiveCommand SaveCommand { get; private set; }
-        
+        public IReactiveCommand SaveCommand { get; }
+
         /// <summary>
         /// Gets a command that sets status to false.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; private set; }
+        public IReactiveCommand CancelCommand { get; }
 
         /// <summary>
         /// Gets or sets the name of the modification.
         /// </summary>
         public string ModificationName
         {
-            get { return this.modificationName; }
-            set { this.RaiseAndSetIfChanged(ref this.modificationName, value); }
+            get => modificationName;
+            set => this.RaiseAndSetIfChanged(ref modificationName, value);
         }
 
         /// <summary>
@@ -164,8 +164,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public bool ModificationNameReadOnly
         {
-            get { return this.modificationNameReadOnly; }
-            set { this.RaiseAndSetIfChanged(ref this.modificationNameReadOnly, value); }
+            get => modificationNameReadOnly;
+            set => this.RaiseAndSetIfChanged(ref modificationNameReadOnly, value);
         }
 
         /// <summary>
@@ -173,8 +173,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public int C
         {
-            get { return this.c; }
-            set { this.RaiseAndSetIfChanged(ref this.c, value); }
+            get => c;
+            set => this.RaiseAndSetIfChanged(ref c, value);
         }
 
         /// <summary>
@@ -182,8 +182,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public int H
         {
-            get { return this.h; }
-            set { this.RaiseAndSetIfChanged(ref this.h, value); }
+            get => h;
+            set => this.RaiseAndSetIfChanged(ref h, value);
         }
 
         /// <summary>
@@ -191,8 +191,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public int N
         {
-            get { return this.n; }
-            set { this.RaiseAndSetIfChanged(ref this.n, value); }
+            get => n;
+            set => this.RaiseAndSetIfChanged(ref n, value);
         }
 
         /// <summary>
@@ -200,8 +200,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public int O
         {
-            get { return this.o; }
-            set { this.RaiseAndSetIfChanged(ref this.o, value); }
+            get => o;
+            set => this.RaiseAndSetIfChanged(ref o, value);
         }
 
         /// <summary>
@@ -209,8 +209,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public int S
         {
-            get { return this.s; }
-            set { this.RaiseAndSetIfChanged(ref this.s, value); }
+            get => s;
+            set => this.RaiseAndSetIfChanged(ref s, value);
         }
 
         /// <summary>
@@ -218,8 +218,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public int P
         {
-            get { return this.p; }
-            set { this.RaiseAndSetIfChanged(ref this.p, value); }
+            get => p;
+            set => this.RaiseAndSetIfChanged(ref p, value);
         }
 
         /// <summary>
@@ -227,18 +227,15 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public Composition Composition
         {
-            get
-            {
-                return new Composition(this.C, this.H, this.N, this.O, this.S);
-            }
+            get => new Composition(C, H, N, O, S);
 
             set
             {
-                this.C = value.C;
-                this.H = value.H;
-                this.N = value.N;
-                this.O = value.O;
-                this.S = value.S;
+                C = value.C;
+                H = value.H;
+                N = value.N;
+                O = value.O;
+                S = value.S;
             }
         }
 
@@ -247,8 +244,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public string MassStr
         {
-             get { return this.massStr; }
-            set { this.RaiseAndSetIfChanged(ref this.massStr, value); }
+             get => massStr;
+            set => this.RaiseAndSetIfChanged(ref massStr, value);
         }
 
         /// <summary>
@@ -256,8 +253,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public double Mass
         {
-            get { return this.mass; }
-            set { this.RaiseAndSetIfChanged(ref this.mass, value); }
+            get => mass;
+            set => this.RaiseAndSetIfChanged(ref mass, value);
         }
 
         /// <summary>
@@ -265,8 +262,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public bool FromFormulaChecked
         {
-            get { return this.fromFormulaChecked; }
-            set { this.RaiseAndSetIfChanged(ref this.fromFormulaChecked, value); }
+            get => fromFormulaChecked;
+            set => this.RaiseAndSetIfChanged(ref fromFormulaChecked, value);
         }
 
         /// <summary>
@@ -274,8 +271,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         public bool FromMassChecked
         {
-            get { return this.fromMassChecked; }
-            set { this.RaiseAndSetIfChanged(ref this.fromMassChecked, value); }
+            get => fromMassChecked;
+            set => this.RaiseAndSetIfChanged(ref fromMassChecked, value);
         }
 
         /// <summary>
@@ -284,26 +281,23 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         private void SaveImplementation()
         {
-            if (string.IsNullOrWhiteSpace(this.ModificationName))
+            if (string.IsNullOrWhiteSpace(ModificationName))
             {
-                this.dialogService.MessageBox("Modification must have a name.");
+                dialogService.MessageBox("Modification must have a name.");
                 return;
             }
 
-            double massShift = 0.0;
-            if (this.FromMassChecked && (string.IsNullOrEmpty(this.massStr) || !double.TryParse(this.massStr, out massShift)))
+            var massShift = 0.0;
+            if (FromMassChecked && (string.IsNullOrEmpty(massStr) || !double.TryParse(massStr, out massShift)))
             {
-                this.dialogService.MessageBox(string.Format("Invalid mass: {0}", this.massStr));
+                dialogService.MessageBox(string.Format("Invalid mass: {0}", massStr));
                 return;
             }
 
-            this.mass = massShift;
+            mass = massShift;
 
-            this.Status = true;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = true;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -312,11 +306,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// </summary>
         private void CancelImplementation()
         {
-            this.Status = false;
-            if (this.ReadyToClose != null)
-            {
-                this.ReadyToClose(this, EventArgs.Empty);
-            }
+            Status = false;
+            ReadyToClose?.Invoke(this, EventArgs.Empty);
         }
     }
 }

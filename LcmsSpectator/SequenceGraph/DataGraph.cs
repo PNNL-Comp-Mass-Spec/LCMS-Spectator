@@ -10,7 +10,6 @@
 
 namespace LcmsSpectator.SequenceGraph
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -39,7 +38,7 @@ namespace LcmsSpectator.SequenceGraph
             var revSequence = new Sequence(sequence);
             revSequence.Reverse();
             var vertex = end;
-            for (int i = 0; i < revSequence.Count; i++)
+            foreach (var residue in revSequence)
             {
                 if (vertex == null)
                 {
@@ -47,8 +46,7 @@ namespace LcmsSpectator.SequenceGraph
                 }
 
                 vertices.Add(vertex);
-                IEnumerable<DataEdge> inEdges;
-                if (this.TryGetInEdges(vertex, out inEdges) && inEdges != null)
+                if (TryGetInEdges(vertex, out var inEdges) && inEdges != null)
                 {
                     var edges = inEdges.ToList();
                     if (edges.Count == 0)
@@ -57,18 +55,18 @@ namespace LcmsSpectator.SequenceGraph
                     }
 
                     DataVertex newVertex = null;
-                    var modaa = revSequence[i] as ModifiedAminoAcid;
+                    var modaa = residue as ModifiedAminoAcid;
                     foreach (var edge in edges)
                     {
                         var modEdgeaa = edge.AminoAcid as ModifiedAminoAcid;
                         if (modaa != null && modEdgeaa != null &&
-                            modEdgeaa.Residue == modaa.Residue && 
+                            modEdgeaa.Residue == modaa.Residue &&
                             modEdgeaa.Modification.Equals(modaa.Modification))
                         {
                             newVertex = edge.GetOtherVertex(vertex);
                         }
-                        else if (modaa == null && modEdgeaa == null && 
-                                 edge.AminoAcid.Residue == revSequence[i].Residue)
+                        else if (modaa == null && modEdgeaa == null &&
+                                 edge.AminoAcid.Residue == residue.Residue)
                         {
                             newVertex = edge.GetOtherVertex(vertex);
                         }
@@ -91,7 +89,7 @@ namespace LcmsSpectator.SequenceGraph
         {
             var sequences = new List<List<DataVertex>> { new List<DataVertex>() };
             sequences[0].Add(start);
-            this.GetAllSequencePathsRec(start, end, sequences, 0);
+            GetAllSequencePathsRec(start, end, sequences, 0);
             return sequences;
         }
 
@@ -102,10 +100,9 @@ namespace LcmsSpectator.SequenceGraph
         /// <param name="end">The end node.</param>
         /// <param name="sequences">List of paths, where each path is a list of vertices.</param>
         /// <param name="sequenceIndex">Distance from start node.</param>
-        private void GetAllSequencePathsRec(DataVertex start, DataVertex end, List<List<DataVertex>> sequences, int sequenceIndex)
+        private void GetAllSequencePathsRec(DataVertex start, DataVertex end, IList<List<DataVertex>> sequences, int sequenceIndex)
         {
-            IEnumerable<DataEdge> edges;
-            this.TryGetOutEdges(start, out edges);
+            TryGetOutEdges(start, out var edges);
             if (edges == null)
             {   // reached end
                 sequences[sequenceIndex].Add(start);
@@ -123,7 +120,7 @@ namespace LcmsSpectator.SequenceGraph
                 if (newVertex != null)
                 {
                     sequences[sequenceIndex].Add(newVertex);
-                    this.GetAllSequencePathsRec(newVertex, end, sequences, sequenceIndex);
+                    GetAllSequencePathsRec(newVertex, end, sequences, sequenceIndex);
                 }
             }
             else
@@ -144,7 +141,7 @@ namespace LcmsSpectator.SequenceGraph
                         sequences[newIndex].Add(vertex);
                     }
 
-                    this.GetAllSequencePathsRec(newVertex, end, sequences, newIndex);
+                    GetAllSequencePathsRec(newVertex, end, sequences, newIndex);
                 }
             }
         }
@@ -165,7 +162,7 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         public DataVertex()
         {
-            this.Text = string.Empty;
+            Text = string.Empty;
         }
 
         /// <summary>
@@ -187,7 +184,7 @@ namespace LcmsSpectator.SequenceGraph
         /// Gets or sets the chemical formula for this node for prefix fragments.
         /// </summary>
         public Composition PrefixComposition { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the chemical formula for this node for suffix fragments.
         /// </summary>
@@ -204,7 +201,7 @@ namespace LcmsSpectator.SequenceGraph
         /// <returns>The string.</returns>
         public override string ToString()
         {
-            return this.Text;
+            return Text;
         }
     }
 
@@ -225,7 +222,7 @@ namespace LcmsSpectator.SequenceGraph
         public DataEdge(DataVertex source, DataVertex target, double weight = 1)
             : base(source, target, weight)
         {
-            this.Modifications = ModificationCombination.NoModification;
+            Modifications = ModificationCombination.NoModification;
         }
 
         /// <summary>
@@ -234,8 +231,8 @@ namespace LcmsSpectator.SequenceGraph
         public DataEdge()
             : base(null, null, 1)
         {
-            this.Modifications = ModificationCombination.NoModification;
-            this.SequenceIndex = 0;
+            Modifications = ModificationCombination.NoModification;
+            SequenceIndex = 0;
         }
 
         /// <summary>
@@ -248,23 +245,20 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         public ModificationCombination Modifications
         {
-            get
-            {
-                return this.modifications;
-            }
+            get => modifications;
 
             set
             {
-                this.modifications = value;
-                if (this.modifications.Modifications.Count > 0)
+                modifications = value;
+                if (modifications.Modifications.Count > 0)
                 {
-                    this.AminoAcid = new ModifiedAminoAcid(this.AminoAcid, this.modifications.Modifications.LastOrDefault());
+                    AminoAcid = new ModifiedAminoAcid(AminoAcid, modifications.Modifications.LastOrDefault());
                 }
             }
         }
 
         /// <summary>
-        /// Gets or sets the index in the sequence graph in this 
+        /// Gets or sets the index in the sequence graph in this
         /// </summary>
         public int SequenceIndex { get; set; }
 
@@ -275,15 +269,15 @@ namespace LcmsSpectator.SequenceGraph
         {
             get
             {
-                if (this.AminoAcid == null)
+                if (AminoAcid == null)
                 {
                     return string.Empty;
                 }
 
                 var text =
-                    (this.Modifications.GetNumModifications() == 0)
-                        ? string.Format("{0}", this.AminoAcid.Residue)
-                        : string.Format("{0}", this.Modifications);
+                    (Modifications.GetNumModifications() == 0)
+                        ? string.Format("{0}", AminoAcid.Residue)
+                        : string.Format("{0}", Modifications);
                 return text;
             }
         }
@@ -294,7 +288,7 @@ namespace LcmsSpectator.SequenceGraph
         /// <returns>The string.</returns>
         public override string ToString()
         {
-            return this.Text;
+            return Text;
         }
     }
 }

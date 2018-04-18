@@ -18,9 +18,9 @@ namespace LcmsSpectator.Models
     using InformedProteomics.Backend.Data.Sequence;
     using InformedProteomics.Backend.Data.Spectrometry;
     using InformedProteomics.Backend.MassSpecData;
-    using LcmsSpectator.Readers.SequenceReaders;
+    using Readers.SequenceReaders;
     using ReactiveUI;
-    
+
     /// <summary>
     /// A class that represents a protein-spectrum match identification.
     /// </summary>
@@ -112,19 +112,19 @@ namespace LcmsSpectator.Models
         public PrSm(ISequenceReader sequenceReader = null)
         {
             this.sequenceReader = sequenceReader ?? new SequenceReader();
-            this.RawFileName = string.Empty;
-            this.SequenceText = string.Empty;
-            this.Sequence = new Sequence(new List<AminoAcid>());
-            this.ProteinName = string.Empty;
-            this.ProteinDesc = string.Empty;
-            this.UseGolfScoring = false;
-            this.Heavy = false;
-            this.lcms = null;
-            this.scan = 0;
-            this.Mass = double.NaN;
-            this.PrecursorMz = double.NaN;
-            this.QValue = -1.0;
-            this.charge = 1;
+            RawFileName = string.Empty;
+            SequenceText = string.Empty;
+            Sequence = new Sequence(new List<AminoAcid>());
+            ProteinName = string.Empty;
+            ProteinDesc = string.Empty;
+            UseGolfScoring = false;
+            Heavy = false;
+            lcms = null;
+            scan = 0;
+            Mass = double.NaN;
+            PrecursorMz = double.NaN;
+            QValue = -1.0;
+            charge = 1;
         }
 
         #region Public Properties
@@ -134,8 +134,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public string RawFileName
         {
-            get { return this.rawFileName; } 
-            set { this.RaiseAndSetIfChanged(ref this.rawFileName, value); }
+            get => rawFileName;
+            set => this.RaiseAndSetIfChanged(ref rawFileName, value);
         }
 
         /// <summary>
@@ -143,8 +143,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public ILcMsRun LcMs
         {
-            get { return this.lcms; }
-            set { this.RaiseAndSetIfChanged(ref this.lcms, value); }
+            get => lcms;
+            set => this.RaiseAndSetIfChanged(ref lcms, value);
         }
 
         /// <summary>
@@ -152,45 +152,26 @@ namespace LcmsSpectator.Models
         /// </summary>
         public int Scan
         {
-            get { return this.scan; }
-            set { this.RaiseAndSetIfChanged(ref this.scan, value); }
+            get => scan;
+            set => this.RaiseAndSetIfChanged(ref scan, value);
         }
 
         /// <summary>
         /// Gets the retention time of identification.
         /// Requires both LCMS and Scan to be set.
         /// </summary>
-        public double RetentionTime
-        {
-            get
-            {
-                return (this.LcMs == null) ? 0.0 : this.LcMs.GetElutionTime(this.Scan);
-            }
-        }
+        public double RetentionTime => LcMs?.GetElutionTime(Scan) ?? 0.0;
 
         /// <summary>
         /// Gets the MS/MS Spectrum associated with Scan.
         /// Requires both LCMS and Scan to be set.
         /// </summary>
-        public ProductSpectrum Ms2Spectrum
-        {
-            get
-            {
-                return (this.LcMs == null) ? null : this.LcMs.GetSpectrum(this.Scan) as ProductSpectrum;
-            }
-        }
+        public ProductSpectrum Ms2Spectrum => LcMs?.GetSpectrum(Scan) as ProductSpectrum;
 
         /// <summary>
         /// Gets the ActivationMethod for the MS/MS Spectrum.
         /// </summary>
-        public ActivationMethod ActivationMethod
-        {
-            get
-            {
-                var spectrum = (this.LcMs == null) ? null : this.LcMs.GetSpectrum(this.Scan, false) as ProductSpectrum;
-                return spectrum == null ? ActivationMethod.Unknown : spectrum.ActivationMethod;
-            }
-        }
+        public ActivationMethod ActivationMethod => LcMs?.GetSpectrum(Scan, false) is ProductSpectrum spectrum ? spectrum.ActivationMethod : ActivationMethod.Unknown;
 
         /// <summary>
         /// Gets the spectrum for previous MS1 scan before Scan.
@@ -200,13 +181,13 @@ namespace LcmsSpectator.Models
         {
             get
             {
-                if (this.LcMs == null)
+                if (LcMs == null)
                 {
                     return null;
                 }
 
-                var prevms1Scan = this.LcMs.GetPrevScanNum(this.Scan, 1);
-                var spectrum = this.LcMs.GetSpectrum(prevms1Scan);
+                var prevms1Scan = LcMs.GetPrevScanNum(Scan, 1);
+                var spectrum = LcMs.GetSpectrum(prevms1Scan);
                 return spectrum;
             }
         }
@@ -219,31 +200,28 @@ namespace LcmsSpectator.Models
         {
             get
             {
-                if (this.LcMs == null)
+                if (LcMs == null)
                 {
                     return null;
                 }
 
-                var nextms1Scan = this.LcMs.GetNextScanNum(this.Scan, 1);
-                return this.LcMs.GetSpectrum(nextms1Scan);
+                var nextms1Scan = LcMs.GetNextScanNum(Scan, 1);
+                return LcMs.GetSpectrum(nextms1Scan);
             }
         }
 
         /// <summary>
         /// Gets the scan and data set label for identification.
         /// </summary>
-        public string ScanText
-        {
-            get { return string.Format("{0} ({1})", this.Scan, this.RawFileName); }
-        }
+        public string ScanText => string.Format("{0} ({1})", Scan, RawFileName);
 
         /// <summary>
         /// Gets or sets the charge state of identification.
         /// </summary>
         public int Charge
         {
-            get { return this.charge; }
-            set { this.RaiseAndSetIfChanged(ref this.charge, value); }
+            get => charge;
+            set => this.RaiseAndSetIfChanged(ref charge, value);
         }
 
         /// <summary>
@@ -251,20 +229,17 @@ namespace LcmsSpectator.Models
         /// </summary>
         public string SequenceText
         {
-            get
-            {
-                return this.sequenceText;
-            }
-            
+            get => sequenceText;
+
             set
             {
-                if (this.sequenceText != value)
+                if (sequenceText != value)
                 {
-                    var parsedSequence = this.ParseSequence(value);
+                    var parsedSequence = ParseSequence(value);
                     if (parsedSequence != null)
                     {
-                        this.sequenceText = value;
-                        this.Sequence = parsedSequence;
+                        sequenceText = value;
+                        Sequence = parsedSequence;
 
                         this.RaisePropertyChanged();
                     }
@@ -275,18 +250,15 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Gets the string containing list of modifications in the sequence and their positions.
         /// </summary>
-        public string ModificationLocations
-        {
-            get { return this.GetModificationLocations(); }
-        }
+        public string ModificationLocations => GetModificationLocations();
 
         /// <summary>
         /// Gets or sets the name of identified protein.
         /// </summary>
         public string ProteinName
         {
-            get { return this.proteinName; }
-            set { this.RaiseAndSetIfChanged(ref this.proteinName, value); }
+            get => proteinName;
+            set => this.RaiseAndSetIfChanged(ref proteinName, value);
         }
 
         /// <summary>
@@ -294,28 +266,22 @@ namespace LcmsSpectator.Models
         /// </summary>
         public string ProteinDesc
         {
-            get { return this.proteinDesc; }
-            set { this.RaiseAndSetIfChanged(ref this.proteinDesc, value); }
+            get => proteinDesc;
+            set => this.RaiseAndSetIfChanged(ref proteinDesc, value);
         }
 
         /// <summary>
         /// Gets the conjoined protein name and description.
         /// </summary>
-        public string ProteinNameDesc
-        {
-            get
-            {
-                return string.Format("{0} {1}", this.ProteinName, this.ProteinDesc);
-            }
-        }
+        public string ProteinNameDesc => string.Format("{0} {1}", ProteinName, ProteinDesc);
 
         /// <summary>
         /// Gets or sets the identification score.
         /// </summary>
         public double Score
         {
-            get { return this.score; }
-            set { this.RaiseAndSetIfChanged(ref this.score, value); }
+            get => score;
+            set => this.RaiseAndSetIfChanged(ref score, value);
         }
 
         /// <summary>
@@ -323,8 +289,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public bool UseGolfScoring
         {
-            get { return this.useGolfScoring; }
-            set { this.RaiseAndSetIfChanged(ref this.useGolfScoring, value); }
+            get => useGolfScoring;
+            set => this.RaiseAndSetIfChanged(ref useGolfScoring, value);
         }
 
         /// <summary>
@@ -332,8 +298,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public double QValue
         {
-            get { return this.qvalue; }
-            set { this.RaiseAndSetIfChanged(ref this.qvalue, value); }
+            get => qvalue;
+            set => this.RaiseAndSetIfChanged(ref qvalue, value);
         }
 
         /// <summary>
@@ -341,8 +307,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public bool Heavy
         {
-            get { return this.heavy; }
-            set { this.RaiseAndSetIfChanged(ref this.heavy, value); }
+            get => heavy;
+            set => this.RaiseAndSetIfChanged(ref heavy, value);
         }
 
         /// <summary>
@@ -351,21 +317,18 @@ namespace LcmsSpectator.Models
         /// </summary>
         public Sequence Sequence
         {
-            get
-            {
-                return this.sequence;
-            }
+            get => sequence;
 
             set
             {
-                if (value != null && !value.Equals(this.sequence))
+                if (value != null && !value.Equals(sequence))
                 {
-                    this.sequence = value;
-                    if (this.sequence.Count > 0)
+                    sequence = value;
+                    if (sequence.Count > 0)
                     {
-                        this.Mass = this.sequence.Mass + Composition.H2O.Mass;
-                        var ion = new Ion(this.sequence.Composition + Composition.H2O, this.Charge);
-                        this.PrecursorMz = ion.GetMostAbundantIsotopeMz();
+                        Mass = sequence.Mass + Composition.H2O.Mass;
+                        var ion = new Ion(sequence.Composition + Composition.H2O, Charge);
+                        PrecursorMz = ion.GetMostAbundantIsotopeMz();
                     }
                 }
 
@@ -379,8 +342,8 @@ namespace LcmsSpectator.Models
         /// </summary>
         public double Mass
         {
-            get { return this.mass; }
-            set { this.RaiseAndSetIfChanged(ref this.mass, value); }
+            get => mass;
+            set => this.RaiseAndSetIfChanged(ref mass, value);
         }
 
         /// <summary>
@@ -389,28 +352,28 @@ namespace LcmsSpectator.Models
         /// </summary>
         public double PrecursorMz
         {
-            get { return this.precursorMz; }
-            set { this.RaiseAndSetIfChanged(ref this.precursorMz, value); }
+            get => precursorMz;
+            set => this.RaiseAndSetIfChanged(ref precursorMz, value);
         }
         #endregion
 
         /// <summary>
-        /// Set sequece as the visibile sequence and actual underlying sequence.
+        /// Set newSequence as the visibile sequence and actual underlying sequence.
         /// If the underlying sequence is null, the visible sequence will be parsed to
         /// create it.
         /// </summary>
         /// <param name="sequenceStr">The visible sequence.</param>
-        /// <param name="sequence">Actual underlying sequence.</param>
-        public void SetSequence(string sequenceStr, Sequence sequence = null)
+        /// <param name="newSequence">Actual underlying sequence.</param>
+        public void SetSequence(string sequenceStr, Sequence newSequence = null)
         {
-            if (sequence != null)
+            if (newSequence != null)
             {
-                this.sequenceText = sequenceStr;
-                this.Sequence = sequence;
+                sequenceText = sequenceStr;
+                Sequence = newSequence;
             }
             else
             {
-                this.SequenceText = sequenceStr;
+                SequenceText = sequenceStr;
             }
         }
 
@@ -420,20 +383,19 @@ namespace LcmsSpectator.Models
         public void UpdateModifications()
         {
             var aminoAcidSet = new AminoAcidSet();
-            for (int i = 0; i < this.Sequence.Count; i++)
+            for (var i = 0; i < Sequence.Count; i++)
             {
-                var modAminoAcid = this.Sequence[i] as ModifiedAminoAcid;
-                if (modAminoAcid != null)
+                if (Sequence[i] is ModifiedAminoAcid modAminoAcid)
                 {
                     var modification = Modification.Get(modAminoAcid.Modification.Name);
                     if (modification != null)
                     {
-                        this.Sequence[i] = new ModifiedAminoAcid(aminoAcidSet.GetAminoAcid(modAminoAcid.Residue), modification);
+                        Sequence[i] = new ModifiedAminoAcid(aminoAcidSet.GetAminoAcid(modAminoAcid.Residue), modification);
                     }
                 }
             }
 
-            this.Sequence = new Sequence(this.Sequence);
+            Sequence = new Sequence(Sequence);
         }
 
         /// <summary>
@@ -443,7 +405,7 @@ namespace LcmsSpectator.Models
         /// <returns>Integer indicating if this is greater than the PRSM object.</returns>
         public int CompareTo(PrSm other)
         {
-            var comp = this.UseGolfScoring ? other.Score.CompareTo(this.Score) : this.Score.CompareTo(other.Score);
+            var comp = UseGolfScoring ? other.Score.CompareTo(Score) : Score.CompareTo(other.Score);
             return comp;
         }
 
@@ -453,7 +415,7 @@ namespace LcmsSpectator.Models
         /// <returns>The FragmentationSequence.</returns>
         public FragmentationSequence GetFragmentationSequence()
         {
-            return this.LcMs == null ? null : new FragmentationSequence(this.sequence, this.charge, this.lcms, this.ActivationMethod);
+            return LcMs == null ? null : new FragmentationSequence(sequence, charge, lcms, ActivationMethod);
         }
 
         /// <summary>
@@ -463,10 +425,9 @@ namespace LcmsSpectator.Models
         private string GetModificationLocations()
         {
             var modificationLocations = new StringBuilder();
-            for (int i = 0; i < Sequence.Count; i++)
+            for (var i = 0; i < Sequence.Count; i++)
             {
-                var aa = Sequence[i] as ModifiedAminoAcid;
-                if (aa != null)
+                if (Sequence[i] is ModifiedAminoAcid aa)
                 {
                     modificationLocations.AppendFormat("{0}{1}[{2}] ", aa.Residue, i + 1, aa.Modification.Name);
                 }
@@ -489,7 +450,7 @@ namespace LcmsSpectator.Models
         {
             try
             {
-                var seq = this.sequenceReader.Read(sequenceStr);
+                var seq = sequenceReader.Read(sequenceStr);
                 return seq;
             }
             catch (Exception)

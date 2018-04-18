@@ -11,7 +11,6 @@
 namespace LcmsSpectator.Views.Plots
 {
     using System;
-    using System.Globalization;
     using System.Windows;
     using System.Windows.Controls;
 
@@ -25,16 +24,16 @@ namespace LcmsSpectator.Views.Plots
         /// </summary>
         public FeatureViewerView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
 
-            this.AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
-            this.AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
-            this.XMin.Visibility = Visibility.Collapsed;
-            this.XMax.Visibility = Visibility.Collapsed;
-            this.YMin.Visibility = Visibility.Collapsed;
-            this.YMax.Visibility = Visibility.Collapsed;
-            this.ManualAdjustment.Checked += this.ManualAdjustmentChecked;
-            this.ManualAdjustment.Unchecked += this.ManualAdjustmentChecked;
+            AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
+            AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
+            XMin.Visibility = Visibility.Collapsed;
+            XMax.Visibility = Visibility.Collapsed;
+            YMin.Visibility = Visibility.Collapsed;
+            YMax.Visibility = Visibility.Collapsed;
+            ManualAdjustment.Checked += ManualAdjustmentChecked;
+            ManualAdjustment.Unchecked += ManualAdjustmentChecked;
         }
 
         /// <summary>
@@ -44,25 +43,25 @@ namespace LcmsSpectator.Views.Plots
         /// <param name="args">The event arguments.</param>
         public void ManualAdjustmentChecked(object sender, EventArgs args)
         {
-            if (this.ManualAdjustment.IsChecked)
+            if (ManualAdjustment.IsChecked)
             {
-                this.AdjustXRow.Height = new GridLength(25, GridUnitType.Pixel);
-                this.AdjustYColumn.Width = new GridLength(25, GridUnitType.Pixel);
-                this.XMin.Visibility = Visibility.Visible;
-                this.XMax.Visibility = Visibility.Visible;
-                this.YMin.Visibility = Visibility.Visible;
-                this.YMax.Visibility = Visibility.Visible;
-                this.InvalidateVisual();
+                AdjustXRow.Height = new GridLength(25, GridUnitType.Pixel);
+                AdjustYColumn.Width = new GridLength(25, GridUnitType.Pixel);
+                XMin.Visibility = Visibility.Visible;
+                XMax.Visibility = Visibility.Visible;
+                YMin.Visibility = Visibility.Visible;
+                YMax.Visibility = Visibility.Visible;
+                InvalidateVisual();
             }
             else
             {
-                this.AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
-                this.AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
-                this.XMin.Visibility = Visibility.Collapsed;
-                this.XMax.Visibility = Visibility.Collapsed;
-                this.YMin.Visibility = Visibility.Collapsed;
-                this.YMax.Visibility = Visibility.Collapsed;
-                this.InvalidateVisual();
+                AdjustXRow.Height = new GridLength(0, GridUnitType.Pixel);
+                AdjustYColumn.Width = new GridLength(0, GridUnitType.Pixel);
+                XMin.Visibility = Visibility.Collapsed;
+                XMax.Visibility = Visibility.Collapsed;
+                YMin.Visibility = Visibility.Collapsed;
+                YMax.Visibility = Visibility.Collapsed;
+                InvalidateVisual();
             }
         }
 

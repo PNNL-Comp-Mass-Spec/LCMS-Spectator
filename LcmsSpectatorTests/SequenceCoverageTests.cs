@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LcmsSpectatorTests
 {
@@ -28,12 +26,12 @@ namespace LcmsSpectatorTests
         public void CompareFragments(string lcmsSpecPeakList, string prosightAnnotations)
         {
             Console.WriteLine("{0}", Path.GetFileNameWithoutExtension(lcmsSpecPeakList));
-            var lcmsSpecResults = this.ReadLcmsSpectatorPeakList(lcmsSpecPeakList);
-            var prosightResults = this.ReadProsightResults(prosightAnnotations);
+            var lcmsSpecResults = ReadLcmsSpectatorPeakList(lcmsSpecPeakList);
+            var prosightResults = ReadProsightResults(prosightAnnotations);
 
             var ionTypeCount = new Dictionary<string, int>();
             var notFoundIons = new Dictionary<string, int>();
-            int notFoundCount = 0;
+            var notFoundCount = 0;
             foreach (var prosightResult in prosightResults)
             {
                 if (!ionTypeCount.ContainsKey(prosightResult.IonType))
@@ -43,7 +41,7 @@ namespace LcmsSpectatorTests
 
                 ionTypeCount[prosightResult.IonType]++;
 
-                bool found = false;
+                var found = false;
                 foreach (var lcmsSpecResult in lcmsSpecResults)
                 {
                     if (lcmsSpecResult.IonType == prosightResult.IonType && lcmsSpecResult.Index == prosightResult.Index)
@@ -76,10 +74,10 @@ namespace LcmsSpectatorTests
 
         private List<FoundIon> ReadLcmsSpectatorPeakList(string lcmsSpecPeakList)
         {
-            var baseIonTypes = BaseIonType.AllBaseIonTypes;
+            var baseIonTypes = BaseIonType.AllBaseIonTypes.ToList();
 
             var results = new List<FoundIon>();
-            int lineCount = 0;
+            var lineCount = 0;
             var headerToColumn = new Dictionary<string, int>();
             foreach (var line in File.ReadLines(lcmsSpecPeakList))
             {
@@ -91,7 +89,7 @@ namespace LcmsSpectatorTests
 
                 if (lineCount++ == 0)
                 {
-                    for (int i = 0; i < parts.Length; i++)
+                    for (var i = 0; i < parts.Length; i++)
                     {
                         headerToColumn.Add(parts[i], i);
                     }
@@ -100,7 +98,7 @@ namespace LcmsSpectatorTests
                 }
 
                 var ionName = parts[headerToColumn["Ion"]];
-                string parsedIonName = string.Empty;
+                var parsedIonName = string.Empty;
 
                 // Get ion type
                 foreach (var ionType in baseIonTypes)
@@ -142,14 +140,14 @@ namespace LcmsSpectatorTests
             };
 
             var results = new List<FoundIon>();
-            int lineCount = 0;
+            var lineCount = 0;
             var headerToColumn = new Dictionary<string, int>();
             foreach (var line in File.ReadLines(prosightResultsFile))
             {
                 var parts = line.Split('\t');
                 if (lineCount++ == 0)
                 {
-                    for (int i = 0; i < parts.Length; i++)
+                    for (var i = 0; i < parts.Length; i++)
                     {
                         headerToColumn.Add(parts[i], i);
                     }
@@ -159,7 +157,7 @@ namespace LcmsSpectatorTests
 
                 var ionNumber = Convert.ToInt32(parts[headerToColumn["Ion Number"]]);
                 var ionName = parts[headerToColumn["Name"]];
-                string parsedIonName = string.Empty;
+                var parsedIonName = string.Empty;
 
                 // Get ion type
                 foreach (var ionType in ionTypeMapping.Keys)
