@@ -16,6 +16,12 @@ A guide for using LCMS-Spectator can be found on our [GitHub Wiki Page](https://
 * https://github.com/PNNL-Comp-Mass-Spec/LCMS-Spectator/releases
 * https://omics.pnl.gov/software/lcmsspectator
 
+### Continuous Integration
+
+The latest version of the application is available on the [AppVeyor CI server](https://ci.appveyor.com/project/PNNLCompMassSpec/lcms-spectator/build/artifacts)
+
+[![Build status](https://ci.appveyor.com/api/projects/status/bw5slqcrbg923gfu?svg=true)](https://ci.appveyor.com/project/PNNLCompMassSpec/lcms-spectator)
+
 ### Supported file formats
 #### Spectrum files
 

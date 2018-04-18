@@ -1,0 +1,12 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+before_build:
+- cmd: nuget.exe restore LcmsSpectator.sln
+configuration: Release
+platform: Any CPU
+build:
+  project: LcmsSpectator.sln
+  verbosity: minimal
+artifacts:
+- path: LcmsSpectator/bin/Debug
+  name: LCMS-Spectator
