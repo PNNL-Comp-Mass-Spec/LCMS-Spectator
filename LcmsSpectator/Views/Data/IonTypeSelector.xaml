@@ -1,12 +1,14 @@
-﻿<UserControl x:Class="LcmsSpectator.Views.Data.IonTypeSelector"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:utils="clr-namespace:LcmsSpectator.Utils"
-             xmlns:controls="clr-namespace:LcmsSpectator.Controls"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+﻿<UserControl
+    x:Class="LcmsSpectator.Views.Data.IonTypeSelector"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:LcmsSpectator.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+    d:DesignHeight="300"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
     <UserControl.Resources>
         <utils:NeutralLossToStringConverter x:Key="NeutralLossToString" />
     </UserControl.Resources>
@@ -18,45 +20,74 @@
             <RowDefinition Height="1" />
             <RowDefinition Height="33*" />
         </Grid.RowDefinitions>
-        <controls:MultiSelectDataGrid   AutoGenerateColumns="False" SelectionMode="Extended"
-                                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
-                                        Grid.Row="0" ItemsSource="{Binding BaseIonTypes}"
-                                        SelectedItemsSource="{Binding SelectedBaseIonTypes, Mode=TwoWay}">
+        <controls:MultiSelectDataGrid
+            Grid.Row="0"
+            Grid.Column="0"
+            AutoGenerateColumns="False"
+            IsReadOnly="True"
+            ItemsSource="{Binding BaseIonTypes}"
+            RowHeaderWidth="0"
+            SelectedItemsSource="{Binding SelectedBaseIonTypes, Mode=TwoWay}"
+            SelectionMode="Extended">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Ion Type" Width="*" Binding="{Binding Symbol}"/>
+                <DataGridTextColumn
+                    Width="*"
+                    Binding="{Binding Symbol}"
+                    Header="Ion Type" />
             </DataGrid.Columns>
         </controls:MultiSelectDataGrid>
-        <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" ShowsPreview="True" Height="1" />
-        <controls:MultiSelectDataGrid   AutoGenerateColumns="False" SelectionMode="Extended"
-                                        IsReadOnly="True" Grid.Column="0" RowHeaderWidth="0" 
-                                        Grid.Row="2" ItemsSource="{Binding NeutralLosses}"
-                                        SelectedItemsSource="{Binding SelectedNeutralLosses, Mode=TwoWay}">
+        <GridSplitter
+            Grid.Row="1"
+            Height="1"
+            HorizontalAlignment="Stretch"
+            ShowsPreview="True" />
+        <controls:MultiSelectDataGrid
+            Grid.Row="2"
+            Grid.Column="0"
+            AutoGenerateColumns="False"
+            IsReadOnly="True"
+            ItemsSource="{Binding NeutralLosses}"
+            RowHeaderWidth="0"
+            SelectedItemsSource="{Binding SelectedNeutralLosses, Mode=TwoWay}"
+            SelectionMode="Extended">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Neutral Loss" Width="*" Binding="{Binding Converter={StaticResource NeutralLossToString}}"/>
+                <DataGridTextColumn
+                    Width="*"
+                    Binding="{Binding Converter={StaticResource NeutralLossToString}}"
+                    Header="Neutral Loss" />
             </DataGrid.Columns>
         </controls:MultiSelectDataGrid>
-        <GridSplitter Grid.Row="3" HorizontalAlignment="Stretch" ShowsPreview="True" Height="1" />
+        <GridSplitter
+            Grid.Row="3"
+            Height="1"
+            HorizontalAlignment="Stretch"
+            ShowsPreview="True" />
         <GroupBox Grid.Row="4" ToolTip="Select Charges [Min, Max]">
             <GroupBox.Header>
                 <Label>Ion Charges</Label>
             </GroupBox.Header>
-            <ScrollViewer VerticalAlignment="Top"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
+            <ScrollViewer
+                VerticalAlignment="Top"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical">
                     <TextBlock>Min:</TextBlock>
-                    <TextBox Height="20" TextAlignment="Right"
-                                    Margin="0,0,0,20"
-                                    Text="{Binding Path=MinCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox
+                        Height="20"
+                        Margin="0,0,0,20"
+                        Text="{Binding Path=MinCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextAlignment="Right">
                         <TextBox.InputBindings>
-                            <KeyBinding Command="{Binding Path=SetIonChargesCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+                            <KeyBinding Key="Enter" Command="{Binding Path=SetIonChargesCommand, UpdateSourceTrigger=PropertyChanged}" />
                         </TextBox.InputBindings>
                     </TextBox>
                     <TextBlock>Max:</TextBlock>
-                    <TextBox Height="20" TextAlignment="Right"
-                                    Text="{Binding Path=MaxCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox
+                        Height="20"
+                        Text="{Binding Path=MaxCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextAlignment="Right">
                         <TextBox.InputBindings>
-                            <KeyBinding Command="{Binding Path=SetIonChargesCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+                            <KeyBinding Key="Enter" Command="{Binding Path=SetIonChargesCommand, UpdateSourceTrigger=PropertyChanged}" />
                         </TextBox.InputBindings>
                     </TextBox>
                 </StackPanel>

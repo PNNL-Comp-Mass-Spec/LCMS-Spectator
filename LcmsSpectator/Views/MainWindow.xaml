@@ -1,58 +1,68 @@
-﻿<Window x:Class="LcmsSpectator.Views.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
-        xmlns:views1="clr-namespace:LcmsSpectator.Views.Data"
-        xmlns:controls="clr-namespace:LcmsSpectator.Controls"
-        xmlns:utils="clr-namespace:LcmsSpectator.Utils"
-        xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
-        xmlns:models1="clr-namespace:LcmsSpectator.Models"
-        xmlns:data="clr-namespace:LcmsSpectator.ViewModels.Data"
-        Title="LcMsSpectator" WindowState="Maximized">
+﻿<Window
+    x:Class="LcmsSpectator.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:LcmsSpectator.Controls"
+    xmlns:data="clr-namespace:LcmsSpectator.ViewModels.Data"
+    xmlns:models1="clr-namespace:LcmsSpectator.Models"
+    xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
+    xmlns:views1="clr-namespace:LcmsSpectator.Views.Data"
+    xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
+    Title="LcMsSpectator"
+    WindowState="Maximized">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <utils:ChargeToStringConverter x:Key="ChargeFormatter" />
         <DataTemplate DataType="{x:Type data:DataSetViewModel}">
             <views1:DataSetView />
-            
         </DataTemplate>
         <utils:DoubleToStringConverter x:Key="MassFormatter" />
         <utils:SequenceToStringConverter x:Key="SequenceToStringConverter" />
     </Window.Resources>
     <Grid>
-        <!-- Menu -->
+        <!--  Menu  -->
         <Menu VerticalAlignment="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="Open _Data Set" Command="{Binding OpenDataSetCommand}" />
-                <MenuItem Header="Open _Raw/MzML File(s)" Command="{Binding OpenRawFileCommand}" />
-                <MenuItem Header="Open _Id File" Command="{Binding OpenTsvFileCommand}" />
-                <MenuItem Header="Open _Feature File" Command="{Binding OpenFeatureFileCommand}" />
-                <MenuItem Header="Open _Target List" DataContext="{Binding CreateSequenceViewModel}" Command="{Binding OpenTargetListCommand}" />
-                <MenuItem Header="Search _DMS" Command="{Binding OpenFromDmsCommand}"
-                          Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}" />
+                <MenuItem Command="{Binding OpenDataSetCommand}" Header="Open _Data Set" />
+                <MenuItem Command="{Binding OpenRawFileCommand}" Header="Open _Raw/MzML File(s)" />
+                <MenuItem Command="{Binding OpenTsvFileCommand}" Header="Open _Id File" />
+                <MenuItem Command="{Binding OpenFeatureFileCommand}" Header="Open _Feature File" />
+                <MenuItem
+                    Command="{Binding OpenTargetListCommand}"
+                    DataContext="{Binding CreateSequenceViewModel}"
+                    Header="Open _Target List" />
+                <MenuItem
+                    Command="{Binding OpenFromDmsCommand}"
+                    Header="Search _DMS"
+                    Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}" />
                 <Separator />
-                <MenuItem Header="_Export Results" Command="{Binding ExportResultsCommand}" />
+                <MenuItem Command="{Binding ExportResultsCommand}" Header="_Export Results" />
                 <Separator />
-                <MenuItem Header="E_xit" Command="{Binding QuitProgramCommand}" />
+                <MenuItem Command="{Binding QuitProgramCommand}" Header="E_xit" />
             </MenuItem>
             <MenuItem Header="_Config">
-                <MenuItem Header="_Settings" Command="{Binding OpenSettingsCommand}" />
-                <MenuItem Header="_Manage Modifications" Command="{Binding OpenManageModificationsCommand}" />
+                <MenuItem Command="{Binding OpenSettingsCommand}" Header="_Settings" />
+                <MenuItem Command="{Binding OpenManageModificationsCommand}" Header="_Manage Modifications" />
             </MenuItem>
             <MenuItem Header="_Search">
-                <MenuItem Header="_Run MSPathFinder" Command="{Binding RunMsPathFinderSearchCommand}" />
+                <MenuItem Command="{Binding RunMsPathFinderSearchCommand}" Header="_Run MSPathFinder" />
             </MenuItem>
             <MenuItem Header="_Tools">
-                <MenuItem Header="_Open Isotopic Profile Viewer" Command="{Binding OpenIsotopicProfileViewerCommand}" />
+                <MenuItem Command="{Binding OpenIsotopicProfileViewerCommand}" Header="_Open Isotopic Profile Viewer" />
             </MenuItem>
             <MenuItem Header="_Help">
-                <MenuItem Header="_About" Command="{Binding OpenAboutBoxCommand}" />
+                <MenuItem Command="{Binding OpenAboutBoxCommand}" Header="_About" />
             </MenuItem>
         </Menu>
-        <!-- End Menu -->
-        <Grid HorizontalAlignment="Stretch" Margin="0,22,0,0">
-<!--            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Layout="{Binding AvLayout}"> -->
-            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded">
+        <!--  End Menu  -->
+        <Grid Margin="0,22,0,0" HorizontalAlignment="Stretch">
+            <!--            <xcad:DockingManager Name="AvDock" DocumentsSource="{Binding DataSets}" Loaded="Window_OnLoaded" Unloaded="DockingManager_OnUnloaded" Layout="{Binding AvLayout}"> -->
+            <xcad:DockingManager
+                Name="AvDock"
+                DocumentsSource="{Binding DataSets}"
+                Loaded="Window_OnLoaded"
+                Unloaded="DockingManager_OnUnloaded">
                 <xcad:DockingManager.LayoutItemContainerStyle>
                     <Style TargetType="{x:Type xcad:LayoutItem}">
                         <Setter Property="Title" Value="{Binding Model.Title}" />
@@ -62,17 +72,22 @@
                 <xcad:LayoutRoot>
                     <xcad:LayoutPanel>
                         <xcad:LayoutDocumentPane />
-                        <xcad:LayoutAnchorablePaneGroup Orientation="Horizontal" DockWidth="*" DockHeight="200">
-                                <xcad:LayoutAnchorablePane IsMaximized="True">
-                                    <xcad:LayoutAnchorable Title="Protein Tree" IsMaximized="True">
-                                        <Grid x:Name="ProteinTree">
+                        <xcad:LayoutAnchorablePaneGroup
+                            DockHeight="200"
+                            DockWidth="*"
+                            Orientation="Horizontal">
+                            <xcad:LayoutAnchorablePane IsMaximized="True">
+                                <xcad:LayoutAnchorable Title="Protein Tree" IsMaximized="True">
+                                    <Grid x:Name="ProteinTree">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="*" />
-                                            <RowDefinition Height="30" x:Name="ProgressRow" />
+                                            <RowDefinition x:Name="ProgressRow" Height="30" />
                                         </Grid.RowDefinitions>
-                                        <controls:MvvmTreeView Grid.Row="0" DataContext="{Binding ScanViewModel}"
-                                                               ItemsSource="{Binding FilteredProteins}"
-                                                               SelectedItemTarget="{Binding TreeViewSelectedItem, Mode=TwoWay}">
+                                        <controls:MvvmTreeView
+                                            Grid.Row="0"
+                                            DataContext="{Binding ScanViewModel}"
+                                            ItemsSource="{Binding FilteredProteins}"
+                                            SelectedItemTarget="{Binding TreeViewSelectedItem, Mode=TwoWay}">
                                             <controls:MvvmTreeView.ContextMenu>
                                                 <ContextMenu>
                                                     <MenuItem Header="_Filter" ItemsSource="{Binding Filters}">
@@ -84,11 +99,11 @@
                                                             </Style>
                                                         </MenuItem.ItemContainerStyle>
                                                     </MenuItem>
-                                                    <MenuItem Header="_Clear All Filters" Command="{Binding ClearFiltersCommand}" />
+                                                    <MenuItem Command="{Binding ClearFiltersCommand}" Header="_Clear All Filters" />
                                                     <Separator />
                                                     <MenuItem Header="Export">
-                                                        <MenuItem Header="As Text File" Command="{Binding ExportProteinTreeCommand}" />
-                                                        <MenuItem Header="As Tab-separted file" Command="{Binding ExportProteinTreeAsTsvCommand}" />
+                                                        <MenuItem Command="{Binding ExportProteinTreeCommand}" Header="As Text File" />
+                                                        <MenuItem Command="{Binding ExportProteinTreeAsTsvCommand}" Header="As Tab-separted file" />
                                                     </MenuItem>
                                                 </ContextMenu>
                                             </controls:MvvmTreeView.ContextMenu>
@@ -97,49 +112,58 @@
                                                     <TextBlock Text="{Binding ProteinName}" ToolTipService.ShowDuration="12000">
                                                         <TextBlock.ToolTip>
                                                             <StackPanel>
-                                                                <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14" />
+                                                                <TextBlock
+                                                                    FontSize="14"
+                                                                    FontWeight="Bold"
+                                                                    Text="{Binding ProteinName}" />
                                                                 <TextBlock Text="{Binding ProteinDescription}" />
                                                                 <TextBlock Text="{Binding Sequence, Converter={StaticResource SequenceToStringConverter}}" />
                                                             </StackPanel>
                                                         </TextBlock.ToolTip>
-                                                        </TextBlock>
+                                                    </TextBlock>
                                                 </HierarchicalDataTemplate>
                                                 <HierarchicalDataTemplate DataType="{x:Type models1:ProteoformId}" ItemsSource="{Binding ChargeStates.Values}">
                                                     <TextBlock Text="{Binding Annotation}" ToolTipService.ShowDuration="12000">
                                                         <TextBlock.ToolTip>
                                                             <StackPanel>
-                                                                <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14"/>
+                                                                <TextBlock
+                                                                    FontSize="14"
+                                                                    FontWeight="Bold"
+                                                                    Text="{Binding ProteinName}" />
                                                                 <TextBlock Text="{Binding ProteinDesc}" />
                                                                 <TextBlock>
-                                                                        <Run Text="{Binding PreSequence, Mode=OneWay}" />
-                                                                        <Run Text="{Binding SequenceText, Mode=OneWay}" FontWeight="Bold" />
-                                                                        <Run Text="{Binding PostSequence, Mode=OneWay}" />
+                                                                    <Run Text="{Binding PreSequence, Mode=OneWay}" />
+                                                                    <Run FontWeight="Bold" Text="{Binding SequenceText, Mode=OneWay}" />
+                                                                    <Run Text="{Binding PostSequence, Mode=OneWay}" />
                                                                 </TextBlock>
                                                                 <Separator Visibility="Hidden" />
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="60">Mass:</TextBlock>
+                                                                    <TextBlock Width="60" FontWeight="Bold">Mass:</TextBlock>
                                                                     <TextBlock Text="{Binding Mass, Converter={StaticResource MassFormatter}}" />
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </TextBlock.ToolTip>
-                                                        </TextBlock>
+                                                    </TextBlock>
                                                 </HierarchicalDataTemplate>
                                                 <HierarchicalDataTemplate DataType="{x:Type models1:ChargeStateId}" ItemsSource="{Binding PrSms.Values}">
                                                     <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" ToolTipService.ShowDuration="12000">
                                                         <TextBlock.ToolTip>
                                                             <StackPanel>
-                                                                <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14" />
+                                                                <TextBlock
+                                                                    FontSize="14"
+                                                                    FontWeight="Bold"
+                                                                    Text="{Binding ProteinName}" />
                                                                 <TextBlock Text="{Binding ProteinDesc}" />
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="60">Mass:</TextBlock>
+                                                                    <TextBlock Width="60" FontWeight="Bold">Mass:</TextBlock>
                                                                     <TextBlock Text="{Binding Mass, Converter={StaticResource MassFormatter}}" />
                                                                 </StackPanel>
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="175">Most Abundant Isotope m/z:</TextBlock>
+                                                                    <TextBlock Width="175" FontWeight="Bold">Most Abundant Isotope m/z:</TextBlock>
                                                                     <TextBlock Text="{Binding Mz, Converter={StaticResource MassFormatter}}" />
                                                                 </StackPanel>
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="90">Charge State:</TextBlock>
+                                                                    <TextBlock Width="90" FontWeight="Bold">Charge State:</TextBlock>
                                                                     <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
                                                                 </StackPanel>
                                                             </StackPanel>
@@ -150,51 +174,66 @@
                                                     <TextBlock Text="{Binding ScanText}" ToolTipService.ShowDuration="12000">
                                                         <TextBlock.ToolTip>
                                                             <StackPanel>
-                                                                <TextBlock Text="{Binding ProteinName}" FontWeight="Bold" FontSize="14" />
+                                                                <TextBlock
+                                                                    FontSize="14"
+                                                                    FontWeight="Bold"
+                                                                    Text="{Binding ProteinName}" />
                                                                 <TextBlock Text="{Binding ProteinDesc}" />
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="60">Mass:</TextBlock>
+                                                                    <TextBlock Width="60" FontWeight="Bold">Mass:</TextBlock>
                                                                     <TextBlock Text="{Binding Mass, Converter={StaticResource MassFormatter}}" />
                                                                 </StackPanel>
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="175">Most Abundant Isotope m/z:</TextBlock>
+                                                                    <TextBlock Width="175" FontWeight="Bold">Most Abundant Isotope m/z:</TextBlock>
                                                                     <TextBlock Text="{Binding PrecursorMz, Converter={StaticResource MassFormatter}}" />
                                                                 </StackPanel>
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="140">Charge State:</TextBlock>
+                                                                    <TextBlock Width="140" FontWeight="Bold">Charge State:</TextBlock>
                                                                     <TextBlock Text="{Binding Charge, Converter={StaticResource ChargeFormatter}}" />
                                                                 </StackPanel>
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="140">Data Set:</TextBlock>
+                                                                    <TextBlock Width="140" FontWeight="Bold">Data Set:</TextBlock>
                                                                     <TextBlock Text="{Binding RawFileName}" />
                                                                 </StackPanel>
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="140">Scan #:</TextBlock>
+                                                                    <TextBlock Width="140" FontWeight="Bold">Scan #:</TextBlock>
                                                                     <TextBlock Text="{Binding Scan}" />
                                                                 </StackPanel>
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Width="140">Retention Time:</TextBlock>
+                                                                    <TextBlock Width="140" FontWeight="Bold">Retention Time:</TextBlock>
                                                                     <TextBlock Text="{Binding RetentionTime, Converter={StaticResource MassFormatter}}" />
                                                                 </StackPanel>
                                                             </StackPanel>
                                                         </TextBlock.ToolTip>
-                                                        </TextBlock>
+                                                    </TextBlock>
                                                 </HierarchicalDataTemplate>
                                             </controls:MvvmTreeView.Resources>
                                         </controls:MvvmTreeView>
-                                        <ProgressBar Visibility="{Binding IdFileLoading, Converter={StaticResource BoolToVis}}" Grid.Row="1" Height="25" VerticalAlignment="Bottom" Value="{Binding IdFileLoadProgress, Mode=OneWay}" x:Name="FileLoadProgress" />
+                                        <ProgressBar
+                                            x:Name="FileLoadProgress"
+                                            Grid.Row="1"
+                                            Height="25"
+                                            VerticalAlignment="Bottom"
+                                            Visibility="{Binding IdFileLoading, Converter={StaticResource BoolToVis}}"
+                                            Value="{Binding IdFileLoadProgress, Mode=OneWay}" />
                                     </Grid>
-                                    </xcad:LayoutAnchorable>
-                                </xcad:LayoutAnchorablePane>
-                            </xcad:LayoutAnchorablePaneGroup>
+                                </xcad:LayoutAnchorable>
+                            </xcad:LayoutAnchorablePane>
+                        </xcad:LayoutAnchorablePaneGroup>
                     </xcad:LayoutPanel>
-                </xcad:LayoutRoot> 
+                </xcad:LayoutRoot>
             </xcad:DockingManager>
-            <Border BorderBrush="Black" BorderThickness="1" Background="#F0000000" Grid.RowSpan="6" Grid.ColumnSpan="2"
-                                 VerticalAlignment="Stretch" Visibility="{Binding ShowSplash, Converter={StaticResource BoolToVis}}">
-                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" >
+            <Border
+                Grid.RowSpan="6"
+                Grid.ColumnSpan="2"
+                VerticalAlignment="Stretch"
+                Background="#F0000000"
+                BorderBrush="Black"
+                BorderThickness="1"
+                Visibility="{Binding ShowSplash, Converter={StaticResource BoolToVis}}">
+                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="50*"/>
+                        <RowDefinition Height="50*" />
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
@@ -205,28 +244,58 @@
                         <RowDefinition Height="30" />
                         <RowDefinition Height="10" />
                         <RowDefinition Height="30" />
-                        <RowDefinition Height="50*"/>
+                        <RowDefinition Height="50*" />
                     </Grid.RowDefinitions>
-                    <TextBlock Margin="0"
-                                           TextWrapping="Wrap"
-                                           VerticalAlignment="Bottom"
-                                           Grid.Row="0"
-                                           TextAlignment="Center"
-                                           FontSize="24" FontWeight="Bold" Foreground="#7EFFFFFF">
-                                           Welcome to LcMSSpectator!
+                    <TextBlock
+                        Grid.Row="0"
+                        Margin="0"
+                        VerticalAlignment="Bottom"
+                        FontSize="24"
+                        FontWeight="Bold"
+                        Foreground="#7EFFFFFF"
+                        TextAlignment="Center"
+                        TextWrapping="Wrap">
+                        Welcome to LcMSSpectator!
                     </TextBlock>
-                    <Button Grid.Row="2" Command="{Binding OpenDataSetCommand}" 
-                            Background="#7EFFFFFF" FontWeight="Bold">Open Data Set</Button>
+                    <Button
+                        Grid.Row="2"
+                        Background="#7EFFFFFF"
+                        Command="{Binding OpenDataSetCommand}"
+                        FontWeight="Bold">
+                        Open Data Set
+                    </Button>
 
-                    <Button Grid.Row="4" Command="{Binding OpenRawFileCommand}"
-                            Background="#7EFFFFFF" FontWeight="Bold">Open _Raw/MzML File(s)</Button>
-                    <Button Grid.Row="6" Command="{Binding OpenTsvFileCommand}"
-                            Background="#7EFFFFFF" FontWeight="Bold">Open _Id File</Button>
-                    <Button Grid.Row="8" Command="{Binding OpenFeatureFileCommand}"
-                            Background="#7EFFFFFF" BorderThickness="0" FontWeight="Bold">Open Feature File</Button>
-                    <Button Grid.Row="10" Command="{Binding OpenFromDmsCommand}" 
-                            Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}"
-                            Background="#7EFFFFFF" BorderThickness="0" FontWeight="Bold">Open From DMS</Button>
+                    <Button
+                        Grid.Row="4"
+                        Background="#7EFFFFFF"
+                        Command="{Binding OpenRawFileCommand}"
+                        FontWeight="Bold">
+                        Open _Raw/MzML File(s)
+                    </Button>
+                    <Button
+                        Grid.Row="6"
+                        Background="#7EFFFFFF"
+                        Command="{Binding OpenTsvFileCommand}"
+                        FontWeight="Bold">
+                        Open _Id File
+                    </Button>
+                    <Button
+                        Grid.Row="8"
+                        Background="#7EFFFFFF"
+                        BorderThickness="0"
+                        Command="{Binding OpenFeatureFileCommand}"
+                        FontWeight="Bold">
+                        Open Feature File
+                    </Button>
+                    <Button
+                        Grid.Row="10"
+                        Background="#7EFFFFFF"
+                        BorderThickness="0"
+                        Command="{Binding OpenFromDmsCommand}"
+                        FontWeight="Bold"
+                        Visibility="{Binding ShowOpenFromDms, Converter={StaticResource BoolToVis}}">
+                        Open From DMS
+                    </Button>
                 </Grid>
             </Border>
         </Grid>

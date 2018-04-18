@@ -1,164 +1,398 @@
-﻿<Window x:Class="LcmsSpectator.Views.SearchSettingsWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:views="clr-namespace:LcmsSpectator.Views"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Title="Search Settings" Height="550" Width="500" ResizeMode="NoResize">
+﻿<Window
+    x:Class="LcmsSpectator.Views.SearchSettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="clr-namespace:LcmsSpectator.Views"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    Title="Search Settings"
+    Width="500"
+    Height="550"
+    ResizeMode="NoResize">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
-    
+
     <Window.InputBindings>
-        <KeyBinding Command="{Binding PrevTabCommand}" Key="Left" />
-        <KeyBinding Command="{Binding NextTabCommand}" Key="Right" />
+        <KeyBinding Key="Left" Command="{Binding PrevTabCommand}" />
+        <KeyBinding Key="Right" Command="{Binding NextTabCommand}" />
     </Window.InputBindings>
-    
+
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="10" />
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
-    <TabControl SelectedIndex="{Binding TabIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        <TabControl SelectedIndex="{Binding TabIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <TabControl.InputBindings>
-                <KeyBinding Command="{Binding PrevTabCommand}" Key="Left" />
-                <KeyBinding Command="{Binding NextTabCommand}" Key="Right" />
+                <KeyBinding Key="Left" Command="{Binding PrevTabCommand}" />
+                <KeyBinding Key="Right" Command="{Binding NextTabCommand}" />
             </TabControl.InputBindings>
             <TabItem Name="DatasetInfoExisting">
-            <TabItem.Header>
-                Dataset Info
-            </TabItem.Header>
-            <Grid Margin="5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="25*" />
-                    <ColumnDefinition Width="50*" />
-                    <ColumnDefinition Width="10" />
-                    <ColumnDefinition Width="60" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="30" />
-                </Grid.RowDefinitions>
-               
-                <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" Height="25">Spectrum File Path</TextBlock>
-                <TextBox Grid.Row="0" Grid.Column="1" Height="25" Text="{Binding SpectrumFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <Button Grid.Row="0" Grid.Column="3" Height="25" Command="{Binding BrowseSpectrumFilesCommand}">Browse</Button>
-
-                <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" Height="25">Fasta DB File Path</TextBlock>
-                <TextBox Grid.Row="1" Grid.Column="1" Height="25" Text="{Binding FastaDbFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <Button Grid.Row="1" Grid.Column="3" Height="25" Command="{Binding BrowseFastaDbFilesCommand}">Browse</Button>
-
-                <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" Height="25">Feature File Path</TextBlock>
-                <TextBox Grid.Row="2" Grid.Column="1" Height="25" Text="{Binding FeatureFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <Button Grid.Row="2" Grid.Column="3" Height="25" Command="{Binding BrowseFeatureFilesCommand}">Browse</Button>
-
-                <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" Height="25">Output Directory</TextBlock>
-                <TextBox Grid.Row="3" Grid.Column="1" Height="25" Text="{Binding OutputFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                <Button Grid.Row="3" Grid.Column="3" Height="25" Command="{Binding BrowseOutputDirectoriesCommand}">Browse</Button>
-            </Grid>
-        </TabItem>
-
-        <TabItem>
-            <TabItem.Header>
-                Search Settings
-            </TabItem.Header>
-            <ScrollViewer>
-                <Grid Margin="0,0,5,0">
+                <TabItem.Header>
+                    Dataset Info
+                </TabItem.Header>
+                <Grid Margin="5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="25*" />
                         <ColumnDefinition Width="50*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="60" />
                     </Grid.ColumnDefinitions>
-
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
                         <RowDefinition Height="30" />
-                        <RowDefinition Height="60" />
-                        <RowDefinition Height="60" />
-                        <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
-                        <RowDefinition Height="30" />
-                        <RowDefinition Height="60" />
-                            <RowDefinition Height="30" />
-                            <RowDefinition Height="30" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" Height="25">Precursor Ion Tolerance</TextBlock>
-                    <TextBox Grid.Row="0" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left" Text="{Binding PrecursorIonToleranceValue}"
-                             TextAlignment="Right" />
-                    <ComboBox Grid.Row="0" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right" 
-                              ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding PrecursorIonToleranceUnit}" IsEnabled="False" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Height="25"
+                        FontWeight="Bold">
+                        Spectrum File Path
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Height="25"
+                        Text="{Binding SpectrumFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button
+                        Grid.Row="0"
+                        Grid.Column="3"
+                        Height="25"
+                        Command="{Binding BrowseSpectrumFilesCommand}">
+                        Browse
+                    </Button>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" Height="25">Product Ion Tolerance</TextBlock>
-                    <TextBox Grid.Row="1" Grid.Column="1" Height="25" Width="225" HorizontalAlignment="Left" Text="{Binding ProductIonToleranceValue}"
-                             TextAlignment="Right" />
-                    <ComboBox Grid.Row="1" Grid.Column="1" Height="25" Width="50" HorizontalAlignment="Right"
-                              ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding ProductIonToleranceUnit}" IsEnabled="False"/>
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Height="25"
+                        FontWeight="Bold">
+                        Fasta DB File Path
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Height="25"
+                        Text="{Binding FastaDbFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button
+                        Grid.Row="1"
+                        Grid.Column="3"
+                        Height="25"
+                        Command="{Binding BrowseFastaDbFilesCommand}">
+                        Browse
+                    </Button>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Length</TextBlock>
-                    <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MinSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Height="25"
+                        FontWeight="Bold">
+                        Feature File Path
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Height="25"
+                        Text="{Binding FeatureFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button
+                        Grid.Row="2"
+                        Grid.Column="3"
+                        Height="25"
+                        Command="{Binding BrowseFeatureFilesCommand}">
+                        Browse
+                    </Button>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Length</TextBlock>
-                    <xctk:IntegerUpDown Grid.Row="3" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MaxSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Height="25"
+                        FontWeight="Bold">
+                        Output Directory
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Height="25"
+                        Text="{Binding OutputFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button
+                        Grid.Row="3"
+                        Grid.Column="3"
+                        Height="25"
+                        Command="{Binding BrowseOutputDirectoriesCommand}">
+                        Browse
+                    </Button>
+                </Grid>
+            </TabItem>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Min Precursor Ion Charge</TextBlock>
-                    <xctk:IntegerUpDown Grid.Row="4" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MinPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" />
-
-                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="WrapWithOverflow">Max Precursor Ion Charge</TextBlock>
-                    <xctk:IntegerUpDown Grid.Row="5" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MaxPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" />
-
-                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" Height="25">Min Product Ion Charge</TextBlock>
-                    <xctk:IntegerUpDown Grid.Row="6" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MinProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" />
-
-                    <TextBlock Grid.Row="7" Grid.Column="0" FontWeight="Bold" Height="25">Max Product Ion Charge</TextBlock>
-                    <xctk:IntegerUpDown Grid.Row="7" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MaxProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="1" />
-
-                    <TextBlock Grid.Row="8" Grid.Column="0" FontWeight="Bold" Height="25">Min Sequence Mass</TextBlock>
-                    <xctk:DoubleUpDown Grid.Row="8" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MinSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <TextBlock Grid.Row="9" Grid.Column="0" FontWeight="Bold" Height="25">Max Sequence Mass</TextBlock>
-                    <xctk:DoubleUpDown Grid.Row="9" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MaxSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                    <TextBlock Grid.Row="11" Grid.Column="0" FontWeight="Bold" Height="50" TextWrapping="Wrap">Max Dynamic Modifications Per Sequence</TextBlock>
-                    <xctk:IntegerUpDown Grid.Row="11" Grid.Column="1" Height="25" TextAlignment="Right"
-                             Text="{Binding MaxDynamicModificationsPerSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" />
-                    
-                    <TextBlock Grid.Row="12" Grid.Column="0" FontWeight="Bold" Height="25"># matches per spectrum</TextBlock>
-                    <xctk:IntegerUpDown Grid.Row="12" Grid.Column="1" Text="{Binding NumMatchesPerSpectrum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Right"
-                                        Minimum="1" />
-
-                    <TextBlock Grid.Row="13" Grid.Column="0" FontWeight="Bold" Height="25">MS/MS Scan Range</TextBlock>
-                    <Grid Grid.Row="13" Grid.Column="1" Height="25">
+            <TabItem>
+                <TabItem.Header>
+                    Search Settings
+                </TabItem.Header>
+                <ScrollViewer>
+                    <Grid Margin="0,0,5,0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="10" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="25*" />
+                            <ColumnDefinition Width="50*" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBox Grid.Column="0" TextAlignment="Right"
-                                 Text="{Binding MinScanNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <TextBlock Grid.Column="1" FontWeight="Bold" TextAlignment="Center">-</TextBlock>
-                        <TextBox Grid.Column="2" TextAlignment="Right"
-                                 Text="{Binding MaxScanNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="60" />
+                            <RowDefinition Height="60" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="60" />
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="30" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            Precursor Ion Tolerance
+                        </TextBlock>
+                        <TextBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Width="225"
+                            Height="25"
+                            HorizontalAlignment="Left"
+                            Text="{Binding PrecursorIonToleranceValue}"
+                            TextAlignment="Right" />
+                        <ComboBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Width="50"
+                            Height="25"
+                            HorizontalAlignment="Right"
+                            IsEnabled="False"
+                            ItemsSource="{Binding ToleranceUnits}"
+                            SelectedItem="{Binding PrecursorIonToleranceUnit}" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            Product Ion Tolerance
+                        </TextBlock>
+                        <TextBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Width="225"
+                            Height="25"
+                            HorizontalAlignment="Left"
+                            Text="{Binding ProductIonToleranceValue}"
+                            TextAlignment="Right" />
+                        <ComboBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Width="50"
+                            Height="25"
+                            HorizontalAlignment="Right"
+                            IsEnabled="False"
+                            ItemsSource="{Binding ToleranceUnits}"
+                            SelectedItem="{Binding ProductIonToleranceUnit}" />
+
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            Min Sequence Length
+                        </TextBlock>
+                        <xctk:IntegerUpDown
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Height="25"
+                            Minimum="0"
+                            Text="{Binding MinSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            Max Sequence Length
+                        </TextBlock>
+                        <xctk:IntegerUpDown
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Height="25"
+                            Minimum="0"
+                            Text="{Binding MaxSequenceLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            Height="50"
+                            FontWeight="Bold"
+                            TextWrapping="WrapWithOverflow">
+                            Min Precursor Ion Charge
+                        </TextBlock>
+                        <xctk:IntegerUpDown
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Height="25"
+                            Minimum="1"
+                            Text="{Binding MinPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="0"
+                            Height="50"
+                            FontWeight="Bold"
+                            TextWrapping="WrapWithOverflow">
+                            Max Precursor Ion Charge
+                        </TextBlock>
+                        <xctk:IntegerUpDown
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            Height="25"
+                            Minimum="1"
+                            Text="{Binding MaxPrecursorIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            Min Product Ion Charge
+                        </TextBlock>
+                        <xctk:IntegerUpDown
+                            Grid.Row="6"
+                            Grid.Column="1"
+                            Height="25"
+                            Minimum="1"
+                            Text="{Binding MinProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="7"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            Max Product Ion Charge
+                        </TextBlock>
+                        <xctk:IntegerUpDown
+                            Grid.Row="7"
+                            Grid.Column="1"
+                            Height="25"
+                            Minimum="1"
+                            Text="{Binding MaxProductIonCharge, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="8"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            Min Sequence Mass
+                        </TextBlock>
+                        <xctk:DoubleUpDown
+                            Grid.Row="8"
+                            Grid.Column="1"
+                            Height="25"
+                            Text="{Binding MinSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="9"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            Max Sequence Mass
+                        </TextBlock>
+                        <xctk:DoubleUpDown
+                            Grid.Row="9"
+                            Grid.Column="1"
+                            Height="25"
+                            Text="{Binding MaxSequenceMass, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="11"
+                            Grid.Column="0"
+                            Height="50"
+                            FontWeight="Bold"
+                            TextWrapping="Wrap">
+                            Max Dynamic Modifications Per Sequence
+                        </TextBlock>
+                        <xctk:IntegerUpDown
+                            Grid.Row="11"
+                            Grid.Column="1"
+                            Height="25"
+                            Minimum="0"
+                            Text="{Binding MaxDynamicModificationsPerSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="12"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            # matches per spectrum
+                        </TextBlock>
+                        <xctk:IntegerUpDown
+                            Grid.Row="12"
+                            Grid.Column="1"
+                            Minimum="1"
+                            Text="{Binding NumMatchesPerSpectrum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right" />
+
+                        <TextBlock
+                            Grid.Row="13"
+                            Grid.Column="0"
+                            Height="25"
+                            FontWeight="Bold">
+                            MS/MS Scan Range
+                        </TextBlock>
+                        <Grid
+                            Grid.Row="13"
+                            Grid.Column="1"
+                            Height="25">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox
+                                Grid.Column="0"
+                                Text="{Binding MinScanNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                TextAlignment="Right" />
+                            <TextBlock
+                                Grid.Column="1"
+                                FontWeight="Bold"
+                                TextAlignment="Center">
+                                -
+                            </TextBlock>
+                            <TextBox
+                                Grid.Column="2"
+                                Text="{Binding MaxScanNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                TextAlignment="Right" />
+                        </Grid>
                     </Grid>
-                </Grid>
-            </ScrollViewer>
-        </TabItem>
-        
-        <TabItem Header="Sequence">
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Sequence">
                 <Grid Margin="10">
 
                     <Grid.RowDefinitions>
@@ -166,19 +400,40 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    
+
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="33*" />
                         <ColumnDefinition Width="33*" />
                         <ColumnDefinition Width="33*" />
                     </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" Height="25" Margin="20,0,0,0">Search Mode</TextBlock>
-                    <ComboBox Grid.Row="0" Grid.Column="1" Height="25" Width="60" HorizontalAlignment="Left"
-                          ItemsSource="{Binding SearchModes}" SelectedItem="{Binding SelectedSearchMode, Mode=TwoWay}" />
-                    <TextBlock Grid.Row="0" Grid.Column="2" Height="25" Text="{Binding SearchModeDescription}" />
 
-                    <RadioButton Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" IsChecked="{Binding FromFastaEntry, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Height="25"
+                        Margin="20,0,0,0"
+                        FontWeight="Bold">
+                        Search Mode
+                    </TextBlock>
+                    <ComboBox
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Width="60"
+                        Height="25"
+                        HorizontalAlignment="Left"
+                        ItemsSource="{Binding SearchModes}"
+                        SelectedItem="{Binding SelectedSearchMode, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Height="25"
+                        Text="{Binding SearchModeDescription}" />
+
+                    <RadioButton
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        IsChecked="{Binding FromFastaEntry, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <GroupBox IsEnabled="{Binding FromFastaEntry}">
                             <GroupBox.Header>
                                 <TextBlock FontWeight="Bold">By FASTA Entry</TextBlock>
@@ -193,23 +448,51 @@
                                     <ColumnDefinition Width="3" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <ListBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"  Height="100" ItemsSource="{Binding FastaEntries}">
+                                <ListBox
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="3"
+                                    Height="100"
+                                    ItemsSource="{Binding FastaEntries}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
                                                 <CheckBox IsChecked="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                <TextBlock Text="{Binding ProteinName}" Margin="3,0,0,0" ToolTip="{Binding FormattedEntry}" />
+                                                <TextBlock
+                                                    Margin="3,0,0,0"
+                                                    Text="{Binding ProteinName}"
+                                                    ToolTip="{Binding FormattedEntry}" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
-                                <Button Grid.Row="1" Grid.Column="0" Margin="0,3,3,0" Height="25" VerticalAlignment="Bottom" Command="{Binding SelectAllProteinsCommand}">Select All</Button>
-                                <Button Grid.Row="1" Grid.Column="2" Margin="0,3,0,0" Height="25" VerticalAlignment="Bottom" Command="{Binding SelectNoProteinsCommand}">Select None</Button>
+                                <Button
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Height="25"
+                                    Margin="0,3,3,0"
+                                    VerticalAlignment="Bottom"
+                                    Command="{Binding SelectAllProteinsCommand}">
+                                    Select All
+                                </Button>
+                                <Button
+                                    Grid.Row="1"
+                                    Grid.Column="2"
+                                    Height="25"
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Bottom"
+                                    Command="{Binding SelectNoProteinsCommand}">
+                                    Select None
+                                </Button>
                             </Grid>
                         </GroupBox>
                     </RadioButton>
 
-                    <RadioButton Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"  IsChecked="{Binding FromSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <RadioButton
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        IsChecked="{Binding FromSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <GroupBox IsEnabled="{Binding FromSequence, UpdateSourceTrigger=PropertyChanged}">
                             <GroupBox.Header>
                                 <TextBlock FontWeight="Bold">By Sequence</TextBlock>
@@ -225,113 +508,210 @@
                                     <ColumnDefinition Width="3" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBox Margin="0,0,0,5" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
-                                            Text="{Binding SelectedSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"  Height="100" ItemsSource="{Binding SequenceProteins}">
+                                <TextBox
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="3"
+                                    Margin="0,0,0,5"
+                                    Text="{Binding SelectedSequence, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <ListBox
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="3"
+                                    Height="100"
+                                    ItemsSource="{Binding SequenceProteins}">
                                     <ListBox.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal">
                                                 <CheckBox IsChecked="{Binding Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                <TextBlock Text="{Binding ProteinName}" Margin="3,0,0,0" ToolTip="{Binding FormattedEntry}" />
+                                                <TextBlock
+                                                    Margin="3,0,0,0"
+                                                    Text="{Binding ProteinName}"
+                                                    ToolTip="{Binding FormattedEntry}" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </ListBox.ItemTemplate>
                                 </ListBox>
-                                <CheckBox Grid.Row="2" Grid.Column="0" Margin="0,3,3,0" Height="25" VerticalAlignment="Bottom" IsChecked="{Binding FixedNTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Fixed N-Terminus</CheckBox>
-                                <CheckBox Grid.Row="2" Grid.Column="2" Margin="0,3,0,0" Height="25" VerticalAlignment="Bottom" IsChecked="{Binding FixedCTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Fixed C-Terminus</CheckBox>
+                                <CheckBox
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Height="25"
+                                    Margin="0,3,3,0"
+                                    VerticalAlignment="Bottom"
+                                    IsChecked="{Binding FixedNTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    Fixed N-Terminus
+                                </CheckBox>
+                                <CheckBox
+                                    Grid.Row="2"
+                                    Grid.Column="2"
+                                    Height="25"
+                                    Margin="0,3,0,0"
+                                    VerticalAlignment="Bottom"
+                                    IsChecked="{Binding FixedCTerm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    Fixed C-Terminus
+                                </CheckBox>
                             </Grid>
                         </GroupBox>
                     </RadioButton>
                 </Grid>
-        </TabItem>
-        
-        <TabItem>
-            <TabItem.Header>
-                Search Modifications
-            </TabItem.Header>
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="25" />
-                    <ColumnDefinition Width="25*" />
-                    <ColumnDefinition Width="25*" />
-                    <ColumnDefinition Width="25*" />
-                    <ColumnDefinition Width="25*" />
-                </Grid.ColumnDefinitions>
-                <Button Grid.Row="0" Grid.Column="0" Width="25" HorizontalAlignment="Left" FontSize="13" FontWeight="Bold" 
-                        Command="{Binding AddModificationCommand}" Height="25" ToolTip="Add Modification">+</Button>
-                <Button Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2"
-                        Command="{Binding ManageModificationsCommand}" HorizontalAlignment="Right"
-                        Height="25">Manage Modifications</Button>
-                <DataGrid x:Name="SearchModificationsDataGrid" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" AutoGenerateColumns="False"
-                          RowHeaderWidth="0" CanUserAddRows="False" ItemsSource="{Binding SearchModifications}">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="25">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Command="{Binding RemoveModificationCommand}" FontWeight="Bold" ToolTip="Remove Modification">-</Button>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Residue" Width="12*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                   <ComboBox ItemsSource="{Binding Path=AminoAcidResidues}" SelectedItem="{Binding Path=SelectedResidue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Modification" Width="25*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding Modifications}" SelectedItem="{Binding SelectedModification, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="True" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Location" Width="25*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="Fixed?" Width="25*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding IsFixed}" SelectedItem="{Binding FixedSelection, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-        </TabItem>
-    </TabControl>
+            </TabItem>
 
-        <Border Grid.Row="0" Grid.Column="0" BorderBrush="Black" BorderThickness="1" Background="#80000000"
-            VerticalAlignment="Stretch" Visibility="{Binding SearchRunning, Converter={StaticResource BoolToVis}}">
+            <TabItem>
+                <TabItem.Header>
+                    Search Modifications
+                </TabItem.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25" />
+                        <ColumnDefinition Width="25*" />
+                        <ColumnDefinition Width="25*" />
+                        <ColumnDefinition Width="25*" />
+                        <ColumnDefinition Width="25*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Width="25"
+                        Height="25"
+                        HorizontalAlignment="Left"
+                        Command="{Binding AddModificationCommand}"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        ToolTip="Add Modification">
+                        +
+                    </Button>
+                    <Button
+                        Grid.Row="0"
+                        Grid.Column="3"
+                        Grid.ColumnSpan="2"
+                        Height="25"
+                        HorizontalAlignment="Right"
+                        Command="{Binding ManageModificationsCommand}">
+                        Manage Modifications
+                    </Button>
+                    <DataGrid
+                        x:Name="SearchModificationsDataGrid"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="5"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        ItemsSource="{Binding SearchModifications}"
+                        RowHeaderWidth="0">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="25">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button
+                                            Command="{Binding RemoveModificationCommand}"
+                                            FontWeight="Bold"
+                                            ToolTip="Remove Modification">
+                                            -
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="12*" Header="Residue">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox
+                                            IsEditable="True"
+                                            ItemsSource="{Binding Path=AminoAcidResidues}"
+                                            SelectedItem="{Binding Path=SelectedResidue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="25*" Header="Modification">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox
+                                            IsEditable="True"
+                                            ItemsSource="{Binding Modifications}"
+                                            SelectedItem="{Binding SelectedModification, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="25*" Header="Location">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Width="25*" Header="Fixed?">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding IsFixed}" SelectedItem="{Binding FixedSelection, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <Border
+            Grid.Row="0"
+            Grid.Column="0"
+            VerticalAlignment="Stretch"
+            Background="#80000000"
+            BorderBrush="Black"
+            BorderThickness="1"
+            Visibility="{Binding SearchRunning, Converter={StaticResource BoolToVis}}">
             <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="50*"/>
-                    <RowDefinition Height="50*"/>
+                    <RowDefinition Height="50*" />
+                    <RowDefinition Height="50*" />
                 </Grid.RowDefinitions>
-                <StackPanel Background="LightGray" Height="75" Width="250">
+                <StackPanel
+                    Width="250"
+                    Height="75"
+                    Background="LightGray">
                     <TextBlock Margin="10" Text="{Binding Path=SearchProgressStatus}" />
-                    <ProgressBar Value="{Binding Path=SearchProgressPercent}" Margin="10" Height="20" />
+                    <ProgressBar
+                        Height="20"
+                        Margin="10"
+                        Value="{Binding Path=SearchProgressPercent}" />
                 </StackPanel>
             </Grid>
         </Border>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0">
-        <Button Width="20" Margin="0,0,10,0" Command="{Binding PrevTabCommand}" ToolTip="Previous Tab">&lt;</Button>
-        <Button Width="20" Command="{Binding NextTabCommand}" ToolTip="Next Tab">&gt;</Button>
-    </StackPanel>
-        
-    <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right">
-        <Button Width="60" Margin="0,0,10,0" Command="{Binding CancelCommand}">Cancel</Button>
-        <Button Width="60" Command="{Binding RunCommand}">Run</Button>
-    </StackPanel>
+        <StackPanel
+            Grid.Row="2"
+            Grid.Column="0"
+            Orientation="Horizontal">
+            <Button
+                Width="20"
+                Margin="0,0,10,0"
+                Command="{Binding PrevTabCommand}"
+                ToolTip="Previous Tab">
+                &lt;
+            </Button>
+            <Button
+                Width="20"
+                Command="{Binding NextTabCommand}"
+                ToolTip="Next Tab">
+                &gt;
+            </Button>
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="2"
+            Grid.Column="0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Width="60"
+                Margin="0,0,10,0"
+                Command="{Binding CancelCommand}">
+                Cancel
+            </Button>
+            <Button Width="60" Command="{Binding RunCommand}">Run</Button>
+        </StackPanel>
     </Grid>
 </Window>

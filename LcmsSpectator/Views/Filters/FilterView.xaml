@@ -1,7 +1,9 @@
-﻿<Window x:Class="LcmsSpectator.Views.FilterView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Height="150" Width="400">   
+﻿<Window
+    x:Class="LcmsSpectator.Views.FilterView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Width="400"
+    Height="150">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="30*" />
@@ -9,14 +11,27 @@
             <RowDefinition Height="25*" />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Text="{Binding Description}" />
-        <ComboBox Grid.Row="1" IsEditable="True" Height="25" ItemsSource="{Binding DefaultValues}" Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                  Name="FilterValue">
+        <ComboBox
+            Name="FilterValue"
+            Grid.Row="1"
+            Height="25"
+            IsEditable="True"
+            ItemsSource="{Binding DefaultValues}"
+            Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <ComboBox.InputBindings>
-                <KeyBinding Command="{Binding Path=FilterCommand, UpdateSourceTrigger=PropertyChanged}" Key="Enter" />
+                <KeyBinding Key="Enter" Command="{Binding Path=FilterCommand, UpdateSourceTrigger=PropertyChanged}" />
             </ComboBox.InputBindings>
         </ComboBox>
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Width="60" Command="{Binding Path=FilterCommand}" Margin="0,0,10,0">Filter</Button>
+        <StackPanel
+            Grid.Row="2"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Width="60"
+                Margin="0,0,10,0"
+                Command="{Binding Path=FilterCommand}">
+                Filter
+            </Button>
             <Button Width="60" Command="{Binding Path=CancelCommand}">Cancel</Button>
         </StackPanel>
     </Grid>

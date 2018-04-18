@@ -1,12 +1,15 @@
-﻿<UserControl x:Class="LcmsSpectator.Views.SequenceViewer.SequenceViewer"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:sequenceViewer="clr-namespace:LcmsSpectator.ViewModels.SequenceViewer"
-             mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance d:Type=sequenceViewer:SequenceViewerViewModel, IsDesignTimeCreatable=True}"
-             d:DesignHeight="300" d:DesignWidth="300">
+﻿<UserControl
+    x:Class="LcmsSpectator.Views.SequenceViewer.SequenceViewer"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sequenceViewer="clr-namespace:LcmsSpectator.ViewModels.SequenceViewer"
+    d:DataContext="{d:DesignInstance d:Type=sequenceViewer:SequenceViewerViewModel,
+                                     IsDesignTimeCreatable=True}"
+    d:DesignHeight="300"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
     <UserControl.ContextMenu>
         <ContextMenu>
             <MenuItem Click="MenuItem_OnClick" Header="Save as Image" />
@@ -14,17 +17,25 @@
     </UserControl.ContextMenu>
     <UserControl.Resources>
         <ControlTemplate x:Key="IonTemplate">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
-                <TextBlock FontSize="13" Text="{Binding LabeledIonViewModel.IonType.BaseIonType.Symbol}" FontWeight="Bold"
-                                           Foreground="{Binding Color}"/>
+            <StackPanel
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <TextBlock
+                    FontSize="13"
+                    FontWeight="Bold"
+                    Foreground="{Binding Color}"
+                    Text="{Binding LabeledIonViewModel.IonType.BaseIonType.Symbol}" />
 
                 <StackPanel>
-                    <TextBlock Text="{Binding ChargeSymbol}"
-                                               FontSize="9"
-                                               Foreground="{Binding Color}" />
-                    <TextBlock Text="{Binding LabeledIonViewModel.Index}"
-                                               FontSize="9"
-                                               Foreground="{Binding Color}"/>
+                    <TextBlock
+                        FontSize="9"
+                        Foreground="{Binding Color}"
+                        Text="{Binding ChargeSymbol}" />
+                    <TextBlock
+                        FontSize="9"
+                        Foreground="{Binding Color}"
+                        Text="{Binding LabeledIonViewModel.Index}" />
                 </StackPanel>
             </StackPanel>
         </ControlTemplate>
@@ -35,13 +46,20 @@
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+        <StackPanel
+            Grid.Row="1"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
             <TextBlock Margin="0,0,5,0" FontWeight="Bold">Sequence Coverage:</TextBlock>
             <TextBlock Text="{Binding SequenceCoverage}" />
         </StackPanel>
 
-        <ScrollViewer Grid.Row="0" CanContentScroll="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding SequenceFragments}" Name="SequenceContainer">
+        <ScrollViewer
+            Grid.Row="0"
+            CanContentScroll="True"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+            <ItemsControl Name="SequenceContainer" ItemsSource="{Binding SequenceFragments}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel />
@@ -49,41 +67,69 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Height="90" Width="40" Margin="0,0,0,5">
+                        <Grid
+                            Width="40"
+                            Height="90"
+                            Margin="0,0,0,5">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <!-- Suffix -->
-                            <Border Grid.Row="0" DataContext="{Binding SuffixIon}" Margin="-2,0,0,0"
-                                BorderThickness="2,2,0,0" BorderBrush="{Binding Color}"
-                                Width="36" HorizontalAlignment="Left">
+                            <!--  Suffix  -->
+                            <Border
+                                Grid.Row="0"
+                                Width="36"
+                                Margin="-2,0,0,0"
+                                HorizontalAlignment="Left"
+                                BorderBrush="{Binding Color}"
+                                BorderThickness="2,2,0,0"
+                                DataContext="{Binding SuffixIon}">
                                 <ContentControl Template="{StaticResource IonTemplate}" />
                             </Border>
 
-                            <!-- Residue -->
+                            <!--  Residue  -->
                             <Grid Grid.Row="1">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="*" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
-                                <Border Grid.Row="0" BorderThickness="2,0,0,0" BorderBrush="{Binding SuffixIon.Color}" Margin="-2,0,0,0" />
-                                <Border Grid.Row="1" BorderThickness="0,0,2,0" BorderBrush="{Binding PrefixIon.Color}" />
+                                <Border
+                                    Grid.Row="0"
+                                    Margin="-2,0,0,0"
+                                    BorderBrush="{Binding SuffixIon.Color}"
+                                    BorderThickness="2,0,0,0" />
+                                <Border
+                                    Grid.Row="1"
+                                    BorderBrush="{Binding PrefixIon.Color}"
+                                    BorderThickness="0,0,2,0" />
                             </Grid>
-                            <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <StackPanel
+                                Grid.Row="1"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
                                 <!--<StackPanel.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Add/Edit Modification" Command="{Binding SelectModificationCommand}" />
                                 </ContextMenu>
                             </StackPanel.ContextMenu>-->
-                                <TextBlock Text="{Binding AminoAcid.Residue}" FontFamily="Courier New" FontSize="18" FontWeight="Bold" />
+                                <TextBlock
+                                    FontFamily="Courier New"
+                                    FontSize="18"
+                                    FontWeight="Bold"
+                                    Text="{Binding AminoAcid.Residue}" />
                                 <TextBlock FontSize="9" Text="{Binding ModificationSymbol}" />
                             </StackPanel>
 
-                            <!-- Prefix -->
-                            <Border Grid.Row="2" DataContext="{Binding PrefixIon}" BorderThickness="0,0,2,2" BorderBrush="{Binding Color}"
-                                Width="38" HorizontalAlignment="Right">
+                            <!--  Prefix  -->
+                            <Border
+                                Grid.Row="2"
+                                Width="38"
+                                HorizontalAlignment="Right"
+                                BorderBrush="{Binding Color}"
+                                BorderThickness="0,0,2,2"
+                                DataContext="{Binding PrefixIon}">
                                 <ContentControl Template="{StaticResource IonTemplate}" />
                             </Border>
                         </Grid>

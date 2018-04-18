@@ -1,8 +1,11 @@
-﻿<Window x:Class="LcmsSpectator.Views.FileSelectors.ExportDatasetWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:data="clr-namespace:LcmsSpectator.ViewModels.Data"
-        Title="Export Dataset" Height="190" Width="600">
+﻿<Window
+    x:Class="LcmsSpectator.Views.FileSelectors.ExportDatasetWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:data="clr-namespace:LcmsSpectator.ViewModels.Data"
+    Title="Export Dataset"
+    Width="600"
+    Height="190">
     <GroupBox Margin="15" Header="Export Dataset">
         <Grid>
             <Grid.ColumnDefinitions>
@@ -18,8 +21,19 @@
                 <RowDefinition Height="25" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" FontWeight="Bold" VerticalAlignment="Center">Dataset</TextBlock>
-            <ComboBox Grid.Row="0" Grid.Column="1" Height="25" Grid.ColumnSpan="3" ItemsSource="{Binding Datasets}" SelectedItem="{Binding SelectedDataset}">
+            <TextBlock
+                Grid.Row="0"
+                VerticalAlignment="Center"
+                FontWeight="Bold">
+                Dataset
+            </TextBlock>
+            <ComboBox
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="3"
+                Height="25"
+                ItemsSource="{Binding Datasets}"
+                SelectedItem="{Binding SelectedDataset}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type data:DataSetViewModel}">
                         <TextBlock Text="{Binding Title}" />
@@ -27,12 +41,38 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center">Output Path</TextBlock>
-            <TextBox Grid.Row="1" Grid.Column="1" Height="25" Text="{Binding OutputFilePath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-            <Button Grid.Row="1" Grid.Column="3" Height="25" Command="{Binding BrowseOutputFilesCommand}">Browse</Button>
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                FontWeight="Bold">
+                Output Path
+            </TextBlock>
+            <TextBox
+                Grid.Row="1"
+                Grid.Column="1"
+                Height="25"
+                Text="{Binding OutputFilePath, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+            <Button
+                Grid.Row="1"
+                Grid.Column="3"
+                Height="25"
+                Command="{Binding BrowseOutputFilesCommand}">
+                Browse
+            </Button>
 
-            <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Right">
-                <Button Width="60" Margin="0,0,10,0" Command="{Binding CancelCommand}">Cancel</Button>
+            <StackPanel
+                Grid.Row="3"
+                Grid.Column="1"
+                Grid.ColumnSpan="3"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal">
+                <Button
+                    Width="60"
+                    Margin="0,0,10,0"
+                    Command="{Binding CancelCommand}">
+                    Cancel
+                </Button>
                 <Button Width="60" Command="{Binding ExportCommand}">Export</Button>
             </StackPanel>
         </Grid>

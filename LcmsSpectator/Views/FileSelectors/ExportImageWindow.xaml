@@ -1,19 +1,22 @@
-﻿<Window x:Class="LcmsSpectator.Views.FileSelectors.ExportImageWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Export Image" Height="250" Width="600">
+﻿<Window
+    x:Class="LcmsSpectator.Views.FileSelectors.ExportImageWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Export Image"
+    Width="600"
+    Height="250">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="10" />
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
-        
+
         <GroupBox>
             <GroupBox.Header>
                 <TextBlock FontWeight="Bold">Export Image</TextBlock>
             </GroupBox.Header>
-            
+
             <Grid Margin="5">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30" />
@@ -25,32 +28,89 @@
                     <ColumnDefinition Width="100" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="5" />
-                    <ColumnDefinition Width="60"></ColumnDefinition>
+                    <ColumnDefinition Width="60" />
                 </Grid.ColumnDefinitions>
-                
-                <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center">File Path</TextBlock>
-                <TextBox Grid.Row="0" Grid.Column="1" Height="25"
-                         Text="{Binding FilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                <Button Grid.Row="0" Grid.Column="3" Height="25" Command="{Binding BrowseFilesCommand}">Browse</Button>
-                
-                <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center">Height</TextBlock>
-                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Height="25" TextAlignment="Right"
-                         Text="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center">Width</TextBlock>
-                <TextBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Height="25" TextAlignment="Right"
-                         Text="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold">
+                    File Path
+                </TextBlock>
+                <TextBox
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Height="25"
+                    Text="{Binding FilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="3"
+                    Height="25"
+                    Command="{Binding BrowseFilesCommand}">
+                    Browse
+                </Button>
 
-                <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold" VerticalAlignment="Center">DPI</TextBlock>
-                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Height="25" TextAlignment="Right"
-                         Text="{Binding Dpi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold">
+                    Height
+                </TextBlock>
+                <TextBox
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="3"
+                    Height="25"
+                    Text="{Binding Height, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    TextAlignment="Right" />
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold">
+                    Width
+                </TextBlock>
+                <TextBox
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="3"
+                    Height="25"
+                    Text="{Binding Width, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    TextAlignment="Right" />
+
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold">
+                    DPI
+                </TextBlock>
+                <TextBox
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Grid.ColumnSpan="3"
+                    Height="25"
+                    Text="{Binding Dpi, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    TextAlignment="Right" />
 
             </Grid>
-            
+
         </GroupBox>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right">
-            <Button Width="60" Margin="0,0,10,0" Command="{Binding CancelCommand}">Cancel</Button>
+        <StackPanel
+            Grid.Row="2"
+            Grid.Column="0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Width="60"
+                Margin="0,0,10,0"
+                Command="{Binding CancelCommand}">
+                Cancel
+            </Button>
             <Button Width="60" Command="{Binding ExportCommand}">Export</Button>
         </StackPanel>
 

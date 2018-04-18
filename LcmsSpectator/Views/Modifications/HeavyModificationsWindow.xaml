@@ -1,8 +1,11 @@
-﻿<Window x:Class="LcmsSpectator.Views.Modifications.HeavyModificationsWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:modifications="clr-namespace:LcmsSpectator.Views.Modifications"
-        Title="Heavy Modifications" Height="300" Width="675">
+﻿<Window
+    x:Class="LcmsSpectator.Views.Modifications.HeavyModificationsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:modifications="clr-namespace:LcmsSpectator.Views.Modifications"
+    Title="Heavy Modifications"
+    Width="675"
+    Height="300">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="100*" />
@@ -15,10 +18,18 @@
             </GroupBox.Header>
             <modifications:HeavyModificationsView DataContext="{Binding HeavyModificationsViewModel}" />
         </GroupBox>
-        
-        <Button Grid.Row="2" Width="140" HorizontalAlignment="Left">Manage Modifications</Button>
-        
-        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
+
+        <Button
+            Grid.Row="2"
+            Width="140"
+            HorizontalAlignment="Left">
+            Manage Modifications
+        </Button>
+
+        <StackPanel
+            Grid.Row="2"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
             <Button Width="70" Command="{Binding CancelCommand}">Cancel</Button>
             <Label Width="10" />
             <Button Width="70" Command="{Binding SaveCommand}">Save</Button>

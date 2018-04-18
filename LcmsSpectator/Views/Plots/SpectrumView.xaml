@@ -1,14 +1,17 @@
-﻿<UserControl x:Class="LcmsSpectator.Views.Plots.SpectrumView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:wpf="http://oxyplot.org/wpf"
-             xmlns:utils="clr-namespace:LcmsSpectator.Utils"
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:sequenceViewer="clr-namespace:LcmsSpectator.Views.SequenceViewer"
-             mc:Ignorable="d" Background="White"
-             d:DesignHeight="300" d:DesignWidth="900">
+﻿<UserControl
+    x:Class="LcmsSpectator.Views.Plots.SpectrumView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sequenceViewer="clr-namespace:LcmsSpectator.Views.SequenceViewer"
+    xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+    xmlns:wpf="http://oxyplot.org/wpf"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    d:DesignHeight="300"
+    d:DesignWidth="900"
+    Background="White"
+    mc:Ignorable="d">
     <UserControl.Resources>
         <utils:NeutralLossToStringConverter x:Key="NeutralLossToString" />
     </UserControl.Resources>
@@ -21,42 +24,96 @@
             <RowDefinition Height="*" />
             <!--<RowDefinition Height="Auto" MaxHeight="100" />-->
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Grid.Column="0" DataContext="{Binding PrimarySpectrumViewModel}">
+        <Grid
+            Grid.Row="0"
+            Grid.Column="0"
+            DataContext="{Binding PrimarySpectrumViewModel}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
-                <RowDefinition Height="25" Name="AdjustXRow" />
+                <RowDefinition Name="AdjustXRow" Height="25" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="25" Name="AdjustYColumn" />
+                <ColumnDefinition Name="AdjustYColumn" Width="25" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left" Name="XMin" Text="{Binding XMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBox Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Right" Name="XMax"  Text="{Binding XMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <xctk:DoubleUpDown Increment="100" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Bottom" Name="YMin" Text="{Binding YMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <TextBox
+                Name="XMin"
+                Grid.Row="1"
+                Grid.Column="1"
+                Width="100"
+                HorizontalAlignment="Left"
+                Text="{Binding XMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox
+                Name="XMax"
+                Grid.Row="1"
+                Grid.Column="1"
+                Width="100"
+                HorizontalAlignment="Right"
+                Text="{Binding XMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <xctk:DoubleUpDown
+                Name="YMin"
+                Grid.Row="0"
+                Grid.Column="0"
+                Width="100"
+                VerticalAlignment="Bottom"
+                Increment="100"
+                Text="{Binding YMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <xctk:DoubleUpDown.LayoutTransform>
                     <RotateTransform Angle="-90" />
                 </xctk:DoubleUpDown.LayoutTransform>
             </xctk:DoubleUpDown>
-            <xctk:DoubleUpDown Increment="100" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Top" Name="YMax" Text="{Binding YMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <xctk:DoubleUpDown
+                Name="YMax"
+                Grid.Row="0"
+                Grid.Column="0"
+                Width="100"
+                VerticalAlignment="Top"
+                Increment="100"
+                Text="{Binding YMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <xctk:DoubleUpDown.LayoutTransform>
                     <RotateTransform Angle="-90" />
                 </xctk:DoubleUpDown.LayoutTransform>
             </xctk:DoubleUpDown>
 
-            <wpf:PlotView Name="Ms2Spectrum" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="1">
+            <wpf:PlotView
+                Name="Ms2Spectrum"
+                Grid.Row="0"
+                Grid.Column="1"
+                Model="{Binding Path=PlotModel}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Select or Sum _Spectra" Command="{Binding OpenScanSelectionCommand}" />
-                        <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
-                        <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
-                        <MenuItem Header="Show Deconvoluted Ions" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedIons, Mode=TwoWay}" />
-                        <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
-                        <MenuItem Header="Show Only _Top 20 Peaks" IsCheckable="True" IsChecked="{Binding ShowOnlyTop20Peaks, Mode=TwoWay}" />
-                        <MenuItem Header="Open _Error/Coverage Map" Command="{Binding OpenErrorMapCommand}" />
-                        <MenuItem Header="Run MsPf Search" Command="{Binding StartMsPfSearchCommand}" Name="StartMsPfSearch" />
+                        <MenuItem Command="{Binding OpenScanSelectionCommand}" Header="Select or Sum _Spectra" />
+                        <MenuItem
+                            Header="Show _Filtered Spectrum"
+                            IsCheckable="True"
+                            IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+                        <MenuItem
+                            Header="Show _Deconvoluted Spectrum"
+                            IsCheckable="True"
+                            IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
+                        <MenuItem
+                            Header="Show Deconvoluted Ions"
+                            IsCheckable="True"
+                            IsChecked="{Binding ShowDeconvolutedIons, Mode=TwoWay}" />
+                        <MenuItem
+                            Header="Show _Unexplained Peaks"
+                            IsCheckable="True"
+                            IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                        <MenuItem
+                            Header="Show Only _Top 20 Peaks"
+                            IsCheckable="True"
+                            IsChecked="{Binding ShowOnlyTop20Peaks, Mode=TwoWay}" />
+                        <MenuItem Command="{Binding OpenErrorMapCommand}" Header="Open _Error/Coverage Map" />
+                        <MenuItem
+                            Name="StartMsPfSearch"
+                            Command="{Binding StartMsPfSearchCommand}"
+                            Header="Run MsPf Search" />
                         <Separator />
-                        <MenuItem Header="Ion Types" ItemsSource="{Binding BaseIonTypes}" DataContext="{Binding FragmentationSequenceViewModel}">
+                        <MenuItem
+                            DataContext="{Binding FragmentationSequenceViewModel}"
+                            Header="Ion Types"
+                            ItemsSource="{Binding BaseIonTypes}">
                             <MenuItem.ItemContainerStyle>
                                 <Style TargetType="MenuItem">
                                     <Setter Property="Header" Value="{Binding BaseIonType.Symbol}" />
@@ -66,7 +123,10 @@
                                 </Style>
                             </MenuItem.ItemContainerStyle>
                         </MenuItem>
-                        <MenuItem Header="Neutral Losses" ItemsSource="{Binding NeutralLosses}" DataContext="{Binding FragmentationSequenceViewModel}">
+                        <MenuItem
+                            DataContext="{Binding FragmentationSequenceViewModel}"
+                            Header="Neutral Losses"
+                            ItemsSource="{Binding NeutralLosses}">
                             <MenuItem.ItemContainerStyle>
                                 <Style TargetType="MenuItem">
                                     <Setter Property="Header" Value="{Binding NeutralLoss, Converter={StaticResource NeutralLossToString}}" />
@@ -77,20 +137,46 @@
                             </MenuItem.ItemContainerStyle>
                         </MenuItem>
                         <!--<MenuItem Header="Select Fragment Ions" Command="{Binding SelectFragmentIonsCommand}" /> -->
-                        <MenuItem Header="Show Precursor Ions" IsCheckable="True" IsChecked="{Binding AddPrecursorIons, Mode=TwoWay}" DataContext="{Binding FragmentationSequenceViewModel}" />
-                        <MenuItem Header="Select All Ions" Command="{Binding SelectAllIonsCommand}" DataContext="{Binding FragmentationSequenceViewModel}" />
-                        <MenuItem Header="Hide All Ions" Command="{Binding HideAllIonsCommand}" DataContext="{Binding FragmentationSequenceViewModel}"  />
+                        <MenuItem
+                            DataContext="{Binding FragmentationSequenceViewModel}"
+                            Header="Show Precursor Ions"
+                            IsCheckable="True"
+                            IsChecked="{Binding AddPrecursorIons, Mode=TwoWay}" />
+                        <MenuItem
+                            Command="{Binding SelectAllIonsCommand}"
+                            DataContext="{Binding FragmentationSequenceViewModel}"
+                            Header="Select All Ions" />
+                        <MenuItem
+                            Command="{Binding HideAllIonsCommand}"
+                            DataContext="{Binding FragmentationSequenceViewModel}"
+                            Header="Hide All Ions" />
                         <Separator />
-                        <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" Name="AutoAdjustYCheck" />
-                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustmentCheck" />
-                        <MenuItem Header="Save As _Image" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
-                        <MenuItem Header="Save Peak List" Command="{Binding SaveAsTsvCommand}" />
-                        <MenuItem Header="Save Peaks to Clipboard" Command="{Binding SaveToClipboardCommand}" />
+                        <MenuItem
+                            Name="AutoAdjustYCheck"
+                            Header="Automatically Adjust Y Axis"
+                            IsCheckable="True"
+                            IsChecked="{Binding AutoAdjustYAxis}" />
+                        <MenuItem
+                            Name="ManualAdjustmentCheck"
+                            Header="Show _Manual Adjustment"
+                            IsCheckable="True"
+                            IsChecked="{Binding ShowManualAdjustment}" />
+                        <MenuItem
+                            Command="{Binding SaveAsImageCommand}"
+                            CommandParameter="png"
+                            Header="Save As _Image" />
+                        <MenuItem Command="{Binding SaveAsTsvCommand}" Header="Save Peak List" />
+                        <MenuItem Command="{Binding SaveToClipboardCommand}" Header="Save Peaks to Clipboard" />
                     </ContextMenu>
                 </wpf:PlotView.ContextMenu>
             </wpf:PlotView>
         </Grid>
-        <Expander Grid.Row="0" Grid.Column="1" ExpandDirection="Right" IsExpanded="True" BorderThickness="0">
+        <Expander
+            Grid.Row="0"
+            Grid.Column="1"
+            BorderThickness="0"
+            ExpandDirection="Right"
+            IsExpanded="True">
             <Expander.Header>
                 <TextBlock Text="Secondary Spectra">
                     <TextBlock.LayoutTransform>
@@ -107,35 +193,93 @@
                     <ColumnDefinition Width="50" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Button Margin="5" Height="30" Grid.Row="0" Grid.Column="0" Command="{Binding SwapSecondary1Command}" ToolTip="Show this spectrum in primary view">&lt;-&gt;</Button>
-                <Button Margin="5" Height="30" Grid.Row="1" Grid.Column="0" Command="{Binding SwapSecondary2Command}" ToolTip="Show this spectrum in primary view">&lt;-&gt;</Button>
-                <wpf:PlotView Name="PreviousMs1" DataContext="{Binding Secondary1ViewModel}" Model="{Binding Path=PlotModel}" Grid.Row="0" Grid.Column="1" Width="400">
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Height="30"
+                    Margin="5"
+                    Command="{Binding SwapSecondary1Command}"
+                    ToolTip="Show this spectrum in primary view">
+                    &lt;-&gt;
+                </Button>
+                <Button
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Height="30"
+                    Margin="5"
+                    Command="{Binding SwapSecondary2Command}"
+                    ToolTip="Show this spectrum in primary view">
+                    &lt;-&gt;
+                </Button>
+                <wpf:PlotView
+                    Name="PreviousMs1"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Width="400"
+                    DataContext="{Binding Secondary1ViewModel}"
+                    Model="{Binding Path=PlotModel}">
                     <wpf:PlotView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Select or Sum _Spectra" Command="{Binding OpenScanSelectionCommand}" />
-                            <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
-                            <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
-                            <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                            <MenuItem Command="{Binding OpenScanSelectionCommand}" Header="Select or Sum _Spectra" />
+                            <MenuItem
+                                Header="Show _Filtered Spectrum"
+                                IsCheckable="True"
+                                IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+                            <MenuItem
+                                Header="Show _Deconvoluted Spectrum"
+                                IsCheckable="True"
+                                IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
+                            <MenuItem
+                                Header="Show _Unexplained Peaks"
+                                IsCheckable="True"
+                                IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                             <Separator />
-                            <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" />
-                            <MenuItem Header="Save As _Image" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
-                            <MenuItem Header="Save Peak List" Command="{Binding SaveAsTsvCommand}" />
-                            <MenuItem Header="Save Peaks to Clipboard" Command="{Binding SaveToClipboardCommand}" />
+                            <MenuItem
+                                Header="Automatically Adjust Y Axis"
+                                IsCheckable="True"
+                                IsChecked="{Binding AutoAdjustYAxis}" />
+                            <MenuItem
+                                Command="{Binding SaveAsImageCommand}"
+                                CommandParameter="png"
+                                Header="Save As _Image" />
+                            <MenuItem Command="{Binding SaveAsTsvCommand}" Header="Save Peak List" />
+                            <MenuItem Command="{Binding SaveToClipboardCommand}" Header="Save Peaks to Clipboard" />
                         </ContextMenu>
                     </wpf:PlotView.ContextMenu>
                 </wpf:PlotView>
-                <wpf:PlotView Name="NextMs1" DataContext="{Binding Secondary2ViewModel}" Model="{Binding Path=PlotModel}" Grid.Row="1"  Grid.Column="1" Width="400">
+                <wpf:PlotView
+                    Name="NextMs1"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Width="400"
+                    DataContext="{Binding Secondary2ViewModel}"
+                    Model="{Binding Path=PlotModel}">
                     <wpf:PlotView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Select or Sum _Spectra" Command="{Binding OpenScanSelectionCommand}" />
-                            <MenuItem Header="Show _Filtered Spectrum" IsCheckable="True" IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
-                            <MenuItem Header="Show _Deconvoluted Spectrum" IsCheckable="True" IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
-                            <MenuItem Header="Show _Unexplained Peaks" IsCheckable="True" IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+                            <MenuItem Command="{Binding OpenScanSelectionCommand}" Header="Select or Sum _Spectra" />
+                            <MenuItem
+                                Header="Show _Filtered Spectrum"
+                                IsCheckable="True"
+                                IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+                            <MenuItem
+                                Header="Show _Deconvoluted Spectrum"
+                                IsCheckable="True"
+                                IsChecked="{Binding ShowDeconvolutedSpectrum, Mode=TwoWay}" />
+                            <MenuItem
+                                Header="Show _Unexplained Peaks"
+                                IsCheckable="True"
+                                IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
                             <Separator />
-                            <MenuItem Header="Automatically Adjust Y Axis" IsCheckable="True" IsChecked="{Binding AutoAdjustYAxis}" />
-                            <MenuItem Header="Save As _Image" Command="{Binding SaveAsImageCommand}" CommandParameter="png" />
-                            <MenuItem Header="Save Peak List" Command="{Binding SaveAsTsvCommand}" />
-                            <MenuItem Header="Save Peaks to Clipboard" Command="{Binding SaveToClipboardCommand}" />
+                            <MenuItem
+                                Header="Automatically Adjust Y Axis"
+                                IsCheckable="True"
+                                IsChecked="{Binding AutoAdjustYAxis}" />
+                            <MenuItem
+                                Command="{Binding SaveAsImageCommand}"
+                                CommandParameter="png"
+                                Header="Save As _Image" />
+                            <MenuItem Command="{Binding SaveAsTsvCommand}" Header="Save Peak List" />
+                            <MenuItem Command="{Binding SaveToClipboardCommand}" Header="Save Peaks to Clipboard" />
                         </ContextMenu>
                     </wpf:PlotView.ContextMenu>
                 </wpf:PlotView>

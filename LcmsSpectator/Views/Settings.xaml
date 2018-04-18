@@ -1,12 +1,15 @@
-﻿<Window x:Class="LcmsSpectator.Views.Settings"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:views="clr-namespace:LcmsSpectator.Views"
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             mc:Ignorable="d" Title="LcMsSpectator: Settings"
-             Height="460" Width="800">
+﻿<Window
+    x:Class="LcmsSpectator.Views.Settings"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:LcmsSpectator.Views"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    Title="LcMsSpectator: Settings"
+    Width="800"
+    Height="460"
+    mc:Ignorable="d">
     <Window.Resources>
         <DataTemplate x:Key="ModItemTemplate">
             <Grid>
@@ -17,18 +20,41 @@
                     <ColumnDefinition Width="25*" />
                     <ColumnDefinition Width="25*" />
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Command="{Binding RemoveModificationCommand}" FontWeight="Bold">-</Button>
-                <ComboBox Grid.Column="1" ItemsSource="{Binding Modifications}" SelectedItem="{Binding SelectedModification}" IsEditable="True" />
-                <ComboBox Grid.Column="2" ItemsSource="{Binding AminoAcidResidues}" SelectedItem="{Binding SelectedResidue}" IsEditable="True" />
-                <ComboBox Grid.Column="3" ItemsSource="{Binding SequenceLocations}" SelectedItem="{Binding SelectedSequenceLocation}" />
-                <ComboBox Grid.Column="4" ItemsSource="{Binding IsFixed}" SelectedItem="{Binding FixedSelection}" />
+                <Button
+                    Grid.Column="0"
+                    Command="{Binding RemoveModificationCommand}"
+                    FontWeight="Bold">
+                    -
+                </Button>
+                <ComboBox
+                    Grid.Column="1"
+                    IsEditable="True"
+                    ItemsSource="{Binding Modifications}"
+                    SelectedItem="{Binding SelectedModification}" />
+                <ComboBox
+                    Grid.Column="2"
+                    IsEditable="True"
+                    ItemsSource="{Binding AminoAcidResidues}"
+                    SelectedItem="{Binding SelectedResidue}" />
+                <ComboBox
+                    Grid.Column="3"
+                    ItemsSource="{Binding SequenceLocations}"
+                    SelectedItem="{Binding SelectedSequenceLocation}" />
+                <ComboBox
+                    Grid.Column="4"
+                    ItemsSource="{Binding IsFixed}"
+                    SelectedItem="{Binding FixedSelection}" />
             </Grid>
         </DataTemplate>
     </Window.Resources>
-    <Grid Height="400" Margin="10,10,10,10" VerticalAlignment="Top">
+    <Grid
+        Height="400"
+        Margin="10,10,10,10"
+        VerticalAlignment="Top">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="10" /> <!-- Spacer -->
+            <RowDefinition Height="10" />
+            <!--  Spacer  -->
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
         <TabControl Grid.Row="0" TabStripPlacement="Top">
@@ -48,32 +74,115 @@
                         <ColumnDefinition Width="30*" />
                         <ColumnDefinition Width="10*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold">Precursor Ion Tolerance</TextBlock>
-                    <TextBox Grid.Row="1" Grid.Column="1" TextAlignment="Right" Text="{Binding PrecursorIonTolerance}" Height="25" VerticalAlignment="Top" />
-                    <ComboBox Grid.Row="1" Grid.Column="2" ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding PrecursorIonToleranceUnit}"
-                              Height="25" VerticalAlignment="Top"/>
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        FontWeight="Bold">
+                        Precursor Ion Tolerance
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        Text="{Binding PrecursorIonTolerance}"
+                        TextAlignment="Right" />
+                    <ComboBox
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        ItemsSource="{Binding ToleranceUnits}"
+                        SelectedItem="{Binding PrecursorIonToleranceUnit}" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold">Product Ion Tolerance</TextBlock>
-                    <TextBox Grid.Row="2" Grid.Column="1" TextAlignment="Right" Text="{Binding ProductIonTolerance}" Height="25" VerticalAlignment="Top"  />
-                    <ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{Binding ToleranceUnits}" SelectedItem="{Binding ProductIonToleranceUnit}"
-                              Height="25" VerticalAlignment="Top"/>
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        FontWeight="Bold">
+                        Product Ion Tolerance
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        Text="{Binding ProductIonTolerance}"
+                        TextAlignment="Right" />
+                    <ComboBox
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        ItemsSource="{Binding ToleranceUnits}"
+                        SelectedItem="{Binding ProductIonToleranceUnit}" />
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">Ion Correlation Threshold</TextBlock>
-                    <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding IonCorrelationThreshold}" Height="25" VerticalAlignment="Top" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        FontWeight="Bold">
+                        Ion Correlation Threshold
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        Text="{Binding IonCorrelationThreshold}"
+                        TextAlignment="Right" />
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold" ToolTip="Must be an odd integer of at least 3. 0 = No smoothing.">Default Points To Smooth</TextBlock>
-                    <TextBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PointsToSmooth}" Height="25" VerticalAlignment="Top"
-                             ToolTip="Must be an odd integer of at least 3. 0 = No smoothing."/>
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        FontWeight="Bold"
+                        ToolTip="Must be an odd integer of at least 3. 0 = No smoothing.">
+                        Default Points To Smooth
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        Text="{Binding PointsToSmooth}"
+                        TextAlignment="Right"
+                        ToolTip="Must be an odd integer of at least 3. 0 = No smoothing." />
 
                     <!--<TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Spectrum Filter Window Size</TextBlock>
                     <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterWindowSize}" Height="25" VerticalAlignment="Top" />-->
-                    
-                    <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold" ToolTip="Precursor Isotope Relative Intensity Threshold">Precursor Isotope Relative Intensity Threshold</TextBlock>
-                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding PrecursorRelativeIntensityThreshold}" Height="25" VerticalAlignment="Top" />
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" ToolTip="Resolution of exported images">Resolution of exported images (DPI)</TextBlock>
-                    <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding ExportImageDpi}" Height="25" VerticalAlignment="Top" />
-                    
+                    <TextBlock
+                        Grid.Row="5"
+                        Grid.Column="0"
+                        FontWeight="Bold"
+                        ToolTip="Precursor Isotope Relative Intensity Threshold">
+                        Precursor Isotope Relative Intensity Threshold
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="5"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        Text="{Binding PrecursorRelativeIntensityThreshold}"
+                        TextAlignment="Right" />
+
+                    <TextBlock
+                        Grid.Row="6"
+                        Grid.Column="0"
+                        FontWeight="Bold"
+                        ToolTip="Resolution of exported images">
+                        Resolution of exported images (DPI)
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="6"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        Text="{Binding ExportImageDpi}"
+                        TextAlignment="Right" />
+
                     <!--<TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" ToolTip="Show monoisotopic m/z and charge reported by instrument">Show monoisotopic m/z and charge reported by instrument</TextBlock>
                     <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" IsChecked="{Binding ShowInstrumentData}"/>-->
                 </Grid>
@@ -94,9 +203,9 @@
                     </Grid.ColumnDefinitions>
                     <Button Grid.Row="0" Grid.Column="0"
                             Width="25" HorizontalAlignment="Left" FontSize="13" FontWeight="Bold" Command="{Binding AddModificationCommand}">+</Button>-->
-                    <!--<Button Grid.Row="0" Grid.Column="4" Command="{Binding CreateNewModificationCommand}"
-                            HorizontalAlignment="Right">Create New Modification</Button> -->
-                    <!--<TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Modification</TextBlock>
+            <!--<Button Grid.Row="0" Grid.Column="4" Command="{Binding CreateNewModificationCommand}"
+                            HorizontalAlignment="Right">Create New Modification</Button>-->
+            <!--<TextBlock Grid.Row="1" Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Modification</TextBlock>
                     <TextBlock Grid.Row="1" Grid.Column="2" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Amino Acid</TextBlock>
                     <TextBlock Grid.Row="1" Grid.Column="3" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Location</TextBlock>
                     <TextBlock Grid.Row="1" Grid.Column="4" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center">Fixed?</TextBlock>
@@ -127,29 +236,62 @@
                         <ColumnDefinition Width="60*" />
                         <ColumnDefinition Width="30*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.Column="0"
-                               Height="30" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Top">Activation Method</TextBlock>
-                    
-                    <TextBlock Grid.Row="1" Grid.Column="0" FontWeight="Bold">CID/HCD</TextBlock>
-                    <TextBlock Grid.Row="2" Grid.Column="0" FontWeight="Bold">ETD</TextBlock>
-                    <CheckBox Grid.Row="3" Grid.Column="0" IsChecked="{Binding AutomaticallySelectIonTypes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                              Automatically select ion types based on activation method of currently select ms2 spectrum
-                    </CheckBox>
-
-                    <TextBlock Grid.Row="0" Grid.Column="1"
-                               Height="30" FontWeight="Bold" TextAlignment="Center" VerticalAlignment="Top">
-                        Ion Types
-                        <LineBreak />
-                        (Separated by Spaces)
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Height="30"
+                        VerticalAlignment="Top"
+                        FontWeight="Bold"
+                        TextAlignment="Center">
+                        Activation Method
                     </TextBlock>
 
-                    <TextBox Grid.Row="1" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding CidHcdIonTypes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                             IsEnabled="{Binding AutomaticallySelectIonTypes, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBox Grid.Row="2" Grid.Column="1" Height="25" VerticalAlignment="Top" Text="{Binding EtdIonTypes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-                             IsEnabled="{Binding AutomaticallySelectIonTypes, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        FontWeight="Bold">
+                        CID/HCD
+                    </TextBlock>
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        FontWeight="Bold">
+                        ETD
+                    </TextBlock>
+                    <CheckBox
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        IsChecked="{Binding AutomaticallySelectIonTypes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                        Automatically select ion types based on activation method of currently select ms2 spectrum
+                    </CheckBox>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Height="30"
+                        VerticalAlignment="Top"
+                        FontWeight="Bold"
+                        TextAlignment="Center">
+                        Ion Types<LineBreak />
+                        (Separated by Spaces)</TextBlock>
+
+                    <TextBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        IsEnabled="{Binding AutomaticallySelectIonTypes, UpdateSourceTrigger=PropertyChanged}"
+                        Text="{Binding CidHcdIonTypes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                    <TextBox
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        IsEnabled="{Binding AutomaticallySelectIonTypes, UpdateSourceTrigger=PropertyChanged}"
+                        Text="{Binding EtdIonTypes, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
                 </Grid>
             </TabItem>
-            
+
             <TabItem Header="Feature Map Colors">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -160,17 +302,30 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    
-                    <GroupBox Header="Feature Colors" Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
+
+                    <GroupBox
+                        Grid.Row="0"
+                        Grid.RowSpan="2"
+                        Grid.Column="0"
+                        Header="Feature Colors">
                         <views:ColorList DataContext="{Binding FeatureColors}" />
                     </GroupBox>
 
-                    <GroupBox Header="Identification Point Colors" Grid.Row="0" Grid.Column="1">
+                    <GroupBox
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Header="Identification Point Colors">
                         <views:ColorList DataContext="{Binding IdColors}" />
                     </GroupBox>
 
-                    <GroupBox Header="Unidentified MS/MS Scan Point Color" Grid.Row="1" Grid.Column="1">
-                        <xctk:ColorPicker Height="25" SelectedColor="{Binding Ms2ScanColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" DisplayColorAndName="True" />
+                    <GroupBox
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Header="Unidentified MS/MS Scan Point Color">
+                        <xctk:ColorPicker
+                            Height="25"
+                            DisplayColorAndName="True"
+                            SelectedColor="{Binding Ms2ScanColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </GroupBox>
                 </Grid>
             </TabItem>
@@ -179,7 +334,8 @@
         <Grid Grid.Row="2" Margin="550,0,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50*" />
-                <ColumnDefinition Width="10" /> <!-- Spacer -->
+                <ColumnDefinition Width="10" />
+                <!--  Spacer  -->
                 <ColumnDefinition Width="50*" />
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Command="{Binding CancelCommand}">Cancel</Button>

@@ -1,13 +1,16 @@
-﻿<UserControl x:Class="LcmsSpectator.Views.Plots.FeatureViewerView"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:wpf="http://oxyplot.org/wpf"
-             xmlns:utils="clr-namespace:LcmsSpectator.Utils"
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="1100" Background="White">
+﻿<UserControl
+    x:Class="LcmsSpectator.Views.Plots.FeatureViewerView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+    xmlns:wpf="http://oxyplot.org/wpf"
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    d:DesignHeight="300"
+    d:DesignWidth="1100"
+    Background="White"
+    mc:Ignorable="d">
     <UserControl.Resources>
         <utils:DoubleToStringConverterSci x:Key="ScoreFormatter" />
         <utils:DoubleToStringConverter x:Key="Rounder" />
@@ -20,42 +23,97 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" MaxWidth="560" Name="IsotopeColumn" />
+            <ColumnDefinition
+                Name="IsotopeColumn"
+                Width="Auto"
+                MaxWidth="560" />
         </Grid.ColumnDefinitions>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
-                <RowDefinition Height="25" Name="AdjustXRow" />
+                <RowDefinition Name="AdjustXRow" Height="25" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="25" Name="AdjustYColumn" />
+                <ColumnDefinition Name="AdjustYColumn" Width="25" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <xctk:DoubleUpDown Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left" Name="XMin" DataContext="{Binding FeatureMapViewModel}" Text="{Binding XMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <xctk:DoubleUpDown Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Right" Name="XMax" DataContext="{Binding FeatureMapViewModel}" Text="{Binding XMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <xctk:DoubleUpDown
+                Name="XMin"
+                Grid.Row="1"
+                Grid.Column="1"
+                Width="100"
+                HorizontalAlignment="Left"
+                DataContext="{Binding FeatureMapViewModel}"
+                Text="{Binding XMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <xctk:DoubleUpDown
+                Name="XMax"
+                Grid.Row="1"
+                Grid.Column="1"
+                Width="100"
+                HorizontalAlignment="Right"
+                DataContext="{Binding FeatureMapViewModel}"
+                Text="{Binding XMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-            <xctk:DoubleUpDown Increment="100" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Bottom" Name="YMin" DataContext="{Binding FeatureMapViewModel}" Text="{Binding YMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <xctk:DoubleUpDown
+                Name="YMin"
+                Grid.Row="0"
+                Grid.Column="0"
+                Width="100"
+                VerticalAlignment="Bottom"
+                DataContext="{Binding FeatureMapViewModel}"
+                Increment="100"
+                Text="{Binding YMinimum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <xctk:DoubleUpDown.LayoutTransform>
                     <RotateTransform Angle="-90" />
                 </xctk:DoubleUpDown.LayoutTransform>
             </xctk:DoubleUpDown>
-            <xctk:DoubleUpDown Increment="100" Grid.Row="0" Grid.Column="0" Width="100" VerticalAlignment="Top" Name="YMax" DataContext="{Binding FeatureMapViewModel}" Text="{Binding YMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <xctk:DoubleUpDown
+                Name="YMax"
+                Grid.Row="0"
+                Grid.Column="0"
+                Width="100"
+                VerticalAlignment="Top"
+                DataContext="{Binding FeatureMapViewModel}"
+                Increment="100"
+                Text="{Binding YMaximum, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                 <xctk:DoubleUpDown.LayoutTransform>
                     <RotateTransform Angle="-90" />
                 </xctk:DoubleUpDown.LayoutTransform>
             </xctk:DoubleUpDown>
 
-            <wpf:PlotView Grid.Row="0" Grid.Column="1" Name="FeatureMap" DataContext="{Binding FeatureMapViewModel}" Model="{Binding FeatureMap}" Margin="0,0,10,0">
+            <wpf:PlotView
+                Name="FeatureMap"
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="0,0,10,0"
+                DataContext="{Binding FeatureMapViewModel}"
+                Model="{Binding FeatureMap}">
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundIdMs2}" Header="Show _Identified MS/MS scans" />
-                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowFoundUnIdMs2}" Header="Show _Unidentified MS/MS scans" />
-                        <MenuItem IsCheckable="True" IsChecked="{Binding ShowManualAdjustment}" Header="Show _Manual Adjustment" Name="ManualAdjustment" />
+                        <MenuItem
+                            Header="Show _Identified MS/MS scans"
+                            IsCheckable="True"
+                            IsChecked="{Binding ShowFoundIdMs2}" />
+                        <MenuItem
+                            Header="Show _Unidentified MS/MS scans"
+                            IsCheckable="True"
+                            IsChecked="{Binding ShowFoundUnIdMs2}" />
+                        <MenuItem
+                            Name="ManualAdjustment"
+                            Header="Show _Manual Adjustment"
+                            IsCheckable="True"
+                            IsChecked="{Binding ShowManualAdjustment}" />
                         <Separator />
                         <MenuItem Header="Abundance Axis">
-                            <MenuItem IsCheckable="True" IsChecked="{Binding IsLinearAbundanceAxis}" Header="Linear" />
-                            <MenuItem IsCheckable="True" IsChecked="{Binding IsLogarithmicAbundanceAxis}" Header="Logarithmic" />
+                            <MenuItem
+                                Header="Linear"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsLinearAbundanceAxis}" />
+                            <MenuItem
+                                Header="Logarithmic"
+                                IsCheckable="True"
+                                IsChecked="{Binding IsLogarithmicAbundanceAxis}" />
                         </MenuItem>
                         <Separator />
                         <MenuItem Command="{Binding SaveAsImageCommand}" Header="_Save As Image" />
@@ -67,8 +125,13 @@
                 </wpf:PlotView.InputBindings>
             </wpf:PlotView>
         </Grid>
-        <Expander Grid.Row="0" Grid.Column="1" ExpandDirection="Right" MaxWidth="540" IsExpanded="{Binding IsotopicEnvelopeExpanded}"
-                  Background="White">
+        <Expander
+            Grid.Row="0"
+            Grid.Column="1"
+            MaxWidth="540"
+            Background="White"
+            ExpandDirection="Right"
+            IsExpanded="{Binding IsotopicEnvelopeExpanded}">
             <Expander.Header>
                 <TextBlock Text="Isotopic Envelope">
                     <TextBlock.LayoutTransform>
@@ -82,15 +145,21 @@
                     <RowDefinition Height="25*" />
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
-                    <wpf:PlotView Name="TheoreticalIsotopicEnvelope" Model="{Binding IsotopicEnvelope.PlotModel}" Grid.Row="0" Width="400" />
+                    <wpf:PlotView
+                        Name="TheoreticalIsotopicEnvelope"
+                        Grid.Row="0"
+                        Width="400"
+                        Model="{Binding IsotopicEnvelope.PlotModel}" />
                 </Grid>
-                <ScrollViewer Grid.Row="1" VerticalAlignment="Top"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
+                <ScrollViewer
+                    Grid.Row="1"
+                    VerticalAlignment="Top"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
                     <Grid Margin="10,0,10,0" DataContext="{Binding FeatureMapViewModel}">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition MinWidth="120" Width="*" />
-                            <ColumnDefinition MinWidth="70" Width="*" />
+                            <ColumnDefinition Width="*" MinWidth="120" />
+                            <ColumnDefinition Width="*" MinWidth="70" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="20" />
@@ -102,31 +171,100 @@
                             <RowDefinition Height="20" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock  Grid.Row="0" Grid.Column="0" FontWeight="Bold">Feature ID:</TextBlock>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedFeature.Id, Converter={StaticResource NumFormatter}}" HorizontalAlignment="Right" />
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            FontWeight="Bold">
+                            Feature ID:
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{Binding SelectedFeature.Id, Converter={StaticResource NumFormatter}}" />
 
-                        <TextBlock  Grid.Row="1" Grid.Column="0" FontWeight="Bold">Probability:</TextBlock>
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedFeature.Score, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            FontWeight="Bold">
+                            Probability:
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{Binding SelectedFeature.Score, Converter={StaticResource ScoreFormatter}}" />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0"  FontWeight="Bold">Summed Correlation:</TextBlock>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedFeature.Correlation, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            FontWeight="Bold">
+                            Summed Correlation:
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{Binding SelectedFeature.Correlation, Converter={StaticResource ScoreFormatter}}" />
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" FontWeight="Bold">Scan:</TextBlock>
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedFeature.Scan}" HorizontalAlignment="Right"  />
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            FontWeight="Bold">
+                            Scan:
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{Binding SelectedFeature.Scan}" />
 
-                        <TextBlock Grid.Row="4" Grid.Column="0" FontWeight="Bold">Retention Time:</TextBlock>
-                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedFeature.RetentionTime, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            FontWeight="Bold">
+                            Retention Time:
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{Binding SelectedFeature.RetentionTime, Converter={StaticResource ScoreFormatter}}" />
 
-                        <TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Mass:</TextBlock>
-                        <TextBlock Grid.Row="5" Grid.Column="1"  Text="{Binding SelectedFeature.Mass, Converter={StaticResource Rounder}}" HorizontalAlignment="Right"  />
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="0"
+                            FontWeight="Bold">
+                            Mass:
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{Binding SelectedFeature.Mass, Converter={StaticResource Rounder}}" />
 
-                        <TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Abundance:</TextBlock>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding SelectedFeature.Abundance, Converter={StaticResource ScoreFormatter}}" HorizontalAlignment="Right"  />
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="0"
+                            FontWeight="Bold">
+                            Abundance:
+                        </TextBlock>
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="1"
+                            HorizontalAlignment="Right"
+                            Text="{Binding SelectedFeature.Abundance, Converter={StaticResource ScoreFormatter}}" />
                     </Grid>
                 </ScrollViewer>
             </Grid>
         </Expander>
-        <Expander Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Header="Filters" ExpandDirection="Down" IsExpanded="False">
+        <Expander
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            ExpandDirection="Down"
+            Header="Filters"
+            IsExpanded="False">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="70*" />
@@ -137,35 +275,88 @@
                     <ColumnDefinition Width="33*" />
                     <ColumnDefinition Width="33*" />
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Horizontal">
-                    <TextBlock Width="150" FontWeight="Bold" VerticalAlignment="Center"># Features Displayed</TextBlock>
-                    <xctk:IntegerUpDown Width="100" Value="{Binding PointsDisplayed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Increment="100" Minimum="0" />
+                <StackPanel
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Width="150"
+                        VerticalAlignment="Center"
+                        FontWeight="Bold">
+                        # Features Displayed
+                    </TextBlock>
+                    <xctk:IntegerUpDown
+                        Width="100"
+                        Increment="100"
+                        Minimum="0"
+                        Value="{Binding PointsDisplayed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <!--<TextBox Width="100" Text="{Binding PointsDisplayed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Name="PointsDisplayedTextBox" />
                     <StackPanel Orientation="vertical">
                         <RepeatButton Content="˄" Name="Up"   Height="15.5" Width="20" FontSize="10" Click="UpClicked" />
                         <RepeatButton Content="˅" Name="Down" Height="15.5" Width="20" FontSize="10" Click="DownClicked" />
                     </StackPanel>-->
                 </StackPanel>
-                <Slider Grid.Column="1" Grid.Row="0" Margin="0,0,5,0"
-            Value="{Binding AbundanceThreshold, Mode=TwoWay}" Orientation="Horizontal"
-            Maximum="{Binding MaximumAbundanceThreshold, Mode=TwoWay}" Minimum="{Binding MinimumAbundanceThreshold, Mode=TwoWay}"
-            TickPlacement="TopLeft" AutoToolTipPlacement="TopLeft" ToolTip="Abundance Threshold (Log10)"
-            TickFrequency="0.5" IsSnapToTickEnabled="True" />
-                    
-                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock TextAlignment="Center" FontSize="10" VerticalAlignment="Top" Width="150">Maximum Abundance (Log10)</TextBlock>
+                <Slider
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="0,0,5,0"
+                    AutoToolTipPlacement="TopLeft"
+                    IsSnapToTickEnabled="True"
+                    Maximum="{Binding MaximumAbundanceThreshold, Mode=TwoWay}"
+                    Minimum="{Binding MinimumAbundanceThreshold, Mode=TwoWay}"
+                    Orientation="Horizontal"
+                    TickFrequency="0.5"
+                    TickPlacement="TopLeft"
+                    ToolTip="Abundance Threshold (Log10)"
+                    Value="{Binding AbundanceThreshold, Mode=TwoWay}" />
+
+                <StackPanel
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Width="150"
+                        VerticalAlignment="Top"
+                        FontSize="10"
+                        TextAlignment="Center">
+                        Maximum Abundance (Log10)
+                    </TextBlock>
                     <TextBlock>[</TextBlock>
-                    <TextBlock Width="50" FontSize="10" Text="{Binding MinimumAbundance, Converter={StaticResource ScoreFormatter}}" />
-                    <TextBlock Width="10" FontSize="10" Text="-" />
-                    <TextBlock Width="50" FontSize="10" Text="{Binding MaximumAbundance, Converter={StaticResource ScoreFormatter}}" />
+                    <TextBlock
+                        Width="50"
+                        FontSize="10"
+                        Text="{Binding MinimumAbundance, Converter={StaticResource ScoreFormatter}}" />
+                    <TextBlock
+                        Width="10"
+                        FontSize="10"
+                        Text="-" />
+                    <TextBlock
+                        Width="50"
+                        FontSize="10"
+                        Text="{Binding MaximumAbundance, Converter={StaticResource ScoreFormatter}}" />
                     <TextBlock>]</TextBlock>
                 </StackPanel>
-                
-                <Slider Grid.Row="0" Grid.Column="2" IsSnapToTickEnabled="False" TickPlacement="TopLeft"  
-                        AutoToolTipPlacement="TopLeft" ToolTip="Feature Size" Minimum="0.1" Maximum="2"
-                        TickFrequency="0.1" DataContext="{Binding FeatureMapViewModel}"
-                        Value="{Binding FeatureSize, Mode=TwoWay}" />
-                <TextBlock Grid.Row="1" Grid.Column="2" FontSize="10" HorizontalAlignment="Center">Feature Size</TextBlock>
+
+                <Slider
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    AutoToolTipPlacement="TopLeft"
+                    DataContext="{Binding FeatureMapViewModel}"
+                    IsSnapToTickEnabled="False"
+                    Maximum="2"
+                    Minimum="0.1"
+                    TickFrequency="0.1"
+                    TickPlacement="TopLeft"
+                    ToolTip="Feature Size"
+                    Value="{Binding FeatureSize, Mode=TwoWay}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="2"
+                    HorizontalAlignment="Center"
+                    FontSize="10">
+                    Feature Size
+                </TextBlock>
             </Grid>
         </Expander>
     </Grid>
