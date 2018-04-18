@@ -12,13 +12,15 @@
         <DataTemplate x:Key="DatasetItemTemplate">
             <Grid Background="Transparent" ShowGridLines="False">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="10*" />
+                    <ColumnDefinition Width="60" />
                     <ColumnDefinition Width="80*" />
-                    <ColumnDefinition Width="10*" />
-                    <ColumnDefinition Width="50" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="{Binding DatasetId}" />
-                <TextBlock Grid.Column="1" Text="{Binding Dataset}" />
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="0,0,30,0"
+                    Text="{Binding Dataset}" />
                 <TextBlock Grid.Column="2" Text="{Binding Instrument}" />
             </Grid>
         </DataTemplate>

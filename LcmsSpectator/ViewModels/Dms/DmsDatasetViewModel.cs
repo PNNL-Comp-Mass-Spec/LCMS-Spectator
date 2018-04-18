@@ -57,7 +57,7 @@ namespace LcmsSpectator.ViewModels.Dms
         private string datasetFolderPath;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DmsDatasetViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="DmsDatasetViewModel"/> class.
         /// </summary>
         /// <param name="datasetInfo">
         /// Existing data set to edit.
@@ -66,7 +66,7 @@ namespace LcmsSpectator.ViewModels.Dms
         {
             if (datasetInfo != null)
             {
-                UdtDatasetInfo = datasetInfo.Value;   
+                UdtDatasetInfo = datasetInfo.Value;
             }
         }
 
@@ -163,6 +163,11 @@ namespace LcmsSpectator.ViewModels.Dms
         {
             get => datasetFolderPath;
             set => this.RaiseAndSetIfChanged(ref datasetFolderPath, value);
+        }
+
+        public override string ToString()
+        {
+            return $"{DatasetId}: {Dataset} {Instrument}";
         }
     }
 }
