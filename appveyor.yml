@@ -7,6 +7,10 @@ platform: Any CPU
 build:
   project: LcmsSpectator.sln
   verbosity: minimal
+test:
+  categories:
+    except:
+    - PNL_Domain
 artifacts:
 - path: LcmsSpectator/bin/Debug
   name: LCMS-Spectator
