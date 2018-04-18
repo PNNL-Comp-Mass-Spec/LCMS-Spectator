@@ -23,6 +23,7 @@ namespace LcmsSpectatorTests
         //[TestCase(@"C:\Users\wilk011\Documents\DataFiles\UVPD\defaultCorrelationPeakList.tsv", @"C:\Users\wilk011\Documents\DataFiles\UVPD\uvpd.tsv")]
         [TestCase(@"C:\Users\wilk011\Documents\DataFiles\UVPD\zeroCorrelationPeakList.tsv", @"C:\Users\wilk011\Documents\DataFiles\UVPD\uvpd.tsv")]
         //[TestCase(@"C:\Users\wilk011\Documents\DataFiles\UVPD\neutralZeroCorrelationPeakList.tsv", @"C:\Users\wilk011\Documents\DataFiles\UVPD\uvpd.tsv")]
+        [Ignore("Missing data file")]
         public void CompareFragments(string lcmsSpecPeakList, string prosightAnnotations)
         {
             Console.WriteLine("{0}", Path.GetFileNameWithoutExtension(lcmsSpecPeakList));

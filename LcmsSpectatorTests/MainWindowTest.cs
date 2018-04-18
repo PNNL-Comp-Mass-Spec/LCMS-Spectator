@@ -10,24 +10,28 @@
     public class MainWindowTest
     {
         [Test]
+        [Ignore("Undefined")]
         public void TestRegisterModification()
         {
 
         }
 
         [Test]
+        [Ignore("Undefined")]
         public void TestUnregisterModification()
         {
 
         }
 
         [Test]
+        [Ignore("Undefined")]
         public void TestUpdateModification()
         {
 
         }
 
         [Test]
+        [Ignore("Missing data file")]
         public void TestFileReading()
         {
             var mzIdReader = new SimpleMZIdentMLReader();

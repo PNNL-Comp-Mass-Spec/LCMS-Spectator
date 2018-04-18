@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace LcmsSpectatorTests
 {
@@ -13,7 +15,47 @@ namespace LcmsSpectatorTests
     [TestFixture]
     public class MsPathFinderTest
     {
+
+        /// <summary>
+        /// Create a directory in the user's temp directory to hold test result files
+        /// </summary>
+        /// <param name="testCategory"></param>
+        /// <param name="deleteExistingFiles"></param>
+        /// <returns></returns>
+        public static DirectoryInfo CreateTestResultDirectory(string testCategory, bool deleteExistingFiles = false)
+        {
+            string dirPath;
+            if (string.IsNullOrWhiteSpace(testCategory))
+                dirPath = Path.Combine(Path.GetTempPath(), "TestResults");
+            else
+                dirPath = Path.Combine(Path.GetTempPath(), "TestResults", testCategory);
+
+            var outputDir = new DirectoryInfo(dirPath);
+            if (!outputDir.Exists)
+            {
+                outputDir.Create();
+            }
+
+            if (!deleteExistingFiles)
+                return outputDir;
+
+            try
+            {
+                foreach (var item in outputDir.GetFileSystemInfos("*"))
+                {
+                    item.Delete();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting files in {0}: {1}", outputDir.FullName, ex);
+            }
+
+            return outputDir;
+        }
+
         [Test]
+        [Ignore("Missing data file")]
         public void TestIanCidData()
         {
             const string specFilePath =
@@ -65,6 +107,7 @@ namespace LcmsSpectatorTests
         }
 
         [TestCase(176, "GIGAVLKVLTTGLPALISWIKRKRQQ")]
+        [Ignore("Missing data file")]
         public void ScorePSM(int scan, string sequenceStr)
         {
             // Set input file paths.
@@ -98,8 +141,9 @@ namespace LcmsSpectatorTests
         }
 
         [TestCase(0.7, 1)]
-        //public void BruteForceSearch(double minCorrelation, int idsPerSpectrum)
-        //{
+        [Ignore("Missing data file")]
+        public void BruteForceSearch(double minCorrelation, int idsPerSpectrum)
+        {
         //    // Set input file paths.
         //    const string specFilePath =
         //        @"\\protoapps\userdata\Wilkins\UIMF Files\9 pep mix 365 mTorr with ims 45V CID\9 pep mix 365 mTorr with ims 45V CID.pbf";
@@ -200,7 +244,7 @@ namespace LcmsSpectatorTests
         //                             id.Qvalue);
         //        }
         //    }
-        //}
+        }
 
         private string GetSequenceString(Sequence sequence)
         {

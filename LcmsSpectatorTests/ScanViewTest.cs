@@ -18,12 +18,13 @@ namespace LcmsSpectatorTests
     public class ScanViewTest
     {
         private const string rawFile =
-            @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw";
+            @"\\proto-2\unitTest_Files\DIA_TestFiles\DataFromJarret\10mz\raw\Q_2014_0523_50_10_fmol_uL_10mz.raw";
 
         private const string idFile =
-            @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv";
+            @"\\proto-2\unitTest_Files\DIA_TestFiles\DataFromJarret\10mz\raw\Q_2014_0523_50_10_fmol_uL_10mz.tsv";
 
         [Test]
+        [Ignore("Missing data files")]
         public void TestClearFilters()
         {
             // init test data
@@ -47,7 +48,7 @@ namespace LcmsSpectatorTests
             var sequenceFilter = scanVm.Filters.FirstOrDefault(x => x.Name == "Sequence") as MultiValueFilterViewModel;
             Assert.NotNull(sequenceFilter);
             sequenceFilter.Values.Add("EAQ");
-           
+
             /////scanVm.AddFilter("Protein", "YLR");
             var proteinFilter =
                 scanVm.Filters.FirstOrDefault(x => x.Name == "Protein Name") as MultiValueFilterViewModel;

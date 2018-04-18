@@ -19,7 +19,8 @@ namespace LcmsSpectatorTests
     public class SpectrumPlotTest
     {
         [TestCase(@"\\proto-2\UnitTest_Files\LcMsSpectator\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3.raw",
-                 @"\\proto-2\UnitTest_Files\LcMsSpectator\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3_IcTda.tsv")]
+                  @"\\proto-2\UnitTest_Files\LcMsSpectator\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3_IcTda.tsv")]
+        [Category("PNL_Domain")]
         public void TestDisplaySpectrum(string rawFile, string tsvFile)
         {
             // init
@@ -58,6 +59,7 @@ namespace LcmsSpectatorTests
         /// </summary>
         /// <param name="rawFile"></param>
         [TestCase(@"\\proto-2\UnitTest_Files\LcMsSpectator\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3.raw")]
+        [Category("PNL_Domain")]
         public void TestShowFilteredSpectrum(string rawFile)
         {
             var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
@@ -104,6 +106,7 @@ namespace LcmsSpectatorTests
         /// <param name="idFile"></param>
         [TestCase(@"\\proto-2\UnitTest_Files\LcMsSpectator\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3.raw",
                   @"\\proto-2\UnitTest_Files\LcMsSpectator\TopDown\Anil\QC_Shew_IntactProtein_new_CID-30CE-4Sep14_Bane_C2Column_3_IcTda.tsv")]
+        [Category("PNL_Domain")]
         public void TestMassExportPeakLists(string rawFile, string idFile)
         {
             // Read files
@@ -116,10 +119,9 @@ namespace LcmsSpectatorTests
                 id.RawFileName = Path.GetFileNameWithoutExtension(rawFile);
             }
 
-            var dirPath = @"C:\Users\wilk011\Documents\DataFiles\TestResults\ExporterTest";
-            Directory.CreateDirectory(dirPath);
+            var outputDir = MsPathFinderTest.CreateTestResultDirectory("ExporterTest");
 
-            var exporter = new SpectrumPeakExporter(dirPath);
+            var exporter = new SpectrumPeakExporter(outputDir.FullName);
             exporter.Export(ids.ToList());
         }
     }

@@ -24,6 +24,7 @@ namespace LcmsSpectatorTests
         [TestCase(@"Biodiversity_B_cereus_ATCC14579_LB_aerobic_1_17July16_Samwise_16-04-10_msgfplus.mzid.gz", @"Bacillus_cereus_ATCC14579_300MZ_infeng.tsv")]
         [TestCase(@"Biodiversity_B_cereus_T_LB_aerobic_3_17July16_Samwise_16-04-10_msgfplus.mzid.gz", @"Biodiversity_B_cereus_T_LB_aerobic_3_17July16_Samwise_16-04-10_300MZ_infeng.tsv")]
         [TestCase(@"Biodiversity_B_fragilis_CMcarb_anaerobic_01_01Feb16_Arwen_15-07-13_msgfplus.mzid.gz", @"Biodiversity_B_fragilis_CMcarb_anaerobic_01_01Feb16_Arwen_15-07-13_300MZ_infeng.tsv")]
+        [Ignore("Missing data file")]
         public void TestFlashComparison(string mzidFile, string infengineResults)
         {
             //string directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
@@ -64,6 +65,7 @@ namespace LcmsSpectatorTests
 
         [Test]
         [TestCase(@"FLASH_1_B_ATCC_VS_B_ATCC", @"1_B_ATCC_VS_B_ATCC.mclf", @"Same_missingIds.tsv")]
+        [Ignore("Missing data file")]
         public void TestCountMissingIds(string flashFile, string mclfFile, string missingIdsFile)
         {
             // Resolve full file paths
@@ -105,6 +107,7 @@ namespace LcmsSpectatorTests
 
         [Test]
         [TestCase(@"BC v BioDiv_uniqueFlashIds.tsv", @"Bacillus_cereus_ATCC14579_NCBI_06132016.fasta")]
+        [Ignore("Missing data file")]
         public void CountFlashIdsInFasta(string uniqueIdFile, string fastaFile)
         {
             var directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
@@ -128,6 +131,7 @@ namespace LcmsSpectatorTests
 
         [Test]
         [TestCase(@"BC v BioDiv_missingIds.tsv", @"Bacillus_cereus_ATCC14579_NCBI_06132016.fasta")]
+        [Ignore("Missing data file")]
         public void CountMissingIdsInFasta(string missingIdsFile, string fastaFile)
         {
             var directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";
@@ -171,6 +175,7 @@ namespace LcmsSpectatorTests
         }
 
         [Test]
+        [Ignore("Missing data file")]
         public void CountScansTest()
         {
             var file = @"C:\Users\wilk011\Documents\DataFiles\MSPF\Ecoli_Ribosome\Ecoli_intact_UVPD-3pulse0p5mJ_05-20-2017.pbf";
@@ -201,6 +206,7 @@ namespace LcmsSpectatorTests
         //[TestCase("BC v BioDiv", @"Biodiversity_B_cereus_ATCC14579_LB_aerobic_1_17July16_Samwise_16-04-10_msgfplus.mzid.gz", @"4_B_ATCC_VS_BIODIV_infeng.tsv", @"Biodiversity_B_cereus_ATCC14579_LB_aerobic_1_17July16_Samwise_16-04-10.mzML.gz")]
         //[TestCase("Human v BC", @"CPTAC3_harmonization_P33_07_18Apr17_Samwise_REP_17-02-02_msgfplus.mzid.gz", @"5_HUMAN_VS_B_ATCC_infeng.tsv", @"CPTAC3_harmonization_P33_07_18Apr17_Samwise_REP_17-02-02.mzML")]
         [TestCase("Human v BioDiv", @"CPTAC3_harmonization_P33_07_18Apr17_Samwise_REP_17-02-02_msgfplus.mzid.gz", @"6_HUMAN_VS_BIODIV_infeng.tsv", @"CPTAC3_harmonization_P33_07_18Apr17_Samwise_REP_17-02-02.mzML")]
+        [Ignore("Missing data file")]
         public void TestFlashSpectrumBased(string testCaseTitle, string mzidFile, string infengineResults, string mzmlFile)
         {
             var directoryPath = @"C:\Users\wilk011\Documents\DataFiles\FlashUnitTest";

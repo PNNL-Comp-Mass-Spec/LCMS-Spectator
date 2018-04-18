@@ -21,10 +21,11 @@ namespace LcmsSpectatorTests
     [TestFixture]
     public class XicPlotTest
     {
-        //[TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
-        //    @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
-        //public void TestDisplayXic(string rawFile, string idFile)
-        //{
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        [Ignore("Missing data files")]
+        public void TestDisplayXic(string rawFile, string idFile)
+        {
         //    // init
         //    var idFileReader = IdFileReaderFactory.CreateReader(idFile);
         //    var ids = idFileReader.Read();
@@ -79,12 +80,13 @@ namespace LcmsSpectatorTests
         //            Assert.True(xicPoint.Y.Equals(xic[0].Intensity));
         //        }
         //    }
-        //}
+        }
 
-        //[TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
-        //    @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
-        //public void TestToggleXicVisibility(string rawFile, string idFile)
-        //{
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        [Ignore("Missing data files")]
+        public void TestToggleXicVisibility(string rawFile, string idFile)
+        {
         //    // init
         //    var idFileReader = IdFileReaderFactory.CreateReader(idFile);
         //    var ids = idFileReader.Read();
@@ -124,12 +126,13 @@ namespace LcmsSpectatorTests
         //        }
         //        Assert.True(foundSeries);
         //    }
-        //}
+        }
 
-        //[TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
-        //    @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
-        //public void TestToggleShowScanMarkers(string rawFile, string idFile)
-        //{
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        [Ignore("Missing data files")]
+        public void TestToggleShowScanMarkers(string rawFile, string idFile)
+        {
         //    // init
         //    var idFileReader = IdFileReaderFactory.CreateReader(idFile);
         //    var ids = idFileReader.Read();
@@ -186,58 +189,60 @@ namespace LcmsSpectatorTests
         //        if (xicSeries == null) continue;
         //        Assert.True(xicSeries.MarkerType == MarkerType.None);
         //    }
-        //}
+        }
 
-    //    [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
-    //@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
-    //    public void TestToggleShowLegend(string rawFile, string idFile)
-    //    {
-    //        // init
-    //        var idFileReader = IdFileReaderFactory.CreateReader(idFile);
-    //        var ids = idFileReader.Read();
-    //        var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
-    //        ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
-    //        var id = ids.GetHighestScoringPrSm();
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        [Ignore("Missing data files")]
+        public void TestToggleShowLegend(string rawFile, string idFile)
+        {
+        //        // init
+        //        var idFileReader = IdFileReaderFactory.CreateReader(idFile);
+        //        var ids = idFileReader.Read();
+        //        var lcms = PbfLcMsRun.GetLcMsRun(rawFile);
+        //        ids.SetLcmsRun(lcms, Path.GetFileNameWithoutExtension(rawFile));
+        //        var id = ids.GetHighestScoringPrSm();
 
-    //        // init XicPlotViewModel
-    //        SelectedPrSmViewModel.Instance.Charge = 2;
-    //        var dialogService = new TestableMainDialogService();
-    //        var xicPlotViewModel = new XicPlotViewModel(dialogService, new MockTaskService(), "", new LinearAxis(), false, false)
-    //        {
-    //            Lcms = lcms
-    //        };
+        //        // init XicPlotViewModel
+        //        SelectedPrSmViewModel.Instance.Charge = 2;
+        //        var dialogService = new TestableMainDialogService();
+        //        var xicPlotViewModel = new XicPlotViewModel(dialogService, new MockTaskService(), "", new LinearAxis(), false, false)
+        //        {
+        //            Lcms = lcms
+        //        };
 
-    //        // init test ions
-    //        var baseIonTypes = new List<BaseIonType> { BaseIonType.B, BaseIonType.Y };
-    //        var neutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
-    //        const int charge = 1;
-    //        const int minCharge = 1, maxCharge = 2;
-    //        var ionTypeFactory = new IonTypeFactory(maxCharge);
-    //        var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
-    //        var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
-    //        var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
-    //        xicPlotViewModel.Ions = ionVms;
+        //        // init test ions
+        //        var baseIonTypes = new List<BaseIonType> { BaseIonType.B, BaseIonType.Y };
+        //        var neutralLosses = new List<NeutralLoss> { NeutralLoss.NoLoss };
+        //        const int charge = 1;
+        //        const int minCharge = 1, maxCharge = 2;
+        //        var ionTypeFactory = new IonTypeFactory(maxCharge);
+        //        var ionTypes = IonUtils.GetIonTypes(ionTypeFactory, baseIonTypes, neutralLosses, minCharge, maxCharge);
+        //        var ions = IonUtils.GetFragmentIonLabels(id.Sequence, charge, ionTypes);
+        //        var ionVms = ions.Select(label => new LabeledIonViewModel(label)).ToList();
+        //        xicPlotViewModel.Ions = ionVms;
 
-    //        // Check to legend is off (initial condition)
-    //        Assert.True(xicPlotViewModel.PlotModel.IsLegendVisible == false);
+        //        // Check to legend is off (initial condition)
+        //        Assert.True(xicPlotViewModel.PlotModel.IsLegendVisible == false);
 
-    //        // toggle ShowLegend on
-    //        xicPlotViewModel.ShowLegend = true;
+        //        // toggle ShowLegend on
+        //        xicPlotViewModel.ShowLegend = true;
 
-    //        // Check to ensure legend is visible
-    //        Assert.True(xicPlotViewModel.PlotModel.IsLegendVisible);
+        //        // Check to ensure legend is visible
+        //        Assert.True(xicPlotViewModel.PlotModel.IsLegendVisible);
 
-    //        // toggle ShowLegend off
-    //        xicPlotViewModel.ShowLegend = false;
+        //        // toggle ShowLegend off
+        //        xicPlotViewModel.ShowLegend = false;
 
-    //        // Check to ensure legend is back off
-    //        Assert.True(xicPlotViewModel.PlotModel.IsLegendVisible == false);
-    //    }
+        //        // Check to ensure legend is back off
+        //        Assert.True(xicPlotViewModel.PlotModel.IsLegendVisible == false);
+        }
 
-        //[TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
-        //          @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
-        //public void TestSelectedScanChanged(string rawFile, string idFile)
-        //{
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        [Ignore("Missing data files")]
+        public void TestSelectedScanChanged(string rawFile, string idFile)
+        {
         //    // init
         //    var idFileReader = IdFileReaderFactory.CreateReader(idFile);
         //    var ids = idFileReader.Read();
@@ -264,12 +269,13 @@ namespace LcmsSpectatorTests
         //        Assert.True(marker != null);
         //        Assert.True(marker.X.Equals(rt));
         //    }
-        //}
+        }
 
-        //[TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
-        //    @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
-        //public void TestAreaCalculation(string rawFile, string idFile)
-        //{
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        [Ignore("Missing data files")]
+        public void TestAreaCalculation(string rawFile, string idFile)
+        {
         //    const double tolerance = 0.01;
 
         //    // init
@@ -315,12 +321,13 @@ namespace LcmsSpectatorTests
         //    // calculate area
         //    double area = xics.SelectMany(xic => xic.Xic).Sum(xicPoint => xicPoint.Intensity);
         //    Assert.True(Math.Abs(area - xicPlotViewModel.Area) < tolerance);
-        //}
+        }
 
-        //[TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
-        //@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
-        //public void TestM1InAreaCalc(string rawFile, string idFile)
-        //{
+        [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.raw",
+                  @"\\protoapps\UserData\Wilkins\BottomUp\DIA_10mz\data\Q_2014_0523_50_10_fmol_uL_10mz.tsv")]
+        [Ignore("Missing data files")]
+        public void TestM1InAreaCalc(string rawFile, string idFile)
+        {
         //    // init
         //    var idFileReader = IdFileReaderFactory.CreateReader(idFile);
         //    var ids = idFileReader.Read();
@@ -349,6 +356,6 @@ namespace LcmsSpectatorTests
 
         //    // areas should be the same if M-1 isn't used in area calculation
         //    Assert.True(area.Equals(area1));
-        //}
+        }
     }
 }
