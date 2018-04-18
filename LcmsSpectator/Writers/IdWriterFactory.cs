@@ -1,15 +1,18 @@
 ﻿namespace LcmsSpectator.Writers
 {
+    using System;
     using System.IO;
 
     public class IdWriterFactory
     {
         public static IIdWriter GetIdWriter(string filePath)
         {
-            var extension = Path.GetFileNameWithoutExtension(filePath);
+            var extension = Path.GetExtension(filePath);
             IIdWriter writer = null;
 
-            switch (filePath)
+            if (string.IsNullOrEmpty(extension))
+                throw new Exception("Specified file path does not have an extension");
+            switch (extension.ToLower())
             {
                 case ".tsv":
                     writer = new IcFileWriter(filePath);
