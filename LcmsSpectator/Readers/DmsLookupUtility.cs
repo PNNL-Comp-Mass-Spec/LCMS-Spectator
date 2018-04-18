@@ -108,7 +108,7 @@ namespace LcmsSpectator.Readers
         /// Looks up datasets in DMS based on the filters
         /// </summary>
         /// <param name="mostRecentWeeks">Find datasets created within the last X weeks</param>
-        /// <param name="datasetNameFilter">Optional dataset name filter; use percent sign for wildcard symbol</param>
+        /// <param name="datasetNameFilter">Optional dataset name filter; use percent sign or asterisk for wildcard symbol</param>
         /// <returns>Dictionary where key is Dataset ID and value is dataset info</returns>
         public Dictionary<int, UdtDatasetInfo> GetDatasets(int mostRecentWeeks, string datasetNameFilter)
         {
@@ -371,6 +371,12 @@ namespace LcmsSpectator.Readers
             if (string.IsNullOrWhiteSpace(filterSpec))
             {
                 return "%";
+            }
+
+            if (filterSpec.Contains("*"))
+            {
+                // Replace * wildcards with SQL-style % wildcards
+                filterSpec = filterSpec.Replace("*", "%");
             }
 
             if (!filterSpec.Contains("%"))
