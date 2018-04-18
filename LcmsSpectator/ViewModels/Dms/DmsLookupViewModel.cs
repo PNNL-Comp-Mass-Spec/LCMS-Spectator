@@ -30,6 +30,7 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <summary>
         /// The path for the FASTA files on DMS.
         /// </summary>
+        /// <remarks>Protein collection based FASTA files are in this directory; legacy FASTA files are elsewhere</remarks>
         public const string FastaFilePath = @"\\gigasax\DMS_FASTA_File_Archive\dynamic\forward";
 
         /// <summary>

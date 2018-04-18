@@ -53,9 +53,9 @@ namespace LcmsSpectator.DialogServices
             Tuple<string, string> data = null;
             if (dmsLookupViewModel.Status)
             {
-                var dataSetFolderPath = (dmsLookupViewModel.SelectedDataset == null) ? string.Empty : 
+                var dataSetFolderPath = (dmsLookupViewModel.SelectedDataset == null) ? string.Empty :
                                     dmsLookupViewModel.SelectedDataset.DatasetFolderPath;
-                var jobFolderPath = (dmsLookupViewModel.SelectedJob == null) ? string.Empty : 
+                var jobFolderPath = (dmsLookupViewModel.SelectedJob == null) ? string.Empty :
                                     dmsLookupViewModel.SelectedJob.JobFolderPath;
                 data = new Tuple<string, string>(dataSetFolderPath, jobFolderPath);
             }
