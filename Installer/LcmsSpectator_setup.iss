@@ -27,7 +27,6 @@ Source: LcmsSpectator\bin\Release\QuickGraph.dll;                            Des
 Source: LcmsSpectator\bin\Release\QuickGraph.Graphviz.dll;                   DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.Serialization.dll;              DestDir: {app}
 Source: LcmsSpectator\bin\Release\ReactiveUI.dll;                            DestDir: {app}
-Source: LcmsSpectator\bin\Release\ReactiveUI.Events.dll;                     DestDir: {app}
 Source: LcmsSpectator\bin\Release\Splat.dll;                                 DestDir: {app}
 Source: LcmsSpectator\bin\Release\System.Reactive.Core.dll;                  DestDir: {app}
 Source: LcmsSpectator\bin\Release\System.Reactive.Interfaces.dll;            DestDir: {app}
