@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace LcmsSpectatorTests
 {
@@ -52,6 +53,21 @@ namespace LcmsSpectatorTests
             }
 
             return outputDir;
+        }
+
+
+        /// <summary>
+        /// Pause program execution for the specific number of milliseconds (maximum 10 seconds)
+        /// </summary>
+        /// <param name="sleepTimeMsec">Value between 10 and 10000 (i.e. between 10 msec and 10 seconds)</param>
+        public static async Task SleepMillisecondsAsync(int sleepTimeMsec)
+        {
+            if (sleepTimeMsec < 10)
+                sleepTimeMsec = 10;
+            else if (sleepTimeMsec > 10000)
+                sleepTimeMsec = 10000;
+
+            await Task.Delay(TimeSpan.FromMilliseconds(sleepTimeMsec));
         }
 
         [Test]

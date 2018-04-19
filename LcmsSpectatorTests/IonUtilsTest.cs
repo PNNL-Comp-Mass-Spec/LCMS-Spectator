@@ -30,6 +30,7 @@ namespace LcmsSpectatorTests
         // [TestCase(@"\\protoapps\UserData\Wilkins\BottomUp\DDA\Q_2014_0523_1_0_amol_uL_DDA.raw",
         //           @"\\protoapps\UserData\Wilkins\BottomUp\DDA\Q_2014_0523_1_0_amol_uL_DDA_IcTda.tsv")]
         [Category("PNL_Domain")]
+        [Category("Long_Running")]
         public void TestIsotopePeakAlignment(string rawFilePath, string idFilePath)
         {
             var idFileReader = IdFileReaderFactory.CreateReader(idFilePath);
