@@ -46,6 +46,10 @@ Source: LcmsSpectator\bin\Release\System.Data.SQLite.dll;                    Des
 Source: LcmsSpectator\bin\Release\x64\SQLite.Interop.dll;                    DestDir: {app}\x64
 Source: LcmsSpectator\bin\Release\x86\SQLite.Interop.dll;                    DestDir: {app}\x86
 
+; PSI_Interface
+Source: LcmsSpectator\bin\Release\PSI_Interface.dll;                         DestDir: {app}
+Source: LcmsSpectator\bin\Release\DotNetZip.dll;                             DestDir: {app}
+
 ; Separately-managed libraries
 Source: Library\QuadTreeLib\QuadTreeLib.dll;                                 DestDir: {app}
 Source: Library\MwtWinDll.dll;                                               DestDir: {app}
@@ -71,10 +75,6 @@ Source: Library\InformedProteomics\MathNet.Numerics.dll;                     Des
 Source: Library\InformedProteomics\ProteinFileReader.dll;                    DestDir: {app}
 Source: Library\InformedProteomics\SAIS.dll;                                 DestDir: {app}
 Source: Library\InformedProteomics\ThermoRawFileReader.dll;                  DestDir: {app}
-
-; PSI_Interface
-Source: Library\PSI_Interface\PSI_Interface.dll;                             DestDir: {app}
-Source: Library\PSI_Interface\Ionic.Zip.dll;                                 DestDir: {app}
 
 ; Xceed Themes
 Source: Library\Theme\Xceed.Wpf.Themes.dll;                                  DestDir: {app}

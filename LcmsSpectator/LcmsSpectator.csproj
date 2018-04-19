@@ -76,6 +76,9 @@
     <ApplicationIcon>Resources\iconSmall.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DotNetZip, Version=1.10.1.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+      <HintPath>..\packages\DotNetZip.1.10.1\lib\net20\DotNetZip.dll</HintPath>
+    </Reference>
     <Reference Include="GraphX.Controls, Version=2.3.3.0, Culture=neutral, PublicKeyToken=bab23663f80c9e76, processorArchitecture=MSIL">
       <HintPath>..\packages\GraphX.2.3.3.0\lib\net40-client\GraphX.Controls.dll</HintPath>
       <Private>True</Private>
@@ -116,9 +119,8 @@
     <Reference Include="PHRPReader">
       <HintPath>..\Library\PHRPReader\PHRPReader.dll</HintPath>
     </Reference>
-    <Reference Include="PSI_Interface, Version=1.1.6179.32903, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Library\PSI_Interface\PSI_Interface.dll</HintPath>
+    <Reference Include="PSI_Interface, Version=1.3.21.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PSI_Interface.1.3.21\lib\net45\PSI_Interface.dll</HintPath>
     </Reference>
     <Reference Include="QuadTreeLib">
       <HintPath>..\Library\QuadTreeLib\QuadTreeLib.dll</HintPath>
