@@ -70,10 +70,6 @@
     <Reference Include="InformedProteomics.Scoring">
       <HintPath>..\Library\InformedProteomics\InformedProteomics.Scoring.dll</HintPath>
     </Reference>
-    <Reference Include="Ionic.Zip, Version=1.9.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\informed-proteomics\lib\PSI_Interface\Ionic.Zip.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework, Version=3.2.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.2.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
