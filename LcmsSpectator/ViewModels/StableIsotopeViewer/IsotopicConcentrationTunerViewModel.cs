@@ -139,7 +139,7 @@
         }
 
         /// <summary>
-        /// Build the plot for the 
+        /// Build the plot for the
         /// </summary>
         /// <param name="curve"></param>
         private void BuildResultPlot(IsotopicConcentrationTuner.IsotopeConcentrationCorrelationCurve curve)
@@ -173,7 +173,7 @@
             {
                 X = curve.BestConcentration.IsotopeConcentration,
                 TextColor = OxyColors.Gray,
-                Text = string.Format("({0}, {1})", 
+                Text = string.Format("({0}, {1})",
                                      curve.BestConcentration.IsotopeConcentration,
                                      curve.BestConcentration.PearsonCorrelation),
                 TextOrientation = AnnotationTextOrientation.Vertical,

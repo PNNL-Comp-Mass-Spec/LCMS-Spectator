@@ -58,7 +58,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
                 {
                     var index = Math.Min(lastIndex, sequence.Length - 1);
                     sequence = sequence.Substring(0, index);
-                }   
+                }
             }
 
             const string AminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";

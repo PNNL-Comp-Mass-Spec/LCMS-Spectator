@@ -12,7 +12,7 @@ namespace LcmsSpectator.DialogServices
 {
     using System;
     using System.Collections.Generic;
-    
+
     /// <summary>
     /// Interface for service for opening dialogs from a view model.
     /// </summary>

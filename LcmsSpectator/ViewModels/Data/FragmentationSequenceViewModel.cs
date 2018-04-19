@@ -154,7 +154,7 @@
         /// Gets the list of possible base ion types.
         /// </summary>
         public ReactiveList<BaseIonTypeViewModel> BaseIonTypes { get; }
-        
+
         /// <summary>
         /// Gets the list of possible neutral losses.
         /// </summary>
@@ -214,7 +214,7 @@
             if (AddPrecursorIons)
             {
                 var precursorIons = await FragmentationSequence.GetChargePrecursorLabelsAsync(HeavyModifications);
-                fragmentIons.AddRange(precursorIons);   
+                fragmentIons.AddRange(precursorIons);
             }
 
             return fragmentIons.ToArray();

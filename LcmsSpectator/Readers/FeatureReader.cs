@@ -93,7 +93,7 @@ namespace LcmsSpectator.Readers
                 }
                 else
                 {
-                    throw new KeyNotFoundException(string.Format("Missing expected column header \"{0}\" in feature file.", header));   
+                    throw new KeyNotFoundException(string.Format("Missing expected column header \"{0}\" in feature file.", header));
                 }
             }
 

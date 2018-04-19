@@ -39,7 +39,7 @@ namespace LcmsSpectator.ViewModels.Filters
         string Description { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this item is selected 
+        /// Gets or sets a value indicating whether this item is selected
         /// </summary>
         bool Selected { get; set; }
 

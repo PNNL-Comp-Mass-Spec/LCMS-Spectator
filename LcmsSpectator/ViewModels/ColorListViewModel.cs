@@ -46,17 +46,17 @@ namespace LcmsSpectator.ViewModels
                 }) { Title = "Blue-Red" });
             ColorPalettes.Add(new ColorPaletteViewModel(new[]
                 {
-                    new Color { A = 255, R = 255, G = 200, B = 200 }, 
+                    new Color { A = 255, R = 255, G = 200, B = 200 },
                     System.Windows.Media.Colors.Red
                 }) { Title = "Reds" });
             ColorPalettes.Add(new ColorPaletteViewModel(new[]
                 {
-                    new Color { A = 255, R = 200, G = 255, B = 200 }, 
+                    new Color { A = 255, R = 200, G = 255, B = 200 },
                     System.Windows.Media.Colors.Green
                 }) { Title = "Greens" });
             ColorPalettes.Add(new ColorPaletteViewModel(new[]
                 {
-                    new Color { A = 255, R = 200, G = 200, B = 255 }, 
+                    new Color { A = 255, R = 200, G = 200, B = 255 },
                     System.Windows.Media.Colors.Blue
                 }) { Title = "Blues" });
 
@@ -93,7 +93,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets a derived collection of the actual colors in the Color view models.
         /// </summary>
-        public IReactiveDerivedList<Color> Colors { get; }  
+        public IReactiveDerivedList<Color> Colors { get; }
 
         /// <summary>
         /// Gets a command that adds a color to the color list

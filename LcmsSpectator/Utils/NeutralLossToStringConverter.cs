@@ -14,7 +14,7 @@ namespace LcmsSpectator.Utils
     using System.Globalization;
     using System.Windows.Data;
     using InformedProteomics.Backend.Data.Spectrometry;
-    
+
     /// <summary>
     /// Converter that formats a neutral loss to a string.
     /// </summary>

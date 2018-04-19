@@ -61,7 +61,7 @@ namespace LcmsSpectator.PlotModels.ColorDictionaries
                 }
                 else
                 {
-                    color = label.Index > 0 ? OxyColors.DarkRed : OxyColors.AliceBlue;   
+                    color = label.Index > 0 ? OxyColors.DarkRed : OxyColors.AliceBlue;
                 }
             }
 

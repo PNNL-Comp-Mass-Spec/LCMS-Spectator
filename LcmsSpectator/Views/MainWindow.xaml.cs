@@ -31,8 +31,8 @@ namespace LcmsSpectator.Views
             ProgressRow.Height = new GridLength(0, GridUnitType.Pixel);
             FileLoadProgress.IsVisibleChanged += (s, e) =>
                 {
-                    ProgressRow.Height = FileLoadProgress.IsVisible ? 
-                                                    new GridLength(30, GridUnitType.Pixel) : 
+                    ProgressRow.Height = FileLoadProgress.IsVisible ?
+                                                    new GridLength(30, GridUnitType.Pixel) :
                                                     new GridLength(0, GridUnitType.Pixel);
                 };
         }
@@ -103,7 +103,7 @@ namespace LcmsSpectator.Views
                         args.Content = Application.Current.MainWindow.FindName(args.Model.ContentId);
                     };
                     serializer.Deserialize(stream);
-                } 
+                }
             }
             catch (Exception)
             {

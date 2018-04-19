@@ -1,7 +1,7 @@
 ﻿namespace LcmsSpectator.Models
 {
     using System.Collections.Generic;
-    
+
     public interface IFeatureExtractor
     {
         /// <summary>

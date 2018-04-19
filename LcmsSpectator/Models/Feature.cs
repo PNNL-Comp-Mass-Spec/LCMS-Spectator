@@ -100,7 +100,7 @@ namespace LcmsSpectator.Models
         /// Gets the geometric rectangle representation for this feature.
         /// </summary>
         public RectangleF Rectangle { get; }
-        
+
         /// <summary>
         /// Represents a single LC retention time point for a MS1 feature.
         /// </summary>

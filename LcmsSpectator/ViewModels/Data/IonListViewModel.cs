@@ -381,7 +381,7 @@ namespace LcmsSpectator.ViewModels.Data
                     }
 
                     fragmentLabelList.AddRange(ionFragments);
-                }   
+                }
             }
 
             return fragmentLabelList;
@@ -468,7 +468,7 @@ namespace LcmsSpectator.ViewModels.Data
                     index = SelectedPrSm.Charge - minCharge;
                 }
 
-                if (i == SelectedPrSm.Charge) 
+                if (i == SelectedPrSm.Charge)
                 {
                     index = 0;         // guarantee that actual charge is index 0
                 }

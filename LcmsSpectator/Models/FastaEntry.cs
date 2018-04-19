@@ -53,7 +53,7 @@ namespace LcmsSpectator.Models
         private Sequence proteinSequence;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FastaEntry"/> class. 
+        /// Initializes a new instance of the <see cref="FastaEntry"/> class.
         /// </summary>
         public FastaEntry()
         {
@@ -116,7 +116,7 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Gets an entry formatted as it should be in a FASTA database file.
         /// </summary>
-        public string FormattedEntry 
+        public string FormattedEntry
         {
             get
             {

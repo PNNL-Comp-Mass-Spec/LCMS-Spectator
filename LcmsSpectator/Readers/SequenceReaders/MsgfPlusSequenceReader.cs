@@ -73,7 +73,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
                 {
                     var index = Math.Min(lastIndex, msgfPlusPeptideStr.Length - 1);
                     msgfPlusPeptideStr = msgfPlusPeptideStr.Substring(0, index);
-                }   
+                }
             }
 
             const string AminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";

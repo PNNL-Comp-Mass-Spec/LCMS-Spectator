@@ -52,7 +52,7 @@ namespace LcmsSpectator.ViewModels.Data
         private XicViewModel xicViewModel;
 
         /// <summary>
-        /// View model for spectrum plots (MS/MS, previous MS1, next MS1) 
+        /// View model for spectrum plots (MS/MS, previous MS1, next MS1)
         /// </summary>
         private SpectrumViewModel spectrumViewModel;
 
@@ -102,7 +102,7 @@ namespace LcmsSpectator.ViewModels.Data
         private string loadProgressStatus;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DataSetViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="DataSetViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>
         public DataSetViewModel(IMainDialogService dialogService)
@@ -243,7 +243,7 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
-        /// Gets or sets the path to the FASTA database file associated with this data set. 
+        /// Gets or sets the path to the FASTA database file associated with this data set.
         /// </summary>
         public string FastaDbFilePath { get; set; }
 
@@ -262,7 +262,7 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
-        /// Gets view model for spectrum plots (MS/MS, previous MS1, next MS1) 
+        /// Gets view model for spectrum plots (MS/MS, previous MS1, next MS1)
         /// </summary>
         public SpectrumViewModel SpectrumViewModel
         {

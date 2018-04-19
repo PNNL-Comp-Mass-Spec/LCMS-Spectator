@@ -38,7 +38,7 @@ namespace LcmsSpectator.ViewModels.Modifications
         private Modification selectedModification;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ManageModificationsViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="ManageModificationsViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from the view model.</param>
         public ManageModificationsViewModel(IMainDialogService dialogService)

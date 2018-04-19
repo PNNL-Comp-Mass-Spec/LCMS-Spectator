@@ -39,7 +39,7 @@ namespace LcmsSpectator.ViewModels.Filters
         private readonly Validate validator;
 
         /// <summary>
-        /// A value indicating whether this item is selected 
+        /// A value indicating whether this item is selected
         /// </summary>
         private bool selected;
 
@@ -60,7 +60,7 @@ namespace LcmsSpectator.ViewModels.Filters
         private readonly char delimiter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MultiValueFilterViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="MultiValueFilterViewModel"/> class.
         /// Initializes instance of the Filter
         /// </summary>
         /// <param name="name">The name of the filter.</param>
@@ -131,7 +131,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <param name="data">The data to filter.</param>
         /// <param name="value">The value of the filter.</param>
         /// <returns>The filtered data.</returns>
-        public delegate IEnumerable<object> FilterFunction(IEnumerable<object> data, IEnumerable<string> value); 
+        public delegate IEnumerable<object> FilterFunction(IEnumerable<object> data, IEnumerable<string> value);
 
         /// <summary>
         /// Delegate defining interface of function that validates a filter value.

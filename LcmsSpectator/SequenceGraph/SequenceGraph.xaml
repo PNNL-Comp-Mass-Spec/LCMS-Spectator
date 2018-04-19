@@ -1,11 +1,11 @@
 ﻿<UserControl x:Class="LcmsSpectator.SequenceGraph.SequenceGraph"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="clr-namespace:GraphX.Controls;assembly=GraphX.Controls"
              xmlns:sequenceGraph1="clr-namespace:LcmsSpectator.SequenceGraph"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -28,10 +28,10 @@
                             <Grid>
                                 <Path Stroke="{TemplateBinding Foreground}"
                           StrokeThickness="2" MinWidth="1" MinHeight="1"
-                          ToolTip="{TemplateBinding ToolTip}" 
+                          ToolTip="{TemplateBinding ToolTip}"
                             x:Name="PART_edgePath"/>
                                 <Path Stroke="{TemplateBinding Foreground}"
-                          StrokeThickness="2" MinWidth="1" MinHeight="1" 
+                          StrokeThickness="2" MinWidth="1" MinHeight="1"
                             x:Name="PART_edgeArrowPath"/>
                                 <controls:EdgeLabelControl x:Name="PART_edgeLabel" Content="{Binding Edge.Text, RelativeSource={RelativeSource TemplatedParent}}" />
                             </Grid>

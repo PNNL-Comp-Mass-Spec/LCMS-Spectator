@@ -11,7 +11,7 @@
 namespace LcmsSpectator.Models
 {
     using InformedProteomics.Backend.MassSpecData;
-    
+
     /// <summary>
     /// An interface for a single hierarchical level of an IdentificationTree.
     /// </summary>

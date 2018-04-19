@@ -36,7 +36,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private readonly LinearAxis xaxis;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IsotopicEnvelopePlotViewModel"/> class. 
+        /// Initializes a new instance of the <see cref="IsotopicEnvelopePlotViewModel"/> class.
         /// </summary>
         public IsotopicEnvelopePlotViewModel()
         {
@@ -139,7 +139,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     "{3}: {4:0.###}" + Environment.NewLine +
                     "Index: {Index:0.###}"
                 };
-                PlotModel.Series.Add(actSeries);  
+                PlotModel.Series.Add(actSeries);
             }
             else
             {
@@ -156,7 +156,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     "{3}: {4:0.###}" + Environment.NewLine +
                     "Index: {Index:0.###}"
                 };
-                PlotModel.Series.Add(actSeries);  
+                PlotModel.Series.Add(actSeries);
             }
 
             // Calculate min and max boundaries for plot

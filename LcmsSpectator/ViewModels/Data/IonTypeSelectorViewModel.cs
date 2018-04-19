@@ -272,7 +272,7 @@ namespace LcmsSpectator.ViewModels.Data
                     IonUtils.GetIonTypes(
                         IcParameters.Instance.IonTypeFactory,
                         selectedBase,
-                        selectedLosses, 
+                        selectedLosses,
                         MinCharge,
                         MaxCharge));
         }
