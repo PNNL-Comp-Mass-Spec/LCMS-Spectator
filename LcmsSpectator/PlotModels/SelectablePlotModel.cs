@@ -8,13 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+
 namespace LcmsSpectator.PlotModels
 {
-    using System;
-    using OxyPlot;
-    using OxyPlot.Axes;
-    using OxyPlot.Series;
-
     /// <summary>
     /// This class is an AutoAdjustedYPlotModel that shows a stem marker at a given DataPoint X value.
     /// </summary>

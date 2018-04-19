@@ -8,28 +8,27 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.PlotModels;
 using LcmsSpectator.PlotModels.ColorDictionaries;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Data;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.Plots
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-    using InformedProteomics.Backend.MassSpecData;
-    using Config;
-    using DialogServices;
-    using PlotModels;
-    using Utils;
-    using Data;
-    using OxyPlot;
-    using OxyPlot.Axes;
-    using OxyPlot.Series;
-    using ReactiveUI;
-
     /// <summary>
     /// This class maintains a plot model for a extracted ion chromatogram.
     /// </summary>

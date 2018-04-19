@@ -8,13 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+
 namespace LcmsSpectator.Views
 {
-    using System.Collections.Generic;
-    using System.Windows;
-    using System.Windows.Controls;
-    using System.Windows.Input;
-
     /// <summary>
     /// Interaction logic for FilterView.xaml
     /// </summary>

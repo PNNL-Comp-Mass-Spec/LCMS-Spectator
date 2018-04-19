@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Models;
+using PSI_Interface.CV;
+using PSI_Interface.IdentData;
 
 namespace LcmsSpectator.Writers
 {
-
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using Models;
-
-    using PSI_Interface.CV;
-    using PSI_Interface.IdentData;
-
     [Obsolete("This class is not functional")]
     public class MzIdWriter : IIdWriter
     {

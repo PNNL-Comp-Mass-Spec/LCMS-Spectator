@@ -8,25 +8,24 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
 using LcmsSpectator.PlotModels.ColorDictionaries;
+using LcmsSpectator.Utils;
+using OxyPlot;
+using OxyPlot.Annotations;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.Plots
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using Config;
-    using DialogServices;
-    using Models;
-    using Utils;
-    using OxyPlot;
-    using OxyPlot.Annotations;
-    using OxyPlot.Axes;
-    using OxyPlot.Series;
-    using ReactiveUI;
-
     /// <summary>
     /// View model that maintains a (false) heat map of LCMS features.
     /// </summary>

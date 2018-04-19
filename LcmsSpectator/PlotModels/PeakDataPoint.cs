@@ -8,13 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using InformedProteomics.Backend.Data.Spectrometry;
+using OxyPlot;
+
 namespace LcmsSpectator.PlotModels
 {
-    using System.Collections.Generic;
-
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using OxyPlot;
-
     /// <summary>
     /// Data point for a Spectrum point. (M/Z vs Intensity)
     /// </summary>

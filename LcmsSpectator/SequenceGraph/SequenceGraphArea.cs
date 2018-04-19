@@ -7,12 +7,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using GraphX.Controls;
+using QuickGraph;
+
 namespace LcmsSpectator.SequenceGraph
 {
-    using GraphX.Controls;
-
-    using QuickGraph;
-
     /// <summary>
     /// Concrete sequence graph control.
     /// </summary>

@@ -8,12 +8,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using InformedProteomics.Backend.Data.Sequence;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Modifications
 {
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using ReactiveUI;
-
     /// <summary>
     /// A view model representing a modification that can be selected or unselected.
     /// </summary>

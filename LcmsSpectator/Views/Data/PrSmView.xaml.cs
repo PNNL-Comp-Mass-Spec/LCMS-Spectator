@@ -8,13 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace LcmsSpectator.Views
+using System.Windows;
+using System.Windows.Controls;
+using LcmsSpectator.Models;
+
+namespace LcmsSpectator.Views.Data
 {
-    using System.Windows;
-    using System.Windows.Controls;
-
-    using Models;
-
     /// <summary>
     /// Interaction logic for PrSmView.xaml
     /// </summary>

@@ -9,11 +9,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.TopDown.Scoring;
+
 namespace LcmsSpectator.Models
 {
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.TopDown.Scoring;
-
     /// <summary>
     /// Scorer factory that creates the correct type of scorer based on the parameters supplied
     /// in its constructor.

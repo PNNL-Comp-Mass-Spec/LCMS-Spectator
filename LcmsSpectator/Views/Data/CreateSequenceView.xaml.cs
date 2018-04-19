@@ -8,14 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using InformedProteomics.Backend.Data.Sequence;
+
 namespace LcmsSpectator.Views.Data
 {
-    using System.Windows;
-    using System.Windows.Controls;
-    using System.Windows.Input;
-
-    using InformedProteomics.Backend.Data.Sequence;
-
     /// <summary>
     /// Interaction logic for CreateSequenceView.xaml
     /// </summary>

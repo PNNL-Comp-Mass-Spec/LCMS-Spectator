@@ -8,10 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows;
+
 namespace LcmsSpectator.Views.FileSelectors
 {
-    using System.Windows;
-
     /// <summary>
     /// Interaction logic for SelectDataSetView.xaml
     /// </summary>

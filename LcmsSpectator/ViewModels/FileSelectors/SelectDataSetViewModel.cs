@@ -8,16 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Reactive.Linq;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.ViewModels.Data;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.FileSelectors
 {
-    using System;
-    using System.Reactive.Linq;
-
-    using DialogServices;
-    using Data;
-
-    using ReactiveUI;
-
     /// <summary>
     /// View model for selecting an existing dataset or a new raw file to open.
     /// </summary>

@@ -1,11 +1,9 @@
-﻿namespace LcmsSpectator.ViewModels.StableIsotopeViewer
+﻿using System;
+using System.Reactive.Linq;
+using ReactiveUI;
+
+namespace LcmsSpectator.ViewModels.StableIsotopeViewer
 {
-    using System;
-
-    using System.Reactive.Linq;
-
-    using ReactiveUI;
-
     /// <summary>
     /// View model for editing the proportion for a single isotope.
     /// </summary>

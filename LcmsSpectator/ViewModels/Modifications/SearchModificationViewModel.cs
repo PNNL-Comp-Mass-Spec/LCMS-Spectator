@@ -8,19 +8,17 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Globalization;
+using System.Reactive.Linq;
+using InformedProteomics.Backend.Data.Enum;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Modifications
 {
-    using System;
-    using System.Globalization;
-    using System.Reactive.Linq;
-
-    using InformedProteomics.Backend.Data.Enum;
-    using InformedProteomics.Backend.Data.Sequence;
-    using Config;
-    using DialogServices;
-
-    using ReactiveUI;
-
     /// <summary>
     /// View model for editing a SearchModification object.
     /// </summary>

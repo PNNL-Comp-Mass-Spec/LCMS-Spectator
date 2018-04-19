@@ -1,13 +1,11 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
+using System.Windows.Data;
+using InformedProteomics.Backend.Data.Sequence;
 
 namespace LcmsSpectator.Utils
 {
-    using System.Globalization;
-    using System.Windows.Data;
-
-    using InformedProteomics.Backend.Data.Sequence;
-
     /// <summary>
     /// Converter for converting an InformedProteomics sequence to a string.
     /// </summary>

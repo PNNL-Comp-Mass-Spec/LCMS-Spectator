@@ -1,8 +1,8 @@
-﻿namespace LcmsSpectator.Writers
-{
-    using System;
-    using System.IO;
+﻿using System;
+using System.IO;
 
+namespace LcmsSpectator.Writers
+{
     public class IdWriterFactory
     {
         public static IIdWriter GetIdWriter(string filePath)

@@ -8,18 +8,17 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Enum;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Database;
+
 namespace LcmsSpectator.SequenceGraph
 {
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Enum;
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Database;
-
     /// <summary>
     /// Class for building a data graph from an InformedProteomics SequenceGraph.
     /// </summary>

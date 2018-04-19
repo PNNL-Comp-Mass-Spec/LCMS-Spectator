@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using InformedProteomics.Backend.Data.Biology;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.StableIsotopeViewer
 {
-    using System;
-    using System.Linq;
-    using System.Reactive.Linq;
-
-    using InformedProteomics.Backend.Data.Biology;
-
-    using ReactiveUI;
-
     /// <summary>
     /// This is a view model for editing the proportions of the isotopes for a given element.
     /// </summary>

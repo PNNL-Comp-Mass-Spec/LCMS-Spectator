@@ -8,15 +8,15 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Reactive.Linq;
+using LcmsSpectator.DialogServices;
+using OxyPlot;
+using OxyPlot.Wpf;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.FileSelectors
 {
-    using System;
-    using System.Reactive.Linq;
-    using DialogServices;
-    using OxyPlot;
-    using OxyPlot.Wpf;
-    using ReactiveUI;
-
     /// <summary>
     /// View model for selecting dimensions and resolution of an exported image.
     /// </summary>

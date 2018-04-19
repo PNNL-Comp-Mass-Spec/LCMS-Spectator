@@ -8,12 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Readers.SequenceReaders;
+
 namespace LcmsSpectator.Models
 {
-    using System;
-    using InformedProteomics.Backend.Data.Sequence;
-    using Readers.SequenceReaders;
-
     /// <summary>
     /// Class for target sequence and charge state.
     /// </summary>

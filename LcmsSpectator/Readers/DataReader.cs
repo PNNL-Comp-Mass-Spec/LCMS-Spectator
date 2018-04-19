@@ -8,23 +8,21 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Config;
+using LcmsSpectator.Models;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels;
+using LcmsSpectator.ViewModels.Data;
+using ReactiveUI;
+
 namespace LcmsSpectator.Readers
 {
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using Config;
-    using Models;
-    using Utils;
-    using ViewModels;
-    using ViewModels.Data;
-    using ReactiveUI;
-
     /// <summary>
     /// The DataReader is a class that encapsulates reading raw files, ID files, and feature files.
     /// </summary>

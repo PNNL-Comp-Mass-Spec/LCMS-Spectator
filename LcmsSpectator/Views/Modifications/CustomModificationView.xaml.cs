@@ -8,12 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+
 namespace LcmsSpectator.Views.Modifications
 {
-    using System.Windows;
-    using System.Windows.Controls;
-    using System.Windows.Input;
-
     /// <summary>
     /// Interaction logic for CustomModificationView.xaml
     /// </summary>

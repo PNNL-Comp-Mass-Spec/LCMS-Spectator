@@ -8,15 +8,16 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Forms;
+
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
+
 namespace LcmsSpectator.DialogServices
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Windows;
-    using System.Windows.Forms;
-
-    using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-    using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 
     /// <summary>
     /// Service for opening dialogs from a view model.

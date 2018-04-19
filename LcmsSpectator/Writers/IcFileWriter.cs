@@ -8,14 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.Writers
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
-    using InformedProteomics.Backend.Data.Sequence;
-    using Models;
-
     /// <summary>
     /// Writer for MSPathFinder TSV result format.
     /// </summary>

@@ -9,11 +9,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using OxyPlot;
+using OxyPlot.Axes;
+
 namespace LcmsSpectator.PlotModels
 {
-    using OxyPlot;
-    using OxyPlot.Axes;
-
     /// <summary>
     /// Plot model that automatically adjusts the visible range of the Y Axis based on the
     /// tallest point in the range visible on the X Axis.

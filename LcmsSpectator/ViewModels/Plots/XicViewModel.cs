@@ -8,23 +8,22 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reactive.Linq;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.ViewModels.Data;
+using LcmsSpectator.ViewModels.Modifications;
+using OxyPlot.Axes;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using InformedProteomics.Backend.MassSpecData;
-
-    using Config;
-    using DialogServices;
-    using Models;
-    using Data;
-    using Modifications;
-    using OxyPlot.Axes;
-    using ReactiveUI;
-
     /// <summary>
     /// View model for fragment, precursor, and heavy XIC plots.
     /// </summary>

@@ -1,21 +1,15 @@
-﻿namespace LcmsSpectator.ViewModels.StableIsotopeViewer
+﻿using System;
+using System.Reactive;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Utils;
+using OxyPlot;
+using OxyPlot.Annotations;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using ReactiveUI;
+
+namespace LcmsSpectator.ViewModels.StableIsotopeViewer
 {
-    using System;
-    using System.Threading.Tasks;
-
-    using System.Reactive;
-
-    using InformedProteomics.Backend.Utils;
-
-    using OxyPlot;
-    using OxyPlot.Annotations;
-    using OxyPlot.Axes;
-    using OxyPlot.Series;
-
-    using ReactiveUI;
-
-    using IsotopicConcentrationTuner = InformedProteomics.Backend.Utils.IsotopicConcentrationTuner;
-
     /// <summary>
     /// View model for editing, running, and displaying results for the <see cref="IsotopicConcentrationTuner" />.
     /// </summary>

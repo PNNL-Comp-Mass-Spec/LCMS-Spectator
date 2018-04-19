@@ -1,18 +1,17 @@
-﻿namespace LcmsSpectator.Models
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Data;
+using Splat;
+
+namespace LcmsSpectator.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassSpecData;
-    using Utils;
-    using ViewModels.Data;
-    using Splat;
-
     public class FragmentationSequence
     {
         /// <summary>

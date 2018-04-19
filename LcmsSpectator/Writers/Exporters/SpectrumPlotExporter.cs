@@ -1,25 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.Utils;
+using LcmsSpectator.Models;
+using LcmsSpectator.PlotModels;
 using LcmsSpectator.PlotModels.ColorDictionaries;
+using LcmsSpectator.Utils;
+using OxyPlot;
+using OxyPlot.Annotations;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 
 namespace LcmsSpectator.Writers.Exporters
 {
-    using System.IO;
-
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.Utils;
-
-    using Models;
-    using PlotModels;
-    using Utils;
-
-    using OxyPlot;
-    using OxyPlot.Annotations;
-    using OxyPlot.Axes;
-    using OxyPlot.Series;
-
     public class SpectrumPlotExporter
     {
         private readonly IEnumerable<IonType> ionTypes;

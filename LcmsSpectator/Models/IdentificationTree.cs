@@ -9,15 +9,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.MassSpecData;
+
 namespace LcmsSpectator.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.MassSpecData;
-
     /// <summary>
     /// A class containing a hierarchy of Protein-Spectrum-Match identifications.
     /// The hierarchy is: Protein, Proteoform, Charge state, ID

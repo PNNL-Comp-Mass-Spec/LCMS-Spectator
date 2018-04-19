@@ -8,13 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+
 namespace LcmsSpectator.Controls
 {
-    using System.Collections;
-    using System.Linq;
-    using System.Windows;
-    using System.Windows.Controls;
-
     /// <summary>
     /// ListBox that exposes the SelectedItems as a dependency property for use with MultiSelection.
     /// </summary>

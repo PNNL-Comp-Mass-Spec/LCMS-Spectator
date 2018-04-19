@@ -1,11 +1,9 @@
-﻿namespace LcmsSpectator.ViewModels.Data
+﻿using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Models;
+
+namespace LcmsSpectator.ViewModels.Data
 {
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using Models;
-
     public interface IFragmentationSequenceViewModel
     {
         /// <summary>

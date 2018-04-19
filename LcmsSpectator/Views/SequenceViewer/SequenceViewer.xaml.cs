@@ -1,13 +1,12 @@
 ﻿using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using LcmsSpectator.DialogServices;
 
 namespace LcmsSpectator.Views.SequenceViewer
 {
-    using System.Windows.Controls;
-
     /// <summary>
     /// Interaction logic for SequenceViewer.xaml
     /// </summary>

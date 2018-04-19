@@ -8,11 +8,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.Writers
 {
-    using System.Collections.Generic;
-    using Models;
-
     /// <summary>
     /// The IdWriter interface.
     /// </summary>

@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Linq;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.ViewModels.Modifications;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.SequenceViewer
 {
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using Config;
-    using DialogServices;
-    using Modifications;
-
-    using ReactiveUI;
-
     /// <summary>
     /// View model for representing a sequence cleavage on
     /// </summary>

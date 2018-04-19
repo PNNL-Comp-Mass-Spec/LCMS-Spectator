@@ -8,16 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.Readers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using Models;
-
     /// <summary>
     /// Interface for database search results readers.
     /// </summary>

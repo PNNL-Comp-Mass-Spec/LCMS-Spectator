@@ -8,31 +8,29 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.PlotModels;
 using LcmsSpectator.PlotModels.ColorDictionaries;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Data;
+using LcmsSpectator.ViewModels.SequenceViewer;
+using LcmsSpectator.Writers.Exporters;
+using OxyPlot;
+using OxyPlot.Annotations;
+using OxyPlot.Axes;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.Plots
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassSpecData;
-    using Config;
-    using DialogServices;
-    using PlotModels;
-    using Utils;
-    using Data;
-    using SequenceViewer;
-    using Writers.Exporters;
-
-    using OxyPlot;
-    using OxyPlot.Annotations;
-    using OxyPlot.Axes;
-    using ReactiveUI;
-
     /// <summary>
     /// This class maintains a plot model for an MS spectrum.
     /// </summary>

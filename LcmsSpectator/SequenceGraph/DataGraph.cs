@@ -8,19 +8,16 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
+using GraphX.PCL.Common.Models;
+using GraphX.PCL.Logic.Models;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Sequence;
+using QuickGraph;
+
 namespace LcmsSpectator.SequenceGraph
 {
-    using System.Collections.Generic;
-    using System.Linq;
-
-    using GraphX.PCL.Common.Models;
-    using GraphX.PCL.Logic.Models;
-
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using QuickGraph;
-
     /// <summary>
     /// Data model for GraphX graph.
     /// </summary>

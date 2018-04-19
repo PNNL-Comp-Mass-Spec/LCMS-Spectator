@@ -8,13 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.Readers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using Models;
-
     /// <summary>
     /// Reader for list of targets containing target sequence and charge state.
     /// </summary>

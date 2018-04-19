@@ -1,12 +1,11 @@
-﻿namespace LcmsSpectator
+﻿using System.Windows;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Readers;
+using LcmsSpectator.ViewModels;
+using LcmsSpectator.Views;
+
+namespace LcmsSpectator
 {
-    using System.Windows;
-
-    using DialogServices;
-    using Readers;
-    using ViewModels;
-    using Views;
-
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>

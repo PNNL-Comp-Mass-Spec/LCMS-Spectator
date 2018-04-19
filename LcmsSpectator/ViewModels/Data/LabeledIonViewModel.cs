@@ -8,27 +8,23 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
+using InformedProteomics.Backend.Utils;
+using LcmsSpectator.Config;
+using LcmsSpectator.PlotModels;
+using LcmsSpectator.Utils;
+using ReactiveUI;
+using Splat;
+
 namespace LcmsSpectator.ViewModels.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Biology;
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassSpecData;
-    using InformedProteomics.Backend.Utils;
-
-    using Config;
-    using PlotModels;
-    using Utils;
-
-    using ReactiveUI;
-
-    using Splat;
-
     /// <summary>
     /// View model for labeled ion that can be selected/unselected.
     /// </summary>

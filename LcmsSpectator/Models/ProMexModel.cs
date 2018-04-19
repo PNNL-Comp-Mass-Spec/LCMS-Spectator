@@ -8,18 +8,17 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Readers;
+using QuadTreeLib;
+
 namespace LcmsSpectator.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.Linq;
-    using InformedProteomics.Backend.Data.Biology;
-    using InformedProteomics.Backend.MassSpecData;
-    using Readers;
-
-    using QuadTreeLib;
-
     /// <summary>
     /// Model for PROMEX features.
     /// </summary>

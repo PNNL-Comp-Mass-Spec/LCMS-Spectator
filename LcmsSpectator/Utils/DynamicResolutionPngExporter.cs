@@ -8,12 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using OxyPlot;
+using OxyPlot.Wpf;
+
 namespace LcmsSpectator.Utils
 {
-    using System;
-    using OxyPlot;
-    using OxyPlot.Wpf;
-
     /// <summary>
     /// Exporter for PNG files with dynamic resolution.
     /// </summary>

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using OxyPlot;
 
 namespace LcmsSpectator.ViewModels
 {
-    using OxyPlot;
-
     class PlotViewModel
     {
         public PlotModel CorrHistogram { get; set; }

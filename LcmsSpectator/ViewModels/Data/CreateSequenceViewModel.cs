@@ -9,25 +9,22 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Reactive.Linq;
+using System.Text.RegularExpressions;
+using InformedProteomics.Backend.Data.Enum;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.Readers.SequenceReaders;
+using LcmsSpectator.Utils;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Reactive.Linq;
-    using System.Text.RegularExpressions;
-
-    using InformedProteomics.Backend.Data.Enum;
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-
-    using Config;
-    using DialogServices;
-    using Models;
-    using Readers.SequenceReaders;
-    using Utils;
-
-    using ReactiveUI;
-
     /// <summary>
     /// This class is a view model for editing the sequence, charge, and scan number
     /// of a protein-spectrum match.

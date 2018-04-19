@@ -1,7 +1,7 @@
-﻿namespace LcmsSpectator.Views.StableIsotopeViewer
-{
-    using System.Windows;
+﻿using System.Windows;
 
+namespace LcmsSpectator.Views.StableIsotopeViewer
+{
     /// <summary>
     /// Interaction logic for StableIsotopeViewer.xaml
     /// </summary>

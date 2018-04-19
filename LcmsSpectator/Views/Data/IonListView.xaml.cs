@@ -8,10 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows.Controls;
+
 namespace LcmsSpectator.Views.Data
 {
-    using System.Windows.Controls;
-
     /// <summary>
     /// Interaction logic for IonListView.xaml
     /// </summary>

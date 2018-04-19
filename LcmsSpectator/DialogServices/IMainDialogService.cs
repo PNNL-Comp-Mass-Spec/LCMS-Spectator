@@ -8,19 +8,19 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using LcmsSpectator.ViewModels;
+using LcmsSpectator.ViewModels.Data;
+using LcmsSpectator.ViewModels.Dms;
+using LcmsSpectator.ViewModels.FileSelectors;
+using LcmsSpectator.ViewModels.Filters;
+using LcmsSpectator.ViewModels.Modifications;
+using LcmsSpectator.ViewModels.Plots;
+using LcmsSpectator.ViewModels.SequenceViewer;
+using LcmsSpectator.ViewModels.StableIsotopeViewer;
+
 namespace LcmsSpectator.DialogServices
 {
-    using System;
-    using ViewModels;
-    using ViewModels.Data;
-    using ViewModels.Dms;
-    using ViewModels.FileSelectors;
-    using ViewModels.Filters;
-    using ViewModels.Modifications;
-    using ViewModels.Plots;
-    using ViewModels.SequenceViewer;
-    using ViewModels.StableIsotopeViewer;
-
     /// <summary>
     /// Interface for dialog services for opening LCMSSpectator dialog boxes from a view model.
     /// </summary>

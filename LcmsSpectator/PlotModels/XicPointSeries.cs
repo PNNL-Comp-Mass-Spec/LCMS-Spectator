@@ -8,12 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Linq;
+using System.Threading;
+using OxyPlot.Series;
+
 namespace LcmsSpectator.PlotModels
 {
-    using System.Linq;
-    using System.Threading;
-    using OxyPlot.Series;
-
     /// <summary>
     /// This class is for a series of XIC data points.
     /// </summary>

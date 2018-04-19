@@ -1,19 +1,17 @@
-﻿namespace LcmsSpectator.ViewModels.Data
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Config;
+using LcmsSpectator.Models;
+using LcmsSpectator.Utils;
+using ReactiveUI;
+
+namespace LcmsSpectator.ViewModels.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-
-    using Config;
-    using Models;
-    using Utils;
-    using ReactiveUI;
-
     public class FragmentationSequenceViewModel : ReactiveObject, IFragmentationSequenceViewModel
     {
         /// <summary>

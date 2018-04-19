@@ -8,13 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using InformedProteomics.Backend.MassSpecData;
+
 namespace LcmsSpectator.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using InformedProteomics.Backend.MassSpecData;
-
     /// <summary>
     /// This class is a container for PRSMs that have the same charge state.
     /// </summary>

@@ -13,11 +13,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows;
+using System.Windows.Controls;
+
 namespace LcmsSpectator.Controls
 {
-    using System.Windows;
-    using System.Windows.Controls;
-
     /// <summary>
     /// Microsoft has done everything in their power to make using WPF TreeViews a !@#$ING nightmare, especially
     /// with MVVM. The SelectedItem Dependency property of the TreeView control is readonly, which prevents conventionally

@@ -8,32 +8,30 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.Database;
+using InformedProteomics.Backend.MassSpecData;
 using InformedProteomics.Backend.Utils;
+using InformedProteomics.TopDown.Execution;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.Readers;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Modifications;
+using ReactiveUI;
+using MsPfParameters = LcmsSpectator.Models.MsPfParameters;
 
 namespace LcmsSpectator.ViewModels
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassSpecData;
-    using InformedProteomics.TopDown.Execution;
-    using Config;
-    using DialogServices;
-    using Models;
-    using Readers;
-    using Utils;
-    using Modifications;
-    using ReactiveUI;
-
-    using MsPfParameters = Models.MsPfParameters;
-
     /// <summary>
     /// View model for configuration settings for running an MSPathFinder Database search.
     /// </summary>
@@ -386,7 +384,7 @@ namespace LcmsSpectator.ViewModels
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SearchSettingsViewModel"/> class.
-        /// Initializes from <see cref="MsPfParameters" />, MSPathFinder parameters.
+        /// Initializes from <see cref="Models.MsPfParameters" />, MSPathFinder parameters.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model</param>
         /// <param name="mspfParameters">The MSPathFinder parameters.</param>
@@ -805,7 +803,7 @@ namespace LcmsSpectator.ViewModels
 
         /// <summary>Get a launcher for TopDown MSPathFinder searches.</summary>
         /// <param name="ms2ScanNums">The MS/MS scan numbers to restrict search to.</param>
-        /// <returns>The <see cref="IcTopDownLauncher"/>.</returns>
+        /// <returns>The <see cref="InformedProteomics.TopDown.Execution.IcTopDownLauncher"/>.</returns>
         public IcTopDownLauncher GetTopDownLauncher(IEnumerable<int> ms2ScanNums = null)
         {
             var searchModifications = SearchModifications.Select(searchModification => searchModification.SearchModification).ToList();

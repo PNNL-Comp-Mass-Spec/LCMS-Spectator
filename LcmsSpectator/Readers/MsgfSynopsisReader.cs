@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Models;
+using LcmsSpectator.Readers.SequenceReaders;
+using PHRPReader;
 
 namespace LcmsSpectator.Readers
 {
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using Models;
-    using SequenceReaders;
-
-    using PHRPReader;
-
     public class MsgfSynopsisReader : IIdFileReader
     {
         private readonly string filePath;

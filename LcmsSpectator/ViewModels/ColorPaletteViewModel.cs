@@ -8,13 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Windows.Media;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Windows.Media;
-    using ReactiveUI;
-
     /// <summary>
     /// View model for a color palette.
     /// </summary>

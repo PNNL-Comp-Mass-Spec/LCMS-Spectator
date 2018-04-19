@@ -8,18 +8,18 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.Utils;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using InformedProteomics.Backend.MassSpecData;
-    using DialogServices;
-    using Models;
-    using Utils;
-    using ReactiveUI;
-
     /// <summary>
     /// View model for maintaining feature map plot and feature data manipulation.
     /// </summary>

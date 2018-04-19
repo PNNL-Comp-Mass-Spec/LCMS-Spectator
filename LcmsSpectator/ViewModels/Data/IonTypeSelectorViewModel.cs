@@ -8,21 +8,18 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Utils;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Data
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
-
-    using InformedProteomics.Backend.Data.Spectrometry;
-
-    using Config;
-    using DialogServices;
-    using Utils;
-
-    using ReactiveUI;
-
     /// <summary>
     /// A view model that builds a list of fragment ion types based on selected based ion types, neutral losses, and charge range.
     /// </summary>

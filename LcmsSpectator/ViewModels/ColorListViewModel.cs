@@ -8,18 +8,17 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Windows.Media;
+using OxyPlot;
+using OxyPlot.Wpf;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Windows.Media;
-    using OxyPlot;
-    using OxyPlot.Wpf;
-
-    using ReactiveUI;
-
     /// <summary>
     /// View model for list of ColorViewModels.
     /// </summary>

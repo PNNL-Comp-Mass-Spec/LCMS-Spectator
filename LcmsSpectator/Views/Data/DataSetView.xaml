@@ -8,7 +8,6 @@
     xmlns:plots="clr-namespace:LcmsSpectator.Views.Plots"
     xmlns:sequenceViewer="clr-namespace:LcmsSpectator.Views.SequenceViewer"
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
-    xmlns:views="clr-namespace:LcmsSpectator.Views"
     xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
     d:DesignHeight="300"
@@ -28,7 +27,7 @@
             <RowDefinition Height="93*" />
             <RowDefinition Height="25" />
         </Grid.RowDefinitions>
-        <views:PrSmView Grid.Row="0" DataContext="{Binding SelectedPrSm}" />
+        <data:PrSmView Grid.Row="0" DataContext="{Binding SelectedPrSm}" />
         <GridSplitter
             Grid.Row="1"
             HorizontalAlignment="Stretch"
@@ -190,7 +189,7 @@
                             </xcad:LayoutAnchorable>
 
                             <!--<xcad:LayoutAnchorable Title="TargetView">
-                                <views:CreateSequenceView DataContext="{Binding CreateSequenceViewModel}" x:Name="CreateSequence"/>
+                                <data:CreateSequenceView DataContext="{Binding CreateSequenceViewModel}" x:Name="CreateSequence"/>
                             </xcad:LayoutAnchorable>-->
                         </xcad:LayoutAnchorablePane>
                     </xcad:LayoutAnchorablePaneGroup>

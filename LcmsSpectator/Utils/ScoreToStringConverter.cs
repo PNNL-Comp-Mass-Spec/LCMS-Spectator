@@ -8,12 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Globalization;
+using System.Windows.Data;
+
 namespace LcmsSpectator.Utils
 {
-    using System;
-    using System.Globalization;
-    using System.Windows.Data;
-
     /// <summary>
     /// Converter for converting a double to scientific notation.
     /// </summary>

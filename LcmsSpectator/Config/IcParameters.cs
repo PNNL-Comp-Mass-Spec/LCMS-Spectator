@@ -8,22 +8,19 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Enum;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using OxyPlot;
+using ReactiveUI;
+
 namespace LcmsSpectator.Config
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Enum;
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-
-    using OxyPlot;
-
-    using ReactiveUI;
-
     /// <summary>
     /// Represents the type of precursor ions displayed.
     /// </summary>

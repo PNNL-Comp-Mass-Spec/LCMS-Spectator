@@ -8,21 +8,18 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Linq;
+using System.Windows.Media;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.ViewModels.Modifications;
+using OxyPlot.Wpf;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels
 {
-    using System;
-    using System.Linq;
-    using System.Windows.Media;
-
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using Config;
-    using DialogServices;
-    using Modifications;
-
-    using OxyPlot.Wpf;
-
-    using ReactiveUI;
-
     /// <summary>
     /// Tracks settings and then publishes them to application settings when user clicks OK.
     /// </summary>

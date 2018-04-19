@@ -9,27 +9,23 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
+using LcmsSpectator.Models;
+using LcmsSpectator.Utils;
+using ReactiveUI;
+using Splat;
+
 namespace LcmsSpectator.ViewModels.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassSpecData;
-
-    using Config;
-    using Models;
-    using Utils;
-
-    using ReactiveUI;
-
-    using Splat;
-
     /// <summary>
     /// This class maintains the lists of the precursor and fragment ions for a particular
     /// sequence and set of ion types.

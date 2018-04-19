@@ -8,13 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using LcmsSpectator.DialogServices;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Filters
 {
-    using System;
-    using System.Collections.Generic;
-    using DialogServices;
-    using ReactiveUI;
-
     /// <summary>
     /// A view model for selecting and validating a filter value.
     /// </summary>

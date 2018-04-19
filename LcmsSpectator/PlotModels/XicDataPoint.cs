@@ -8,11 +8,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using InformedProteomics.Backend.Data.Spectrometry;
+using OxyPlot;
+
 namespace LcmsSpectator.PlotModels
 {
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using OxyPlot;
-
     /// <summary>
     /// Data point for a XIC point. (Retention Time vs Intensity)
     /// </summary>

@@ -8,16 +8,15 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
 
 namespace LcmsSpectator.Readers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Data.SqlClient;
-    using System.Linq;
-    using System.Text;
-
     /// <summary>
     /// Class for searching for data sets and jobs on the PNNL DMS system.
     /// </summary>

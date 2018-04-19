@@ -8,10 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows;
+
 namespace LcmsSpectator.Views.Modifications
 {
-    using System.Windows;
-
     /// <summary>
     /// Interaction logic for ManageModificationsWindow.xaml
     /// </summary>

@@ -8,16 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Models;
+using LcmsSpectator.ViewModels.Data;
+
 namespace LcmsSpectator.Readers
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using Models;
-    using ViewModels.Data;
-
     /// <summary>
     /// The DataReader is an interface for reading raw files, ID files, and feature files.
     /// </summary>

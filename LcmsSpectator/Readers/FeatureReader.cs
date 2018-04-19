@@ -8,16 +8,16 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Models;
+
 namespace LcmsSpectator.Readers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using Models;
-
     /// <summary>
     /// The reader for MS1 feature files.
     /// </summary>

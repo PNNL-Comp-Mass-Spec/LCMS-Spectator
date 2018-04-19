@@ -8,16 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Drawing;
+using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.Data.Spectrometry;
+using QuadTreeLib;
+
 namespace LcmsSpectator.Models
 {
-    using System.Collections.Generic;
-    using System.Drawing;
-
-    using InformedProteomics.Backend.Data.Biology;
-    using InformedProteomics.Backend.Data.Spectrometry;
-
-    using QuadTreeLib;
-
     /// <summary>
     /// Represents a feature over a LC retention time and charge state range.
     /// </summary>

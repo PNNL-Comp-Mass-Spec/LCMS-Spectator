@@ -1,14 +1,12 @@
-﻿namespace LcmsSpectator.Readers
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Models;
+
+namespace LcmsSpectator.Readers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using Models;
-
     public class FastaReaderWriter
     {
         /// <summary>

@@ -8,18 +8,18 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Models;
+using LcmsSpectator.Readers.SequenceReaders;
+
 namespace LcmsSpectator.Readers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.IO.Compression;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using InformedProteomics.Backend.Data.Sequence;
-    using Models;
-    using SequenceReaders;
-
     /// <summary>
     /// Reader for MSPathFinder results file.
     /// </summary>

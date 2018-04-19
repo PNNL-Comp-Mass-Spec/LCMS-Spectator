@@ -8,11 +8,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows;
+using System.Windows.Controls;
+
 namespace LcmsSpectator.Views.Plots
 {
-    using System.Windows;
-    using System.Windows.Controls;
-
     /// <summary>
     /// Interaction logic for XicView.xaml
     /// </summary>

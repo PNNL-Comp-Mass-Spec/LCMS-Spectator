@@ -8,14 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.IO;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+
 namespace LcmsSpectator.Views
 {
-    using System.IO;
-    using System.Reflection;
-    using System.Windows;
-    using System.Windows.Media;
-    using System.Windows.Media.Imaging;
-
     /// <summary>
     /// Interaction logic for AboutBox.xaml
     /// </summary>

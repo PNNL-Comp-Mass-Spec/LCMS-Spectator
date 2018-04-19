@@ -8,19 +8,19 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Text;
+using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Readers.SequenceReaders;
+using ReactiveUI;
+
 namespace LcmsSpectator.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using InformedProteomics.Backend.Data.Biology;
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassSpecData;
-    using Readers.SequenceReaders;
-    using ReactiveUI;
-
     /// <summary>
     /// A class that represents a protein-spectrum match identification.
     /// </summary>

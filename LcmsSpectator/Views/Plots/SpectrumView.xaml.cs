@@ -8,12 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Windows;
+using System.Windows.Controls;
+
 namespace LcmsSpectator.Views.Plots
 {
-    using System;
-    using System.Windows;
-    using System.Windows.Controls;
-
     /// <summary>
     /// Interaction logic for SpectrumView.xaml
     /// </summary>

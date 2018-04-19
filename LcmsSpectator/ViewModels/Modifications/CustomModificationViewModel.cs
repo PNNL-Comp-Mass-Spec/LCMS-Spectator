@@ -8,17 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Globalization;
+using InformedProteomics.Backend.Data.Composition;
+using LcmsSpectator.DialogServices;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Modifications
 {
-    using System;
-    using System.Globalization;
-
-    using InformedProteomics.Backend.Data.Composition;
-
-    using DialogServices;
-
-    using ReactiveUI;
-
     /// <summary>
     /// This class is a view model for editing the empirical formula or mass shift of a modification.
     /// </summary>

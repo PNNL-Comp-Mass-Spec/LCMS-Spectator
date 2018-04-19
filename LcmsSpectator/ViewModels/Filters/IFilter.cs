@@ -8,11 +8,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+
 namespace LcmsSpectator.ViewModels.Filters
 {
-    using System;
-    using System.Collections.Generic;
-
     /// <summary>
     /// An interface for selecting and validating a filter value.
     /// </summary>

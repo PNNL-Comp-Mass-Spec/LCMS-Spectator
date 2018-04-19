@@ -8,10 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels
 {
-    using ReactiveUI;
-
     /// <summary>
     /// View model that displays animated loading screen text.
     /// </summary>

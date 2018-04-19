@@ -8,17 +8,17 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.IO;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Enum;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Config;
+using ReactiveUI;
+
 namespace LcmsSpectator.Models
 {
-    using System;
-    using System.IO;
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Enum;
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using Config;
-    using ReactiveUI;
-
     /// <summary>
     /// A class representing a parsed MSPathFinder parameter file.
     /// </summary>

@@ -8,10 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows.Controls;
+
 namespace LcmsSpectator.Views.Plots
 {
-    using System.Windows.Controls;
-
     /// <summary>
     /// Interaction logic for ErrorMap.xaml
     /// </summary>

@@ -8,18 +8,16 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+using GraphX.Controls.Models;
+using GraphX.PCL.Common.Enums;
+using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
+using InformedProteomics.Backend.Data.Sequence;
+
 namespace LcmsSpectator.SequenceGraph
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Windows;
-
-    using GraphX.Controls.Models;
-    using GraphX.PCL.Common.Enums;
-    using GraphX.PCL.Logic.Algorithms.LayoutAlgorithms;
-
-    using InformedProteomics.Backend.Data.Sequence;
-
     /// <summary>
     /// Interaction logic for SequenceGraph.xaml
     /// </summary>

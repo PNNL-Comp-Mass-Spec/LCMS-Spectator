@@ -8,18 +8,18 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Config;
+using LcmsSpectator.Models;
+using MTDBFramework;
+
 namespace LcmsSpectator.Readers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading.Tasks;
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Sequence;
-    using Config;
-    using Models;
-    using MTDBFramework;
-
     /// <summary>
     /// Reader for MTDB file.
     /// </summary>

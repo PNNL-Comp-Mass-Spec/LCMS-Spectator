@@ -8,20 +8,17 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.IO;
+using System.Reactive.Linq;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.Utils;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.FileSelectors
 {
-    using System;
-    using System.IO;
-    using System.Reactive.Linq;
-
-    using InformedProteomics.Backend.MassSpecData;
-
-    using DialogServices;
-    using Models;
-    using Utils;
-
-    using ReactiveUI;
-
     /// <summary>
     /// View model for selecting raw file path, feature file path, and ID file path.
     /// </summary>

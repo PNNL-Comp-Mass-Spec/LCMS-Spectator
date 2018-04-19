@@ -8,14 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using LcmsSpectator.Readers;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Dms
 {
-    using System;
-
-    using Readers;
-
-    using ReactiveUI;
-
     /// <summary>
     /// This class is a view model for editing DMS job info.
     /// </summary>

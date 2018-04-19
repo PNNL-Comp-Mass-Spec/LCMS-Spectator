@@ -8,23 +8,19 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.PlotModels;
+using OxyPlot;
+using OxyPlot.Axes;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
-    using InformedProteomics.Backend.Data.Biology;
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Spectrometry;
-
-    using PlotModels;
-
-    using OxyPlot;
-    using OxyPlot.Axes;
-
-    using ReactiveUI;
-
     /// <summary>
     /// A view model that maintains a spectrum plot that shows the real vs theoretical isotopic envelope.
     /// </summary>

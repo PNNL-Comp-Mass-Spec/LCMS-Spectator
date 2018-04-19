@@ -8,16 +8,15 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Reactive.Linq;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.ViewModels.Data;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.FileSelectors
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Reactive.Linq;
-
-    using DialogServices;
-    using Data;
-    using ReactiveUI;
-
     /// <summary>
     /// View model for selecting a dataset and export path.
     /// </summary>

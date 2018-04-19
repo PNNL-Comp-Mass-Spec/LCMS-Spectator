@@ -1,24 +1,19 @@
-﻿namespace LcmsSpectator.ViewModels.StableIsotopeViewer
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using InformedProteomics.Backend.Data.Biology;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.Utils;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.PlotModels;
+using LcmsSpectator.ViewModels.Data;
+using LcmsSpectator.ViewModels.Plots;
+using ReactiveUI;
+
+namespace LcmsSpectator.ViewModels.StableIsotopeViewer
 {
-    using System;
-
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reactive.Linq;
-
-    using InformedProteomics.Backend.Data.Biology;
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.Utils;
-
-    using DialogServices;
-    using PlotModels;
-    using Data;
-    using Plots;
-
-    using ReactiveUI;
-
-
     public class StableIsotopeViewModel : ReactiveObject
     {
         /// <summary>

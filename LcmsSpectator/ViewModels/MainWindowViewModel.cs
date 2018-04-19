@@ -9,32 +9,30 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.Readers;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Data;
+using LcmsSpectator.ViewModels.Dms;
+using LcmsSpectator.ViewModels.FileSelectors;
+using LcmsSpectator.ViewModels.Modifications;
+using LcmsSpectator.ViewModels.StableIsotopeViewer;
+using LcmsSpectator.Writers;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.MassSpecData;
-
-    using Config;
-    using DialogServices;
-    using Models;
-    using Readers;
-    using Utils;
-    using Data;
-    using Dms;
-    using FileSelectors;
-    using Modifications;
-    using StableIsotopeViewer;
-    //using LcmsSpectator.ViewModels.StableIsotopeViewer;
-    using Writers;
-    using ReactiveUI;
-
     /// <summary>
     /// View model for main window. This is the view model for the entry point of the application.
     /// Composed of all child view models.

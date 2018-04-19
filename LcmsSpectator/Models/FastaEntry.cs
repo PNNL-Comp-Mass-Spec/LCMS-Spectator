@@ -8,15 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Text;
+using InformedProteomics.Backend.Data.Sequence;
+using ReactiveUI;
+
 namespace LcmsSpectator.Models
 {
-    using System;
-    using System.Text;
-
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using ReactiveUI;
-
     /// <summary>
     /// This class represents an entry for a single protein in a FASTA database.
     /// </summary>

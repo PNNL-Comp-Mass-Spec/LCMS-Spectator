@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.Utils;
+using LcmsSpectator.Models;
+using LcmsSpectator.PlotModels;
 
 namespace LcmsSpectator.Writers.Exporters
 {
-    using System.IO;
-
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.Utils;
-
-    using Models;
-    using PlotModels;
-
-    using Path = System.IO.Path;
-
     public class SpectrumPeakExporter
     {
         private readonly IEnumerable<IonType> ionTypes;

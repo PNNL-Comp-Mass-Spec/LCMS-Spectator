@@ -8,15 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Modifications
 {
-    using System;
-
-    using Config;
-    using DialogServices;
-
-    using ReactiveUI;
-
     /// <summary>
     /// View model for a window for selecting heavy modifications for light and heavy peptides.
     /// </summary>

@@ -1,27 +1,21 @@
-﻿using LcmsSpectator.PlotModels.ColorDictionaries;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Windows.Media;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.PlotModels;
+using LcmsSpectator.PlotModels.ColorDictionaries;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Data;
+using OxyPlot.Wpf;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.SequenceViewer
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
-    using System.Reactive.Linq;
-    using System.Windows.Media;
-
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-
-    using DialogServices;
-    using Models;
-    using PlotModels;
-    using Utils;
-    using Data;
-
-    using OxyPlot.Wpf;
-
-    using ReactiveUI;
-
     public class SequenceViewerViewModel : ReactiveObject
     {
         /// <summary>

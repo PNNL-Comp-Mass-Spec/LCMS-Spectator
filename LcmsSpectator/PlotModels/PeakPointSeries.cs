@@ -8,10 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using OxyPlot.Series;
+
 namespace LcmsSpectator.PlotModels
 {
-    using OxyPlot.Series;
-
     /// <summary>
     /// This class is for a series of spectrum data points.
     /// </summary>

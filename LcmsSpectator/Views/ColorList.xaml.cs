@@ -8,10 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows.Controls;
+
 namespace LcmsSpectator.Views
 {
-    using System.Windows.Controls;
-
     /// <summary>
     /// Interaction logic for ColorList.xaml
     /// </summary>

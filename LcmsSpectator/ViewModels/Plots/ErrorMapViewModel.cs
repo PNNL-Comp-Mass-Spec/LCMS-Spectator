@@ -8,29 +8,25 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.PlotModels;
+using LcmsSpectator.Utils;
+using LcmsSpectator.Writers.Exporters;
+using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Data.Spectrometry;
-
-    using Config;
-    using DialogServices;
-    using PlotModels;
-    using Utils;
-    using Writers.Exporters;
-
-    using OxyPlot;
-    using OxyPlot.Axes;
-    using OxyPlot.Series;
-
-    using ReactiveUI;
-
     /// <summary>
     /// This class maintains a heat map plot model showing sequence vs ion type vs error.
     /// </summary>

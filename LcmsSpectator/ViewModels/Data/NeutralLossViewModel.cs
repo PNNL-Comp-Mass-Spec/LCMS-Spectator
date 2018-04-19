@@ -8,11 +8,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using InformedProteomics.Backend.Data.Spectrometry;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Data
 {
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using ReactiveUI;
-
     /// <summary>
     /// View model for a NeutralLoss model.
     /// </summary>

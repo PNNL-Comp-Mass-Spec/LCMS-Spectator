@@ -8,24 +8,20 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Linq;
+using System.Reactive.Linq;
+using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.ViewModels.Data;
+using OxyPlot.Axes;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
-    using System;
-    using System.Linq;
-    using System.Reactive.Linq;
-
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using InformedProteomics.Backend.MassSpecData;
-
-    using Config;
-    using DialogServices;
-    using Models;
-    using Data;
-
-    using OxyPlot.Axes;
-
-    using ReactiveUI;
-
     /// <summary>
     /// View model for displaying MS and MS/MS spectrum plots.
     /// </summary>

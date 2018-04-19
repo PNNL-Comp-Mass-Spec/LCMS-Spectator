@@ -1,9 +1,8 @@
-﻿namespace LcmsSpectator.ViewModels.Data
+﻿using System;
+using ReactiveUI;
+
+namespace LcmsSpectator.ViewModels.Data
 {
-    using System;
-
-    using ReactiveUI;
-
     /// <summary>
     /// This class is a view model for items that are displayed in a list view.
     /// </summary>

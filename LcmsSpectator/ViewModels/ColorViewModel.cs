@@ -8,12 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Windows.Media;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels
 {
-    using System;
-    using System.Windows.Media;
-    using ReactiveUI;
-
     /// <summary>
     /// View model for single color.
     /// </summary>

@@ -8,20 +8,17 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Linq;
+using System.Reactive.Linq;
+using InformedProteomics.Backend.Data.Composition;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Modifications
 {
-    using System;
-    using System.Linq;
-    using System.Reactive.Linq;
-
-    using InformedProteomics.Backend.Data.Composition;
-    using InformedProteomics.Backend.Data.Sequence;
-
-    using Config;
-    using DialogServices;
-
-    using ReactiveUI;
-
     /// <summary>
     /// View model for managing modifications registered by the application.
     /// </summary>

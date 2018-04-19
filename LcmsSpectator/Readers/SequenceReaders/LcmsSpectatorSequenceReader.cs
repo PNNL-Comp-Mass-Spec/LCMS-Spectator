@@ -8,14 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using InformedProteomics.Backend.Data.Sequence;
+
 namespace LcmsSpectator.Readers.SequenceReaders
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using InformedProteomics.Backend.Data.Sequence;
-
     /// <summary>
     /// Reader for protein/peptide sequences in the LCMSSpectator style.
     /// </summary>

@@ -8,29 +8,25 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 using InformedProteomics.Backend.Database;
+using InformedProteomics.Backend.MassSpecData;
+using InformedProteomics.Backend.Utils;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.Readers;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Plots;
+using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.MassSpecData;
-    using InformedProteomics.Backend.Utils;
-
-    using Config;
-    using DialogServices;
-    using Models;
-    using Readers;
-    using Utils;
-    using Plots;
-
-    using ReactiveUI;
-
     /// <summary>
     /// Class representing a data set, containing a LCMSRun, identifications, and features.
     /// </summary>

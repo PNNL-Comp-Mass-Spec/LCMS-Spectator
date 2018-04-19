@@ -8,20 +8,18 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.Readers;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Dms
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Reactive.Linq;
-
-    using DialogServices;
-    using Models;
-    using Readers;
-
-    using ReactiveUI;
-
     /// <summary>
     /// A view model for searching DMS for datasets and jobs.
     /// </summary>

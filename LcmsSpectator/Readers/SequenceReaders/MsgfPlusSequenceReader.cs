@@ -8,16 +8,16 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
+using InformedProteomics.Backend.Data.Sequence;
+using LcmsSpectator.Config;
+
 namespace LcmsSpectator.Readers.SequenceReaders
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using InformedProteomics.Backend.Data.Sequence;
-    using Config;
-
     /// <summary>
     /// Reader for protein/peptide sequences in the MS-GF+ style.
     /// </summary>

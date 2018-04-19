@@ -8,10 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using InformedProteomics.Backend.Data.Sequence;
+
 namespace LcmsSpectator.Readers.SequenceReaders
 {
-    using InformedProteomics.Backend.Data.Sequence;
-
     /// <summary>
     /// Reader for protein/peptide sequences in the LCMSSpectator style or MS-GF+ style.
     /// </summary>

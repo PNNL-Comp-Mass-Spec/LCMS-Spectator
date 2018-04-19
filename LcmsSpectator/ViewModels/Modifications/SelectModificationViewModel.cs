@@ -1,13 +1,10 @@
-﻿namespace LcmsSpectator.ViewModels.Modifications
+﻿using System;
+using System.Collections.Generic;
+using System.Reactive.Linq;
+using ReactiveUI;
+
+namespace LcmsSpectator.ViewModels.Modifications
 {
-    using System;
-
-    using System.Collections.Generic;
-
-    using System.Reactive.Linq;
-
-    using ReactiveUI;
-
     /// <summary>
     ///
     /// </summary>

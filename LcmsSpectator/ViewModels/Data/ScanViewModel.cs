@@ -8,27 +8,25 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.MassSpecData;
+using LcmsSpectator.Config;
+using LcmsSpectator.DialogServices;
+using LcmsSpectator.Models;
+using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Filters;
+using LcmsSpectator.Writers.Exporters;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using System.Reactive;
-    using System.Reactive.Linq;
-    using System.Threading.Tasks;
-    using InformedProteomics.Backend.MassSpecData;
-
-    using Config;
-    using DialogServices;
-    using Models;
-    using Utils;
-    using Filters;
-    using Writers.Exporters;
-
-    using ReactiveUI;
-
     /// <summary>
     /// This class maintains a filterable list of Protein-Spectrum-Match identifications.
     /// </summary>

@@ -8,21 +8,18 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+using InformedProteomics.Backend.Data.Sequence;
+using InformedProteomics.Backend.Results;
+using LcmsSpectator.Models;
+using LcmsSpectator.Readers.SequenceReaders;
+using PSI_Interface.IdentData;
+
 namespace LcmsSpectator.Readers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Text;
-    using System.Threading.Tasks;
-
-    using InformedProteomics.Backend.Data.Sequence;
-    using InformedProteomics.Backend.Results;
-
-    using Models;
-    using SequenceReaders;
-
-    using PSI_Interface.IdentData;
-
     /// <summary>
     /// Reader for MZID files.
     /// </summary>

@@ -8,10 +8,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Windows;
+
 namespace LcmsSpectator.Views
 {
-    using System.Windows;
-
     /// <summary>
     /// Interaction logic for Settings.xaml
     /// </summary>

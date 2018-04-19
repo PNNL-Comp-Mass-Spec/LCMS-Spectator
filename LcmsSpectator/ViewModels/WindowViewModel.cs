@@ -8,12 +8,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
+using System.Reactive.Linq;
+using ReactiveUI;
+
 namespace LcmsSpectator.ViewModels
 {
-    using System;
-    using System.Reactive.Linq;
-    using ReactiveUI;
-
     /// <summary>
     /// Base class for windows.
     /// </summary>
