@@ -22,7 +22,6 @@ Source: LcmsSpectator\bin\Release\GraphX.PCL.Common.dll;                     Des
 Source: LcmsSpectator\bin\Release\GraphX.PCL.Logic.dll;                      DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.dll;                               DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.Wpf.dll;                           DestDir: {app}
-Source: LcmsSpectator\bin\Release\OxyPlot.Xps.dll;                           DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.Data.dll;                       DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.dll;                            DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.Graphviz.dll;                   DestDir: {app}
