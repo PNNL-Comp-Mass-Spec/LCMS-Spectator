@@ -12,5 +12,5 @@ test:
     except:
     - PNL_Domain
 artifacts:
-- path: LcmsSpectator/bin/Debug
+- path: LcmsSpectator/bin/Release
   name: LCMS-Spectator
