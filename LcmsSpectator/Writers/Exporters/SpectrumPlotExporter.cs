@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LcmsSpectator.PlotModels.ColorDictionaries;
 
 namespace LcmsSpectator.Writers.Exporters
 {
@@ -12,7 +13,6 @@ namespace LcmsSpectator.Writers.Exporters
 
     using Models;
     using PlotModels;
-    using PlotModels.ColorDicionaries;
     using Utils;
 
     using OxyPlot;

@@ -8,14 +8,13 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace LcmsSpectator.PlotModels.ColorDicionaries
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using OxyPlot;
+
+namespace LcmsSpectator.PlotModels.ColorDictionaries
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
-    using OxyPlot;
-
     /// <summary>
     /// This class maps proteins to an OxyPlot coloring.
     /// </summary>

@@ -1,4 +1,6 @@
-﻿namespace LcmsSpectator.ViewModels.SequenceViewer
+﻿using LcmsSpectator.PlotModels.ColorDictionaries;
+
+namespace LcmsSpectator.ViewModels.SequenceViewer
 {
     using System;
     using System.Collections.Generic;
@@ -13,7 +15,6 @@
     using DialogServices;
     using Models;
     using PlotModels;
-    using PlotModels.ColorDicionaries;
     using Utils;
     using Data;
 

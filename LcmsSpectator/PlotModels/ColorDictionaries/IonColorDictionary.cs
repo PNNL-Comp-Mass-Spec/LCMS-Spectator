@@ -8,14 +8,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace LcmsSpectator.PlotModels.ColorDicionaries
-{
-    using System;
-    using System.Collections.Generic;
-    using InformedProteomics.Backend.Data.Spectrometry;
-    using ViewModels.Data;
-    using OxyPlot;
+using System;
+using System.Collections.Generic;
+using InformedProteomics.Backend.Data.Spectrometry;
+using LcmsSpectator.ViewModels.Data;
+using OxyPlot;
 
+namespace LcmsSpectator.PlotModels.ColorDictionaries
+{
     /// <summary>
     /// This class maps ions to their proper OxyPlot coloring.
     /// </summary>

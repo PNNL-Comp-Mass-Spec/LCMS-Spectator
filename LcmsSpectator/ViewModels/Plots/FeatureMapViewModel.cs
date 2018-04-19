@@ -8,6 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using LcmsSpectator.PlotModels.ColorDictionaries;
+
 namespace LcmsSpectator.ViewModels.Plots
 {
     using System;
@@ -18,7 +20,6 @@ namespace LcmsSpectator.ViewModels.Plots
     using Config;
     using DialogServices;
     using Models;
-    using PlotModels.ColorDicionaries;
     using Utils;
     using OxyPlot;
     using OxyPlot.Annotations;
