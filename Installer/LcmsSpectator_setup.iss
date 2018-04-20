@@ -18,6 +18,8 @@ Source: LcmsSpectator\bin\Release\LcmsSpectator.exe.config;                  Des
 Source: LcmsSpectator\bin\Release\GraphX.Controls.dll;                       DestDir: {app}
 Source: LcmsSpectator\bin\Release\GraphX.PCL.Common.dll;                     DestDir: {app}
 Source: LcmsSpectator\bin\Release\GraphX.PCL.Logic.dll;                      DestDir: {app}
+Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.dll;          DestDir: {app}
+Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll;    DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.dll;                               DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.Wpf.dll;                           DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.Data.dll;                       DestDir: {app}

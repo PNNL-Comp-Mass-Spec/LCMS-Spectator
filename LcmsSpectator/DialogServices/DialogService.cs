@@ -11,7 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Forms;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
@@ -112,11 +112,22 @@ namespace LcmsSpectator.DialogServices
         /// </summary>
         /// <param name="description">The descriptive text displayed above the Tree View in the dialog box.</param>
         /// <returns>The path for the selected folder.</returns>
-        public virtual string OpenFolder(string description = "")
+        public virtual string OpenFolder(string description = "Choose output folder")
         {
-            var dialog = new FolderBrowserDialog { ShowNewFolderButton = true, Description = description};
-            dialog.ShowDialog();
-            return dialog.SelectedPath;
+            var dialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true,
+                Title = description,
+            };
+
+            var result = dialog.ShowDialog();
+
+            if (result == CommonFileDialogResult.Ok)
+            {
+                return dialog.FileName;
+            }
+
+            return "";
         }
 
         /// <summary>
