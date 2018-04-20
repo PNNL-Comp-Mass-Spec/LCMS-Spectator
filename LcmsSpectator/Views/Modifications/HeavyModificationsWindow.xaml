@@ -2,7 +2,12 @@
     x:Class="LcmsSpectator.Views.Modifications.HeavyModificationsWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:modifications="clr-namespace:LcmsSpectator.Views.Modifications"
+    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Modifications"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:HeavyModificationsWindowViewModel}, IsDesignTimeCreatable=True}"
+    mc:Ignorable="d"
     Title="Heavy Modifications"
     Width="675"
     Height="300">

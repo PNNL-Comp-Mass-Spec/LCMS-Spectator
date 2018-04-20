@@ -65,7 +65,15 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
         /// <summary>
         /// Initializes new instance of the <see cref="StableIsotopeViewModel"/> class.
         /// </summary>
-        public StableIsotopeViewModel(IMainDialogService dialogService = null)
+        public StableIsotopeViewModel() : this(null)
+        {
+            // Not using a default parameter to make WPF design-time view happy
+        }
+
+        /// <summary>
+        /// Initializes new instance of the <see cref="StableIsotopeViewModel"/> class.
+        /// </summary>
+        public StableIsotopeViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService ?? new MainDialogService();
 

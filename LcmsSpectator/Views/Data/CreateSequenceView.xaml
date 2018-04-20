@@ -6,14 +6,14 @@
     xmlns:data="clr-namespace:LcmsSpectator.ViewModels.Data"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
-    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
     d:DesignHeight="300"
     d:DesignWidth="1200"
+    d:DataContext="{d:DesignInstance {x:Type data:CreateSequenceViewModel}, IsDesignTimeCreatable=True}"
     mc:Ignorable="d">
     <UserControl.Resources>
         <utils:ChargeToStringConverter x:Key="ChargeFormatter" />
         <DataTemplate x:Key="XicDataTemplate" DataType="{x:Type data:DataSetViewModel}">
-            <TextBlock Text="{Binding RawFileName}" />
+            <TextBlock Text="{Binding Title}" />
         </DataTemplate>
     </UserControl.Resources>
     <Grid>

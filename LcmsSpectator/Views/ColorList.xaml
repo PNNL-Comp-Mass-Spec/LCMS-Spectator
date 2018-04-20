@@ -5,6 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:ColorListViewModel}, IsDesignTimeCreatable=True}"
     d:DesignHeight="300"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -53,14 +55,14 @@
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="25">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
+                        <DataTemplate DataType="{x:Type viewModels:ColorViewModel}">
                             <Button Command="{Binding RemoveCommand}" Content="-" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Width="*" Header="Color">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
+                        <DataTemplate DataType="{x:Type viewModels:ColorViewModel}">
                             <xctk:ColorPicker DisplayColorAndName="True" SelectedColor="{Binding SelectedColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

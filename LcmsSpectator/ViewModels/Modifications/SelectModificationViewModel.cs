@@ -16,6 +16,14 @@ namespace LcmsSpectator.ViewModels.Modifications
         private ModificationViewModel modificationViewModel;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public SelectModificationViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes new instance of the <see cref="SelectModificationViewModel" /> class.
         /// </summary>
         /// <param name="modifications">The modifications to select from.</param>

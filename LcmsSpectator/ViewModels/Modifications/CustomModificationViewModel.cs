@@ -88,6 +88,14 @@ namespace LcmsSpectator.ViewModels.Modifications
         private bool fromMassChecked;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public CustomModificationViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the CustomModificationViewModel class when there is no known composition.
         /// </summary>
         /// <param name="modificationName">The name of the modification.</param>

@@ -240,6 +240,14 @@ namespace LcmsSpectator.ViewModels
         private CancellationTokenSource runSearchCancellationToken;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public SearchSettingsViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SearchSettingsViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>

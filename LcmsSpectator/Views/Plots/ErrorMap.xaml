@@ -5,8 +5,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:oxy="http://oxyplot.org/wpf"
-    xmlns:utils="clr-namespace:LcmsSpectator.Utils"
-    xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
+    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:ErrorMapViewModel}, IsDesignTimeCreatable=True}"
+    d:DesignHeight="300"
+    d:DesignWidth="300"
     mc:Ignorable="d">
 
     <Grid>

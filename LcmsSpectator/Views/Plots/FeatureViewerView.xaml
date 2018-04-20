@@ -7,8 +7,10 @@
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
     xmlns:wpf="http://oxyplot.org/wpf"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
     d:DesignHeight="300"
     d:DesignWidth="1100"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:FeatureViewerViewModel}, IsDesignTimeCreatable=True}"
     Background="White"
     mc:Ignorable="d">
     <UserControl.Resources>

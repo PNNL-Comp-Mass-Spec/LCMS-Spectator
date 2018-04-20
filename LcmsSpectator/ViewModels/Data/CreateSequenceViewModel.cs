@@ -63,6 +63,14 @@ namespace LcmsSpectator.ViewModels.Data
         private DataSetViewModel selectedDataSetViewModel;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public CreateSequenceViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the CreateSequenceViewModel class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>

@@ -48,6 +48,14 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         private bool rawPathSelected;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public SelectDataSetViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SelectDataSetViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>

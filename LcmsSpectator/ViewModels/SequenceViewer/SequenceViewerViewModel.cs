@@ -46,8 +46,16 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         /// <summary>
         /// Initializes new instance of the <see cref="SequenceViewerViewModel" /> class.
         /// </summary>
+        public SequenceViewerViewModel() : this(null)
+        {
+            // Not using a default parameter to make WPF design-time view happy
+        }
+
+        /// <summary>
+        /// Initializes new instance of the <see cref="SequenceViewerViewModel" /> class.
+        /// </summary>
         /// <param name="dialogService">Service for opening LCMSSpectator dialogs.</param>
-        public SequenceViewerViewModel(IMainDialogService dialogService = null)
+        public SequenceViewerViewModel(IMainDialogService dialogService)
         {
             this.dialogService = dialogService ?? new MainDialogService();
             SequenceFragments = new ReactiveList<FragmentViewModel> { ChangeTrackingEnabled = true };

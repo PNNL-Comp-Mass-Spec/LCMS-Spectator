@@ -301,8 +301,8 @@
     <Compile Include="Views\FileSelectors\SelectDataSetView.xaml.cs">
       <DependentUpon>SelectDataSetView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\plotViewer.xaml.cs">
-      <DependentUpon>plotViewer.xaml</DependentUpon>
+    <Compile Include="Views\PlotViewer.xaml.cs">
+      <DependentUpon>PlotViewer.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SearchSettingsWindow.xaml.cs">
       <DependentUpon>SearchSettingsWindow.xaml</DependentUpon>
@@ -452,7 +452,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\plotViewer.xaml">
+    <Page Include="Views\PlotViewer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -118,6 +118,14 @@ namespace LcmsSpectator.ViewModels.Data
         private bool enablePrecursorRowVirtualization;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public IonListViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="IonListViewModel"/> class.
         /// </summary>
         /// <param name="lcms">The LCMSRun for the data set.</param>

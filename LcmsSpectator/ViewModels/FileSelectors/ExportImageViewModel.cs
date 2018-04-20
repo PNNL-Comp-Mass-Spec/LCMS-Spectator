@@ -11,7 +11,6 @@
 using System;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Windows.Input;
 using LcmsSpectator.DialogServices;
 using OxyPlot;
 using OxyPlot.Wpf;
@@ -48,6 +47,14 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// The DPI of the exported image.
         /// </summary>
         private int dpi;
+
+        /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public ExportImageViewModel()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportImageViewModel"/> class.

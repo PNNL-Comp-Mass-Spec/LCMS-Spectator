@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace LcmsSpectator.Views
 {
     /// <summary>
-    /// Interaction logic for plotViewer.xaml
+    /// Interaction logic for PlotViewer.xaml
     /// </summary>
-    public partial class plotViewer : UserControl
+    public partial class PlotViewer : UserControl
     {
-        public plotViewer()
+        public PlotViewer()
         {
             InitializeComponent();
         }

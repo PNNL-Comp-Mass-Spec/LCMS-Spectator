@@ -66,6 +66,14 @@ namespace LcmsSpectator.ViewModels
         private bool idFileLoading;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public MainWindowViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the MainWindowViewModel class.
         /// </summary>
         /// <param name="dialogService">Service for view model friendly dialogs</param>

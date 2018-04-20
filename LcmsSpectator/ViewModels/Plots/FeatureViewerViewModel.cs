@@ -83,6 +83,14 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showSplash;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public FeatureViewerViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="FeatureViewerViewModel"/> class.
         /// </summary>
         /// <param name="lcms">The LCMSRun for the data set.</param>

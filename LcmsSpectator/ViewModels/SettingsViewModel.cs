@@ -38,6 +38,14 @@ namespace LcmsSpectator.ViewModels
         private bool automaticallySelectIonTypes;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public SettingsViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SettingsViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from a view model.</param>

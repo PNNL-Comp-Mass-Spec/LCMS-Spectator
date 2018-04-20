@@ -53,7 +53,15 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
         /// <summary>
         /// Initializes a new instance of the <see cref="IsotopicConcentrationTunerViewModel" /> class.
         /// </summary>
-        public IsotopicConcentrationTunerViewModel(IsotopicConcentrationTuner tuner = null)
+        public IsotopicConcentrationTunerViewModel() : this(null)
+        {
+            // Not using a default parameter to make WPF design-time view happy
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IsotopicConcentrationTunerViewModel" /> class.
+        /// </summary>
+        public IsotopicConcentrationTunerViewModel(IsotopicConcentrationTuner tuner)
         {
             this.tuner = tuner ?? new IsotopicConcentrationTuner();
             RunTuningCommand = ReactiveCommand.CreateFromTask(async _ => await RunTuning());

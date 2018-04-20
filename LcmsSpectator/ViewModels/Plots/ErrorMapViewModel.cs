@@ -95,6 +95,14 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool shouldCombineChargeStates;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public ErrorMapViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the ErrorMapViewModel class.
         /// </summary>
         /// <param name="dialogService">

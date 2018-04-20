@@ -66,6 +66,14 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         private bool datasetSelected;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public OpenDataWindowViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OpenDataWindowViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>

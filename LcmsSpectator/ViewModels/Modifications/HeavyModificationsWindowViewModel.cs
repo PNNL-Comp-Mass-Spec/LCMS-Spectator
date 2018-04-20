@@ -22,6 +22,14 @@ namespace LcmsSpectator.ViewModels.Modifications
     public class HeavyModificationsWindowViewModel : ReactiveObject
     {
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public HeavyModificationsWindowViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="HeavyModificationsWindowViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>

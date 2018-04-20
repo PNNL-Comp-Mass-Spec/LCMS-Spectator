@@ -99,6 +99,14 @@ namespace LcmsSpectator.ViewModels.Data
         private string loadProgressStatus;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public DataSetViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DataSetViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>

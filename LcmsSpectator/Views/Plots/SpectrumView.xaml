@@ -4,12 +4,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:sequenceViewer="clr-namespace:LcmsSpectator.Views.SequenceViewer"
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
     xmlns:wpf="http://oxyplot.org/wpf"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
     d:DesignHeight="300"
     d:DesignWidth="900"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:SpectrumViewModel}, IsDesignTimeCreatable=True}"
     Background="White"
     mc:Ignorable="d">
     <UserControl.Resources>

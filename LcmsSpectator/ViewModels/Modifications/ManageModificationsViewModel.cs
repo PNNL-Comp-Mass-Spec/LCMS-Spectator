@@ -8,6 +8,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -33,6 +34,14 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// The modification selected from the list of modifications.
         /// </summary>
         private Modification selectedModification;
+
+        /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public ManageModificationsViewModel()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ManageModificationsViewModel"/> class.

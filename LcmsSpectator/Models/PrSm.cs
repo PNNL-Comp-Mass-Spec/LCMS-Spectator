@@ -106,10 +106,18 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="PrSm"/> class.
         /// </summary>
+        public PrSm() : this(null)
+        {
+            // Not using a default parameter to make WPF design-time view happy
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PrSm"/> class.
+        /// </summary>
         /// <param name="sequenceReader">
         /// Sequence reader for parsing sequences for the dataset this PRSM belongs to.
         /// </param>
-        public PrSm(ISequenceReader sequenceReader = null)
+        public PrSm(ISequenceReader sequenceReader)
         {
             this.sequenceReader = sequenceReader ?? new SequenceReader();
             RawFileName = string.Empty;

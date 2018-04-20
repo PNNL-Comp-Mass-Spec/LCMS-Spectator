@@ -60,6 +60,14 @@ namespace LcmsSpectator.ViewModels.Filters
         private readonly char delimiter;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public MultiValueFilterViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MultiValueFilterViewModel"/> class.
         /// Initializes instance of the Filter
         /// </summary>

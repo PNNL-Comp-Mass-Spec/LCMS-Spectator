@@ -103,6 +103,14 @@ namespace LcmsSpectator.ViewModels.Plots
         private readonly HashSet<Tuple<LinearAxis, LinearAxis>> plotLinkageTracker;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public XicViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="XicViewModel"/> class.
         /// </summary>
         /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>

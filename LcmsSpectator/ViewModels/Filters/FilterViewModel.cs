@@ -42,6 +42,14 @@ namespace LcmsSpectator.ViewModels.Filters
         private bool selected;
 
         /// <summary>
+        /// Default constructor to support WPF design-time use
+        /// </summary>
+        [Obsolete("For WPF Design-time use only.", true)]
+        public FilterViewModel()
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="LcmsSpectator.ViewModels.Filters.FilterViewModel"/> class.
         /// Initializes instance of the Filter
         /// </summary>
