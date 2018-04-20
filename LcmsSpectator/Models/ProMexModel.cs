@@ -10,8 +10,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
+using System.Windows;
 using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Readers;
@@ -208,7 +208,7 @@ namespace LcmsSpectator.Models
             var minRt = (float)lcms.GetElutionTime(lcms.MinLcScan);
             var maxRt = (float)lcms.GetElutionTime(lcms.MaxLcScan);
 
-            var rectangle = new RectangleF
+            var rectangle = new Rect
             {
                 X = minRt,
                 Width = maxRt - minRt,

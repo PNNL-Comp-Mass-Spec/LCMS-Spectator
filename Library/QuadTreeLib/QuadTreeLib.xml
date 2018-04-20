@@ -1,0 +1,298 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>QuadTreeLib</name>
+    </assembly>
+    <members>
+        <member name="T:QuadTreeLib.PointQuadTreeNode`1">
+            <summary>
+            The QuadTreeNode
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:QuadTreeLib.PointQuadTreeNode`1.#ctor(System.Windows.Rect)">
+            <summary>
+            Construct a quadtree node with the given bounds
+            </summary>
+            <param name="bounds"></param>
+        </member>
+        <member name="F:QuadTreeLib.PointQuadTreeNode`1.m_bounds">
+            <summary>
+            The area of this node
+            </summary>
+        </member>
+        <member name="F:QuadTreeLib.PointQuadTreeNode`1.m_contents">
+            <summary>
+            The contents of this node.
+            Note that the contents have no limit: this is not the standard way to impement a QuadTree
+            </summary>
+        </member>
+        <member name="F:QuadTreeLib.PointQuadTreeNode`1.m_nodes">
+            <summary>
+            The child nodes of the QuadTree
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.PointQuadTreeNode`1.IsEmpty">
+            <summary>
+            Is the node empty
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.PointQuadTreeNode`1.Bounds">
+            <summary>
+            Area of the quadtree node
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.PointQuadTreeNode`1.Count">
+            <summary>
+            Total number of nodes in the this node and all SubNodes
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.PointQuadTreeNode`1.SubTreeContents">
+            <summary>
+            Return the contents of this node and all subnodes in the true below this one.
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.PointQuadTreeNode`1.Contents">
+            <summary>
+            The contents of this node.
+            Note that the contents have no limit: this is not the standard way to impement a QuadTree
+            </summary>
+        </member>
+        <member name="M:QuadTreeLib.PointQuadTreeNode`1.Query(System.Windows.Rect)">
+            <summary>
+            Query the QuadTree for items that are in the given area
+            </summary>
+            <param name="queryArea"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QuadTreeLib.PointQuadTreeNode`1.Insert(`0)">
+            <summary>
+            Insert an item to this node
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="M:QuadTreeLib.PointQuadTreeNode`1.ForEach(QuadTreeLib.PointQuadTree{`0}.QTAction)">
+            <summary>
+            Perform the specified action for this node and all child nodes
+            </summary>
+            <param name="action"></param>
+        </member>
+        <member name="M:QuadTreeLib.PointQuadTreeNode`1.CreateSubNodes">
+            <summary>
+            Internal method to create the subnodes (partitions space)
+            </summary>
+        </member>
+        <member name="T:QuadTreeLib.IHasPoint">
+            <summary>
+            An interface that defines an object with a rectangle
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.IHasPoint.Point">
+            <summary>
+            Top-Left Reference point for the object
+            </summary>
+        </member>
+        <member name="T:QuadTreeLib.PointQuadTree`1">
+            <summary>
+            A Quadtree is a structure designed to partition space so
+            that it's faster to find out what is inside or outside a given
+            area. See http://en.wikipedia.org/wiki/Quadtree
+            This QuadTree contains items that have an area (RectangleF)
+            it will store a reference to the item in the quad
+            that is just big enough to hold it. Each quad has a bucket that
+            contain multiple items.
+            </summary>
+        </member>
+        <member name="F:QuadTreeLib.PointQuadTree`1.m_root">
+            <summary>
+            The root QuadTreeNode
+            </summary>
+        </member>
+        <member name="F:QuadTreeLib.PointQuadTree`1.m_rectangle">
+            <summary>
+            The bounds of this QuadTree
+            </summary>
+        </member>
+        <member name="T:QuadTreeLib.PointQuadTree`1.QTAction">
+            <summary>
+            An delegate that performs an action on a QuadTreeNode
+            </summary>
+            <param name="obj"></param>
+        </member>
+        <member name="M:QuadTreeLib.PointQuadTree`1.#ctor(System.Windows.Rect)">
+             <summary>
+            
+             </summary>
+             <param name="rectangle"></param>
+        </member>
+        <member name="P:QuadTreeLib.PointQuadTree`1.Count">
+            <summary>
+            Get the count of items in the QuadTree
+            </summary>
+        </member>
+        <member name="M:QuadTreeLib.PointQuadTree`1.Insert(`0)">
+            <summary>
+            Insert the feature into the QuadTree
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="M:QuadTreeLib.PointQuadTree`1.Query(System.Windows.Rect)">
+            <summary>
+            Query the QuadTree, returning the items that are in the given area
+            </summary>
+            <param name="area"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QuadTreeLib.PointQuadTree`1.ForEach(QuadTreeLib.PointQuadTree{`0}.QTAction)">
+            <summary>
+            Do the specified action for each item in the quadtree
+            </summary>
+            <param name="action"></param>
+        </member>
+        <member name="T:QuadTreeLib.IHasRect">
+            <summary>
+            An interface that defines an object with a rectangle
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.IHasRect.Rectangle">
+            <summary>
+            A rectangle defining the object location boundaries
+            </summary>
+        </member>
+        <member name="T:QuadTreeLib.QuadTree`1">
+            <summary>
+            A Quadtree is a structure designed to partition space so
+            that it's faster to find out what is inside or outside a given
+            area. See http://en.wikipedia.org/wiki/Quadtree
+            This QuadTree contains items that have an area (RectangleF)
+            it will store a reference to the item in the quad
+            that is just big enough to hold it. Each quad has a bucket that
+            contain multiple items.
+            </summary>
+        </member>
+        <member name="F:QuadTreeLib.QuadTree`1.m_root">
+            <summary>
+            The root QuadTreeNode
+            </summary>
+        </member>
+        <member name="F:QuadTreeLib.QuadTree`1.m_rectangle">
+            <summary>
+            The bounds of this QuadTree
+            </summary>
+        </member>
+        <member name="T:QuadTreeLib.QuadTree`1.QTAction">
+            <summary>
+            An delegate that performs an action on a QuadTreeNode
+            </summary>
+            <param name="obj"></param>
+        </member>
+        <member name="M:QuadTreeLib.QuadTree`1.#ctor(System.Windows.Rect)">
+             <summary>
+            
+             </summary>
+             <param name="rectangle"></param>
+        </member>
+        <member name="P:QuadTreeLib.QuadTree`1.Count">
+            <summary>
+            Get the count of items in the QuadTree
+            </summary>
+        </member>
+        <member name="M:QuadTreeLib.QuadTree`1.Insert(`0)">
+            <summary>
+            Insert the feature into the QuadTree
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="M:QuadTreeLib.QuadTree`1.Query(System.Windows.Rect)">
+            <summary>
+            Query the QuadTree, returning the items that are in the given area
+            </summary>
+            <param name="area"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QuadTreeLib.QuadTree`1.ForEach(QuadTreeLib.QuadTree{`0}.QTAction)">
+            <summary>
+            Do the specified action for each item in the quadtree
+            </summary>
+            <param name="action"></param>
+        </member>
+        <member name="T:QuadTreeLib.QuadTreeNode`1">
+            <summary>
+            The QuadTreeNode
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="M:QuadTreeLib.QuadTreeNode`1.#ctor(System.Windows.Rect)">
+            <summary>
+            Construct a quadtree node with the given bounds
+            </summary>
+            <param name="bounds"></param>
+        </member>
+        <member name="F:QuadTreeLib.QuadTreeNode`1.m_bounds">
+            <summary>
+            The area of this node
+            </summary>
+        </member>
+        <member name="F:QuadTreeLib.QuadTreeNode`1.m_contents">
+            <summary>
+            The contents of this node.
+            Note that the contents have no limit: this is not the standard way to impement a QuadTree
+            </summary>
+        </member>
+        <member name="F:QuadTreeLib.QuadTreeNode`1.m_nodes">
+            <summary>
+            The child nodes of the QuadTree
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.QuadTreeNode`1.IsEmpty">
+            <summary>
+            Is the node empty
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.QuadTreeNode`1.Bounds">
+            <summary>
+            Area of the quadtree node
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.QuadTreeNode`1.Count">
+            <summary>
+            Total number of nodes in the this node and all SubNodes
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.QuadTreeNode`1.SubTreeContents">
+            <summary>
+            Return the contents of this node and all subnodes in the true below this one.
+            </summary>
+        </member>
+        <member name="P:QuadTreeLib.QuadTreeNode`1.Contents">
+            <summary>
+            The contents of this node.
+            Note that the contents have no limit: this is not the standard way to impement a QuadTree
+            </summary>
+        </member>
+        <member name="M:QuadTreeLib.QuadTreeNode`1.Query(System.Windows.Rect)">
+            <summary>
+            Query the QuadTree for items that are in the given area
+            </summary>
+            <param name="queryArea"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QuadTreeLib.QuadTreeNode`1.Insert(`0)">
+            <summary>
+            Insert an item to this node
+            </summary>
+            <param name="item"></param>
+        </member>
+        <member name="M:QuadTreeLib.QuadTreeNode`1.ForEach(QuadTreeLib.QuadTree{`0}.QTAction)">
+            <summary>
+            Perform the specified action for this node and all child nodes
+            </summary>
+            <param name="action"></param>
+        </member>
+        <member name="M:QuadTreeLib.QuadTreeNode`1.CreateSubNodes">
+            <summary>
+            Internal method to create the subnodes (partitions space)
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -9,7 +9,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Drawing;
+using System.Windows;
 using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Spectrometry;
 using QuadTreeLib;
@@ -42,7 +42,7 @@ namespace LcmsSpectator.Models
             MaxPoint = maxPoint;
             AssociatedPrSms = new List<PrSm>();
             AssociatedMs2 = new List<int>();
-            Rectangle = new RectangleF
+            Rectangle = new Rect
             {
                 X = (float)MinPoint.RetentionTime,
                 Y = (float)MinPoint.Mass,
@@ -97,7 +97,7 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Gets the geometric rectangle representation for this feature.
         /// </summary>
-        public RectangleF Rectangle { get; }
+        public Rect Rectangle { get; }
 
         /// <summary>
         /// Represents a single LC retention time point for a MS1 feature.

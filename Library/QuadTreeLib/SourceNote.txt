@@ -1,3 +1,5 @@
 Compiled from source code freely available from:
 http://bluetoque.ca/products/quadtree/
 https://bitbucket.org/bluetoque/bluetoque.quadtree
+
+Modified by Bryson Gibbons to use WindowsBase objects (Point and Rect) instead of System.Drawing objects (PointF and RectangleF)
