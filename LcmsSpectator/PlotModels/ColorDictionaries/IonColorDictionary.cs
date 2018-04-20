@@ -114,6 +114,123 @@ namespace LcmsSpectator.PlotModels.ColorDictionaries
             var ionAStart = OxyColor.FromRgb(0, ColorMin, 0);
             var ionAEnd = OxyColor.FromRgb(0, ColorMax, 0);
             var ionAColors = OxyPalette.Interpolate(length, ionAEnd, ionAStart);
+
+            var ionBStart = OxyColor.FromRgb(0, 0, ColorMin);
+            var ionBEnd = OxyColor.FromRgb(0, 0, ColorMax);
+            var ionBColors = OxyPalette.Interpolate(length, ionBEnd, ionBStart);
+
+            var ionCStart = OxyColor.FromRgb(0, ColorMin, ColorMin);
+            var ionCEnd = OxyColor.FromRgb(0, ColorMax, ColorMax);
+            var ionCColors = OxyPalette.Interpolate(length, ionCEnd, ionCStart);
+
+            var ionDStart = OxyColor.FromRgb(255, ColorMin / 2, 8);
+            var ionDEnd = OxyColor.FromRgb(255, ColorMin, 0);
+            var ionDColors = OxyPalette.Interpolate(length, ionDEnd, ionDStart);
+
+            var ionVStart = OxyColor.FromRgb(210, 105, 30);
+            var ionVEnd = OxyColor.FromRgb(139, 69, 19);
+            var ionVColors = OxyPalette.Interpolate(length, ionVEnd, ionVStart);
+
+            var ionWStart = OxyColor.FromRgb(220, 220, 220);
+            var ionWEnd = OxyColor.FromRgb(169, 169, 169);
+            var ionWColors = OxyPalette.Interpolate(length, ionWEnd, ionWStart);
+
+            var ionXStart = OxyColors.OliveDrab; //OxyColors.Yellow; //OxyColor.FromRgb(ColorMin, ColorMin, 0);
+            var ionXEnd = OxyColors.DarkOliveGreen; //OxyColors.Goldenrod; //OxyColor.FromRgb(ColorMax, ColorMax, 0);
+            var ionXColors = OxyPalette.Interpolate(length, ionXEnd, ionXStart);
+
+            var ionYStart = OxyColor.FromRgb(ColorMin, 0, 0);
+            var ionYEnd = OxyColor.FromRgb(ColorMax, 0, 0);
+            var ionYColors = OxyPalette.Interpolate(length, ionYEnd, ionYStart);
+
+            var ionZStart = OxyColor.FromRgb(ColorMin, 0, ColorMin);
+            var ionZEnd = OxyColor.FromRgb(ColorMax, 0, ColorMax);
+            var ionZColors = OxyPalette.Interpolate(length, ionZEnd, ionZStart);
+
+            var unknownIonColors = OxyPalette.Interpolate(length, OxyColors.Black, OxyColors.Black);
+
+            foreach (var ionType in BaseIonType.AllBaseIonTypes)
+            {
+                IList<OxyColor> colors;
+                switch (ionType.Symbol.ToLower()[0])
+                {
+                    case 'a':
+                        colors = ionAColors.Colors;
+                        break;
+                    case 'b':
+                        colors = ionBColors.Colors;
+                        break;
+                    case 'c':
+                        colors = ionCColors.Colors;
+                        break;
+                    case 'd':
+                        colors = ionDColors.Colors;
+                        break;
+                    case 'v':
+                        colors = ionVColors.Colors;
+                        break;
+                    case 'w':
+                        colors = ionWColors.Colors;
+                        break;
+                    case 'x':
+                        colors = ionXColors.Colors;
+                        break;
+                    case 'y':
+                        colors = ionYColors.Colors;
+                        break;
+                    case 'z':
+                        colors = ionZColors.Colors;
+                        break;
+                    default:
+                        colors = unknownIonColors.Colors;
+                        break;
+                }
+                this.fragmentColors.Add(ionType.Symbol, colors);
+                this.fragmentColors.Add(ionType.GetDeconvolutedIon().Symbol, colors);
+            }
+
+            this.precursorColors = new Dictionary<int, OxyColor>
+            {
+                { -1, OxyColors.DarkGray },
+                { 0, OxyColors.Purple },
+                { 1, OxyColors.Red },
+                { 2, OxyColors.Blue },
+                { 3, OxyColors.Green },
+                { 4, OxyColors.Gold },
+                { 5, OxyColors.Brown },
+                { 6, OxyColors.Orange },
+                { 7, OxyColors.PaleGreen },
+                { 8, OxyColors.Turquoise },
+                { 9, OxyColors.Olive },
+                { 10, OxyColors.Beige },
+                { 11, OxyColors.Lime },
+                { 12, OxyColors.Salmon },
+                { 13, OxyColors.MintCream },
+                { 14, OxyColors.SteelBlue },
+                { 15, OxyColors.Violet },
+                { 16, OxyColors.Blue },
+                { 17, OxyColors.Navy },
+                { 18, OxyColors.Red },
+                { 19, OxyColors.SpringGreen },
+                { 20, OxyColors.Gold },
+                { 21, OxyColors.DarkOrange }
+            };
+        }
+
+        /// <summary>
+        /// Build new color dictionary.
+        /// </summary>
+        /// <param name="length">Maximum number of colors for each base ion type.</param>
+        public void BuildColorDictionaryOld(int length)
+        {
+            const byte ColorMin = 150;
+            const byte ColorMax = 255;
+
+            this.fragmentColors = new Dictionary<string, IList<OxyColor>>();
+
+            var ionAStart = OxyColor.FromRgb(0, ColorMin, 0);
+            var ionAEnd = OxyColor.FromRgb(0, ColorMax, 0);
+            var ionAColors = OxyPalette.Interpolate(length, ionAEnd, ionAStart);
             fragmentColors.Add(BaseIonType.A.Symbol, ionAColors.Colors);
             fragmentColors.Add(BaseIonType.A.GetDeconvolutedIon().Symbol, ionAColors.Colors);
             fragmentColors.Add(BaseIonType.Ar.Symbol, ionAColors.Colors);
