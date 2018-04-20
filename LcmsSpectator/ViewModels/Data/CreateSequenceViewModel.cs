@@ -11,6 +11,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using InformedProteomics.Backend.Data.Enum;
@@ -71,16 +72,9 @@ namespace LcmsSpectator.ViewModels.Data
             this.dialogService = dialogService;
             SequenceText = string.Empty;
 
-            var createPrSmCommand = ReactiveCommand.Create();
-            createPrSmCommand.Subscribe(_ => CreatePrSmImplementation());
-            CreatePrSmCommand = createPrSmCommand;
-
-            CreateAndAddPrSmCommand = ReactiveCommand.Create();
-            CreateAndAddPrSmCommand.Subscribe(_ => CreatePrSmImplementation());
-
-            var insertStaticModificationsCommand = ReactiveCommand.Create();
-            insertStaticModificationsCommand.Subscribe(_ => InsertStaticModifications());
-            InsertStaticModificationsCommand = insertStaticModificationsCommand;
+            CreatePrSmCommand = ReactiveCommand.Create(CreatePrSmImplementation);
+            CreateAndAddPrSmCommand = ReactiveCommand.Create(CreatePrSmImplementation);
+            InsertStaticModificationsCommand = ReactiveCommand.Create(InsertStaticModifications);
 
             SelectedCharge = 2;
             SelectedScan = 0;
@@ -117,20 +111,20 @@ namespace LcmsSpectator.ViewModels.Data
         /// Gets a command that when executed creates a new protein-spectrum match from the
         /// selected sequence, charge, scan number, and data set.
         /// </summary>
-        public IReactiveCommand CreatePrSmCommand { get; }
+        public ReactiveCommand<Unit, Unit> CreatePrSmCommand { get; }
 
         /// <summary>
         /// Gets a command that when executed creates a new protein-spectrum match from the
         /// selected sequence, charge, scan number, and data set. It also signals the parent
         /// data set that it should be added to the Scan View.
         /// </summary>
-        public ReactiveCommand<object> CreateAndAddPrSmCommand { get; }
+        public ReactiveCommand<Unit, Unit> CreateAndAddPrSmCommand { get; }
 
         /// <summary>
         /// Gets a command that when executed inserts the modifications into the sequence
         /// that are marked as static for a certain residue.
         /// </summary>
-        public IReactiveCommand InsertStaticModificationsCommand { get; }
+        public ReactiveCommand<Unit, Unit> InsertStaticModificationsCommand { get; }
 
         /// <summary>
         /// Gets or sets the selected protein-spectrum match.
@@ -281,9 +275,9 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void InsertStaticMsgfPlusModifications()
         {
-            const string Pattern = @"[A-Z](\+[0-9]+\.[0-9]+)*";
+            const string pattern = @"[A-Z](\+[0-9]+\.[0-9]+)*";
 
-            var matches = Regex.Matches(SequenceText, Pattern);
+            var matches = Regex.Matches(SequenceText, pattern);
 
             var newSequence = new List<string>();
 
@@ -320,9 +314,9 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void InsertStaticLcmsSpectatorModifications()
         {
-            const string Pattern = @"[A-Z](\[[A-Z][a-z]+\])*";
+            const string pattern = @"[A-Z](\[[A-Z][a-z]+\])*";
 
-            var matches = Regex.Matches(SequenceText, Pattern);
+            var matches = Regex.Matches(SequenceText, pattern);
 
             var newSequence = new List<string>();
 

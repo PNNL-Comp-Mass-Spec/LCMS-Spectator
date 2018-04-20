@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
@@ -116,15 +117,13 @@ namespace LcmsSpectator.ViewModels.Plots
                             FeatureMapViewModel.Features = filteredFeatures.ToList();
                         });
 
-            var openFeatureFileCommand = ReactiveCommand.Create();
-            openFeatureFileCommand.Subscribe(_ => OpenFeatureFileImplementation());
-            OpenFeatureFileCommand = openFeatureFileCommand;
+            OpenFeatureFileCommand = ReactiveCommand.Create(OpenFeatureFileImplementation);
         }
 
         /// <summary>
         /// Gets a command that displays open file dialog to select feature file and then read and display features.
         /// </summary>
-        public IReactiveCommand OpenFeatureFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenFeatureFileCommand { get; }
 
         /// <summary>
         /// Gets the view model for the Feature Map plot.

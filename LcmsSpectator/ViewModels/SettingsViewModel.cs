@@ -10,6 +10,7 @@
 
 using System;
 using System.Linq;
+using System.Reactive;
 using System.Windows.Media;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.Config;
@@ -81,21 +82,10 @@ namespace LcmsSpectator.ViewModels
                 Modifications.Add(modificationVm);
             }
 
-            var addModificationCommand = ReactiveCommand.Create();
-            addModificationCommand.Subscribe(_ => AddModificationImplementation());
-            AddModificationCommand = addModificationCommand;
-
-            var createNewModificationCommand = ReactiveCommand.Create();
-            createNewModificationCommand.Subscribe(_ => CreateNewModificationImplementation());
-            CreateNewModificationCommand = createNewModificationCommand;
-
-            var saveCommand = ReactiveCommand.Create();
-            saveCommand.Subscribe(_ => SaveImplementation());
-            SaveCommand = saveCommand;
-
-            var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => CancelImplementation());
-            CancelCommand = cancelCommand;
+            AddModificationCommand = ReactiveCommand.Create(AddModificationImplementation);
+            CreateNewModificationCommand = ReactiveCommand.Create(CreateNewModificationImplementation);
+            SaveCommand = ReactiveCommand.Create(SaveImplementation);
+            CancelCommand = ReactiveCommand.Create(CancelImplementation);
 
             HeavyModificationsViewModel = new HeavyModificationsViewModel(dialogService);
 
@@ -110,22 +100,22 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets a command that adds a search modification to the modification selector list.
         /// </summary>
-        public IReactiveCommand AddModificationCommand { get; }
+        public ReactiveCommand<Unit, Unit> AddModificationCommand { get; }
 
         /// <summary>
         /// Gets a command that creates and register a new modification.
         /// </summary>
-        public IReactiveCommand CreateNewModificationCommand { get; }
+        public ReactiveCommand<Unit, Unit> CreateNewModificationCommand { get; }
 
         /// <summary>
         /// Gets a command that validates all settings and saves them.
         /// </summary>
-        public IReactiveCommand SaveCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
         /// <summary>
         /// Gets a command that closes settings without saving.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Gets the view Model for light/heavy modification selector

@@ -9,6 +9,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Reactive;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using ReactiveUI;
@@ -28,13 +29,8 @@ namespace LcmsSpectator.ViewModels.Modifications
         {
             HeavyModificationsViewModel = new HeavyModificationsViewModel(dialogService);
 
-            var saveCommand = ReactiveCommand.Create();
-            saveCommand.Subscribe(_ => SaveImplementation());
-            SaveCommand = saveCommand;
-
-            var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => CancelImplementation());
-            CancelCommand = cancelCommand;
+            SaveCommand = ReactiveCommand.Create(SaveImplementation);
+            CancelCommand = ReactiveCommand.Create(CancelImplementation);
 
             Status = false;
         }
@@ -53,12 +49,12 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// Gets a command that sets status to true,
         /// saves the selected heavy modifications, and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand SaveCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
         /// <summary>
         /// Gets a command that sets status to false and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether the modifications should be saved.

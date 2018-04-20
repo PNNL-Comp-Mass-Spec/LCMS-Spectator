@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using LcmsSpectator.DialogServices;
 using ReactiveUI;
@@ -97,25 +98,15 @@ namespace LcmsSpectator.ViewModels.Filters
             this.filter = filter;
             this.validator = validator;
 
-            var filterCommand = ReactiveCommand.Create();
-            filterCommand.Subscribe(_ => FilterImplementation());
-            FilterCommand = filterCommand;
+            FilterCommand = ReactiveCommand.Create(FilterImplementation);
+            CancelCommand = ReactiveCommand.Create(CancelImplementation);
 
-            var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => CancelImplementation());
-            CancelCommand = cancelCommand;
-
-            var selectValueCommand = ReactiveCommand.Create(
+            SelectValueCommand = ReactiveCommand.Create(SelectValueImplementation,
                                          this.WhenAnyValue(x => x.Value)
                                              .Select(ParseValues)
                                              .Select(vals => vals.Any()));
 
-            selectValueCommand.Subscribe(_ => SelectValueImplementation());
-            SelectValueCommand = selectValueCommand;
-
-            var removeValueCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedValue).Select(v => v != null));
-            removeValueCommand.Subscribe(_ => RemoveValueImplementation());
-            RemoveValueCommand = removeValueCommand;
+            RemoveValueCommand = ReactiveCommand.Create(RemoveValueImplementation, this.WhenAnyValue(x => x.SelectedValue).Select(v => v != null));
 
             Value = defaultValue;
             Values = new ReactiveList<string>();
@@ -200,22 +191,22 @@ namespace LcmsSpectator.ViewModels.Filters
         /// Gets a command that sets status to true if a valid filter has been selected
         /// and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand FilterCommand { get; }
+        public ReactiveCommand<Unit, Unit> FilterCommand { get; }
 
         /// <summary>
         /// Gets a command that sets status to false and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Gets a command that inserts the selected value into the selected values list.
         /// </summary>
-        public IReactiveCommand SelectValueCommand { get; }
+        public ReactiveCommand<Unit, Unit> SelectValueCommand { get; }
 
         /// <summary>
         /// Gets a command that removes the selected value into the selected values list.
         /// </summary>
-        public IReactiveCommand RemoveValueCommand { get; }
+        public ReactiveCommand<Unit, Unit> RemoveValueCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid filter has been selected.
@@ -317,7 +308,12 @@ namespace LcmsSpectator.ViewModels.Filters
             }
             else
             {
-                parsedValues = new List<string> { valueList.Trim() };
+                var parsed = new List<string>();
+                parsedValues = parsed;
+                if (!string.IsNullOrWhiteSpace(valueList))
+                {
+                    parsed.Add(valueList.Trim());
+                }
             }
 
             // Get only values that are not in value list.

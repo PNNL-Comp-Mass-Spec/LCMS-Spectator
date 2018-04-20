@@ -74,9 +74,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <param name="ids">The Protein-Spectrum-Match identifications to display.</param>
         public ScanViewModel(IMainDialogService dialogService, IEnumerable<PrSm> ids)
         {
-            var clearFiltersCommand = ReactiveCommand.Create();
-            clearFiltersCommand.Subscribe(_ => ClearFilters());
-            ClearFiltersCommand = clearFiltersCommand;
+            ClearFiltersCommand = ReactiveCommand.Create(ClearFilters);
             this.dialogService = dialogService;
 
             FilteredData = new PrSm[0];
@@ -139,40 +137,38 @@ namespace LcmsSpectator.ViewModels.Data
                 .Where(sender => sender.Sequence.Count > 0)
                 .Subscribe(UpdatePrSmScore);
 
-            ExportSpectraCommand = ReactiveCommand.CreateAsyncTask(_ => ExportSpectraImplementation());
-            ExportPeaksCommand = ReactiveCommand.CreateAsyncTask(_ => ExportPeaksImplementation());
-            ExportProteinTreeCommand = ReactiveCommand.Create();
-            ExportProteinTreeCommand.Subscribe(_ => ExportProteinTreeImplentation());
+            ExportSpectraCommand = ReactiveCommand.CreateFromTask(ExportSpectraImplementation);
+            ExportPeaksCommand = ReactiveCommand.CreateFromTask(ExportPeaksImplementation);
+            ExportProteinTreeCommand = ReactiveCommand.Create(ExportProteinTreeImplentation);
 
-            ExportProteinTreeAsTsvCommand = ReactiveCommand.Create();
-            ExportProteinTreeAsTsvCommand.Subscribe(_ => ExportProteinTreeAsTsvImplentation());
+            ExportProteinTreeAsTsvCommand = ReactiveCommand.Create(ExportProteinTreeAsTsvImplentation);
 
         }
 
         /// <summary>
         /// Gets a command that clears all the filters.
         /// </summary>
-        public IReactiveCommand ClearFiltersCommand { get; }
+        public ReactiveCommand<Unit, Unit> ClearFiltersCommand { get; }
 
         /// <summary>
         /// Gets a command that exports the spectra plots for the selected identifications.
         /// </summary>
-        public ReactiveCommand<Unit> ExportSpectraCommand { get; }
+        public ReactiveCommand<Unit, Unit> ExportSpectraCommand { get; }
 
         /// <summary>
         /// Gets a command that exports the spectra peaks to TSV for the selected identifications.
         /// </summary>
-        public ReactiveCommand<Unit> ExportPeaksCommand { get; }
+        public ReactiveCommand<Unit, Unit> ExportPeaksCommand { get; }
 
         /// <summary>
         /// Gets a command that exports the protein tree as a hierarchy.
         /// </summary>
-        public ReactiveCommand<object> ExportProteinTreeCommand { get; }
+        public ReactiveCommand<Unit, Unit> ExportProteinTreeCommand { get; }
 
         /// <summary>
         /// Gets a command that exports the protein tree as a tab separated value file.
         /// </summary>
-        public ReactiveCommand<object> ExportProteinTreeAsTsvCommand { get; }
+        public ReactiveCommand<Unit, Unit> ExportProteinTreeAsTsvCommand { get; }
 
         /// <summary>
         /// Gets the list of possible filters.

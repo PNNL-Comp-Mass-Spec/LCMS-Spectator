@@ -9,7 +9,9 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Windows.Input;
 using LcmsSpectator.DialogServices;
 using OxyPlot;
 using OxyPlot.Wpf;
@@ -62,18 +64,13 @@ namespace LcmsSpectator.ViewModels.FileSelectors
             Width = width;
             Dpi = dpi;
 
-            var exportCommand = ReactiveCommand.Create(
+            ExportCommand = ReactiveCommand.CreateCombined(new [] { SuccessCommand },
                                     this.WhenAnyValue(x => x.FilePath, x => x.Height, x => x.Width, x => x.Dpi)
                                         .Select(
                                             x => !string.IsNullOrWhiteSpace(x.Item1) &&
                                             x.Item2 >= 0 && x.Item3 >= 0 && x.Item4 >= 0));
-            exportCommand.Subscribe(_ => SuccessCommand.Execute(null));
-            ExportCommand = exportCommand;
 
-            var browseFilesCommand = ReactiveCommand.Create();
-            browseFilesCommand.Select(_ => this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png"))
-                .Subscribe(filePath => FilePath = filePath);
-            BrowseFilesCommand = browseFilesCommand;
+            BrowseFilesCommand = ReactiveCommand.Create(() => FilePath = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png"));
 
             SuccessCommand.Where(_ => plotModel != null).Subscribe(_ => ExportPlotModel(plotModel));
         }
@@ -117,12 +114,12 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// Gets a command that browses image file paths.
         /// </summary>
-        public IReactiveCommand BrowseFilesCommand { get; }
+        public ReactiveCommand<Unit, string> BrowseFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that triggers the export.
         /// </summary>
-        public IReactiveCommand ExportCommand { get; }
+        public CombinedReactiveCommand<Unit, Unit> ExportCommand { get; }
 
         /// <summary>
         /// Exports a plot model to an image with the given settings.

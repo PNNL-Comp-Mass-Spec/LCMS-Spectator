@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Reactive.Linq;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.ViewModels.Data;
@@ -52,19 +53,12 @@ namespace LcmsSpectator.ViewModels.FileSelectors
                 SelectedDataset = Datasets[0];
             }
 
-            var browseOuputFilesCommand = ReactiveCommand.Create();
-            browseOuputFilesCommand.Subscribe(_ => BrowseOutputFilesImplementation());
-            BrowseOutputFilesCommand = browseOuputFilesCommand;
+            BrowseOutputFilesCommand = ReactiveCommand.Create(BrowseOutputFilesImplementation);
 
-            var exportCommand = ReactiveCommand.Create(
-                                                       this.WhenAnyValue(x => x.SelectedDataset, x => x.OutputFilePath)
+            ExportCommand = ReactiveCommand.Create(ExportImplementation, this.WhenAnyValue(x => x.SelectedDataset, x => x.OutputFilePath)
                                                            .Select(x => x.Item1 != null && !string.IsNullOrWhiteSpace(x.Item2)));
-            exportCommand.Subscribe(_ => ExportImplementation());
-            ExportCommand = exportCommand;
 
-            var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => CancelImplementation());
-            CancelCommand = cancelCommand;
+            CancelCommand = ReactiveCommand.Create(CancelImplementation);
         }
 
         /// <summary>
@@ -103,17 +97,17 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// Gets a command that opens a save dialog so the user can select a TSV file path.
         /// </summary>
-        public IReactiveCommand BrowseOutputFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseOutputFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that closes the window and exports the data set.
         /// </summary>
-        public IReactiveCommand ExportCommand { get; }
+        public ReactiveCommand<Unit, Unit> ExportCommand { get; }
 
         /// <summary>
         /// Gets a command that closes the window and does nothing.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Implementation for <see cref="BrowseOutputFilesCommand"/>.

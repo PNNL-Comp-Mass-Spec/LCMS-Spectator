@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.MassSpecData;
@@ -130,16 +131,15 @@ namespace LcmsSpectator.ViewModels.Plots
 
             ions = new LabeledIonViewModel[0];
 
-            var retentionTimeSelectedCommand = ReactiveCommand.Create();
-            retentionTimeSelectedCommand
-            .Select(_ => PlotModel.SelectedDataPoint as XicDataPoint)
-            .Where(dp => dp != null)
-            .Subscribe(dp => SelectedScan = dp.ScanNum);
-            RetentionTimeSelectedCommand = retentionTimeSelectedCommand;
+            RetentionTimeSelectedCommand = ReactiveCommand.Create(() =>
+            {
+                if (PlotModel.SelectedDataPoint is XicDataPoint dp)
+                {
+                    SelectedScan = dp.ScanNum;
+                }
+            });
 
-            var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => SaveAsImage());
-            SaveAsImageCommand = saveAsImageCommand;
+            SaveAsImageCommand = ReactiveCommand.Create(SaveAsImage);
 
             // When ShowLegend is updated, IsLegendVisible on the plot should be updated
             this.WhenAnyValue(x => x.ShowLegend).Subscribe(v =>
@@ -213,12 +213,12 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets command triggered when new scan is selected (double clicked) on XIC.
         /// </summary>
-        public IReactiveCommand RetentionTimeSelectedCommand { get; }
+        public ReactiveCommand<Unit, Unit> RetentionTimeSelectedCommand { get; }
 
         /// <summary>
         /// Gets command for exporting XIC plot as an image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveAsImageCommand { get; }
 
         /// <summary>
         /// Gets the plot model for the extracted ion chromatogram plot.

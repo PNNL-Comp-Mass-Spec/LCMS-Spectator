@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Sequence;
@@ -76,8 +77,7 @@ namespace LcmsSpectator.ViewModels.Data
             AddPrecursorIons = true;
 
             // HideAllIonsCommand deselects all ion types and neutral losses.
-            var hideAllIonsCommand = ReactiveCommand.Create();
-            hideAllIonsCommand.Subscribe(_ =>
+            HideAllIonsCommand = ReactiveCommand.Create(() =>
             {
                 AddPrecursorIons = false;
                 foreach (var baseIonType in BaseIonTypes)
@@ -90,7 +90,6 @@ namespace LcmsSpectator.ViewModels.Data
                     neutralLoss.IsSelected = neutralLoss.NeutralLoss == NeutralLoss.NoLoss && neutralLoss.IsSelected;
                 }
             });
-            HideAllIonsCommand = hideAllIonsCommand;
 
             // When Base Ion Types are selected/deselected, update ion types.
             BaseIonTypes.ItemChanged.Where(x => x.PropertyName == "IsSelected")
@@ -112,8 +111,7 @@ namespace LcmsSpectator.ViewModels.Data
                 .SelectMany(async _ => await GetLabeledIonViewModels())
                 .Subscribe(livms => LabeledIonViewModels = livms);
 
-            SelectAllIonsCommand = ReactiveCommand.Create();
-            SelectAllIonsCommand.Subscribe(_ =>
+            SelectAllIonsCommand = ReactiveCommand.Create(() =>
             {
                 foreach (var ion in BaseIonTypes)
                 {
@@ -141,12 +139,12 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Gets a command that deselects all ion types.
         /// </summary>
-        public IReactiveCommand HideAllIonsCommand { get; }
+        public ReactiveCommand<Unit, Unit> HideAllIonsCommand { get; }
 
         /// <summary>
         /// Gets a command that selects all ion types.
         /// </summary>
-        public ReactiveCommand<object> SelectAllIonsCommand { get; }
+        public ReactiveCommand<Unit, Unit> SelectAllIonsCommand { get; }
 
         /// <summary>
         /// Gets the list of possible base ion types.

@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Database;
@@ -188,19 +189,15 @@ namespace LcmsSpectator.ViewModels.Data
                 .Subscribe(f => f.Selected = true);
 
             // Start MsPf Search Command
-            var startMsPfSearchCommand = ReactiveCommand.Create();
-            startMsPfSearchCommand.Subscribe(_ => StartMsPfSearchImplementation());
-            StartMsPfSearchCommand = startMsPfSearchCommand;
+            StartMsPfSearchCommand = ReactiveCommand.Create(StartMsPfSearchImplementation);
 
             // Close command verifies that the user wants to close the dataset, then sets ReadyToClose to true if they are
-            var closeCommand = ReactiveCommand.Create();
-            closeCommand.Subscribe(_ =>
+            CloseCommand = ReactiveCommand.Create(() =>
             {
                 ReadyToClose =
                     dialogService.ConfirmationBox(
                         string.Format("Are you sure you would like to close {0}?", Title), string.Empty);
             });
-            CloseCommand = closeCommand;
         }
 
         /// <summary>
@@ -216,13 +213,13 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Gets a command that starts an MSPathFinder with this data set.
         /// </summary>
-        public IReactiveCommand StartMsPfSearchCommand { get; }
+        public ReactiveCommand<Unit, Unit> StartMsPfSearchCommand { get; }
 
         /// <summary>
         /// Gets a command that is activated when the close button is clicked on a dataset.
         /// Initiates a close request for the main view model
         /// </summary>
-        public IReactiveCommand CloseCommand { get; }
+        public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
         /// <summary>
         /// Gets the LCMSRun representing the raw file for this dataset.

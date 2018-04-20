@@ -8,9 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System;
 using System.Globalization;
-using System.Reactive.Linq;
+using System.Reactive;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectator.Config;
@@ -64,16 +63,18 @@ namespace LcmsSpectator.ViewModels.Modifications
 
             Remove = false;
 
-            var removeModificationCommand = ReactiveCommand.Create();
-            removeModificationCommand
-                .Where(_ => this.dialogService.ConfirmationBox(
+            RemoveModificationCommand = ReactiveCommand.Create(() =>
+            {
+                if (this.dialogService.ConfirmationBox(
                     string.Format(
                         "Are you sure you would like to remove {0}[{1}]?",
                         SelectedResidue,
                         SelectedModification.Name),
                     "Remove Search Modification"))
-                .Subscribe(_ => Remove = true);
-            RemoveModificationCommand = removeModificationCommand;
+                {
+                    Remove = true;
+                }
+            });
         }
 
         /// <summary>
@@ -135,7 +136,7 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Gets a command that removes this modification from the list.
         /// </summary>
-        public IReactiveCommand RemoveModificationCommand { get; }
+        public ReactiveCommand<Unit, Unit> RemoveModificationCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether this modification should be removed.

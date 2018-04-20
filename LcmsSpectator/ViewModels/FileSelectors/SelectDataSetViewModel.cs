@@ -9,6 +9,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.ViewModels.Data;
@@ -56,24 +57,15 @@ namespace LcmsSpectator.ViewModels.FileSelectors
             this.dialogService = dialogService;
             DataSets = dataSets;
 
-            var browseRawFilesCommand = ReactiveCommand.Create();
-            browseRawFilesCommand.Subscribe(_ => BrowseRawFilesImplementation());
-            BrowseRawFilesCommand = browseRawFilesCommand;
-
-            var clearRawFilesCommand = ReactiveCommand.Create();
-            clearRawFilesCommand.Subscribe(_ => ClearRawFilesImplementation());
-            ClearRawFilesCommand = clearRawFilesCommand;
+            BrowseRawFilesCommand = ReactiveCommand.Create(BrowseRawFilesImplementation);
+            ClearRawFilesCommand = ReactiveCommand.Create(ClearRawFilesImplementation);
 
             // Ok command is only available if RawFilePath isn't empty or SelectedDataSet isn't null
-            var okCommand = ReactiveCommand.Create(
+            OkCommand = ReactiveCommand.Create(OkImplementation,
                         this.WhenAnyValue(x => x.RawFilePath, x => x.SelectedDataSet, x => x.RawPathSelected, x => x.DatasetSelected)
                             .Select(p => ((p.Item3 && !string.IsNullOrEmpty(p.Item1)) || (p.Item4 && p.Item2 != null))));
-            okCommand.Subscribe(_ => OkImplementation());
-            OkCommand = okCommand;
 
-            var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => CancelImplementation());
-            CancelCommand = cancelCommand;
+            CancelCommand = ReactiveCommand.Create(CancelImplementation);
 
             RawPathSelected = true;
             DatasetSelected = false;
@@ -94,22 +86,22 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
         /// </summary>
-        public IReactiveCommand BrowseRawFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseRawFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that clears the currently selected raw file path.
         /// </summary>
-        public IReactiveCommand ClearRawFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> ClearRawFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that validates the selected raw file path and trigger ReadyToClose.
         /// </summary>
-        public IReactiveCommand OkCommand { get; }
+        public ReactiveCommand<Unit, Unit> OkCommand { get; }
 
         /// <summary>
         /// Gets a command that triggers ReadyToClose
         /// </summary>
-        public IReactiveCommand CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid dataset or raw file path was selected.

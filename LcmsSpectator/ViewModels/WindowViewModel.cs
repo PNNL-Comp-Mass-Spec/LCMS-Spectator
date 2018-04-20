@@ -9,7 +9,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
-using System.Reactive.Linq;
+using System.Reactive;
 using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels
@@ -29,20 +29,16 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         protected WindowViewModel()
         {
-            SuccessCommand = ReactiveCommand.Create();
-            SuccessCommand.Select(_ => Validate()).Subscribe(
-            status =>
+            SuccessCommand = ReactiveCommand.Create(() =>
             {
-                Status = status;
-                if (status)
+                Status = Validate();
+                if (Status)
                 {
                     ReadyToClose?.Invoke(this, EventArgs.Empty);
                 }
             });
 
-            CancelCommand = ReactiveCommand.Create();
-            CancelCommand.Subscribe(
-            status =>
+            CancelCommand = ReactiveCommand.Create(() =>
             {
                 Status = false;
                 ReadyToClose?.Invoke(this, EventArgs.Empty);
@@ -66,12 +62,12 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets a command for success.
         /// </summary>
-        public ReactiveCommand<object> SuccessCommand { get; }
+        public ReactiveCommand<Unit, Unit> SuccessCommand { get; }
 
         /// <summary>
         /// Gets a command for canceling the operation.
         /// </summary>
-        public ReactiveCommand<object> CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Gets an observable that determines whether or not  the Success command is executable.

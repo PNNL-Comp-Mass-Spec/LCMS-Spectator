@@ -10,6 +10,7 @@
 
 using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectator.Config;
@@ -48,13 +49,8 @@ namespace LcmsSpectator.ViewModels.Modifications
                 FixedSelection = "Fixed"
             }));
 
-            var addLightModificationCommand = ReactiveCommand.Create();
-            addLightModificationCommand.Subscribe(_ => LightModifications.Add(new SearchModificationViewModel(dialogService)));
-            AddLightModificationCommand = addLightModificationCommand;
-
-            var addHeavyModificationCommand = ReactiveCommand.Create();
-            addHeavyModificationCommand.Subscribe(_ => HeavyModifications.Add(new SearchModificationViewModel(dialogService)));
-            AddHeavyModificationCommand = addHeavyModificationCommand;
+            AddLightModificationCommand = ReactiveCommand.Create(() => LightModifications.Add(new SearchModificationViewModel(dialogService)));
+            AddHeavyModificationCommand = ReactiveCommand.Create(() => HeavyModifications.Add(new SearchModificationViewModel(dialogService)));
 
             LightModifications.ItemChanged.Where(x => x.PropertyName == "Remove")
                 .Select(x => x.Sender).Where(sender => sender.Remove)
@@ -78,12 +74,12 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Gets a command that adds a new modification to the light modifications list.
         /// </summary>
-        public IReactiveCommand AddLightModificationCommand { get; }
+        public ReactiveCommand<Unit, Unit> AddLightModificationCommand { get; }
 
         /// <summary>
         /// Gets a command that adds a new modification to the heavy modifications list.
         /// </summary>
-        public IReactiveCommand AddHeavyModificationCommand { get; }
+        public ReactiveCommand<Unit, Unit> AddHeavyModificationCommand { get; }
 
         /// <summary>
         /// Save the selected heavy and light modifications to the settings.

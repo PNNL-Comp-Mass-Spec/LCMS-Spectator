@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reactive;
 using LcmsSpectator.DialogServices;
 using ReactiveUI;
 
@@ -73,12 +74,8 @@ namespace LcmsSpectator.ViewModels.Filters
             DefaultValues = values;
             this.filter = filter;
             this.validator = validator;
-            var filterCommand = ReactiveCommand.Create();
-            filterCommand.Subscribe(_ => FilterImplementation());
-            FilterCommand = filterCommand;
-            var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => CancelImplementation());
-            CancelCommand = cancelCommand;
+            FilterCommand = ReactiveCommand.Create(FilterImplementation);
+            CancelCommand = ReactiveCommand.Create(CancelImplementation);
             Value = defaultValue;
             this.dialogService = dialogService;
             Status = false;
@@ -142,12 +139,12 @@ namespace LcmsSpectator.ViewModels.Filters
         /// Gets a command that sets status to true if a valid filter has been selected
         /// and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand FilterCommand { get; }
+        public ReactiveCommand<Unit, Unit> FilterCommand { get; }
 
         /// <summary>
         /// Gets a command that sets status to false and triggers the ReadyToClose event.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid filter has been selected.

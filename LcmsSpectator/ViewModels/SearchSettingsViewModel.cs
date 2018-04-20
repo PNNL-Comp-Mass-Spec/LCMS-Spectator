@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -257,82 +258,60 @@ namespace LcmsSpectator.ViewModels
             FromSequence = false;
 
             // Browse Spectrum Files Command
-            var browseRawFilesCommand = ReactiveCommand.Create();
-            browseRawFilesCommand.Subscribe(_ => BrowseSpectrumFilesImplementation());
-            BrowseSpectrumFilesCommand = browseRawFilesCommand;
+            BrowseSpectrumFilesCommand = ReactiveCommand.Create(BrowseSpectrumFilesImplementation);
 
             // Browse Feature Files Command
-            var browseFeatureFilesCommand = ReactiveCommand.Create();
-            browseFeatureFilesCommand.Subscribe(_ => BrowseFeatureFilesImplementation());
-            BrowseFeatureFilesCommand = browseFeatureFilesCommand;
+            BrowseFeatureFilesCommand = ReactiveCommand.Create(BrowseFeatureFilesImplementation);
 
             // Browse Fasta DB Files Command
-            var browseFastaDbFilesCommand = ReactiveCommand.Create();
-            browseFastaDbFilesCommand.Subscribe(_ => BrowseFastaDbFilesImplementation());
-            BrowseFastaDbFilesCommand = browseFastaDbFilesCommand;
+            BrowseFastaDbFilesCommand = ReactiveCommand.Create(BrowseFastaDbFilesImplementation);
 
             // Browse Output Directories Command
-            var browseOutputDirectoriesCommand = ReactiveCommand.Create();
-            browseOutputDirectoriesCommand.Subscribe(_ => BrowseOutputDirectoriesImplementation());
-            BrowseOutputDirectoriesCommand = browseOutputDirectoriesCommand;
+            BrowseOutputDirectoriesCommand = ReactiveCommand.Create(BrowseOutputDirectoriesImplementation);
 
             // Select All Proteins Command
-            var selectAllProteinsCommand = ReactiveCommand.Create(FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
-            selectAllProteinsCommand.Subscribe(_ => SelectProteinsImplementation(true));
-            SelectAllProteinsCommand = selectAllProteinsCommand;
+            SelectAllProteinsCommand = ReactiveCommand.Create(() => SelectProteinsImplementation(true), FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
 
             // Select No Proteins Command
-            var selectNoProteins = ReactiveCommand.Create(FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
-            selectNoProteins.Subscribe(_ => SelectProteinsImplementation(false));
-            SelectNoProteinsCommand = selectNoProteins;
+            SelectNoProteinsCommand = ReactiveCommand.Create(() => SelectProteinsImplementation(false), FastaEntries.WhenAnyValue(x => x.Count).Select(count => count > 0));
 
             // Manage Modifications Command
-            var manageModificationsCommand = ReactiveCommand.Create();
-            manageModificationsCommand.Subscribe(_ => ManageModificationsImplementation());
-            ManageModificationsCommand = manageModificationsCommand;
+            ManageModificationsCommand = ReactiveCommand.Create(ManageModificationsImplementation);
 
             // Add Modifications Command
-            var addModificationCommand = ReactiveCommand.Create();
-            addModificationCommand.Subscribe(_ => AddModificationImplementation());
-            AddModificationCommand = addModificationCommand;
+            AddModificationCommand = ReactiveCommand.Create(AddModificationImplementation);
 
             // Run Command - Disabled when there is no SpectrumFilePath, FastaDbFilePath, or OutputFilePath selected
-            RunCommand = ReactiveCommand.CreateAsyncTask(
-                                                              this.WhenAnyValue(
-                                                                                x => x.SpectrumFilePath,
-                                                                                x => x.FastaDbFilePath,
-                                                                                x => x.OutputFilePath)
-                                                                  .Select(x => !string.IsNullOrWhiteSpace(x.Item1) &&
-                                                                               !string.IsNullOrWhiteSpace(x.Item2) &&
-                                                                               !string.IsNullOrWhiteSpace(x.Item3)),
-                                                              async _ => await RunImplementation());
+            RunCommand = ReactiveCommand.CreateFromTask(async _ => await RunImplementation(),
+                                                        this.WhenAnyValue(
+                                                                          x => x.SpectrumFilePath,
+                                                                          x => x.FastaDbFilePath,
+                                                                          x => x.OutputFilePath)
+                                                            .Select(x => !string.IsNullOrWhiteSpace(x.Item1) &&
+                                                                         !string.IsNullOrWhiteSpace(x.Item2) &&
+                                                                         !string.IsNullOrWhiteSpace(x.Item3))
+                                                        );
 
             // Prev tab command
-            var prevTabCommand = ReactiveCommand.Create(
+            PrevTabCommand = ReactiveCommand.Create(() => TabIndex--,
                 Observable.Merge(
                         new[]
                             {
                                 this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex > 0),
                                 RunCommand.IsExecuting.Select(exec => !exec)
                             }));
-            prevTabCommand.Subscribe(_ => TabIndex--);
-            PrevTabCommand = prevTabCommand;
 
             // Next tab command
-            var nextTabCommand = ReactiveCommand.Create(
+            NextTabCommand = ReactiveCommand.Create(() =>TabIndex++,
                     Observable.Merge(
                         new[]
                             {
                                 this.WhenAnyValue(x => x.TabIndex).Select(tabIndex => tabIndex < MaxTabIndex),
                                 RunCommand.IsExecuting.Select(exec => !exec)
                             }));
-            nextTabCommand.Subscribe(_ => TabIndex++);
-            NextTabCommand = nextTabCommand;
 
             // Cancel Command
-            var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => CancelImplementation());
-            CancelCommand = cancelCommand;
+            CancelCommand = ReactiveCommand.Create(CancelImplementation);
 
             // Default values
             SelectedSearchMode = InternalCleavageType.SingleInternalCleavage;
@@ -434,62 +413,62 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets a command that decrements the tab index.
         /// </summary>
-        public IReactiveCommand PrevTabCommand { get; }
+        public ReactiveCommand<Unit, int> PrevTabCommand { get; }
 
         /// <summary>
         /// Gets a command that increments the tab index.
         /// </summary>
-        public IReactiveCommand NextTabCommand { get; }
+        public ReactiveCommand<Unit, int> NextTabCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
         /// </summary>
-        public IReactiveCommand BrowseSpectrumFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseSpectrumFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a feature file path.
         /// </summary>
-        public IReactiveCommand BrowseFeatureFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseFeatureFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a FASTA file path.
         /// </summary>
-        public IReactiveCommand BrowseFastaDbFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseFastaDbFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts user for an output directory.
         /// </summary>
-        public IReactiveCommand BrowseOutputDirectoriesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseOutputDirectoriesCommand { get; }
 
         /// <summary>
         /// Gets a command that selects all proteins in the <see cref="FastaEntries" /> list.
         /// </summary>
-        public IReactiveCommand SelectAllProteinsCommand { get; }
+        public ReactiveCommand<Unit, Unit> SelectAllProteinsCommand { get; }
 
         /// <summary>
         /// Gets a command that de-selects all proteins in the <see cref="FastaEntries" /> list.
         /// </summary>
-        public IReactiveCommand SelectNoProteinsCommand { get; }
+        public ReactiveCommand<Unit, Unit> SelectNoProteinsCommand { get; }
 
         /// <summary>
         /// Gets a command that manages the modification registered with the application.
         /// </summary>
-        public IReactiveCommand ManageModificationsCommand { get; }
+        public ReactiveCommand<Unit, Unit> ManageModificationsCommand { get; }
 
         /// <summary>
         /// Gets a command that adds a search modification.
         /// </summary>
-        public IReactiveCommand AddModificationCommand { get; }
+        public ReactiveCommand<Unit, Unit> AddModificationCommand { get; }
 
         /// <summary>
         /// Gets a command that validates search settings and closes the window.
         /// </summary>
-        public IReactiveCommand RunCommand { get; }
+        public ReactiveCommand<Unit, Unit> RunCommand { get; }
 
         /// <summary>
         /// Gets a command that closes the window.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Gets or sets the tab index for the tab control.

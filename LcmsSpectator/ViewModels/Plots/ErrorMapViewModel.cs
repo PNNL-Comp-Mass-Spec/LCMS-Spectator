@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.Config;
@@ -158,12 +159,9 @@ namespace LcmsSpectator.ViewModels.Plots
             this.WhenAnyValue(x => x.ShouldCombineChargeStates).Subscribe(_ => SetData(selectedSequence, selectedPeakDataPoints));
 
             // Save As Image Command requests a file path from the user and then saves the error map as an image
-            var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => SaveAsImageImpl());
-            SaveAsImageCommand = saveAsImageCommand;
+            SaveAsImageCommand = ReactiveCommand.Create(SaveAsImageImpl);
 
-            SaveDataTableCommand = ReactiveCommand.Create();
-            SaveDataTableCommand.Subscribe(_ => SaveDataTableImpl());
+            SaveDataTableCommand = ReactiveCommand.Create(SaveDataTableImpl);
         }
 
         /// <summary>
@@ -174,12 +172,12 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets a command that prompts user for file path and save plot as image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveAsImageCommand { get; }
 
         /// <summary>
         /// Gets a command that prompt user for file path and save data table as list.
         /// </summary>
-        public ReactiveCommand<object> SaveDataTableCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveDataTableCommand { get; }
 
         /// <summary>
         /// Gets or sets the data that is shown in the "Table" view. This excludes any fragments without data.

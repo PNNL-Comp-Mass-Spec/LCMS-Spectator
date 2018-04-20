@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Models;
@@ -108,19 +109,13 @@ namespace LcmsSpectator.ViewModels.Dms
             Jobs = new ReactiveList<DmsJobViewModel>();
             dmsLookupUtility = new DmsLookupUtility();
 
-            var lookUpCommand = ReactiveCommand.Create();
-            lookUpCommand.Subscribe(_ => Lookup());
-            LookupCommand = lookUpCommand;
+            LookupCommand = ReactiveCommand.Create(Lookup);
 
             // If there is no data set selected or there is no job selected, disable open button
-            var openCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedDataset, x => x.SelectedJob)
+            OpenCommand = ReactiveCommand.Create(OpenImplementation, this.WhenAnyValue(x => x.SelectedDataset, x => x.SelectedJob)
                                                      .Select(x => !string.IsNullOrEmpty(x.Item1?.DatasetFolderPath) && !string.IsNullOrEmpty(x.Item2?.JobFolderPath)));
-            openCommand.Subscribe(_ => OpenImplementation());
-            OpenCommand = openCommand;
 
-            var closeCommand = ReactiveCommand.Create();
-            closeCommand.Subscribe(_ => CloseImplementation());
-            CloseCommand = closeCommand;
+            CloseCommand = ReactiveCommand.Create(CloseImplementation);
 
             SelectedDataset = new DmsDatasetViewModel();
             SelectedJob = new DmsJobViewModel();
@@ -185,17 +180,17 @@ namespace LcmsSpectator.ViewModels.Dms
         /// <summary>
         /// Gets a command that searches DMS for data sets.
         /// </summary>
-        public IReactiveCommand LookupCommand { get; }
+        public ReactiveCommand<Unit, Unit> LookupCommand { get; }
 
         /// <summary>
         /// Gets a command that opens the selected data set and job.
         /// </summary>
-        public IReactiveCommand OpenCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenCommand { get; }
 
         /// <summary>
         /// Gets a command that closes the search without opening a data set or job.
         /// </summary>
-        public IReactiveCommand CloseCommand { get; }
+        public ReactiveCommand<Unit, Unit> CloseCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid data set has been selected.

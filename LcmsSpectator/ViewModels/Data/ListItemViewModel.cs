@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Reactive;
 using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.Data
@@ -17,8 +17,7 @@ namespace LcmsSpectator.ViewModels.Data
         {
             Item = item;
 
-            RemoveCommand = ReactiveCommand.Create();
-            RemoveCommand.Subscribe(_ => ShouldBeRemoved = true);
+            RemoveCommand = ReactiveCommand.Create(() => ShouldBeRemoved = true);
         }
 
         /// <summary>
@@ -29,7 +28,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Gets a command that marks this item for removal from its containing list.
         /// </summary>
-        public ReactiveCommand<object> RemoveCommand { get; }
+        public ReactiveCommand<Unit, bool> RemoveCommand { get; }
 
         /// <summary>
         /// A value indicating whether this item should be removed from its containing list.

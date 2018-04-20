@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -93,16 +94,11 @@ namespace LcmsSpectator.ViewModels.Data
             this.possibleScanNumbers = new HashSet<int>(possibleScanNumbers);
             ScanNumbers = new ReactiveList<int> { ChangeTrackingEnabled = true };
 
-            AddScanRangeCommand = ReactiveCommand.Create();
-            AddScanRangeCommand.Subscribe(_ => InsertScans());
+            AddScanRangeCommand = ReactiveCommand.Create(InsertScans);
 
-            RemoveSelectedScanCommand = ReactiveCommand.Create();
-            RemoveSelectedScanCommand
-                .Where(_ => ScanNumbers.Contains(SelectedScanNumber))
-                .Subscribe(_ => ScanNumbers.Remove(SelectedScanNumber));
+            RemoveSelectedScanCommand = ReactiveCommand.Create(() => ScanNumbers.Remove(SelectedScanNumber), this.WhenAnyValue(x => x.SelectedScanNumber, x => x.ScanNumbers.Count).Select(x => ScanNumbers.Contains(x.Item1)));
 
-            ClearScansCommand = ReactiveCommand.Create();
-            ClearScansCommand.Subscribe(_ => ScanNumbers.Clear());
+            ClearScansCommand = ReactiveCommand.Create(() => ScanNumbers.Clear());
 
             AbsoluteMaxScanNumber = this.possibleScanNumbers.Max();
 
@@ -132,19 +128,19 @@ namespace LcmsSpectator.ViewModels.Data
         /// Gets a command that selects scan numbers from the scan number range
         /// and adds them to the <see cref="ScanNumbers" /> list.
         /// </summary>
-        public ReactiveCommand<object> AddScanRangeCommand { get; }
+        public ReactiveCommand<Unit, Unit> AddScanRangeCommand { get; }
 
         /// <summary>
         /// Gets a command that removes the <see cref="SelectedScanNumber" /> from the
         /// <see cref="ScanNumbers" /> list.
         /// </summary>
-        public ReactiveCommand<object> RemoveSelectedScanCommand { get; }
+        public ReactiveCommand<Unit, bool> RemoveSelectedScanCommand { get; }
 
         /// <summary>
         /// Gets a command that removes all of the scan numbers from the
         /// <see cref="ScanNumbers" /> list.
         /// </summary>
-        public ReactiveCommand<object> ClearScansCommand { get; }
+        public ReactiveCommand<Unit, Unit> ClearScansCommand { get; }
 
         /// <summary>
         /// Gets or sets the MS level of scan numbers to select from.

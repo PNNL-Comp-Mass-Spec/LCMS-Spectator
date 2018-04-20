@@ -12,6 +12,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using InformedProteomics.Backend.Data.Spectrometry;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
@@ -91,9 +92,7 @@ namespace LcmsSpectator.ViewModels.Data
             minSelectedCharge = 2;
             MinCharge = 2;
             AbsoluteMaxCharge = 50;
-            var setIonChargesCommand = ReactiveCommand.Create();
-            setIonChargesCommand.Subscribe(_ => SetIonChargesImplementation());
-            SetIonChargesCommand = setIonChargesCommand;
+            SetIonChargesCommand = ReactiveCommand.Create(SetIonChargesImplementation);
 
             BaseIonTypes = new List<BaseIonType>
             {
@@ -147,7 +146,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Gets a command that calculates new ion types when the charge range changes.
         /// </summary>
-        public IReactiveCommand SetIonChargesCommand { get; }
+        public ReactiveCommand<Unit, Unit> SetIonChargesCommand { get; }
 
         /// <summary>
         /// Gets all ion types currently selected

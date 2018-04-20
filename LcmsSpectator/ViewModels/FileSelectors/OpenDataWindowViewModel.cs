@@ -10,6 +10,7 @@
 
 using System;
 using System.IO;
+using System.Reactive;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
@@ -74,38 +75,18 @@ namespace LcmsSpectator.ViewModels.FileSelectors
 
             this.WhenAnyValue(x => x.ParamFilePath).Subscribe(ReadParamFile);
 
-            var browseParamFilesCommand = ReactiveCommand.Create();
-            browseParamFilesCommand.Subscribe(_ => BrowseParamFilesImplementation());
-            BrowseParamFilesCommand = browseParamFilesCommand;
-
-            var browseRawFilesCommand = ReactiveCommand.Create();
-            browseRawFilesCommand.Subscribe(_ => BrowseRawFilesImplementation());
-            BrowseRawFilesCommand = browseRawFilesCommand;
-
-            var browseFeatureFilesCommand = ReactiveCommand.Create();
-            browseFeatureFilesCommand.Subscribe(_ => BrowseFeatureFilesImplementation());
-            BrowseFeatureFilesCommand = browseFeatureFilesCommand;
-
-            var browseIdFilesCommand = ReactiveCommand.Create();
-            browseIdFilesCommand.Subscribe(_ => BrowseIdFilesImplementation());
-            BrowseIdFilesCommand = browseIdFilesCommand;
-
-            var browseFastaFilesCommand = ReactiveCommand.Create();
-            browseFastaFilesCommand.Subscribe(_ => BrowseFastaFilesImplementation());
-            BrowseFastaFilesCommand = browseFastaFilesCommand;
+            BrowseParamFilesCommand = ReactiveCommand.Create(BrowseParamFilesImplementation);
+            BrowseRawFilesCommand = ReactiveCommand.Create(BrowseRawFilesImplementation);
+            BrowseFeatureFilesCommand = ReactiveCommand.Create(BrowseFeatureFilesImplementation);
+            BrowseIdFilesCommand = ReactiveCommand.Create(BrowseIdFilesImplementation);
+            BrowseFastaFilesCommand = ReactiveCommand.Create(BrowseFastaFilesImplementation);
 
             ParamFileSelected = true;
             DatasetSelected = false;
 
             // Ok button should be enabled if RawFilePath isn't null or empty
-            var okCommand =
-            ReactiveCommand.Create(this.WhenAnyValue(x => x.RawFilePath).Select(x => !string.IsNullOrWhiteSpace(x)));
-            okCommand.Subscribe(_ => OkImplementation());
-            OkCommand = okCommand;
-
-            var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => CancelImplementation());
-            CancelCommand = cancelCommand;
+            OkCommand = ReactiveCommand.Create(OkImplementation, this.WhenAnyValue(x => x.RawFilePath).Select(x => !string.IsNullOrWhiteSpace(x)));
+            CancelCommand = ReactiveCommand.Create(CancelImplementation);
 
             Status = false;
         }
@@ -118,37 +99,37 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <summary>
         /// Gets a command that prompts the user for a MSPF parameter file path.
         /// </summary>
-        public IReactiveCommand BrowseParamFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseParamFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a raw file path.
         /// </summary>
-        public IReactiveCommand BrowseRawFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseRawFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a feature file path.
         /// </summary>
-        public IReactiveCommand BrowseFeatureFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseFeatureFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for an ID file path.
         /// </summary>
-        public IReactiveCommand BrowseIdFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseIdFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts the user for a FASTA file path.
         /// </summary>
-        public IReactiveCommand BrowseFastaFilesCommand { get; }
+        public ReactiveCommand<Unit, Unit> BrowseFastaFilesCommand { get; }
 
         /// <summary>
         /// Gets a command that validates the selected raw file path and trigger ReadyToClose.
         /// </summary>
-        public IReactiveCommand OkCommand { get; }
+        public ReactiveCommand<Unit, Unit> OkCommand { get; }
 
         /// <summary>
         /// Gets a command that triggers ReadyToClose
         /// </summary>
-        public IReactiveCommand CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Gets a value indicating whether a valid dataset or raw file path was selected.

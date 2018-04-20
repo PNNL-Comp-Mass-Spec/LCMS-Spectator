@@ -10,6 +10,7 @@
 
 using System;
 using System.Globalization;
+using System.Reactive;
 using InformedProteomics.Backend.Data.Composition;
 using LcmsSpectator.DialogServices;
 using ReactiveUI;
@@ -103,13 +104,8 @@ namespace LcmsSpectator.ViewModels.Modifications
             FromFormulaChecked = true;
             FromMassChecked = false;
 
-            var saveCommand = ReactiveCommand.Create();
-            saveCommand.Subscribe(_ => SaveImplementation());
-            SaveCommand = saveCommand;
-
-            var cancelCommand = ReactiveCommand.Create();
-            cancelCommand.Subscribe(_ => CancelImplementation());
-            CancelCommand = cancelCommand;
+            SaveCommand = ReactiveCommand.Create(SaveImplementation);
+            CancelCommand = ReactiveCommand.Create(CancelImplementation);
 
             this.WhenAnyValue(x => x.Mass).Subscribe(mass => MassStr = mass.ToString(CultureInfo.InvariantCulture));
         }
@@ -140,12 +136,12 @@ namespace LcmsSpectator.ViewModels.Modifications
         /// <summary>
         /// Gets a command creates a modification from the values selected and sets the status.
         /// </summary>
-        public IReactiveCommand SaveCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveCommand { get; }
 
         /// <summary>
         /// Gets a command that sets status to false.
         /// </summary>
-        public IReactiveCommand CancelCommand { get; }
+        public ReactiveCommand<Unit, Unit> CancelCommand { get; }
 
         /// <summary>
         /// Gets or sets the name of the modification.

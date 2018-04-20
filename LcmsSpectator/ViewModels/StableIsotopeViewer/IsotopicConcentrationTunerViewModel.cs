@@ -56,7 +56,7 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
         public IsotopicConcentrationTunerViewModel(IsotopicConcentrationTuner tuner = null)
         {
             this.tuner = tuner ?? new IsotopicConcentrationTuner();
-            RunTuningCommand = ReactiveCommand.CreateAsyncTask(async _ => await RunTuning());
+            RunTuningCommand = ReactiveCommand.CreateFromTask(async _ => await RunTuning());
 
             // Set default values
             StatusMessage = "Running...";
@@ -71,7 +71,7 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
         /// <summary>
         /// Gets an asynchonous command that runs the tuning process.
         /// </summary>
-        public ReactiveCommand<Unit> RunTuningCommand { get; }
+        public ReactiveCommand<Unit, Unit> RunTuningCommand { get; }
 
         /// <summary>
         /// Gets the plot model that displays the result curve from the tuning.

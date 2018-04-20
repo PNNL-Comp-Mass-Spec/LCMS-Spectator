@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Composition;
@@ -83,47 +84,34 @@ namespace LcmsSpectator.ViewModels
             ScanViewModel.Filters.Remove(ScanViewModel.Filters.FirstOrDefault(f => f.Name == "Hide Unidentified Scans"));
 
             // Create commands for file operations
-            OpenDataSetCommand = ReactiveCommand.CreateAsyncTask(async _ => await OpenDataSetImplementation());
-            OpenRawFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await OpenRawFileImplementation());
-            OpenTsvFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await OpenIdFileImplementation());
-            OpenFeatureFileCommand = ReactiveCommand.CreateAsyncTask(async _ => await OpenFeatureFileImplementation());
-            OpenFromDmsCommand = ReactiveCommand.CreateAsyncTask(async _ => await OpenFromDmsImplementation());
+            OpenDataSetCommand = ReactiveCommand.CreateFromTask(async _ => await OpenDataSetImplementation());
+            OpenRawFileCommand = ReactiveCommand.CreateFromTask(async _ => await OpenRawFileImplementation());
+            OpenTsvFileCommand = ReactiveCommand.CreateFromTask(async _ => await OpenIdFileImplementation());
+            OpenFeatureFileCommand = ReactiveCommand.CreateFromTask(async _ => await OpenFeatureFileImplementation());
+            OpenFromDmsCommand = ReactiveCommand.CreateFromTask(async _ => await OpenFromDmsImplementation());
 
             // Create command to open settings window
-            var openSettingsCommand = ReactiveCommand.Create();
-            openSettingsCommand.Subscribe(_ => this.dialogService.OpenSettings(new SettingsViewModel(this.dialogService)));
-            OpenSettingsCommand = openSettingsCommand;
+            OpenSettingsCommand = ReactiveCommand.Create(() => this.dialogService.OpenSettings(new SettingsViewModel(this.dialogService)));
 
             // Create command to opne isotopic profile viewer
-            OpenIsotopicProfileViewerCommand = ReactiveCommand.Create();
-            OpenIsotopicProfileViewerCommand.Subscribe(OpenIsotopicProfileViewer);
+            OpenIsotopicProfileViewerCommand = ReactiveCommand.Create(OpenIsotopicProfileViewer);
 
             //this.OpenIsotopicProfileViewer(new object());
 
             // Create command to open about box
-            var openAboutBoxCommand = ReactiveCommand.Create();
-            openAboutBoxCommand.Subscribe(_ => this.dialogService.OpenAboutBox());
-            OpenAboutBoxCommand = openAboutBoxCommand;
+            OpenAboutBoxCommand = ReactiveCommand.Create(() => this.dialogService.OpenAboutBox());
 
             // Create command to open new modification management window
-            var openManageModificationsCommand = ReactiveCommand.Create();
-            openManageModificationsCommand.Subscribe(_ => ManageModificationsImplementation());
-            OpenManageModificationsCommand = openManageModificationsCommand;
+            OpenManageModificationsCommand = ReactiveCommand.Create(ManageModificationsImplementation);
 
             // Create MSPathFinder search command
-            var runMsPathFinderSearchCommand = ReactiveCommand.Create();
-            runMsPathFinderSearchCommand.Subscribe(_ => RunMsPathFinderSearchImplementation());
-            RunMsPathFinderSearchCommand = runMsPathFinderSearchCommand;
+            RunMsPathFinderSearchCommand = ReactiveCommand.Create(RunMsPathFinderSearchImplementation);
 
             // Create export command
-            var exportResultsCommand = ReactiveCommand.Create(DataSets.WhenAnyValue(x => x.Count).Select(count => count > 0));
-            exportResultsCommand.Subscribe(_ => ExportResultsImplementation());
-            ExportResultsCommand = exportResultsCommand;
+            ExportResultsCommand = ReactiveCommand.Create(ExportResultsImplementation, DataSets.WhenAnyValue(x => x.Count).Select(count => count > 0));
 
             // Create export command
-            var quitProgramCommand = ReactiveCommand.Create();
-            quitProgramCommand.Subscribe(_ => this.dialogService.QuitProgram());
-            QuitProgramCommand = quitProgramCommand;
+            QuitProgramCommand = ReactiveCommand.Create(() => this.dialogService.QuitProgram());
 
             ShowSplash = true;
 
@@ -165,62 +153,62 @@ namespace LcmsSpectator.ViewModels
         /// Gets command that opens a dialog box prompting the user for a raw file path,
         /// feature file path, and ID file path, then opens the files.
         /// </summary>
-        public IReactiveCommand OpenDataSetCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenDataSetCommand { get; }
 
         /// <summary>
         /// Gets command that prompts the user for raw file(s) to open.
         /// </summary>
-        public IReactiveCommand OpenRawFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenRawFileCommand { get; }
 
         /// <summary>
         /// Gets command that prompts the user for id file to open.
         /// </summary>
-        public IReactiveCommand OpenTsvFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenTsvFileCommand { get; }
 
         /// <summary>
         /// Gets command that prompts user for feature file to open.
         /// </summary>
-        public IReactiveCommand OpenFeatureFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenFeatureFileCommand { get; }
 
         /// <summary>
         /// Gets command that opens the DMS search dialog.
         /// </summary>
-        public IReactiveCommand OpenFromDmsCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenFromDmsCommand { get; }
 
         /// <summary>
         /// Gets command that opens settings window.
         /// </summary>
-        public IReactiveCommand OpenSettingsCommand { get; }
+        public ReactiveCommand<Unit, bool> OpenSettingsCommand { get; }
 
         /// <summary>
         /// Gets a command that opens the isotopic profile viewer.
         /// </summary>
-        public ReactiveCommand<object> OpenIsotopicProfileViewerCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenIsotopicProfileViewerCommand { get; }
 
         /// <summary>
         /// Gets command that opens about box.
         /// </summary>
-        public IReactiveCommand OpenAboutBoxCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenAboutBoxCommand { get; }
 
         /// <summary>
         /// Gets command that opens a window for managing registered modifications.
         /// </summary>
-        public IReactiveCommand OpenManageModificationsCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenManageModificationsCommand { get; }
 
         /// <summary>
         /// Gets command that runs an MSPathFinder database search.
         /// </summary>
-        public IReactiveCommand RunMsPathFinderSearchCommand { get; }
+        public ReactiveCommand<Unit, Unit> RunMsPathFinderSearchCommand { get; }
 
         /// <summary>
         /// Gets a command that exports results of a data set to a file.
         /// </summary>
-        public IReactiveCommand ExportResultsCommand { get; }
+        public ReactiveCommand<Unit, Unit> ExportResultsCommand { get; }
 
         /// <summary>
         /// Gets a command that exits the program
         /// </summary>
-        public IReactiveCommand QuitProgramCommand { get; }
+        public ReactiveCommand<Unit, Unit> QuitProgramCommand { get; }
 
         /// <summary>
         /// Gets view model for list of scans and identifications.
@@ -692,7 +680,7 @@ namespace LcmsSpectator.ViewModels
             return true;
         }
 
-        public void OpenIsotopicProfileViewer(object o)
+        public void OpenIsotopicProfileViewer()
         {
             var ds = new MainDialogService();
             ds.OpenStableIsotopeViewer(new StableIsotopeViewModel());

@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Config;
@@ -175,9 +176,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             showHeavy = false;
             showFragmentXic = false;
-            var openHeavyModificationsCommand = ReactiveCommand.Create();
-            openHeavyModificationsCommand.Subscribe(_ => OpenHeavyModificationsImplentation());
-            OpenHeavyModificationsCommand = openHeavyModificationsCommand;
+            OpenHeavyModificationsCommand = ReactiveCommand.Create(OpenHeavyModificationsImplentation);
 
             PrecursorPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
             FragmentPlotViewModel.FragmentationSequenceViewModel.HeavyModifications = IcParameters.Instance.LightModifications.ToArray();
@@ -225,18 +224,14 @@ namespace LcmsSpectator.ViewModels.Plots
             PrecursorToFragmentLinkLabel = "L";
             LightToHeavyLinkLabel = "L";
 
-            LinkLightToHeavyCommand = ReactiveCommand.Create();
-            LinkLightToHeavyCommand.Subscribe(
-                _ =>
+            LinkLightToHeavyCommand = ReactiveCommand.Create(() =>
                     {
                         TogglePlotLinks(fragmentXAxis, heavyFragmentXAxis);
                         TogglePlotLinks(precursorXAxis, heavyPrecursorXAxis);
                         LightToHeavyLinkLabel = LightToHeavyLinkLabel == "L" ? "U" : "L";
                     });
 
-            LinkPrecursorToFragmentCommand = ReactiveCommand.Create();
-            LinkPrecursorToFragmentCommand.Subscribe(
-                _ =>
+            LinkPrecursorToFragmentCommand = ReactiveCommand.Create(() =>
                     {
                         TogglePlotLinks(precursorXAxis, fragmentXAxis);
                         TogglePlotLinks(heavyPrecursorXAxis, heavyFragmentXAxis);
@@ -267,17 +262,17 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets command that opens window for selecting heavy modifications for light and heavy peptides.
         /// </summary>
-        public ReactiveCommand<object> OpenHeavyModificationsCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenHeavyModificationsCommand { get; }
 
         /// <summary>
         /// Gets a command that links the Precursor XIC axes to the Fragment XIC axes.
         /// </summary>
-        public ReactiveCommand<object> LinkLightToHeavyCommand { get; }
+        public ReactiveCommand<Unit, Unit> LinkLightToHeavyCommand { get; }
 
         /// <summary>
         /// Gets a command that links the precursor XIC axes to the Heavy Precursor XIC axes.
         /// </summary>
-        public ReactiveCommand<object> LinkPrecursorToFragmentCommand { get; }
+        public ReactiveCommand<Unit, Unit> LinkPrecursorToFragmentCommand { get; }
 
         private string lightToHeavyLinkLabel;
 

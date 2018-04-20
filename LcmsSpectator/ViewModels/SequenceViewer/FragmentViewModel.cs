@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive;
 using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
@@ -52,11 +53,11 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         public FragmentViewModel(AminoAcid aminoAcid, int index = 0, IMainDialogService dialogService = null)
         {
             AminoAcid = aminoAcid;
+            Index = index;
             SetModSymbol(aminoAcid as ModifiedAminoAcid);
 
             this.dialogService = dialogService ?? new MainDialogService();
-            SelectModificationCommand = ReactiveCommand.Create();
-            SelectModificationCommand.Subscribe(_ => SelectModificationImpl());
+            SelectModificationCommand = ReactiveCommand.Create(SelectModificationImpl);
 
             // Update the modification symbol when the amino acid changes.
             this.WhenAnyValue(x => x.AminoAcid).Subscribe(aa => SetModSymbol(aa as ModifiedAminoAcid));
@@ -65,7 +66,7 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         /// <summary>
         /// Gets a command that opens a dialog that allows the user to change the selected modification.
         /// </summary>
-        public ReactiveCommand<object> SelectModificationCommand { get; }
+        public ReactiveCommand<Unit, Unit> SelectModificationCommand { get; }
 
         /// <summary>
         /// Gets the selected amino acid.

@@ -10,6 +10,7 @@
 
 using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
@@ -135,24 +136,19 @@ namespace LcmsSpectator.ViewModels.Plots
             Secondary2ViewModel = NextMs1SpectrumViewModel;
 
             // Wire commands to swap the spectrum that is shown in the primary view
-            var swapSecondary1Command = ReactiveCommand.Create();
-            swapSecondary1Command.Subscribe(_ => SwapSecondary1());
-            SwapSecondary1Command = swapSecondary1Command;
-
-            var swapSecondary2Command = ReactiveCommand.Create();
-            swapSecondary2Command.Subscribe(_ => SwapSecondary2());
-            SwapSecondary2Command = swapSecondary2Command;
+            SwapSecondary1Command = ReactiveCommand.Create(SwapSecondary1);
+            SwapSecondary2Command = ReactiveCommand.Create(SwapSecondary2);
         }
 
         /// <summary>
         /// Gets a command that swaps the first secondary view model with primary view model.
         /// </summary>
-        public IReactiveCommand SwapSecondary1Command { get; }
+        public ReactiveCommand<Unit, Unit> SwapSecondary1Command { get; }
 
         /// <summary>
         /// Gets a command that swaps the second secondary view model with primary view model.
         /// </summary>
-        public IReactiveCommand SwapSecondary2Command { get; }
+        public ReactiveCommand<Unit, Unit> SwapSecondary2Command { get; }
 
         /// <summary>
         /// Gets the spectrum plot view model for MS/MS spectrum.

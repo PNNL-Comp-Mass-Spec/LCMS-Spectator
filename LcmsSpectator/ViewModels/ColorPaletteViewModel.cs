@@ -8,8 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Windows.Media;
 using ReactiveUI;
 
@@ -43,9 +43,7 @@ namespace LcmsSpectator.ViewModels
                 Colors.AddRange(colors);
             }
 
-            var paletteSelectedCommand = ReactiveCommand.Create();
-            paletteSelectedCommand.Subscribe(_ => IsSelected = true);
-            PaletteSelectedCommand = paletteSelectedCommand;
+            PaletteSelectedCommand = ReactiveCommand.Create(() => IsSelected = true);
         }
 
         /// <summary>
@@ -74,6 +72,6 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets a command that marks the palette as selected.
         /// </summary>
-        public IReactiveCommand PaletteSelectedCommand { get; }
+        public ReactiveCommand<Unit, bool> PaletteSelectedCommand { get; }
     }
 }

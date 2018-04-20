@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Biology;
 using InformedProteomics.Backend.Data.Composition;
@@ -117,25 +118,13 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
 
             // Commands
 
-            BuildPlotCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.Mass).Select(mass => mass > 0.0));
-            BuildPlotCommand.Subscribe(_ => BuildIsotopicProfilePlot());
+            BuildPlotCommand = ReactiveCommand.Create(BuildIsotopicProfilePlot, this.WhenAnyValue(x => x.Mass).Select(mass => mass > 0.0));
+            ResetToDefaultProportionsCommand = ReactiveCommand.Create(() => SelectedElement?.Reset());
+            TuneConcentrationCommand = ReactiveCommand.Create(TuneConcentration);
+            PastePeaksFromClipboardCommand = ReactiveCommand.Create(PastePeaksFromClipboard);
+            ClearObservedPeaksCommand = ReactiveCommand.Create(() => ObservedPeaks.Clear());
 
-            ResetToDefaultProportionsCommand = ReactiveCommand.Create();
-            ResetToDefaultProportionsCommand
-                .Where(_ => SelectedElement != null)
-                .Subscribe(_ => SelectedElement.Reset());
-
-            TuneConcentrationCommand = ReactiveCommand.Create();
-            TuneConcentrationCommand.Subscribe(_ => TuneConcentration());
-
-            PastePeaksFromClipboardCommand = ReactiveCommand.Create();
-            PastePeaksFromClipboardCommand.Subscribe(_ => PastePeaksFromClipboard());
-
-            ClearObservedPeaksCommand = ReactiveCommand.Create();
-            ClearObservedPeaksCommand.Subscribe(_ => ObservedPeaks.Clear());
-
-            AddObservedPeakCommand = ReactiveCommand.Create();
-            AddObservedPeakCommand.Subscribe(_ => ObservedPeaks
+            AddObservedPeakCommand = ReactiveCommand.Create(() => ObservedPeaks
                                                            .Add(new ListItemViewModel<PeakDataPoint>(
                                                                 new PeakDataPoint(0.0, 0.0, 0.0, 0.0, string.Empty))));
         }
@@ -143,34 +132,34 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
         /// <summary>
         /// Gets a command that builds the isotopic profile plot.
         /// </summary>
-        public ReactiveCommand<object> BuildPlotCommand { get; }
+        public ReactiveCommand<Unit, Unit> BuildPlotCommand { get; }
 
         /// <summary>
         /// Gets a command that resets the proportions for the selected element back to their defaults.
         /// </summary>
-        public ReactiveCommand<object> ResetToDefaultProportionsCommand { get; }
+        public ReactiveCommand<Unit, Unit> ResetToDefaultProportionsCommand { get; }
 
         /// <summary>
         /// Gets a command that opens a dialog for tuning the selected isotope concentration to find the
         /// value that produces a theoretical isotopic distribution that best fits
         /// the observed peak list.
         /// </summary>
-        public ReactiveCommand<object> TuneConcentrationCommand { get; }
+        public ReactiveCommand<Unit, Unit> TuneConcentrationCommand { get; }
 
         /// <summary>
         /// Gets a command that pastes a peak list from the clipboard.
         /// </summary>
-        public ReactiveCommand<object> PastePeaksFromClipboardCommand { get; }
+        public ReactiveCommand<Unit, Unit> PastePeaksFromClipboardCommand { get; }
 
         /// <summary>
         /// Gets a command that clears the observed peak list.
         /// </summary>
-        public ReactiveCommand<object> ClearObservedPeaksCommand { get; }
+        public ReactiveCommand<Unit, Unit> ClearObservedPeaksCommand { get; }
 
         /// <summary>
         /// Gets a command that adds a new, empty peak to the observed peak list.
         /// </summary>
-        public ReactiveCommand<object> AddObservedPeakCommand { get; }
+        public ReactiveCommand<Unit, Unit> AddObservedPeakCommand { get; }
 
         /// <summary>
         /// Gets a mapping between the code for an element and the isotope proportions for that element.

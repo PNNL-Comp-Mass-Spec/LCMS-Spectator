@@ -8,7 +8,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System;
+using System.Reactive;
 using System.Windows.Media;
 using ReactiveUI;
 
@@ -36,9 +36,7 @@ namespace LcmsSpectator.ViewModels
         {
             SelectedColor = new Color { A = 255, R = 0, G = 0, B = 0 };
 
-            var removeCommand = ReactiveCommand.Create();
-            removeCommand.Subscribe(_ => IsRemoveRequested = true);
-            RemoveCommand = removeCommand;
+            RemoveCommand = ReactiveCommand.Create(() => IsRemoveRequested = true);
         }
 
         /// <summary>
@@ -62,6 +60,6 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets a command for removing the color.
         /// </summary>
-        public IReactiveCommand RemoveCommand { get; }
+        public ReactiveCommand<Unit, bool> RemoveCommand { get; }
     }
 }

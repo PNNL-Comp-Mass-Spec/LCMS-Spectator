@@ -11,6 +11,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Media;
 using OxyPlot;
@@ -74,9 +75,7 @@ namespace LcmsSpectator.ViewModels
                             palette.IsSelected = false;
                         });
 
-            var addColorCommand = ReactiveCommand.Create();
-            addColorCommand.Subscribe(_ => ColorViewModels.Add(new ColorViewModel()));
-            AddColorCommand = addColorCommand;
+            AddColorCommand = ReactiveCommand.Create(() => ColorViewModels.Add(new ColorViewModel()));
         }
 
         /// <summary>
@@ -97,7 +96,7 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets a command that adds a color to the color list
         /// </summary>
-        public IReactiveCommand AddColorCommand { get; }
+        public ReactiveCommand<Unit, Unit> AddColorCommand { get; }
 
         /// <summary>
         /// Get raw colors as OxyPlot OxyColors.

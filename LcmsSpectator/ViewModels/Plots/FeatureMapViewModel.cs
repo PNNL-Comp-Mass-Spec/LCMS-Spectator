@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
@@ -191,27 +192,18 @@ namespace LcmsSpectator.ViewModels.Plots
             IsLogarithmicAbundanceAxis = true;
             FeatureSize = 0.1;
 
-            var featureSelectedCommand = ReactiveCommand.Create();
-            featureSelectedCommand.Subscribe(_ => FeatureSelectedImplementation());
-            FeatureSelectedCommand = featureSelectedCommand;
+            FeatureSelectedCommand = ReactiveCommand.Create(FeatureSelectedImplementation);
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
-            var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => SaveAsImageImplementation());
-            SaveAsImageCommand = saveAsImageCommand;
-
-            var buildPlotCommand = ReactiveCommand.Create();
-            buildPlotCommand.Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Subscribe(_ => BuildPlot());
-            BuildPlotCommand = buildPlotCommand;
+            SaveAsImageCommand = ReactiveCommand.Create(SaveAsImageImplementation);
 
             // Initialize color axes.
-            const int NumColors = 5000;
+            const int numColors = 5000;
             featureColorAxis = new LinearColorAxis     // Color axis for features
             {
                 Title = "Abundance",
                 Position = AxisPosition.Right,
-                Palette = OxyPalette.Interpolate(NumColors, IcParameters.Instance.FeatureColors),
+                Palette = OxyPalette.Interpolate(numColors, IcParameters.Instance.FeatureColors),
             };
 
             colorDictionary = new ProteinColorDictionary();
@@ -300,19 +292,6 @@ namespace LcmsSpectator.ViewModels.Plots
             this.WhenAnyValue(x => x.IsLogarithmicAbundanceAxis)
                 .Subscribe(isLogarithmicAbundanceAxis => IsLinearAbundanceAxis = !isLogarithmicAbundanceAxis);
 
-            this.WhenAnyValue(x => x.IsLinearAbundanceAxis)
-                .Subscribe(
-                    isLinear =>
-                        {
-                            featureColorAxis.Title = isLinear ? "Abundance" : "Abundance (Log10)";
-                            BuildPlotCommand.Execute(null);
-                        });
-
-            this.WhenAnyValue(x => x.FeatureSize)
-                .Subscribe(_ => BuildPlotCommand.Execute(null));
-
-            this.WhenAnyValue(x => x.Features).Subscribe(_ => BuildPlotCommand.Execute(null));
-
             // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
             this.WhenAnyValue(x => x.XMinimum, x => x.XMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
@@ -348,40 +327,35 @@ namespace LcmsSpectator.ViewModels.Plots
                         });
                 });
 
-            IcParameters.Instance.WhenAnyValue(x => x.FeatureColors)
-                        .Select(colors => OxyPalette.Interpolate(NumColors, colors))
-                        .Subscribe(palette =>
-                        {
-                            featureColorAxis.Palette = palette;
-                            BuildPlotCommand.Execute(null);
-                        });
-            IcParameters.Instance.WhenAnyValue(x => x.IdColors, x => x.Ms2ScanColor)
-                .Subscribe(x =>
+            var propMon = this.WhenAnyValue(x => x.IsLinearAbundanceAxis, x => x.FeatureSize, x => x.Features)
+                .Select(x => featureColorAxis.Title = x.Item1 ? "Abundance" : "Abundance (Log10)");
+
+            var colorMon = IcParameters.Instance.WhenAnyValue(x => x.IdColors, x => x.Ms2ScanColor, x => x.FeatureColors)
+                .Select(x =>
                 {
                     var colorList = new List<OxyColor> { Capacity = x.Item1.Length + 1 };
                     colorList.Add(x.Item2);
                     colorList.AddRange(x.Item1);
                     colorDictionary.SetColors(colorList);
                     ms2ColorAxis.Palette = colorDictionary.OxyPalette;
-                    BuildPlotCommand.Execute(null);
+                    featureColorAxis.Palette = OxyPalette.Interpolate(numColors, x.Item3);
+                    return string.Empty;
                 });
+
+            // Link two observables to a single throttle and action.
+            propMon.Merge(colorMon).Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler).Subscribe(x => BuildPlot());
         }
 
         /// <summary>
         /// Gets a command that saves the feature map as a PNG image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveAsImageCommand { get; }
 
         /// <summary>
         /// Gets a command activated when a feature is selected (double clicked) on the
         /// feature map plot.
         /// </summary>
-        public IReactiveCommand FeatureSelectedCommand { get; }
-
-        /// <summary>
-        /// Gets a command for building the feature map plot.
-        /// </summary>
-        public IReactiveCommand BuildPlotCommand { get; }
+        public ReactiveCommand<Unit, Unit> FeatureSelectedCommand { get; }
 
         /// <summary>
         /// Gets the Plot model for the feature map.

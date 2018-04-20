@@ -8,8 +8,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Sequence;
@@ -43,33 +43,25 @@ namespace LcmsSpectator.ViewModels.Modifications
             this.dialogService = dialogService;
             Modifications = new ReactiveList<Modification>();
 
-            var addCommand = ReactiveCommand.Create();
-            addCommand.Subscribe(_ => AddImplementation());
-            AddCommand = addCommand;
-
-            var editCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedModification).Select(m => m != null));
-            editCommand.Subscribe(_ => EditImplementation());
-            EditCommand = editCommand;
-
-            var removeCommand = ReactiveCommand.Create(this.WhenAnyValue(x => x.SelectedModification).Select(m => m != null));
-            removeCommand.Subscribe(_ => RemoveImplementation());
-            RemoveCommand = removeCommand;
+            AddCommand = ReactiveCommand.Create(AddImplementation);
+            EditCommand = ReactiveCommand.Create(EditImplementation, this.WhenAnyValue(x => x.SelectedModification).Select(m => m != null));
+            RemoveCommand = ReactiveCommand.Create(RemoveImplementation, this.WhenAnyValue(x => x.SelectedModification).Select(m => m != null));
         }
 
         /// <summary>
         /// Gets a command that adds a new modification to the modification list.
         /// </summary>
-        public IReactiveCommand AddCommand { get; }
+        public ReactiveCommand<Unit, Unit> AddCommand { get; }
 
         /// <summary>
         /// Gets a command for editing the selected modification.
         /// </summary>
-        public IReactiveCommand EditCommand { get; }
+        public ReactiveCommand<Unit, Unit> EditCommand { get; }
 
         /// <summary>
         /// Gets a command that removes the selected modification from the modification list.
         /// </summary>
-        public IReactiveCommand RemoveCommand { get; }
+        public ReactiveCommand<Unit, Unit> RemoveCommand { get; }
 
         /// <summary>
         /// Gets the list of modifications.

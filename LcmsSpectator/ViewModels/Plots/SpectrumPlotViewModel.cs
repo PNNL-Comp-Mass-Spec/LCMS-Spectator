@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
@@ -248,11 +249,11 @@ namespace LcmsSpectator.ViewModels.Plots
                                         ion.GetPeaksAsync(GetSpectrum(),
                                             ShowDeconvolutedSpectrum || ShowDeconvolutedIons)));
                 })
-                .Subscribe(peakDataPoints =>
+                .Subscribe(dataPoints =>
                 {
                     ions = FragmentationSequenceViewModel.LabeledIonViewModels;
-                    SetTerminalResidues(peakDataPoints);
-                    UpdatePlotModel(peakDataPoints);
+                    SetTerminalResidues(dataPoints);
+                    UpdatePlotModel(dataPoints);
 
                     if (FragmentationSequenceViewModel is FragmentationSequenceViewModel model)
                     {
@@ -333,24 +334,14 @@ namespace LcmsSpectator.ViewModels.Plots
             };
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
-            var saveAsImageCommand = ReactiveCommand.Create();
-            saveAsImageCommand.Subscribe(_ => SaveAsImageImplementation());
-            SaveAsImageCommand = saveAsImageCommand;
+            SaveAsImageCommand = ReactiveCommand.Create(SaveAsImageImplementation);
 
             // Error map command opens a new error map window and passes it the most abundant isotope peak data points
             // and the current sequence.
-            var openErrorMapCommand = ReactiveCommand.Create();
-            openErrorMapCommand.Subscribe(_ => dialogService.OpenErrorMapWindow(errorMapViewModel));
-            OpenErrorMapCommand = openErrorMapCommand;
-
-            OpenScanSelectionCommand = ReactiveCommand.Create();
-            OpenScanSelectionCommand.Subscribe(_ => OpenScanSelectionImplementation());
-
-            SaveAsTsvCommand = ReactiveCommand.Create();
-            SaveAsTsvCommand.Subscribe(_ => SaveAsTsvImplementation());
-
-            SaveToClipboardCommand = ReactiveCommand.Create();
-            SaveToClipboardCommand.Subscribe(_ => SaveToClipboardImplementation());
+            OpenErrorMapCommand = ReactiveCommand.Create(() => dialogService.OpenErrorMapWindow(errorMapViewModel));
+            OpenScanSelectionCommand = ReactiveCommand.Create(OpenScanSelectionImplementation);
+            SaveAsTsvCommand = ReactiveCommand.Create(SaveAsTsvImplementation);
+            SaveToClipboardCommand = ReactiveCommand.Create(SaveToClipboardImplementation);
         }
 
         /// <summary>
@@ -507,27 +498,27 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets a command that prompts user for file path and save plot as image.
         /// </summary>
-        public IReactiveCommand SaveAsImageCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveAsImageCommand { get; }
 
         /// <summary>
         /// Gets a command that opens error heat map and table for this spectrum and ions
         /// </summary>
-        public IReactiveCommand OpenErrorMapCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenErrorMapCommand { get; }
 
         /// <summary>
         /// Gets a command that opens the scan selection view model
         /// </summary>
-        public ReactiveCommand<object> OpenScanSelectionCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenScanSelectionCommand { get; }
 
         /// <summary>
         /// Gets a command that prompts user for file path and save spectrum as TSV to that path.
         /// </summary>
-        public ReactiveCommand<object> SaveAsTsvCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveAsTsvCommand { get; }
 
         /// <summary>
         /// Gets a command that copies the peaks in view to the user's clipboard.
         /// </summary>
-        public ReactiveCommand<object> SaveToClipboardCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveToClipboardCommand { get; }
 
         /// <summary>
         /// Build spectrum plot model.
