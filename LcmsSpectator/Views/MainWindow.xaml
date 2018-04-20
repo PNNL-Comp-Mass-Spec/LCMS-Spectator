@@ -70,11 +70,12 @@
                     </Style>
                 </xcad:DockingManager.LayoutItemContainerStyle>
                 <xcad:LayoutRoot>
-                    <xcad:LayoutPanel>
-                        <xcad:LayoutDocumentPane />
+                    <xcad:LayoutPanel Orientation="Horizontal">
                         <xcad:LayoutAnchorablePaneGroup
                             DockHeight="200"
-                            DockWidth="*"
+                            DockWidth="251"
+                            FloatingHeight="900"
+                            FloatingWidth="350"
                             Orientation="Horizontal">
                             <xcad:LayoutAnchorablePane IsMaximized="True">
                                 <xcad:LayoutAnchorable Title="Protein Tree" IsMaximized="True">
@@ -220,6 +221,7 @@
                                 </xcad:LayoutAnchorable>
                             </xcad:LayoutAnchorablePane>
                         </xcad:LayoutAnchorablePaneGroup>
+                        <xcad:LayoutDocumentPane DockWidth="*" DockHeight="*" />
                     </xcad:LayoutPanel>
                 </xcad:LayoutRoot>
             </xcad:DockingManager>

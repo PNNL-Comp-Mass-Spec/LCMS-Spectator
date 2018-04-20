@@ -10,8 +10,8 @@
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
     xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-    d:DesignHeight="300"
-    d:DesignWidth="300"
+    d:DesignHeight="800"
+    d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -43,7 +43,7 @@
                 <xcad:Office2007SilverTheme />
             </xcad:DockingManager.Theme>-->
             <xcad:LayoutRoot>
-                <xcad:LayoutPanel>
+                <xcad:LayoutPanel Orientation="Vertical">
                     <xcad:LayoutDocumentPane DockWidth="*">
                         <xcad:LayoutDocument Title="XIC View" CanClose="False">
                             <plots:XicView x:Name="XicView" DataContext="{Binding XicViewModel}" />
@@ -92,16 +92,16 @@
                         </xcad:LayoutDocument>
                     </xcad:LayoutDocumentPane>
                     <xcad:LayoutAnchorablePaneGroup
-                        DockHeight="200"
+                        DockHeight="400"
                         DockWidth="*"
-                        Orientation="Horizontal">
-                        <xcad:LayoutAnchorablePane IsMaximized="True">
-                            <xcad:LayoutAnchorable Title="Sequence View">
+                        Orientation="Vertical">
+                        <xcad:LayoutAnchorablePane IsMaximized="True" DockHeight="200" DockWidth="221" FloatingHeight="200" FloatingWidth="800">
+                            <xcad:LayoutAnchorable Title="Sequence View" FloatingHeight="200" FloatingWidth="800">
                                 <sequenceViewer:SequenceViewer x:Name="SequenceView" DataContext="{Binding SpectrumViewModel.Ms2SpectrumViewModel.SequenceViewerViewModel}" />
                             </xcad:LayoutAnchorable>
                         </xcad:LayoutAnchorablePane>
-                        <xcad:LayoutAnchorablePane IsMaximized="True">
-                            <xcad:LayoutAnchorable Title="Scan View">
+                        <xcad:LayoutAnchorablePane IsMaximized="True" DockHeight="200" DockWidth="221" FloatingHeight="200" FloatingWidth="800">
+                            <xcad:LayoutAnchorable Title="Scan View" FloatingHeight="200" FloatingWidth="800">
                                 <Grid x:Name="ScanView">
                                     <DataGrid
                                         Name="ScanDataGrid"

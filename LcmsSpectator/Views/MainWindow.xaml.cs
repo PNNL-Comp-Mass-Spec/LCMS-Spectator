@@ -45,6 +45,7 @@ namespace LcmsSpectator.Views
         /// <param name="e">The event arguments.</param>
         private void Window_OnLoaded(object sender, RoutedEventArgs e)
         {
+            /*
             var fileName = "layout.xml";
             if (File.Exists(fileName))
             {
@@ -85,6 +86,7 @@ namespace LcmsSpectator.Views
                         MessageBoxImage.Exclamation);
                 }
             }
+            */
         }
 
         /// <summary>

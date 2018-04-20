@@ -11,8 +11,6 @@ AppName=LcmsSpectator
 
 [Files]
 ; Application files
-Source: LcmsSpectator\bin\Release\layout.xml;                                DestDir: {app}
-Source: LcmsSpectator\bin\Release\layoutdoc.xml;                             DestDir: {app}
 Source: LcmsSpectator\bin\Release\LcmsSpectator.exe;                         DestDir: {app}
 Source: LcmsSpectator\bin\Release\LcmsSpectator.exe.config;                  DestDir: {app}
 

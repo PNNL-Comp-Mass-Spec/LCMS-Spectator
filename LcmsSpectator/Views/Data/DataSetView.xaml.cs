@@ -63,6 +63,7 @@ namespace LcmsSpectator.Views.Data
         /// <param name="e">The event arguments.</param>
         private void Window_OnLoaded(object sender, RoutedEventArgs e)
         {
+            /*
             var fileName = "layoutdoc.xml";
             if (File.Exists(fileName))
             {
@@ -103,6 +104,7 @@ namespace LcmsSpectator.Views.Data
                         MessageBoxImage.Exclamation);
                 }
             }
+            */
         }
 
         /// <summary>
@@ -111,14 +113,21 @@ namespace LcmsSpectator.Views.Data
         /// <param name="layout">Serialized layout string.</param>
         private void LoadLayout(string layout)
         {
-            var serializer = new XmlLayoutSerializer(AvDock);
-            using (var stream = new StreamReader(layout))
+            try
             {
-                serializer.LayoutSerializationCallback += (s, args) =>
+                var serializer = new XmlLayoutSerializer(AvDock);
+                using (var stream = new StreamReader(layout))
                 {
-                    args.Content = FindName(args.Model.ContentId);
-                };
-                serializer.Deserialize(stream);
+                    serializer.LayoutSerializationCallback += (s, args) =>
+                    {
+                        args.Content = FindName(args.Model.ContentId);
+                    };
+                    serializer.Deserialize(stream);
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Could not load layout file.", string.Empty, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
