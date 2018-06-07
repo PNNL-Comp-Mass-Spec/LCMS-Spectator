@@ -236,7 +236,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 proMexModel.ReadFeatures(filePath);
                 MaximumAbundanceThreshold = Math.Log10(proMexModel.AbsoluteAbundanceMaximum);
                 MinimumAbundanceThreshold = Math.Log10(proMexModel.AbsoluteAbundanceMinimum);
-                AbundanceThreshold = Math.Max(maximumAbundanceThreshold, minimumAbundance);
+                AbundanceThreshold = Math.Max(MaximumAbundanceThreshold, MinimumAbundance);
                 FeatureMapViewModel.Features = proMexModel.GetFeatures(
                     AbundanceThreshold,
                     PointsDisplayed).ToList();

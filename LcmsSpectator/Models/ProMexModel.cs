@@ -87,7 +87,7 @@ namespace LcmsSpectator.Models
         /// <returns>Filtered features.</returns>
         public IEnumerable<Feature> GetFeatures(double abundanceThreshold, int maxPoints)
         {
-            var maxAbundance = Math.Pow(abundanceThreshold, 10);
+            var maxAbundance = Math.Pow(10, abundanceThreshold);
             if (Features == null)
             {
                 return new List<Feature>();
