@@ -94,6 +94,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private bool shouldCombineChargeStates;
 
+        private PlotModel plotModel;
+
         /// <summary>
         /// Default constructor to support WPF design-time use
         /// </summary>
@@ -111,7 +113,7 @@ namespace LcmsSpectator.ViewModels.Plots
         public ErrorMapViewModel(IDialogService dialogService)
         {
             this.dialogService = dialogService;
-            PlotModel = new PlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.Navy };
+            plotModel = new ViewResolvingPlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.DimGray };
             selectedPeakDataPoints = new IList<PeakDataPoint>[0];
             ShouldCombineChargeStates = true;
 
@@ -129,7 +131,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 MaximumPadding = 0,
                 FontSize = 10
             };
-            PlotModel.Axes.Add(xaxis);
+            plotModel.Axes.Add(xaxis);
 
             // Init Y axis
             yaxis = new LinearAxis
@@ -145,24 +147,25 @@ namespace LcmsSpectator.ViewModels.Plots
                 MaximumPadding = 0,
                 FontSize = 10
             };
-            PlotModel.Axes.Add(yaxis);
+            plotModel.Axes.Add(yaxis);
 
             // Init Color axis
-            var minColor = OxyColor.FromRgb(127, 255, 0);
-            var maxColor = OxyColor.FromRgb(255, 0, 0);
+            var minColor = OxyColors.Navy;
+            var medColor = OxyColors.White;
+            var maxColor = OxyColors.DarkRed;
             colorAxis = new LinearColorAxis
             {
                 Title = "Error",
                 Position = AxisPosition.Right,
                 AxisDistance = -0.5,
                 AbsoluteMinimum = 0,
-                Palette = OxyPalette.Interpolate(1000, minColor, maxColor),
+                Palette = OxyPalette.Interpolate(1000, minColor, medColor, maxColor),
                 Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
                 Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
                 AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue(),
-                LowColor = OxyColors.Navy,
+                LowColor = OxyColors.DimGray,
             };
-            PlotModel.Axes.Add(colorAxis);
+            plotModel.Axes.Add(colorAxis);
 
             this.WhenAnyValue(x => x.ShouldCombineChargeStates).Subscribe(_ => SetData(selectedSequence, selectedPeakDataPoints));
 
@@ -175,7 +178,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets the plot Model for error heat map
         /// </summary>
-        public PlotModel PlotModel { get; }
+        public IPlotModel PlotModel => plotModel;
 
         /// <summary>
         /// Gets a command that prompts user for file path and save plot as image.
@@ -264,7 +267,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             // Build and invalidate erorr map plot display
             BuildErrorPlotModel(sequence, GetErrorDataArray(mostAbundantPeaks, sequence.Count));
-            PlotModel.MouseDown += MapMouseDown;
+            plotModel.MouseDown += MapMouseDown;
         }
 
         /// <summary>
@@ -281,10 +284,11 @@ namespace LcmsSpectator.ViewModels.Plots
             // initialize color axis
             ////var minColor = OxyColor.FromRgb(127, 255, 0);
             colorAxis.Minimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue();
+            colorAxis.AbsoluteMinimum = -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue();
             colorAxis.Maximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
             colorAxis.AbsoluteMaximum = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
 
-            PlotModel.Series.Clear();
+            plotModel.Series.Clear();
 
             // initialize heat map
             var heatMapSeries = new HeatMapSeries
@@ -300,10 +304,10 @@ namespace LcmsSpectator.ViewModels.Plots
                         ////"{3}: {4:0}" + Environment.NewLine +
                         "{5}: {6:0.###}ppm",
             };
-            PlotModel.Series.Add(heatMapSeries);
+            plotModel.Series.Add(heatMapSeries);
 
             xaxis.AbsoluteMaximum = sequence.Count;
-            yaxis.AbsoluteMaximum = ionTypes.Length;
+            yaxis.AbsoluteMaximum = ionTypes.Length + 1;
 
             // Set yAxis double -> string label converter function
             yaxis.LabelFormatter = y =>
@@ -334,7 +338,7 @@ namespace LcmsSpectator.ViewModels.Plots
             };
 
             // Update plot
-            PlotModel.InvalidatePlot(true);
+            plotModel.InvalidatePlot(true);
         }
 
         /// <summary>
@@ -461,10 +465,10 @@ namespace LcmsSpectator.ViewModels.Plots
                 }
 
                 DynamicResolutionPngExporter.Export(
-                    PlotModel,
+                    plotModel,
                     filePath,
-                    (int)PlotModel.Width,
-                    (int)PlotModel.Height,
+                    (int)plotModel.Width,
+                    (int)plotModel.Height,
                     OxyColors.White,
                     IcParameters.Instance.ExportImageDpi);
             }
@@ -510,7 +514,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="args">The event arguments.</param>
         private void MapMouseDown(object sender, OxyMouseEventArgs args)
         {
-            var series = PlotModel.GetSeriesFromPoint(args.Position);
+            var series = plotModel.GetSeriesFromPoint(args.Position);
             if (!(series is HeatMapSeries heatMap))
                 return;
 

@@ -206,6 +206,7 @@
     <Compile Include="ViewModels\FileSelectors\OpenDataWindowViewModel.cs" />
     <Compile Include="ViewModels\Data\ScanViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\SelectDataSetViewModel.cs" />
+    <Compile Include="ViewModels\Plots\ViewResolvingPlotModel.cs" />
     <Compile Include="ViewModels\PlotViewModel.cs" />
     <Compile Include="ViewModels\PrecursorSequenceIonViewModel.cs" />
     <Compile Include="ViewModels\SearchSettingsViewModel.cs" />
