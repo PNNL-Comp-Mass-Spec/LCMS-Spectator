@@ -9,7 +9,7 @@ Identification and target files can also be loaded to show the spectral and chro
 
 It uses [Informed-Proteomics](https://github.com/PNNL-Comp-Mass-Spec/Informed-Proteomics) for reading spectrum files and can function as a GUI for ProMex and MSPathFinder.
 
-A guide for using LCMS-Spectator can be found on our [GitHub Wiki Page](https://github.com/PNNL-Comp-Mass-Spec/LCMS-Spectator/wiki/Screenshots-with-Descriptions).
+A guide for using LCMS-Spectator can be found on our [GitHub Wiki Page](https://github.com/PNNL-Comp-Mass-Spec/LCMS-Spectator/wiki).
 
 ## Downloads
 
