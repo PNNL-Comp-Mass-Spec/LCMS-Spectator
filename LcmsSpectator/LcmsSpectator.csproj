@@ -83,7 +83,7 @@
       <HintPath>..\Library\MTDBFramework\MTDBFramework.dll</HintPath>
     </Reference>
     <Reference Include="PHRPReader">
-      <HintPath>..\Library\PHRPReader\PHRPReader.dll</HintPath>
+      <HintPath>..\Library\MTDBFramework\PHRPReader.dll</HintPath>
     </Reference>
     <Reference Include="QuadTreeLib">
       <HintPath>..\Library\QuadTreeLib\QuadTreeLib.dll</HintPath>
