@@ -37,6 +37,8 @@ namespace LcmsSpectator.ViewModels
     /// </summary>
     public class SearchSettingsViewModel : ReactiveObject
     {
+        private const bool ASYNC_SEARCH = true;
+
         /// <summary>
         /// The maximum possible tab index for the tab control.
         /// </summary>
@@ -788,34 +790,40 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>Get a launcher for TopDown MSPathFinder searches.</summary>
-        /// <param name="ms2ScanNums">The MS/MS scan numbers to restrict search to.</param>
+        /// <param name="ms2Scans">The MS/MS scan numbers to restrict search to.</param>
+        /// <param name="fastaFilePath"></param>
         /// <returns>The <see cref="InformedProteomics.TopDown.Execution.IcTopDownLauncher"/>.</returns>
-        public IcTopDownLauncher GetTopDownLauncher(IEnumerable<int> ms2ScanNums = null)
+        public IcTopDownLauncher GetTopDownLauncher(IEnumerable<int> ms2Scans, string fastaFilePath)
         {
             var searchModifications = SearchModifications.Select(searchModification => searchModification.SearchModification).ToList();
             var aminoAcidSet = new AminoAcidSet(searchModifications, maxDynamicModificationsPerSequence);
             return
                 new IcTopDownLauncher(
                     new InformedProteomics.TopDown.Execution.MsPfParameters
-                        {
-                            MinSequenceLength = MinSequenceLength,
-                            MaxSequenceLength = MaxSequenceLength,
-                            //MaxNumNTermCleavages = 1,
-                            //MaxNumCTermCleavages = 0,
-                            MinPrecursorIonCharge = MinPrecursorIonCharge,
-                            MaxPrecursorIonCharge = MaxPrecursorIonCharge,
-                            MinProductIonCharge = MinProductIonCharge,
-                            MaxProductIonCharge = MaxProductIonCharge,
-                            MinSequenceMass = MinSequenceMass,
-                            MaxSequenceMass = MaxSequenceMass,
-                           // PrecursorIonTolerancePpm = this.PrecursorIonToleranceValue,
-                            //ProductIonTolerancePpm = this.ProductIonToleranceValue,
-                            //RunTargetDecoyAnalysis = DatabaseSearchMode.Both,
-                            //SearchMode = this.SelectedSearchMode,
-                            //MaxNumThreads = 4,
-                            //ScanNumbers = ms2ScanNums,
-                            //NumMatchesPerSpectrum = this.NumMatchesPerSpectrum,
-                        });
+                    {
+                        AminoAcidSet = aminoAcidSet,
+                        MinSequenceLength = MinSequenceLength,
+                        MaxSequenceLength = MaxSequenceLength,
+                        //MaxNumNTermCleavages = 1,
+                        //MaxNumCTermCleavages = 0,
+                        MinPrecursorIonCharge = MinPrecursorIonCharge,
+                        MaxPrecursorIonCharge = MaxPrecursorIonCharge,
+                        MinProductIonCharge = MinProductIonCharge,
+                        MaxProductIonCharge = MaxProductIonCharge,
+                        MinSequenceMass = MinSequenceMass,
+                        MaxSequenceMass = MaxSequenceMass,
+                        PrecursorIonTolerancePpm = PrecursorIonToleranceValue,
+                        ProductIonTolerancePpm = ProductIonToleranceValue,
+                        //RunTargetDecoyAnalysis = DatabaseSearchMode.Both,
+                        TargetDecoySearchMode = DatabaseSearchMode.Both,
+                        InternalCleavageMode = SelectedSearchMode,
+                        //MaxNumThreads = 4,
+                        ScanNumbers = ms2Scans,
+                        NumMatchesPerSpectrum = NumMatchesPerSpectrum,
+                        SpecFilePath = SpectrumFilePath,
+                        DatabaseFilePath = fastaFilePath,
+                        OutputDir = OutputFilePath
+                    });
         }
 
         /// <summary>
@@ -969,11 +977,16 @@ namespace LcmsSpectator.ViewModels
             var lcms = await Task.Run(() => PbfLcMsRun.GetLcMsRun(SpectrumFilePath, 0, 0), runSearchCancellationToken.Token);
 
             // Get MS/MS scan numbers
-            IEnumerable<int> ms2Scans = null;
+            IEnumerable<int> ms2Scans;
             if (MaxScanNumber > 0 && (MaxScanNumber - MinScanNumber) >= 0)
             {
                 var allMs2Scans = lcms.GetScanNumbers(2);
                 ms2Scans = allMs2Scans.Where(scan => scan >= MinScanNumber && scan <= MaxScanNumber);
+            }
+            else
+            {
+                var allMs2Scans = lcms.GetScanNumbers(2);
+                ms2Scans = allMs2Scans;
             }
 
             // Create truncated FASTA
@@ -989,15 +1002,27 @@ namespace LcmsSpectator.ViewModels
             });
 
             // Run Search
-            var topDownLauncher = GetTopDownLauncher(ms2Scans);
-            runSearchTask = Task.Run(
-                                          () => topDownLauncher.RunSearch(
-                                                                          IcParameters.Instance.IonCorrelationThreshold,
-                                                                          runSearchCancellationToken.Token,
-                                                                          progress),
-                                                runSearchCancellationToken.Token);
-            await runSearchTask;
-            ////topDownLauncher.RunSearch(IcParameters.Instance.IonCorrelationThreshold);
+            var topDownLauncher = GetTopDownLauncher(ms2Scans, truncatedFastaDbFilePath);
+
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (ASYNC_SEARCH)
+            {
+                runSearchTask = Task.Run(
+                    () => topDownLauncher.RunSearch(
+                        IcParameters.Instance.IonCorrelationThreshold,
+                        runSearchCancellationToken.Token,
+                        progress),
+                    runSearchCancellationToken.Token);
+                await runSearchTask;
+            }
+            else
+#pragma warning disable 162
+            // ReSharper disable once HeuristicUnreachableCode
+            {
+                topDownLauncher.RunSearch(IcParameters.Instance.IonCorrelationThreshold);
+            }
+#pragma warning restore 162
+
             SearchRunning = false;
 
             runSearchCancellationToken = null;
