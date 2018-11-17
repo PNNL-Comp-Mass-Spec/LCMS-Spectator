@@ -2,6 +2,9 @@
 ; http://www.jrsoftware.org/isinfo.php
 
 #define ApplicationVersion GetFileVersion('..\LcmsSpectator\bin\Release\LcmsSpectator.exe')
+#if ApplicationVersion == ""
+     #error LcmsSpectator.exe was not found in the Release directory; rebuild the app in Release mode
+#endif
 
 [CustomMessages]
 AppName=LcmsSpectator
@@ -15,24 +18,31 @@ Source: LcmsSpectator\bin\Release\LcmsSpectator.exe;                         Des
 Source: LcmsSpectator\bin\Release\LcmsSpectator.exe.config;                  DestDir: {app}
 
 ; Nuget-Installed libraries
+Source: LcmsSpectator\bin\Release\alglibnet2.dll;                            DestDir: {app}
+Source: LcmsSpectator\bin\Release\CsvHelper.dll;                             DestDir: {app}
 Source: LcmsSpectator\bin\Release\GraphX.Controls.dll;                       DestDir: {app}
 Source: LcmsSpectator\bin\Release\GraphX.PCL.Common.dll;                     DestDir: {app}
 Source: LcmsSpectator\bin\Release\GraphX.PCL.Logic.dll;                      DestDir: {app}
+Source: LcmsSpectator\bin\Release\MathNet.Numerics.dll;                      DestDir: {app}
 Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.dll;          DestDir: {app}
 Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll;    DestDir: {app}
+Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.dll;     DestDir: {app}
+Source: LcmsSpectator\bin\Release\PNNLOmics.dll;                             DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.dll;                               DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.Wpf.dll;                           DestDir: {app}
+Source: LcmsSpectator\bin\Release\PRISM.dll;                                 DestDir: {app}
+Source: LcmsSpectator\bin\Release\ProteinFileReader.dll;                     DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.Data.dll;                       DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.dll;                            DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.Graphviz.dll;                   DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.Serialization.dll;              DestDir: {app}
 Source: LcmsSpectator\bin\Release\ReactiveUI.dll;                            DestDir: {app}
+Source: LcmsSpectator\bin\Release\ReactiveUI.WPF.dll;                        DestDir: {app}
+Source: LcmsSpectator\bin\Release\SAIS.dll;                                  DestDir: {app}
 Source: LcmsSpectator\bin\Release\Splat.dll;                                 DestDir: {app}
-Source: LcmsSpectator\bin\Release\System.Reactive.Core.dll;                  DestDir: {app}
-Source: LcmsSpectator\bin\Release\System.Reactive.Interfaces.dll;            DestDir: {app}
-Source: LcmsSpectator\bin\Release\System.Reactive.Linq.dll;                  DestDir: {app}
-Source: LcmsSpectator\bin\Release\System.Reactive.PlatformServices.dll;      DestDir: {app}
-Source: LcmsSpectator\bin\Release\System.Reactive.Windows.Threading.dll;     DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Drawing.Primitives.dll;             DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Reactive.dll;                       DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.ValueTuple.dll;                     DestDir: {app}
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.dll;                  DestDir: {app}
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Aero.dll;      DestDir: {app}
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Metro.dll;     DestDir: {app}
@@ -40,21 +50,17 @@ Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.VS2010.dll;    Des
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.DataGrid.dll;                    DestDir: {app}
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.Toolkit.dll;                     DestDir: {app}
 
+; SQLite
 Source: LcmsSpectator\bin\Release\System.Data.SQLite.dll;                    DestDir: {app}
 Source: LcmsSpectator\bin\Release\x64\SQLite.Interop.dll;                    DestDir: {app}\x64
 Source: LcmsSpectator\bin\Release\x86\SQLite.Interop.dll;                    DestDir: {app}\x86
 
 ; PSI_Interface
 Source: LcmsSpectator\bin\Release\PSI_Interface.dll;                         DestDir: {app}
-Source: LcmsSpectator\bin\Release\DotNetZip.dll;                             DestDir: {app}
 
 ; Separately-managed libraries
 Source: Library\QuadTreeLib\QuadTreeLib.dll;                                 DestDir: {app}
 Source: Library\MwtWinDll.dll;                                               DestDir: {app}
-
-; PNNLOmics
-Source: Library\InformedProteomics\alglibnet2.dll;                           DestDir: {app}
-Source: Library\InformedProteomics\PNNLOmics.dll;                            DestDir: {app}
 
 ; MTDBFramework
 Source: Library\MTDBFramework\FluentNHibernate.dll;                          DestDir: {app}
@@ -65,18 +71,16 @@ Source: Library\MTDBFramework\NETPrediction.dll;                             Des
 Source: Library\MTDBFramework\PHRPReader.dll;                                DestDir: {app}
 
 ; InformedProteomics
-Source: Library\InformedProteomics\InformedProteomics.Backend.dll;           DestDir: {app}
+Source: Library\InformedProteomics\InformedProteomics.Backend.dll;              DestDir: {app}
+Source: Library\InformedProteomics\InformedProteomics.Backend.Database.dll;     DestDir: {app}
+Source: Library\InformedProteomics\InformedProteomics.Backend.MassSpecData.dll; DestDir: {app}
 Source: Library\InformedProteomics\InformedProteomics.FeatureFinding.dll;    DestDir: {app}
 Source: Library\InformedProteomics\InformedProteomics.Scoring.dll;           DestDir: {app}
 Source: Library\InformedProteomics\InformedProteomics.TopDown.dll;           DestDir: {app}
-Source: Library\InformedProteomics\MathNet.Numerics.dll;                     DestDir: {app}
-Source: Library\InformedProteomics\ProteinFileReader.dll;                    DestDir: {app}
-Source: Library\InformedProteomics\SAIS.dll;                                 DestDir: {app}
 Source: Library\InformedProteomics\ThermoRawFileReader.dll;                  DestDir: {app}
 
-; Xceed Themes
-Source: Library\Theme\Xceed.Wpf.Themes.dll;                                  DestDir: {app}
-Source: Library\Theme\Xceed.Wpf.Themes.Office2007.dll;                       DestDir: {app}
+; Documentation
+Source: README.md;                                                           DestDir: {app}
 
 [Dirs]
 Name: {commonappdata}\LcmsSpectator; Flags: uninsalwaysuninstall
@@ -89,6 +93,7 @@ Name: {group}\LCMS Spectator; Filename: {app}\LcmsSpectator.exe; Comment: LCMS S
 [Tasks]
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
+
 [Setup]
 ; As AnyCPU, we can install as 32-bit or 64-bit, so allow installing on 32-bit Windows, but make sure it installs as 64-bit on 64-bit Windows
 ArchitecturesAllowed=x64 x86
