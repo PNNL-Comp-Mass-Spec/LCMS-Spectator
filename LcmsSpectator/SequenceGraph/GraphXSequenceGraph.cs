@@ -113,17 +113,17 @@ namespace LcmsSpectator.SequenceGraph
         /// <returns>Constructed GraphXSequenceGraph.</returns>
         public static GraphXSequenceGraph Create(AminoAcidSet aminoAcidSet, string annotation, IEnumerable<SearchModification> mods)
         {
-            const char Delimiter = (char)FastaDatabase.Delimiter;
+            const char Delimiter = (char)FastaDatabaseConstants.Delimiter;
             if (annotation == null
                 || !Regex.IsMatch(annotation, @"^[A-Z" + Delimiter + @"]\.[A-Z]+\.[A-Z" + Delimiter + @"]$"))
             {
                 return null;
             }
 
-            var nterm = annotation[0] == FastaDatabase.Delimiter
+            var nterm = annotation[0] == FastaDatabaseConstants.Delimiter
                                   ? AminoAcid.ProteinNTerm
                                   : AminoAcid.PeptideNTerm;
-            var cterm = annotation[annotation.Length - 1] == FastaDatabase.Delimiter
+            var cterm = annotation[annotation.Length - 1] == FastaDatabaseConstants.Delimiter
                                   ? AminoAcid.ProteinCTerm
                                   : AminoAcid.PeptideCTerm;
 

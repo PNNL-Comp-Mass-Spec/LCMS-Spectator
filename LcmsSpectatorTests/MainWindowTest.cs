@@ -1,6 +1,7 @@
-﻿namespace LcmsSpectatorTests
+﻿using InformedProteomics.Backend.SearchResults;
+
+namespace LcmsSpectatorTests
 {
-    using InformedProteomics.Backend.Results;
 
     using NUnit.Framework;
 

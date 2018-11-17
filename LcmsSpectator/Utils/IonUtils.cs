@@ -17,6 +17,7 @@ using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MathAndStats;
 using InformedProteomics.Backend.Utils;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.ViewModels.Data;

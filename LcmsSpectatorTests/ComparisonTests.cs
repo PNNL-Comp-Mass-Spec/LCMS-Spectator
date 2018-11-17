@@ -180,7 +180,7 @@ namespace LcmsSpectatorTests
         {
             var file = @"C:\Users\wilk011\Documents\DataFiles\MSPF\Ecoli_Ribosome\Ecoli_intact_UVPD-3pulse0p5mJ_05-20-2017.pbf";
             var pbfLcmsRun = PbfLcMsRun.GetLcMsRun(file);
-            var deconvoluter = new Deconvoluter(1, 20, 2, 0.1, new Tolerance(10, ToleranceUnit.Ppm));
+            var deconvoluter = new Deconvoluter(1, 20, 2, new Tolerance(10, ToleranceUnit.Ppm));
             var lcmsRunDecon = new LcmsRunDeconvoluter(pbfLcmsRun, deconvoluter, 2, 6);
             var dlcms = new DPbfLcMsRun(file, lcmsRunDecon, keepDataReaderOpen: true);
             var count = 0;

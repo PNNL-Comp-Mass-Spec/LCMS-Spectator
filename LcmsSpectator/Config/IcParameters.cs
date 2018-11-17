@@ -16,6 +16,7 @@ using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Enum;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
+using InformedProteomics.Backend.MathAndStats;
 using OxyPlot;
 using ReactiveUI;
 
@@ -63,7 +64,7 @@ namespace LcmsSpectator.Config
         private double ionCorrelationThreshold;
 
         /// <summary>
-        /// The default value to use for the <see cref="InformedProteomics.Backend.Utils.SavitzkyGolaySmoother" /> in XIC plot smoothing slider.
+        /// The default value to use for the <see cref="SavitzkyGolaySmoother" /> in XIC plot smoothing slider.
         /// </summary>
         private int pointsToSmooth;
 
@@ -229,7 +230,7 @@ namespace LcmsSpectator.Config
         }
 
         /// <summary>
-        /// Gets or sets the default value to use for the <see cref="InformedProteomics.Backend.Utils.SavitzkyGolaySmoother" /> in XIC plot smoothing slider.
+        /// Gets or sets the default value to use for the <see cref="SavitzkyGolaySmoother" /> in XIC plot smoothing slider.
         /// </summary>
         public int PointsToSmooth
         {

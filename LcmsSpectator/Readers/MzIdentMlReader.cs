@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Sequence;
-using InformedProteomics.Backend.Results;
+using InformedProteomics.Backend.SearchResults;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers.SequenceReaders;
 using PSI_Interface.IdentData;
