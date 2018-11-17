@@ -129,10 +129,10 @@ namespace LcmsSpectator.SequenceGraph
 
         private void BuildSequenceGraphLogicCore()
         {
-            const LayoutAlgorithmTypeEnum algo = LayoutAlgorithmTypeEnum.Tree;
-            var logicCore = new LogicCore { DefaultLayoutAlgorithm = algo };
+            const LayoutAlgorithmTypeEnum layoutAlgorithm = LayoutAlgorithmTypeEnum.Tree;
+            var logicCore = new LogicCore { DefaultLayoutAlgorithm = layoutAlgorithm };
 
-            logicCore.DefaultLayoutAlgorithmParams = logicCore.AlgorithmFactory.CreateLayoutParameters(algo);
+            logicCore.DefaultLayoutAlgorithmParams = logicCore.AlgorithmFactory.CreateLayoutParameters(layoutAlgorithm);
             var layoutParams = ((SimpleTreeLayoutParameters)logicCore.DefaultLayoutAlgorithmParams);
             layoutParams.Direction = LayoutDirection.LeftToRight;
             layoutParams.LayerGap = 125;

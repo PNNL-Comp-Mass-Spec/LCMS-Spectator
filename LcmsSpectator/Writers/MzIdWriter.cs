@@ -21,8 +21,9 @@ namespace LcmsSpectator.Writers
         /// </summary>
         private Dictionary<int, CV.TermInfo> accessionModMap;
 
-        public MzIdWriter(string filePath)
+        public MzIdWriter(string mzidFilePath)
         {
+            filePath = mzidFilePath;
             accessionModMap = new Dictionary<int, CV.TermInfo>();
             PopulateAccessionModMap();
         }

@@ -41,12 +41,12 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Horizontal axis of the error map plot (ion types)
         /// </summary>
-        private readonly LinearAxis xaxis;
+        private readonly LinearAxis xAxis;
 
         /// <summary>
         /// Vertical axis of error map plot (sequence residue)
         /// </summary>
-        private readonly LinearAxis yaxis;
+        private readonly LinearAxis yAxis;
 
         /// <summary>
         /// Color axis of the error map plot (peak error)
@@ -64,12 +64,12 @@ namespace LcmsSpectator.ViewModels.Plots
         private ReactiveList<PeakDataPoint> dataTable;
 
         /// <summary>
-        /// The iontype selected from the error map.
+        /// The IonType selected from the error map.
         /// </summary>
         private string selectedIonType;
 
         /// <summary>
-        /// The residue and index of the seleted item.
+        /// The residue and index of the selected item.
         /// </summary>
         private string selectedAminoAcid;
 
@@ -94,7 +94,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private bool shouldCombineChargeStates;
 
-        private PlotModel plotModel;
+        private readonly PlotModel plotModel;
 
         /// <summary>
         /// Default constructor to support WPF design-time use
@@ -118,7 +118,7 @@ namespace LcmsSpectator.ViewModels.Plots
             ShouldCombineChargeStates = true;
 
             // Init x axis
-            xaxis = new LinearAxis
+            xAxis = new LinearAxis
             {
                 Title = "Amino Acid",
                 Position = AxisPosition.Top,
@@ -131,10 +131,10 @@ namespace LcmsSpectator.ViewModels.Plots
                 MaximumPadding = 0,
                 FontSize = 10
             };
-            plotModel.Axes.Add(xaxis);
+            plotModel.Axes.Add(xAxis);
 
             // Init Y axis
-            yaxis = new LinearAxis
+            yAxis = new LinearAxis
             {
                 Title = "Ion Type",
                 Position = AxisPosition.Left,
@@ -147,7 +147,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 MaximumPadding = 0,
                 FontSize = 10
             };
-            plotModel.Axes.Add(yaxis);
+            plotModel.Axes.Add(yAxis);
 
             // Init Color axis
             var minColor = OxyColors.Navy;
@@ -306,11 +306,11 @@ namespace LcmsSpectator.ViewModels.Plots
             };
             plotModel.Series.Add(heatMapSeries);
 
-            xaxis.AbsoluteMaximum = sequence.Count;
-            yaxis.AbsoluteMaximum = ionTypes.Length + 1;
+            xAxis.AbsoluteMaximum = sequence.Count;
+            yAxis.AbsoluteMaximum = ionTypes.Length + 1;
 
             // Set yAxis double -> string label converter function
-            yaxis.LabelFormatter = y =>
+            yAxis.LabelFormatter = y =>
             {
                 if (y.Equals(0))
                 {
@@ -325,7 +325,7 @@ namespace LcmsSpectator.ViewModels.Plots
             };
 
             // Set xAxis double -> string label converter function
-            xaxis.LabelFormatter = x =>
+            xAxis.LabelFormatter = x =>
             {
                 if (x.Equals(0))
                 {

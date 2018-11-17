@@ -66,7 +66,7 @@ namespace LcmsSpectator.Readers
         public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             var dataset = await Task.Run(() => mzIdentMlReader.Read(filePath));
-            var prsms = new List<PrSm>();
+            var prsmList = new List<PrSm>();
             var sequenceReader = new SequenceReader();
 
             foreach (var evidence in dataset.Identifications)
@@ -94,11 +94,11 @@ namespace LcmsSpectator.Readers
                         UseGolfScoring = true,
                         QValue = evidence.QValue,
                     };
-                    prsms.Add(prsm);
+                    prsmList.Add(prsm);
                 }
             }
 
-            return prsms;
+            return prsmList;
         }
 
         /// <summary>
@@ -112,10 +112,9 @@ namespace LcmsSpectator.Readers
             foreach (var aa in sequence)
             {
                 sequenceStr.Append(aa.Residue);
-                if (aa is ModifiedAminoAcid)
+                if (aa is ModifiedAminoAcid modifiedAA)
                 {
-                    var modAa = aa as ModifiedAminoAcid;
-                    sequenceStr.AppendFormat("[{0}]", modAa.Modification.Name);
+                    sequenceStr.AppendFormat("[{0}]", modifiedAA.Modification.Name);
                 }
             }
 

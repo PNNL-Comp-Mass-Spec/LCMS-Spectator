@@ -72,23 +72,23 @@ namespace LcmsSpectator.Readers
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadFile(List<string> modIgnoreList = null, IProgress<double> progress = null)
+        private async Task<IEnumerable<PrSm>> ReadFile(IReadOnlyCollection<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             progress = progress ?? new Progress<double>();
             var ext = Path.GetExtension(filePath);
-            IEnumerable<PrSm> prsms;
+            IEnumerable<PrSm> prsmList;
             if (string.Equals(ext, ".tsv", StringComparison.OrdinalIgnoreCase))
             {
                 var fileInfo = new FileInfo(filePath);
                 var reader = new StreamReader(File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                prsms = await ReadTsv(reader, modIgnoreList, fileInfo.Length, progress);
-                return prsms;
+                prsmList = await ReadTsv(reader, modIgnoreList, fileInfo.Length, progress);
+                return prsmList;
             }
 
             if (string.Equals(ext, ".zip", StringComparison.OrdinalIgnoreCase))
             {
-                prsms = await ReadZip(modIgnoreList, progress);
-                return prsms;
+                prsmList = await ReadZip(modIgnoreList, progress);
+                return prsmList;
             }
 
             throw new ArgumentException(string.Format("Cannot read file with extension \"{0}\"", ext));
@@ -103,10 +103,11 @@ namespace LcmsSpectator.Readers
         /// <param name="fileSizeBytes">Size of the source file, in bytes</param>
         /// <param name="progress">Progress</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadTsv(StreamReader stream, List<string> modIgnoreList, long fileSizeBytes, IProgress<double> progress)
+        private async Task<IEnumerable<PrSm>> ReadTsv(
+            StreamReader stream, IReadOnlyCollection<string> modIgnoreList, long fileSizeBytes, IProgress<double> progress)
         {
 
-            var prsms = new List<PrSm>();
+            var prsmList = new List<PrSm>();
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
             long bytesRead = 0;
@@ -135,14 +136,14 @@ namespace LcmsSpectator.Readers
                 var idData = CreatePrSms(line, headers, modIgnoreList);
                 if (idData != null)
                 {
-                    prsms.AddRange(idData);
+                    prsmList.AddRange(idData);
                 }
 
                 progress.Report(bytesRead / (double)fileSizeBytes * 100);
             }
 
             stream.Close();
-            return prsms;
+            return prsmList;
         }
 
         /// <summary>
@@ -151,7 +152,7 @@ namespace LcmsSpectator.Readers
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <param name="progress">The progress reporter.</param>
         /// <returns>Task that creates an identification tree of MSPathFinder identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadZip(List<string> modIgnoreList, IProgress<double> progress)
+        private async Task<IEnumerable<PrSm>> ReadZip(IReadOnlyCollection<string> modIgnoreList, IProgress<double> progress)
         {
             var zipFilePath = filePath;
             var fileName = Path.GetFileNameWithoutExtension(zipFilePath);
@@ -204,7 +205,7 @@ namespace LcmsSpectator.Readers
             var score = Convert.ToDouble(parts[headers[scoreLabel]]);
 
             var proteinNames = parts[headers["Protein"]].Split(';');
-            var prsms = new List<PrSm> { Capacity = proteinNames.Length };
+            var prsmList = new List<PrSm> { Capacity = proteinNames.Length };
 
             if (modIgnoreList != null)
             {
@@ -229,10 +230,10 @@ namespace LcmsSpectator.Readers
                     ProteinDesc = parts[headers["Description"]].Split(';').FirstOrDefault(),
                     Score = Math.Round(score, 3),
                 };
-                prsms.Add(prsm);
+                prsmList.Add(prsm);
             }
 
-            return prsms;
+            return prsmList;
         }
 
         /// <summary>

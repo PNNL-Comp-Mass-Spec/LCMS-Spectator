@@ -95,8 +95,8 @@ namespace LcmsSpectator.Readers
                 var modLabel = string.Format("[{0}]", mod.Item2.Name);
                 sequenceText = sequenceText.Insert(mod.Item1, modLabel);
                 ////var aa = sequence[pos];
-                ////var modaa = new ModifiedAminoAcid(aa, mod.Item2);
-                ////sequence[pos] = modaa;
+                ////var modifiedAA = new ModifiedAminoAcid(aa, mod.Item2);
+                ////sequence[pos] = modifiedAA;
             }
 
             return sequenceText;
@@ -114,19 +114,19 @@ namespace LcmsSpectator.Readers
         {
             progress = progress ?? new Progress<double>();
             var ext = Path.GetExtension(filePath);
-            IEnumerable<PrSm> prsms;
+            IEnumerable<PrSm> prsmList;
             if (string.Equals(ext, ".tsv", StringComparison.OrdinalIgnoreCase))
             {
                 var fileInfo = new FileInfo(filePath);
                 var reader = new StreamReader(File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                prsms = await ReadTsv(reader, modIgnoreList, fileInfo.Length, progress);
-                return prsms;
+                prsmList = await ReadTsv(reader, modIgnoreList, fileInfo.Length, progress);
+                return prsmList;
             }
 
             if (string.Equals(ext, ".zip", StringComparison.OrdinalIgnoreCase))
             {
-                prsms = await ReadZip(modIgnoreList, progress);
-                return prsms;
+                prsmList = await ReadZip(modIgnoreList, progress);
+                return prsmList;
             }
 
             throw new ArgumentException(string.Format("Cannot read file with extension \"{0}\"", ext));
@@ -145,7 +145,7 @@ namespace LcmsSpectator.Readers
         private async Task<IEnumerable<PrSm>> ReadTsv(StreamReader stream, List<string> modIgnoreList, long fileSizeBytes, IProgress<double> progress)
         {
 
-            var prsms = new List<PrSm>();
+            var prsmList = new List<PrSm>();
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
             long bytesRead = 0;
@@ -174,14 +174,14 @@ namespace LcmsSpectator.Readers
                 var idData = CreatePrSms(line, headers, modIgnoreList);
                 if (idData != null)
                 {
-                    prsms.AddRange(idData);
+                    prsmList.AddRange(idData);
                 }
 
                 progress.Report(bytesRead / (double)fileSizeBytes * 100);
             }
 
             stream.Close();
-            return prsms;
+            return prsmList;
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace LcmsSpectator.Readers
             var score = Convert.ToDouble(parts[headers[scoreLabel]]);
 
             var proteinNames = parts[headers["ProteinName"]].Split(';');
-            var prsms = new List<PrSm> { Capacity = proteinNames.Length };
+            var prsmList = new List<PrSm> { Capacity = proteinNames.Length };
 
             if (modIgnoreList != null)
             {
@@ -283,10 +283,10 @@ namespace LcmsSpectator.Readers
                 {
                     prsm.QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4);
                 }
-                prsms.Add(prsm);
+                prsmList.Add(prsm);
             }
 
-            return prsms;
+            return prsmList;
         }
 
         /// <summary>

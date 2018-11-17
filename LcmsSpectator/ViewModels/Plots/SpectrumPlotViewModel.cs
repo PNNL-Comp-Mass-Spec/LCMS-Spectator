@@ -97,7 +97,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// The XAxis of spectrum PlotModel plot.
         /// </summary>
-        private LinearAxis xaxis;
+        private LinearAxis xAxis;
 
         /// <summary>
         /// A value indicating whether or not de-convoluted spectrum is showing.
@@ -117,22 +117,22 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// The minimum for the X axis of the spectrum plot.
         /// </summary>
-        private double xminimum;
+        private double xMinimum;
 
         /// <summary>
         /// The maximum for the X axis of the spectrum plot.
         /// </summary>
-        private double xmaximum;
+        private double xMaximum;
 
         /// <summary>
         /// The minimum for the X axis of the spectrum plot.
         /// </summary>
-        private double yminimum;
+        private double yMinimum;
 
         /// <summary>
         /// The maximum for the Y axis of the spectrum plot.
         /// </summary>
-        private double ymaximum;
+        private double yMaximum;
 
         /// <summary>
         /// A value indicating whether this plot should automatically
@@ -271,11 +271,11 @@ namespace LcmsSpectator.ViewModels.Plots
                     });
 
             // Update ions when relative intensity threshold changes.
-            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precRelInt =>
+            IcParameters.Instance.WhenAnyValue(x => x.PrecursorRelativeIntensityThreshold).Subscribe(precursorRelInt =>
             {
-                if (FragmentationSequenceViewModel is PrecursorSequenceIonViewModel precFragVm)
+                if (FragmentationSequenceViewModel is PrecursorSequenceIonViewModel precursorFragVm)
                 {
-                    precFragVm.RelativeIntensityThreshold = precRelInt;
+                    precursorFragVm.RelativeIntensityThreshold = precursorRelInt;
                 }
             });
 
@@ -303,10 +303,10 @@ namespace LcmsSpectator.ViewModels.Plots
             // Update plot axes when FeaturePlotXMin, YMin, XMax, and YMax change
             this.WhenAnyValue(x => x.XMinimum, x => x.XMaximum)
                 .Throttle(TimeSpan.FromSeconds(1), RxApp.TaskpoolScheduler)
-                .Where(x => !xaxis.ActualMinimum.Equals(x.Item1) || !xaxis.ActualMaximum.Equals(x.Item2))
+                .Where(x => !xAxis.ActualMinimum.Equals(x.Item1) || !xAxis.ActualMaximum.Equals(x.Item2))
                 .Subscribe(x =>
                 {
-                    xaxis.Zoom(x.Item1, x.Item2);
+                    xAxis.Zoom(x.Item1, x.Item2);
                     PlotModel.InvalidatePlot(false);
                 });
             this.WhenAnyValue(y => y.YMinimum, y => y.YMaximum)
@@ -320,10 +320,10 @@ namespace LcmsSpectator.ViewModels.Plots
                     });
 
             // Update X min and max properties when x axis is panned or zoomed
-            xaxis.AxisChanged += (o, e) =>
+            xAxis.AxisChanged += (o, e) =>
             {
-                XMinimum = Math.Round(xaxis.ActualMinimum, 3);
-                XMaximum = Math.Round(xaxis.ActualMaximum, 3);
+                XMinimum = Math.Round(xAxis.ActualMinimum, 3);
+                XMaximum = Math.Round(xAxis.ActualMaximum, 3);
             };
 
             // Update Y min and max properties when Y axis is panned or zoomed
@@ -413,8 +413,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double XMinimum
         {
-            get => xminimum;
-            set => this.RaiseAndSetIfChanged(ref xminimum, value);
+            get => xMinimum;
+            set => this.RaiseAndSetIfChanged(ref xMinimum, value);
         }
 
         /// <summary>
@@ -422,8 +422,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double XMaximum
         {
-            get => xmaximum;
-            set => this.RaiseAndSetIfChanged(ref xmaximum, value);
+            get => xMaximum;
+            set => this.RaiseAndSetIfChanged(ref xMaximum, value);
         }
 
         /// <summary>
@@ -431,8 +431,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double YMinimum
         {
-            get => yminimum;
-            set => this.RaiseAndSetIfChanged(ref yminimum, value);
+            get => yMinimum;
+            set => this.RaiseAndSetIfChanged(ref yMinimum, value);
         }
 
         /// <summary>
@@ -440,8 +440,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public double YMaximum
         {
-            get => ymaximum;
-            set => this.RaiseAndSetIfChanged(ref ymaximum, value);
+            get => yMaximum;
+            set => this.RaiseAndSetIfChanged(ref yMaximum, value);
         }
 
         /// <summary>
@@ -468,8 +468,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public LinearAxis XAxis
         {
-            get => xaxis;
-            private set => this.RaiseAndSetIfChanged(ref xaxis, value);
+            get => xAxis;
+            private set => this.RaiseAndSetIfChanged(ref xAxis, value);
         }
 
         /// <summary>
@@ -640,7 +640,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 if (filteredDeconvolutedSpectrum == null)
                 {
                     filteredDeconvolutedSpectrum = new Spectrum(spectrumToReturn.Peaks, spectrumToReturn.ScanNum);
-                    filteredDeconvolutedSpectrum.FilterNosieByIntensityHistogram();
+                    filteredDeconvolutedSpectrum.FilterNoiseByIntensityHistogram();
                     deconvolutedSpectrum = Deconvoluter.GetCombinedDeconvolutedSpectrum(
                         spectrumToReturn,
                             Constants.MinCharge,
@@ -664,7 +664,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 if (filteredSpectrum == null)
                 {
                     filteredSpectrum = new Spectrum(spectrumToReturn.Peaks, spectrumToReturn.ScanNum);
-                    filteredSpectrum.FilterNosieByIntensityHistogram();
+                    filteredSpectrum.FilterNoiseByIntensityHistogram();
                 }
 
                 spectrumToReturn = filteredSpectrum;

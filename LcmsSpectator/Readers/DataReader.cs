@@ -136,9 +136,9 @@ namespace LcmsSpectator.Readers
             // Show neighboring charge state XICs by default for MSPathFinder results
             if (toolType != null && toolType == ToolType.MsPathFinder)
             {
-                if (dataSetViewModel.XicViewModel.PrecursorPlotViewModel.FragmentationSequenceViewModel is PrecursorSequenceIonViewModel precFragSeq)
+                if (dataSetViewModel.XicViewModel.PrecursorPlotViewModel.FragmentationSequenceViewModel is PrecursorSequenceIonViewModel precursorFragSeq)
                 {
-                    precFragSeq.PrecursorViewMode = PrecursorViewMode.Charges;
+                    precursorFragSeq.PrecursorViewMode = PrecursorViewMode.Charges;
                 }
             }
 

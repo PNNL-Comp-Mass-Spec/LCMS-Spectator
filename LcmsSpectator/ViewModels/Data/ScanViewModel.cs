@@ -139,9 +139,9 @@ namespace LcmsSpectator.ViewModels.Data
 
             ExportSpectraCommand = ReactiveCommand.CreateFromTask(ExportSpectraImplementation);
             ExportPeaksCommand = ReactiveCommand.CreateFromTask(ExportPeaksImplementation);
-            ExportProteinTreeCommand = ReactiveCommand.Create(ExportProteinTreeImplentation);
+            ExportProteinTreeCommand = ReactiveCommand.Create(ExportProteinTreeImplementation);
 
-            ExportProteinTreeAsTsvCommand = ReactiveCommand.Create(ExportProteinTreeAsTsvImplentation);
+            ExportProteinTreeAsTsvCommand = ReactiveCommand.Create(ExportProteinTreeAsTsvImplementation);
 
         }
 
@@ -538,17 +538,17 @@ namespace LcmsSpectator.ViewModels.Data
             }
         }
 
-        private void ExportProteinTreeImplentation()
+        private void ExportProteinTreeImplementation()
         {
             var path = dialogService.SaveFile(".txt", "Text Files|*.txt");
             if (!string.IsNullOrEmpty(path))
             {
                 using (var writer = new StreamWriter(path))
                 {
-                    foreach (var prot in IdTree.ProteinIds)
+                    foreach (var protein in IdTree.ProteinIds)
                     {
-                        writer.WriteLine(prot.ProteinName);
-                        foreach (var proteoform in prot.Proteoforms)
+                        writer.WriteLine(protein.ProteinName);
+                        foreach (var proteoform in protein.Proteoforms)
                         {
                             writer.WriteLine("\t{0}", proteoform.Value.Annotation);
                             foreach (var charge in proteoform.Value.ChargeStates)
@@ -565,7 +565,7 @@ namespace LcmsSpectator.ViewModels.Data
             }
         }
 
-        private void ExportProteinTreeAsTsvImplentation()
+        private void ExportProteinTreeAsTsvImplementation()
         {
             var path = dialogService.SaveFile(".tsv", "Tab-separated values|*.tsv");
             if (!string.IsNullOrEmpty(path))
@@ -573,15 +573,16 @@ namespace LcmsSpectator.ViewModels.Data
                 using (var writer = new StreamWriter(path))
                 {
                     writer.WriteLine("Scan\tProtein\tProteoform\tCharge\tScore");
-                    foreach (var prot in IdTree.Proteins)
+                    foreach (var protein in IdTree.Proteins)
                     {
-                        foreach (var proteoform in prot.Value.Proteoforms)
+                        foreach (var proteoform in protein.Value.Proteoforms)
                         {
                             foreach (var charge in proteoform.Value.ChargeStates)
                             {
                                 foreach (var scan in charge.Value.PrSms)
                                 {
-                                    writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", scan.Value.Scan, prot.Key, proteoform.Value.Annotation, charge.Key, scan.Value.Score);
+                                    writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}",
+                                                     scan.Value.Scan, protein.Key, proteoform.Value.Annotation, charge.Key, scan.Value.Score);
                                 }
                             }
                         }
