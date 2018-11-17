@@ -640,9 +640,9 @@ namespace LcmsSpectator.ViewModels
             {
                 await dataReader.OpenDataSet(dataSetViewModel, rawFilePath);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                dialogService.ExceptionAlert(new Exception(string.Format("Cannot read {0}.", Path.GetFileNameWithoutExtension(rawFilePath))));
+                dialogService.ExceptionAlert(new Exception(string.Format("Cannot read {0}: {1}", Path.GetFileNameWithoutExtension(rawFilePath), ex.Message)));
                 if (DataSets.Count > 0 && DataSets.Contains(dataSetViewModel))
                 {
                     DataSets.Remove(dataSetViewModel);
