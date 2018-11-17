@@ -84,7 +84,7 @@ namespace LcmsSpectator.ViewModels
         private string truncatedFastaDbFilePath;
 
         /// <summary>
-        /// The path for the PROMEX feature file.
+        /// The path for the ProMex feature file.
         /// </summary>
         private string featureFilePath;
 
@@ -311,7 +311,7 @@ namespace LcmsSpectator.ViewModels
                             }));
 
             // Next tab command
-            NextTabCommand = ReactiveCommand.Create(() =>TabIndex++,
+            NextTabCommand = ReactiveCommand.Create(() => TabIndex++,
                     Observable.Merge(
                         new[]
                             {
@@ -507,7 +507,7 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Gets or sets the path for the PROMEX feature file.
+        /// Gets or sets the path for the ProMex feature file.
         /// </summary>
         public string FeatureFilePath
         {
@@ -1079,12 +1079,12 @@ namespace LcmsSpectator.ViewModels
                     entries = selectedEntries.Select(
                                 entry =>
                                 new FastaEntry
-                                    {
-                                        ProteinName = entry.ProteinName,
-                                        ProteinDescription = entry.ProteinDescription,
-                                        ProteinSequenceText = SelectedSequence,
-                                        Selected = true
-                                    });
+                                {
+                                    ProteinName = entry.ProteinName,
+                                    ProteinDescription = entry.ProteinDescription,
+                                    ProteinSequenceText = SelectedSequence,
+                                    Selected = true
+                                });
                     entries = new List<FastaEntry> { entries.FirstOrDefault() };
                 }
                 else if (FixedNTerm)
@@ -1094,11 +1094,11 @@ namespace LcmsSpectator.ViewModels
                               where startIndex > -1
                               let sequence = entry.ProteinSequenceText.Substring(startIndex)
                               select new FastaEntry
-                                  {
-                                      ProteinName = entry.ProteinName,
-                                      ProteinDescription = entry.ProteinDescription,
-                                      ProteinSequenceText = sequence
-                                  };
+                              {
+                                  ProteinName = entry.ProteinName,
+                                  ProteinDescription = entry.ProteinDescription,
+                                  ProteinSequenceText = sequence
+                              };
                 }
                 else if (FixedCTerm)
                 {
