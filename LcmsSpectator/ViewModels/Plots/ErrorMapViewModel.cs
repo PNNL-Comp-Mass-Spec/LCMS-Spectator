@@ -251,6 +251,7 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             // Remove all points except for most abundant isotope peaks
+            // ReSharper disable once PossibleMultipleEnumeration
             var mostAbundantPeaks = GetMostAbundantIsotopePeaks(peakDataPoints).ToArray();
 
             // No data, nothing to do
@@ -259,6 +260,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 return;
             }
 
+            // ReSharper disable once PossibleMultipleEnumeration
             selectedPeakDataPoints = peakDataPoints;
 
             // Remove NaN values for data table (only showing fragment ions found in spectrum in data table)
@@ -394,7 +396,9 @@ namespace LcmsSpectator.ViewModels.Plots
                 var ionType = dataPoint.IonType;
                 if (ShouldCombineChargeStates)
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     ionType = new IonType(ionType.Name, ionType.OffsetComposition, 1, ionType.IsPrefixIon);
+#pragma warning restore CS0618 // Type or member is obsolete
                 }
 
                 if (!dataDict.ContainsKey(ionType))

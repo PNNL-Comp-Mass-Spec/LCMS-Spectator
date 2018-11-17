@@ -3,6 +3,7 @@ using System.IO;
 
 namespace LcmsSpectator.Writers
 {
+    [Obsolete("Unused")]
     public class IdWriterFactory
     {
         public static IIdWriter GetIdWriter(string filePath)

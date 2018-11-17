@@ -8,6 +8,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -31,7 +32,10 @@ namespace LcmsSpectator.SequenceGraph
         /// <summary>
         /// The vertices selected in the sequence graph.
         /// </summary>
+        [Obsolete("Unused")]
+#pragma warning disable 649
         private List<List<DataVertex>> selectedVertices;
+#pragma warning restore 649
 
         public SequenceGraph()
         {
@@ -39,7 +43,9 @@ namespace LcmsSpectator.SequenceGraph
             Graph = new DataGraph();
             BuildSequenceGraphLogicCore();
             SelectedSequence = new Sequence(new List<AminoAcid>());
+#pragma warning disable 618
             SelectedVertices = new List<List<DataVertex>>();
+#pragma warning restore 618
             SequenceGraphArea.Loaded += SequenceGraphArea_Loaded;
             SequenceGraphArea.VertexSelected += VertexSelectedEvent;
         }
@@ -49,6 +55,8 @@ namespace LcmsSpectator.SequenceGraph
         /// <summary>
         /// Generate sequence graph from data graph.
         /// </summary>
+        [Obsolete("Unused")]
+        // ReSharper disable once UnusedMember.Local
         private void GenerateSequenceGraph()
         {
             sequenceGraph = GraphXSequenceGraph.Create(
@@ -92,16 +100,22 @@ namespace LcmsSpectator.SequenceGraph
 
             var graph = (DataGraph)SequenceGraphArea.LogicCore.Graph;
             var vertex = (DataVertex)args.VertexControl.Vertex;
+
+#pragma warning disable 618
             SelectedVertices = graph.GetAllSequencePaths(vertex, seqGraph.EndPoint);
+#pragma warning restore 618
         }
 
         /// <summary>
         /// Sets the vertices selected from the sequence graph.
         /// </summary>
+        [Obsolete("Unused")]
         private List<List<DataVertex>> SelectedVertices
         {
+            // ReSharper disable once UnusedMember.Local
             get => selectedVertices;
 
+            // ReSharper disable once ValueParameterNotUsed
             set
             {
 /*                if (_selectedVertices != null)
@@ -190,6 +204,7 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event arguments.</param>
+        [Obsolete("Unused")]
         private static void OnProteinSequencePropertyChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
         {
         }
