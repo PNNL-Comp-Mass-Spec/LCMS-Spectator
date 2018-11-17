@@ -101,7 +101,7 @@ namespace LcmsSpectator.ViewModels
             // Create command to open settings window
             OpenSettingsCommand = ReactiveCommand.Create(() => this.dialogService.OpenSettings(new SettingsViewModel(this.dialogService)));
 
-            // Create command to opne isotopic profile viewer
+            // Create command to open isotopic profile viewer
             OpenIsotopicProfileViewerCommand = ReactiveCommand.Create(OpenIsotopicProfileViewer);
 
             //this.OpenIsotopicProfileViewer(new object());

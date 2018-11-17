@@ -29,7 +29,7 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         private ProductSpectrum selectedSpectrum;
 
         /// <summary>
-        /// The fragmentation sequence model that this view model formats for displasy.
+        /// The fragmentation sequence model that this view model formats for display.
         /// </summary>
         private FragmentationSequenceViewModel fragmentationSequence;
 
@@ -86,7 +86,7 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         }
 
         /// <summary>
-        /// Gets or sets the fragmentation sequence model that this view model formats for displasy.
+        /// Gets or sets the fragmentation sequence model that this view model formats for display.
         /// </summary>
         public FragmentationSequenceViewModel FragmentationSequence
         {

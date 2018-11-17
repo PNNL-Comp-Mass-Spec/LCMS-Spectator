@@ -77,7 +77,7 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
         }
 
         /// <summary>
-        /// Gets an asynchonous command that runs the tuning process.
+        /// Gets an asynchronous command that runs the tuning process.
         /// </summary>
         public ReactiveCommand<Unit, Unit> RunTuningCommand { get; }
 

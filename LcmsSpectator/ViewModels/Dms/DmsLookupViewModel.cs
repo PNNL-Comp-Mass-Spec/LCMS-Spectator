@@ -155,7 +155,7 @@ namespace LcmsSpectator.ViewModels.Dms
                     }
                 });
 
-            // When a null data set is selected and a search has ocurred, show no results screen
+            // When a null data set is selected and a search has occurred, show no results screen
             this.WhenAnyValue(x => x.Datasets.Count, x => x.IsFirstSearch)
                 .Select(x => x.Item1 == 0 && !x.Item2)
                 .Subscribe(noResults => IsNoResultsShown = noResults);

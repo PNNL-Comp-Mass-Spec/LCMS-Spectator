@@ -200,7 +200,7 @@ namespace LcmsSpectator.SequenceGraph
             new FrameworkPropertyMetadata(OnSearchModificationsPropertyChanged));
 
         /// <summary>
-        /// Event handler triggered when the ProteinSequence depedency property is changed.
+        /// Event handler triggered when the ProteinSequence dependency property is changed.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event arguments.</param>

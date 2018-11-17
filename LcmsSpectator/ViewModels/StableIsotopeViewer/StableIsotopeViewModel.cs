@@ -101,7 +101,7 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
 
             ObservedPeaks = new ReactiveList<ListItemViewModel<PeakDataPoint>> { ChangeTrackingEnabled = true };
 
-            // Add some empty peaks initialy to peak list
+            // Add some empty peaks initially to peak list
             for (var i = 0; i < DefaultNumberOfPeakFields; i++)
             {
                 ObservedPeaks.Add(new ListItemViewModel<PeakDataPoint>(new PeakDataPoint(0, 0, 0, 0, string.Empty)));
@@ -329,7 +329,7 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
         /// <summary>
         /// Pastes delimited peak list from clipboard.
         /// Assumes M/Z is first column and Intensity is second column.
-        /// Impelementation of <see cref="PastePeaksFromClipboardCommand" />.
+        /// Implementation of <see cref="PastePeaksFromClipboardCommand" />.
         /// </summary>
         private void PastePeaksFromClipboard()
         {

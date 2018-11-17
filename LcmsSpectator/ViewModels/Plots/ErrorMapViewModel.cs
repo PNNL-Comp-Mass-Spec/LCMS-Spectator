@@ -210,7 +210,7 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Gets the iontype selected from the error map.
+        /// Gets the IonType selected from the error map.
         /// </summary>
         public string SelectedIonType
         {
@@ -219,7 +219,7 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Gets the residue and index of the seleted item.
+        /// Gets the residue and index of the selected item.
         /// </summary>
         public string SelectedAminoAcid
         {
@@ -267,7 +267,7 @@ namespace LcmsSpectator.ViewModels.Plots
             //this.DataTable = new ReactiveList<PeakDataPoint>(mostAbundantPeaks.Where(dp => !dp.Error.Equals(double.NaN)));
             DataTable = new ReactiveList<PeakDataPoint>(mostAbundantPeaks);
 
-            // Build and invalidate erorr map plot display
+            // Build and invalidate error map plot display
             BuildErrorPlotModel(sequence, GetErrorDataArray(mostAbundantPeaks, sequence.Count));
             plotModel.MouseDown += MapMouseDown;
         }
@@ -517,7 +517,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Event handler for click event. Selects data based on cell clicked in heat map.
         /// </summary>
-        /// <param name="sender">The sender heatmap plotmodel.</param>
+        /// <param name="sender">The sender HeatMap PlotModel.</param>
         /// <param name="args">The event arguments.</param>
         private void MapMouseDown(object sender, OxyMouseEventArgs args)
         {
