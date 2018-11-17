@@ -110,7 +110,7 @@ namespace LcmsSpectator.Readers
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadFile(List<string> modIgnoreList, IProgress<double> progress)
+        private async Task<IEnumerable<PrSm>> ReadFile(IReadOnlyCollection<string> modIgnoreList, IProgress<double> progress)
         {
             progress = progress ?? new Progress<double>();
             var ext = Path.GetExtension(filePath);
@@ -142,7 +142,7 @@ namespace LcmsSpectator.Readers
         /// <param name="fileSizeBytes">Size of the source file, in bytes</param>
         /// <param name="progress">Progress</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadTsv(StreamReader stream, List<string> modIgnoreList, long fileSizeBytes, IProgress<double> progress)
+        private async Task<IEnumerable<PrSm>> ReadTsv(StreamReader stream, IReadOnlyCollection<string> modIgnoreList, long fileSizeBytes, IProgress<double> progress)
         {
 
             var prsmList = new List<PrSm>();
@@ -190,7 +190,7 @@ namespace LcmsSpectator.Readers
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <param name="progress">The progress reporter.</param>
         /// <returns>Task that creates an identification tree of MSPathFinder identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadZip(List<string> modIgnoreList, IProgress<double> progress)
+        private async Task<IEnumerable<PrSm>> ReadZip(IReadOnlyCollection<string> modIgnoreList, IProgress<double> progress)
         {
             var zipFilePath = filePath;
             var fileName = Path.GetFileNameWithoutExtension(zipFilePath);

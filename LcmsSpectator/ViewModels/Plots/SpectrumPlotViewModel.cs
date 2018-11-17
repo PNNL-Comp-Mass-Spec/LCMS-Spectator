@@ -701,7 +701,7 @@ namespace LcmsSpectator.ViewModels.Plots
             return spectrumToReturn;
         }
 
-        private void SetTerminalResidues(IList<PeakDataPoint>[] dataPoints)
+        private void SetTerminalResidues(IEnumerable<IList<PeakDataPoint>> dataPoints)
         {
             var sequence = FragmentationSequenceViewModel.FragmentationSequence.Sequence;
             var residueCount = sequence.Count;

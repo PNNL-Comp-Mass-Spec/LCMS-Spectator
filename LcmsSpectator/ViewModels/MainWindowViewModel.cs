@@ -652,7 +652,7 @@ namespace LcmsSpectator.ViewModels
             return dataSetViewModel;
         }
 
-        private void RegisterUnknownModifications(IList<Modification> modifications)
+        private void RegisterUnknownModifications(IEnumerable<Modification> modifications)
         {
             var registeredNames = new HashSet<string>();
             foreach (var modification in modifications)
