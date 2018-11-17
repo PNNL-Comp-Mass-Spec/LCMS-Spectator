@@ -354,8 +354,10 @@ namespace LcmsSpectator.ViewModels.Dms
                 return null;
             }
 
-            // Find promex folder
-            var promexDir = Directory.GetDirectories(SelectedDataset.DatasetFolderPath).FirstOrDefault(d => d.Contains("ProMex"));
+            // Find the ProMex directory
+            var subdirectories = Directory.GetDirectories(SelectedDataset.DatasetFolderPath);
+            var promexDir = subdirectories.FirstOrDefault(d => d.IndexOf("ProMex", StringComparison.OrdinalIgnoreCase) >= 0);
+
             if (string.IsNullOrEmpty(promexDir))
             {
                 return null;
