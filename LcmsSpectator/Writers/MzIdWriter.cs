@@ -14,12 +14,12 @@ namespace LcmsSpectator.Writers
         /// <summary>
         /// File path to write to.
         /// </summary>
-        private string filePath;
+        private readonly string filePath;
 
         /// <summary>
         /// Maps modification numbers to accessions.
         /// </summary>
-        private Dictionary<int, CV.TermInfo> accessionModMap;
+        private readonly Dictionary<int, CV.TermInfo> accessionModMap;
 
         public MzIdWriter(string mzidFilePath)
         {
