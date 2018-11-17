@@ -310,6 +310,21 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
                 return;
             }
 
+            var observedPeaks = new List<Peak>();
+            foreach (var peak in ObservedPeaks)
+            {
+                if (peak.Item.X > 0)
+                {
+                    observedPeaks.Add(new Peak(peak.Item.X, peak.Item.Y));
+                }
+            }
+
+            if (observedPeaks.Count == 0)
+            {
+                dialogService.MessageBox("Please define the observed peaks before tuning");
+                return;
+            }
+
             // Set up concentration tuner.
             var concentrationTuner = new IsotopicConcentrationTuner
             {
@@ -317,7 +332,7 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
                 Charge = Charge,
                 Element = SelectedElement.Atom,
                 IsotopeIndex = selectedProportion.IsotopeIndex,
-                ObservedPeaks = ObservedPeaks.Select(peakDataPoint => new Peak(peakDataPoint.Item.X, peakDataPoint.Item.Y)).ToList(),
+                ObservedPeaks = observedPeaks,
                 RelativeIntensityThreshold = RelativeIntensityThreshold,
                 Tolerance = new Tolerance(ToleranceValue, ToleranceUnit)
             };
