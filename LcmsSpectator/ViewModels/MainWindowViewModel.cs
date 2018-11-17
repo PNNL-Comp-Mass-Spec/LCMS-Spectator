@@ -654,22 +654,16 @@ namespace LcmsSpectator.ViewModels
 
         private void RegisterUnknownModifications(IEnumerable<Modification> modifications)
         {
-            var registeredNames = new HashSet<string>();
             foreach (var modification in modifications)
             {
-                if (!registeredNames.Contains(modification.Name))
+                if (modification.Composition is CompositionWithDeltaMass)
                 {
-                    if (modification.Composition is CompositionWithDeltaMass)
-                    {
-                        IcParameters.Instance.RegisterModification(modification.Name, modification.Mass);
-                    }
-                    else
-                    {
-                        IcParameters.Instance.RegisterModification(modification.Name, modification.Composition);
-                    }
+                    IcParameters.Instance.RegisterModification(modification.Name, modification.Mass);
                 }
-
-                // ToDo: should we add modification.Name to registeredNames ?
+                else
+                {
+                    IcParameters.Instance.RegisterModification(modification.Name, modification.Composition);
+                }
             }
         }
 
