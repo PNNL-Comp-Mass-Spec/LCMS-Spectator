@@ -375,7 +375,7 @@ namespace LcmsSpectator.ViewModels.Data
 
             LoadProgressPercent = 0.0;
             LoadProgressStatus = "Loading...";
-            var progress = new Progress<ProgressData>(progressData =>
+            var progress = new Progress<PRISM.ProgressData>(progressData =>
             {
                 progressData.UpdateFrequencySeconds = 2;
                 if (progressData.ShouldUpdate())

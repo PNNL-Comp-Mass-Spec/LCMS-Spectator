@@ -198,7 +198,7 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
             Progress = 0.0;
 
             // Set up progress reporter
-            var progressReporter = new Progress<ProgressData>(pd => Progress = pd.Percent);
+            var progressReporter = new Progress<PRISM.ProgressData>(pd => Progress = pd.Percent);
 
             ShouldShowProgress = true;
 

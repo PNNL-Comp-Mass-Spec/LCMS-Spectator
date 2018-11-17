@@ -44,7 +44,7 @@ namespace LcmsSpectator.Writers.Exporters
             // this.tolerance = tolerance ?? new Tolerance(10, ToleranceUnit.Ppm);
         }
 
-        public void Export(IList<PeakDataPoint> peakDataPoints, IProgress<ProgressData> progress = null)
+        public void Export(IList<PeakDataPoint> peakDataPoints, IProgress<PRISM.ProgressData> progress = null)
         {
             using (var writer = new StreamWriter(outputFile))
             {
@@ -65,9 +65,9 @@ namespace LcmsSpectator.Writers.Exporters
             }
         }
 
-        public void Export(IList<PrSm> ids, IProgress<ProgressData> progress = null)
+        public void Export(IList<PrSm> ids, IProgress<PRISM.ProgressData> progress = null)
         {
-            var progressData = new ProgressData(progress);
+            var progressData = new PRISM.ProgressData(progress);
             var i = 1;
             foreach (var id in ids)
             {
@@ -77,9 +77,9 @@ namespace LcmsSpectator.Writers.Exporters
             }
         }
 
-        public async Task ExportAsync(IList<PrSm> ids, IProgress<ProgressData> progress = null)
+        public async Task ExportAsync(IList<PrSm> ids, IProgress<PRISM.ProgressData> progress = null)
         {
-            var progressData = new ProgressData(progress);
+            var progressData = new PRISM.ProgressData(progress);
             var i = 1;
             foreach (var id in ids)
             {

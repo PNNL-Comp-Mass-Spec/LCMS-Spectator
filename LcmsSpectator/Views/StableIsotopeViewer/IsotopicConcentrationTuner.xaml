@@ -89,7 +89,7 @@
                     <ProgressBar
                         Height="20"
                         Margin="10"
-                        Value="{Binding Path=Progress}" />
+                        Value="{Binding Path=Progress, Mode=OneWay}" />
                 </StackPanel>
             </Grid>
         </Border>

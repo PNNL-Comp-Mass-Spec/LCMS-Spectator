@@ -979,7 +979,7 @@ namespace LcmsSpectator.ViewModels
             // Progress updater
             SearchProgressPercent = 0.0;
             SearchProgressStatus = "Searching...";
-            var progress = new Progress<ProgressData>(progressData =>
+            var progress = new Progress<PRISM.ProgressData>(progressData =>
             {
                 SearchProgressPercent = progressData.Percent;
                 SearchProgressStatus = progressData.Status;
