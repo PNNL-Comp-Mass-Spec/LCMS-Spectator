@@ -824,6 +824,9 @@ namespace LcmsSpectator.ViewModels
         /// <returns>Path to feature file as a string.</returns>
         public string GetFeatureFilePath()
         {
+            if (string.IsNullOrWhiteSpace(SpectrumFilePath))
+                return string.Empty;
+
             var dataSetName = Path.GetFileNameWithoutExtension(SpectrumFilePath);
             return string.IsNullOrWhiteSpace(FeatureFilePath) ?
                    string.Format("{0}\\{1}.ms1ft", OutputFilePath, dataSetName) :

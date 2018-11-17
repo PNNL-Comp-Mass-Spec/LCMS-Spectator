@@ -704,16 +704,20 @@ namespace LcmsSpectator.ViewModels.Plots
         private void SetTerminalResidues(IList<PeakDataPoint>[] dataPoints)
         {
             var sequence = FragmentationSequenceViewModel.FragmentationSequence.Sequence;
+            var residueCount = sequence.Count;
+
             foreach (var dataPoint in dataPoints.SelectMany(x => x))
             {
                 if (dataPoint.IonType != null && dataPoint.IonType.Name != "Precursor")
                 {
                     var index = dataPoint.IonType.IsPrefixIon
                         ? dataPoint.Index - 1
-                        : sequence.Count - dataPoint.Index;
-                    //if (index < 0 || index > sequence.Count - 1) continue;
+                        : residueCount - dataPoint.Index;
 
-                    dataPoint.Residue = sequence[index].Residue;
+                    if (index >= 0 && index < residueCount)
+                    {
+                        dataPoint.Residue = sequence[index].Residue;
+                    }
                 }
             }
         }

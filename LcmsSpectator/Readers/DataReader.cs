@@ -163,7 +163,7 @@ namespace LcmsSpectator.Readers
             }
 
             // Open feature file
-            if (!string.IsNullOrEmpty(featureFilePath))
+            if (!string.IsNullOrEmpty(featureFilePath) && File.Exists(featureFilePath))
             {
                 ReadingFeatureFiles = true;
                 dataSetViewModel.FeatureMapViewModel.OpenFeatureFile(featureFilePath);

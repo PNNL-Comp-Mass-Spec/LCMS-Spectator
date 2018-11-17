@@ -411,12 +411,15 @@ namespace LcmsSpectator.ViewModels.Plots
                     index = sequenceLength - dataPoint.Index;
                 }
 
-                // If the ion type has multiple options, choose the best one.
-                if (points[index] == null ||
-                    double.IsNaN(points[index].Error) ||
-                    (dataPoint.Y / Math.Abs(dataPoint.Error)) > (points[index].Y / Math.Abs(points[index].Error)))
+                if (index >= 0 && index < points.Length)
                 {
-                    points[index] = dataPoint;
+                    // If the ion type has multiple options, choose the best one.
+                    if (points[index] == null ||
+                        double.IsNaN(points[index].Error) ||
+                        (dataPoint.Y / Math.Abs(dataPoint.Error)) > (points[index].Y / Math.Abs(points[index].Error)))
+                    {
+                        points[index] = dataPoint;
+                    }
                 }
             }
 
