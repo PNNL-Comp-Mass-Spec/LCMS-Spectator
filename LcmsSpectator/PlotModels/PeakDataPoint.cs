@@ -24,7 +24,7 @@ namespace LcmsSpectator.PlotModels
         /// </summary>
         /// <param name="x">The X value.</param>
         /// <param name="y">The Y value.</param>
-        /// <param name="error">The peak error.</param>
+        /// <param name="error">The peak error (can be double.NaN)</param>
         /// <param name="correlation">The Pearson correlation for the isotopic envelope this peak is a part of.</param>
         /// <param name="title">The title of this point.</param>
         public PeakDataPoint(double x, double y, double error, double correlation, string title)

@@ -17,7 +17,6 @@ using InformedProteomics.Backend.Data.Composition;
 using InformedProteomics.Backend.Data.Spectrometry;
 using InformedProteomics.Backend.MassSpecData;
 using InformedProteomics.Backend.MathAndStats;
-using InformedProteomics.Backend.Utils;
 using LcmsSpectator.Config;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.Utils;
@@ -297,11 +296,9 @@ namespace LcmsSpectator.ViewModels.Data
                     Index = Index
                 }
             };
-            IonType ionType = null;
-            if (IsFragmentIon)
-            {
-                ionType = IonType;
-            }
+
+            // If this is a fragmentation spectrum, use IonType, otherwise set ionType to null
+            var ionType = IsFragmentIon ? IonType : null;
 
             var deconvoluted = spectrum.Item2;
             Ion ion;
