@@ -568,7 +568,8 @@ namespace LcmsSpectator.ViewModels.Plots
                 spectrumDirty = false;
             }
 
-            var maxCharge = peakDataPoints.Length > 0 ? ions.Max(x => x.IonType.Charge) : 2;
+            var maxCharge = ions.Length > 0 ? ions.Max(x => x.IonType.Charge) : 2;
+
             maxCharge = Math.Max(maxCharge, 2);
             var colors = new IonColorDictionary(maxCharge);
             foreach (var points in peakDataPoints)
