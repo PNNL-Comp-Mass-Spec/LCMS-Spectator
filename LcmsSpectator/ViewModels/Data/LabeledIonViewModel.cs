@@ -297,7 +297,6 @@ namespace LcmsSpectator.ViewModels.Data
                     Index = Index
                 }
             };
-            var peakDataPoints = new List<PeakDataPoint>();
             IonType ionType = null;
             if (IsFragmentIon)
             {
@@ -310,7 +309,8 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 if (IonType.Charge > 1)
                 {
-                    return peakDataPoints; // Deconvoluted spectrum means decharged (only charge 1 ions shown)
+                    // Deconvoluted spectrum means de-charged (only charge 1 ions shown)
+                    return new List<PeakDataPoint>();
                 }
 
                 if (!IsFragmentIon)
@@ -343,7 +343,7 @@ namespace LcmsSpectator.ViewModels.Data
             }
 
             var errors = IonUtils.GetIsotopePpmError(peaks, ion, 0.1, deconvoluted);
-            peakDataPoints = new List<PeakDataPoint> { Capacity = errors.Length };
+            var peakDataPoints = new List<PeakDataPoint> { Capacity = errors.Length };
             for (var i = 0; i < errors.Length; i++)
             {
                 if (errors[i] != null)
@@ -358,8 +358,8 @@ namespace LcmsSpectator.ViewModels.Data
                 }
             }
 
-            peakDataPoints = peakDataPoints.OrderByDescending(x => x.Y).ToList();
-            return peakDataPoints;
+            var sortedPeakDataPoints = peakDataPoints.OrderByDescending(x => x.Y).ToList();
+            return sortedPeakDataPoints;
         }
 
         /// <summary>
