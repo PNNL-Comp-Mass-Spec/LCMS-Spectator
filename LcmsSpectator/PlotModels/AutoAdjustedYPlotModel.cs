@@ -9,6 +9,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System;
 using OxyPlot;
 using OxyPlot.Axes;
 
@@ -127,15 +128,30 @@ namespace LcmsSpectator.PlotModels
             lock (seriesLock)
             {
                 var maxY = 0.0;
-                foreach (var series in Series)
+
+                var attemptsRemaining = 3;
+                while (attemptsRemaining > 0)
                 {
-                    if (series is IDataPointSeries dataPointSeries)
+                    try
                     {
-                        var seriesMaxY = dataPointSeries.GetMaxYInRange(minX, maxX);
-                        if (seriesMaxY >= maxY)
+                        foreach (var series in Series)
                         {
-                            maxY = seriesMaxY;
+                            if (series is IDataPointSeries dataPointSeries)
+                            {
+                                var seriesMaxY = dataPointSeries.GetMaxYInRange(minX, maxX);
+                                if (seriesMaxY >= maxY)
+                                {
+                                    maxY = seriesMaxY;
+                                }
+                            }
                         }
+
+                        break;
+                    }
+                    catch (Exception)
+                    {
+                        // We may have had a "Series was modified" exception; try the foreach again
+                        attemptsRemaining--;
                     }
                 }
 
