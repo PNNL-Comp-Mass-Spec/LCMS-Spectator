@@ -393,6 +393,9 @@ namespace LcmsSpectator.ViewModels.Plots
             // partition data set by ion type
             foreach (var dataPoint in dataPoints)
             {
+                if (double.IsNaN(dataPoint.Error))
+                    continue;
+
                 var ionType = dataPoint.IonType;
                 if (ShouldCombineChargeStates)
                 {
