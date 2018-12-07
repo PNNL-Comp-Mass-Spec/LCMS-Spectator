@@ -365,7 +365,7 @@ namespace LcmsSpectator.ViewModels.Data
                 o =>
                 {
                     var str = o as string;
-                    return Int32.TryParse(str, out _);
+                    return int.TryParse(str, out _);
                 },
                 dialogService,
                 null,
