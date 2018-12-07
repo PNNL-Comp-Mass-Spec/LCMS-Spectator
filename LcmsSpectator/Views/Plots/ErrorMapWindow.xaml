@@ -7,13 +7,14 @@
     xmlns:oxy="http://oxyplot.org/wpf"
     xmlns:plots="clr-namespace:LcmsSpectator.Views.Plots"
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
-    xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:ErrorMapViewModel}, IsDesignTimeCreatable=True}"
-    mc:Ignorable="d"
+    xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
     Title="Error Map"
-    Width="300"
-    Height="300">
+    Width="650"
+    Height="300"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:ErrorMapViewModel},
+                                     IsDesignTimeCreatable=True}"
+    mc:Ignorable="d">
     <Window.Resources>
         <utils:DoubleToStringConverter x:Key="DoubleToStringConverter" />
     </Window.Resources>
@@ -25,6 +26,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="30" />
+
             </Grid.RowDefinitions>
 
             <xcad:DockingManager Name="AvDock">
@@ -65,14 +67,83 @@
                 </xcad:LayoutRoot>
             </xcad:DockingManager>
 
-            <CheckBox
-                Grid.Row="1"
-                Margin="0,5,0,0"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                IsChecked="{Binding ShouldCombineChargeStates}">
-                Combine Charge States
-            </CheckBox>
+            <Grid
+                Margin="1"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="155" />
+                    <ColumnDefinition Width="170" />
+                    <ColumnDefinition Width="90" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <CheckBox
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,1,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding ShouldCombineChargeStates}">
+                    Combine Charge States
+                </CheckBox>
+
+                <CheckBox
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="0,1,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    IsChecked="{Binding TableShouldIncludeUnmatched}">
+                    Table includes unmatched
+                </CheckBox>
+
+                <Label
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Margin="0,1,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center">
+                    Min Intensity:
+                </Label>
+
+                <TextBox
+                    Grid.Row="0"
+                    Grid.Column="3"
+                    Width="50"
+                    Margin="0,1,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Text="{Binding MinimumIonIntensity}" />
+
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="4"
+                    Margin="5,1,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Command="{Binding UpdateNowCommand}">
+                    Update
+                </Button>
+
+
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="5"
+                    Margin="5,1,0,0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Command="{Binding ZoomOutCommand}">
+                    Zoom out
+                </Button>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

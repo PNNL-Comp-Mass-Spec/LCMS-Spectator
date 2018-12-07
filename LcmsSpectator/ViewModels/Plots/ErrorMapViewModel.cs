@@ -64,6 +64,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private ReactiveList<PeakDataPoint> dataTable;
 
         /// <summary>
+        /// Minimum intensity of ions to include
+        /// </summary>
+        private double minimumIonIntensity;
+
+        /// <summary>
         /// The IonType selected from the error map.
         /// </summary>
         private string selectedIonType;
@@ -94,6 +99,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private bool shouldCombineChargeStates;
 
+        /// <summary>
+        /// When true, include unmatched ions in the table
+        /// </summary>
+        private bool tableShouldIncludeUnmatched;
+
         private readonly PlotModel plotModel;
 
         /// <summary>
@@ -115,7 +125,9 @@ namespace LcmsSpectator.ViewModels.Plots
             this.dialogService = dialogService;
             plotModel = new ViewResolvingPlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.DimGray };
             selectedPeakDataPoints = new IList<PeakDataPoint>[0];
+            minimumIonIntensity = 0;
             ShouldCombineChargeStates = true;
+            TableShouldIncludeUnmatched = false;
 
             // Init x axis
             xAxis = new LinearAxis
@@ -167,12 +179,18 @@ namespace LcmsSpectator.ViewModels.Plots
             };
             plotModel.Axes.Add(colorAxis);
 
-            this.WhenAnyValue(x => x.ShouldCombineChargeStates).Subscribe(_ => SetData(selectedSequence, selectedPeakDataPoints));
+            this.WhenAnyValue(x => x.ShouldCombineChargeStates).Subscribe(_ => UpdateNow());
+
+            this.WhenAnyValue(x => x.TableShouldIncludeUnmatched).Subscribe(_ => UpdateNow());
 
             // Save As Image Command requests a file path from the user and then saves the error map as an image
             SaveAsImageCommand = ReactiveCommand.Create(SaveAsImageImpl);
 
             SaveDataTableCommand = ReactiveCommand.Create(SaveDataTableImpl);
+
+            UpdateNowCommand = ReactiveCommand.Create(UpdateNow);
+
+            ZoomOutCommand = ReactiveCommand.Create(ZoomOutPlot);
         }
 
         /// <summary>
@@ -191,12 +209,31 @@ namespace LcmsSpectator.ViewModels.Plots
         public ReactiveCommand<Unit, Unit> SaveDataTableCommand { get; }
 
         /// <summary>
-        /// Gets or sets the data that is shown in the "Table" view. This excludes any fragments without data.
+        /// Gets a command that updates the data using the current minimum intensity filter
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> UpdateNowCommand { get; }
+
+        /// <summary>
+        /// Gets a command that zooms out the plot fully
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> ZoomOutCommand { get; }
+
+        /// <summary>
+        /// Gets or sets the data that is shown in the "Table" view. This optionally excludes any fragments without data.
         /// </summary>
         public ReactiveList<PeakDataPoint> DataTable
         {
             get => dataTable;
             private set => this.RaiseAndSetIfChanged(ref dataTable, value);
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the minimum intensity of ions to include
+        /// </summary>
+        public double MinimumIonIntensity
+        {
+            get => minimumIonIntensity;
+            set => this.RaiseAndSetIfChanged(ref minimumIonIntensity, value);
         }
 
         /// <summary>
@@ -263,13 +300,29 @@ namespace LcmsSpectator.ViewModels.Plots
             // ReSharper disable once PossibleMultipleEnumeration
             selectedPeakDataPoints = peakDataPoints;
 
-            // Remove NaN values for data table (only showing fragment ions found in spectrum in data table)
-            //this.DataTable = new ReactiveList<PeakDataPoint>(mostAbundantPeaks.Where(dp => !dp.Error.Equals(double.NaN)));
-            DataTable = new ReactiveList<PeakDataPoint>(mostAbundantPeaks);
+            if (TableShouldIncludeUnmatched)
+            {
+                DataTable = new ReactiveList<PeakDataPoint>(mostAbundantPeaks);
+            }
+            else
+            {
+                // Only showing fragment ions found in spectrum in data table
+                DataTable = new ReactiveList<PeakDataPoint>(mostAbundantPeaks.Where(dp => !double.IsNaN(dp.Error)));
+            }
 
             // Build and invalidate error map plot display
             BuildErrorPlotModel(sequence, GetErrorDataArray(mostAbundantPeaks, sequence.Count));
             plotModel.MouseDown += MapMouseDown;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the table of ions and errors
+        /// should include ions that did match an ion (b ion, y ion, c ion, z ion, etc.)
+        /// </summary>
+        public bool TableShouldIncludeUnmatched
+        {
+            get => tableShouldIncludeUnmatched;
+            set => this.RaiseAndSetIfChanged(ref tableShouldIncludeUnmatched, value);
         }
 
         /// <summary>
@@ -445,10 +498,9 @@ namespace LcmsSpectator.ViewModels.Plots
             foreach (var peaks in peakDataPoints)
             {
                 var peak = peaks.OrderByDescending(p => p.Y).FirstOrDefault();
-                if (peak?.IonType != null && peak.IonType.Name != "Precursor")
-                {
-                    mostAbundantPeaks.Add(peak);
-                }
+                if (peak?.IonType == null || peak.IonType.Name == "Precursor" || peak.Y < MinimumIonIntensity) continue;
+
+                mostAbundantPeaks.Add(peak);
             }
 
             return mostAbundantPeaks;
@@ -547,13 +599,24 @@ namespace LcmsSpectator.ViewModels.Plots
                 value = parts[1];
 
                 var intPart = value.Split('p')[0];
-                if (Int32.TryParse(intPart, out var result) && result < -1*IcParameters.Instance.ProductIonTolerancePpm.GetValue())
+                if (int.TryParse(intPart, out var result) && result < -1 * IcParameters.Instance.ProductIonTolerancePpm.GetValue())
                 {
                     value = "N/A";
                 }
             }
 
             SelectedValue = value;
+        }
+
+        private void UpdateNow()
+        {
+            SetData(selectedSequence, selectedPeakDataPoints);
+        }
+
+        private void ZoomOutPlot()
+        {
+            plotModel.ResetAllAxes();
+            plotModel.InvalidatePlot(true);
         }
     }
 }
