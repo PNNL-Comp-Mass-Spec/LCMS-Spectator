@@ -251,6 +251,10 @@ namespace LcmsSpectator.Models
 
                         this.RaisePropertyChanged();
                     }
+                    else
+                    {
+                        sequenceText = value; // TODO: add a warning marker
+                    }
                 }
             }
         }
@@ -463,6 +467,7 @@ namespace LcmsSpectator.Models
             }
             catch (Exception)
             {
+                // TODO: return some kind of placeholder...
                 return null;
             }
         }

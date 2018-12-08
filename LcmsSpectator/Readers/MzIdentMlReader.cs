@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.SearchResults;
+using LcmsSpectator.Config;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers.SequenceReaders;
 using PSI_Interface.IdentData;
@@ -68,6 +69,23 @@ namespace LcmsSpectator.Readers
             var dataset = await Task.Run(() => mzIdentMlReader.Read(filePath));
             var prsmList = new List<PrSm>();
             var sequenceReader = new SequenceReader();
+
+            foreach (var mod in dataset.SearchModifications)
+            {
+                if (mod.Name.Equals("unknown modification", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (Modification.Get(mod.Name) == null)
+                {
+                    // Add the modification to the list, with an unspecified accession number
+                    var modData = new Modification(0, mod.Mass, mod.Name);
+                    Modification.Register(modData);
+                    // Could use IcParameters.Instance.RegisterModification, but we want to support whatever the name in the file is, regardless of if the mass is a duplicate.
+                    IcParameters.Instance.RegisteredModifications.Add(modData);
+                }
+            }
 
             foreach (var evidence in dataset.Identifications)
             {
