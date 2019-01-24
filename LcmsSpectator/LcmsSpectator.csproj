@@ -171,6 +171,8 @@
     <Compile Include="Utils\ChargeToStringConverter.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\DynamicResolutionPngExporter.cs" />
+    <Compile Include="Utils\EnumCheckedConverter.cs" />
+    <Compile Include="Utils\EnumDescriptionConverter.cs" />
     <Compile Include="Utils\FileConstants.cs" />
     <Compile Include="Utils\IonUtils.cs" />
     <Compile Include="Utils\ScoreToStringConverter.cs" />
