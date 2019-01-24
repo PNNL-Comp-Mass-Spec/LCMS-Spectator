@@ -5,17 +5,22 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
     xmlns:wpf="http://oxyplot.org/wpf"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:SpectrumViewModel},
+                                     IsDesignTimeCreatable=True}"
     d:DesignHeight="300"
     d:DesignWidth="900"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:SpectrumViewModel}, IsDesignTimeCreatable=True}"
     Background="White"
     mc:Ignorable="d">
+
     <UserControl.Resources>
         <utils:NeutralLossToStringConverter x:Key="NeutralLossToString" />
+        <utils:EnumDescriptionConverter x:Key="EnumDescriptionConverter" />
+        <utils:EnumCheckedConverter x:Key="EnumCheckedConverter" />
     </UserControl.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="75*" />
@@ -101,10 +106,33 @@
                             Header="Show _Unexplained Peaks"
                             IsCheckable="True"
                             IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
-                        <MenuItem
-                            Header="Show Only _Top 20 Peaks"
-                            IsCheckable="True"
-                            IsChecked="{Binding ShowOnlyTop20Peaks, Mode=TwoWay}" />
+
+                        <MenuItem Header="Show Top N Peaks" ItemsSource="{Binding PeakFilterModeList}">
+                            <MenuItem.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- Menu item header bound to enum converter -->
+                                    <!-- IsChecked bound to current selection -->
+                                    <!-- Toggle bound to a command, setting current selection -->
+                                    <MenuItem
+                                        Width="150"
+                                        Command="{Binding DataContext.TogglePeakFilterModeCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                        CommandParameter="{Binding}"
+                                        Header="{Binding Path=., Converter={StaticResource EnumDescriptionConverter}}"
+                                        IsCheckable="True">
+                                        <MenuItem.IsChecked>
+                                            <MultiBinding
+                                                Converter="{StaticResource EnumCheckedConverter}"
+                                                Mode="OneWay"
+                                                NotifyOnSourceUpdated="True"
+                                                UpdateSourceTrigger="PropertyChanged">
+                                                <Binding Path="DataContext.PeakFilterMode" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}" />
+                                                <Binding Path="." />
+                                            </MultiBinding>
+                                        </MenuItem.IsChecked>
+                                    </MenuItem>
+                                </DataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
                         <MenuItem Command="{Binding OpenErrorMapCommand}" Header="Open _Error/Coverage Map" />
                         <MenuItem
                             Name="StartMsPfSearch"

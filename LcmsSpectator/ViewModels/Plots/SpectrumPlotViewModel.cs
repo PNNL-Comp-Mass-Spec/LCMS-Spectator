@@ -10,6 +10,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -38,6 +39,50 @@ namespace LcmsSpectator.ViewModels.Plots
     public class SpectrumPlotViewModel : ReactiveObject
     {
         /// <summary>
+        /// Used to filter which peaks are shown in the fragmentation spectrum
+        /// </summary>
+        public enum PeakFilterModes
+        {
+
+            /// <summary>
+            /// Display all peaks
+            /// </summary>
+            [Description("All")]
+            All = -1,
+
+            /// <summary>
+            /// Display the top 20 peaks
+            /// </summary>
+            [Description("20")]
+            Top20 = 20,
+
+            /// <summary>
+            /// Display the top 100 peaks
+            /// </summary>
+            [Description("100")]
+            Top100 = 100,
+
+            /// <summary>
+            /// Display the top 500 peaks
+            /// </summary>
+            [Description("500")]
+            Top500 = 500,
+
+            /// <summary>
+            /// Display the top 1000 peaks
+            /// </summary>
+            [Description("1000")]
+            Top1000 = 1000,
+
+            /// <summary>
+            /// Display the top 2500 peaks
+            /// </summary>
+            [Description("2500")]
+            Top2500 = 2500
+
+        }
+
+        /// <summary>
         /// Dialog service for opening dialogs from view model.
         /// </summary>
         private readonly IMainDialogService dialogService;
@@ -60,7 +105,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private AutoAdjustedYPlotModel plotModel;
 
         /// <summary>
-        /// // Tracks whether or not the spectrum has changed
+        /// Tracks whether or not the spectrum has changed
         /// </summary>
         private bool spectrumDirty;
 
@@ -141,6 +186,16 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool autoAdjustYAxis;
 
         /// <summary>
+        /// Most recent scan number when GetSpectrum() was called
+        /// </summary>
+        private int mostRecentScanNum;
+
+        /// <summary>
+        /// Most recent peak filter mode when GetSpectrum() was called
+        /// </summary>
+        private PeakFilterModes mostRecentPeakFilterMode = PeakFilterModes.All;
+
+        /// <summary>
         /// A value indicating whether the manual adjustment text boxes should be displayed.
         /// </summary>
         private bool showManualAdjustment;
@@ -152,9 +207,9 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showUnexplainedPeaks;
 
         /// <summary>
-        /// A value indicating whether only the top 20 intensity peaks should be shown in the spectrum.
+        /// A value indicating whether to show all peaks in a spectrum, or the top N peaks (sorted by intensity)
         /// </summary>
-        private bool showOnlyTop20Peaks;
+        private PeakFilterModes peakFilterMode;
 
         /// <summary>
         /// The title of spectrum plot.
@@ -192,6 +247,11 @@ namespace LcmsSpectator.ViewModels.Plots
             ShowUnexplainedPeaks = true;
             ShowFilteredSpectrum = false;
             ShowDeconvolutedSpectrum = false;
+
+            PeakFilterModeList = new ReactiveList<PeakFilterModes>(Enum.GetValues(typeof(PeakFilterModes)).Cast<PeakFilterModes>());
+
+            PeakFilterMode = PeakFilterModes.Top1000;
+
             AutoAdjustYAxis = true;
             Title = string.Empty;
             XAxis = new LinearAxis
@@ -200,6 +260,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 StringFormat = "0.###",
                 Position = AxisPosition.Bottom,
             };
+
             PlotModel = new AutoAdjustedYPlotModel(XAxis, multiplier)
             {
                 IsLegendVisible = false,
@@ -236,7 +297,7 @@ namespace LcmsSpectator.ViewModels.Plots
                               x => x.ShowDeconvolutedIons,
                               x => x.ShowFilteredSpectrum,
                               x => x.ShowUnexplainedPeaks,
-                              x => x.ShowOnlyTop20Peaks)
+                              x => x.PeakFilterMode)
                 .Where(x => x.Item1 != null && x.Item2 != null)
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
                 .SelectMany(async x =>
@@ -342,6 +403,7 @@ namespace LcmsSpectator.ViewModels.Plots
             OpenScanSelectionCommand = ReactiveCommand.Create(OpenScanSelectionImplementation);
             SaveAsTsvCommand = ReactiveCommand.Create(SaveAsTsvImplementation);
             SaveToClipboardCommand = ReactiveCommand.Create(SaveToClipboardImplementation);
+            TogglePeakFilterModeCommand = ReactiveCommand.Create<PeakFilterModes>(arg => PeakFilterMode = arg);
         }
 
         /// <summary>
@@ -372,13 +434,15 @@ namespace LcmsSpectator.ViewModels.Plots
             set => this.RaiseAndSetIfChanged(ref showUnexplainedPeaks, value);
         }
 
+        public IReadOnlyReactiveList<PeakFilterModes> PeakFilterModeList { get; }
+
         /// <summary>
-        /// Gets or sets a value indicating whether only the top 20 intensity peaks should be shown in the spectrum.
+        /// Gets or sets a value indicating whether to show all peaks in a spectrum, or the top N peaks (sorted by intensity)
         /// </summary>
-        public bool ShowOnlyTop20Peaks
+        public PeakFilterModes PeakFilterMode
         {
-            get => showOnlyTop20Peaks;
-            set => this.RaiseAndSetIfChanged(ref showOnlyTop20Peaks, value);
+            get => peakFilterMode;
+            set => this.RaiseAndSetIfChanged(ref peakFilterMode, value);
         }
 
         /// <summary>
@@ -519,6 +583,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Gets a command that copies the peaks in view to the user's clipboard.
         /// </summary>
         public ReactiveCommand<Unit, Unit> SaveToClipboardCommand { get; }
+
+        public ReactiveCommand<PeakFilterModes, Unit> TogglePeakFilterModeCommand { get; }
 
         /// <summary>
         /// Build spectrum plot model.
@@ -693,13 +759,20 @@ namespace LcmsSpectator.ViewModels.Plots
                 spectrumToReturn = deconvolutedSpectrum;
             }
 
-            if (ShowOnlyTop20Peaks)
+            if (mostRecentScanNum != Spectrum.ScanNum || mostRecentPeakFilterMode != PeakFilterMode)
             {
-                var top20Peaks = spectrumToReturn.Peaks.OrderByDescending(p => p.Intensity).Take(20).OrderBy(p => p.Mz).ToList();
-                spectrumToReturn = new Spectrum(top20Peaks, spectrumToReturn.ScanNum);
+                mostRecentScanNum = Spectrum.ScanNum;
+                mostRecentPeakFilterMode = PeakFilterMode;
+                spectrumDirty = true;
             }
 
-            return spectrumToReturn;
+            if (PeakFilterMode == PeakFilterModes.All)
+                return spectrumToReturn;
+
+            var numPeaksToShow = (int)PeakFilterMode;
+
+            var topNPeaks = spectrumToReturn.Peaks.OrderByDescending(p => p.Intensity).Take(numPeaksToShow).OrderBy(p => p.Mz).ToList();
+            return new Spectrum(topNPeaks, spectrumToReturn.ScanNum);
         }
 
         private void SetTerminalResidues(IEnumerable<IList<PeakDataPoint>> dataPoints)
