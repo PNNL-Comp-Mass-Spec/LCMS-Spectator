@@ -114,35 +114,51 @@ namespace LcmsSpectator.Models
             var sequence = labelModifications == null ? Sequence : IonUtils.GetHeavySequence(Sequence, labelModifications);
 
             var precursorIon = IonUtils.GetPrecursorIon(sequence, Charge);
-            lock (cacheLock)
-            {
-                foreach (var ionType in ionTypes)
-                {
-                    var ionFragments = new List<LabeledIonViewModel>();
-                    for (var i = 1; i < Sequence.Count; i++)
-                    {
-                        var startIndex = ionType.IsPrefixIon ? 0 : i;
-                        var length = ionType.IsPrefixIon ? i : sequence.Count - i;
-                        var fragment = new Sequence(Sequence.GetRange(startIndex, length));
-                        var ions = ionType.GetPossibleIons(fragment);
 
-                        foreach (var ion in ions)
+            var tasks = new List<Task<object>>();
+
+            // Define a delegate that prints and returns the system tick count
+            Func<object, List<LabeledIonViewModel>> action = (object type) =>
+            {
+                IonType iType = (IonType)type;
+                var ionFragments = new List<LabeledIonViewModel>();
+                for (var i = 1; i < Sequence.Count; i++)
+                {
+                    var startIndex = iType.IsPrefixIon ? 0 : i;
+                    var length = iType.IsPrefixIon ? i : sequence.Count - i;
+                    var fragment = new Sequence(Sequence.GetRange(startIndex, length));
+                    var ions = iType.GetPossibleIons(fragment);
+                    foreach (var ion in ions)
+                    {
+                        lock (cacheLock)
                         {
-                            var labeledIonViewModel = fragmentCache.Get(new Tuple<Composition, IonType>(ion.Composition, ionType));
+                            var labeledIonViewModel = fragmentCache.Get(new Tuple<Composition, IonType>(ion.Composition, iType));
                             labeledIonViewModel.Index = length;
                             labeledIonViewModel.PrecursorIon = precursorIon;
 
                             ionFragments.Add(labeledIonViewModel);
                         }
-
-                        if (!ionType.IsPrefixIon)
-                        {
-                            ionFragments.Reverse();
-                        }
                     }
 
-                    fragmentLabelList.AddRange(ionFragments);
+                    if (!iType.IsPrefixIon)
+                    {
+                        ionFragments.Reverse();
+                    }
                 }
+                return ionFragments;
+            };
+
+            foreach (var ionType in ionTypes)
+            {
+                tasks.Add(Task<object>.Factory.StartNew(action, ionType));
+            }
+
+            Task.WaitAll(tasks.ToArray());
+
+            foreach (Task<object> task in tasks)
+            {
+                List<LabeledIonViewModel> list = (List<LabeledIonViewModel>)task.Result;
+                fragmentLabelList.AddRange(list);
             }
 
             return fragmentLabelList;
