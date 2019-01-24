@@ -5,11 +5,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Modifications"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:CustomModificationViewModel}, IsDesignTimeCreatable=True}"
-    mc:Ignorable="d"
     Title="CustomModificationView"
     Width="500"
-    Height="260">
+    Height="260"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:CustomModificationViewModel},
+                                     IsDesignTimeCreatable=True}"
+    mc:Ignorable="d">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />

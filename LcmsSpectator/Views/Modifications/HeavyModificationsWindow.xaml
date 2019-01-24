@@ -6,11 +6,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:modifications="clr-namespace:LcmsSpectator.Views.Modifications"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Modifications"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:HeavyModificationsWindowViewModel}, IsDesignTimeCreatable=True}"
-    mc:Ignorable="d"
     Title="Heavy Modifications"
     Width="675"
-    Height="300">
+    Height="300"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:HeavyModificationsWindowViewModel},
+                                     IsDesignTimeCreatable=True}"
+    mc:Ignorable="d">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="100*" />

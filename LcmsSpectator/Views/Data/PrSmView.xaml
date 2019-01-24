@@ -6,9 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
     xmlns:viewModels="clr-namespace:LcmsSpectator.Models"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:PrSm},
+                                     IsDesignTimeCreatable=True}"
     d:DesignHeight="200"
     d:DesignWidth="900"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:PrSm}, IsDesignTimeCreatable=True}"
     mc:Ignorable="d">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />

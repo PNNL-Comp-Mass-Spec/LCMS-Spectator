@@ -4,11 +4,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:wpf="http://oxyplot.org/wpf"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
+    xmlns:wpf="http://oxyplot.org/wpf"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:XicViewModel},
+                                     IsDesignTimeCreatable=True}"
     d:DesignHeight="500"
     d:DesignWidth="500"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:XicViewModel}, IsDesignTimeCreatable=True}"
     Background="White"
     mc:Ignorable="d">
     <Grid>

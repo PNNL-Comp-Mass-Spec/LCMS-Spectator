@@ -6,7 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:oxy="http://oxyplot.org/wpf"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:ErrorMapViewModel}, IsDesignTimeCreatable=True}"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:ErrorMapViewModel},
+                                     IsDesignTimeCreatable=True}"
     d:DesignHeight="300"
     d:DesignWidth="300"
     mc:Ignorable="d">

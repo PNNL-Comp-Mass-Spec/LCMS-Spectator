@@ -5,11 +5,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.FileSelectors"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:OpenDataWindowViewModel}, IsDesignTimeCreatable=True}"
-    mc:Ignorable="d"
     Title="Open Data Set"
     Width="610"
-    Height="300">
+    Height="300"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:OpenDataWindowViewModel},
+                                     IsDesignTimeCreatable=True}"
+    mc:Ignorable="d">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />

@@ -7,11 +7,12 @@
     xmlns:oxy="http://oxyplot.org/wpf"
     xmlns:stableIsotopeViewer="clr-namespace:LcmsSpectator.ViewModels.StableIsotopeViewer"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-    d:DataContext="{d:DesignInstance {x:Type stableIsotopeViewer:IsotopicConcentrationTunerViewModel}, IsDesignTimeCreatable=True}"
-    mc:Ignorable="d"
     Title="{Binding Title}"
     Width="600"
-    Height="350">
+    Height="350"
+    d:DataContext="{d:DesignInstance {x:Type stableIsotopeViewer:IsotopicConcentrationTunerViewModel},
+                                     IsDesignTimeCreatable=True}"
+    mc:Ignorable="d">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>

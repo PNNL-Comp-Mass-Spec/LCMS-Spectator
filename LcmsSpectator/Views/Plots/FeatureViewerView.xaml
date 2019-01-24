@@ -5,12 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
+    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
     xmlns:wpf="http://oxyplot.org/wpf"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-    xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:FeatureViewerViewModel},
+                                     IsDesignTimeCreatable=True}"
     d:DesignHeight="300"
     d:DesignWidth="1100"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:FeatureViewerViewModel}, IsDesignTimeCreatable=True}"
     Background="White"
     mc:Ignorable="d">
     <UserControl.Resources>

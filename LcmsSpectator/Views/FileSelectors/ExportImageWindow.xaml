@@ -5,11 +5,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.FileSelectors"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:ExportImageViewModel}, IsDesignTimeCreatable=True}"
-    mc:Ignorable="d"
     Title="Export Image"
     Width="600"
-    Height="250">
+    Height="250"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:ExportImageViewModel},
+                                     IsDesignTimeCreatable=True}"
+    mc:Ignorable="d">
     <Grid Margin="15">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />

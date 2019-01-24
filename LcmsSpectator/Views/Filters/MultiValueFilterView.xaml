@@ -5,11 +5,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Filters"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:MultiValueFilterViewModel}, IsDesignTimeCreatable=True}"
-    mc:Ignorable="d"
     Title="MultiValueFilterView"
     Width="400"
-    Height="400">
+    Height="400"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:MultiValueFilterViewModel},
+                                     IsDesignTimeCreatable=True}"
+    mc:Ignorable="d">
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="10*" />

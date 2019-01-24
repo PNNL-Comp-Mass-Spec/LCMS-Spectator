@@ -7,9 +7,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:utils="clr-namespace:LcmsSpectator.Utils"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Data"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:IonTypeSelectorViewModel},
+                                     IsDesignTimeCreatable=True}"
     d:DesignHeight="300"
     d:DesignWidth="300"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:IonTypeSelectorViewModel}, IsDesignTimeCreatable=True}"
     mc:Ignorable="d">
     <UserControl.Resources>
         <utils:NeutralLossToStringConverter x:Key="NeutralLossToString" />

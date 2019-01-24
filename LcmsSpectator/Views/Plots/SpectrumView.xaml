@@ -110,9 +110,9 @@
                         <MenuItem Header="Show Top N Peaks" ItemsSource="{Binding PeakFilterModeList}">
                             <MenuItem.ItemTemplate>
                                 <DataTemplate>
-                                    <!-- Menu item header bound to enum converter -->
-                                    <!-- IsChecked bound to current selection -->
-                                    <!-- Toggle bound to a command, setting current selection -->
+                                    <!--  Menu item header bound to enum converter  -->
+                                    <!--  IsChecked bound to current selection  -->
+                                    <!--  Toggle bound to a command, setting current selection  -->
                                     <MenuItem
                                         Width="150"
                                         Command="{Binding DataContext.TogglePeakFilterModeCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"

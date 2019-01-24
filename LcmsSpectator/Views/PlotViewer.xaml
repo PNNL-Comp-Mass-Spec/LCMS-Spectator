@@ -6,9 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:oxy="http://oxyplot.org/wpf"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels"
+    d:DataContext="{d:DesignInstance {x:Type viewModels:PlotViewModel},
+                                     IsDesignTimeCreatable=True}"
     d:DesignHeight="300"
     d:DesignWidth="300"
-    d:DataContext="{d:DesignInstance {x:Type viewModels:PlotViewModel}, IsDesignTimeCreatable=True}"
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
