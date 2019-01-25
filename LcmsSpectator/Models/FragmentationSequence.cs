@@ -14,6 +14,8 @@ namespace LcmsSpectator.Models
 {
     public class FragmentationSequence
     {
+        private const bool USE_THREADING = true;
+
         /// <summary>
         /// Lock for thread-safe access to fragmentIonResultCache
         /// </summary>
@@ -136,8 +138,19 @@ namespace LcmsSpectator.Models
 
                 var precursorIon = IonUtils.GetPrecursorIon(sequence, Charge);
 
+
+                var parallelOptions = new ParallelOptions();
+
+#pragma warning disable 162
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                if (!USE_THREADING)
+                {
+                    parallelOptions.MaxDegreeOfParallelism = 1;
+                }
+#pragma warning restore 162
+
                 // Automatically break up the ionTypes into groups and process in parallel
-                Parallel.ForEach(ionTypes, ionType =>
+                Parallel.ForEach(ionTypes, parallelOptions, ionType =>
                 {
                     var ionFragments = new List<LabeledIonViewModel>();
                     for (var i = 1; i < Sequence.Count; i++)
