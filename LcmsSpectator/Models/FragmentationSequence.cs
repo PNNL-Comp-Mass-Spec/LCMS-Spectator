@@ -15,14 +15,14 @@ namespace LcmsSpectator.Models
     public class FragmentationSequence
     {
         /// <summary>
-        /// Lock for thread-safe access to caches.
+        /// Lock for thread-safe access to fragmentIonResultCache
         /// </summary>
-        private readonly object cacheLock;
+        private readonly object fragmentIonResultCacheLock = new object();
 
         /// <summary>
-        /// Cache for previously calculated fragment ions for a particular composition and ion type.
+        /// Cache for previously calculated fragment ions for a particular set of ion types and fixed modifications
         /// </summary>
-        private readonly MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel> fragmentCache;
+        private readonly MemoizingMRUCache<FragmentLabelGenerationParameters, FragmentLabelResultData> fragmentIonResultCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FragmentationSequence"/> class.
@@ -33,13 +33,12 @@ namespace LcmsSpectator.Models
         /// <param name="activationMethod">The Activation Method.</param>
         public FragmentationSequence(Sequence sequence, int charge, ILcMsRun lcms, ActivationMethod activationMethod)
         {
-            cacheLock = new object();
-            fragmentCache = new MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel>(GetLabeledIonViewModel, 1000);
-
             Sequence = sequence;
             Charge = charge;
             LcMsRun = lcms;
             ActivationMethod = activationMethod;
+
+            fragmentIonResultCache = new MemoizingMRUCache<FragmentLabelGenerationParameters, FragmentLabelResultData>(GetFragmentLabelResultData, 6);
         }
 
         /// <summary>
@@ -105,63 +104,65 @@ namespace LcmsSpectator.Models
         /// <returns>A list of fragment labeled ions.</returns>
         public List<LabeledIonViewModel> GetFragmentLabels(IList<IonType> ionTypes, SearchModification[] labelModifications = null)
         {
-            var fragmentLabelList = new List<LabeledIonViewModel> { Capacity = Sequence.Count * ionTypes.Count * Charge };
             if (Sequence.Count < 1 || LcMsRun == null)
             {
-                return fragmentLabelList;
+                return new List<LabeledIonViewModel>(0);
             }
 
-            var sequence = labelModifications == null ? Sequence : IonUtils.GetHeavySequence(Sequence, labelModifications);
-
-            var precursorIon = IonUtils.GetPrecursorIon(sequence, Charge);
-
-            var tasks = new List<Task<object>>();
-
-            // Define a delegate that prints and returns the system tick count
-            Func<object, List<LabeledIonViewModel>> action = (object type) =>
+            FragmentLabelResultData resultCache;
+            lock (fragmentIonResultCacheLock)
             {
-                IonType iType = (IonType)type;
-                var ionFragments = new List<LabeledIonViewModel>();
-                for (var i = 1; i < Sequence.Count; i++)
+                var key = new FragmentLabelGenerationParameters(ionTypes, labelModifications);
+                resultCache = fragmentIonResultCache.Get(key);
+            }
+
+            lock (resultCache.ComputeLock)
+            {
+                if (resultCache.ResultsComputed)
                 {
-                    var startIndex = iType.IsPrefixIon ? 0 : i;
-                    var length = iType.IsPrefixIon ? i : sequence.Count - i;
-                    var fragment = new Sequence(Sequence.GetRange(startIndex, length));
-                    var ions = iType.GetPossibleIons(fragment);
-                    foreach (var ion in ions)
+                    return resultCache.Results.ToList();
+                }
+
+                var fragmentListLock = new object();
+                var fragmentLabelList = resultCache.Results;
+                resultCache.ResultsComputed = true;
+
+                var sequence = labelModifications == null ? Sequence : IonUtils.GetHeavySequence(Sequence, labelModifications);
+
+                var precursorIon = IonUtils.GetPrecursorIon(sequence, Charge);
+
+                Parallel.ForEach(ionTypes, ionType =>
+                {
+                    var ionFragments = new List<LabeledIonViewModel>();
+                    for (var i = 1; i < Sequence.Count; i++)
                     {
-                        lock (cacheLock)
+                        var startIndex = ionType.IsPrefixIon ? 0 : i;
+                        var length = ionType.IsPrefixIon ? i : sequence.Count - i;
+                        var fragment = new Sequence(Sequence.GetRange(startIndex, length));
+                        var ions = ionType.GetPossibleIons(fragment);
+                        foreach (var ion in ions)
                         {
-                            var labeledIonViewModel = fragmentCache.Get(new Tuple<Composition, IonType>(ion.Composition, iType));
+                            var labeledIonViewModel = new LabeledIonViewModel(ion.Composition, ionType, true, LcMsRun);
                             labeledIonViewModel.Index = length;
                             labeledIonViewModel.PrecursorIon = precursorIon;
 
                             ionFragments.Add(labeledIonViewModel);
                         }
+
+                        if (!ionType.IsPrefixIon)
+                        {
+                            ionFragments.Reverse();
+                        }
                     }
 
-                    if (!iType.IsPrefixIon)
+                    lock (fragmentListLock)
                     {
-                        ionFragments.Reverse();
+                        fragmentLabelList.AddRange(ionFragments);
                     }
-                }
-                return ionFragments;
-            };
+                });
 
-            foreach (var ionType in ionTypes)
-            {
-                tasks.Add(Task<object>.Factory.StartNew(action, ionType));
+                return fragmentLabelList.ToList();
             }
-
-            Task.WaitAll(tasks.ToArray());
-
-            foreach (Task<object> task in tasks)
-            {
-                List<LabeledIonViewModel> list = (List<LabeledIonViewModel>)task.Result;
-                fragmentLabelList.AddRange(list);
-            }
-
-            return fragmentLabelList;
         }
 
         /// <summary>
@@ -249,14 +250,222 @@ namespace LcmsSpectator.Models
         }
 
         /// <summary>
-        /// Calculate a fragment ion label.
+        /// Get a new <see cref="FragmentLabelResultData"/> object for the specified parameters
         /// </summary>
-        /// <param name="key">The key consisting of empirical formula (composition) and ion type.</param>
-        /// <param name="ob">The ob required for cache access.</param>
-        /// <returns>A fragment labeled ion.</returns>
-        private LabeledIonViewModel GetLabeledIonViewModel(Tuple<Composition, IonType> key, object ob)
+        /// <param name="parameters"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private FragmentLabelResultData GetFragmentLabelResultData(FragmentLabelGenerationParameters parameters, object context)
         {
-            return new LabeledIonViewModel(key.Item1, key.Item2, true, LcMsRun);
+            return new FragmentLabelResultData(new List<LabeledIonViewModel>(Sequence.Count * parameters.IonTypes.Count * Charge));
         }
+
+        #region Internal Classes for results caching
+
+        private class FragmentLabelGenerationParameters : IEquatable<FragmentLabelGenerationParameters>
+        {
+            public IReadOnlyList<IonType> IonTypes { get; }
+            public IReadOnlyList<SearchModification> LabelModifications { get; }
+
+            public FragmentLabelGenerationParameters(IEnumerable<IonType> ionTypes, IEnumerable<SearchModification> labelModifications)
+            {
+                IonTypes = ionTypes.ToList();
+                LabelModifications = labelModifications.ToList();
+            }
+
+            public bool Equals(FragmentLabelGenerationParameters other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                // TODO: perform collection item-by-item comparison
+                return Equals(IonTypes, other.IonTypes) && Equals(LabelModifications, other.LabelModifications);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((FragmentLabelGenerationParameters)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return ((IonTypes != null ? GetHashCode(IonTypes) : 0) * 397) ^ (LabelModifications != null ? GetHashCode(LabelModifications) : 0);
+                }
+            }
+
+            #region Collection Equality/HashCodes
+
+            private bool Equals(IEnumerable<IonType> x, IEnumerable<IonType> y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+
+                if (x == null || y == null)
+                {
+                    return false;
+                }
+
+                return x.OrderBy(GetHashCode).SequenceEqual(y.OrderBy(GetHashCode));
+            }
+
+            private int GetHashCode(IEnumerable<IonType> obj)
+            {
+                unchecked
+                {
+                    var hashCode = 0;
+                    foreach (var o in obj)
+                    {
+                        hashCode = (hashCode * 397) ^ GetHashCode(o);
+                    }
+                    return hashCode;
+                }
+            }
+
+            private bool Equals(IEnumerable<SearchModification> x, IEnumerable<SearchModification> y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+
+                if (x == null || y == null)
+                {
+                    return false;
+                }
+
+                return x.OrderBy(GetHashCode).SequenceEqual(y.OrderBy(GetHashCode));
+            }
+
+            private int GetHashCode(IEnumerable<SearchModification> obj)
+            {
+                unchecked
+                {
+                    var hashCode = 0;
+                    foreach (var o in obj)
+                    {
+                        hashCode = (hashCode * 397) ^ GetHashCode(o);
+                    }
+                    return hashCode;
+                }
+            }
+
+            #endregion
+
+            #region IonType Equality/HashCode
+
+            private bool Equals(IonType x, IonType y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+                if (x == null || y == null)
+                {
+                    return false;
+                }
+                return string.Equals(x.Name, y.Name) && Equals(x.OffsetComposition, y.OffsetComposition) && x.Charge == y.Charge && x.IsPrefixIon == y.IsPrefixIon && Equals(x.BaseIonType, y.BaseIonType) && Equals(x.NeutralLoss, y.NeutralLoss);
+            }
+
+            private int GetHashCode(IonType obj)
+            {
+                if (obj == null)
+                {
+                    return 0;
+                }
+                unchecked
+                {
+                    var hashCode = (obj.Name != null ? obj.Name.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (obj.OffsetComposition != null ? obj.OffsetComposition.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ obj.Charge;
+                    hashCode = (hashCode * 397) ^ obj.IsPrefixIon.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (obj.BaseIonType != null ? obj.BaseIonType.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (obj.NeutralLoss != null ? obj.NeutralLoss.GetHashCode() : 0);
+                    return hashCode;
+                }
+            }
+
+            #endregion
+
+            #region IonType Equality/HashCode
+
+            private bool Equals(SearchModification x, SearchModification y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+                if (x == null || y == null)
+                {
+                    return false;
+                }
+                return Equals(x.Modification, y.Modification) && x.TargetResidue == y.TargetResidue && x.Location == y.Location && x.IsFixedModification == y.IsFixedModification;
+            }
+
+            private int GetHashCode(SearchModification obj)
+            {
+                if (obj == null)
+                {
+                    return 0;
+                }
+                unchecked
+                {
+                    var hashCode = (obj.Modification != null ? GetHashCode(obj.Modification) : 0);
+                    hashCode = (hashCode * 397) ^ obj.TargetResidue.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (int)obj.Location;
+                    hashCode = (hashCode * 397) ^ obj.IsFixedModification.GetHashCode();
+                    return hashCode;
+                }
+            }
+
+            private bool Equals(Modification x, Modification y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+                if (x == null || y == null)
+                {
+                    return false;
+                }
+                return Equals(x.Name, y.Name) && x.AccessionNum == y.AccessionNum && Equals(x.Composition, y.Composition);
+            }
+
+            private int GetHashCode(Modification obj)
+            {
+                if (obj == null)
+                {
+                    return 0;
+                }
+                unchecked
+                {
+                    var hashCode = (obj.Name != null ? obj.Name.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ obj.AccessionNum;
+                    hashCode = (hashCode * 397) ^ obj.Composition.GetHashCode();
+                    return hashCode;
+                }
+            }
+
+            #endregion
+        }
+
+        private class FragmentLabelResultData
+        {
+            public List<LabeledIonViewModel> Results { get; }
+            public object ComputeLock { get; } = new object();
+            public bool ResultsComputed { get; set; }
+
+            public FragmentLabelResultData(List<LabeledIonViewModel> results)
+            {
+                Results = results;
+            }
+        }
+
+        #endregion
     }
 }
