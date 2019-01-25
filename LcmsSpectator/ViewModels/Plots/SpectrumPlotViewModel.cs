@@ -78,8 +78,25 @@ namespace LcmsSpectator.ViewModels.Plots
             /// Display the top 2500 peaks
             /// </summary>
             [Description("2500")]
-            Top2500 = 2500
+            Top2500 = 2500,
 
+            /// <summary>
+            /// Display the top 5000 peaks
+            /// </summary>
+            [Description("5000")]
+            Top5000 = 5000,
+
+            /// <summary>
+            /// Display the top 10000 peaks
+            /// </summary>
+            [Description("10000")]
+            Top10000 = 10000,
+
+            /// <summary>
+            /// Display the top 15000 peaks
+            /// </summary>
+            [Description("15000")]
+            Top15000 = 15000
         }
 
         /// <summary>
