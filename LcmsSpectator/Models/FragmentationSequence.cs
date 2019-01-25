@@ -110,27 +110,33 @@ namespace LcmsSpectator.Models
             }
 
             FragmentLabelResultData resultCache;
+            // Avoid duplication of computation effort: check for existing results with the same parameters
             lock (fragmentIonResultCacheLock)
             {
                 var key = new FragmentLabelGenerationParameters(ionTypes, labelModifications);
                 resultCache = fragmentIonResultCache.Get(key);
             }
 
+            // Only allow one thread to compute/access results at a time
+            // This effectively allows the first thread to run the whole computation while blocking other threads until computation is done.
             lock (resultCache.ComputeLock)
             {
+                // Non-first thread: By the time other threads access this property, the results should be available
                 if (resultCache.ResultsComputed)
                 {
+                    // Return a copy of the results (limiting ability to affect the original results)
                     return resultCache.Results.ToList();
                 }
 
+                // First thread: run all of the computations for this set of parameters
                 var fragmentListLock = new object();
                 var fragmentLabelList = resultCache.Results;
-                resultCache.ResultsComputed = true;
 
                 var sequence = labelModifications == null ? Sequence : IonUtils.GetHeavySequence(Sequence, labelModifications);
 
                 var precursorIon = IonUtils.GetPrecursorIon(sequence, Charge);
 
+                // Automatically break up the ionTypes into groups and process in parallel
                 Parallel.ForEach(ionTypes, ionType =>
                 {
                     var ionFragments = new List<LabeledIonViewModel>();
@@ -142,9 +148,11 @@ namespace LcmsSpectator.Models
                         var ions = ionType.GetPossibleIons(fragment);
                         foreach (var ion in ions)
                         {
-                            var labeledIonViewModel = new LabeledIonViewModel(ion.Composition, ionType, true, LcMsRun);
-                            labeledIonViewModel.Index = length;
-                            labeledIonViewModel.PrecursorIon = precursorIon;
+                            var labeledIonViewModel = new LabeledIonViewModel(ion.Composition, ionType, true, LcMsRun)
+                            {
+                                Index = length,
+                                PrecursorIon = precursorIon
+                            };
 
                             ionFragments.Add(labeledIonViewModel);
                         }
@@ -155,12 +163,17 @@ namespace LcmsSpectator.Models
                         }
                     }
 
+                    // Only allow one thread at a time to write to the output list.
                     lock (fragmentListLock)
                     {
                         fragmentLabelList.AddRange(ionFragments);
                     }
                 });
 
+                // Flag computation as complete
+                resultCache.ResultsComputed = true;
+
+                // Return a copy of the results (limiting ability to affect the original results)
                 return fragmentLabelList.ToList();
             }
         }
@@ -262,6 +275,9 @@ namespace LcmsSpectator.Models
 
         #region Internal Classes for results caching
 
+        /// <summary>
+        /// Parameter class, with additions to perform proper checking for equality of the collections and their contents.
+        /// </summary>
         private class FragmentLabelGenerationParameters : IEquatable<FragmentLabelGenerationParameters>
         {
             public IReadOnlyList<IonType> IonTypes { get; }
@@ -277,7 +293,6 @@ namespace LcmsSpectator.Models
             {
                 if (ReferenceEquals(null, other)) return false;
                 if (ReferenceEquals(this, other)) return true;
-                // TODO: perform collection item-by-item comparison
                 return Equals(IonTypes, other.IonTypes) && Equals(LabelModifications, other.LabelModifications);
             }
 
@@ -454,12 +469,30 @@ namespace LcmsSpectator.Models
             #endregion
         }
 
+        /// <summary>
+        /// Results container
+        /// </summary>
         private class FragmentLabelResultData
         {
+            /// <summary>
+            /// List of results
+            /// </summary>
             public List<LabeledIonViewModel> Results { get; }
+
+            /// <summary>
+            /// Lock object to only allow one thread at a time to determine if computation needs to occur.
+            /// </summary>
             public object ComputeLock { get; } = new object();
+
+            /// <summary>
+            /// If the results have already been computed.
+            /// </summary>
             public bool ResultsComputed { get; set; }
 
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="results">List for results, allows capacity to be pre-set.</param>
             public FragmentLabelResultData(List<LabeledIonViewModel> results)
             {
                 Results = results;
