@@ -115,5 +115,10 @@ namespace LcmsSpectator.PlotModels
                 return x.X.CompareTo(y.X);
             }
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0} at {1:F1} m/z, mono mass {2:F2}", Title, X, MonoisotopicMass);
+        }
     }
 }

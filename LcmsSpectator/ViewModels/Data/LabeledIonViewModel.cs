@@ -434,5 +434,10 @@ namespace LcmsSpectator.ViewModels.Data
 
             return x;
         }
+
+        public override string ToString()
+        {
+            return string.IsNullOrEmpty(Label) ? "LcmsSpectator.ViewModels.Data.LabeledIonViewModel" : Label;
+        }
     }
 }
