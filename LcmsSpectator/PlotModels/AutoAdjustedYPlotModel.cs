@@ -30,7 +30,7 @@ namespace LcmsSpectator.PlotModels
         /// Initializes a new instance of the <see cref="AutoAdjustedYPlotModel"/> class.
         /// </summary>
         /// <param name="xaxis">The X Axis of the plot</param>
-        /// <param name="multiplier">Multiplier that determines how much space to leave about tallest point.</param>
+        /// <param name="multiplier">Multiplier that determines how much space to leave above tallest point.</param>
         public AutoAdjustedYPlotModel(Axis xaxis, double multiplier)
         {
             seriesLock = new object();
@@ -70,7 +70,7 @@ namespace LcmsSpectator.PlotModels
         public bool AutoAdjustYAxis { get; set; }
 
         /// <summary>
-        /// Gets a multiplier that determines how much space to leave about tallest point.
+        /// Gets a multiplier that determines how much space to leave above the tallest point.
         /// </summary>
         protected double Multiplier { get; }
 

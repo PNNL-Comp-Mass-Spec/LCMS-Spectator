@@ -43,6 +43,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Cache that stores peaks generated for this ion for a given spectrum.
         /// </summary>
+        /// <remarks>The tuple is a spectrum and a bool for IsDeconvoluted</remarks>
         private readonly MemoizingMRUCache<Tuple<Spectrum, bool>, IList<PeakDataPoint>> peakCache;
 
         /// <summary>
@@ -216,7 +217,7 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
-        /// Get the peaks for the ion.
+        /// Find data points in the spectrum that match the ion tracked by this LabeledIonViewModel instance
         /// </summary>
         /// <param name="spectrum">The spectrum to get the peaks from</param>
         /// <param name="deconvoluted">A value indicating whether the peaks come from a deconvoluted spectrum.</param>
@@ -235,6 +236,7 @@ namespace LcmsSpectator.ViewModels.Data
                     peakCache.Invalidate(key);
                 }
 
+                // This will call GetPeakDataPoints in this class
                 peaks = peakCache.Get(key, useCache);
             }
 
@@ -263,8 +265,8 @@ namespace LcmsSpectator.ViewModels.Data
             IList<XicDataPoint> x;
             lock (xicCacheLock)
             {
-                // MemoizingMRUCache isn't threadsafe. Shouldn't matter for my purposes,
-                // but I'm putting a lock around it just in case.
+                // MemoizingMRUCache isn't thread safe. Shouldn't matter for our purposes,
+                // but put a lock around it just in case.
                 if (!useCache)
                 {
                     xicCache.Invalidate(pointsToSmooth);
@@ -277,9 +279,9 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
-        /// Get the peaks for the ion.
+        /// Find data points in the spectrum that match the ion tracked by this LabeledIonViewModel instance
         /// </summary>
-        /// <param name="spectrum">The spectrum to get the peaks from</param>
+        /// <param name="spectrum">Tuple tracking the spectrum and whether or not it is deconvoluted</param>
         /// <param name="o">Object required for cache</param>
         /// <returns>The peaks for the ion.</returns>
         private IList<PeakDataPoint> GetPeakDataPoints(Tuple<Spectrum, bool> spectrum, object o)
@@ -326,9 +328,11 @@ namespace LcmsSpectator.ViewModels.Data
                 ion = Ion;
             }
 
+            // Retrieve a Tuple containing an array of isotope peaks and their Pearson correlation with the theoretical isotope envelope for this ion.
             var labeledIonPeaks = IonUtils.GetIonPeaks(ion, spectrum.Item1, tolerance, deconvoluted);
             if (labeledIonPeaks.Item1 == null)
             {
+                // None of data points in the spectrum matched this ion
                 return noPeaks;
             }
 

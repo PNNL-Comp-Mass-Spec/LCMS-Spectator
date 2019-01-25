@@ -252,8 +252,8 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Initializes a new instance of the SpectrumPlotViewModel class.
         /// </summary>
         /// <param name="dialogService">Dialog service for opening dialogs from ViewModel.</param>
-        /// <param name="fragSeqVm">Gets or sets the view model for the fragmentation sequence (fragment ion generator)</param>
-        /// <param name="multiplier">How much padding should be before the lowest peak and after the highest peak?</param>
+        /// <param name="fragSeqVm">The view model for the fragmentation sequence (fragment ion generator)</param>
+        /// <param name="multiplier">Multiplier that determines how much space to leave above the tallest point.</param>
         /// <param name="autoZoomXAxis">Should this view model automatically zoom the plot?</param>
         public SpectrumPlotViewModel(IMainDialogService dialogService, IFragmentationSequenceViewModel fragSeqVm, double multiplier, bool autoZoomXAxis = true)
         {
@@ -319,6 +319,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
                 .SelectMany(async x =>
                 {
+                    // Retrieve all of the possible fragment ions (b ions, y ions, etc.) for all charge states from 1+ to the Charge of the precursor ion minus 1
                     var vms = await FragmentationSequenceViewModel.GetLabeledIonViewModels();
                     var spec = GetSpectrum();
                     return await
