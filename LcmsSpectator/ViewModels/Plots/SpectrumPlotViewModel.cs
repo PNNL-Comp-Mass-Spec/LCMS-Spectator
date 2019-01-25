@@ -320,11 +320,12 @@ namespace LcmsSpectator.ViewModels.Plots
                 .SelectMany(async x =>
                 {
                     var vms = await FragmentationSequenceViewModel.GetLabeledIonViewModels();
-                    return  await
+                    var spec = GetSpectrum();
+                    return await
                             Task.WhenAll(
                                 vms.Select(
                                     ion =>
-                                        ion.GetPeaksAsync(GetSpectrum(),
+                                        ion.GetPeaksAsync(spec,
                                             ShowDeconvolutedSpectrum || ShowDeconvolutedIons)));
                 })
                 .Subscribe(dataPoints =>
