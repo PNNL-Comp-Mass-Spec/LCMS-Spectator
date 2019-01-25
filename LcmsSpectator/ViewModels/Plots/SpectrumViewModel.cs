@@ -90,12 +90,14 @@ namespace LcmsSpectator.ViewModels.Plots
         public SpectrumViewModel(IMainDialogService dialogService, ILcMsRun lcms)
         {
             this.lcms = lcms;
-            Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, new FragmentationSequenceViewModel(), 1.05);
+            Ms2SpectrumViewModel = new SpectrumPlotViewModel(dialogService, new FragmentationSequenceViewModel(), 1.15);
+
             PrevMs1SpectrumViewModel = new SpectrumPlotViewModel(
                 dialogService,
                 new PrecursorSequenceIonViewModel { PrecursorViewMode = PrecursorViewMode.Charges },
                 1.25,
                 false);
+
             NextMs1SpectrumViewModel = new SpectrumPlotViewModel(
                 dialogService,
                 new PrecursorSequenceIonViewModel { PrecursorViewMode = PrecursorViewMode.Charges },
