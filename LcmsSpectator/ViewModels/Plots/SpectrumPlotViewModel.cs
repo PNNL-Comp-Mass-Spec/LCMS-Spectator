@@ -436,7 +436,12 @@ namespace LcmsSpectator.ViewModels.Plots
             // Update plot when settings change
             IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
                         .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
-                        .SelectMany(async x => await Task.WhenAll(ions.Select(ion => ion.GetPeaksAsync(GetSpectrum(), ShowDeconvolutedSpectrum, false))))
+                        .SelectMany(async x =>
+                        {
+                            var spec = GetSpectrum();
+                            return await Task.WhenAll(ions.Select(ion =>
+                                    ion.GetPeaksAsync(spec, ShowDeconvolutedSpectrum, false)));
+                        })
                         .Subscribe(UpdatePlotModel);
 
             // When AutoAdjustYAxis changes, update value in plot model.
@@ -817,6 +822,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <returns>Filtered and/or de-convoluted spectrum</returns>
         private Spectrum GetSpectrum()
         {
+            if (Spectrum == null)
+            {
+                return new Spectrum(new Peak[0], 0);
+            }
+
             // Filtered/Deconvoluted Spectrum?
             var spectrumToReturn = Spectrum;
             var tolerance = (spectrumToReturn is ProductSpectrum)
