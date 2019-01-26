@@ -228,8 +228,8 @@ namespace LcmsSpectator.Config
 
         /// <summary>
         /// Gets or sets the minimum pearson correlation for ions displayed in MS/MS spectra.
-        /// Value between 0 and 1, with 1 meaning a perfect correlation
         /// </summary>
+        /// <remarks>Value between 0 and 1, with 1 meaning a perfect correlation</remarks>
         public double IonCorrelationThreshold
         {
             get => ionCorrelationThreshold;
