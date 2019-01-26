@@ -82,7 +82,7 @@ namespace LcmsSpectatorTests
                 await MsPathFinderTest.SleepMillisecondsAsync(1000);
 
                 // check unfiltered spectrum
-                specPlotVm.ShowFilteredSpectrum = false;
+                specPlotVm.NoiseFilterMode = SpectrumPlotViewModel.NoiseFilterModes.Disabled;
 
                 await MsPathFinderTest.SleepMillisecondsAsync(1000);
 
@@ -99,7 +99,7 @@ namespace LcmsSpectatorTests
                 await MsPathFinderTest.SleepMillisecondsAsync(1000);
 
                 // check filtered spectrum
-                specPlotVm.ShowFilteredSpectrum = true;
+                specPlotVm.NoiseFilterMode = SpectrumPlotViewModel.NoiseFilterModes.IntensityHistogram;
 
                 await MsPathFinderTest.SleepMillisecondsAsync(1000);
 

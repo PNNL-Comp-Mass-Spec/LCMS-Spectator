@@ -90,10 +90,35 @@
                 <wpf:PlotView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Command="{Binding OpenScanSelectionCommand}" Header="Select or Sum _Spectra" />
-                        <MenuItem
-                            Header="Show _Filtered Spectrum"
-                            IsCheckable="True"
-                            IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+
+                        <!-- Previously ShowFilteredSpectrum -->
+                        <MenuItem Header="Noise Filter Mode" ItemsSource="{Binding NoiseFilterModeList}">
+                            <MenuItem.ItemTemplate>
+                                <DataTemplate>
+                                    <!--  Menu item header bound to enum converter  -->
+                                    <!--  IsChecked bound to current selection  -->
+                                    <!--  Toggle bound to a command, setting current selection  -->
+                                    <MenuItem
+                                        Width="225"
+                                        Command="{Binding DataContext.ToggleNoiseFilterModeCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                        CommandParameter="{Binding}"
+                                        Header="{Binding Path=., Converter={StaticResource EnumDescriptionConverter}}"
+                                        IsCheckable="True">
+                                        <MenuItem.IsChecked>
+                                            <MultiBinding
+                                                Converter="{StaticResource EnumCheckedConverter}"
+                                                Mode="OneWay"
+                                                NotifyOnSourceUpdated="True"
+                                                UpdateSourceTrigger="PropertyChanged">
+                                                <Binding Path="DataContext.NoiseFilterMode" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}" />
+                                                <Binding Path="." />
+                                            </MultiBinding>
+                                        </MenuItem.IsChecked>
+                                    </MenuItem>
+                                </DataTemplate>
+                            </MenuItem.ItemTemplate>
+                        </MenuItem>
+
                         <MenuItem
                             Header="Show _Deconvoluted Spectrum"
                             IsCheckable="True"
@@ -133,6 +158,7 @@
                                 </DataTemplate>
                             </MenuItem.ItemTemplate>
                         </MenuItem>
+
                         <MenuItem Command="{Binding OpenErrorMapCommand}" Header="Open _Error/Coverage Map" />
                         <MenuItem
                             Name="StartMsPfSearch"
@@ -250,10 +276,35 @@
                     <wpf:PlotView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding OpenScanSelectionCommand}" Header="Select or Sum _Spectra" />
-                            <MenuItem
-                                Header="Show _Filtered Spectrum"
-                                IsCheckable="True"
-                                IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+
+                            <!-- Previously ShowFilteredSpectrum -->
+                            <!--<MenuItem Header="Noise Filter Mode" ItemsSource="{Binding NoiseFilterModeList}">
+                                <MenuItem.ItemTemplate>
+                                    <DataTemplate>
+                                        --><!--  Menu item header bound to enum converter  -->
+                                        <!--  IsChecked bound to current selection  -->
+                                        <!--  Toggle bound to a command, setting current selection  --><!--
+                                        <MenuItem
+                                            Width="225"
+                                            Command="{Binding DataContext.ToggleNoiseFilterModeCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                            CommandParameter="{Binding}"
+                                            Header="{Binding Path=., Converter={StaticResource EnumDescriptionConverter}}"
+                                            IsCheckable="True">
+                                            <MenuItem.IsChecked>
+                                                <MultiBinding
+                                                    Converter="{StaticResource EnumCheckedConverter}"
+                                                    Mode="OneWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <Binding Path="DataContext.NoiseFilterMode" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}" />
+                                                    <Binding Path="." />
+                                                </MultiBinding>
+                                            </MenuItem.IsChecked>
+                                        </MenuItem>
+                                    </DataTemplate>
+                                </MenuItem.ItemTemplate>
+                            </MenuItem>-->
+
                             <MenuItem
                                 Header="Show _Deconvoluted Spectrum"
                                 IsCheckable="True"
@@ -262,6 +313,34 @@
                                 Header="Show _Unexplained Peaks"
                                 IsCheckable="True"
                                 IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+
+                            <!--<MenuItem Header="Show Top N Peaks" ItemsSource="{Binding PeakFilterModeList}">
+                                <MenuItem.ItemTemplate>
+                                    <DataTemplate>
+                                        --><!--  Menu item header bound to enum converter  -->
+                                        <!--  IsChecked bound to current selection  -->
+                                        <!--  Toggle bound to a command, setting current selection  --><!--
+                                        <MenuItem
+                                            Width="150"
+                                            Command="{Binding DataContext.TogglePeakFilterModeCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                            CommandParameter="{Binding}"
+                                            Header="{Binding Path=., Converter={StaticResource EnumDescriptionConverter}}"
+                                            IsCheckable="True">
+                                            <MenuItem.IsChecked>
+                                                <MultiBinding
+                                                    Converter="{StaticResource EnumCheckedConverter}"
+                                                    Mode="OneWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <Binding Path="DataContext.PeakFilterMode" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}" />
+                                                    <Binding Path="." />
+                                                </MultiBinding>
+                                            </MenuItem.IsChecked>
+                                        </MenuItem>
+                                    </DataTemplate>
+                                </MenuItem.ItemTemplate>
+                            </MenuItem>-->
+
                             <Separator />
                             <MenuItem
                                 Header="Automatically Adjust Y Axis"
@@ -286,10 +365,35 @@
                     <wpf:PlotView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Command="{Binding OpenScanSelectionCommand}" Header="Select or Sum _Spectra" />
-                            <MenuItem
-                                Header="Show _Filtered Spectrum"
-                                IsCheckable="True"
-                                IsChecked="{Binding ShowFilteredSpectrum, Mode=TwoWay}" />
+
+                            <!-- Previously ShowFilteredSpectrum -->
+                            <!--<MenuItem Header="Noise Filter Mode" ItemsSource="{Binding NoiseFilterModeList}">
+                                <MenuItem.ItemTemplate>
+                                    <DataTemplate>
+                                        --><!--  Menu item header bound to enum converter  -->
+                                        <!--  IsChecked bound to current selection  -->
+                                        <!--  Toggle bound to a command, setting current selection  --><!--
+                                        <MenuItem
+                                            Width="225"
+                                            Command="{Binding DataContext.ToggleNoiseFilterModeCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                            CommandParameter="{Binding}"
+                                            Header="{Binding Path=., Converter={StaticResource EnumDescriptionConverter}}"
+                                            IsCheckable="True">
+                                            <MenuItem.IsChecked>
+                                                <MultiBinding
+                                                    Converter="{StaticResource EnumCheckedConverter}"
+                                                    Mode="OneWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <Binding Path="DataContext.NoiseFilterMode" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}" />
+                                                    <Binding Path="." />
+                                                </MultiBinding>
+                                            </MenuItem.IsChecked>
+                                        </MenuItem>
+                                    </DataTemplate>
+                                </MenuItem.ItemTemplate>
+                            </MenuItem>-->
+
                             <MenuItem
                                 Header="Show _Deconvoluted Spectrum"
                                 IsCheckable="True"
@@ -298,6 +402,34 @@
                                 Header="Show _Unexplained Peaks"
                                 IsCheckable="True"
                                 IsChecked="{Binding ShowUnexplainedPeaks, Mode=TwoWay}" />
+
+                            <!--<MenuItem Header="Show Top N Peaks" ItemsSource="{Binding PeakFilterModeList}">
+                                <MenuItem.ItemTemplate>
+                                    <DataTemplate>
+                                        --><!--  Menu item header bound to enum converter  -->
+                                        <!--  IsChecked bound to current selection  -->
+                                        <!--  Toggle bound to a command, setting current selection  --><!--
+                                        <MenuItem
+                                            Width="150"
+                                            Command="{Binding DataContext.TogglePeakFilterModeCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}}"
+                                            CommandParameter="{Binding}"
+                                            Header="{Binding Path=., Converter={StaticResource EnumDescriptionConverter}}"
+                                            IsCheckable="True">
+                                            <MenuItem.IsChecked>
+                                                <MultiBinding
+                                                    Converter="{StaticResource EnumCheckedConverter}"
+                                                    Mode="OneWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <Binding Path="DataContext.PeakFilterMode" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}" />
+                                                    <Binding Path="." />
+                                                </MultiBinding>
+                                            </MenuItem.IsChecked>
+                                        </MenuItem>
+                                    </DataTemplate>
+                                </MenuItem.ItemTemplate>
+                            </MenuItem>-->
+
                             <Separator />
                             <MenuItem
                                 Header="Automatically Adjust Y Axis"

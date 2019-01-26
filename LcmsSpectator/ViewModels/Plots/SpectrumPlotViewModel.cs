@@ -39,7 +39,25 @@ namespace LcmsSpectator.ViewModels.Plots
     public class SpectrumPlotViewModel : ReactiveObject
     {
         /// <summary>
-        /// Used to filter which peaks are shown in the fragmentation spectrum
+        /// Method used to filter data for the fragmentation spectrum plot and the fragmentation ion view
+        /// </summary>
+        public enum NoiseFilterModes
+        {
+            [Description("Disabled")]
+            Disabled = 0,
+
+            [Description("Intensity Histogram")]
+            IntensityHistogram = 1,
+
+            [Description("S/N")]
+            SignalToNoiseRatio = 2,
+
+            [Description("Local Window S/N")]
+            LocalWindowSignalToNoiseRatio = 3
+        }
+
+        /// <summary>
+        /// Used to filter which peaks are shown in the fragmentation spectrum plot
         /// </summary>
         public enum PeakFilterModes
         {
@@ -49,6 +67,8 @@ namespace LcmsSpectator.ViewModels.Plots
             /// </summary>
             [Description("All")]
             All = -1,
+
+            // ReSharper disable UnusedMember.Global
 
             /// <summary>
             /// Display the top 20 peaks
@@ -97,6 +117,8 @@ namespace LcmsSpectator.ViewModels.Plots
             /// </summary>
             [Description("15000")]
             Top15000 = 15000
+
+            // ReSharper restore UnusedMember.Global
         }
 
         /// <summary>
@@ -132,6 +154,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private Spectrum filteredSpectrum;
 
         /// <summary>
+        /// Noise filter used when updating filteredSpectrum
+        /// </summary>
+        private NoiseFilterModes filteredSpectrumNoiseMode = NoiseFilterModes.Disabled;
+
+        /// <summary>
         /// Stores the de-convoluted version of the spectrum for fast access
         /// </summary>
         private Spectrum deconvolutedSpectrum;
@@ -140,6 +167,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Stores the filtered and de-convoluted version of the spectrum for fast access
         /// </summary>
         private Spectrum filteredDeconvolutedSpectrum;
+
+        /// <summary>
+        /// Noise filter used when updating filteredDeconvolutedSpectrum
+        /// </summary>
+        private NoiseFilterModes filteredDeconvolutedSpectrumNoiseMode = NoiseFilterModes.Disabled;
 
         /// <summary>
         /// List of ions that are highlighted on the spectrum plot.
@@ -174,6 +206,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// A value indicating whether or not the filtered spectrum is showing.
         /// </summary>
+        [Obsolete("Use NoiseFilterMode")]
         private bool showFilteredSpectrum;
 
         /// <summary>
@@ -224,6 +257,11 @@ namespace LcmsSpectator.ViewModels.Plots
         private bool showUnexplainedPeaks;
 
         /// <summary>
+        /// Method used to filter data for the fragmentation spectrum plot and the fragmentation ion view
+        /// </summary>
+        private NoiseFilterModes noiseFilterMode = NoiseFilterModes.IntensityHistogram;
+
+        /// <summary>
         /// A value indicating whether to show all peaks in a spectrum, or the top N peaks (sorted by intensity)
         /// </summary>
         private PeakFilterModes peakFilterMode;
@@ -262,12 +300,15 @@ namespace LcmsSpectator.ViewModels.Plots
             this.autoZoomXAxis = autoZoomXAxis;
             errorMapViewModel = new ErrorMapViewModel(dialogService);
             ShowUnexplainedPeaks = true;
-            ShowFilteredSpectrum = false;
+            NoiseFilterMode = NoiseFilterModes.Disabled;
             ShowDeconvolutedSpectrum = false;
+
+            NoiseFilterModeList = new ReactiveList<NoiseFilterModes>(Enum.GetValues(typeof(NoiseFilterModes)).Cast<NoiseFilterModes>());
 
             PeakFilterModeList = new ReactiveList<PeakFilterModes>(Enum.GetValues(typeof(PeakFilterModes)).Cast<PeakFilterModes>());
 
-            PeakFilterMode = PeakFilterModes.Top1000;
+            // Default to plot the top 5000 peaks
+            PeakFilterMode = PeakFilterModes.Top5000;
 
             AutoAdjustYAxis = true;
             Title = string.Empty;
@@ -312,7 +353,7 @@ namespace LcmsSpectator.ViewModels.Plots
                               x => x.FragmentationSequenceViewModel.LabeledIonViewModels,
                               x => x.ShowDeconvolutedSpectrum,
                               x => x.ShowDeconvolutedIons,
-                              x => x.ShowFilteredSpectrum,
+                              x => x.NoiseFilterMode,
                               x => x.ShowUnexplainedPeaks,
                               x => x.PeakFilterMode)
                 .Where(x => x.Item1 != null && x.Item2 != null)
@@ -338,7 +379,40 @@ namespace LcmsSpectator.ViewModels.Plots
                     if (FragmentationSequenceViewModel is FragmentationSequenceViewModel model)
                     {
                         SequenceViewerViewModel.FragmentationSequence = model;
-                        SequenceViewerViewModel.SelectedSpectrum = Spectrum as ProductSpectrum;
+
+                        ProductSpectrum spectrumForFragmentView;
+                        switch (NoiseFilterMode)
+                        {
+                            case NoiseFilterModes.Disabled:
+                                spectrumForFragmentView = Spectrum as ProductSpectrum;
+                                break;
+
+                            case NoiseFilterModes.IntensityHistogram:
+                                var histFilteredSpectrum = new ProductSpectrum(Spectrum.Peaks, Spectrum.ScanNum);
+                                histFilteredSpectrum.SetMsLevel(Spectrum.MsLevel);
+                                histFilteredSpectrum.FilterNoiseByIntensityHistogram();
+                                spectrumForFragmentView = histFilteredSpectrum;
+                                break;
+
+                            case NoiseFilterModes.SignalToNoiseRatio:
+                                var snFilteredSpectrum = new ProductSpectrum(Spectrum.Peaks, Spectrum.ScanNum);
+                                snFilteredSpectrum.SetMsLevel(Spectrum.MsLevel);
+                                snFilteredSpectrum.FilterNoise(IcParameters.Instance.MinimumSignalToNoise);
+                                spectrumForFragmentView = snFilteredSpectrum;
+                                break;
+
+                            case NoiseFilterModes.LocalWindowSignalToNoiseRatio:
+                                var windowedSnFilteredSpectrum = new ProductSpectrum(Spectrum.Peaks, Spectrum.ScanNum);
+                                windowedSnFilteredSpectrum.SetMsLevel(Spectrum.MsLevel);
+                                windowedSnFilteredSpectrum.FilterNoiseByLocalWindow(IcParameters.Instance.MinimumSignalToNoise);
+                                spectrumForFragmentView = windowedSnFilteredSpectrum;
+                                break;
+
+                            default:
+                                throw new InvalidEnumArgumentException(nameof(NoiseFilterMode));
+                        }
+
+                        SequenceViewerViewModel.SelectedSpectrum = spectrumForFragmentView;
                     }
                 });       // Update plot when data changes
 
@@ -422,6 +496,7 @@ namespace LcmsSpectator.ViewModels.Plots
             OpenScanSelectionCommand = ReactiveCommand.Create(OpenScanSelectionImplementation);
             SaveAsTsvCommand = ReactiveCommand.Create(SaveAsTsvImplementation);
             SaveToClipboardCommand = ReactiveCommand.Create(SaveToClipboardImplementation);
+            ToggleNoiseFilterModeCommand = ReactiveCommand.Create<NoiseFilterModes>(arg => NoiseFilterMode = arg);
             TogglePeakFilterModeCommand = ReactiveCommand.Create<PeakFilterModes>(arg => PeakFilterMode = arg);
         }
 
@@ -453,6 +528,23 @@ namespace LcmsSpectator.ViewModels.Plots
             set => this.RaiseAndSetIfChanged(ref showUnexplainedPeaks, value);
         }
 
+        /// <summary>
+        /// List of Noise Filter Modes
+        /// </summary>
+        public IReadOnlyReactiveList<NoiseFilterModes> NoiseFilterModeList { get; }
+
+        /// <summary>
+        /// Gets or sets a value indicating how to remove noise peaks from the spectral data
+        /// </summary>
+        public NoiseFilterModes NoiseFilterMode
+        {
+            get => noiseFilterMode;
+            set => this.RaiseAndSetIfChanged(ref noiseFilterMode, value);
+        }
+
+        /// <summary>
+        /// List of Peak Filter Modes
+        /// </summary>
         public IReadOnlyReactiveList<PeakFilterModes> PeakFilterModeList { get; }
 
         /// <summary>
@@ -467,6 +559,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets or sets a value indicating whether or not the filtered spectrum is showing.
         /// </summary>
+        [Obsolete("Use NoiseFilterMode")]
         public bool ShowFilteredSpectrum
         {
             get => showFilteredSpectrum;
@@ -603,6 +696,14 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public ReactiveCommand<Unit, Unit> SaveToClipboardCommand { get; }
 
+        /// <summary>
+        /// Gets a command used to update the noise filter mode
+        /// </summary>
+        public ReactiveCommand<NoiseFilterModes, Unit> ToggleNoiseFilterModeCommand { get; }
+
+        /// <summary>
+        /// Gets a command used to update the peak filter mode
+        /// </summary>
         public ReactiveCommand<PeakFilterModes, Unit> TogglePeakFilterModeCommand { get; }
 
         /// <summary>
@@ -711,7 +812,7 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Get correctly filtered and/or de-convoluted spectrum
+        /// Get correctly filtered and/or de-convoluted spectrum (for use in the plot)
         /// </summary>
         /// <returns>Filtered and/or de-convoluted spectrum</returns>
         private Spectrum GetSpectrum()
@@ -721,12 +822,31 @@ namespace LcmsSpectator.ViewModels.Plots
             var tolerance = (spectrumToReturn is ProductSpectrum)
                                 ? IcParameters.Instance.ProductIonTolerancePpm
                                 : IcParameters.Instance.PrecursorTolerancePpm;
-            if (ShowFilteredSpectrum && ShowDeconvolutedSpectrum)
+            if (NoiseFilterMode != NoiseFilterModes.Disabled && ShowDeconvolutedSpectrum)
             {
-                if (filteredDeconvolutedSpectrum == null)
+                if (filteredDeconvolutedSpectrum == null || filteredDeconvolutedSpectrumNoiseMode != NoiseFilterMode)
                 {
                     filteredDeconvolutedSpectrum = new Spectrum(spectrumToReturn.Peaks, spectrumToReturn.ScanNum);
-                    filteredDeconvolutedSpectrum.FilterNoiseByIntensityHistogram();
+                    filteredDeconvolutedSpectrumNoiseMode = NoiseFilterMode;
+
+                    switch (NoiseFilterMode)
+                    {
+                        case NoiseFilterModes.IntensityHistogram:
+                            filteredDeconvolutedSpectrum.FilterNoiseByIntensityHistogram();
+                            break;
+
+                        case NoiseFilterModes.SignalToNoiseRatio:
+                            filteredDeconvolutedSpectrum.FilterNoise(IcParameters.Instance.MinimumSignalToNoise);
+                            break;
+
+                        case NoiseFilterModes.LocalWindowSignalToNoiseRatio:
+                            filteredDeconvolutedSpectrum.FilterNoiseByLocalWindow(IcParameters.Instance.MinimumSignalToNoise);
+                            break;
+
+                        default:
+                            throw new InvalidEnumArgumentException(nameof(NoiseFilterMode));
+                    }
+
                     deconvolutedSpectrum = Deconvoluter.GetCombinedDeconvolutedSpectrum(
                         spectrumToReturn,
                             Constants.MinCharge,
@@ -734,6 +854,7 @@ namespace LcmsSpectator.ViewModels.Plots
                             Constants.IsotopeOffsetTolerance,
                             tolerance,
                             IcParameters.Instance.IonCorrelationThreshold);
+
                     //this.deconvolutedSpectrum = ProductScorerBasedOnDeconvolutedSpectra.GetDeconvolutedSpectrum(
                     //    spectrumToReturn,
                     //    Constants.MinCharge,
@@ -745,12 +866,31 @@ namespace LcmsSpectator.ViewModels.Plots
 
                 spectrumToReturn = filteredDeconvolutedSpectrum;
             }
-            else if (ShowFilteredSpectrum)
+            else if (NoiseFilterMode != NoiseFilterModes.Disabled)
             {
-                if (filteredSpectrum == null)
+                if (filteredSpectrum == null || filteredSpectrumNoiseMode != NoiseFilterMode)
                 {
                     filteredSpectrum = new Spectrum(spectrumToReturn.Peaks, spectrumToReturn.ScanNum);
-                    filteredSpectrum.FilterNoiseByIntensityHistogram();
+                    filteredSpectrumNoiseMode = NoiseFilterMode;
+
+                    switch (NoiseFilterMode)
+                    {
+                        case NoiseFilterModes.IntensityHistogram:
+                            filteredSpectrum.FilterNoiseByIntensityHistogram();
+                            break;
+
+                        case NoiseFilterModes.SignalToNoiseRatio:
+                            filteredSpectrum.FilterNoise(IcParameters.Instance.MinimumSignalToNoise);
+                            break;
+
+                        case NoiseFilterModes.LocalWindowSignalToNoiseRatio:
+                            filteredSpectrum.FilterNoiseByLocalWindow(IcParameters.Instance.MinimumSignalToNoise);
+                            break;
+
+                        default:
+                            throw new InvalidEnumArgumentException(nameof(NoiseFilterMode));
+                    }
+
                 }
 
                 spectrumToReturn = filteredSpectrum;
