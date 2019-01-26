@@ -281,10 +281,10 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Find data points in the spectrum that match the ion tracked by this LabeledIonViewModel instance
         /// </summary>
-        /// <param name="spectrum">Tuple tracking the spectrum and whether or not it is deconvoluted</param>
+        /// <param name="spectrumInfo">Tuple tracking the spectrum and whether or not it is deconvoluted</param>
         /// <param name="o">Object required for cache</param>
         /// <returns>The peaks for the ion.</returns>
-        private IList<PeakDataPoint> GetPeakDataPoints(Tuple<Spectrum, bool> spectrum, object o)
+        private IList<PeakDataPoint> GetPeakDataPoints(Tuple<Spectrum, bool> spectrumInfo, object o)
         {
             var tolerance = IsFragmentIon
                             ? IcParameters.Instance.ProductIonTolerancePpm
@@ -299,10 +299,18 @@ namespace LcmsSpectator.ViewModels.Data
                 }
             };
 
+            var spectrum = spectrumInfo.Item1;
+            var deconvoluted = spectrumInfo.Item2;
+
+            if (spectrum == null)
+            {
+                // The spectrum object is null
+                return noPeaks;
+            }
+
             // If this is a fragmentation spectrum, use IonType, otherwise set ionType to null
             var ionType = IsFragmentIon ? IonType : null;
 
-            var deconvoluted = spectrum.Item2;
             Ion ion;
             if (deconvoluted)
             {
@@ -329,7 +337,7 @@ namespace LcmsSpectator.ViewModels.Data
             }
 
             // Retrieve a Tuple containing an array of isotope peaks and their Pearson correlation with the theoretical isotope envelope for this ion.
-            var labeledIonPeaks = IonUtils.GetIonPeaks(ion, spectrum.Item1, tolerance, deconvoluted);
+            var labeledIonPeaks = IonUtils.GetIonPeaks(ion, spectrum, tolerance, deconvoluted);
             if (labeledIonPeaks.Item1 == null)
             {
                 // None of data points in the spectrum matched this ion
