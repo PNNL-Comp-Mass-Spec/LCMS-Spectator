@@ -434,7 +434,7 @@ namespace LcmsSpectator.ViewModels.Plots
             });
 
             // Update plot when settings change
-            IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
+            IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold, x => x.MinimumSignalToNoise)
                         .Throttle(TimeSpan.FromMilliseconds(400), RxApp.TaskpoolScheduler)
                         .SelectMany(async x =>
                         {
