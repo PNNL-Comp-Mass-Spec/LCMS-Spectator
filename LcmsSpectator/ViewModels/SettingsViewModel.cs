@@ -58,6 +58,7 @@ namespace LcmsSpectator.ViewModels
             ProductIonTolerance = IcParameters.Instance.ProductIonTolerancePpm.GetValue();
             ProductIonToleranceUnit = IcParameters.Instance.ProductIonTolerancePpm.GetUnit();
             IonCorrelationThreshold = IcParameters.Instance.IonCorrelationThreshold;
+            MinimumSignalToNoise = IcParameters.Instance.MinimumSignalToNoise;
             PointsToSmooth = IcParameters.Instance.PointsToSmooth;
             PrecursorRelativeIntensityThreshold = IcParameters.Instance.PrecursorRelativeIntensityThreshold;
             ShowInstrumentData = IcParameters.Instance.ShowInstrumentData;
@@ -168,7 +169,13 @@ namespace LcmsSpectator.ViewModels
         /// <summary>
         /// Gets or sets the minimum possible correlation of ions.
         /// </summary>
+        /// <remarks>Value between 0 and 1, with 1 meaning a perfect correlation</remarks>
         public double IonCorrelationThreshold { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum signal to noise ratio to use when filtering by S/N
+        /// </summary>
+        public double MinimumSignalToNoise { get; set; }
 
         /// <summary>
         /// Gets or sets the default value for "Points To Smooth" slider.
@@ -288,6 +295,7 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.PrecursorTolerancePpm = new Tolerance(PrecursorIonTolerance, PrecursorIonToleranceUnit);
             IcParameters.Instance.ProductIonTolerancePpm = new Tolerance(ProductIonTolerance, ProductIonToleranceUnit);
             IcParameters.Instance.IonCorrelationThreshold = IonCorrelationThreshold;
+            IcParameters.Instance.MinimumSignalToNoise = MinimumSignalToNoise;
             IcParameters.Instance.PointsToSmooth = PointsToSmooth;
             IcParameters.Instance.PrecursorRelativeIntensityThreshold = PrecursorRelativeIntensityThreshold;
             IcParameters.Instance.ShowInstrumentData = ShowInstrumentData;

@@ -64,6 +64,11 @@ namespace LcmsSpectator.Config
         private double ionCorrelationThreshold;
 
         /// <summary>
+        /// The minimum signal to noise ratio to use when filtering by S/N
+        /// </summary>
+        private double minimumSignalToNoise;
+
+        /// <summary>
         /// The default value to use for the <see cref="SavitzkyGolaySmoother" /> in XIC plot smoothing slider.
         /// </summary>
         private int pointsToSmooth;
@@ -150,6 +155,7 @@ namespace LcmsSpectator.Config
             PrecursorTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
             ProductIonTolerancePpm = new Tolerance(10, ToleranceUnit.Ppm);
             IonCorrelationThreshold = 0.7;
+            minimumSignalToNoise = 1.5;
             PointsToSmooth = 9;
             PrecursorRelativeIntensityThreshold = 0.1;
             ShowInstrumentData = false;
@@ -228,6 +234,14 @@ namespace LcmsSpectator.Config
         {
             get => ionCorrelationThreshold;
             set => this.RaiseAndSetIfChanged(ref ionCorrelationThreshold, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum signal to noise ratio to use when filtering by S/N
+        /// </summary>
+        public double MinimumSignalToNoise {
+            get => minimumSignalToNoise;
+            set => this.RaiseAndSetIfChanged(ref minimumSignalToNoise, value);
         }
 
         /// <summary>

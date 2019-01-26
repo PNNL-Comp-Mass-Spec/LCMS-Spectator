@@ -71,6 +71,7 @@
                         <RowDefinition Height="14*" />
                         <RowDefinition Height="14*" />
                         <RowDefinition Height="14*" />
+                        <RowDefinition Height="14*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="60*" />
@@ -123,10 +124,26 @@
                         Grid.Row="3"
                         Grid.Column="0"
                         FontWeight="Bold">
-                        Ion Correlation Threshold
+                        Minimum S/N Threshold When Filtering
                     </TextBlock>
                     <TextBox
                         Grid.Row="3"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Height="25"
+                        VerticalAlignment="Top"
+                        Text="{Binding MinimumSignalToNoise}"
+                        TextAlignment="Right" />
+
+                    <TextBlock
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        FontWeight="Bold"
+                        ToolTip="Value between 0 and 1">
+                        Pearson Correlation Threshold for Ions
+                    </TextBlock>
+                    <TextBox
+                        Grid.Row="4"
                         Grid.Column="1"
                         Grid.ColumnSpan="2"
                         Height="25"
@@ -135,14 +152,14 @@
                         TextAlignment="Right" />
 
                     <TextBlock
-                        Grid.Row="4"
+                        Grid.Row="5"
                         Grid.Column="0"
                         FontWeight="Bold"
                         ToolTip="Must be an odd integer of at least 3. 0 = No smoothing.">
                         Default Points To Smooth
                     </TextBlock>
                     <TextBox
-                        Grid.Row="4"
+                        Grid.Row="5"
                         Grid.Column="1"
                         Grid.ColumnSpan="2"
                         Height="25"
@@ -151,18 +168,18 @@
                         TextAlignment="Right"
                         ToolTip="Must be an odd integer of at least 3. 0 = No smoothing." />
 
-                    <!--<TextBlock Grid.Row="5" Grid.Column="0" FontWeight="Bold">Spectrum Filter Window Size</TextBlock>
-                    <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterWindowSize}" Height="25" VerticalAlignment="Top" />-->
+                    <!--<TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold">Spectrum Filter Window Size</TextBlock>
+                    <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" TextAlignment="Right" Text="{Binding SpectrumFilterWindowSize}" Height="25" VerticalAlignment="Top" />-->
 
                     <TextBlock
-                        Grid.Row="5"
+                        Grid.Row="6"
                         Grid.Column="0"
                         FontWeight="Bold"
                         ToolTip="Precursor Isotope Relative Intensity Threshold">
                         Precursor Isotope Relative Intensity Threshold
                     </TextBlock>
                     <TextBox
-                        Grid.Row="5"
+                        Grid.Row="6"
                         Grid.Column="1"
                         Grid.ColumnSpan="2"
                         Height="25"
@@ -171,14 +188,14 @@
                         TextAlignment="Right" />
 
                     <TextBlock
-                        Grid.Row="6"
+                        Grid.Row="7"
                         Grid.Column="0"
                         FontWeight="Bold"
                         ToolTip="Resolution of exported images">
                         Resolution of exported images (DPI)
                     </TextBlock>
                     <TextBox
-                        Grid.Row="6"
+                        Grid.Row="7"
                         Grid.Column="1"
                         Grid.ColumnSpan="2"
                         Height="25"
@@ -186,8 +203,8 @@
                         Text="{Binding ExportImageDpi}"
                         TextAlignment="Right" />
 
-                    <!--<TextBlock Grid.Row="6" Grid.Column="0" FontWeight="Bold" ToolTip="Show monoisotopic m/z and charge reported by instrument">Show monoisotopic m/z and charge reported by instrument</TextBlock>
-                    <CheckBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" IsChecked="{Binding ShowInstrumentData}"/>-->
+                    <!--<TextBlock Grid.Row="8" Grid.Column="0" FontWeight="Bold" ToolTip="Show monoisotopic m/z and charge reported by instrument">Show monoisotopic m/z and charge reported by instrument</TextBlock>
+                    <CheckBox Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" IsChecked="{Binding ShowInstrumentData}"/>-->
                 </Grid>
             </TabItem>
             <!--<TabItem Header="Modifications">
