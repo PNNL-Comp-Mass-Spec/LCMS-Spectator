@@ -1,9 +1,9 @@
 # LCMS-Spectator
 LCMS raw data and MSGF+ results viewer
 
-LCMS-Spectator is a standalone Windows graphical user interface tool for viewing LC-MS data and identifications.
+LCMS-Spectator is a standalone Windows program for viewing LC-MS data and peptide identifications.
 
-It reads Thermo raw files (\*.raw) and MzML files and shows MS and MS/MS spectra as well as precursor and product ion chromatograms as resizable, floatable tabbed-documents.
+It reads Thermo raw files (\*.raw) and mzML files and shows MS and MS/MS spectra as well as precursor and product ion chromatograms as resizable, floatable tabbed-documents.
 
 Identification and target files can also be loaded to show the spectral and chromatographic evidence. The tool currently supports [MS-GF+](https://github.com/MSGFPlus/msgfplus) MzIdentML files (.mzid) and [MSPathFinder](https://github.com/PNNL-Comp-Mass-Spec/Informed-Proteomics) tab-delimited result files (.tsv).
 
@@ -25,15 +25,15 @@ The latest version of the application is available on the [AppVeyor CI server](h
 ### Supported file formats
 #### Spectrum files
 
-When used with no other software installed, LCMS-Spectator supports the use of centroid mzML files as spectrum input. If Thermo Finnigan MSFileReader is installed, it also supports reading from Thermo Finnigan .raw files ([Download MSFileReader here](https://thermo.flexnetoperations.com/control/thmo/download?element=6306677), requires registration to download; choose the Utility software section and look for "MS File Reader 3.1 SP2".  Note that "MS File Reader 3.1 SP4" is also available but that version has not worked for us).
+When used with no other software installed, LCMS-Spectator supports the use of centroided mzML files as spectrum input. If Thermo Finnigan MSFileReader is installed, it also supports reading from Thermo Finnigan .raw files ([Download MSFileReader here](https://thermo.flexnetoperations.com/control/thmo/download?element=6306677), requires registration to download; choose the Utility software section and look for "MS File Reader 3.1 SP2".  Note that "MS File Reader 3.1 SP4" is also available but that version has not worked for us).
 
 Several other formats are supported if an appropriate version of ProteoWizard is installed ([Download here](http://proteowizard.sourceforge.net/download.html), make sure the version downloaded matches system architecture)
 
 #### Search result files
 
-Supports .mzid files, but will only show limited information about the results for .mzid files that were not produced by MSGF+ or MSPathFinder (scores will not be shown for other search tools).
+Supports .mzid files, but will only show limited information about the results for .mzid files that were not produced by MS-GF+ or MSPathFinder (scores will not be shown for other search tools).
 
-Also supports .tsv files created by MSPathFinder or MSGF+.
+Also supports .tsv files created by MSPathFinder or MS-GF+.
 
 ## System Requirements
 Minimum required:
