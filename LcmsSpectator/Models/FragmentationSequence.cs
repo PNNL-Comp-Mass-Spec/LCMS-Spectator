@@ -138,7 +138,6 @@ namespace LcmsSpectator.Models
 
                 var precursorIon = IonUtils.GetPrecursorIon(sequence, Charge);
 
-
                 var parallelOptions = new ParallelOptions();
 
 #pragma warning disable 162
@@ -294,7 +293,7 @@ namespace LcmsSpectator.Models
         private class FragmentLabelGenerationParameters : IEquatable<FragmentLabelGenerationParameters>
         {
             public IReadOnlyList<IonType> IonTypes { get; }
-            public IReadOnlyList<SearchModification> LabelModifications { get; }
+            private IReadOnlyList<SearchModification> LabelModifications { get; }
 
             public FragmentLabelGenerationParameters(IEnumerable<IonType> ionTypes, IEnumerable<SearchModification> labelModifications)
             {
