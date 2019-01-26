@@ -21,6 +21,8 @@ namespace LcmsSpectator.Views
     /// </summary>
     public partial class AboutBox : Window
     {
+        private const string PROGRAM_DATE = "January 25, 2019";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AboutBox"/> class.
         /// </summary>
@@ -31,6 +33,7 @@ namespace LcmsSpectator.Views
             WindowAboutBox.Title = string.Format("About {0}", AssemblyTitle);
             LabelProductName.Content = AssemblyProduct;
             LabelVersion.Content = string.Format("Version {0}", AssemblyVersion);
+            LabelDate.Content = PROGRAM_DATE;
             LabelCopyright.Content = AssemblyCopyright;
             LabelCompanyName.Content = AssemblyCompany;
             TextBoxDescription.Text = AssemblyDescription;
