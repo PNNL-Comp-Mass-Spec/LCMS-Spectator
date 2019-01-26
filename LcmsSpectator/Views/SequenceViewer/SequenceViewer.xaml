@@ -46,6 +46,11 @@
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
 
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="190" />
+        </Grid.ColumnDefinitions>
+
         <StackPanel
             Grid.Row="1"
             Grid.Column="0"
@@ -54,10 +59,21 @@
             <TextBlock Margin="0,0,5,0" FontWeight="Bold">Sequence Coverage:</TextBlock>
             <TextBlock Text="{Binding SequenceCoverage, StringFormat={}{0:F1}%}" />
         </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="1"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
+            <TextBlock Margin="0,0,5,0" FontWeight="Bold">Spectrum Peak Count:</TextBlock>
+            <TextBlock Text="{Binding SelectedSpectrumPeakCount, StringFormat={}{0:N0}}" />
         </StackPanel>
 
         <ScrollViewer
             Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
             CanContentScroll="True"
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto">

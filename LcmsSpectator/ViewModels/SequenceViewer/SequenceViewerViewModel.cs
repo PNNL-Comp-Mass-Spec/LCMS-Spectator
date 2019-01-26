@@ -29,6 +29,11 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         private ProductSpectrum selectedSpectrum;
 
         /// <summary>
+        /// Number of data points (peaks) in selectedSpectrum
+        /// </summary>
+        private int selectedSpectrumPeakCount;
+
+        /// <summary>
         /// The fragmentation sequence model that this view model formats for display.
         /// </summary>
         private FragmentationSequenceViewModel fragmentationSequence;
@@ -82,7 +87,22 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
         public ProductSpectrum SelectedSpectrum
         {
             get => selectedSpectrum;
-            set => this.RaiseAndSetIfChanged(ref selectedSpectrum, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref selectedSpectrum, value);
+                if (value?.Peaks == null)
+                    SelectedSpectrumPeakCount = 0;
+                else
+                    SelectedSpectrumPeakCount = value.Peaks.Length;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of data points in SelectedSpectrum
+        /// </summary>
+        public int SelectedSpectrumPeakCount {
+            get => selectedSpectrumPeakCount;
+            set => this.RaiseAndSetIfChanged(ref selectedSpectrumPeakCount, value);
         }
 
         /// <summary>
