@@ -348,7 +348,7 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 // Assure that the charge state isn't too high for this ion
                 // Impose a minimum threshold of 4+
-                var maxReasonableCharge = Math.Max(4, Ion.Composition.Mass / 1000.0 * 3);
+                var maxReasonableCharge = Math.Round(Math.Max(4, Ion.Composition.Mass / 1000.0 * 3));
                 if (Ion.Charge > maxReasonableCharge)
                 {
                     // Charge state is unreasonably high given the monoisotopic mass
