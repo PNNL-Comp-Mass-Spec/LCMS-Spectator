@@ -303,14 +303,14 @@ namespace LcmsSpectator.Models
 
             public bool Equals(FragmentLabelGenerationParameters other)
             {
-                if (ReferenceEquals(null, other)) return false;
+                if (other == null) return false;
                 if (ReferenceEquals(this, other)) return true;
                 return Equals(IonTypes, other.IonTypes) && Equals(LabelModifications, other.LabelModifications);
             }
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
+                if (obj == null) return false;
                 if (ReferenceEquals(this, obj)) return true;
                 if (obj.GetType() != this.GetType()) return false;
                 return Equals((FragmentLabelGenerationParameters)obj);
