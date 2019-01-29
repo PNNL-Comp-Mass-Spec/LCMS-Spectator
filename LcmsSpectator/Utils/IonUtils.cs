@@ -320,8 +320,8 @@ namespace LcmsSpectator.Utils
         /// <returns>The error in ppm.</returns>
         public static double GetPeakPpmError(Peak peak, double theoMz)
         {
-            // error = (observed - theo)/observed*10e6
-            return (peak.Mz - theoMz) / peak.Mz * Math.Pow(10, 6);
+            // error = (observed - theo)/theo*1e6
+            return (peak.Mz - theoMz) / theoMz * 1e6;
         }
 
         /// <summary>

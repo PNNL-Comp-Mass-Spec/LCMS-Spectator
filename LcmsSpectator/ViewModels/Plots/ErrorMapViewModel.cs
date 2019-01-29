@@ -91,7 +91,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// The currently selected peak data points.
         /// </summary>
-        private IEnumerable<IList<PeakDataPoint>> selectedPeakDataPoints;
+        private IList<IList<PeakDataPoint>> selectedPeakDataPoints;
 
         /// <summary>
         /// A value indicating whether multiple charge states for an ion should
@@ -278,7 +278,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         /// <param name="sequence">The sequence to display as the x axis of the plot.</param>
         /// <param name="peakDataPoints">The peak data points to extract error values from.</param>
-        public void SetData(Sequence sequence, IEnumerable<IList<PeakDataPoint>> peakDataPoints)
+        public void SetData(Sequence sequence, IList<IList<PeakDataPoint>> peakDataPoints)
         {
             selectedSequence = sequence;
 
@@ -288,7 +288,6 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             // Remove all points except for most abundant isotope peaks
-            // ReSharper disable once PossibleMultipleEnumeration
             var mostAbundantPeaks = GetMostAbundantIsotopePeaks(peakDataPoints).ToArray();
 
             // No data, nothing to do
@@ -297,7 +296,6 @@ namespace LcmsSpectator.ViewModels.Plots
                 return;
             }
 
-            // ReSharper disable once PossibleMultipleEnumeration
             selectedPeakDataPoints = peakDataPoints;
 
             if (TableShouldIncludeUnmatched)
