@@ -37,30 +37,33 @@
                                 <plots:ErrorMap />
                             </xcad:LayoutDocument>
                             <xcad:LayoutDocument Title="Table" CanClose="False">
-                                <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding DataTable}">
-                                    <DataGrid.ContextMenu>
-                                        <ContextMenu>
-                                            <MenuItem Command="{Binding SaveAsImageCommand}" Header="Save as _Image" />
-                                            <MenuItem Command="{Binding SaveDataTableCommand}" Header="Save Data Table" />
-                                        </ContextMenu>
-                                    </DataGrid.ContextMenu>
-                                    <DataGrid.Columns>
-                                        <!--<DataGridTextColumn Header="Residue" Binding="{Binding Residue}" /> -->
-                                        <DataGridTextColumn Binding="{Binding Index}" Header="Index" />
-                                        <DataGridTextColumn Binding="{Binding Residue}" Header="Residue" />
-                                        <DataGridTextColumn Binding="{Binding IonType.BaseIonType.Symbol}" Header="Ion" />
-                                        <DataGridTextColumn Binding="{Binding IonType.Charge}" Header="Charge" />
-                                        <DataGridTextColumn Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" Header="M/Z" />
-                                        <DataGridTextColumn Binding="{Binding MonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" Header="Monoisotopic Mass" />
-                                        <DataGridTextColumn Binding="{Binding TheoMonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" Header="Theo Monoisotopic Mass" />
-                                        <DataGridTextColumn Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" Header="Intensity" />
-                                        <DataGridTextColumn Binding="{Binding Error, Converter={StaticResource DoubleToStringConverter}}" Header="Error (ppm)" />
-                                        <DataGridTextColumn
-                                            Width="*"
-                                            Binding="{Binding Correlation, Converter={StaticResource DoubleToStringConverter}}"
-                                            Header="Correlation" />
-                                    </DataGrid.Columns>
-                                </DataGrid>
+                                <DockPanel LastChildFill="True">
+                                    <TextBlock DockPanel.Dock="Top" Text="Values are from (or calculated using) the most abundant isotope." />
+                                    <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding DataTable}">
+                                        <DataGrid.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Command="{Binding SaveAsImageCommand}" Header="Save as _Image" />
+                                                <MenuItem Command="{Binding SaveDataTableCommand}" Header="Save Data Table" />
+                                            </ContextMenu>
+                                        </DataGrid.ContextMenu>
+                                        <DataGrid.Columns>
+                                            <!--<DataGridTextColumn Header="Residue" Binding="{Binding Residue}" /> -->
+                                            <DataGridTextColumn Binding="{Binding Index}" Header="Index" />
+                                            <DataGridTextColumn Binding="{Binding Residue}" Header="Residue" />
+                                            <DataGridTextColumn Binding="{Binding IonType.BaseIonType.Symbol}" Header="Ion" />
+                                            <DataGridTextColumn Binding="{Binding IonType.Charge}" Header="Charge" />
+                                            <DataGridTextColumn Binding="{Binding X, Converter={StaticResource DoubleToStringConverter}}" Header="M/Z" />
+                                            <DataGridTextColumn Binding="{Binding MonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" Header="Monoisotopic Mass" />
+                                            <DataGridTextColumn Binding="{Binding TheoMonoisotopicMass, Converter={StaticResource DoubleToStringConverter}}" Header="Theo Monoisotopic Mass" />
+                                            <DataGridTextColumn Binding="{Binding Y, Converter={StaticResource DoubleToStringConverter}}" Header="Intensity" />
+                                            <DataGridTextColumn Binding="{Binding Error, Converter={StaticResource DoubleToStringConverter}}" Header="Error (ppm)" />
+                                            <DataGridTextColumn
+                                                Width="*"
+                                                Binding="{Binding Correlation, Converter={StaticResource DoubleToStringConverter}}"
+                                                Header="Correlation" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </DockPanel>
                             </xcad:LayoutDocument>
                         </xcad:LayoutDocumentPane>
                     </xcad:LayoutPanel>

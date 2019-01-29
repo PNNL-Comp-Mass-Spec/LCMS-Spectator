@@ -369,10 +369,13 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 if (errors[i] != null)
                 {
+                    // Calculate the monoisotopic m/z so that we can calculate the proper monoisotopic mass for isotope peaks
+                    var monoMz = peaks[i].Mz - (InformedProteomics.Backend.Data.Biology.Constants.Proton / Ion.Charge * i);
                     peakDataPoints.Add(new PeakDataPoint(peaks[i].Mz, peaks[i].Intensity, errors[i].Value, correlation, Label)
                     {
-                        MonoisotopicMass = (peaks[i].Mz * Ion.Charge) - InformedProteomics.Backend.Data.Biology.Constants.Proton * Ion.Charge,
+                        MonoisotopicMass = (monoMz - InformedProteomics.Backend.Data.Biology.Constants.Proton) * Ion.Charge,
                         TheoMonoisotopicMass = Ion.Composition.Mass,
+                        IsotopeIndex = i,
                         Index = Index,
                         IonType = ionType,
                     });

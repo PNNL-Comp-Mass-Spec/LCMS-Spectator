@@ -52,6 +52,8 @@ namespace LcmsSpectator.PlotModels
 
         public double TheoMonoisotopicMass { get; set; }
 
+        public int IsotopeIndex { get; set; }
+
         /// <summary>
         /// Gets or sets the residue that this peak is associated with.
         /// </summary>
@@ -73,7 +75,7 @@ namespace LcmsSpectator.PlotModels
         public string Title { get; set; }
 
         /// <summary>
-        /// Gets or sets the isotope index of this point.
+        /// Gets or sets the index of the the residue that this peak is associated with.
         /// </summary>
         public int Index { get; set; }
 
