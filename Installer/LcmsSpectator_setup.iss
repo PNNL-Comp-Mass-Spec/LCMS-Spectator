@@ -77,7 +77,11 @@ Source: Library\InformedProteomics\InformedProteomics.Backend.MassSpecData.dll; 
 Source: Library\InformedProteomics\InformedProteomics.FeatureFinding.dll;    DestDir: {app}
 Source: Library\InformedProteomics\InformedProteomics.Scoring.dll;           DestDir: {app}
 Source: Library\InformedProteomics\InformedProteomics.TopDown.dll;           DestDir: {app}
-Source: Library\InformedProteomics\ThermoRawFileReader.dll;                  DestDir: {app}
+Source: Library\InformedProteomics\ThermoRawFileReader.dll;                  DestDir: {app} 
+Source: Library\InformedProteomics\ThermoFisher.CommonCore.BackgroundSubtraction.dll;   DestDir: {app} 
+Source: Library\InformedProteomics\ThermoFisher.CommonCore.Data.dll;                    DestDir: {app} 
+Source: Library\InformedProteomics\ThermoFisher.CommonCore.MassPrecisionEstimator.dll;  DestDir: {app} 
+Source: Library\InformedProteomics\ThermoFisher.CommonCore.RawFileReader.dll;           DestDir: {app}
 
 ; Documentation
 Source: README.md;                                                           DestDir: {app}

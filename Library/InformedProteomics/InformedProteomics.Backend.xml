@@ -313,7 +313,7 @@
         </member>
         <member name="T:InformedProteomics.Backend.Data.Biology.IMolecule">
             <summary>
-            Interface for biological components that have a elemental composition
+            Interface for biological components that have an elemental composition
             </summary>
         </member>
         <member name="P:InformedProteomics.Backend.Data.Biology.IMolecule.Composition">
@@ -722,13 +722,13 @@
             Parse a plain-string empirical formula, for example
             C2H3N1O1S
             </summary>
-            <param name="plaincompositionStr"></param>
+            <param name="plainCompositionStr"></param>
             <remarks>Empirical formula cannot have parentheses or spaces</remarks>
             <returns>Composition object, or null if a parse error</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Data.Composition.Composition.Parse(System.String)">
             <summary>
-            Parse unimod-like composition string, for example
+            Parse UniMod-like composition string, for example
             H(117) C(77) N(17) O(26) S(2)
             </summary>
             <param name="compositionStr"></param>
@@ -1295,7 +1295,7 @@
         </member>
         <member name="P:InformedProteomics.Backend.Data.Sequence.Modification.AccessionNum">
             <summary>
-            The UNIMOD accession number of the modification
+            The UniMod accession number of the modification
             </summary>
         </member>
         <member name="P:InformedProteomics.Backend.Data.Sequence.Modification.Composition">
@@ -1538,7 +1538,7 @@
         </member>
         <member name="F:InformedProteomics.Backend.Data.Sequence.Modification.TevFp2">
             <summary>
-            For Aaron's data
+            Protein Probe
             </summary>
         </member>
         <member name="F:InformedProteomics.Backend.Data.Sequence.Modification.MassToModMap">
@@ -1660,7 +1660,7 @@
         </member>
         <member name="T:InformedProteomics.Backend.Data.Sequence.ModificationParams">
             <summary>
-            This class catalogues all possible combinations of modifications
+            This class catalogs all possible combinations of modifications
             </summary>
         </member>
         <member name="M:InformedProteomics.Backend.Data.Sequence.ModificationParams.#ctor">
@@ -1688,7 +1688,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.Data.Sequence.ModificationParams.GetModificationCombination(System.Int32)">
             <summary>
-            Gets the modificatino combination with the specified modCombIndex
+            Gets the modification combination with the specified modCombIndex
             </summary>
             <param name="modCombIndex">modification combination modCombIndex</param>
             <returns>modification combination</returns>
@@ -1970,7 +1970,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.Data.Sequence.SequenceGraph.GetNumProteoformSequences(System.Int32)">
             <summary>
-            Get number of possible proteoform sequences for the speicified modification combination
+            Get number of possible proteoform sequences for the specified modification combination
             </summary>
             <param name="modIndex">index of modification combination</param>
             <returns>number of sequences</returns>
@@ -2283,7 +2283,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.AbstractFragmentScorer.FindMatchedPeaks(InformedProteomics.Backend.Data.Composition.Composition,System.Double,System.Double)">
             <summary>
-            Find the praks that match the provided composition
+            Find the peaks that match the provided composition
             </summary>
             <param name="fragmentComposition"></param>
             <param name="corrThreshold"></param>
@@ -2598,7 +2598,7 @@
             <param name="originalSpec"></param>
             <param name="peaks"></param>
         </member>
-        <member name="M:InformedProteomics.Backend.Data.Spectrometry.DeconvolutedSpectrum.#ctor(System.Collections.Generic.ICollection{InformedProteomics.Backend.Data.Spectrometry.DeconvolutedPeak},System.Int32)">
+        <member name="M:InformedProteomics.Backend.Data.Spectrometry.DeconvolutedSpectrum.#ctor(System.Collections.Generic.IEnumerable{InformedProteomics.Backend.Data.Spectrometry.DeconvolutedPeak},System.Int32)">
             <summary>
             Constructor
             </summary>
@@ -2879,7 +2879,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.IonType.GetMz(System.Double)">
             <summary>
-            Geth the m/z of <paramref name="cutMass"/> + (the offset mass)
+            Get the m/z of <paramref name="cutMass"/> + (the offset mass)
             </summary>
             <param name="cutMass"></param>
             <returns></returns>
@@ -3406,7 +3406,7 @@
             Types of MS2 ion detectors
             </summary>
         </member>
-        <member name="F:InformedProteomics.Backend.Data.Spectrometry.Ms2DetectorType.Iontrap">
+        <member name="F:InformedProteomics.Backend.Data.Spectrometry.Ms2DetectorType.IonTrap">
             <summary>
             Ion trap
             </summary>
@@ -3662,7 +3662,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.MzComparerWithBinning.GetRoundedValue(System.Double)">
             <summary>
-            Get the m/z rounded by <see cref="F:InformedProteomics.Backend.Data.Spectrometry.MzComparerWithBinning.NumBits"/> using bitshifting magic
+            Get the m/z rounded by <see cref="F:InformedProteomics.Backend.Data.Spectrometry.MzComparerWithBinning.NumBits"/> using bit shifting magic
             </summary>
             <param name="mz"></param>
             <returns></returns>
@@ -3792,12 +3792,12 @@
         </member>
         <member name="F:InformedProteomics.Backend.Data.Spectrometry.Protocol.Itraq">
             <summary>
-            ITraq Label reagents
+            iTRAQ Label reagents
             </summary>
         </member>
         <member name="F:InformedProteomics.Backend.Data.Spectrometry.Protocol.ItraqPhospho">
             <summary>
-            ITraq Label reagents with phosphorylation
+            iTRAQ Label reagents with phosphorylation
             </summary>
         </member>
         <member name="F:InformedProteomics.Backend.Data.Spectrometry.Protocol.Tmt">
@@ -3889,7 +3889,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.ContainsIon(InformedProteomics.Backend.Data.Biology.Ion,InformedProteomics.Backend.Data.Spectrometry.Tolerance,System.Double)">
             <summary>
-            Checks whether this spectrum contains all isotope peaks whose relative intensity is equal or larter than the threshold
+            Checks whether this spectrum contains all isotope peaks whose relative intensity is equal or larger than the threshold
             </summary>
             <param name="ion">ion</param>
             <param name="tolerance">tolerance</param>
@@ -3934,7 +3934,7 @@
             <param name="relativeIntensityThreshold">relative intensity threshold of the theoretical isotope profile</param>
             <returns>fit score</returns>
         </member>
-        <member name="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.GetConsineScore(InformedProteomics.Backend.Data.Biology.Ion,InformedProteomics.Backend.Data.Spectrometry.Tolerance,System.Double)">
+        <member name="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.GetCosineScore(InformedProteomics.Backend.Data.Biology.Ion,InformedProteomics.Backend.Data.Spectrometry.Tolerance,System.Double)">
             <summary>
             Computes the cosine between the ion and corresponding peaks in the spectrum
             </summary>
@@ -3963,13 +3963,6 @@
             </summary>
             <param name="signalToNoiseRatio"></param>
         </member>
-        <member name="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.FilterNosieByLocalWindow(System.Double,System.Int32)">
-            <summary>
-            Filter noise peaks out using a local window
-            </summary>
-            <param name="signalToNoiseRatio"></param>
-            <param name="windowPpm"></param>
-        </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.FilterNoiseByLocalWindow(System.Double,System.Int32)">
             <summary>
             Filter noise peaks out using a local window
@@ -3984,11 +3977,6 @@
             <param name="peakStartIndex"></param>
             <param name="peakEndIndex"></param>
             <returns></returns>
-        </member>
-        <member name="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.FilterNosieByIntensityHistogram">
-            <summary>
-            Filter noise peaks out using an intensity histogram
-            </summary>
         </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.FilterNoiseByIntensityHistogram">
             <summary>
@@ -4086,13 +4074,13 @@
         </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.TargetedDeconvolutedSpectrum.FindPeak(InformedProteomics.Backend.Data.Composition.Composition,InformedProteomics.Backend.Data.Spectrometry.Tolerance)">
             <summary>
-            Find a neutral monoisotopic peak corrsponding to a single compound/
+            Find a neutral monoisotopic peak corresponding to a single compound
             </summary>
             <param name="composition">The compound to look for.</param>
             <param name="tolerance">The peak tolerance to use.</param>
             <returns>The neutral monoisotopic peak.</returns>
         </member>
-        <member name="M:InformedProteomics.Backend.Data.Spectrometry.TargetedDeconvolutedSpectrum.GetCorrCos(InformedProteomics.Backend.Data.Biology.Ion,InformedProteomics.Backend.Data.Spectrometry.Peak[])">
+        <member name="M:InformedProteomics.Backend.Data.Spectrometry.TargetedDeconvolutedSpectrum.GetCorrCos(InformedProteomics.Backend.Data.Biology.Ion,System.Collections.Generic.IReadOnlyList{InformedProteomics.Backend.Data.Spectrometry.Peak})">
             <summary>
             Gets the pearson correlation and cosine score of an observed isotopic distribution compared to a theoretical ion.
             </summary>
@@ -4268,7 +4256,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.Xic.Equals(InformedProteomics.Backend.Data.Spectrometry.Xic)">
             <summary>
-            Check 2 Xics for equality
+            Check 2 XICs for equality
             </summary>
             <param name="other"></param>
             <returns></returns>
@@ -5233,6 +5221,7 @@
         <member name="M:InformedProteomics.Backend.MathAndStats.ArrayUtil.MaxSumSubarray(System.Collections.Generic.IList{System.Double},System.Int32@,System.Int32@)">
             <summary>
             Kadane's algorithm
+            https://en.wikipedia.org/wiki/Maximum_subarray_problem
             </summary>
             <param name="a"></param>
             <param name="start"></param>
@@ -5383,7 +5372,7 @@
             <param name="v2Index"></param>
             <returns></returns>
         </member>
-        <member name="M:InformedProteomics.Backend.MathAndStats.FitScoreCalculator.GetHyperGeometricPvalue(System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean)">
+        <member name="M:InformedProteomics.Backend.MathAndStats.FitScoreCalculator.GetHyperGeometricPValue(System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean)">
             <summary>
             Calculate the HyperGeometric P value for the provided data
             </summary>
@@ -5394,7 +5383,7 @@
             <param name="upperTailProb"></param>
             <returns></returns>
         </member>
-        <member name="M:InformedProteomics.Backend.MathAndStats.FitScoreCalculator.GetRankSumPvalue(System.Double,System.Double,System.Double,System.Boolean)">
+        <member name="M:InformedProteomics.Backend.MathAndStats.FitScoreCalculator.GetRankSumPValue(System.Double,System.Double,System.Double,System.Boolean)">
             <summary>
             Calculate the Rank Sum P value for the provided data
             </summary>
@@ -5430,7 +5419,7 @@
             <summary>
             Calculate the cosine score for the provided data. Larger scores are better.
             </summary>
-            <param name="theorPeakList"></param>
+            <param name="theoreticalPeakList"></param>
             <param name="observedPeakList"></param>
             <returns></returns>
         </member>
@@ -5438,7 +5427,7 @@
             <summary>
             Calculate the dot product of the provided data
             </summary>
-            <param name="theorPeakList"></param>
+            <param name="theoreticalPeakList"></param>
             <param name="observedPeakList"></param>
             <returns></returns>
         </member>
@@ -5446,7 +5435,7 @@
             <summary>
             Calculate the Decon Tools fit score for the provided data. Smaller scores are better.
             </summary>
-            <param name="theorPeakList"></param>
+            <param name="theoreticalPeakList"></param>
             <param name="observedPeakList"></param>
             <returns></returns>
         </member>
@@ -5454,7 +5443,7 @@
             <summary>
             Calculate the fit of Normalized vectors using the provided data.
             </summary>
-            <param name="normTheorPeakList"></param>
+            <param name="normTheoreticalPeakList"></param>
             <param name="normObservedPeakList"></param>
             <returns></returns>
         </member>
@@ -5899,7 +5888,7 @@
             Computes the False Decoy Ratio and scores for the supplied target and decoy hits
             </summary>
         </member>
-        <member name="P:InformedProteomics.Backend.SearchResults.FdrCalculator.NumPsms">
+        <member name="P:InformedProteomics.Backend.SearchResults.FdrCalculator.NumPSMs">
             <summary>
             Number of PSMs with a QValue &lt; 0.01
             </summary>
@@ -5969,6 +5958,7 @@
         <member name="F:InformedProteomics.Backend.SearchResults.ResultFileReader.SupportedResultsFiles">
             <summary>
             File extensions supported by the results reader.
+            These extensions need to be lowercase
             </summary>
         </member>
         <member name="M:InformedProteomics.Backend.SearchResults.ResultFileReader.ReadResultFile(System.String)">
@@ -6348,7 +6338,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.Utils.PeakListUtils.GetExceptWith(System.Collections.Generic.List{InformedProteomics.Backend.Data.Spectrometry.Peak},System.Collections.Generic.List{InformedProteomics.Backend.Data.Spectrometry.Peak},System.Collections.Generic.IComparer{InformedProteomics.Backend.Data.Spectrometry.Peak})">
             <summary>
-            Get the exceptwith of the 2 peak lists
+            Compare two peak lists and create a list of peaks that are in peakList1 but not in peakList2
             </summary>
             <param name="peakList1"></param>
             <param name="peakList2"></param>
@@ -6406,7 +6396,7 @@
         </member>
         <member name="M:InformedProteomics.Backend.Utils.SimpleStringProcessing.GetStringBetweenDots(System.String)">
             <summary>
-            Get the string between 2 periods, so A.BCDEFGHI.J returns BCDEFGHI
+            Get the string between 2 periods, so A.PEPTIDE.J returns PEPTIDE
             </summary>
             <param name="str"></param>
             <returns></returns>
@@ -6431,7 +6421,7 @@
             Constructor
             </summary>
             <param name="filePath">File to read</param>
-            <param name="delimeter">Delimeter, tab by default</param>
+            <param name="delimiter">Delimiter, tab by default</param>
         </member>
         <member name="P:InformedProteomics.Backend.Utils.TsvFileParser.FileName">
             <summary>

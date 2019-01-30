@@ -329,7 +329,7 @@
             <param name="numCTermCleavages"></param>
             <returns></returns>
         </member>
-        <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.SequenceAnnotationsAndOffsetsWithNtermOrCtermCleavageNoLargerThan(System.Int32,System.Int32,System.Int32,System.Int32)">
+        <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.SequenceAnnotationsAndOffsetsWithNTermOrCTermCleavageNoLargerThan(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
             Get the annotation and offset data from the database for all sequences that comply with the parameters
             </summary>
@@ -427,7 +427,7 @@
         </member>
         <member name="P:InformedProteomics.Backend.Database.ProteinHashInfo.SequenceLength">
             <summary>
-            Number of residues in the protein sequqence
+            Number of residues in the protein sequence
             </summary>
         </member>
         <member name="P:InformedProteomics.Backend.Database.ProteinHashInfo.SequenceHash">
