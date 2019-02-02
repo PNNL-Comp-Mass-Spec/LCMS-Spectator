@@ -48,11 +48,11 @@
             <xcad:LayoutRoot>
                 <xcad:LayoutPanel Orientation="Vertical">
                     <xcad:LayoutDocumentPane DockWidth="*">
-                        <xcad:LayoutDocument Title="XIC View" CanClose="False">
-                            <plots:XicView x:Name="XicView" DataContext="{Binding XicViewModel}" />
-                        </xcad:LayoutDocument>
                         <xcad:LayoutDocument Title="Spectrum View" CanClose="False">
                             <plots:SpectrumView x:Name="SpectrumView" DataContext="{Binding SpectrumViewModel}" />
+                        </xcad:LayoutDocument>
+                        <xcad:LayoutDocument Title="XIC View" CanClose="False">
+                            <plots:XicView x:Name="XicView" DataContext="{Binding XicViewModel}" />
                         </xcad:LayoutDocument>
                         <xcad:LayoutDocument Title="Feature Map" CanClose="False">
                             <Grid x:Name="FeatureMap" DataContext="{Binding FeatureMapViewModel}">
