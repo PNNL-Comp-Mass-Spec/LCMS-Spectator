@@ -74,10 +74,10 @@ Source: Library\MTDBFramework\PHRPReader.dll;                                Des
 Source: Library\InformedProteomics\InformedProteomics.Backend.dll;              DestDir: {app}
 Source: Library\InformedProteomics\InformedProteomics.Backend.Database.dll;     DestDir: {app}
 Source: Library\InformedProteomics\InformedProteomics.Backend.MassSpecData.dll; DestDir: {app}
-Source: Library\InformedProteomics\InformedProteomics.FeatureFinding.dll;    DestDir: {app}
-Source: Library\InformedProteomics\InformedProteomics.Scoring.dll;           DestDir: {app}
-Source: Library\InformedProteomics\InformedProteomics.TopDown.dll;           DestDir: {app}
-Source: Library\InformedProteomics\ThermoRawFileReader.dll;                  DestDir: {app} 
+Source: Library\InformedProteomics\InformedProteomics.FeatureFinding.dll;       DestDir: {app}
+Source: Library\InformedProteomics\InformedProteomics.Scoring.dll;              DestDir: {app}
+Source: Library\InformedProteomics\InformedProteomics.TopDown.dll;              DestDir: {app}          
+Source: Library\InformedProteomics\RawFileReaderLicense.doc;                    DestDir: {app} 
 Source: Library\InformedProteomics\ThermoFisher.CommonCore.BackgroundSubtraction.dll;   DestDir: {app} 
 Source: Library\InformedProteomics\ThermoFisher.CommonCore.Data.dll;                    DestDir: {app} 
 Source: Library\InformedProteomics\ThermoFisher.CommonCore.MassPrecisionEstimator.dll;  DestDir: {app} 
