@@ -3273,15 +3273,6 @@
             Scan number where peak was observed
             </summary>
         </member>
-        <member name="M:InformedProteomics.Backend.Data.Spectrometry.LcMsPeak.ReplaceData(System.Double,System.Double,System.Int32)">
-            <summary>
-            Replace the data in the peak (used by PbfLcMsRun)
-            </summary>
-            <param name="mz"></param>
-            <param name="intensity"></param>
-            <param name="scanNum"></param>
-            <returns></returns>
-        </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.LcMsPeak.CompareTo(InformedProteomics.Backend.Data.Spectrometry.LcMsPeak)">
             <summary>
             Compare 2 LcMsPeaks (for sorting)
@@ -3338,11 +3329,12 @@
             <param name="msLevel">The MS level (ex MS1, MS2, etc) to extract spectra for.</param>
             <param name="maxDegreeOfParallelism">The maximum number of threads the deconvoluter can use.</param>
         </member>
-        <member name="M:InformedProteomics.Backend.Data.Spectrometry.LcmsRunDeconvoluter.ReadAllSpectra">
+        <member name="M:InformedProteomics.Backend.Data.Spectrometry.LcmsRunDeconvoluter.ReadAllSpectra(System.Boolean)">
             <summary>
             Gets all spectra.
             Deconvolutes spectra in parallel as it reads them.
             </summary>
+            <param name="includePeaks">Ignored</param>
             <returns>Deconvoluted spectra.</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.LcmsRunDeconvoluter.ReadMassSpectrum(System.Int32,System.Boolean)">
@@ -3352,6 +3344,14 @@
             <param name="scanNum">The scan to deconvolute.</param>
             <param name="includePeaks">Should it be deconvoluted?</param>
             <returns>Deconvoluted spectrum.</returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.Data.Spectrometry.LcmsRunDeconvoluter.GetSpectrum(System.Int32,System.Boolean)">
+            <summary>
+            Read the specified spectrum from the file, optionally reading only the metadata
+            </summary>
+            <param name="scanNum"></param>
+            <param name="includePeaks"></param>
+            <returns></returns>
         </member>
         <member name="P:InformedProteomics.Backend.Data.Spectrometry.LcmsRunDeconvoluter.NumSpectra">
             <summary>
@@ -3709,6 +3709,29 @@
         <member name="F:InformedProteomics.Backend.Data.Spectrometry.MzComparerWithBinning.NumBits">
             <summary>
             Number of bits to use for binning
+            </summary>
+        </member>
+        <member name="T:InformedProteomics.Backend.Data.Spectrometry.PeakDetailed">
+            <summary>
+            Like <see cref="T:InformedProteomics.Backend.Data.Spectrometry.Peak"/>, but with additional per-peak data, like the Noise value available from Thermo Label data.
+            </summary>
+        </member>
+        <member name="M:InformedProteomics.Backend.Data.Spectrometry.PeakDetailed.#ctor(System.Double,System.Double,System.Double)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="mz"></param>
+            <param name="intensity"></param>
+            <param name="noise"></param>
+        </member>
+        <member name="P:InformedProteomics.Backend.Data.Spectrometry.PeakDetailed.Noise">
+            <summary>
+            Noise value for the peak
+            </summary>
+        </member>
+        <member name="P:InformedProteomics.Backend.Data.Spectrometry.PeakDetailed.SignalToNoise">
+            <summary>
+            Calculated SignalToNoise value
             </summary>
         </member>
         <member name="T:InformedProteomics.Backend.Data.Spectrometry.PeptideSpectrumMatch">
@@ -4614,72 +4637,35 @@
             Interface for LcMsRun data objects
             </summary>
         </member>
-        <member name="P:InformedProteomics.Backend.MassSpecData.ILcMsRun.MinLcScan">
-            <summary>
-            Index of first LC scan in the dataset
-            </summary>
-        </member>
-        <member name="P:InformedProteomics.Backend.MassSpecData.ILcMsRun.MaxLcScan">
-            <summary>
-            Index of last LC scan in the dataset
-            </summary>
-        </member>
-        <member name="P:InformedProteomics.Backend.MassSpecData.ILcMsRun.NumSpectra">
-            <summary>
-            The number of spectra in the file.
-            </summary>
-        </member>
         <member name="P:InformedProteomics.Backend.MassSpecData.ILcMsRun.IsDia">
             <summary>
             True if the dataset is DIA data
             </summary>
         </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.ILcMsRun.GetElutionTime(System.Int32)">
+        <member name="M:InformedProteomics.Backend.MassSpecData.ILcMsRun.GetFragmentationSpectraScanNums(InformedProteomics.Backend.Data.Biology.Ion)">
             <summary>
-            Get the elution time of the specified scan number
+            Gets scan numbers of the fragmentation spectra whose isolation window contains the precursor ion specified
             </summary>
-            <param name="scanNum"></param>
-            <returns></returns>
+            <param name="precursorIon"></param>
+            <returns>scan numbers of fragmentation spectra</returns>
         </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.ILcMsRun.GetMsLevel(System.Int32)">
+        <member name="M:InformedProteomics.Backend.MassSpecData.ILcMsRun.GetFragmentationSpectraScanNums(System.Double)">
             <summary>
-            Gets the MS level of the specified scan
+            Gets scan numbers of the fragmentation spectra whose isolation window contains the precursor ion specified
             </summary>
-            <param name="scanNum">scan number</param>
-            <returns>MS level</returns>
-        </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.ILcMsRun.GetPrevScanNum(System.Int32,System.Int32)">
-            <summary>
-            Gets the greatest scan number smaller than ms2ScanNum
-            </summary>
-            <param name="scanNum">scan number</param>
-            <param name="msLevel">MS level</param>
-            <returns>previous scan number at the specified level</returns>
-        </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.ILcMsRun.GetNextScanNum(System.Int32,System.Int32)">
-            <summary>
-            Gets the smallest scan number larger than ms2ScanNum
-            </summary>
-            <param name="scanNum">scan number</param>
-            <param name="msLevel">MS level</param>
-            <returns>next scan number at the specified level</returns>
-        </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.ILcMsRun.GetScanNumbers(System.Int32)">
-            <summary>
-            Gets the scan numbers of the specified msLevel
-            </summary>
-            <param name="msLevel">MS level</param>
-            <returns>scan numbers of the specified msLevel</returns>
+            <param name="mostAbundantIsotopeMz"></param>
+            <returns>scan numbers of fragmentation spectra</returns>
         </member>
         <member name="T:InformedProteomics.Backend.MassSpecData.IMassSpecDataReader">
             <summary>
             Interface for objects that can supply mass spectrometry data, usually from a file
             </summary>
         </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.IMassSpecDataReader.ReadAllSpectra">
+        <member name="M:InformedProteomics.Backend.MassSpecData.IMassSpecDataReader.ReadAllSpectra(System.Boolean)">
             <summary>
             Gets all spectra
             </summary>
+            <param name="includePeaks"></param>
             <returns>all spectra</returns>
         </member>
         <member name="M:InformedProteomics.Backend.MassSpecData.IMassSpecDataReader.ReadMassSpectrum(System.Int32,System.Boolean)">
@@ -4742,6 +4728,70 @@
             <summary>
             SHA-1 Checksum of the pbf file, calculated on first access to this property - lowercase, hex only
             </summary>
+        </member>
+        <member name="T:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor">
+            <summary>
+            Interface for objects that can supply random access to spectra
+            </summary>
+        </member>
+        <member name="P:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.MinLcScan">
+            <summary>
+            Index of first LC scan in the dataset
+            </summary>
+        </member>
+        <member name="P:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.MaxLcScan">
+            <summary>
+            Index of last LC scan in the dataset
+            </summary>
+        </member>
+        <member name="P:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.NumSpectra">
+            <summary>
+            The number of spectra in the file.
+            </summary>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.GetElutionTime(System.Int32)">
+            <summary>
+            Get the elution time of the specified scan number
+            </summary>
+            <param name="scanNum"></param>
+            <returns></returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.GetMsLevel(System.Int32)">
+            <summary>
+            Gets the MS level of the specified scan
+            </summary>
+            <param name="scanNum">scan number</param>
+            <returns>MS level</returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.GetPrevScanNum(System.Int32,System.Int32)">
+            <summary>
+            Gets the greatest scan number smaller than ms2ScanNum
+            </summary>
+            <param name="scanNum">scan number</param>
+            <param name="msLevel">MS level</param>
+            <returns>previous scan number at the specified level</returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.GetNextScanNum(System.Int32,System.Int32)">
+            <summary>
+            Gets the smallest scan number larger than ms2ScanNum
+            </summary>
+            <param name="scanNum">scan number</param>
+            <param name="msLevel">MS level</param>
+            <returns>next scan number at the specified level</returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.GetScanNumbers(System.Int32)">
+            <summary>
+            Gets the scan numbers of the specified msLevel
+            </summary>
+            <param name="msLevel">MS level</param>
+            <returns>scan numbers of the specified msLevel</returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.GetIsolationWindow(System.Int32)">
+            <summary>
+            Read and return the isolation window for the specified scan number
+            </summary>
+            <param name="scanNum"></param>
+            <returns></returns>
         </member>
         <member name="T:InformedProteomics.Backend.MassSpecData.ISpectrumExtractor">
             <summary>
@@ -4831,10 +4881,11 @@
             Properly dispose of all unmanaged resources (specifically, file handles)
             </summary>
         </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.ReadAllSpectra">
+        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.ReadAllSpectra(System.Boolean)">
             <summary>
             Gets all spectra
             </summary>
+            <param name="includePeaks"></param>
             <returns>all spectra</returns>
         </member>
         <member name="P:InformedProteomics.Backend.MassSpecData.LcMsRun.NativeIdFormat">
@@ -4899,42 +4950,6 @@
             Return the isolation window for the specified scan number
             </summary>
             <param name="scanNum"></param>
-            <returns></returns>
-        </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.GetSummedMs1Spectrum(System.Int32,System.Double)">
-            <summary>
-            Create a summed MS1 spectrum from the scans within <paramref name="elutionTimeTolerance"/> of <paramref name="scanNum"/>
-            </summary>
-            <param name="scanNum"></param>
-            <param name="elutionTimeTolerance"></param>
-            <returns></returns>
-        </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.GetSummedMs1Spectrum(System.Int32,System.Int32)">
-            <summary>
-            Create a summed MS1 spectrum from the scans in the supplied range
-            </summary>
-            <param name="minScanNum">min scan number, inclusive</param>
-            <param name="maxScanNum">max scan number, inclusive</param>
-            <returns></returns>
-        </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.GetSummedSpectrum(System.Collections.Generic.IList{System.Int32},System.Int32)">
-            <summary>
-            Produce a summed spectrum using the data in the scans specified by <paramref name="scanNums"/>
-            </summary>
-            <param name="scanNums"></param>
-            <param name="repScanNum">Representative scan number</param>
-            <returns></returns>
-        </member>
-        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.GetSummedMs2Spectrum(System.Double,System.Int32,System.Int32,System.Int32,System.Int32,InformedProteomics.Backend.Data.Spectrometry.ActivationMethod)">
-            <summary>
-            Get a summed MS2 spectrum from the dataset, with the provided limits
-            </summary>
-            <param name="monoIsotopicMass"></param>
-            <param name="minScanNum">min scan number, inclusive</param>
-            <param name="maxScanNum">max scan number, inclusive</param>
-            <param name="minCharge">min charge, inclusive</param>
-            <param name="maxCharge">max charge, inclusive</param>
-            <param name="activationMethod"></param>
             <returns></returns>
         </member>
         <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.GetMsLevel(System.Int32)">
@@ -5168,6 +5183,51 @@
             <summary>
             Create the maps for linking MSn scans to their precursors, and for getting the next MS1 scan number given a scan number
             </summary>
+        </member>
+        <member name="T:InformedProteomics.Backend.MassSpecData.LcMsRunExtensions">
+            <summary>
+            Extension methods for ILcMsRun and ISpectrumAccessor
+            </summary>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRunExtensions.GetSummedSpectrum(InformedProteomics.Backend.MassSpecData.ISpectrumAccessor,System.Collections.Generic.IList{System.Int32},System.Int32)">
+            <summary>
+            Produce a summed spectrum using the data in the scans specified by <paramref name="scanNums"/>
+            </summary>
+            <param name="lcmsRun"></param>
+            <param name="scanNums"></param>
+            <param name="repScanNum">Representative scan number</param>
+            <returns></returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRunExtensions.GetSummedMs1Spectrum(InformedProteomics.Backend.MassSpecData.ISpectrumAccessor,System.Int32,System.Double)">
+            <summary>
+            Create a summed MS1 spectrum from the scans within <paramref name="elutionTimeTolerance"/> of <paramref name="scanNum"/>
+            </summary>
+            <param name="lcmsRun"></param>
+            <param name="scanNum"></param>
+            <param name="elutionTimeTolerance"></param>
+            <returns></returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRunExtensions.GetSummedMs1Spectrum(InformedProteomics.Backend.MassSpecData.ISpectrumAccessor,System.Int32,System.Int32)">
+            <summary>
+            Create a summed MS1 spectrum from the scans in the supplied range
+            </summary>
+            <param name="lcmsRun"></param>
+            <param name="minScanNum">min scan number, inclusive</param>
+            <param name="maxScanNum">max scan number, inclusive</param>
+            <returns></returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRunExtensions.GetSummedMs2Spectrum(InformedProteomics.Backend.MassSpecData.ILcMsRun,System.Double,System.Int32,System.Int32,System.Int32,System.Int32,InformedProteomics.Backend.Data.Spectrometry.ActivationMethod)">
+            <summary>
+            Get a summed MS2 spectrum from the dataset, with the provided limits
+            </summary>
+            <param name="lcmsRun"></param>
+            <param name="monoIsotopicMass"></param>
+            <param name="minScanNum">min scan number, inclusive</param>
+            <param name="maxScanNum">max scan number, inclusive</param>
+            <param name="minCharge">min charge, inclusive</param>
+            <param name="maxCharge">max charge, inclusive</param>
+            <param name="activationMethod"></param>
+            <returns></returns>
         </member>
         <member name="T:InformedProteomics.Backend.MathAndStats.ArrayUtil">
             <summary>
