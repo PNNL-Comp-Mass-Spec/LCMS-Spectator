@@ -95,7 +95,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         /// <param name="lcms">The LCMSRun for the data set.</param>
         /// <param name="dialogService">The dialog service for opening dialogs from the view model.</param>
-        public FeatureViewerViewModel(LcMsRun lcms, IDialogService dialogService = null)
+        public FeatureViewerViewModel(ILcMsRun lcms, IDialogService dialogService = null)
         {
             this.dialogService = dialogService ?? new DialogService();
 

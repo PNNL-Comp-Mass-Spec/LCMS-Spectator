@@ -369,7 +369,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, double precursorMz)
         {
             // Do not have a valid LCMSRun or PrecursorMz, so we're not going to find an ms2 spectrum.
-            if (!(lcms is LcMsRun lcmsRun) || precursorMz.Equals(0))
+            if (!(lcms is ILcMsRun lcmsRun) || precursorMz.Equals(0))
             {
                 return null;
             }

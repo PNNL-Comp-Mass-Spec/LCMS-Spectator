@@ -266,19 +266,19 @@ namespace LcmsSpectator.ViewModels.Data
         /// Reads data from LCMSRun if necessary
         /// </summary>
         /// <param name="value">Should the instrument data be shown?</param>
-        /// <param name="pbfLcmsRun">LCMSRun for this data set.</param>
+        /// <param name="lcmsRun">LCMSRun for this data set.</param>
         /// <returns>Asynchronous task.</returns>
-        public async Task ToggleShowInstrumentDataAsync(bool value, PbfLcMsRun pbfLcmsRun)
+        public async Task ToggleShowInstrumentDataAsync(bool value, ILcMsRun lcmsRun)
         {
             if (value)
             {
-                if (pbfLcmsRun != null)
+                if (lcmsRun != null)
                 {
                     var scans = Data;
                     foreach (var scan in scans.Where(scan => scan.Sequence.Count == 0))
                     {
                         var scan1 = scan;
-                        var isolationWindow = await Task.Run(() => pbfLcmsRun.GetIsolationWindow(scan1.Scan));
+                        var isolationWindow = await Task.Run(() => lcmsRun.GetIsolationWindow(scan1.Scan));
                         scan.PrecursorMz = isolationWindow.MonoisotopicMz ?? double.NaN;
                         scan.Charge = isolationWindow.Charge ?? 0;
                         scan.Mass = isolationWindow.MonoisotopicMass ?? double.NaN;

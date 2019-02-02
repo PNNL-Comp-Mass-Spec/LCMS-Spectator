@@ -283,7 +283,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// scan, or sums multiple scans if there is more than one.
         /// </summary>
         /// <returns></returns>
-        public Spectrum GetSelectedSpectrum(LcMsRun lcms)
+        public Spectrum GetSelectedSpectrum(ILcMsRun lcms)
         {
             Spectrum spectrum = null;
             if (ScanNumbers.Count == 1)

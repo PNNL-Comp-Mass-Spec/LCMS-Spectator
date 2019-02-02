@@ -27,7 +27,7 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// The LCMSRun for the data set this feature map shows.
         /// </summary>
-        private readonly LcMsRun lcms;
+        private readonly ILcMsRun lcms;
 
         /// <summary>
         /// Maps feature points to features.
@@ -43,7 +43,7 @@ namespace LcmsSpectator.Models
         /// Initializes a new instance of the <see cref="ProMexModel"/> class.
         /// </summary>
         /// <param name="lcms">The LCMSRun for this feature set.</param>
-        public ProMexModel(LcMsRun lcms)
+        public ProMexModel(ILcMsRun lcms)
         {
             this.lcms = lcms;
         }

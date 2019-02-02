@@ -177,7 +177,7 @@ namespace LcmsSpectator.ViewModels.Data
             ScanViewModel.WhenAnyValue(x => x.FilteredData).Where(_ => FeatureMapViewModel != null).Subscribe(data => FeatureMapViewModel.UpdateIds(data));
 
             // Toggle instrument data when ShowInstrumentData setting is changed.
-            IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Select(async x => await ScanViewModel.ToggleShowInstrumentDataAsync(x, (PbfLcMsRun)LcMs)).Subscribe();
+            IcParameters.Instance.WhenAnyValue(x => x.ShowInstrumentData).Select(async x => await ScanViewModel.ToggleShowInstrumentDataAsync(x, LcMs)).Subscribe();
 
             // When product ion tolerance or ion correlation threshold change, update scorer factory
             IcParameters.Instance.WhenAnyValue(x => x.ProductIonTolerancePpm, x => x.IonCorrelationThreshold)
@@ -391,7 +391,7 @@ namespace LcmsSpectator.ViewModels.Data
             // Now that we have an LcMsRun, initialize viewmodels that require it
             XicViewModel = new XicViewModel(dialogService, LcMs);
             SpectrumViewModel = new SpectrumViewModel(dialogService, LcMs);
-            FeatureMapViewModel = new FeatureViewerViewModel((LcMsRun)LcMs, dialogService);
+            FeatureMapViewModel = new FeatureViewerViewModel(LcMs, dialogService);
 
             // When the selected scan changes in the xic plots, the selected scan for the prsm should update
             XicViewModel.SelectedScanUpdated().Subscribe(scan => SelectedPrSm.Scan = scan);

@@ -1037,7 +1037,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void OpenScanSelectionImplementation()
         {
-            if (!(FragmentationSequenceViewModel.FragmentationSequence.LcMsRun is LcMsRun lcms))
+            if (!(FragmentationSequenceViewModel.FragmentationSequence.LcMsRun is ILcMsRun lcms))
                 return;
 
             var msLevel = Spectrum is ProductSpectrum ? 2 : 1;
