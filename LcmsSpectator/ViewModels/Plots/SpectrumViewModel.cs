@@ -255,6 +255,13 @@ namespace LcmsSpectator.ViewModels.Plots
             }
             else
             {
+                primaryTitle = "MS1 Spectrum";
+                secondary1Title = string.Empty;
+                secondary2Title = string.Empty;
+                secondary1 = null;
+                secondary2 = null;
+                /*
+                 * Previous behavior, which required ILcmsRun implementation; commented out to
                 // The primary spectrum that we want to show is a MS1 spectrum
                 if (lcms != null)
                 {
@@ -289,6 +296,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     secondary1 = lcms.GetSpectrum(scan);
                     secondary2 = lcms.GetSpectrum(lcms.GetNextScanNum(primary.ScanNum, 1));
                 }
+                */
             }
 
             // Ms2 spectrum plot
