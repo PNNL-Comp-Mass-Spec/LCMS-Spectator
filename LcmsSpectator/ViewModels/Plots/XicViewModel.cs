@@ -115,10 +115,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         /// <param name="dialogService">A dialog service for opening dialogs from the view model</param>
         /// <param name="lcms">the LCMSRun representing the raw file for this dataset.</param>
-        public XicViewModel(IMainDialogService dialogService, ILcMsRun lcms)
+        public XicViewModel(IMainDialogService dialogService, ILcMsRun lcms, PbfCreationViewModel pbfCreator)
         {
             this.dialogService = dialogService;
             this.lcms = lcms;
+            PbfCreator = pbfCreator;
             fragmentXAxis = new LinearAxis
             {
                 StringFormat = "0.###",
@@ -248,6 +249,11 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
+        /// View model for checking/creating PBF file
+        /// </summary>
+        public PbfCreationViewModel PbfCreator { get; }
+
+        /// <summary>
         /// Gets view model for fragment XIC plot.
         /// </summary>
         public XicPlotViewModel FragmentPlotViewModel { get; }
@@ -353,6 +359,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="scanNum">Scan number to zoom to.</param>
         public void ZoomToScan(int scanNum)
         {
+            if (!PbfCreator.XicInfoAvailable)
+            {
+                return;
+            }
+
             var rt = lcms.GetElutionTime(scanNum);
             var range = lcms.GetElutionTime(lcms.MaxLcScan) - lcms.GetElutionTime(lcms.MinLcScan);
             var offset = range * 0.03;
@@ -369,6 +380,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="scan">Scan number to put marker at</param>
         public void SetSelectedScan(int scan)
         {
+            if (!PbfCreator.XicInfoAvailable)
+            {
+                return;
+            }
+
             FragmentPlotViewModel.SelectedScan = scan;
             PrecursorPlotViewModel.SelectedScan = scan;
             HeavyFragmentPlotViewModel.SelectedScan = scan;

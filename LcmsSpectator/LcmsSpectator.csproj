@@ -145,6 +145,7 @@
     <Compile Include="PlotModels\XicPointSeries.cs" />
     <Compile Include="Readers\BruteForceSearchResultsReader.cs" />
     <Compile Include="Readers\DataReader.cs" />
+    <Compile Include="Readers\DatasetReaderWrapper.cs" />
     <Compile Include="Readers\DmsLookupUtility.cs" />
     <Compile Include="Readers\FastaReaderWriter.cs" />
     <Compile Include="Readers\FeatureReader.cs" />
@@ -186,6 +187,7 @@
     <Compile Include="ViewModels\Data\FragmentationSequenceViewModel.cs" />
     <Compile Include="ViewModels\Data\ListItemViewModel.cs" />
     <Compile Include="ViewModels\Data\NeutralLossViewModel.cs" />
+    <Compile Include="ViewModels\Data\PbfCreationViewModel.cs" />
     <Compile Include="ViewModels\Data\PeakDataPointViewModel.cs" />
     <Compile Include="ViewModels\Data\ScanSelectionViewModel.cs" />
     <Compile Include="ViewModels\FileSelectors\ExportDatasetViewModel.cs" />
@@ -244,6 +246,9 @@
       <DependentUpon>CreateSequenceView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\ProMexModel.cs" />
+    <Compile Include="Views\Data\PbfCreationView.xaml.cs">
+      <DependentUpon>PbfCreationView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Data\ScanSelectionWindow.xaml.cs">
       <DependentUpon>ScanSelectionWindow.xaml</DependentUpon>
     </Compile>
@@ -371,6 +376,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Data\CreateSequenceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Data\PbfCreationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

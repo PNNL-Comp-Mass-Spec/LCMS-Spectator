@@ -158,7 +158,7 @@ namespace LcmsSpectator.ViewModels.Data
             prsmObservable.Subscribe(prsm => CreateSequenceViewModel.SelectedPrSm = prsm);
 
             // When the prsm updates, update the feature map
-            prsmObservable.Where(_ => FeatureMapViewModel != null).Subscribe(prsm => FeatureMapViewModel.FeatureMapViewModel.SelectedPrSm = prsm);
+            prsmObservable.Where(_ => FeatureMapViewModel != null && FeatureMapViewModel.PbfCreator.XicInfoAvailable).Subscribe(prsm => FeatureMapViewModel.FeatureMapViewModel.SelectedPrSm = prsm);
 
             // When prsm updates, subscribe to scan updates
             prsmObservable.Subscribe(prsm =>
@@ -232,7 +232,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Gets the LCMSRun representing the raw file for this dataset.
         /// </summary>
-        public ILcMsRun LcMs { get; private set; }
+        public DatasetReaderWrapper LcMs { get; private set; }
 
         /// <summary>
         /// Gets or sets parsed MSPathFinder parameters (configuration for database search)
@@ -386,12 +386,14 @@ namespace LcmsSpectator.ViewModels.Data
             });
 
             // load raw file
-            LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, 0, 0, progress));
+            //LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, 0, 0, progress));
+            LcMs = await Task.Run(() => new DatasetReaderWrapper(filePath, progress));
 
             // Now that we have an LcMsRun, initialize viewmodels that require it
-            XicViewModel = new XicViewModel(dialogService, LcMs);
+            var pbfCreator = new PbfCreationViewModel(LcMs);
+            XicViewModel = new XicViewModel(dialogService, LcMs, pbfCreator);
             SpectrumViewModel = new SpectrumViewModel(dialogService, LcMs);
-            FeatureMapViewModel = new FeatureViewerViewModel(LcMs, dialogService);
+            FeatureMapViewModel = new FeatureViewerViewModel(LcMs, pbfCreator, dialogService);
 
             // When the selected scan changes in the xic plots, the selected scan for the prsm should update
             XicViewModel.SelectedScanUpdated().Subscribe(scan => SelectedPrSm.Scan = scan);

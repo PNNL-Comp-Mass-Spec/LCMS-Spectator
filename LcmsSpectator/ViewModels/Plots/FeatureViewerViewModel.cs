@@ -17,6 +17,7 @@ using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Models;
 using LcmsSpectator.Utils;
+using LcmsSpectator.ViewModels.Data;
 using ReactiveUI;
 
 namespace LcmsSpectator.ViewModels.Plots
@@ -95,9 +96,10 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         /// <param name="lcms">The LCMSRun for the data set.</param>
         /// <param name="dialogService">The dialog service for opening dialogs from the view model.</param>
-        public FeatureViewerViewModel(ILcMsRun lcms, IDialogService dialogService = null)
+        public FeatureViewerViewModel(ILcMsRun lcms, PbfCreationViewModel pbfCreator, IDialogService dialogService = null)
         {
             this.dialogService = dialogService ?? new DialogService();
+            PbfCreator = pbfCreator;
 
             FeatureMapViewModel = new FeatureMapViewModel(this.dialogService);
 
@@ -127,6 +129,11 @@ namespace LcmsSpectator.ViewModels.Plots
 
             OpenFeatureFileCommand = ReactiveCommand.Create(OpenFeatureFileImplementation);
         }
+
+        /// <summary>
+        /// View model for checking/creating PBF file
+        /// </summary>
+        public PbfCreationViewModel PbfCreator { get; }
 
         /// <summary>
         /// Gets a command that displays open file dialog to select feature file and then read and display features.
@@ -269,6 +276,11 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="updatePlot">Should the plot be updated after setting ids?</param>
         public void UpdateIds(IEnumerable<PrSm> idList, bool updatePlot = true)
         {
+            if (!PbfCreator.XicInfoAvailable)
+            {
+                return;
+            }
+
             proMexModel.SetIds(idList);
             if (updatePlot)
             {

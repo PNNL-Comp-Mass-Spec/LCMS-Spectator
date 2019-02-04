@@ -8,6 +8,7 @@
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
     xmlns:wpf="http://oxyplot.org/wpf"
     xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    xmlns:data="clr-namespace:LcmsSpectator.Views.Data"
     d:DataContext="{d:DesignInstance {x:Type viewModels:FeatureViewerViewModel},
                                      IsDesignTimeCreatable=True}"
     d:DesignHeight="300"
@@ -362,5 +363,6 @@
                 </TextBlock>
             </Grid>
         </Expander>
+        <data:PbfCreationView Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" DataContext="{Binding PbfCreator}" />
     </Grid>
 </UserControl>

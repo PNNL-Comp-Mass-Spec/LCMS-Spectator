@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:LcmsSpectator.ViewModels.Plots"
     xmlns:wpf="http://oxyplot.org/wpf"
+    xmlns:data="clr-namespace:LcmsSpectator.Views.Data"
     d:DataContext="{d:DesignInstance {x:Type viewModels:XicViewModel},
                                      IsDesignTimeCreatable=True}"
     d:DesignHeight="500"
@@ -23,9 +24,9 @@
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Name="LightColumn" Width="Auto" />
+            <ColumnDefinition Name="LightColumn" Width="*" />
             <ColumnDefinition Name="LinkColumn" Width="30" />
-            <ColumnDefinition Name="HeavyColumn" Width="Auto" />
+            <ColumnDefinition Name="HeavyColumn" Width="*" />
         </Grid.ColumnDefinitions>
         <Viewbox
             Grid.Row="0"
@@ -383,5 +384,6 @@
             </CheckBox>
             <!--<ComboBox Grid.Column="2" ItemsSource="{Binding PrecursorViewModes}" SelectedItem="{Binding PrecursorViewMode}" Width="100" HorizontalAlignment="Right" Margin="0,0,5,0" />-->
         </Grid>
+        <data:PbfCreationView Grid.Row="0" Grid.Column="0" Grid.RowSpan="7" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" DataContext="{Binding PbfCreator}" />
     </Grid>
 </UserControl>
