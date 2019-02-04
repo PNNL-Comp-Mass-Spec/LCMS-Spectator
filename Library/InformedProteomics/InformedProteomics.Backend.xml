@@ -3980,9 +3980,17 @@
             </summary>
             <param name="maxPointsToShow"></param>
         </member>
+        <member name="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.FilterNoiseWithPeakNoiseInfo(System.Double)">
+            <summary>
+            Filter noise peaks out of the spectrum: requires use of <see cref="T:InformedProteomics.Backend.Data.Spectrometry.PeakDetailed"/> with populated noise values.
+            Any non-<see cref="T:InformedProteomics.Backend.Data.Spectrometry.PeakDetailed"/> peaks will be assumed good.
+            If no <see cref="T:InformedProteomics.Backend.Data.Spectrometry.PeakDetailed"/> peaks, <see cref="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.FilterNoise(System.Double)"/> is called internally.
+            </summary>
+            <param name="signalToNoiseRatio"></param>
+        </member>
         <member name="M:InformedProteomics.Backend.Data.Spectrometry.Spectrum.FilterNoise(System.Double)">
             <summary>
-            Filter noise peaks out of the spectrum
+            Filter noise peaks out of the spectrum using a basic signal-to-noise calculation
             </summary>
             <param name="signalToNoiseRatio"></param>
         </member>
