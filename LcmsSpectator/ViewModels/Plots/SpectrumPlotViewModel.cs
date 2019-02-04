@@ -397,7 +397,9 @@ namespace LcmsSpectator.ViewModels.Plots
                             case NoiseFilterModes.SignalToNoiseRatio:
                                 var snFilteredSpectrum = new ProductSpectrum(Spectrum.Peaks, Spectrum.ScanNum);
                                 snFilteredSpectrum.SetMsLevel(Spectrum.MsLevel);
-                                snFilteredSpectrum.FilterNoise(IcParameters.Instance.MinimumSignalToNoise);
+
+                                // Internally calls 'FilterNoise' if peak noise info isn't available.
+                                snFilteredSpectrum.FilterNoiseWithPeakNoiseInfo(IcParameters.Instance.MinimumSignalToNoise);
                                 spectrumForFragmentView = snFilteredSpectrum;
                                 break;
 
