@@ -21,6 +21,7 @@ using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.PlotModels.ColorDictionaries;
+using LcmsSpectator.Readers;
 using LcmsSpectator.Utils;
 using LcmsSpectator.ViewModels.Data;
 using OxyPlot;
@@ -431,6 +432,12 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <returns>The <see cref="Task"/>.</returns>
         private async Task<IList<XicDataPoint>[]> GetXicDataPointsAsync(IEnumerable<LabeledIonViewModel> labeledIons, int smoothingPoints, bool useCache = true)
         {
+            if (lcms is DatasetReaderWrapper drw && !drw.IsXicDataAvailable)
+            {
+                // Don't process this, since we don't have PBF data available.
+                return await Task.FromResult(new IList<XicDataPoint>[0]);
+            }
+
             return await Task.WhenAll(labeledIons.Select(ion => ion.GetXicAsync(smoothingPoints, useCache)));
         }
     }
