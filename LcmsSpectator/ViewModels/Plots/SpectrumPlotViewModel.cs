@@ -848,7 +848,8 @@ namespace LcmsSpectator.ViewModels.Plots
                             break;
 
                         case NoiseFilterModes.SignalToNoiseRatio:
-                            filteredDeconvolutedSpectrum.FilterNoise(IcParameters.Instance.MinimumSignalToNoise);
+                            // Internally calls 'FilterNoise' if peak noise info isn't available.
+                            filteredDeconvolutedSpectrum.FilterNoiseWithPeakNoiseInfo(IcParameters.Instance.MinimumSignalToNoise);
                             break;
 
                         case NoiseFilterModes.LocalWindowSignalToNoiseRatio:
@@ -892,7 +893,8 @@ namespace LcmsSpectator.ViewModels.Plots
                             break;
 
                         case NoiseFilterModes.SignalToNoiseRatio:
-                            filteredSpectrum.FilterNoise(IcParameters.Instance.MinimumSignalToNoise);
+                            // Internally calls 'FilterNoise' if peak noise info isn't available.
+                            filteredSpectrum.FilterNoiseWithPeakNoiseInfo(IcParameters.Instance.MinimumSignalToNoise);
                             break;
 
                         case NoiseFilterModes.LocalWindowSignalToNoiseRatio:
