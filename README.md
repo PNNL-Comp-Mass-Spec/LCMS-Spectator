@@ -25,9 +25,9 @@ The latest version of the application is available on the [AppVeyor CI server](h
 ### Supported file formats
 #### Spectrum files
 
-When used with no other software installed, LCMS-Spectator supports the use of centroided mzML files as spectrum input. If Thermo Finnigan MSFileReader is installed, it also supports reading from Thermo Finnigan .raw files ([Download MSFileReader here](https://thermo.flexnetoperations.com/control/thmo/download?element=6306677), requires registration to download; choose the Utility software section and look for "MS File Reader 3.1 SP2".  Note that "MS File Reader 3.1 SP4" is also available but that version has not worked for us).
+LCMS-Spectator supports the use of centroided mzML files as spectrum input. It can also directly read Thermo .Raw files using the bundled Thermo RawFileReader library.
 
-Several other formats are supported if an appropriate version of ProteoWizard is installed ([Download here](http://proteowizard.sourceforge.net/download.html), make sure the version downloaded matches system architecture)
+Several other formats are supported if an appropriate version of ProteoWizard is installed ([Download here](http://proteowizard.sourceforge.net/download.html); make sure the version downloaded matches system architecture, typically Windows 64-bit)
 
 #### Search result files
 
@@ -105,3 +105,5 @@ or implied. See the License for the specific language governing
 permissions and limitations under the License.
 
 Copyright 2018 Battelle Memorial Institute
+
+RawFileReader reading tool. Copyright © 2016 by Thermo Fisher Scientific, Inc. All rights reserved.
