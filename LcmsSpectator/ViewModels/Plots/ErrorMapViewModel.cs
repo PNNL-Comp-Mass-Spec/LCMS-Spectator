@@ -501,7 +501,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 mostAbundantPeaks.Add(peak);
             }
 
-            return mostAbundantPeaks;
+            return mostAbundantPeaks.OrderBy(x => x.IonType.BaseIonType.Symbol).ThenBy(x => x.IonType.Charge);
         }
 
         /// <summary>
