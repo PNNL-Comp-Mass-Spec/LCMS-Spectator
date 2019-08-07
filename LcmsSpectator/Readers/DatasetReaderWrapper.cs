@@ -131,9 +131,21 @@ namespace LcmsSpectator.Readers
         }
 
         /// <inheritdoc />
+        public string GetNativeId(int scanNum)
+        {
+            return specReader.GetNativeId(scanNum);
+        }
+
+        /// <inheritdoc />
         public double GetElutionTime(int scanNum)
         {
             return specReader.GetElutionTime(scanNum);
+        }
+
+        /// <inheritdoc />
+        public double GetDriftTime(int scanNum)
+        {
+            return specReader.GetDriftTime(scanNum);
         }
 
         /// <inheritdoc />

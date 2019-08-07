@@ -425,6 +425,7 @@ namespace LcmsSpectator.ViewModels.Data
                 var prsmScans = scans.Select(scan => new PrSm
                 {
                     Scan = scan,
+                    NativeId = LcMs?.GetNativeId(scan) ?? string.Empty,
                     RawFileName = Title,
                     LcMs = LcMs,
                     QValue = -1.0,

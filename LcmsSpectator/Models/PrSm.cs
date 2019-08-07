@@ -45,6 +45,7 @@ namespace LcmsSpectator.Models
         /// The MS/MS Scan number of identification.
         /// </summary>
         private int scan;
+        private string nativeId;
 
         /// <summary>
         /// The charge state of identification.
@@ -164,11 +165,23 @@ namespace LcmsSpectator.Models
             set => this.RaiseAndSetIfChanged(ref scan, value);
         }
 
+        public string NativeId
+        {
+            get => nativeId;
+            set => this.RaiseAndSetIfChanged(ref nativeId, value);
+        }
+
         /// <summary>
         /// Gets the retention time of identification.
         /// Requires both LCMS and Scan to be set.
         /// </summary>
         public double RetentionTime => LcMs?.GetElutionTime(Scan) ?? 0.0;
+
+        /// <summary>
+        /// Gets the drift time of identification.
+        /// Requires both LCMS and Scan to be set.
+        /// </summary>
+        public double DriftTime => LcMs?.GetDriftTime(Scan) ?? 0.0;
 
         /// <summary>
         /// Gets the MS/MS Spectrum associated with Scan.

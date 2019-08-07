@@ -103,6 +103,7 @@ namespace LcmsSpectator.Readers
                     {
                         Heavy = false,
                         Scan = evidence.ScanNum,
+                        NativeId = evidence.NativeId,
                         Charge = evidence.Charge,
                         Sequence = sequence,
                         SequenceText = sequenceStr,

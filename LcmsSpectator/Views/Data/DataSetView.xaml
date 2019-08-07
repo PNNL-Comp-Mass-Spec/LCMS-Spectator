@@ -158,6 +158,11 @@
                                                 Header="Scan"
                                                 IsReadOnly="True" />
                                             <DataGridTextColumn
+                                                Width="3*"
+                                                Binding="{Binding NativeId}"
+                                                Header="NativeId"
+                                                IsReadOnly="True" />
+                                            <DataGridTextColumn
                                                 Width="5*"
                                                 Binding="{Binding ActivationMethod}"
                                                 Header="Activation Method"
@@ -166,6 +171,11 @@
                                                 Width="5*"
                                                 Binding="{Binding RetentionTime, Converter={StaticResource MassFormatter}}"
                                                 Header="Retention Time"
+                                                IsReadOnly="True" />
+                                            <DataGridTextColumn
+                                                Width="3*"
+                                                Binding="{Binding DriftTime, Converter={StaticResource MassFormatter}}"
+                                                Header="Drift Time (ms)"
                                                 IsReadOnly="True" />
                                             <DataGridTextColumn
                                                 Width="30*"
