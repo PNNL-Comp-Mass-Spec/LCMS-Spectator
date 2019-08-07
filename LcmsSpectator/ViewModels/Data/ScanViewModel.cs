@@ -62,6 +62,9 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private object treeViewSelectedItem;
 
+        private bool showNativeId = false;
+        private bool showDriftTime = false;
+
         /// <summary>
         /// The hierarchical tree of identifications.
         /// </summary>
@@ -227,6 +230,24 @@ namespace LcmsSpectator.ViewModels.Data
         {
             get => treeViewSelectedItem;
             set => this.RaiseAndSetIfChanged(ref treeViewSelectedItem, value);
+        }
+
+        /// <summary>
+        /// If the NativeID column should be visible
+        /// </summary>
+        public bool ShowNativeId
+        {
+            get => showNativeId;
+            set => this.RaiseAndSetIfChanged(ref showNativeId, value);
+        }
+
+        /// <summary>
+        /// If the DriftTime column should be visible
+        /// </summary>
+        public bool ShowDriftTime
+        {
+            get => showDriftTime;
+            set => this.RaiseAndSetIfChanged(ref showDriftTime, value);
         }
 
         /// <summary>

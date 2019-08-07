@@ -61,6 +61,7 @@ Source: LcmsSpectator\bin\Release\PSI_Interface.dll;                         Des
 ; Separately-managed libraries
 Source: Library\QuadTreeLib\QuadTreeLib.dll;                                 DestDir: {app}
 Source: Library\MwtWinDll.dll;                                               DestDir: {app}
+Source: Library\WpfExtras.dll;                                               DestDir: {app}
 
 ; MTDBFramework
 Source: Library\MTDBFramework\FluentNHibernate.dll;                          DestDir: {app}

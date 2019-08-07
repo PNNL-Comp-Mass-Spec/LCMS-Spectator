@@ -103,6 +103,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WpfExtras">
+      <HintPath>..\Library\WpfExtras.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -246,6 +249,7 @@
       <DependentUpon>CreateSequenceView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\ProMexModel.cs" />
+    <Compile Include="Views\Data\ScanViewBindingProxy.cs" />
     <Compile Include="Views\Data\PbfCreationView.xaml.cs">
       <DependentUpon>PbfCreationView.xaml</DependentUpon>
     </Compile>

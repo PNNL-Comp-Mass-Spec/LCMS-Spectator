@@ -132,6 +132,9 @@
                                         RowHeaderWidth="0"
                                         SelectedItem="{Binding SelectedPrSm, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                                         SelectionMode="Extended">
+                                        <DataGrid.Resources>
+                                            <data:ScanViewBindingProxy x:Key="BaseDC" Data="{Binding}" />
+                                        </DataGrid.Resources>
                                         <DataGrid.ContextMenu>
                                             <ContextMenu>
                                                 <MenuItem Header="_Filter" ItemsSource="{Binding Filters}">
@@ -149,6 +152,9 @@
                                                     <MenuItem Command="{Binding ExportSpectraCommand}" Header="Export Spectra" />
                                                     <MenuItem Command="{Binding ExportPeaksCommand}" Header="Export Peaks" />
                                                 </MenuItem>
+                                                <Separator />
+                                                <MenuItem Header="Show Native ID Column" IsCheckable="true" IsChecked="{Binding ShowNativeId}" />
+                                                <MenuItem Header="Show Drift Time Column" IsCheckable="true" IsChecked="{Binding ShowDriftTime}" />
                                             </ContextMenu>
                                         </DataGrid.ContextMenu>
                                         <DataGrid.Columns>
@@ -161,7 +167,8 @@
                                                 Width="3*"
                                                 Binding="{Binding NativeId}"
                                                 Header="NativeId"
-                                                IsReadOnly="True" />
+                                                IsReadOnly="True"
+                                                Visibility="{Binding Data.ShowNativeId, Converter={StaticResource BoolToVis}, Source={StaticResource BaseDC}}" />
                                             <DataGridTextColumn
                                                 Width="5*"
                                                 Binding="{Binding ActivationMethod}"
@@ -176,7 +183,8 @@
                                                 Width="3*"
                                                 Binding="{Binding DriftTime, Converter={StaticResource MassFormatter}}"
                                                 Header="Drift Time (ms)"
-                                                IsReadOnly="True" />
+                                                IsReadOnly="True"
+                                                Visibility="{Binding Data.ShowDriftTime, Converter={StaticResource BoolToVis}, Source={StaticResource BaseDC}}" />
                                             <DataGridTextColumn
                                                 Width="30*"
                                                 Binding="{Binding SequenceText}"
