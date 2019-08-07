@@ -3879,6 +3879,11 @@
             Elution time (minutes)
             </summary>
         </member>
+        <member name="P:InformedProteomics.Backend.Data.Spectrometry.Spectrum.DriftTime">
+            <summary>
+            Ion Mobility drift time (milliseconds)
+            </summary>
+        </member>
         <member name="P:InformedProteomics.Backend.Data.Spectrometry.Spectrum.Peaks">
             <summary>
             Peaks
@@ -4742,6 +4747,13 @@
             Interface for objects that can supply random access to spectra
             </summary>
         </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.GetNativeId(System.Int32)">
+            <summary>
+            Get the native ID of the specified scan number
+            </summary>
+            <param name="scanNum"></param>
+            <returns></returns>
+        </member>
         <member name="P:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.MinLcScan">
             <summary>
             Index of first LC scan in the dataset
@@ -4760,6 +4772,13 @@
         <member name="M:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.GetElutionTime(System.Int32)">
             <summary>
             Get the elution time of the specified scan number
+            </summary>
+            <param name="scanNum"></param>
+            <returns></returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.ISpectrumAccessor.GetDriftTime(System.Int32)">
+            <summary>
+            Get the ion mobility drift time of the specified scan number (if data is ion mobility)
             </summary>
             <param name="scanNum"></param>
             <returns></returns>
@@ -4974,6 +4993,20 @@
             <param name="scanNum"></param>
             <returns></returns>
         </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.GetNativeId(System.Int32)">
+            <summary>
+            Get the native ID of the specified scan number
+            </summary>
+            <param name="scanNum"></param>
+            <returns></returns>
+        </member>
+        <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.GetDriftTime(System.Int32)">
+            <summary>
+            Get the ion mobility drift time of the specified scan number (if data is ion mobility)
+            </summary>
+            <param name="scanNum"></param>
+            <returns></returns>
+        </member>
         <member name="M:InformedProteomics.Backend.MassSpecData.LcMsRun.GetPrecursorScanNum(System.Int32)">
             <summary>
             Gets the precursor scan number
@@ -5180,6 +5213,11 @@
         <member name="F:InformedProteomics.Backend.MassSpecData.LcMsRun.ScanNumElutionTimeMap">
             <summary>
             Dictionary to map scan numbers to elution times
+            </summary>
+        </member>
+        <member name="F:InformedProteomics.Backend.MassSpecData.LcMsRun.ScanNumNativeIdMap">
+            <summary>
+            Dictionary to map scan numbers to native IDs
             </summary>
         </member>
         <member name="F:InformedProteomics.Backend.MassSpecData.LcMsRun.IsDiaOrNull">
@@ -6458,7 +6496,7 @@
             <summary>
             Perform a set number of random mutations on a string
             </summary>
-            <param name="str"></param>
+            <param name="textToMutate"></param>
             <param name="numMutations"></param>
             <returns></returns>
         </member>
