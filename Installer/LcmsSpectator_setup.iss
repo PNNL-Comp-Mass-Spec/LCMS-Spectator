@@ -20,7 +20,7 @@ Source: LcmsSpectator\bin\Release\LcmsSpectator.exe.config;                  Des
 ; Nuget-Installed libraries
 Source: LcmsSpectator\bin\Release\alglibnet2.dll;                            DestDir: {app}
 Source: LcmsSpectator\bin\Release\CsvHelper.dll;                             DestDir: {app}
-Source: LcmsSpectator\bin\Release\GraphX.Controls.dll;                       DestDir: {app}
+Source: LcmsSpectator\bin\Release\GraphX.WPF.Controls.dll;                   DestDir: {app}
 Source: LcmsSpectator\bin\Release\GraphX.PCL.Common.dll;                     DestDir: {app}
 Source: LcmsSpectator\bin\Release\GraphX.PCL.Logic.dll;                      DestDir: {app}
 Source: LcmsSpectator\bin\Release\MathNet.Numerics.dll;                      DestDir: {app}
@@ -47,7 +47,6 @@ Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.dll;                  Des
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Aero.dll;      DestDir: {app}
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Metro.dll;     DestDir: {app}
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.VS2010.dll;    DestDir: {app}
-Source: LcmsSpectator\bin\Release\Xceed.Wpf.DataGrid.dll;                    DestDir: {app}
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.Toolkit.dll;                     DestDir: {app}
 
 ; SQLite
