@@ -3,17 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:controls="clr-namespace:GraphX.Controls;assembly=GraphX.Controls"
              xmlns:sequenceGraph1="clr-namespace:LcmsSpectator.SequenceGraph"
+             xmlns:graphx="http://schemas.panthernet.ru/graphx/"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <ResourceDictionary>
             <!-- VERTEX CONTROL -->
-            <Style TargetType="{x:Type controls:VertexControl}">
-                <Setter Property="controls:HighlightBehaviour.IsHighlightEnabled" Value="False"/>
+            <Style TargetType="{x:Type graphx:VertexControl}">
+                <Setter Property="graphx:HighlightBehaviour.IsHighlightEnabled" Value="False"/>
                 <Style.Triggers>
-                    <Trigger Property="controls:HighlightBehaviour.Highlighted" Value="True">
+                    <Trigger Property="graphx:HighlightBehaviour.Highlighted" Value="True">
                         <Setter Property="Background" Value="Gold"/>
                         <Setter Property="BorderThickness" Value="7"/>
                     </Trigger>
@@ -21,10 +21,10 @@
             </Style>
 
             <!-- Edge Control -->
-            <Style TargetType="{x:Type controls:EdgeControl}">
+            <Style TargetType="{x:Type graphx:EdgeControl}">
                 <Setter Property="Template">
                     <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type controls:EdgeControl}">
+                        <ControlTemplate TargetType="{x:Type graphx:EdgeControl}">
                             <Grid>
                                 <Path Stroke="{TemplateBinding Foreground}"
                           StrokeThickness="2" MinWidth="1" MinHeight="1"
@@ -33,7 +33,7 @@
                                 <Path Stroke="{TemplateBinding Foreground}"
                           StrokeThickness="2" MinWidth="1" MinHeight="1"
                             x:Name="PART_edgeArrowPath"/>
-                                <controls:EdgeLabelControl x:Name="PART_edgeLabel" Content="{Binding Edge.Text, RelativeSource={RelativeSource TemplatedParent}}" />
+                                <graphx:EdgeLabelControl x:Name="PART_edgeLabel" Content="{Binding Edge.Text, RelativeSource={RelativeSource TemplatedParent}}" />
                             </Grid>
                         </ControlTemplate>
                     </Setter.Value>
@@ -50,9 +50,9 @@
                 <Setter Property="Opacity"
                 Value="1" />
 
-                <Setter Property="controls:HighlightBehaviour.IsHighlightEnabled" Value="False"/>
+                <Setter Property="graphx:HighlightBehaviour.IsHighlightEnabled" Value="False"/>
                 <Style.Triggers>
-                    <Trigger Property="controls:HighlightBehaviour.Highlighted" Value="True">
+                    <Trigger Property="graphx:HighlightBehaviour.Highlighted" Value="True">
                         <Setter Property="Foreground" Value="Gold"/>
                         <Setter Property="StrokeThickness" Value="5"/>
                     </Trigger>
@@ -60,10 +60,10 @@
             </Style>
 
             <!--EDGE LABLE CONTROL -->
-            <Style TargetType="{x:Type controls:EdgeLabelControl}">
+            <Style TargetType="{x:Type graphx:EdgeLabelControl}">
                 <Setter Property="Template">
                     <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type controls:EdgeLabelControl}">
+                        <ControlTemplate TargetType="{x:Type graphx:EdgeLabelControl}">
                             <Grid>
                                 <Border BorderBrush="Black" BorderThickness="1" Background="LightCoral" CornerRadius="8">
                                     <ContentPresenter Margin="3"/>
@@ -74,7 +74,7 @@
                 </Setter>
                 <Setter Property="RenderTransform">
                     <Setter.Value>
-                        <RotateTransform CenterX="0.5" CenterY="0.5" Angle="{Binding RelativeSource={RelativeSource AncestorType=controls:EdgeLabelControl} , Path=Angle}"/>
+                        <RotateTransform CenterX="0.5" CenterY="0.5" Angle="{Binding RelativeSource={RelativeSource AncestorType=graphx:EdgeLabelControl} , Path=Angle}"/>
                     </Setter.Value>
                 </Setter>
             </Style>
@@ -87,8 +87,8 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0"
                    FontWeight="Bold" />
-        <controls:ZoomControl Grid.Row="1" ViewFinderVisibility="Collapsed" x:Name="Zoomer">
+        <graphx:ZoomControl Grid.Row="1" ViewFinderVisibility="Collapsed" x:Name="Zoomer">
             <sequenceGraph1:SequenceGraphArea x:Name="SequenceGraphArea" />
-        </controls:ZoomControl>
+        </graphx:ZoomControl>
     </Grid>
 </UserControl>
