@@ -21,7 +21,7 @@ namespace LcmsSpectator.Views
     /// </summary>
     public partial class AboutBox : Window
     {
-        private const string PROGRAM_DATE = "January 28, 2019";
+        private const string PROGRAM_DATE = "December 9, 2019";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AboutBox"/> class.

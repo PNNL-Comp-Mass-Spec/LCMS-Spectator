@@ -300,7 +300,15 @@ namespace LcmsSpectator.ViewModels.Plots
             }
 
             // Ms2 spectrum plot
-            Ms2SpectrumViewModel.Title = string.Format("{0} (Scan: {1})", primaryTitle, primary.ScanNum);
+            if (primary == null)
+            {
+                Ms2SpectrumViewModel.Title = string.Format("{0} (Scan: {1})", primaryTitle, scan);
+            }
+            else
+            {
+                Ms2SpectrumViewModel.Title = string.Format("{0} (Scan: {1})", primaryTitle, primary.ScanNum);
+            }
+
             Ms2SpectrumViewModel.Spectrum = primary;
 
             // previous Ms1
