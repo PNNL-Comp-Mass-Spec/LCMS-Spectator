@@ -440,6 +440,9 @@
             Constructor
             </summary>
         </member>
+        <member name="M:InformedProteomics.Backend.Database.ProteinHashInfo.ToString">
+            <inheritdoc />
+        </member>
         <member name="M:InformedProteomics.Backend.Database.ProteinHashInfo.Sha1Hash(System.String)">
             <summary>
             Compute the SHA1 Hash of the given text

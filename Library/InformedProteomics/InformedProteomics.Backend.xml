@@ -6127,6 +6127,27 @@
             <param name="centroidedMzs"></param>
             <param name="centroidedIntensities"></param>
         </member>
+        <member name="T:InformedProteomics.Backend.Utils.FlipSwitch">
+            <summary>
+            Singleton class for conditionalizing use of FLIP scoring code.
+            </summary>
+        </member>
+        <member name="P:InformedProteomics.Backend.Utils.FlipSwitch.Instance">
+            <summary>
+            Singleton instance
+            </summary>
+        </member>
+        <member name="P:InformedProteomics.Backend.Utils.FlipSwitch.UseFlipScoring">
+            <summary>
+            If true, FLIP scoring code should be used.
+            </summary>
+        </member>
+        <member name="M:InformedProteomics.Backend.Utils.FlipSwitch.SetUseFlipScoring(System.Boolean)">
+            <summary>
+            Set whether FLIP Scoring should be used or not.
+            </summary>
+            <param name="useIt">True if FLIP Scoring should be used</param>
+        </member>
         <member name="T:InformedProteomics.Backend.Utils.IntRange">
             <summary>
             IntRange: min, max, and test functions for working with ranges
