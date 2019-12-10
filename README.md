@@ -3,7 +3,7 @@ LCMS raw data and MSGF+ results viewer
 
 LCMS-Spectator is a standalone Windows program for viewing LC-MS data and peptide identifications.
 
-It reads Thermo raw files (\*.raw) and mzML files and shows MS and MS/MS spectra as well as precursor and product ion chromatograms as resizable, floatable tabbed-documents.
+It reads Thermo raw files (*.raw) and mzML files and shows MS and MS/MS spectra as well as precursor and product ion chromatograms as resizable, floatable tabbed-documents.
 
 Identification and target files can also be loaded to show the spectral and chromatographic evidence. The tool currently supports [MS-GF+](https://github.com/MSGFPlus/msgfplus) MzIdentML files (.mzid) and [MSPathFinder](https://github.com/PNNL-Comp-Mass-Spec/Informed-Proteomics) tab-delimited result files (.tsv).
 
