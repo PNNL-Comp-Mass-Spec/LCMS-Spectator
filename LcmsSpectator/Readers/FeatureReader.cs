@@ -25,9 +25,9 @@ namespace LcmsSpectator.Readers
     {
         /// <summary>Read a MS1 feature file.</summary>
         /// <param name="filePath">The feature file path.</param>
-        /// <param name="delimeter">The Delimiter character of feature file.</param>
+        /// <param name="delimiter">The Delimiter character of feature file.</param>
         /// <returns>The list of MS1 features..</returns>
-        public static IList<Feature> Read(string filePath, char delimeter = '\t')
+        public static IList<Feature> Read(string filePath, char delimiter = '\t')
         {
             var features = new List<Feature>();
             var file = new StreamReader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
@@ -40,7 +40,7 @@ namespace LcmsSpectator.Readers
                 lineCount++;
                 if (lineCount == 1 && line != null)
                 { // first line
-                    var parts = line.Split(delimeter);
+                    var parts = line.Split(delimiter);
                     for (var i = 0; i < parts.Length; i++)
                     {
                         headers.Add(parts[i], i);
@@ -49,7 +49,7 @@ namespace LcmsSpectator.Readers
                     continue;
                 }
 
-                var idData = ReadFeature(line, delimeter, headers);
+                var idData = ReadFeature(line, delimiter, headers);
                 if (idData != null)
                 {
                     features.Add(idData);
@@ -65,10 +65,10 @@ namespace LcmsSpectator.Readers
         /// Read a line from the feature file containing a single feature.
         /// </summary>
         /// <param name="line">The line from the feature file.</param>
-        /// <param name="delimeter">The delimiter used in feature file.</param>
+        /// <param name="delimiter">The delimiter used in feature file.</param>
         /// <param name="headers">The headers of the feature file columns.</param>
         /// <returns>Parsed feature.</returns>
-        private static Feature ReadFeature(string line, char delimeter, IReadOnlyDictionary<string, int> headers)
+        private static Feature ReadFeature(string line, char delimiter, IReadOnlyDictionary<string, int> headers)
         {
             var expectedHeaders = new List<string>
             {
@@ -97,7 +97,7 @@ namespace LcmsSpectator.Readers
                 }
             }
 
-            var parts = line.Split(delimeter);
+            var parts = line.Split(delimiter);
             var mass = Convert.ToDouble(parts[headers["MonoMass"]]);
             var abundance = Convert.ToDouble(parts[headers["Abundance"]]);
             var score = Convert.ToDouble(parts[headers[likelihoodVarHeader]]);

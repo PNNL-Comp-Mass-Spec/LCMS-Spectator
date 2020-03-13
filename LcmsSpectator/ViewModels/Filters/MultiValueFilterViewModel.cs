@@ -54,7 +54,7 @@ namespace LcmsSpectator.ViewModels.Filters
         private string selectedValue;
 
         /// <summary>
-        /// The deliimeter to use for parsing a string containing a list.
+        /// The delimiter to use for parsing a string containing a list.
         /// 0 = no delimiter.
         /// </summary>
         private readonly char delimiter;
@@ -79,7 +79,7 @@ namespace LcmsSpectator.ViewModels.Filters
         /// <param name="dialogService">Dialog service for opening dialogs from view model.</param>
         /// <param name="values">The default possible values to filter by.</param>
         /// <param name="delimiter">
-        /// The deliimeter to use for parsing a string containing a list.
+        /// The delimiter to use for parsing a string containing a list.
         /// 0 = no delimiter.
         /// </param>
         /// <param name="defaultValue">The default value to filter by.</param>
