@@ -6,43 +6,80 @@ namespace LcmsSpectator.Readers
     {
         public static IIdFileReader CreateReader(string fileName)
         {
-            IIdFileReader reader = null;
+            if (string.IsNullOrWhiteSpace(fileName))
+                return null;
 
             var extension = Path.GetExtension(fileName);
+            string extensionToCheck;
+
             if (extension == ".gz") // "gz" is a compound extension - the original extension precedes it.
             {
-                extension = Path.GetExtension(Path.GetFileNameWithoutExtension(fileName)) + extension;
+                // Results.mzid.gz
+                // Results.mzid
+                // .mzid.gz
+                extensionToCheck = Path.GetExtension(Path.GetFileNameWithoutExtension(fileName)) + extension;
+            }
+            else
+            {
+                extensionToCheck = extension ?? string.Empty;
             }
 
-            switch (extension.ToLower())
+            switch (extensionToCheck.ToLower())
             {
                 case ".zip":
-                    reader = new IcFileReader(fileName);
-                    break;
+                    // Assume we're reading MSPathFinder results, for example Dataset_IcTsv.zip
+                    // The zip file has three files:
+                    //   Dataset_IcTarget.tsv
+                    //   Dataset_IcDecoy.tsv
+                    //   Dataset_IcTda.tsv
+
+                    var icFileReader = new IcFileReader(fileName);
+                    return icFileReader;
+
                 case ".tsv":
                 case ".txt":
                     if (fileName.EndsWith("_syn.txt"))
                     {
-                        reader = new MsgfSynopsisReader(fileName);
-                        break;
+                        var synFileReader = new MsgfSynopsisReader(fileName);
+                        return synFileReader;
                     }
 
-                    var streamReader = new StreamReader(fileName);
-                    var line = streamReader.ReadLine();
-                    if (line != null && line.Contains("MSGFScore")) reader = new MsgfFileReader(fileName);
-                    else if (line != null && line.Contains("#MatchedFragments")) reader = new IcFileReader(fileName);
-                    else if (line != null && line.Contains("Score")) reader = new BruteForceSearchResultsReader(fileName);
-                    streamReader.Close();
+                    string headerLine;
+                    using (var streamReader = new StreamReader(fileName))
+                    {
+                        headerLine = streamReader.ReadLine();
+                    }
+
+                    if (headerLine != null && headerLine.Contains("MSGFScore"))
+                    {
+                        var msgfPlusReader = new MsgfFileReader(fileName);
+                        return msgfPlusReader;
+                    }
+
+                    if (headerLine != null && headerLine.Contains("#MatchedFragments"))
+                    {
+                        var msPathFinderReader = new IcFileReader(fileName);
+                        return msPathFinderReader;
+                    }
+
+                    if (headerLine != null && headerLine.Contains("Score"))
+                    {
+                        var genericReader = new BruteForceSearchResultsReader(fileName);
+                        return genericReader;
+                    }
+
                     break;
+
                 case ".mzid":
                 case ".mzid.gz":
-                    reader = new MzIdentMlReader(fileName);
-                    break;
+                    var mzidReader = new MzIdentMlReader(fileName);
+                    return mzidReader;
+
                 case ".mtdb":
-                    reader = new MtdbReader(fileName);
-                    break;
+                    var mtdbReader = new MtdbReader(fileName);
+                    return mtdbReader;
             }
-            return reader;
+            return null;
         }
     }
 }
