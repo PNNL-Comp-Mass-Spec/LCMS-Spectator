@@ -87,12 +87,21 @@
                                     <Grid x:Name="ProteinTree">
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="*" />
+                                            <RowDefinition Height="30" />
                                             <RowDefinition x:Name="ProgressRow" Height="30" />
                                         </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="75" />
+                                            <ColumnDefinition Width="75" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
                                         <controls:MvvmTreeView
                                             Grid.Row="0"
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="3"
                                             DataContext="{Binding ScanViewModel}"
                                             ItemsSource="{Binding FilteredProteins}"
+                                            ToolTip="Right click to filter"
                                             SelectedItemTarget="{Binding TreeViewSelectedItem, Mode=TwoWay}">
                                             <controls:MvvmTreeView.ContextMenu>
                                                 <ContextMenu>
@@ -109,7 +118,7 @@
                                                     <Separator />
                                                     <MenuItem Header="Export">
                                                         <MenuItem Command="{Binding ExportProteinTreeCommand}" Header="As Text File" />
-                                                        <MenuItem Command="{Binding ExportProteinTreeAsTsvCommand}" Header="As Tab-separted file" />
+                                                        <MenuItem Command="{Binding ExportProteinTreeAsTsvCommand}" Header="As Tab-separated file" />
                                                     </MenuItem>
                                                 </ContextMenu>
                                             </controls:MvvmTreeView.ContextMenu>
@@ -215,9 +224,39 @@
                                                 </HierarchicalDataTemplate>
                                             </controls:MvvmTreeView.Resources>
                                         </controls:MvvmTreeView>
+
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Grid.Column="0"
+                                            Height="25"
+                                            VerticalAlignment="Center"
+                                            FontWeight="Bold">
+                                            Scan Filter
+                                        </TextBlock>
+                                        <TextBox
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Width="70"
+                                            Height="25"
+                                            Margin="0,0,0,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding ScanNumberFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button
+                                            Grid.Row="1"
+                                            Grid.Column="2"
+                                            Height="25"
+                                            Width="60"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding ApplyScanFilterCommand}">
+                                            Apply
+                                        </Button>
+
                                         <ProgressBar
                                             x:Name="FileLoadProgress"
-                                            Grid.Row="1"
+                                            Grid.Row="2"
+                                            Grid.Column="0"
+                                            Grid.ColumnSpan="3"
                                             Height="25"
                                             VerticalAlignment="Bottom"
                                             Visibility="{Binding IdFileLoading, Converter={StaticResource BoolToVis}}"

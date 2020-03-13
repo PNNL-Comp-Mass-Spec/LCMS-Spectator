@@ -65,6 +65,8 @@ namespace LcmsSpectator.ViewModels
         /// </summary>
         private bool idFileLoading;
 
+        private int scanNumberFilter;
+
         /// <summary>
         /// Default constructor to support WPF design-time use
         /// </summary>
@@ -97,6 +99,9 @@ namespace LcmsSpectator.ViewModels
             OpenTsvFileCommand = ReactiveCommand.CreateFromTask(async _ => await OpenIdFileImplementation());
             OpenFeatureFileCommand = ReactiveCommand.CreateFromTask(async _ => await OpenFeatureFileImplementation());
             OpenFromDmsCommand = ReactiveCommand.CreateFromTask(async _ => await OpenFromDmsImplementation());
+
+            // Create a command to apply a scan filter
+            ApplyScanFilterCommand = ReactiveCommand.Create(ApplyScanFilterImplementation);
 
             // Create command to open settings window
             OpenSettingsCommand = ReactiveCommand.Create(() => this.dialogService.OpenSettings(new SettingsViewModel(this.dialogService)));
@@ -156,6 +161,11 @@ namespace LcmsSpectator.ViewModels
             // Warm up InformedProteomics Averagine using arbitrary mass
             Task.Run(() => Averagine.GetIsotopomerEnvelopeFromNominalMass(50000));
         }
+
+        /// <summary>
+        /// Gets a command to apply a scan filter
+        /// </summary>
+        public ReactiveCommand<Unit, Unit> ApplyScanFilterCommand { get; }
 
         /// <summary>
         /// Gets command that opens a dialog box prompting the user for a raw file path,
@@ -267,6 +277,24 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
+        /// Scan number to filter the protein list on
+        /// </summary>
+        public int ScanNumberFilter
+        {
+            get => scanNumberFilter;
+            set => this.RaiseAndSetIfChanged(ref scanNumberFilter, value);
+        }
+
+        /// <summary>
+        /// Filter on scan number
+        /// (removes the filter if ScanNumberFilter is 0)
+        /// </summary>
+        private void ApplyScanFilterImplementation()
+        {
+            ScanViewModel.ApplyScanFilter(ScanNumberFilter);
+        }
+
+        /// <summary>
         /// Implementation for <see cref="OpenDataSetCommand" />.
         /// Prompts the user for a raw file path, id file path, and feature file path and opens them.
         /// </summary>
@@ -284,7 +312,7 @@ namespace LcmsSpectator.ViewModels
                     await ScanViewModel.IdTree.AddFastaEntriesAsync(await dataReader.ReadFastaFile(openDataViewModel.FastaFilePath));
                 }
 
-                await ReadIdFile(openDataViewModel.IdFilePath, dataSetViewModel);
+                await ReadIdFile(openDataViewModel.IdFilePath, dataSetViewModel, openDataViewModel.IdScanStart, openDataViewModel.IdScanEnd);
                 await dataReader.OpenDataSet(dataSetViewModel, openDataViewModel.RawFilePath, featureFilePath: openDataViewModel.FeatureFilePath);
             }
         }

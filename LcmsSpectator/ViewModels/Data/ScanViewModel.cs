@@ -256,6 +256,63 @@ namespace LcmsSpectator.ViewModels.Data
         public ScorerFactory ScorerFactory { get; set; }
 
         /// <summary>
+        /// Update the filters to only show proteins with this scan number
+        /// Set to 0 to remove the filter
+        /// </summary>
+        /// <param name="scanNumber"></param>
+        public async void ApplyScanFilter(int scanNumber)
+        {
+
+            foreach (var filter in Filters)
+            {
+                if (filter.Name != "Scan" || !(filter is MultiValueFilterViewModel scanFilter))
+                    continue;
+
+                if (scanNumber <= 0)
+                {
+                    if (scanFilter.Selected)
+                    {
+                        // Setting Selected to False will auto-update the proteins to remove the filter
+                        scanFilter.Selected = false;
+                    }
+                    return;
+                }
+
+                var scanNumberText = scanNumber.ToString();
+
+                if (scanFilter.Values.Count > 1)
+                {
+                    scanFilter.Values.Clear();
+                }
+                else if (scanFilter.Values.Count == 1)
+                {
+                    if (!scanFilter.Values.First().Equals(scanNumberText))
+                    {
+                        scanFilter.Values[0] = scanNumberText;
+                    }
+                }
+                else
+                {
+                    scanFilter.Values.Add(scanNumberText);
+                }
+
+                scanFilter.Value = scanNumberText;
+
+                if (!scanFilter.Selected)
+                {
+                    // Setting Selected to True auto-updates the proteins to apply the filter
+                    scanFilter.Selected = true;
+                    return;
+                }
+
+                break;
+            }
+
+            // Update the filtered data
+            FilteredData = await FilterDataAsync(Data);
+        }
+
+        /// <summary>
         /// Clear all filters and filter the data.
         /// </summary>
         public void ClearFilters()
@@ -611,5 +668,6 @@ namespace LcmsSpectator.ViewModels.Data
                 }
             }
         }
+
     }
 }

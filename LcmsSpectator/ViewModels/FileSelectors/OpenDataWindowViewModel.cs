@@ -51,6 +51,16 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         private string idFilePath;
 
         /// <summary>
+        /// Optional filter to apply when reading from the ID file
+        /// </summary>
+        private int idScanStart;
+
+        /// <summary>
+        /// Optional filter to apply when reading from the ID file
+        /// </summary>
+        private int idScanEnd;
+
+        /// <summary>
         /// The selected FASTA file path.
         /// </summary>
         private string fastaFilePath;
@@ -178,6 +188,18 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         {
             get => idFilePath;
             set => this.RaiseAndSetIfChanged(ref idFilePath, value);
+        }
+
+        public int IdScanStart
+        {
+            get => idScanStart;
+            set => this.RaiseAndSetIfChanged(ref idScanStart, value);
+        }
+
+        public int IdScanEnd
+        {
+            get => idScanEnd;
+            set => this.RaiseAndSetIfChanged(ref idScanEnd, value);
         }
 
         /// <summary>
