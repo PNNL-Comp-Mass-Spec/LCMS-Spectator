@@ -437,6 +437,7 @@ namespace LcmsSpectator.Models
 
             #region IonType Equality/HashCode
 
+            [ObsoleteAttribute("Unused")]
             private bool Equals(IonType x, IonType y)
             {
                 if (ReferenceEquals(x, y))
@@ -472,6 +473,7 @@ namespace LcmsSpectator.Models
 
             #region IonType Equality/HashCode
 
+            [ObsoleteAttribute("Unused")]
             private bool Equals(SearchModification x, SearchModification y)
             {
                 if (ReferenceEquals(x, y))
