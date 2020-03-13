@@ -142,53 +142,102 @@ namespace LcmsSpectator.Models
 
                 var parallelOptions = new ParallelOptions();
 
-#pragma warning disable 162
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                if (!USE_THREADING)
+                var useThreading = USE_THREADING;
+
+                // ReSharper disable ConditionIsAlwaysTrueOrFalse
+                // ReSharper disable HeuristicUnreachableCode
+                if (!useThreading)
                 {
                     parallelOptions.MaxDegreeOfParallelism = 1;
+                    GetIonFragmentsNonThreaded(precursorIon, sequence, ionTypes, fragmentLabelList);
                 }
-#pragma warning restore 162
-
-                // Automatically break up the ionTypes into groups and process in parallel
-                Parallel.ForEach(ionTypes, parallelOptions, ionType =>
+                else
                 {
-                    var ionFragments = new List<LabeledIonViewModel>();
-                    for (var i = 1; i < Sequence.Count; i++)
+                    // Automatically break up the ionTypes into groups and process in parallel
+                    Parallel.ForEach(ionTypes, parallelOptions, ionType =>
                     {
-                        var startIndex = ionType.IsPrefixIon ? 0 : i;
-                        var length = ionType.IsPrefixIon ? i : sequence.Count - i;
-                        var fragment = new Sequence(Sequence.GetRange(startIndex, length));
-                        var ions = ionType.GetPossibleIons(fragment);
-                        foreach (var ion in ions)
+                        var ionFragments = new List<LabeledIonViewModel>();
+                        for (var i = 1; i < Sequence.Count; i++)
                         {
-                            var labeledIonViewModel = new LabeledIonViewModel(ion.Composition, ionType, true, LcMsRun)
+                            var startIndex = ionType.IsPrefixIon ? 0 : i;
+                            var length = ionType.IsPrefixIon ? i : sequence.Count - i;
+                            var fragment = new Sequence(Sequence.GetRange(startIndex, length));
+                            var ions = ionType.GetPossibleIons(fragment);
+                            foreach (var ion in ions)
                             {
-                                Index = length,
-                                PrecursorIon = precursorIon
-                            };
+                                var labeledIonViewModel = new LabeledIonViewModel(ion.Composition, ionType, true, LcMsRun)
+                                {
+                                    Index = length,
+                                    PrecursorIon = precursorIon
+                                };
 
-                            ionFragments.Add(labeledIonViewModel);
+                                ionFragments.Add(labeledIonViewModel);
+                            }
+
+                            if (!ionType.IsPrefixIon)
+                            {
+                                ionFragments.Reverse();
+                            }
                         }
 
-                        if (!ionType.IsPrefixIon)
+                        // Only allow one thread at a time to write to the output list.
+                        lock (fragmentListLock)
                         {
-                            ionFragments.Reverse();
+                            fragmentLabelList.AddRange(ionFragments);
                         }
-                    }
-
-                    // Only allow one thread at a time to write to the output list.
-                    lock (fragmentListLock)
-                    {
-                        fragmentLabelList.AddRange(ionFragments);
-                    }
-                });
+                    });
+                }
+                // ReSharper restore HeuristicUnreachableCode
+                // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
                 // Flag computation as complete
                 resultCache.ResultsComputed = true;
 
                 // Return a copy of the results (limiting ability to affect the original results)
                 return fragmentLabelList.ToList();
+            }
+        }
+
+        /// <summary>
+        /// Construct the theoretical list of b and y ions
+        /// </summary>
+        /// <param name="precursorIon"></param>
+        /// <param name="sequence"></param>
+        /// <param name="ionTypes"></param>
+        /// <param name="fragmentLabelList"></param>
+        void GetIonFragmentsNonThreaded(
+            InformedProteomics.Backend.Data.Biology.Ion precursorIon,
+            Sequence sequence,
+            IEnumerable<IonType> ionTypes,
+            List<LabeledIonViewModel> fragmentLabelList)
+        {
+            foreach (var ionType in ionTypes)
+            {
+                var ionFragments = new List<LabeledIonViewModel>();
+                for (var i = 1; i < Sequence.Count; i++)
+                {
+                    var startIndex = ionType.IsPrefixIon ? 0 : i;
+                    var length = ionType.IsPrefixIon ? i : sequence.Count - i;
+                    var fragment = new Sequence(Sequence.GetRange(startIndex, length));
+                    var ions = ionType.GetPossibleIons(fragment);
+                    foreach (var ion in ions)
+                    {
+                        var labeledIonViewModel = new LabeledIonViewModel(ion.Composition, ionType, true, LcMsRun)
+                        {
+                            Index = length,
+                            PrecursorIon = precursorIon
+                        };
+
+                        ionFragments.Add(labeledIonViewModel);
+                    }
+
+                    if (!ionType.IsPrefixIon)
+                    {
+                        ionFragments.Reverse();
+                    }
+                }
+
+                fragmentLabelList.AddRange(ionFragments);
             }
         }
 
