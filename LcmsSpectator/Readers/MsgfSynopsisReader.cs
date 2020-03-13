@@ -77,7 +77,7 @@ namespace LcmsSpectator.Readers
                                                Charge = psm.Charge,
                                                Sequence = parsedSequence,
                                                Scan = psm.ScanNumber,
-                                               Score = Convert.ToDouble(psm.MSGFSpecProb),
+                                               Score = Convert.ToDouble(psm.MSGFSpecEValue),
                                                UseGolfScoring = true,
                                                QValue = qValue,
                                            };
