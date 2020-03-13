@@ -7,6 +7,9 @@ using LcmsSpectator.Models;
 
 namespace LcmsSpectator.Readers
 {
+    /// <summary>
+    /// Base class for reading tab-separated value files (.tsv or .txt)
+    /// </summary>
     public abstract class BaseTsvReader : BaseReader
     {
 
@@ -64,7 +67,7 @@ namespace LcmsSpectator.Readers
         }
 
         /// <summary>
-        /// Read a MSPathFinder results from TSV file.
+        /// Read results from a TSV file.
         /// </summary>
         /// <param name="stream">The stream for an open TSV file.</param>
         /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
@@ -118,7 +121,7 @@ namespace LcmsSpectator.Readers
         }
 
         /// <summary>
-        /// Read a MSPathFinder results from GZipped TSV file.
+        /// Read from a TSV file inside a zip file.
         /// </summary>
         /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
         /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>

@@ -74,7 +74,22 @@ namespace LcmsSpectator.Models
         {
             if (!Proteoforms.ContainsKey(id.SequenceText))
             {
+                // Even though we just checked if Proteoforms has this key,
+                // multiple threads could be updating this list simultaneously,
+                // so we could still encounter duplicate key errors
+
+                // However, that likely indicates a programming error, so we will not include a try/catch block here
+
                 Proteoforms.Add(id.SequenceText, new ProteoformId(id, Sequence));
+
+                // try
+                // {
+                //     Proteoforms.Add(id.SequenceText, new ProteoformId(id, Sequence));
+                // }
+                // catch (ArgumentException)
+                // {
+                //     // Ignore this error
+                // }
             }
 
             var proteoform = Proteoforms[id.SequenceText];

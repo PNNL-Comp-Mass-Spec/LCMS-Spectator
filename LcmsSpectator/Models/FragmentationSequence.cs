@@ -132,6 +132,8 @@ namespace LcmsSpectator.Models
 
                 // First thread: run all of the computations for this set of parameters
                 var fragmentListLock = new object();
+
+                // This holds all of the theoretical b and y ions (or c and z ions for HCD)
                 var fragmentLabelList = resultCache.Results;
 
                 var sequence = labelModifications == null ? Sequence : IonUtils.GetHeavySequence(Sequence, labelModifications);
@@ -210,9 +212,9 @@ namespace LcmsSpectator.Models
                 sequence = IonUtils.GetHeavySequence(sequence, labelModifications.ToArray());
             }
 
-            #pragma warning disable 0618
+#pragma warning disable 0618
             var precursorIonType = new IonType("Precursor", Composition.H2O, Charge, false);
-            #pragma warning restore 0618
+#pragma warning restore 0618
             var composition = sequence.Aggregate(Composition.Zero, (current, aa) => current + aa.Composition);
             var relativeIntensities = composition.GetIsotopomerEnvelope();
             var indices = new List<int> { -1 };
@@ -265,9 +267,9 @@ namespace LcmsSpectator.Models
                     index = 0;         // guarantee that actual charge is index 0
                 }
 
-                #pragma warning disable 0618
+#pragma warning disable 0618
                 var precursorIonType = new IonType("Precursor", Composition.H2O, i, false);
-                #pragma warning restore 0618
+#pragma warning restore 0618
                 ions.Add(new LabeledIonViewModel(composition, precursorIonType, false, LcMsRun, null, true, index));
             }
 

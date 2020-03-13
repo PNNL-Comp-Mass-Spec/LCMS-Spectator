@@ -205,7 +205,8 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
-        /// Get the peaks for the ion asynchronously.
+        /// Find data points in the spectrum that match the theoretical b, y, c, or z ion tracked by this LabeledIonViewModel instance
+        /// Gets the peaks asynchronously.
         /// </summary>
         /// <param name="spectrum">The spectrum to get the peaks from</param>
         /// <param name="deconvoluted">A value indicating whether the peaks come from a deconvoluted spectrum.</param>
@@ -279,7 +280,7 @@ namespace LcmsSpectator.ViewModels.Data
         }
 
         /// <summary>
-        /// Find data points in the spectrum that match the ion tracked by this LabeledIonViewModel instance
+        /// Find data points in the spectrum that match the b, y, c, or z ion tracked by this LabeledIonViewModel instance
         /// </summary>
         /// <param name="spectrumInfo">Tuple tracking the spectrum and whether or not it is deconvoluted</param>
         /// <param name="o">Object required for cache</param>

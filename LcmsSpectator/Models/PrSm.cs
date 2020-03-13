@@ -312,6 +312,7 @@ namespace LcmsSpectator.Models
         /// <summary>
         /// Gets or sets a value indicating whether higher scores or lower scores are better.
         /// </summary>
+        /// <remarks>When true, lower scores (closer to 0) are better</remarks>
         public bool UseGolfScoring
         {
             get => useGolfScoring;

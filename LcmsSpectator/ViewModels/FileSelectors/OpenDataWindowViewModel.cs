@@ -46,7 +46,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         private string featureFilePath;
 
         /// <summary>
-        /// The selected ID file path.
+        /// The selected ID file path (e.g. .mzid from MS-GF+)
         /// </summary>
         private string idFilePath;
 
