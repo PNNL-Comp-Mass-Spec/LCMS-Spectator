@@ -41,12 +41,14 @@ namespace LcmsSpectator.Readers
         /// </summary>
         /// <param name="dataSetViewModel">DataSetViewModel to add IDs to.</param>
         /// <param name="idFilePath">Path for ID file to read.</param>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
         /// <param name="modIgnoreList">Modifications to ignore in identifications.</param>
         /// <returns>Task that reads ID file.</returns>
-        Task ReadIdFile(DataSetViewModel dataSetViewModel, string idFilePath, IEnumerable<string> modIgnoreList = null);
+        Task ReadIdFile(DataSetViewModel dataSetViewModel, string idFilePath, int scanStart, int scanEnd, IEnumerable<string> modIgnoreList = null);
 
         /// <summary>
-        /// Open a data set given raw file, id file, and feature file.
+        /// Open a data set given raw file, id file,and feature file (only MSPathFinder has a feature file).
         /// </summary>
         /// <param name="dataSetViewModel">DataSetViewModel to associate open dataset with.</param>
         /// <param name="rawFilePath">Path to raw file to open.</param>
@@ -54,16 +56,20 @@ namespace LcmsSpectator.Readers
         /// <param name="featureFilePath">Path to feature list file.</param>
         /// <param name="paramFilePath">Path to MSPathFinder parameter file.</param>
         /// <param name="toolType">Type of ID tool used for this data set.</param>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
         /// <param name="modIgnoreList">Modifications to ignore if found in ID list.</param>
         /// <returns>Task that opens the data set.</returns>
         Task OpenDataSet(
-                        DataSetViewModel dataSetViewModel,
-                        string rawFilePath,
-                        string idFilePath = "",
-                        string featureFilePath = "",
-                        string paramFilePath = "",
-                        ToolType? toolType = ToolType.MsPathFinder,
-                        IEnumerable<string> modIgnoreList = null);
+            DataSetViewModel dataSetViewModel,
+           string rawFilePath,
+           string idFilePath = "",
+           string featureFilePath = "",
+           string paramFilePath = "",
+           ToolType? toolType = ToolType.MsPathFinder,
+           int scanStart = 0,
+           int scanEnd = 0,
+           IEnumerable<string> modIgnoreList = null);
 
         /// <summary>
         /// Get raw files in a given directory.

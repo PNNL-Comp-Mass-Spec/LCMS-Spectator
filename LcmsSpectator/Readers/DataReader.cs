@@ -86,12 +86,19 @@ namespace LcmsSpectator.Readers
         /// </summary>
         /// <param name="dataSetViewModel">DataSetViewModel to add IDs to.</param>
         /// <param name="idFilePath">Path for ID file to read.</param>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
         /// <param name="modIgnoreList">Modifications to ignore in identifications.</param>
         /// <returns>Task that reads ID file.</returns>
-        public async Task ReadIdFile(DataSetViewModel dataSetViewModel, string idFilePath, IEnumerable<string> modIgnoreList = null)
+        public async Task ReadIdFile(
+            DataSetViewModel dataSetViewModel,
+            string idFilePath,
+            int scanStart = 0,
+            int scanEnd = 0,
+            IEnumerable<string> modIgnoreList = null)
         {
             var reader = IdFileReaderFactory.CreateReader(idFilePath);
-            var ids = await reader.ReadAsync(modIgnoreList);
+            var ids = await reader.ReadAsync(scanStart, scanEnd, modIgnoreList);
             var idList = ids.ToList();
             foreach (var id in idList)
             {
@@ -105,7 +112,7 @@ namespace LcmsSpectator.Readers
         }
 
         /// <summary>
-        /// Open a data set given raw file, id file, and feature file.
+        /// Open a data set given raw file, peptide id file, and feature file (only MSPathFinder has a feature file).
         /// </summary>
         /// <param name="dataSetViewModel">DataSetViewModel to associate open dataset with</param>
         /// <param name="rawFilePath">Path to raw file to open</param>
@@ -113,16 +120,20 @@ namespace LcmsSpectator.Readers
         /// <param name="featureFilePath">Path to feature list file</param>
         /// <param name="paramFilePath">Path to MSPathFinder parameter file.</param>
         /// <param name="toolType">Type of ID tool used for this data set</param>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
         /// <param name="modIgnoreList">Modifications to ignore if found in ID list.</param>
         /// <returns>Task that opens the data set.</returns>
         public async Task OpenDataSet(
-                                    DataSetViewModel dataSetViewModel,
-                                    string rawFilePath,
-                                    string idFilePath = "",
-                                    string featureFilePath = "",
-                                    string paramFilePath = "",
-                                    ToolType? toolType = ToolType.MsPathFinder,
-                                    IEnumerable<string> modIgnoreList = null)
+            DataSetViewModel dataSetViewModel,
+            string rawFilePath,
+            string idFilePath = "",
+            string featureFilePath = "",
+            string paramFilePath = "",
+            ToolType? toolType = ToolType.MsPathFinder,
+            int scanStart = 0,
+            int scanEnd = 0,
+            IEnumerable<string> modIgnoreList = null)
         {
             // Open raw file, if not already open.
             if (!string.IsNullOrEmpty(rawFilePath) && dataSetViewModel.LcMs == null)
@@ -158,7 +169,7 @@ namespace LcmsSpectator.Readers
                     IcParameters.Instance.PrecursorTolerancePpm = dataSetViewModel.MsPfParameters.PrecursorTolerancePpm;
                 }
 
-                await ReadIdFile(dataSetViewModel, idFilePath, modIgnoreList);
+                await ReadIdFile(dataSetViewModel, idFilePath, scanStart, scanEnd, modIgnoreList);
                 ReadingIdFiles = false;
             }
 

@@ -550,12 +550,14 @@ namespace LcmsSpectator.ViewModels
         }
 
         /// <summary>
-        /// Attempt to open Ids from identification file and associate raw file with them.
+        /// Attempt to open peptide IDs from identification file and associate the instrument data with them.
         /// </summary>
         /// <param name="idFilePath">Name of id file.</param>
-        /// <param name="dataSetViewModel">Data Set View model to associate with id file.</param>
+        /// <param name="dataSetViewModel">Data Set View model to associate with peptide ID file.</param>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
         /// <returns>Task for opening identification file.</returns>
-        private async Task ReadIdFile(string idFilePath, DataSetViewModel dataSetViewModel)
+        private async Task ReadIdFile(string idFilePath, DataSetViewModel dataSetViewModel, int scanStart = 0, int scanEnd = 0)
         {
             var attemptToReadFile = true;
             var modIgnoreList = new List<string>();
@@ -568,6 +570,8 @@ namespace LcmsSpectator.ViewModels
                             dataSetViewModel,
                             dataSetViewModel.Title,
                             idFilePath,
+                            scanStart: scanStart,
+                            scanEnd: scanEnd,
                             modIgnoreList: modIgnoreList);
                     attemptToReadFile = false;
                 }

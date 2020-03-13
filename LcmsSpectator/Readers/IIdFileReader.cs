@@ -24,18 +24,30 @@ namespace LcmsSpectator.Readers
         /// <summary>
         /// Read a search results file.
         /// </summary>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="modIgnoreList">Ignores modifications contained in this list (not all readers support this).</param>
         /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null);
+        IEnumerable<PrSm> Read(
+            int scanStart = 0,
+            int scanEnd = 0,
+            IEnumerable<string> modIgnoreList = null,
+            IProgress<double> progress = null);
 
         /// <summary>
         /// Read a search results file asynchronously.
         /// </summary>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="modIgnoreList">Ignores modifications contained in this list (not all readers support this).</param>
         /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null);
+        Task<IEnumerable<PrSm>> ReadAsync(
+            int scanStart = 0,
+            int scanEnd = 0,
+            IEnumerable<string> modIgnoreList = null,
+            IProgress<double> progress = null);
 
         /// <summary>
         /// Gets a list of modifications that potentially need to be registered after reading.
