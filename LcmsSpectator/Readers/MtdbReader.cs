@@ -23,7 +23,7 @@ namespace LcmsSpectator.Readers
     /// <summary>
     /// Reader for MTDB file.
     /// </summary>
-    public class MtdbReader : IIdFileReader
+    public class MtdbReader : BaseReader
     {
         /// <summary>
         /// The path to the database file.
@@ -37,27 +37,21 @@ namespace LcmsSpectator.Readers
         public MtdbReader(string filePath)
         {
             this.filePath = filePath;
-            Modifications = new List<Modification>();
-        }
-
-        /// <summary>
-        /// Read a MTDB Creator results file.
-        /// </summary>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <param name="progress">The progress reporter.</param>
-        /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
-        {
-            return ReadAsync().Result;
         }
 
         /// <summary>
         /// Read a MTDB Creator results file asynchronously.
         /// </summary>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
+        protected override async Task<IEnumerable<PrSm>> ReadFile(
+            int scanStart,
+            int scanEnd,
+            IReadOnlyCollection<string> modIgnoreList = null,
+            IProgress<double> progress = null)
         {
             var prsms = new List<PrSm>();
 
@@ -72,8 +66,12 @@ namespace LcmsSpectator.Readers
             {
                 foreach (var id in target.Evidences)
                 {
-                    // Degan: attempting to make it recognize the proteins from .mtdb format
-                    foreach (var prot in id.Proteins)
+                    if (scanStart > 0 && (id.Scan < scanStart || id.Scan > scanEnd))
+                    {
+                        continue;
+                    }
+
+                    foreach (var protein in id.Proteins)
                     {
                         var strippedSequence = target.Sequence;
                         strippedSequence = strippedSequence.Remove(0, 2);
@@ -102,10 +100,8 @@ namespace LcmsSpectator.Readers
                             entry.Sequence[ptm.Location - 1] = new ModifiedAminoAcid(entry.Sequence[ptm.Location - 1], mod);
                         }
 
-                        // Degan: attempting to make it recognize the proteins from .mtdb format
-                        entry.ProteinName = prot.ProteinName;
+                        entry.ProteinName = protein.ProteinName;
 
-                        // Degan: choosing stripped sequence rather than the raw sequence to exclude prior and successive amino acid
                         entry.SequenceText = strippedSequence;
                         entry.Charge = id.Charge;
                         entry.Scan = id.Scan;
@@ -117,6 +113,5 @@ namespace LcmsSpectator.Readers
             return prsms;
         }
 
-        public IList<Modification> Modifications { get; }
     }
 }

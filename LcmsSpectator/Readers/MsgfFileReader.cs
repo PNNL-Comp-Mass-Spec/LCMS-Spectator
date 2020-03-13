@@ -13,7 +13,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers.SequenceReaders;
 
@@ -22,7 +21,7 @@ namespace LcmsSpectator.Readers
     /// <summary>
     /// Reader for MS-GF+ results file.
     /// </summary>
-    public class MsgfFileReader : IIdFileReader
+    public class MsgfFileReader : BaseReader
     {
         /// <summary>
         /// The path to the TSV file.
@@ -36,43 +35,27 @@ namespace LcmsSpectator.Readers
         public MsgfFileReader(string filePath)
         {
             this.filePath = filePath;
-            Modifications = new List<Modification>();
         }
-
-        /// <summary>
-        /// Read a MS-GF+ results file.
-        /// </summary>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <param name="progress">The progress reporter.</param>
-        /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
-        {
-            return ReadFromTsvFile().Result;
-        }
-
-        /// <summary>
-        /// Read a MS-GF+ results file asynchronously.
-        /// </summary>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <param name="progress">The progress reporter.</param>
-        /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
-        {
-            return await ReadFromTsvFile();
-        }
-
-        public IList<Modification> Modifications { get; }
 
         /// <summary>
         /// Read a MS-GF+ results from TSV file.
         /// </summary>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadFromTsvFile()
+        protected override async Task<IEnumerable<PrSm>> ReadFile(
+            int scanStart,
+            int scanEnd,
+            IReadOnlyCollection<string> modIgnoreList = null,
+            IProgress<double> progress = null)
         {
             var prsms = new List<PrSm>();
             var file = new StreamReader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             var headers = new Dictionary<string, int>();
             var lineCount = 0;
+
             while (!file.EndOfStream)
             {
                 var line = await file.ReadLineAsync();
@@ -102,7 +85,7 @@ namespace LcmsSpectator.Readers
         /// <param name="headers">Headers of the TSV file.</param>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <returns>List of Protein-Spectrum-Match identifications.</returns>
-        private IEnumerable<PrSm> CreatePrSms(string line, IReadOnlyDictionary<string, int> headers, IEnumerable<string> modIgnoreList = null)
+        private IEnumerable<PrSm> CreatePrSms(string line, IReadOnlyDictionary<string, int> headers, IReadOnlyCollection<string> modIgnoreList = null)
         {
             var expectedHeaders = new List<string>
             {
@@ -152,22 +135,26 @@ namespace LcmsSpectator.Readers
                 }
             }
 
-            var sequenceReader = new SequenceReader(filePath.Contains("_syn"));
+            var trimAnnotations = filePath.Contains("_syn");
+            var sequenceReader = new SequenceReader(trimAnnotations);
 
             foreach (var protein in proteinNames)
             {
+                var qValue = ParseDouble(parts[headers["QValue"]], 4);
+                var charge = int.Parse(parts[headers["Charge"]]);
+
                 var prsm = new PrSm(sequenceReader)
                 {
                     Heavy = false,
                     Scan = scan,
-                    Charge = Convert.ToInt32(parts[headers["Charge"]]),
+                    Charge = charge,
                     ////Sequence = sequenceReader.Read(sequenceText, trim),
                     SequenceText = sequenceText,
                     ProteinName = protein,
                     ProteinDesc = string.Empty,
                     Score = score,
                     UseGolfScoring = true,
-                    QValue = Math.Round(Convert.ToDouble(parts[headers["QValue"]]), 4),
+                    QValue = qValue
                 };
                 prsms.Add(prsm);
             }

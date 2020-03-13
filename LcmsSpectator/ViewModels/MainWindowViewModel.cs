@@ -571,7 +571,7 @@ namespace LcmsSpectator.ViewModels
                             modIgnoreList: modIgnoreList);
                     attemptToReadFile = false;
                 }
-                catch (IcFileReader.InvalidModificationNameException e)
+                catch (BaseTsvReader.InvalidModificationNameException e)
                 {
                     // file contains an unknown modification
                     var result =

@@ -10,109 +10,88 @@ using PHRPReader;
 
 namespace LcmsSpectator.Readers
 {
-    public class MsgfSynopsisReader : IIdFileReader
+    public class MsgfSynopsisReader : BaseReader
     {
         private readonly string filePath;
 
         public MsgfSynopsisReader(string filePath)
         {
             this.filePath = filePath;
-            Modifications = new List<Modification>();
         }
 
         /// <summary>
-        /// Gets a list of modifications that potentially need to be registered after reading.
+        /// Read a Peptide Hits Results Processor synopsis results file
         /// </summary>
-        public IList<Modification> Modifications { get; }
-
-        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
+        /// <param name="progress">The progress reporter.</param>
+        /// <returns>Identification tree of MS-GF+ identifications.</returns>
+        protected override async Task<IEnumerable<PrSm>> ReadFile(
+            int scanStart,
+            int scanEnd,
+            IReadOnlyCollection<string> modIgnoreList = null,
+            IProgress<double> progress = null)
         {
-            var oStartupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = true };
-            var phrpReader = new clsPHRPReader(filePath, oStartupOptions);
+            var startupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = true };
+            var phrpReader = new clsPHRPReader(filePath, startupOptions);
 
             if (!string.IsNullOrEmpty(phrpReader.ErrorMessage))
             {
                 throw new Exception(phrpReader.ErrorMessage);
             }
 
-            var identifications = new List<PrSm>();
-            while (phrpReader.MoveNext())
-            {
-                phrpReader.FinalizeCurrentPSM();
-                var psm = phrpReader.CurrentPSM;
-                var proteins = psm.Proteins;
+            var prsmList = await Task.Run(
+                               () =>
+                               {
+                                   var ids = new List<PrSm>();
+                                   while (phrpReader.MoveNext())
+                                   {
+                                       phrpReader.FinalizeCurrentPSM();
+                                       var psm = phrpReader.CurrentPSM;
+                                       var proteins = psm.Proteins;
 
-                var parsedSequence = ParseSequence(psm.PeptideCleanSequence, psm.ModifiedResidues);
-                foreach (var protein in proteins)
-                {
-                    var prsm = new PrSm
-                    {
-                        Heavy = false,
-                        ProteinName = protein,
-                        ProteinDesc = string.Empty,
-                        Charge = psm.Charge,
-                        Sequence = parsedSequence,
-                        Scan = psm.ScanNumber,
-                        Score = Convert.ToDouble(psm.MSGFSpecProb),
-                        UseGolfScoring = true,
-                        QValue = 0,
-                    };
+                                       if (scanStart > 0 && (psm.ScanNumber < scanStart || psm.ScanNumber > scanEnd))
+                                       {
+                                           continue;
+                                       }
 
-                    prsm.SetSequence(GetSequenceText(parsedSequence), parsedSequence);
+                                       double qValue;
+                                       if (psm.AdditionalScores.TryGetValue("QValue", out var qValueText))
+                                       {
+                                           qValue = ParseDouble(qValueText, 4);
+                                       }
+                                       else
+                                       {
+                                           qValue = 0;
+                                       }
 
-                    identifications.Add(prsm);
-                }
-            }
+                                       var parsedSequence = ParseSequence(psm.PeptideCleanSequence, psm.ModifiedResidues);
+                                       foreach (var protein in proteins)
+                                       {
+                                           var prsm = new PrSm
+                                           {
+                                               Heavy = false,
+                                               ProteinName = protein,
+                                               ProteinDesc = string.Empty,
+                                               Charge = psm.Charge,
+                                               Sequence = parsedSequence,
+                                               Scan = psm.ScanNumber,
+                                               Score = Convert.ToDouble(psm.MSGFSpecProb),
+                                               UseGolfScoring = true,
+                                               QValue = qValue,
+                                           };
 
-            return identifications;
-        }
+                                           prsm.SetSequence(GetSequenceText(parsedSequence), parsedSequence);
 
-        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
-        {
-            var oStartupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = true };
-            var phrpReader = new clsPHRPReader(filePath, oStartupOptions);
+                                           ids.Add(prsm);
+                                       }
+                                   }
 
-            if (!string.IsNullOrEmpty(phrpReader.ErrorMessage))
-            {
-                throw new Exception(phrpReader.ErrorMessage);
-            }
+                                   return ids;
+                               });
 
-            var identifications = await Task.Run(
-                () =>
-                    {
-                        var ids = new List<PrSm>();
-                        while (phrpReader.MoveNext())
-                        {
-                            phrpReader.FinalizeCurrentPSM();
-                            var psm = phrpReader.CurrentPSM;
-                            var proteins = psm.Proteins;
-
-                            var parsedSequence = ParseSequence(psm.PeptideCleanSequence, psm.ModifiedResidues);
-                            foreach (var protein in proteins)
-                            {
-                                var prsm = new PrSm
-                                               {
-                                                   Heavy = false,
-                                                   ProteinName = protein,
-                                                   ProteinDesc = string.Empty,
-                                                   Charge = psm.Charge,
-                                                   Sequence = parsedSequence,
-                                                   Scan = psm.ScanNumber,
-                                                   Score = Convert.ToDouble(psm.MSGFSpecProb),
-                                                   UseGolfScoring = true,
-                                                   QValue = 0,
-                                               };
-
-                                prsm.SetSequence(GetSequenceText(parsedSequence), parsedSequence);
-
-                                ids.Add(prsm);
-                            }
-                        }
-
-                        return ids;
-                    });
-
-            return identifications;
+            return prsmList;
         }
 
         /// <summary>
@@ -121,7 +100,7 @@ namespace LcmsSpectator.Readers
         /// <param name="sequenceText">The clean sequence.</param>
         /// <param name="modInfo">The modification info for the sequence.</param>
         /// <returns>The parsed sequence.</returns>
-        private Sequence ParseSequence(string sequenceText, List<clsAminoAcidModInfo> modInfo)
+        private Sequence ParseSequence(string sequenceText, IEnumerable<clsAminoAcidModInfo> modInfo)
         {
             var sequenceReader = new SequenceReader();
             var sequence = sequenceReader.Read(sequenceText);

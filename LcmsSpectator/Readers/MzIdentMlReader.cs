@@ -24,7 +24,7 @@ namespace LcmsSpectator.Readers
     /// <summary>
     /// Reader for MZID files.
     /// </summary>
-    public class MzIdentMlReader : IIdFileReader
+    public class MzIdentMlReader : BaseReader
     {
         /// <summary>
         /// Path for MZID file.
@@ -44,27 +44,21 @@ namespace LcmsSpectator.Readers
         {
             this.filePath = filePath;
             mzIdentMlReader = new SimpleMZIdentMLReader();
-            Modifications = new List<Modification>();
-        }
-
-        /// <summary>
-        /// Read a MZID results file.
-        /// </summary>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <param name="progress">The progress reporter.</param>
-        /// <returns>Identification tree of identifications.</returns>
-        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
-        {
-            return ReadAsync(modIgnoreList).Result;
         }
 
         /// <summary>
         /// Read a MZID results file asynchronously.
         /// </summary>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <param name="progress">The progress reporter.</param>
         /// <returns>Identification tree of MZID identifications.</returns>
-        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
+        protected override async Task<IEnumerable<PrSm>> ReadFile(
+            int scanStart,
+            int scanEnd,
+            IReadOnlyCollection<string> modIgnoreList = null,
+            IProgress<double> progress = null)
         {
             var dataset = await Task.Run(() => mzIdentMlReader.Read(filePath));
             var prsmList = new List<PrSm>();
@@ -95,6 +89,11 @@ namespace LcmsSpectator.Readers
                 foreach (var pepEv in evidence.PepEvidence)
                 {
                     if (pepEv.IsDecoy || pepEv.DbSeq.Accession.StartsWith("XXX"))
+                    {
+                        continue;
+                    }
+
+                    if (scanStart > 0 && (evidence.ScanNum < scanStart || evidence.ScanNum > scanEnd))
                     {
                         continue;
                     }
@@ -140,6 +139,5 @@ namespace LcmsSpectator.Readers
             return sequenceStr.ToString();
         }
 
-        public IList<Modification> Modifications { get; }
     }
 }

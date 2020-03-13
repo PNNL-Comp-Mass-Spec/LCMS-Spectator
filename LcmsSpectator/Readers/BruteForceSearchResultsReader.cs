@@ -11,179 +11,67 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
-using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers.SequenceReaders;
 
 namespace LcmsSpectator.Readers
 {
     /// <summary>
-    /// Reader for MSPathFinder results file.
+    /// Reader for generic results files, with the following tab-separated columns (order does not matter)
+    /// Score   Protein   Description   Sequence   Scan
     /// </summary>
-    public class BruteForceSearchResultsReader : IIdFileReader
+    public class BruteForceSearchResultsReader : BaseTsvReader
     {
         /// <summary>
-        /// The path to the TSV file.
-        /// </summary>
-        private readonly string filePath;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="LcmsSpectator.Readers.IcFileReader"/> class.
+        /// Initializes a new instance of the <see cref="LcmsSpectator.Readers.BruteForceSearchResultsReader"/> class.
         /// </summary>
         /// <param name="filePath">The path to the TSV file.</param>
-        public BruteForceSearchResultsReader(string filePath)
+        public BruteForceSearchResultsReader(string filePath) : base(filePath)
         {
-            this.filePath = filePath;
-            Modifications = new List<Modification>();
         }
 
         /// <summary>
-        /// Read a MSPathFinder results file.
+        /// Read a generic tab-separated results file with the following tab-separated columns (order does not matter)
+        /// Score   Protein   Description   Sequence   Scan
         /// </summary>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <param name="progress">The progress reporter.</param>
-        /// <returns><returns>The Protein-Spectrum-Match identifications.</returns></returns>
-        public IEnumerable<PrSm> Read(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
-        {
-            var modIgnore = modIgnoreList == null ? new List<string>() : new List<string>(modIgnoreList);
-            return ReadFile(modIgnore).Result;
-        }
-
-        /// <summary>
-        /// Read a MSPathFinder results file asynchronously.
-        /// </summary>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <param name="progress">The progress reporter.</param>
-        /// <returns>Identification tree of MSPathFinder identifications.</returns>
-        public async Task<IEnumerable<PrSm>> ReadAsync(IEnumerable<string> modIgnoreList = null, IProgress<double> progress = null)
-        {
-            var modIgnore = modIgnoreList == null ? new List<string>() : new List<string>(modIgnoreList);
-            return await ReadFile(modIgnore);
-        }
-
-        public IList<Modification> Modifications { get; }
-
-        /// <summary>
-        /// Read a MSPathFinder results file.
-        /// </summary>
+        /// <param name="scanStart">Optional filter to apply when reading from the peptide ID file</param>
+        /// <param name="scanEnd">Optional filter to apply when reading from the peptide ID file</param>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <param name="progress">The progress reporter.</param>
         /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadFile(IReadOnlyCollection<string> modIgnoreList = null, IProgress<double> progress = null)
+        protected override async Task<IEnumerable<PrSm>> ReadFile(int scanStart, int scanEnd, IReadOnlyCollection<string> modIgnoreList = null, IProgress<double> progress = null)
         {
             progress = progress ?? new Progress<double>();
             var ext = Path.GetExtension(filePath);
+
             IEnumerable<PrSm> prsmList;
             if (string.Equals(ext, ".tsv", StringComparison.OrdinalIgnoreCase))
             {
                 var fileInfo = new FileInfo(filePath);
                 var reader = new StreamReader(File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                prsmList = await ReadTsv(reader, modIgnoreList, fileInfo.Length, progress);
+                prsmList = await ReadTsv(reader, scanStart, scanEnd, modIgnoreList, fileInfo.Length, progress);
                 return prsmList;
             }
 
             if (string.Equals(ext, ".zip", StringComparison.OrdinalIgnoreCase))
             {
-                prsmList = await ReadZip(modIgnoreList, progress);
+                prsmList = await ReadZip(scanStart, scanEnd, modIgnoreList, progress);
                 return prsmList;
             }
 
             throw new ArgumentException(string.Format("Cannot read file with extension \"{0}\"", ext));
-
-        }
-
-        /// <summary>
-        /// Read a MSPathFinder results from TSV file.
-        /// </summary>
-        /// <param name="stream">The stream for an open TSV file.</param>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list. </param>
-        /// <param name="fileSizeBytes">Size of the source file, in bytes</param>
-        /// <param name="progress">Progress</param>
-        /// <returns>The Protein-Spectrum-Match identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadTsv(
-            StreamReader stream, IReadOnlyCollection<string> modIgnoreList, long fileSizeBytes, IProgress<double> progress)
-        {
-
-            var prsmList = new List<PrSm>();
-            var headers = new Dictionary<string, int>();
-            var lineCount = 0;
-            long bytesRead = 0;
-
-            while (!stream.EndOfStream)
-            {
-                var line = await stream.ReadLineAsync();
-                if (string.IsNullOrWhiteSpace(line))
-                    continue;
-
-                lineCount++;
-                bytesRead += line.Length + 2;
-
-                if (lineCount == 1)
-                {
-                    // first line
-                    var parts = line.Split('\t');
-                    for (var i = 0; i < parts.Length; i++)
-                    {
-                        headers.Add(parts[i], i);
-                    }
-
-                    continue;
-                }
-
-                var idData = CreatePrSms(line, headers, modIgnoreList);
-                if (idData != null)
-                {
-                    prsmList.AddRange(idData);
-                }
-
-                progress.Report(bytesRead / (double)fileSizeBytes * 100);
-            }
-
-            stream.Close();
-            return prsmList;
-        }
-
-        /// <summary>
-        /// Read a MSPathFinder results from GZipped TSV file.
-        /// </summary>
-        /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
-        /// <param name="progress">The progress reporter.</param>
-        /// <returns>Task that creates an identification tree of MSPathFinder identifications.</returns>
-        private async Task<IEnumerable<PrSm>> ReadZip(IReadOnlyCollection<string> modIgnoreList, IProgress<double> progress)
-        {
-            var zipFilePath = filePath;
-            var fileName = Path.GetFileNameWithoutExtension(zipFilePath);
-            if (fileName != null && fileName.EndsWith("_IcTsv"))
-            {
-                fileName = fileName.Substring(0, fileName.Length - 6);
-            }
-
-            var tsvFileName = string.Format("{0}_IcTda.tsv", fileName);
-
-            var zipArchive = ZipFile.OpenRead(zipFilePath);
-            var entry = zipArchive.GetEntry(tsvFileName);
-            if (entry != null)
-            {
-                using (var fileStream = new StreamReader(entry.Open()))
-                {
-                    return await ReadTsv(fileStream, modIgnoreList, entry.Length, progress);
-                }
-            }
-
-            return new List<PrSm>();
         }
 
         /// <summary>
         /// Create Protein-Spectrum-Matches identification from a line of the results file.
         /// </summary>
         /// <param name="line">Single line of the results file.</param>
-        /// <param name="headers">Headers of the TSV file.</param>
+        /// <param name="headers">Headers of the TSV file; keys are header names, values are the column index</param>
         /// <param name="modIgnoreList">Ignores modifications contained in this list.</param>
         /// <returns>List of Protein-Spectrum-Match identifications.</returns>
-        private IEnumerable<PrSm> CreatePrSms(string line, IReadOnlyDictionary<string, int> headers, IEnumerable<string> modIgnoreList)
+        protected override IList<PrSm> CreatePrSms(string line, IReadOnlyDictionary<string, int> headers, IEnumerable<string> modIgnoreList)
         {
             var expectedHeaders = new List<string>
             {
@@ -224,7 +112,7 @@ namespace LcmsSpectator.Readers
                     Heavy = false,
                     Scan = Convert.ToInt32(parts[headers["Scan"]]),
                     Charge = 1,
-                    ////Sequence = sequenceData.Item1,
+                    // Skip: Sequence = sequenceData.Item1,
                     SequenceText = parts[headers["Sequence"]],
                     ProteinName = protein,
                     ProteinDesc = parts[headers["Description"]].Split(';').FirstOrDefault(),
@@ -235,27 +123,6 @@ namespace LcmsSpectator.Readers
 
             return prsmList;
         }
-
-        /// <summary>
-        /// Exception thrown for unknown or modifications.
-        /// </summary>
-        public class InvalidModificationNameException : Exception
-        {
-            /// <summary>
-            /// Initializes a new instance of the <see cref="LcmsSpectator.Readers.IcFileReader.InvalidModificationNameException"/> class.
-            /// </summary>
-            /// <param name="message">Exception message.</param>
-            /// <param name="modificationName">The name of the invalid modification.</param>
-            public InvalidModificationNameException(string message, string modificationName)
-                : base(message)
-            {
-                ModificationName = modificationName;
-            }
-
-            /// <summary>
-            /// Gets the name of the invalid modification.
-            /// </summary>
-            public string ModificationName { get; }
-        }
     }
+
 }
