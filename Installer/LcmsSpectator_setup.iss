@@ -18,7 +18,7 @@ Source: LcmsSpectator\bin\Release\LcmsSpectator.exe;                         Des
 Source: LcmsSpectator\bin\Release\LcmsSpectator.exe.config;                  DestDir: {app}
 
 ; Nuget-Installed libraries
-Source: LcmsSpectator\bin\Release\alglibnet2.dll;                            DestDir: {app}
+Source: LcmsSpectator\bin\Release\Antlr3.Runtime.dll;                        DestDir: {app}
 Source: LcmsSpectator\bin\Release\CsvHelper.dll;                             DestDir: {app}
 Source: LcmsSpectator\bin\Release\GraphX.WPF.Controls.dll;                   DestDir: {app}
 Source: LcmsSpectator\bin\Release\GraphX.PCL.Common.dll;                     DestDir: {app}
@@ -27,7 +27,6 @@ Source: LcmsSpectator\bin\Release\MathNet.Numerics.dll;                      Des
 Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.dll;          DestDir: {app}
 Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll;    DestDir: {app}
 Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.dll;     DestDir: {app}
-Source: LcmsSpectator\bin\Release\PNNLOmics.dll;                             DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.dll;                               DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.Wpf.dll;                           DestDir: {app}
 Source: LcmsSpectator\bin\Release\PRISM.dll;                                 DestDir: {app}
@@ -38,9 +37,10 @@ Source: LcmsSpectator\bin\Release\QuickGraph.Graphviz.dll;                   Des
 Source: LcmsSpectator\bin\Release\QuickGraph.Serialization.dll;              DestDir: {app}
 Source: LcmsSpectator\bin\Release\ReactiveUI.dll;                            DestDir: {app}
 Source: LcmsSpectator\bin\Release\ReactiveUI.WPF.dll;                        DestDir: {app}
+Source: LcmsSpectator\bin\Release\Remotion.Linq.dll;                         DestDir: {app}
+Source: LcmsSpectator\bin\Release\Remotion.Linq.EagerFetching.dll;           DestDir: {app}
 Source: LcmsSpectator\bin\Release\SAIS.dll;                                  DestDir: {app}
 Source: LcmsSpectator\bin\Release\Splat.dll;                                 DestDir: {app}
-Source: LcmsSpectator\bin\Release\System.Drawing.Primitives.dll;             DestDir: {app}
 Source: LcmsSpectator\bin\Release\System.Reactive.dll;                       DestDir: {app}
 Source: LcmsSpectator\bin\Release\System.ValueTuple.dll;                     DestDir: {app}
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.dll;                  DestDir: {app}
@@ -59,13 +59,14 @@ Source: LcmsSpectator\bin\Release\PSI_Interface.dll;                         Des
 
 ; Separately-managed libraries
 Source: Library\QuadTreeLib\QuadTreeLib.dll;                                 DestDir: {app}
-Source: Library\MwtWinDll.dll;                                               DestDir: {app}
 Source: Library\WpfExtras.dll;                                               DestDir: {app}
 
 ; MTDBFramework
+Source: Library\MTDBFramework\FeatureAlignment.dll;                          DestDir: {app}
 Source: Library\MTDBFramework\FluentNHibernate.dll;                          DestDir: {app}
 Source: Library\MTDBFramework\Iesi.Collections.dll;                          DestDir: {app}
 Source: Library\MTDBFramework\MTDBFramework.dll;                             DestDir: {app}
+Source: Library\MTDBFramework\MTDBFrameworkBase.dll;                         DestDir: {app}
 Source: Library\MTDBFramework\NHibernate.dll;                                DestDir: {app}
 Source: Library\MTDBFramework\NETPrediction.dll;                             DestDir: {app}
 Source: Library\MTDBFramework\PHRPReader.dll;                                DestDir: {app}
