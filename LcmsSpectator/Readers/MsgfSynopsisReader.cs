@@ -125,9 +125,7 @@ namespace LcmsSpectator.Readers
             }
 
             // Force it to recalculate mass now that the modifications have been added.
-            sequence = new Sequence(sequence);
-
-            return sequence;
+            return new Sequence(sequence);
         }
 
         private string GetSequenceText(Sequence sequence)
