@@ -33,8 +33,8 @@ namespace LcmsSpectator.Readers
             IReadOnlyCollection<string> modIgnoreList = null,
             IProgress<double> progress = null)
         {
-            var startupOptions = new clsPHRPStartupOptions { LoadModsAndSeqInfo = true };
-            var phrpReader = new clsPHRPReader(filePath, startupOptions);
+            var startupOptions = new StartupOptions { LoadModsAndSeqInfo = true };
+            var phrpReader = new ReaderFactory(filePath, startupOptions);
 
             if (!string.IsNullOrEmpty(phrpReader.ErrorMessage))
             {
@@ -100,7 +100,7 @@ namespace LcmsSpectator.Readers
         /// <param name="sequenceText">The clean sequence.</param>
         /// <param name="modInfo">The modification info for the sequence.</param>
         /// <returns>The parsed sequence.</returns>
-        private Sequence ParseSequence(string sequenceText, IEnumerable<clsAminoAcidModInfo> modInfo)
+        private Sequence ParseSequence(string sequenceText, IEnumerable<AminoAcidModInfo> modInfo)
         {
             var sequenceReader = new SequenceReader();
             var sequence = sequenceReader.Read(sequenceText);
