@@ -157,7 +157,7 @@ namespace LcmsSpectator.Readers
             if (modification == null)
             {
                 var massMods = Modification.GetFromMass(mass);
-                if (massMods != null && massMods.Any())
+                if (massMods?.Any() == true)
                 {
                     modification = massMods[0];
                 }
