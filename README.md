@@ -14,7 +14,6 @@ A guide for using LCMS-Spectator can be found on our [GitHub Wiki Page](https://
 ## Downloads
 
 * https://github.com/PNNL-Comp-Mass-Spec/LCMS-Spectator/releases
-* https://omics.pnl.gov/software/lcmsspectator
 
 ### Continuous Integration
 
@@ -27,7 +26,7 @@ The latest version of the application is available on the [AppVeyor CI server](h
 
 LCMS-Spectator supports the use of centroided mzML files as spectrum input. It can also directly read Thermo .Raw files using the bundled Thermo RawFileReader library.
 
-Several other formats are supported if an appropriate version of ProteoWizard is installed ([Download here](http://proteowizard.sourceforge.net/download.html); make sure the version downloaded matches system architecture, typically Windows 64-bit)
+Several other formats are supported if an appropriate version of ProteoWizard is installed ([Download here](https://proteowizard.sourceforge.io/download.html); make sure the version downloaded matches system architecture, typically Windows 64-bit)
 
 #### Search result files
 
@@ -90,7 +89,7 @@ However, LCMS Spectator also supports running MSPathFinder, as outlined here:
 
 Written by Chris Wilkins and Bryson Gibbons for the Department of Energy (PNNL, Richland, WA) \
 E-mail: matthew.monroe@pnnl.gov or proteomics@pnnl.gov \
-Website: https://omics.pnl.gov/ or https://panomics.pnnl.gov/
+Website: https://github.com/PNNL-Comp-Mass-Spec/ or https://panomics.pnnl.gov/ or https://www.pnnl.gov/integrative-omics
 
 ## License
 

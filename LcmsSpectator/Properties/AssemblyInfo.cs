@@ -8,8 +8,7 @@ using System.Windows;
 [assembly: AssemblyTitle("LcmsSpectator")]
 [assembly: AssemblyDescription("Visualization tool for LC-MS data.\n\n" +
                                "Authors: Chris Wilkins, Sangtae Kim, Jungkap Park, Bryson Gibbons, and Matthew Monroe\n\n" +
-                               "https://github.com/PNNL-Comp-Mass-Spec/LCMS-Spectator/releases" + " \n" +
-                               "https://omics.pnl.gov/")]
+                               "https://github.com/PNNL-Comp-Mass-Spec/LCMS-Spectator/releases")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pacific Northwest National Laboratory")]
 [assembly: AssemblyProduct("LcmsSpectator")]
