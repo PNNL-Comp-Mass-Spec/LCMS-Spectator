@@ -7,6 +7,7 @@ using InformedProteomics.Backend.Data.Sequence;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers.SequenceReaders;
 using PHRPReader;
+using PHRPReader.Data;
 
 namespace LcmsSpectator.Readers
 {
