@@ -1,0 +1,4 @@
+# Jekyll configuration
+name: LCMS-Spectator
+description: Windows graphical user interface tool for viewing LC-MS data and identifications.
+url: https://pnnl-comp-mass-spec.github.io/LCMS-Spectator/
