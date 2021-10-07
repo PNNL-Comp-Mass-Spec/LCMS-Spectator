@@ -130,6 +130,7 @@
     <Compile Include="DialogServices\IDialogService.cs" />
     <Compile Include="DialogServices\IMainDialogService.cs" />
     <Compile Include="DialogServices\MainDialogService.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Models\ChargeStateId.cs" />
     <Compile Include="Models\FastaEntry.cs" />
     <Compile Include="Models\Feature.cs" />
