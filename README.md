@@ -17,8 +17,8 @@ A guide for using LCMS-Spectator can be found on our [GitHub Wiki Page](https://
 
 ### Continuous Integration
 
-The latest version of the application is available on the [AppVeyor CI server](https://ci.appveyor.com/project/PNNLCompMassSpec/lcms-spectator/build/artifacts)
-
+The latest version of the application may be available on the [AppVeyor CI server](https://ci.appveyor.com/project/PNNLCompMassSpec/lcms-spectator/build/artifacts),
+but builds are deleted after 6 months. \
 [![Build status](https://ci.appveyor.com/api/projects/status/bw5slqcrbg923gfu?svg=true)](https://ci.appveyor.com/project/PNNLCompMassSpec/lcms-spectator)
 
 ### Supported file formats
