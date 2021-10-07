@@ -13,6 +13,8 @@ namespace LcmsSpectator.Readers
 {
     public class MsgfSynopsisReader : BaseReader
     {
+        // Ignore Spelling: pre
+
         private readonly string filePath;
 
         public MsgfSynopsisReader(string filePath)
