@@ -2,3 +2,6 @@
 name: LCMS-Spectator
 description: Windows graphical user interface tool for viewing LC-MS data and identifications.
 url: https://pnnl-comp-mass-spec.github.io/LCMS-Spectator/
+
+# Google Analytics
+google_analytics: G-LXXKP1N66C
