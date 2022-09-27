@@ -84,6 +84,7 @@ namespace LcmsSpectator.Readers
             foreach (var evidence in dataset.Identifications)
             {
                 var sequence = evidence.Peptide.GetIpSequence();
+
                 var sequenceStr = GetSequenceStr(sequence);
 
                 foreach (var pepEv in evidence.PepEvidence)
@@ -138,6 +139,5 @@ namespace LcmsSpectator.Readers
 
             return sequenceStr.ToString();
         }
-
     }
 }

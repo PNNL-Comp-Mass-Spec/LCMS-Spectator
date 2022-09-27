@@ -1118,7 +1118,7 @@ namespace LcmsSpectator.ViewModels
                 }
             }
 
-            Console.WriteLine(@"Creating truncated fasta file at: {0}", filePath);
+            Console.WriteLine("Creating truncated fasta file at: {0}", filePath);
             FastaReaderWriter.Write(entries, filePath);
             return filePath;
         }
