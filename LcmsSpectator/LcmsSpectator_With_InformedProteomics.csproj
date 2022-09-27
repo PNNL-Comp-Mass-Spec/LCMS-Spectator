@@ -1,0 +1,577 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B96EED10-F137-4ADE-9FDC-3BC76B3E8A2B}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LcmsSpectator</RootNamespace>
+    <AssemblyName>LcmsSpectator</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\iconSmall.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FeatureAlignment">
+      <HintPath>..\Library\MTDBFramework\FeatureAlignment.dll</HintPath>
+    </Reference>
+    <Reference Include="MTDBFramework, Version=1.0.5478.23028, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Library\MTDBFramework\MTDBFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="MTDBFrameworkBase">
+      <HintPath>..\Library\MTDBFramework\MTDBFrameworkBase.dll</HintPath>
+    </Reference>
+    <Reference Include="PHRPReader">
+      <HintPath>..\Library\MTDBFramework\PHRPReader.dll</HintPath>
+    </Reference>
+    <Reference Include="QuadTreeLib">
+      <HintPath>..\Library\QuadTreeLib\QuadTreeLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WpfExtras">
+      <HintPath>..\Library\WpfExtras.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Config\IcParameters.cs" />
+    <Compile Include="Controls\MultiSelectDataGrid.cs" />
+    <Compile Include="Controls\MultiSelectListBox.cs" />
+    <Compile Include="Controls\MvvmTreeView.cs" />
+    <Compile Include="DialogServices\DialogService.cs" />
+    <Compile Include="DialogServices\IDialogService.cs" />
+    <Compile Include="DialogServices\IMainDialogService.cs" />
+    <Compile Include="DialogServices\MainDialogService.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Models\ChargeStateId.cs" />
+    <Compile Include="Models\FastaEntry.cs" />
+    <Compile Include="Models\Feature.cs" />
+    <Compile Include="Models\FragmentationSequence.cs" />
+    <Compile Include="Models\IdentificationTree.cs" />
+    <Compile Include="Models\IFeatureExtractor.cs" />
+    <Compile Include="Models\IIdData.cs" />
+    <Compile Include="Models\MsPfParameters.cs" />
+    <Compile Include="Models\ProteinId.cs" />
+    <Compile Include="Models\ProteoformId.cs" />
+    <Compile Include="Models\PrSm.cs" />
+    <Compile Include="Models\ScorerFactory.cs" />
+    <Compile Include="Models\Target.cs" />
+    <Compile Include="Models\ToolType.cs" />
+    <Compile Include="PlotModels\ColorDictionaries\ProteinColorDictionary.cs" />
+    <Compile Include="PlotModels\IDataPoint.cs" />
+    <Compile Include="PlotModels\IDataPointSeries.cs" />
+    <Compile Include="PlotModels\PeakDataPoint.cs" />
+    <Compile Include="PlotModels\PeakPointSeries.cs" />
+    <Compile Include="PlotModels\SelectablePlotModel.cs" />
+    <Compile Include="PlotModels\XicDataPoint.cs" />
+    <Compile Include="PlotModels\XicPointSeries.cs" />
+    <Compile Include="Readers\BaseReader.cs" />
+    <Compile Include="Readers\BaseTsvReader.cs" />
+    <Compile Include="Readers\BruteForceSearchResultsReader.cs" />
+    <Compile Include="Readers\DataReader.cs" />
+    <Compile Include="Readers\DatasetReaderWrapper.cs" />
+    <Compile Include="Readers\DmsLookupUtility.cs" />
+    <Compile Include="Readers\FastaReaderWriter.cs" />
+    <Compile Include="Readers\FeatureReader.cs" />
+    <Compile Include="Readers\IcFileReader.cs" />
+    <Compile Include="Readers\IDataReader.cs" />
+    <Compile Include="Readers\IdFileReaderFactory.cs" />
+    <Compile Include="Readers\IIdFileReader.cs" />
+    <Compile Include="Readers\MsgfFileReader.cs" />
+    <Compile Include="Readers\MsgfSynopsisReader.cs" />
+    <Compile Include="Readers\MtdbReader.cs" />
+    <Compile Include="Readers\MzIdentMlReader.cs" />
+    <Compile Include="Readers\SequenceReaders\ISequenceReader.cs" />
+    <Compile Include="Readers\SequenceReaders\LcmsSpectatorSequenceReader.cs" />
+    <Compile Include="Readers\SequenceReaders\MsgfPlusSequenceReader.cs" />
+    <Compile Include="Readers\SequenceReaders\SequenceReader.cs" />
+    <Compile Include="Readers\TargetFileReader.cs" />
+    <Compile Include="SequenceGraph\DataGraph.cs" />
+    <Compile Include="SequenceGraph\GraphXSequenceGraph.cs" />
+    <Compile Include="SequenceGraph\SequenceGraph.xaml.cs">
+      <DependentUpon>SequenceGraph.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SequenceGraph\SequenceGraphArea.cs" />
+    <Compile Include="SequenceGraph\SequencePath.cs" />
+    <Compile Include="Utils\ChargeToStringConverter.cs" />
+    <Compile Include="Utils\Constants.cs" />
+    <Compile Include="Utils\DynamicResolutionPngExporter.cs" />
+    <Compile Include="Utils\EnumCheckedConverter.cs" />
+    <Compile Include="Utils\EnumDescriptionConverter.cs" />
+    <Compile Include="Utils\FileConstants.cs" />
+    <Compile Include="Utils\IonUtils.cs" />
+    <Compile Include="Utils\ScoreToStringConverter.cs" />
+    <Compile Include="Utils\NeutralLossToStringConverter.cs" />
+    <Compile Include="Utils\SequenceToStringConverter.cs" />
+    <Compile Include="ViewModels\ColorListViewModel.cs" />
+    <Compile Include="ViewModels\ColorPaletteViewModel.cs" />
+    <Compile Include="ViewModels\ColorViewModel.cs" />
+    <Compile Include="ViewModels\Data\BaseIonTypeViewModel.cs" />
+    <Compile Include="ViewModels\Data\CreateSequenceViewModel.cs" />
+    <Compile Include="ViewModels\Data\FragmentationSequenceViewModel.cs" />
+    <Compile Include="ViewModels\Data\ListItemViewModel.cs" />
+    <Compile Include="ViewModels\Data\NeutralLossViewModel.cs" />
+    <Compile Include="ViewModels\Data\PbfCreationViewModel.cs" />
+    <Compile Include="ViewModels\Data\PeakDataPointViewModel.cs" />
+    <Compile Include="ViewModels\Data\ScanSelectionViewModel.cs" />
+    <Compile Include="ViewModels\FileSelectors\ExportDatasetViewModel.cs" />
+    <Compile Include="ViewModels\FileSelectors\ExportImageViewModel.cs" />
+    <Compile Include="ViewModels\Data\IFragmentationSequenceViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\CustomModificationViewModel.cs" />
+    <Compile Include="ViewModels\Data\DataSetViewModel.cs" />
+    <Compile Include="ViewModels\Dms\DmsDatasetViewModel.cs" />
+    <Compile Include="ViewModels\Dms\DmsJobViewModel.cs" />
+    <Compile Include="ViewModels\Dms\DmsLookupViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\SelectModificationViewModel.cs" />
+    <Compile Include="ViewModels\Plots\ErrorMapViewModel.cs" />
+    <Compile Include="ViewModels\Plots\FeatureMapViewModel.cs" />
+    <Compile Include="ViewModels\Plots\FeatureViewerViewModel.cs" />
+    <Compile Include="ViewModels\Filters\FilterViewModel.cs" />
+    <Compile Include="ViewModels\Filters\MultiValueFilterViewModel.cs" />
+    <Compile Include="ViewModels\Filters\IFilter.cs" />
+    <Compile Include="ViewModels\Modifications\HeavyModificationsViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\HeavyModificationsWindowViewModel.cs" />
+    <Compile Include="ViewModels\Data\IonListViewModel.cs" />
+    <Compile Include="ViewModels\Data\IonTypeSelectorViewModel.cs" />
+    <Compile Include="ViewModels\Plots\IsotopicEnvelopePlotViewModel.cs" />
+    <Compile Include="ViewModels\Data\LabeledIonViewModel.cs" />
+    <Compile Include="ViewModels\LoadingScreenViewModel.cs" />
+    <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\ManageModificationsViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\ModificationViewModel.cs" />
+    <Compile Include="ViewModels\Modifications\SearchModificationViewModel.cs" />
+    <Compile Include="ViewModels\FileSelectors\OpenDataWindowViewModel.cs" />
+    <Compile Include="ViewModels\Data\ScanViewModel.cs" />
+    <Compile Include="ViewModels\FileSelectors\SelectDataSetViewModel.cs" />
+    <Compile Include="ViewModels\Plots\ViewResolvingPlotModel.cs" />
+    <Compile Include="ViewModels\PlotViewModel.cs" />
+    <Compile Include="ViewModels\PrecursorSequenceIonViewModel.cs" />
+    <Compile Include="ViewModels\SearchSettingsViewModel.cs" />
+    <Compile Include="ViewModels\SequenceViewer\FragmentIonViewModel.cs" />
+    <Compile Include="ViewModels\SequenceViewer\FragmentViewModel.cs" />
+    <Compile Include="ViewModels\SequenceViewer\SequenceViewerViewModel.cs" />
+    <Compile Include="ViewModels\SettingsViewModel.cs" />
+    <Compile Include="ViewModels\Plots\SpectrumPlotViewModel.cs" />
+    <Compile Include="ViewModels\Plots\SpectrumViewModel.cs" />
+    <Compile Include="ViewModels\Plots\XicPlotViewModel.cs" />
+    <Compile Include="ViewModels\Plots\XicViewModel.cs" />
+    <Compile Include="ViewModels\StableIsotopeViewer\IsotopeProportionSelectorViewModel.cs" />
+    <Compile Include="ViewModels\StableIsotopeViewer\IsotopeProportionViewModel.cs" />
+    <Compile Include="ViewModels\StableIsotopeViewer\IsotopicConcentrationTunerViewModel.cs" />
+    <Compile Include="ViewModels\StableIsotopeViewer\StableIsotopeViewModel.cs" />
+    <Compile Include="ViewModels\WindowViewModel.cs" />
+    <Compile Include="Views\AboutBox.xaml.cs">
+      <DependentUpon>AboutBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ColorList.xaml.cs">
+      <DependentUpon>ColorList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Data\CreateSequenceView.xaml.cs">
+      <DependentUpon>CreateSequenceView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ProMexModel.cs" />
+    <Compile Include="Views\Data\ScanViewBindingProxy.cs" />
+    <Compile Include="Views\Data\PbfCreationView.xaml.cs">
+      <DependentUpon>PbfCreationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Data\ScanSelectionWindow.xaml.cs">
+      <DependentUpon>ScanSelectionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FileSelectors\ExportDatasetWindow.xaml.cs">
+      <DependentUpon>ExportDatasetWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FileSelectors\ExportImageWindow.xaml.cs">
+      <DependentUpon>ExportImageWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Modifications\CustomModificationView.xaml.cs">
+      <DependentUpon>CustomModificationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Data\DataSetView.xaml.cs">
+      <DependentUpon>DataSetView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DmsLookupView.xaml.cs">
+      <DependentUpon>DmsLookupView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Modifications\SelectModificationWindow.xaml.cs">
+      <DependentUpon>SelectModificationWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Plots\ErrorMap.xaml.cs">
+      <DependentUpon>ErrorMap.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Plots\ErrorMapWindow.xaml.cs">
+      <DependentUpon>ErrorMapWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Plots\FeatureViewerView.xaml.cs">
+      <DependentUpon>FeatureViewerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Filters\FilterView.xaml.cs">
+      <DependentUpon>FilterView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Filters\MultiValueFilterView.xaml.cs">
+      <DependentUpon>MultiValueFilterView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Modifications\HeavyModificationsView.xaml.cs">
+      <DependentUpon>HeavyModificationsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Modifications\HeavyModificationsWindow.xaml.cs">
+      <DependentUpon>HeavyModificationsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Data\IonListView.xaml.cs">
+      <DependentUpon>IonListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Data\IonTypeSelector.xaml.cs">
+      <DependentUpon>IonTypeSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LoadingScreen.xaml.cs">
+      <DependentUpon>LoadingScreen.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\Modifications\ManageModificationsWindow.xaml.cs">
+      <DependentUpon>ManageModificationsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FileSelectors\OpenDataWindow.xaml.cs">
+      <DependentUpon>OpenDataWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Data\PrSmView.xaml.cs">
+      <DependentUpon>PrSmView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FileSelectors\SelectDataSetView.xaml.cs">
+      <DependentUpon>SelectDataSetView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PlotViewer.xaml.cs">
+      <DependentUpon>PlotViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SearchSettingsWindow.xaml.cs">
+      <DependentUpon>SearchSettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SequenceViewer\SequenceViewer.xaml.cs">
+      <DependentUpon>SequenceViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Settings.xaml.cs">
+      <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Plots\SpectrumView.xaml.cs">
+      <DependentUpon>SpectrumView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\Plots\XicView.xaml.cs">
+      <DependentUpon>XicView.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\StableIsotopeViewer\IsotopicConcentrationTuner.xaml.cs">
+      <DependentUpon>IsotopicConcentrationTuner.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\StableIsotopeViewer\StableIsotopeViewer.xaml.cs">
+      <DependentUpon>StableIsotopeViewer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Writers\Exporters\SpectrumPeakExporter.cs" />
+    <Compile Include="Writers\Exporters\SpectrumPlotExporter.cs" />
+    <Compile Include="Writers\IcFileWriter.cs" />
+    <Compile Include="Writers\IdWriterFactory.cs" />
+    <Compile Include="Writers\IIdWriter.cs" />
+    <Compile Include="Writers\MzIdWriter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="PlotModels\AutoAdjustedYPlotModel.cs" />
+    <Compile Include="PlotModels\ColorDictionaries\IonColorDictionary.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="SequenceGraph\SequenceGraph.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AboutBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ColorList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Data\CreateSequenceView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Data\PbfCreationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Data\ScanSelectionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FileSelectors\ExportDatasetWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FileSelectors\ExportImageWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Modifications\CustomModificationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Data\DataSetView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DmsLookupView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Modifications\SelectModificationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Plots\ErrorMap.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Plots\ErrorMapWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Plots\FeatureViewerView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Filters\FilterView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Filters\MultiValueFilterView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Modifications\HeavyModificationsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Modifications\HeavyModificationsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Data\IonListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Data\IonTypeSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LoadingScreen.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Modifications\ManageModificationsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FileSelectors\OpenDataWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Data\PrSmView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FileSelectors\SelectDataSetView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PlotViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SearchSettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SequenceViewer\SequenceViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Plots\SpectrumView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Plots\XicView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\StableIsotopeViewer\IsotopicConcentrationTuner.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\StableIsotopeViewer\StableIsotopeViewer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\iconSmall.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\PNNL_Logo.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CsvHelper">
+      <Version>15.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Extended.Wpf.Toolkit">
+      <Version>3.6.0</Version>
+    </PackageReference>
+    <PackageReference Include="FluentNHibernate">
+      <Version>2.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="GraphX">
+      <Version>2.3.6</Version>
+    </PackageReference>
+    <PackageReference Include="MathNet.Numerics">
+      <Version>4.9.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.WindowsAPICodePack-Shell">
+      <Version>1.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="OxyPlot.Wpf">
+      <Version>2.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="PRISM-Library">
+      <Version>2.7.0</Version>
+    </PackageReference>
+    <PackageReference Include="ProteinFileReader">
+      <Version>3.0.3</Version>
+    </PackageReference>
+    <PackageReference Include="PSI_Interface">
+      <Version>2.4.3</Version>
+    </PackageReference>
+    <PackageReference Include="QuickGraphPCL">
+      <Version>3.6.61114.2</Version>
+    </PackageReference>
+    <PackageReference Include="ReactiveUI.WPF">
+      <Version>8.7.2</Version>
+    </PackageReference>
+    <PackageReference Include="SAIS-CSharp">
+      <Version>1.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Data.SQLite.Core">
+      <Version>1.0.111</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\SangtaeKim\InformedProteomics\InformedProteomics.Backend.MassSpecData\InformedProteomics.Backend.MassSpecData.csproj">
+      <Project>{05b37516-2b5c-4c60-bfe2-d6854a19478a}</Project>
+      <Name>InformedProteomics.Backend.MassSpecData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\SangtaeKim\InformedProteomics\InformedProteomics.Backend\InformedProteomics.Backend.csproj">
+      <Project>{2fb92658-7c0d-4f8f-9174-b9e74ae613e3}</Project>
+      <Name>InformedProteomics.Backend</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\SangtaeKim\InformedProteomics\InformedProteomics.Scoring\InformedProteomics.Scoring.csproj">
+      <Project>{cf6a61b6-06e4-47d4-be2c-0a4d8c4e018b}</Project>
+      <Name>InformedProteomics.Scoring</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\SangtaeKim\InformedProteomics\InformedProteomics.TopDown\InformedProteomics.TopDown.csproj">
+      <Project>{97b9f853-1b2a-4101-af09-68e0b4cf19ec}</Project>
+      <Name>InformedProteomics.TopDown</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(SolutionDir)README.md" "$(TargetDir)" /D /Y</PostBuildEvent>
+  </PropertyGroup>
+</Project>
