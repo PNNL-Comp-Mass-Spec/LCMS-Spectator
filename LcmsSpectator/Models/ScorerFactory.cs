@@ -79,7 +79,7 @@ namespace LcmsSpectator.Models
                 return new CorrMatchedPeakCounter(productSpectrum, tolerance, minCharge, maxCharge, corrScoreThreshold);
             }
 
-            return new LikelihoodScorer(model, productSpectrum, tolerance, minCharge, maxCharge);
+            return new LikelihoodScorer(productSpectrum, tolerance, minCharge, maxCharge);
         }
     }
 }

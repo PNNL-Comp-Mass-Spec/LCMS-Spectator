@@ -819,7 +819,7 @@ namespace LcmsSpectator.ViewModels
                         InternalCleavageMode = SelectedSearchMode,
                         //MaxNumThreads = 4,
                         ScanNumbers = ms2Scans,
-                        NumMatchesPerSpectrum = NumMatchesPerSpectrum,
+                        MatchesPerSpectrumToKeepInMemory = NumMatchesPerSpectrum,
                         SpecFilePath = SpectrumFilePath,
                         DatabaseFilePath = fastaFilePath,
                         OutputDir = OutputFilePath
@@ -1009,7 +1009,6 @@ namespace LcmsSpectator.ViewModels
             {
                 runSearchTask = Task.Run(
                     () => topDownLauncher.RunSearch(
-                        IcParameters.Instance.IonCorrelationThreshold,
                         runSearchCancellationToken.Token,
                         progress),
                     runSearchCancellationToken.Token);
@@ -1019,7 +1018,7 @@ namespace LcmsSpectator.ViewModels
 #pragma warning disable 162
             // ReSharper disable once HeuristicUnreachableCode
             {
-                topDownLauncher.RunSearch(IcParameters.Instance.IonCorrelationThreshold);
+                topDownLauncher.RunSearch();
             }
 #pragma warning restore 162
 
