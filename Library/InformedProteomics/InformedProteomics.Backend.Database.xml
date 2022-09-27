@@ -28,7 +28,7 @@
         </member>
         <member name="T:InformedProteomics.Backend.Database.FastaDatabase">
             <summary>
-            Facilitates working with a Fasta sequence database, using suffix arrays
+            Facilitates working with a FASTA sequence database, using suffix arrays
             </summary>
         </member>
         <member name="F:InformedProteomics.Backend.Database.FastaDatabase.FileFormatId">
@@ -84,7 +84,7 @@
             </summary>
             <param name="enzyme"></param>
             <param name="shuffle"></param>
-            <returns></returns>
+            <returns>Decoy-based database</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.CreateDecoyDatabase(InformedProteomics.Backend.Data.Biology.Enzyme,System.Boolean)">
             <summary>
@@ -97,7 +97,7 @@
             <summary>
             Returns the characters in the sequence file
             </summary>
-            <returns></returns>
+            <returns>Enumerable list of amino acids in the FASTA file</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.Read">
             <summary>
@@ -106,27 +106,27 @@
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetFastaFilePath">
             <summary>
-            Path to the Fasta file
+            Path to the FASTA file
             </summary>
-            <returns></returns>
+            <returns>File path</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetNumEntries">
             <summary>
             Number of proteins in the database
             </summary>
-            <returns></returns>
+            <returns>Protein count</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetProteinNames">
             <summary>
             Get the names of all proteins in the database
             </summary>
-            <returns></returns>
+            <returns>List of protein names</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetSequence">
             <summary>
             Get the entire concatenated sequence
             </summary>
-            <returns></returns>
+            <returns>Concatenated sequence, as an array of bytes</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.PrintSequence">
             <summary>
@@ -139,49 +139,49 @@
             </summary>
             <param name="enzyme"></param>
             <param name="shuffle"></param>
-            <returns></returns>
+            <returns>File path</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetProteinName(System.Int64)">
             <summary>
             Get the name of the protein that starts at <paramref name="offset"/> in the concatenated sequence
             </summary>
             <param name="offset"></param>
-            <returns></returns>
+            <returns>Protein name</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetProteinDescription(System.Int64)">
             <summary>
             Get the description of the protein that starts at <paramref name="offset"/> in the concatenated sequence
             </summary>
             <param name="offset"></param>
-            <returns></returns>
+            <returns>Protein description</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetOffset(System.String)">
             <summary>
             Get the offset in the concatenated sequence of the protein with name <paramref name="name"/>
             </summary>
             <param name="name"></param>
-            <returns></returns>
+            <returns>Byte offset in the file, or null if an unrecognized protein name</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetProteinDescription(System.String)">
             <summary>
             Get the description of the protein with name <paramref name="name"/>
             </summary>
             <param name="name"></param>
-            <returns></returns>
+            <returns>Protein description, or null if an unrecognized protein name</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetProteinLength(System.String)">
             <summary>
             Get the length of the protein with name <paramref name="name"/>
             </summary>
             <param name="name"></param>
-            <returns></returns>
+            <returns>Number of residues in the given protein, or -1 if an unrecognized protein name</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetProteinSequence(System.String)">
             <summary>
             Get the sequence of the protein with name <paramref name="name"/>
             </summary>
             <param name="name"></param>
-            <returns></returns>
+            <returns>Protein residues of the given protein, or null if an unrecognized protein name</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetProteinSequence(System.Int64,System.Int32)">
             <summary>
@@ -189,27 +189,27 @@
             </summary>
             <param name="offset"></param>
             <param name="length"></param>
-            <returns></returns>
+            <returns>Protein sequence</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetOneBasedPositionInProtein(System.Int64)">
             <summary>
             Get the position in the protein sequence of the offset in the concatenated sequence (one-based index)
             </summary>
             <param name="offset"></param>
-            <returns></returns>
+            <returns>One-based position</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetZeroBasedPositionInProtein(System.Int64)">
             <summary>
             Get the position in the protein sequence of the offset in the concatenated sequence (zero-based index)
             </summary>
             <param name="offset"></param>
-            <returns></returns>
+            <returns>Zero-based position</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.GetLastWriteTimeHash">
             <summary>
             Returns the hash based on last write time, used for consistency verification
             </summary>
-            <returns></returns>
+            <returns>Hash of the last write time</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.FastaDatabase.CheckHashCodeBinaryFile(System.String,System.Int32)">
             <summary>
@@ -217,7 +217,7 @@
             </summary>
             <param name="filePath"></param>
             <param name="code"></param>
-            <returns></returns>
+            <returns>True if the file matches the current filter format and the hash matches the given code, otherwise false</returns>
         </member>
         <member name="F:InformedProteomics.Backend.Database.FastaDatabase._duplicateNameCounts">
             <summary>
@@ -227,7 +227,7 @@
         </member>
         <member name="T:InformedProteomics.Backend.Database.IndexedDatabase">
             <summary>
-            Provide fast, indexed access to Fasta database information using Permuted Longest Common Prefix data
+            Provide fast, indexed access to FASTA database information using Permuted Longest Common Prefix data
             </summary>
         </member>
         <member name="F:InformedProteomics.Backend.Database.IndexedDatabase.PermutedLongestCommonPrefixFileExtension">
@@ -242,7 +242,7 @@
         </member>
         <member name="F:InformedProteomics.Backend.Database.IndexedDatabase.FastaDatabase">
             <summary>
-            The Fasta database that will be indexed
+            The FASTA database that will be indexed
             </summary>
         </member>
         <member name="F:InformedProteomics.Backend.Database.IndexedDatabase.PLcp">
@@ -270,7 +270,7 @@
             <param name="numTolerableTermini"></param>
             <param name="numMissedCleavages"></param>
             <param name="enzyme"></param>
-            <returns></returns>
+            <returns>List of annotation and offset data</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.AnnotationsAndOffsetsParallel(System.Int32,System.Int32,System.Int32,System.Int32,InformedProteomics.Backend.Data.Biology.Enzyme,System.Int32,System.Nullable{System.Threading.CancellationToken})">
             <summary>
@@ -283,7 +283,7 @@
             <param name="enzyme"></param>
             <param name="threads"></param>
             <param name="cancellationToken"></param>
-            <returns></returns>
+            <returns>List of annotation and offset data</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.AnnotationsAndOffsetsNoEnzyme(System.Int32,System.Int32)">
             <summary>
@@ -291,7 +291,7 @@
             </summary>
             <param name="minLength"></param>
             <param name="maxLength"></param>
-            <returns></returns>
+            <returns>List of annotation and offset data</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.AnnotationsAndOffsetsNoEnzymeParallel(System.Int32,System.Int32,System.Int32,System.Nullable{System.Threading.CancellationToken})">
             <summary>
@@ -301,7 +301,7 @@
             <param name="maxLength"></param>
             <param name="threads"></param>
             <param name="cancellationToken"></param>
-            <returns></returns>
+            <returns>List of annotation and offset data</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.IntactSequenceAnnotationsAndOffsets(System.Int32,System.Int32)">
             <summary>
@@ -309,7 +309,7 @@
             </summary>
             <param name="minLength"></param>
             <param name="maxLength"></param>
-            <returns></returns>
+            <returns>List of annotation and offset data</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.IntactSequenceAnnotationsAndOffsets(System.Int32,System.Int32,System.Int32)">
             <summary>
@@ -318,7 +318,7 @@
             <param name="minLength"></param>
             <param name="maxLength"></param>
             <param name="numCTermCleavages"></param>
-            <returns></returns>
+            <returns>List of annotation and offset data</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.IntactSequenceAnnotationsAndOffsetsWithCTermCleavagesLargerThan(System.Int32,System.Int32,System.Int32)">
             <summary>
@@ -327,7 +327,7 @@
             <param name="minLength"></param>
             <param name="maxLength"></param>
             <param name="numCTermCleavages"></param>
-            <returns></returns>
+            <returns>List of annotation and offset data</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.SequenceAnnotationsAndOffsetsWithNTermOrCTermCleavageNoLargerThan(System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
@@ -337,13 +337,12 @@
             <param name="maxSequenceLength"></param>
             <param name="maxNumNTermCleavages"></param>
             <param name="maxNumCTermCleavages"></param>
-            <returns></returns>
+            <returns>List of annotation and offset data</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.GetLongestSequenceLength">
             <summary>
             Length of the longest sequence
             </summary>
-            <returns></returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.EstimateTotalPeptides(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
@@ -354,7 +353,7 @@
             <param name="maxLength"></param>
             <param name="numNTermCleavages"></param>
             <param name="numCTermCleavages"></param>
-            <returns></returns>
+            <returns>Estimated number of peptides</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.EstimateTotalPeptides(InformedProteomics.Backend.Database.InternalCleavageType,System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
@@ -365,7 +364,7 @@
             <param name="maxLength"></param>
             <param name="numNTermCleavages"></param>
             <param name="numCTermCleavages"></param>
-            <returns></returns>
+            <returns>Estimated number of peptides</returns>
         </member>
         <member name="M:InformedProteomics.Backend.Database.IndexedDatabase.GetLcp(System.Collections.Generic.IList{System.Byte},System.Int32,System.Int32)">
             <summary>
@@ -374,7 +373,7 @@
             <param name="sequence"></param>
             <param name="index1"></param>
             <param name="index2"></param>
-            <returns></returns>
+            <returns>Length of the longest common prefix</returns>
         </member>
         <member name="T:InformedProteomics.Backend.Database.SequenceAndOffset">
             <summary>
@@ -498,8 +497,8 @@
             <summary>
             Compares two suffices (index1 and index2)
             </summary>
-            <param name="index">suffix index</param>
             <param name="pattern">sequence to compare</param>
+            <param name="index">suffix index</param>
             <param name="startIndex">known common prefix</param>
             <returns>a positive number if 1 is larger,
             a negative if 1 is smaller and 0 if they are equal.
@@ -513,7 +512,7 @@
             <param name="pattern"></param>
             <param name="index"></param>
             <param name="startIndex"></param>
-            <returns></returns>
+            <returns>Length of the longest common prefix</returns>
         </member>
     </members>
 </doc>
