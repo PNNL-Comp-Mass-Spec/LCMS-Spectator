@@ -168,7 +168,7 @@ namespace LcmsSpectator.PlotModels
         private void XAxisChanged(object sender, AxisChangedEventArgs e)
         {
             if (AutoAdjustYAxis)
-            {   // Y axis is zoomed based on the the maximum visible point in the range selected by the X axis.
+            {   // Y axis is zoomed based on the maximum visible point in the range selected by the X axis.
                 AdjustForZoom();
             }
         }

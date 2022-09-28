@@ -75,7 +75,7 @@ namespace LcmsSpectator.PlotModels
         public string Title { get; set; }
 
         /// <summary>
-        /// Gets or sets the index of the the residue that this peak is associated with.
+        /// Gets or sets the index of the residue that this peak is associated with.
         /// </summary>
         public int Index { get; set; }
 

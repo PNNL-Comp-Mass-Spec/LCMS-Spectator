@@ -79,7 +79,7 @@ namespace LcmsSpectator.ViewModels.Dms
         }
 
         /// <summary>
-        /// Gets or sets the the DMS job info to edit.
+        /// Gets or sets the DMS job info to edit.
         /// </summary>
         public DmsLookupUtility.UdtJobInfo UdtJobInfo
         {

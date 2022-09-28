@@ -48,7 +48,7 @@ namespace LcmsSpectator.ViewModels.Data
         private readonly MemoizingMRUCache<Tuple<Composition, IonType>, LabeledIonViewModel> fragmentCache;
 
         /// <summary>
-        /// Cache for for previously calculated prefix compositions for a given sequence.
+        /// Cache for previously calculated prefix compositions for a given sequence.
         /// </summary>
         private readonly MemoizingMRUCache<Sequence, Composition[]> prefixCompositionCache;
 

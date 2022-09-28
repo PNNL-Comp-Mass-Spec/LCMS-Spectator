@@ -113,7 +113,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private double abundanceMaximum;
 
         /// <summary>
-        /// A value indicating whether whether the  identified MS/MS points associated with features are being shown on
+        /// A value indicating whether the identified MS/MS points associated with features are being shown on
         /// the feature map plot.
         /// </summary>
         private bool showFoundIdMs2;
@@ -444,7 +444,7 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether whether the  identified MS/MS points associated with features are being shown on
+        /// Gets or sets a value indicating whether the identified MS/MS points associated with features are being shown on
         /// the feature map plot.
         /// </summary>
         public bool ShowFoundIdMs2

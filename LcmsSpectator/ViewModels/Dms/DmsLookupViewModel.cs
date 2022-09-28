@@ -33,7 +33,7 @@ namespace LcmsSpectator.ViewModels.Dms
         public const string FastaFilePath = @"\\gigasax\DMS_FASTA_File_Archive\dynamic\forward";
 
         /// <summary>
-        /// The name of the the previous results file
+        /// The name of the previous results file
         /// </summary>
         private const string PreviousResultsFile = @"LCMSSpectator\dmsSearches.txt";
 

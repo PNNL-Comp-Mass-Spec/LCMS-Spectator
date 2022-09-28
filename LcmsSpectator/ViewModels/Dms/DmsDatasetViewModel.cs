@@ -69,7 +69,7 @@ namespace LcmsSpectator.ViewModels.Dms
         }
 
         /// <summary>
-        /// Gets or sets the the DMS data set info to edit.
+        /// Gets or sets the DMS data set info to edit.
         /// </summary>
         public DmsLookupUtility.UdtDatasetInfo UdtDatasetInfo
         {
