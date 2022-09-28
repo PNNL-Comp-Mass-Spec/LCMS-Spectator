@@ -57,10 +57,10 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private readonly LinearAxis yaxis;
 
-        /// <summary>
-        /// MS/MS scans that are identified, but not associated with a feature.
-        /// </summary>
-        ////private Series notFoundMs2S;
+        // <summary>
+        // MS/MS scans that are identified, but not associated with a feature.
+        // </summary>
+        // private Series notFoundMs2S;
 
         /// <summary>
         /// Color axis for MS/MS scan points.
@@ -124,10 +124,10 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private bool showFoundUnIdMs2;
 
-        /// <summary>
-        /// MS/MS scans that are identified, but not associated with a feature.
-        /// </summary>
-        ////private Series notFoundMs2S;
+        // <summary>
+        // MS/MS scans that are identified, but not associated with a feature.
+        // </summary>
+        // private Series notFoundMs2S;
 
         /// <summary>
         /// The feature point selected by the user.
