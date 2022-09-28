@@ -41,7 +41,7 @@ namespace LcmsSpectator.Config
     /// <summary>
     /// This class contains settings fields for the LCMSSpectator Application.
     /// </summary>
-    public class IcParameters : ReactiveObject
+    public sealed class IcParameters : ReactiveObject
     {
         /// <summary>
         /// The singleton object instance of the <see cref="IcParameters" /> class.
