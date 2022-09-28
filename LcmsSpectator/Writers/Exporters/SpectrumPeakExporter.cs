@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Sequence;
 using InformedProteomics.Backend.Data.Spectrometry;
-using InformedProteomics.Backend.Utils;
 using LcmsSpectator.Models;
 using LcmsSpectator.PlotModels;
 
@@ -18,10 +17,7 @@ namespace LcmsSpectator.Writers.Exporters
 
         private readonly string outputFile;
 
-        // Unused:
-        // private readonly Tolerance tolerance;
-
-        public SpectrumPeakExporter(string outputFile, IEnumerable<BaseIonType> baseIonTypes = null, Tolerance tolerance = null)
+        public SpectrumPeakExporter(string outputFile, IEnumerable<BaseIonType> baseIonTypes = null)
         {
             this.outputFile = outputFile;
 
@@ -29,7 +25,9 @@ namespace LcmsSpectator.Writers.Exporters
             if (baseIonTypes != null)
             {
                 foreach (var ionType in baseIonTypes)
+                {
                     ionTypeList.Add(ionType);
+                }
             }
 
             if (ionTypeList.Count == 0)

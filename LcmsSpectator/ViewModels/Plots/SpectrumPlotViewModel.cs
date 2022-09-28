@@ -996,7 +996,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     .OrderBy(peak => peak.X)
                     .ToArray();
 
-            var peakExporter = new SpectrumPeakExporter(string.Empty, null, IcParameters.Instance.ProductIonTolerancePpm);
+            var peakExporter = new SpectrumPeakExporter(string.Empty, null);
             peakExporter.Export(
                     currentSpectrum,
                     fragmentPeaks,
@@ -1024,7 +1024,7 @@ namespace LcmsSpectator.ViewModels.Plots
                     .OrderBy(peak => peak.X)
                     .ToArray();
 
-            var peakExporter = new SpectrumPeakExporter(string.Empty, null, IcParameters.Instance.ProductIonTolerancePpm);
+            var peakExporter = new SpectrumPeakExporter(string.Empty, null);
             peakExporter.ExportToClipBoard(
                     currentSpectrum,
                     fragmentPeaks,

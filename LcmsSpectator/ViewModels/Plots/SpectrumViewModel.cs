@@ -227,8 +227,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// Update the spectrum plots to show a new set of spectra.
         /// </summary>
         /// <param name="scan">The scan number of the primary spectrum to display</param>
-        /// <param name="precursorMz">The precursor M/Z of the ID displayed</param>
-        public void UpdateSpectra(int scan, double precursorMz = 0)
+        public void UpdateSpectra(int scan)
         {
             if (scan == 0 || lcms == null)
             {
@@ -260,8 +259,10 @@ namespace LcmsSpectator.ViewModels.Plots
                 secondary2Title = string.Empty;
                 secondary1 = null;
                 secondary2 = null;
+
                 /*
-                 * Previous behavior, which required ILcmsRun implementation; commented out to
+                 * Previous behavior, which required ILcmsRun implementation and used the value of argument precursorMz on this method
+                 *
                 // The primary spectrum that we want to show is a MS1 spectrum
                 if (lcms != null)
                 {

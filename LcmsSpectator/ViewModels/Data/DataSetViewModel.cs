@@ -137,7 +137,7 @@ namespace LcmsSpectator.ViewModels.Data
             .Where(_ => SelectedPrSm != null && SpectrumViewModel != null && XicViewModel != null)
             .Subscribe(prsm =>
             {
-                SpectrumViewModel.UpdateSpectra(prsm.Scan, SelectedPrSm.PrecursorMz);
+                SpectrumViewModel.UpdateSpectra(prsm.Scan);
                 XicViewModel.SetSelectedScan(prsm.Scan);
                 XicViewModel.ZoomToScan(prsm.Scan);
             });
@@ -166,7 +166,7 @@ namespace LcmsSpectator.ViewModels.Data
             {
                 prsm.WhenAnyValue(x => x.Scan, x => x.PrecursorMz)
                     .Where(x => x.Item1 > 0 && x.Item2 > 0 && SpectrumViewModel != null)
-                    .Subscribe(x => SpectrumViewModel.UpdateSpectra(x.Item1, x.Item2));
+                    .Subscribe(x => SpectrumViewModel.UpdateSpectra(x.Item1));
                 prsm.WhenAnyValue(x => x.Scan).Where(scan => scan > 0 && XicViewModel != null)
                     .Subscribe(scan => XicViewModel.SetSelectedScan(scan));
             });
