@@ -1,9 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using InformedProteomics.Backend.MassSpecData;
 using LcmsSpectator.Models;
 using LcmsSpectator.Readers;
-using LcmsSpectator.ViewModels;
 using LcmsSpectatorTests.DialogServices;
 using NUnit.Framework;
 

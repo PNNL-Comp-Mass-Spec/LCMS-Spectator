@@ -11,7 +11,6 @@
 using System;
 using System.IO;
 using System.Windows;
-using Microsoft.Win32;
 using Xceed.Wpf.AvalonDock.Layout.Serialization;
 
 namespace LcmsSpectator.Views

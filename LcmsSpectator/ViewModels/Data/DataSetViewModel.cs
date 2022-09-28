@@ -17,7 +17,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Database;
 using InformedProteomics.Backend.MassSpecData;
-using InformedProteomics.Backend.Utils;
 using LcmsSpectator.Config;
 using LcmsSpectator.DialogServices;
 using LcmsSpectator.Models;

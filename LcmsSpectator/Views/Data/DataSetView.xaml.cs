@@ -14,7 +14,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using InformedProteomics.Backend.Data.Sequence;
-using Microsoft.Win32;
 using Xceed.Wpf.AvalonDock.Layout.Serialization;
 
 namespace LcmsSpectator.Views.Data

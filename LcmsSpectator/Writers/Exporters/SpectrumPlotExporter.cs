@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using InformedProteomics.Backend.Data.Spectrometry;
-using InformedProteomics.Backend.Utils;
 using LcmsSpectator.Models;
 using LcmsSpectator.PlotModels;
 using LcmsSpectator.PlotModels.ColorDictionaries;
