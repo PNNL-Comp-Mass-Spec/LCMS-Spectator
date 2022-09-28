@@ -547,7 +547,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             if (ratio > 1000 || ratio < 0.001)
             {
-                return string.Format("{0:0.###EE0}", ratio);
+                return string.Format("{0:0.###E0}", ratio);
             }
 
             return Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
