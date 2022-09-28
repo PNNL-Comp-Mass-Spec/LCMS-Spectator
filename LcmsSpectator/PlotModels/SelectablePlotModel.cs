@@ -94,7 +94,7 @@ namespace LcmsSpectator.PlotModels
         public DataPoint GetPointMarker()
         {
             var point = new DataPoint();
-            if (pointMarkers != null && pointMarkers.Points.Count > 0)
+            if (pointMarkers?.Points.Count > 0)
             {
                 point = pointMarkers.Points[0];
             }

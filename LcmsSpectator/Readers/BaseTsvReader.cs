@@ -134,7 +134,7 @@ namespace LcmsSpectator.Readers
         {
             var zipFilePath = filePath;
             var fileName = Path.GetFileNameWithoutExtension(zipFilePath);
-            if (fileName != null && fileName.EndsWith("_IcTsv"))
+            if (fileName?.EndsWith("_IcTsv") == true)
             {
                 fileName = fileName.Substring(0, fileName.Length - 6);
             }

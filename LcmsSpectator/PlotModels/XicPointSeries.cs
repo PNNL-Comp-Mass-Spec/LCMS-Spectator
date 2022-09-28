@@ -78,7 +78,7 @@ namespace LcmsSpectator.PlotModels
             var maxY = 0.0;
             var dataPoints = ActualPoints;
             plotModelLock.EnterReadLock();
-            if (dataPoints != null && dataPoints.Count > 0 && IsVisible)
+            if (dataPoints?.Count > 0 && IsVisible)
             {
                 foreach (var point in dataPoints)
                 {
