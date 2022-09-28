@@ -495,7 +495,7 @@ namespace LcmsSpectator.ViewModels.Plots
             };
 
             // Save As Image Command requests a file path from the user and then saves the spectrum plot as an image
-            SaveAsImageCommand = ReactiveCommand.Create(SaveAsImageImplementation);
+            SaveAsImageCommand = ReactiveCommand.Create<string>(_ => SaveAsImageImplementation());
 
             // Error map command opens a new error map window and passes it the most abundant isotope peak data points
             // and the current sequence.
@@ -681,7 +681,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <summary>
         /// Gets a command that prompts user for file path and save plot as image.
         /// </summary>
-        public ReactiveCommand<Unit, Unit> SaveAsImageCommand { get; }
+        public ReactiveCommand<string, Unit> SaveAsImageCommand { get; }
 
         /// <summary>
         /// Gets a command that opens error heat map and table for this spectrum and ions
