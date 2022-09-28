@@ -9,6 +9,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using System;
+using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using LcmsSpectator.DialogServices;
@@ -134,13 +135,26 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         /// <param name="pm">The plot model to export.</param>
         public void ExportPlotModel(PlotModel pm)
         {
-            PngExporter.Export(
-                            pm,
-                            FilePath,
-                            Width,
-                            Height,
-                            OxyColors.White,
-                            Dpi);
+            // OxyPlot 2.0 syntax
+            //PngExporter.Export(
+            //                pm,
+            //                FilePath,
+            //                Width,
+            //                Height,
+            //                OxyColors.White,
+            //                Dpi);
+
+            // OxyPlot 2.1 syntax
+            pm.Background = OxyColors.White;
+
+            var exporter = new PngExporter
+            {
+                Width = width,
+                Height = height,
+                Resolution = dpi
+            };
+
+            exporter.Export(pm, new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read));
         }
 
         /// <summary>
