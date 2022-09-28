@@ -81,8 +81,7 @@
     <Reference Include="InformedProteomics.TopDown">
       <HintPath>..\Library\InformedProteomics\InformedProteomics.TopDown.dll</HintPath>
     </Reference>
-    <Reference Include="MTDBFramework, Version=1.0.5478.23028, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="MTDBFramework">
       <HintPath>..\Library\MTDBFramework\MTDBFramework.dll</HintPath>
     </Reference>
     <Reference Include="MTDBFrameworkBase">
@@ -106,12 +105,10 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="ThermoFisher.CommonCore.Data, Version=4.0.89.0, Culture=neutral, PublicKeyToken=1aef06afb5abd953, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ThermoFisher.CommonCore.Data">
       <HintPath>..\Library\InformedProteomics\ThermoFisher.CommonCore.Data.dll</HintPath>
     </Reference>
-    <Reference Include="ThermoFisher.CommonCore.RawFileReader, Version=4.0.89.0, Culture=neutral, PublicKeyToken=1aef06afb5abd953, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="ThermoFisher.CommonCore.RawFileReader">
       <HintPath>..\Library\InformedProteomics\ThermoFisher.CommonCore.RawFileReader.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
