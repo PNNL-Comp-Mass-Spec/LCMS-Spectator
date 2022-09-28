@@ -14,62 +14,65 @@ AppName=LcmsSpectator
 
 [Files]
 ; Application files
-Source: LcmsSpectator\bin\Release\LcmsSpectator.exe;                         DestDir: {app}
-Source: LcmsSpectator\bin\Release\LcmsSpectator.exe.config;                  DestDir: {app}
-
-; Nuget-Installed libraries
-Source: LcmsSpectator\bin\Release\Antlr3.Runtime.dll;                        DestDir: {app}
-Source: LcmsSpectator\bin\Release\CsvHelper.dll;                             DestDir: {app}
-Source: LcmsSpectator\bin\Release\GraphX.WPF.Controls.dll;                   DestDir: {app}
-Source: LcmsSpectator\bin\Release\GraphX.PCL.Common.dll;                     DestDir: {app}
-Source: LcmsSpectator\bin\Release\GraphX.PCL.Logic.dll;                      DestDir: {app}
-Source: LcmsSpectator\bin\Release\MathNet.Numerics.dll;                      DestDir: {app}
-Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.dll;          DestDir: {app}
-Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll;    DestDir: {app}
-Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.dll;     DestDir: {app}
-Source: LcmsSpectator\bin\Release\OxyPlot.dll;                               DestDir: {app}
-Source: LcmsSpectator\bin\Release\OxyPlot.Wpf.dll;                           DestDir: {app}
-Source: LcmsSpectator\bin\Release\PRISM.dll;                                 DestDir: {app}
-Source: LcmsSpectator\bin\Release\ProteinFileReader.dll;                     DestDir: {app}
-Source: LcmsSpectator\bin\Release\QuickGraph.Data.dll;                       DestDir: {app}
-Source: LcmsSpectator\bin\Release\QuickGraph.dll;                            DestDir: {app}
-Source: LcmsSpectator\bin\Release\QuickGraph.Graphviz.dll;                   DestDir: {app}
-Source: LcmsSpectator\bin\Release\QuickGraph.Serialization.dll;              DestDir: {app}
-Source: LcmsSpectator\bin\Release\ReactiveUI.dll;                            DestDir: {app}
-Source: LcmsSpectator\bin\Release\ReactiveUI.WPF.dll;                        DestDir: {app}
-Source: LcmsSpectator\bin\Release\Remotion.Linq.dll;                         DestDir: {app}
-Source: LcmsSpectator\bin\Release\Remotion.Linq.EagerFetching.dll;           DestDir: {app}
-Source: LcmsSpectator\bin\Release\SAIS.dll;                                  DestDir: {app}
-Source: LcmsSpectator\bin\Release\Splat.dll;                                 DestDir: {app}
-Source: LcmsSpectator\bin\Release\System.Reactive.dll;                       DestDir: {app}
-Source: LcmsSpectator\bin\Release\System.ValueTuple.dll;                     DestDir: {app}
-Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.dll;                  DestDir: {app}
-Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Aero.dll;      DestDir: {app}
-Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Metro.dll;     DestDir: {app}
-Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.VS2010.dll;    DestDir: {app}
-Source: LcmsSpectator\bin\Release\Xceed.Wpf.Toolkit.dll;                     DestDir: {app}
+Source: LcmsSpectator\bin\Release\LcmsSpectator.exe;                                DestDir: {app}
+Source: LcmsSpectator\bin\Release\LcmsSpectator.exe.config;                         DestDir: {app}
+                                                                                    
+; Nuget-Installed libraries                                                         
+Source: LcmsSpectator\bin\Release\Antlr3.Runtime.dll;                               DestDir: {app}
+Source: LcmsSpectator\bin\Release\CsvHelper.dll;                                    DestDir: {app}
+Source: LcmsSpectator\bin\Release\GraphX.WPF.Controls.dll;                          DestDir: {app}
+Source: LcmsSpectator\bin\Release\GraphX.PCL.Common.dll;                            DestDir: {app}
+Source: LcmsSpectator\bin\Release\GraphX.PCL.Logic.dll;                             DestDir: {app}
+Source: LcmsSpectator\bin\Release\MathNet.Numerics.dll;                             DestDir: {app}
+Source: LcmsSpectator\bin\Release\Microsoft.Bcl.AsyncInterfaces.dll;                DestDir: {app}
+Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.dll;                 DestDir: {app}
+Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll;           DestDir: {app}
+Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.dll; DestDir: {app}
+Source: LcmsSpectator\bin\Release\OxyPlot.dll;                                      DestDir: {app}
+Source: LcmsSpectator\bin\Release\OxyPlot.Wpf.dll;                                  DestDir: {app}
+Source: LcmsSpectator\bin\Release\PRISM.dll;                                        DestDir: {app}
+Source: LcmsSpectator\bin\Release\ProteinFileReader.dll;                            DestDir: {app}
+Source: LcmsSpectator\bin\Release\QuickGraph.Data.dll;                              DestDir: {app}
+Source: LcmsSpectator\bin\Release\QuickGraph.dll;                                   DestDir: {app}
+Source: LcmsSpectator\bin\Release\QuickGraph.Graphviz.dll;                          DestDir: {app}
+Source: LcmsSpectator\bin\Release\QuickGraph.Serialization.dll;                     DestDir: {app}
+Source: LcmsSpectator\bin\Release\ReactiveUI.dll;                                   DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Runtime.CompilerServices.Unsafe.dll;       DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Threading.Tasks.Extensions.dll;            DestDir: {app}
+Source: LcmsSpectator\bin\Release\ReactiveUI.WPF.dll;                               DestDir: {app}
+Source: LcmsSpectator\bin\Release\Remotion.Linq.dll;                                DestDir: {app}
+Source: LcmsSpectator\bin\Release\Remotion.Linq.EagerFetching.dll;                  DestDir: {app}
+Source: LcmsSpectator\bin\Release\SAIS.dll;                                         DestDir: {app}
+Source: LcmsSpectator\bin\Release\Splat.dll;                                        DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Reactive.dll;                              DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.ValueTuple.dll;                            DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.dll;                         DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Aero.dll;             DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.Metro.dll;            DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.Themes.VS2010.dll;           DestDir: {app}
+Source: LcmsSpectator\bin\Release\Xceed.Wpf.Toolkit.dll;                            DestDir: {app}
 
 ; SQLite
-Source: LcmsSpectator\bin\Release\System.Data.SQLite.dll;                    DestDir: {app}
-Source: LcmsSpectator\bin\Release\x64\SQLite.Interop.dll;                    DestDir: {app}\x64
-Source: LcmsSpectator\bin\Release\x86\SQLite.Interop.dll;                    DestDir: {app}\x86
+Source: LcmsSpectator\bin\Release\System.Data.SQLite.dll;                       DestDir: {app}
+Source: LcmsSpectator\bin\Release\x64\SQLite.Interop.dll;                       DestDir: {app}\x64
+Source: LcmsSpectator\bin\Release\x86\SQLite.Interop.dll;                       DestDir: {app}\x86
 
 ; PSI_Interface
-Source: LcmsSpectator\bin\Release\PSI_Interface.dll;                         DestDir: {app}
+Source: LcmsSpectator\bin\Release\PSI_Interface.dll;                            DestDir: {app}
 
 ; Separately-managed libraries
-Source: Library\QuadTreeLib\QuadTreeLib.dll;                                 DestDir: {app}
-Source: Library\WpfExtras.dll;                                               DestDir: {app}
+Source: Library\QuadTreeLib\QuadTreeLib.dll;                                    DestDir: {app}
+Source: Library\WpfExtras.dll;                                                  DestDir: {app}
 
 ; MTDBFramework
-Source: Library\MTDBFramework\FeatureAlignment.dll;                          DestDir: {app}
-Source: Library\MTDBFramework\FluentNHibernate.dll;                          DestDir: {app}
-Source: Library\MTDBFramework\Iesi.Collections.dll;                          DestDir: {app}
-Source: Library\MTDBFramework\MTDBFramework.dll;                             DestDir: {app}
-Source: Library\MTDBFramework\MTDBFrameworkBase.dll;                         DestDir: {app}
-Source: Library\MTDBFramework\NHibernate.dll;                                DestDir: {app}
-Source: Library\MTDBFramework\NETPrediction.dll;                             DestDir: {app}
-Source: Library\MTDBFramework\PHRPReader.dll;                                DestDir: {app}
+Source: Library\MTDBFramework\FeatureAlignment.dll;                             DestDir: {app}
+Source: Library\MTDBFramework\FluentNHibernate.dll;                             DestDir: {app}
+Source: Library\MTDBFramework\Iesi.Collections.dll;                             DestDir: {app}
+Source: Library\MTDBFramework\MTDBFramework.dll;                                DestDir: {app}
+Source: Library\MTDBFramework\MTDBFrameworkBase.dll;                            DestDir: {app}
+Source: Library\MTDBFramework\NHibernate.dll;                                   DestDir: {app}
+Source: Library\MTDBFramework\NETPrediction.dll;                                DestDir: {app}
+Source: Library\MTDBFramework\PHRPReader.dll;                                   DestDir: {app}
 
 ; InformedProteomics
 Source: Library\InformedProteomics\InformedProteomics.Backend.dll;              DestDir: {app}
@@ -79,11 +82,11 @@ Source: Library\InformedProteomics\InformedProteomics.FeatureFinding.dll;       
 Source: Library\InformedProteomics\InformedProteomics.Scoring.dll;              DestDir: {app}
 Source: Library\InformedProteomics\InformedProteomics.TopDown.dll;              DestDir: {app}
 Source: Library\InformedProteomics\RawFileReaderLicense.doc;                    DestDir: {app}
-Source: Library\InformedProteomics\ThermoFisher.CommonCore.Data.dll;                    DestDir: {app}
-Source: Library\InformedProteomics\ThermoFisher.CommonCore.RawFileReader.dll;           DestDir: {app}
+Source: Library\InformedProteomics\ThermoFisher.CommonCore.Data.dll;            DestDir: {app}
+Source: Library\InformedProteomics\ThermoFisher.CommonCore.RawFileReader.dll;   DestDir: {app}
 
 ; Documentation
-Source: README.md;                                                           DestDir: {app}
+Source: README.md;                                                              DestDir: {app}
 
 [Dirs]
 Name: {commonappdata}\LcmsSpectator; Flags: uninsalwaysuninstall
