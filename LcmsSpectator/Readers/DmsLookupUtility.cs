@@ -77,7 +77,6 @@ namespace LcmsSpectator.Readers
 
             foreach (var dataset in lstDatasets)
             {
-
                 if (lstMsgfPlusJobs.TryGetValue(dataset.Key, out var lstJobsForDataset))
                 {
                     foreach (var job in lstJobsForDataset)
@@ -162,7 +161,6 @@ namespace LcmsSpectator.Readers
                         {
                             try
                             {
-
                                 string sqlWithFilter;
                                 if (iteration == 1)
                                 {
@@ -219,9 +217,7 @@ namespace LcmsSpectator.Readers
 
                         if (dctDatasets.Count > 0)
                             break;
-
                     } // for
-
                 } // using
             }
             catch (Exception ex)
@@ -342,11 +338,9 @@ namespace LcmsSpectator.Readers
                     {
                         try
                         {
-
                             var cmd = new SqlCommand(sql, connection);
                             using (var reader = cmd.ExecuteReader())
                             {
-
                                 while (reader.Read())
                                 {
                                     // "Job, Dataset_ID, Tool, Job_Finish, Folder," +
@@ -364,7 +358,6 @@ namespace LcmsSpectator.Readers
                                         ProteinCollection = GetDBString(reader, 7),
                                         OrganismDb = GetDBString(reader, 8)
                                     };
-
 
                                     if (dctJobs.TryGetValue(jobInfo.DatasetId, out var jobsForDataset))
                                     {
@@ -391,7 +384,6 @@ namespace LcmsSpectator.Readers
                             // Delay for 3 second before trying again
                             System.Threading.Thread.Sleep(3000);
                         }
-
                     } // while
                 } // using
             }

@@ -18,7 +18,6 @@ using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 
 namespace LcmsSpectator.DialogServices
 {
-
     /// <summary>
     /// Service for opening dialogs from a view model.
     /// </summary>

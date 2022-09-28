@@ -16,7 +16,6 @@ namespace LcmsSpectatorTests
     [TestFixture]
     public class MsPathFinderTest
     {
-
         /// <summary>
         /// Create a directory in the user's temp directory to hold test result files
         /// </summary>
@@ -54,7 +53,6 @@ namespace LcmsSpectatorTests
 
             return outputDir;
         }
-
 
         /// <summary>
         /// Pause program execution for the specific number of milliseconds (maximum 10 seconds)

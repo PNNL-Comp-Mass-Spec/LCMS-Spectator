@@ -28,7 +28,6 @@ namespace LcmsSpectator.Writers
             PopulateAccessionModMap();
         }
 
-
         public void Write(IEnumerable<PrSm> ids)
         {
             var first = ids.FirstOrDefault();
@@ -38,7 +37,6 @@ namespace LcmsSpectator.Writers
             {
                 name = first.RawFileName;
             }
-
         }
 
         /// <summary>

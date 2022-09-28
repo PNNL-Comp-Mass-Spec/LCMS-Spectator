@@ -145,7 +145,6 @@ namespace LcmsSpectator.ViewModels.Data
             ExportProteinTreeCommand = ReactiveCommand.Create(ExportProteinTreeImplementation);
 
             ExportProteinTreeAsTsvCommand = ReactiveCommand.Create(ExportProteinTreeAsTsvImplementation);
-
         }
 
         /// <summary>
@@ -262,7 +261,6 @@ namespace LcmsSpectator.ViewModels.Data
         /// <param name="scanNumber"></param>
         public async void ApplyScanFilter(int scanNumber)
         {
-
             foreach (var filter in Filters)
             {
                 if (filter.Name != "Scan" || !(filter is MultiValueFilterViewModel scanFilter))
@@ -668,6 +666,5 @@ namespace LcmsSpectator.ViewModels.Data
                 }
             }
         }
-
     }
 }

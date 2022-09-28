@@ -10,7 +10,6 @@ using ReactiveUI;
 
 namespace LcmsSpectatorTests
 {
-
     using LcmsSpectator.Models;
     using LcmsSpectator.ViewModels.Data;
     using LcmsSpectator.ViewModels.Plots;
@@ -140,6 +139,5 @@ namespace LcmsSpectatorTests
             var exporter = new SpectrumPeakExporter(outputDir.FullName);
             exporter.Export(ids.ToList());
         }
-
 }
 }

@@ -61,7 +61,6 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         public enum PeakFilterModes
         {
-
             /// <summary>
             /// Display all peaks
             /// </summary>
@@ -904,7 +903,6 @@ namespace LcmsSpectator.ViewModels.Plots
                         default:
                             throw new InvalidEnumArgumentException(nameof(NoiseFilterMode));
                     }
-
                 }
 
                 spectrumToReturn = filteredSpectrum;

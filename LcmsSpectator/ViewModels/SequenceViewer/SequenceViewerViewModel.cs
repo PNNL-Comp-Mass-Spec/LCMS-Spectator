@@ -78,7 +78,6 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
 
             SequenceFragments.ItemChanged.Where(x => x.PropertyName == "AminoAcid")
                 .Subscribe(x => UpdateSequence(x.Sender.AminoAcid, x.Sender.Index));
-
         }
 
         /// <summary>

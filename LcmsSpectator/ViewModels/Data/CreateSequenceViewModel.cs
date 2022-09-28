@@ -231,7 +231,6 @@ namespace LcmsSpectator.ViewModels.Data
             var score = -1.0;
             if (lcms != null && SelectedScan > 0 && ScorerFactory != null && sequence.Count > 0)
             {
-
                 if (lcms.GetSpectrum(SelectedScan) is ProductSpectrum spectrum)
                 {
                     var scorer = ScorerFactory.GetScorer(spectrum);

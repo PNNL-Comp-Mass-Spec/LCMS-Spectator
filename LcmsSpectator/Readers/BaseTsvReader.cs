@@ -12,7 +12,6 @@ namespace LcmsSpectator.Readers
     /// </summary>
     public abstract class BaseTsvReader : BaseReader
     {
-
         /// <summary>
         /// The path to the TSV file.
         /// </summary>
@@ -63,7 +62,6 @@ namespace LcmsSpectator.Readers
             }
 
             throw new ArgumentException(string.Format("Cannot read file with extension \"{0}\"", ext));
-
         }
 
         /// <summary>
@@ -178,5 +176,4 @@ namespace LcmsSpectator.Readers
             public string ModificationName { get; }
         }
     }
-
 }

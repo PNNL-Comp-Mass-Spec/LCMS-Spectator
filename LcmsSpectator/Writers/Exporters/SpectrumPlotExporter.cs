@@ -116,7 +116,6 @@ namespace LcmsSpectator.Writers.Exporters
                 Title = msLevel == 2 ? string.Format("MS/MS Scan {0}", id.Scan) :
                                        string.Format("MS Scan {0}", id.Scan),
                 IsLegendVisible = false,
-
             };
 
             // Add axes

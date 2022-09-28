@@ -22,7 +22,6 @@ namespace LcmsSpectator.Readers
     /// </summary>
     public class IcFileReader : BaseTsvReader
     {
-
         private readonly bool doNotReadQValue;
 
         /// <summary>
@@ -182,7 +181,6 @@ namespace LcmsSpectator.Readers
             return parsedMods;
         }
 
-
         /// <summary>
         /// Comparer for two modifications that compares by their position in a sequence.
         /// </summary>
@@ -208,5 +206,4 @@ namespace LcmsSpectator.Readers
             }
         }
     }
-
 }

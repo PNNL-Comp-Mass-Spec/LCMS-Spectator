@@ -124,5 +124,4 @@ namespace LcmsSpectator.Readers
             return prsmList;
         }
     }
-
 }

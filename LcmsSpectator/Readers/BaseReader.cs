@@ -107,6 +107,5 @@ namespace LcmsSpectator.Readers
 
             return modIgnoreList.ToList();
         }
-
     }
 }

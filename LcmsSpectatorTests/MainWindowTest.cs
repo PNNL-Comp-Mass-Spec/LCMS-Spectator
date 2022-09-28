@@ -2,7 +2,6 @@
 
 namespace LcmsSpectatorTests
 {
-
     using NUnit.Framework;
 
     using PSI_Interface.IdentData;
@@ -14,21 +13,18 @@ namespace LcmsSpectatorTests
         [Ignore("Undefined")]
         public void TestRegisterModification()
         {
-
         }
 
         [Test]
         [Ignore("Undefined")]
         public void TestUnregisterModification()
         {
-
         }
 
         [Test]
         [Ignore("Undefined")]
         public void TestUpdateModification()
         {
-
         }
 
         [Test]

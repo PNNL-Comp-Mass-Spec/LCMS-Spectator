@@ -42,7 +42,7 @@ namespace LcmsSpectatorTests.DialogServices
             MultiSelectOpenFileOpened = false;
             FilterOpened = false;
         }
-        
+
         public bool DmsLookupOpened { get; private set; }
         public DmsLookupViewModel DmsLookupViewModel { get; private set; }
         public Tuple<string, string> OpenDmsLookup(DmsLookupViewModel dmsLookupViewModel)
@@ -146,7 +146,6 @@ namespace LcmsSpectatorTests.DialogServices
         // private members
         private readonly string _filePath;
 
-
         public bool OpenCustomModification(CustomModificationViewModel customModificationViewModel)
         {
             throw new NotImplementedException();
@@ -167,18 +166,15 @@ namespace LcmsSpectatorTests.DialogServices
             throw new NotImplementedException();
         }
 
-
         public void OpenErrorMapWindow(ErrorMapViewModel errorMapViewModel)
         {
             throw new NotImplementedException();
         }
 
-
         public void OpenManageModifications(ManageModificationsViewModel manageModificationsViewModel)
         {
             throw new NotImplementedException();
         }
-
 
         public bool SearchSettingsWindow(SearchSettingsViewModel searchSettingsViewModel)
         {
@@ -194,18 +190,16 @@ namespace LcmsSpectatorTests.DialogServices
         {
             throw new NotImplementedException();
         }
-        
+
         void IMainDialogService.SearchSettingsWindow(SearchSettingsViewModel searchSettingsViewModel)
         {
             throw new NotImplementedException();
         }
 
-
         public string OpenFolder(string description = "")
         {
             throw new NotImplementedException();
         }
-
 
         public bool ExportImageWindow(ExportImageViewModel exportImageViewModel)
         {
