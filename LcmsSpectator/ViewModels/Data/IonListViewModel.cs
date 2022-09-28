@@ -311,7 +311,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A task that returns a list of fragment labeled ions on completion.</returns>
-        private Task<ReactiveList<LabeledIonViewModel>> GenerateFragmentLabelsAsync(ReactiveList<SearchModification> labelModifications = null)
+        private Task<ReactiveList<LabeledIonViewModel>> GenerateFragmentLabelsAsync(IReadOnlyList<SearchModification> labelModifications = null)
         {
             return Task.Run(() => GenerateFragmentLabels(labelModifications));
         }
@@ -322,7 +322,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A task that returns a list of precursor labeled ions on completion.</returns>
         private Task<ReactiveList<LabeledIonViewModel>> GenerateIsotopeLabelsAsync(
-            ReactiveList<SearchModification> labelModifications = null)
+            IReadOnlyList<SearchModification> labelModifications = null)
         {
             return Task.Run(() => GenerateIsotopePrecursorLabels(labelModifications));
         }
@@ -333,7 +333,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A task that returns a list of precursor labeled ions on completion.</returns>
         private Task<ReactiveList<LabeledIonViewModel>> GenerateChargeLabelsAsync(
-            ReactiveList<SearchModification> labelModifications = null)
+            IReadOnlyList<SearchModification> labelModifications = null)
         {
             return Task.Run(() => GenerateChargePrecursorLabels(labelModifications));
         }
@@ -343,7 +343,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A list of fragment labeled ions.</returns>
-        private ReactiveList<LabeledIonViewModel> GenerateFragmentLabels(ReactiveList<SearchModification> labelModifications = null)
+        private ReactiveList<LabeledIonViewModel> GenerateFragmentLabels(IReadOnlyList<SearchModification> labelModifications = null)
         {
             var fragmentLabelList = new ReactiveList<LabeledIonViewModel> { ChangeTrackingEnabled = true };
             if (SelectedPrSm.Sequence.Count < 1)
@@ -409,7 +409,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A list of precursor labeled ions.</returns>
-        private ReactiveList<LabeledIonViewModel> GenerateIsotopePrecursorLabels(ReactiveList<SearchModification> labelModifications = null)
+        private ReactiveList<LabeledIonViewModel> GenerateIsotopePrecursorLabels(IReadOnlyList<SearchModification> labelModifications = null)
         {
             var ions = new ReactiveList<LabeledIonViewModel> { ChangeTrackingEnabled = true };
             if (SelectedPrSm.Sequence.Count == 0)
@@ -447,7 +447,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         /// <param name="labelModifications">The heavy/light labels.</param>
         /// <returns>A list of neighboring charge state labeled ions.</returns>
-        private ReactiveList<LabeledIonViewModel> GenerateChargePrecursorLabels(ReactiveList<SearchModification> labelModifications = null)
+        private ReactiveList<LabeledIonViewModel> GenerateChargePrecursorLabels(IReadOnlyList<SearchModification> labelModifications = null)
         {
             var ions = new ReactiveList<LabeledIonViewModel> { ChangeTrackingEnabled = true };
             var numChargeStates = IonUtils.GetNumNeighboringChargeStates(SelectedPrSm.Charge);
