@@ -331,7 +331,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             SequenceViewerViewModel = new SequenceViewerViewModel();
 
-            ions = new LabeledIonViewModel[0];
+            ions = Array.Empty<LabeledIonViewModel>();
 
             // When Spectrum updates, clear the filtered spectrum, deconvoluted spectrum, and filtered+deconvoluted spectrum
             this.WhenAnyValue(x => x.Spectrum)
@@ -826,7 +826,7 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             if (Spectrum == null)
             {
-                return new Spectrum(new Peak[0], 0);
+                return new Spectrum(Array.Empty<Peak>(), 0);
             }
 
             // Filtered/Deconvoluted Spectrum?
@@ -981,7 +981,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             if (peakDataPoints == null)
             {
-                peakDataPoints = new IList<PeakDataPoint>[0];
+                peakDataPoints = Array.Empty<IList<PeakDataPoint>>();
             }
 
             var filePath = dialogService.SaveFile(".tsv", @"TSV Files (*.tsv)|*.tsv");
@@ -1016,7 +1016,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             if (peakDataPoints == null)
             {
-                peakDataPoints = new IList<PeakDataPoint>[0];
+                peakDataPoints = Array.Empty<IList<PeakDataPoint>>();
             }
 
             var fragmentPeaks =

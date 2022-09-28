@@ -124,7 +124,7 @@ namespace LcmsSpectator.ViewModels.Plots
         {
             this.dialogService = dialogService;
             plotModel = new ViewResolvingPlotModel { Title = "Error Map", PlotAreaBackground = OxyColors.DimGray };
-            selectedPeakDataPoints = new IList<PeakDataPoint>[0];
+            selectedPeakDataPoints = Array.Empty<IList<PeakDataPoint>>();
             minimumIonIntensity = 0;
             ShouldCombineChargeStates = true;
             TableShouldIncludeUnmatched = false;
