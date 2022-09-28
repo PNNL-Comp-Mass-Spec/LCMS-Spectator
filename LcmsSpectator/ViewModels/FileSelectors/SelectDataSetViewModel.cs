@@ -71,7 +71,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
             // Ok command is only available if RawFilePath isn't empty or SelectedDataSet isn't null
             OkCommand = ReactiveCommand.Create(OkImplementation,
                         this.WhenAnyValue(x => x.RawFilePath, x => x.SelectedDataSet, x => x.RawPathSelected, x => x.DatasetSelected)
-                            .Select(p => ((p.Item3 && !string.IsNullOrEmpty(p.Item1)) || (p.Item4 && p.Item2 != null))));
+                            .Select(p => (p.Item3 && !string.IsNullOrEmpty(p.Item1)) || (p.Item4 && p.Item2 != null)));
 
             CancelCommand = ReactiveCommand.Create(CancelImplementation);
 

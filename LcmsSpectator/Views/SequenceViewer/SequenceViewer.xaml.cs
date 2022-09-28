@@ -25,15 +25,15 @@ namespace LcmsSpectator.Views.SequenceViewer
                 return;
             }
             var bounds = VisualTreeHelper.GetDescendantBounds(target);
-            var rtb = new RenderTargetBitmap((int)(bounds.Width),
-                                                            (int)(bounds.Height), 96, 96,
-                                                            PixelFormats.Pbgra32);
+            var rtb = new RenderTargetBitmap((int)bounds.Width, (int)bounds.Height, 96, 96, PixelFormats.Pbgra32);
             var dv = new DrawingVisual();
+
             using (var ctx = dv.RenderOpen())
             {
                 var vb = new VisualBrush(target);
                 ctx.DrawRectangle(vb, null, new Rect(new Point(), bounds.Size));
             }
+
             rtb.Render(dv);
             var bmp = rtb;
 

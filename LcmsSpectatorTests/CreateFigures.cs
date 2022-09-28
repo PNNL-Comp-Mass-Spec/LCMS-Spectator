@@ -103,9 +103,9 @@ namespace LcmsSpectatorTests
                 Console.WriteLine("ROC Curve data for " + resultFile.Name);
                 Console.WriteLine("{0}\t{1}", "FPR", "TPR");
 
-                foreach (var fpr in (from item in corrRoc.Keys orderby item select item))
+                foreach (var fpr in from item in corrRoc.Keys orderby item select item)
                 {
-                    foreach (var tpr in (from item in corrRoc[fpr] orderby item select item))
+                    foreach (var tpr in from item in corrRoc[fpr] orderby item select item)
                     {
                         Console.WriteLine("{0}\t{1:F1}", fpr, tpr);
                     }
@@ -130,7 +130,7 @@ namespace LcmsSpectatorTests
                 Console.WriteLine("Target PSMs Error Histogram");
                 Console.WriteLine("{0}\t{1}", "Error", "Count");
 
-                foreach (var roundedError in (from item in errHistTarget.Keys orderby item select item))
+                foreach (var roundedError in from item in errHistTarget.Keys orderby item select item)
                 {
                     Console.WriteLine("{0}\t{1}", roundedError, errHistTarget[roundedError]);
                 }
@@ -139,7 +139,7 @@ namespace LcmsSpectatorTests
                 Console.WriteLine("Decoy PSMs Error Histogram");
                 Console.WriteLine("{0}\t{1}", "Error", "Count");
 
-                foreach (var roundedError in (from item in errHistDecoy.Keys orderby item select item))
+                foreach (var roundedError in from item in errHistDecoy.Keys orderby item select item)
                 {
                     Console.WriteLine("{0}\t{1}", roundedError, errHistDecoy[roundedError]);
                 }

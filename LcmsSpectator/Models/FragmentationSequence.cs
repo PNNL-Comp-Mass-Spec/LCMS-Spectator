@@ -457,7 +457,7 @@ namespace LcmsSpectator.Models
                 }
                 unchecked
                 {
-                    var hashCode = (obj.Name != null ? obj.Name.GetHashCode() : 0);
+                    var hashCode = obj.Name != null ? obj.Name.GetHashCode() : 0;
                     hashCode = (hashCode * 397) ^ (obj.OffsetComposition != null ? obj.OffsetComposition.GetHashCode() : 0);
                     hashCode = (hashCode * 397) ^ obj.Charge;
                     hashCode = (hashCode * 397) ^ obj.IsPrefixIon.GetHashCode();
@@ -493,7 +493,7 @@ namespace LcmsSpectator.Models
                 }
                 unchecked
                 {
-                    var hashCode = (obj.Modification != null ? GetHashCode(obj.Modification) : 0);
+                    var hashCode = obj.Modification != null ? GetHashCode(obj.Modification) : 0;
                     hashCode = (hashCode * 397) ^ obj.TargetResidue.GetHashCode();
                     hashCode = (hashCode * 397) ^ (int)obj.Location;
                     hashCode = (hashCode * 397) ^ obj.IsFixedModification.GetHashCode();
@@ -522,7 +522,7 @@ namespace LcmsSpectator.Models
                 }
                 unchecked
                 {
-                    var hashCode = (obj.Name != null ? obj.Name.GetHashCode() : 0);
+                    var hashCode = obj.Name != null ? obj.Name.GetHashCode() : 0;
                     hashCode = (hashCode * 397) ^ obj.AccessionNum;
                     hashCode = (hashCode * 397) ^ obj.Composition.GetHashCode();
                     return hashCode;

@@ -351,7 +351,7 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
 
-            if (!(await OpenResultFile(idFilePath)))
+            if (!await OpenResultFile(idFilePath))
             {
                 dialogService.MessageBox(string.Format("Cannot read ID file: {0}", idFilePath));
             }
@@ -370,7 +370,7 @@ namespace LcmsSpectator.ViewModels
                 return;
             }
 
-            if (!(await OpenResultFile(featureFilePath)))
+            if (!await OpenResultFile(featureFilePath))
             {
                 dialogService.MessageBox(string.Format("Cannot read feature file: {0}", featureFilePath));
             }

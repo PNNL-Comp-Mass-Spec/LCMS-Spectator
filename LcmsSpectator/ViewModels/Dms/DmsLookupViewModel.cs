@@ -311,7 +311,7 @@ namespace LcmsSpectator.ViewModels.Dms
                             let ext = Path.GetExtension(filePath)
                             where !string.IsNullOrEmpty(ext)
                             let extL = ext.ToLower()
-                            where (extL == ".raw" || extL == ".mzml" || extL == ".gz")
+                            where extL == ".raw" || extL == ".mzml" || extL == ".gz"
                             select filePath).ToList();
             for (var i = 0; i < rawFileNames.Count; i++)
             {

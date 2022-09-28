@@ -147,7 +147,7 @@ namespace LcmsSpectator.SequenceGraph
             var logicCore = new LogicCore { DefaultLayoutAlgorithm = layoutAlgorithm };
 
             logicCore.DefaultLayoutAlgorithmParams = logicCore.AlgorithmFactory.CreateLayoutParameters(layoutAlgorithm);
-            var layoutParams = ((SimpleTreeLayoutParameters)logicCore.DefaultLayoutAlgorithmParams);
+            var layoutParams = (SimpleTreeLayoutParameters)logicCore.DefaultLayoutAlgorithmParams;
             layoutParams.Direction = LayoutDirection.LeftToRight;
             layoutParams.LayerGap = 125;
             layoutParams.VertexGap = 40;

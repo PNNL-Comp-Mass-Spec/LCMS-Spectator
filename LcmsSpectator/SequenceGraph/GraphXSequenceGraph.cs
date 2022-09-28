@@ -51,11 +51,11 @@ namespace LcmsSpectator.SequenceGraph
             var modList = mods.ToList();
 
             var ntermMods = (from m in modList
-                             where (m.IsFixedModification && (m.Location == SequenceLocation.ProteinNTerm || m.Location == SequenceLocation.PeptideNTerm))
+                             where m.IsFixedModification && (m.Location == SequenceLocation.ProteinNTerm || m.Location == SequenceLocation.PeptideNTerm)
                              select m).ToList();
 
             var ctermMods = (from m in modList
-                             where (m.IsFixedModification && (m.Location == SequenceLocation.ProteinCTerm || m.Location == SequenceLocation.PeptideCTerm))
+                             where m.IsFixedModification && (m.Location == SequenceLocation.ProteinCTerm || m.Location == SequenceLocation.PeptideCTerm)
                              select m).ToList();
 
             Modification ntermMod = null;
