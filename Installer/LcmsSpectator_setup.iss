@@ -25,11 +25,13 @@ Source: LcmsSpectator\bin\Release\GraphX.PCL.Common.dll;                        
 Source: LcmsSpectator\bin\Release\GraphX.PCL.Logic.dll;                             DestDir: {app}
 Source: LcmsSpectator\bin\Release\MathNet.Numerics.dll;                             DestDir: {app}
 Source: LcmsSpectator\bin\Release\Microsoft.Bcl.AsyncInterfaces.dll;                DestDir: {app}
+Source: LcmsSpectator\bin\Release\Microsoft.Bcl.HashCode.dll;                       DestDir: {app}
 Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.dll;                 DestDir: {app}
 Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.Shell.dll;           DestDir: {app}
 Source: LcmsSpectator\bin\Release\Microsoft.WindowsAPICodePack.ShellExtensions.dll; DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.dll;                                      DestDir: {app}
 Source: LcmsSpectator\bin\Release\OxyPlot.Wpf.dll;                                  DestDir: {app}
+Source: LcmsSpectator\bin\Release\OxyPlot.Wpf.Shared.dll;                           DestDir: {app}
 Source: LcmsSpectator\bin\Release\PRISM.dll;                                        DestDir: {app}
 Source: LcmsSpectator\bin\Release\ProteinFileReader.dll;                            DestDir: {app}
 Source: LcmsSpectator\bin\Release\QuickGraph.Data.dll;                              DestDir: {app}
@@ -44,6 +46,9 @@ Source: LcmsSpectator\bin\Release\Remotion.Linq.dll;                            
 Source: LcmsSpectator\bin\Release\Remotion.Linq.EagerFetching.dll;                  DestDir: {app}
 Source: LcmsSpectator\bin\Release\SAIS.dll;                                         DestDir: {app}
 Source: LcmsSpectator\bin\Release\Splat.dll;                                        DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Buffers.dll;                               DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Memory.dll;                                DestDir: {app}
+Source: LcmsSpectator\bin\Release\System.Numerics.Vectors.dll;                      DestDir: {app}
 Source: LcmsSpectator\bin\Release\System.Reactive.dll;                              DestDir: {app}
 Source: LcmsSpectator\bin\Release\System.ValueTuple.dll;                            DestDir: {app}
 Source: LcmsSpectator\bin\Release\Xceed.Wpf.AvalonDock.dll;                         DestDir: {app}
