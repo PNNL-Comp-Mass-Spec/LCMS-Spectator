@@ -308,9 +308,9 @@ namespace LcmsSpectator.ViewModels
             IcParameters.Instance.IdColors = IdColors.GetOxyColors();
             IcParameters.Instance.Ms2ScanColor = Ms2ScanColor.ToOxyColor();
 
-            var modificationList = Modifications.Select(searchModificationVm => searchModificationVm.SearchModification)
-                                                .Where(searchModification => searchModification != null).ToList();
-            IcParameters.Instance.SearchModifications = modificationList;
+            IcParameters.Instance.SearchModifications =
+                Modifications.Select(searchModificationVm => searchModificationVm.SearchModification)
+                             .Where(searchModification => searchModification != null).ToList();
 
             HeavyModificationsViewModel.Save();
 

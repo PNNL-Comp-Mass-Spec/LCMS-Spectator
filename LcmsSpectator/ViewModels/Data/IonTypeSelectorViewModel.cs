@@ -123,8 +123,7 @@ namespace LcmsSpectator.ViewModels.Data
                 .Subscribe(charge =>
                 {
                     MinCharge = 1;
-                    var max = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
-                    MaxCharge = max;
+                    MaxCharge = Math.Min(Math.Max(charge - 1, 2), Constants.MaxCharge);
                     UpdateIonTypes();
                 });
 

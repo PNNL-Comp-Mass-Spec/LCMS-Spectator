@@ -271,11 +271,9 @@ namespace LcmsSpectator.SequenceGraph
                     return string.Empty;
                 }
 
-                var text =
-                    (Modifications.GetNumModifications() == 0)
+                return                     (Modifications.GetNumModifications() == 0)
                         ? string.Format("{0}", AminoAcid.Residue)
                         : string.Format("{0}", Modifications);
-                return text;
             }
         }
 

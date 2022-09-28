@@ -108,8 +108,7 @@ namespace LcmsSpectator.Readers
         public List<Target> ReadFile()
         {
             var targetList = new List<Target>();
-            var file = File.ReadLines(TargetFilePath);
-            foreach (var line in file)
+            foreach (var line in File.ReadLines(TargetFilePath))
             {
                 var parts = line.Split('\t');
                 if (parts[0] == "Sequence")

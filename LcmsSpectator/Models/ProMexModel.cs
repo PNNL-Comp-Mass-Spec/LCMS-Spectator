@@ -97,8 +97,7 @@ namespace LcmsSpectator.Models
                 Features.Where(feature => feature.MinPoint.Abundance <= maxAbundance) ////&& feature.MinPoint.Score >= scoreThreshold)
                          .OrderByDescending(feature => feature.MinPoint.Abundance).ToList();
             var numDisplayed = Math.Min(maxPoints, filteredFeatures.Count);
-            var topNPoints = filteredFeatures.GetRange(0, numDisplayed);
-            return topNPoints;
+            return filteredFeatures.GetRange(0, numDisplayed);
         }
 
         /// <summary>

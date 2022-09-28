@@ -383,8 +383,7 @@ namespace LcmsSpectator.ViewModels.Data
                 }
             }
 
-            var sortedPeakDataPoints = peakDataPoints.OrderByDescending(x => x.Y).ToList();
-            return sortedPeakDataPoints;
+            return peakDataPoints.OrderByDescending(x => x.Y).ToList();
         }
 
         /// <summary>

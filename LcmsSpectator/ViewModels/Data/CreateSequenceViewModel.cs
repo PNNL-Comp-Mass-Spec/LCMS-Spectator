@@ -240,7 +240,7 @@ namespace LcmsSpectator.ViewModels.Data
             }
 
             var rawFileName = SelectedDataSetViewModel.Title;
-            var prsm = new PrSm
+            SelectedPrSm = new PrSm
             {
                 Heavy = false,
                 RawFileName = rawFileName,
@@ -253,7 +253,6 @@ namespace LcmsSpectator.ViewModels.Data
                 SequenceText = SequenceText,
                 Score = score,
             };
-            SelectedPrSm = prsm;
         }
 
         /// <summary>

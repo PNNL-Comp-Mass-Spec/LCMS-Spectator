@@ -382,21 +382,15 @@ namespace LcmsSpectator.ViewModels.Dms
                 return null;
             }
 
-            ToolType toolType;
             switch (SelectedJob.Tool)
             {
                 case "MS-GF+":
-                    toolType = ToolType.MsgfPlus;
-                    break;
+                    return ToolType.MsgfPlus;
                 case "MSPathFinder":
-                    toolType = ToolType.MsPathFinder;
-                    break;
+                    return ToolType.MsPathFinder;
                 default:
-                    toolType = ToolType.Other;
-                    break;
+                    return ToolType.Other;
             }
-
-            return toolType;
         }
 
         /// <summary>
@@ -444,8 +438,7 @@ namespace LcmsSpectator.ViewModels.Dms
             var previousResultFilePath = GetOrCreatePreviousSearchPath();
             if (File.Exists(previousResultFilePath))
             {
-                var file = File.ReadAllLines(previousResultFilePath);
-                foreach (var line in file)
+                foreach (var line in File.ReadAllLines(previousResultFilePath))
                 {
                     var parts = line.Split('\t');
                     if (parts.Length < 2)

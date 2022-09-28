@@ -184,8 +184,7 @@ namespace LcmsSpectatorTests
             var lcmsRunDecon = new LcmsRunDeconvoluter(pbfLcmsRun, deconvoluter, 2, 6);
             var dlcms = new DPbfLcMsRun(file, lcmsRunDecon, keepDataReaderOpen: true);
             var count = 0;
-            var scans = pbfLcmsRun.GetScanNumbers(2);
-            foreach (var scan in scans)
+            foreach (var scan in pbfLcmsRun.GetScanNumbers(2))
             {
                 if (pbfLcmsRun.GetSpectrum(scan) is ProductSpectrum spectrum &&
                     (spectrum.Peaks.Length < 50 || spectrum.IsolationWindow.Charge == null))

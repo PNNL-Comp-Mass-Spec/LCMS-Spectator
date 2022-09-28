@@ -205,8 +205,7 @@ namespace LcmsSpectatorTests
                     }
 
                     var baseIonTypes = new[] { BaseIonType.A, BaseIonType.B, BaseIonType.C, BaseIonType.X, BaseIonType.Y, BaseIonType.Z };
-                    var cleavages = id.Sequence.GetInternalCleavages();
-                    foreach (var cleavage in cleavages)
+                    foreach (var cleavage in id.Sequence.GetInternalCleavages())
                     {
                         foreach (var baseIonType in baseIonTypes)
                         {
@@ -298,9 +297,7 @@ namespace LcmsSpectatorTests
                 var charge = Convert.ToInt32(parts[headers["Charge"]]);
                 var cleanSeq = new Sequence(parts[headers["Sequence"]], aminoAcidSet);
                 var modsString = parts[headers["Modifications"]];
-                var mods = modsString.Split(',');
-
-                foreach (var mod in mods)
+                foreach (var mod in modsString.Split(','))
                 {
                     var modParts = mod.Split(' ');
                     if (modParts.Length < 2)

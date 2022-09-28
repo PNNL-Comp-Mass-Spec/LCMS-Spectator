@@ -44,7 +44,7 @@ namespace LcmsSpectator.Readers
                 throw new Exception(phrpReader.ErrorMessage);
             }
 
-            var prsmList = await Task.Run(
+            return await Task.Run(
                                () =>
                                {
                                    var ids = new List<PrSm>();
@@ -93,8 +93,6 @@ namespace LcmsSpectator.Readers
 
                                    return ids;
                                });
-
-            return prsmList;
         }
 
         /// <summary>

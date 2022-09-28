@@ -137,8 +137,7 @@ namespace LcmsSpectator.Models
         /// <param name="rawFileName">Name of the data set.</param>
         public void RemovePrSmsFromRawFile(string rawFileName)
         {
-            var newPrsms = PrSms.Where(prsm => prsm.Value.RawFileName != rawFileName).ToDictionary(prsm => prsm.Key, prsm => prsm.Value);
-            PrSms = newPrsms;
+            PrSms = PrSms.Where(prsm => prsm.Value.RawFileName != rawFileName).ToDictionary(prsm => prsm.Key, prsm => prsm.Value);
         }
 
         /// <summary>

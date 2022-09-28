@@ -69,8 +69,7 @@ namespace LcmsSpectatorTests
                     if (observedPeaks == null)
                         continue;
 
-                    var errors = IonUtils.GetIsotopePpmError(observedPeaks, ion, relIntThres);
-                    foreach (var error in errors)
+                    foreach (var error in IonUtils.GetIsotopePpmError(observedPeaks, ion, relIntThres))
                     {
                         if (error == null) continue;
                         if (error > toleranceValue)

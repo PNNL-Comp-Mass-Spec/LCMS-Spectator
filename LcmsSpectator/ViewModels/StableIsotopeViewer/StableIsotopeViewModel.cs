@@ -352,8 +352,7 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
 
             var clipBoardText = System.Windows.Clipboard.GetText();
 
-            var peaks = ParseTextPeaks(clipBoardText);
-            foreach (var peak in peaks)
+            foreach (var peak in ParseTextPeaks(clipBoardText))
             {
                 ObservedPeaks.Add(new ListItemViewModel<PeakDataPoint>(peak));
             }
@@ -368,8 +367,7 @@ namespace LcmsSpectator.ViewModels.StableIsotopeViewer
         private List<PeakDataPoint> ParseTextPeaks(string peakList)
         {
             var dataPoints = new List<PeakDataPoint>();
-            var lines = peakList.Split('\n');
-            foreach (var line in lines)
+            foreach (var line in peakList.Split('\n'))
             {
                 var parts = line.Split('\t');
                 if (parts.Length < 2)

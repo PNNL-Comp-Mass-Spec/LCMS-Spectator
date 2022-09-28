@@ -985,8 +985,7 @@ namespace LcmsSpectator.ViewModels
             }
             else
             {
-                var allMs2Scans = lcms.GetScanNumbers(2);
-                ms2Scans = allMs2Scans;
+                ms2Scans = lcms.GetScanNumbers(2);
             }
 
             // Create truncated FASTA

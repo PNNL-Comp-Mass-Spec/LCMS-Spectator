@@ -81,8 +81,7 @@ namespace LcmsSpectatorTests
                 id.RawFileName = Path.GetFileNameWithoutExtension(rawFile);
             }
 
-            var scans = lcms.GetScanNumbers(2);
-            foreach (var scan in scans)
+            foreach (var scan in lcms.GetScanNumbers(2))
             {
                 idList.Add(new PrSm { Scan = scan, LcMs = lcms, RawFileName = Path.GetFileNameWithoutExtension(rawFile), Score = double.NaN});
             }

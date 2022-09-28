@@ -435,8 +435,7 @@ namespace LcmsSpectator.ViewModels.Plots
             alreadyUpdated.Add(sender);
             if (linkedAxes.ContainsKey(sender))
             {
-                var links = linkedAxes[sender];
-                foreach (var link in links)
+                foreach (var link in linkedAxes[sender])
                 {
                     link.Zoom(sender.ActualMinimum, sender.ActualMaximum);
                     UpdateAxesRecursive(link, alreadyUpdated);

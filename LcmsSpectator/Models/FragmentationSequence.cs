@@ -162,8 +162,7 @@ namespace LcmsSpectator.Models
                             var startIndex = ionType.IsPrefixIon ? 0 : i;
                             var length = ionType.IsPrefixIon ? i : sequence.Count - i;
                             var fragment = new Sequence(Sequence.GetRange(startIndex, length));
-                            var ions = ionType.GetPossibleIons(fragment);
-                            foreach (var ion in ions)
+                            foreach (var ion in ionType.GetPossibleIons(fragment))
                             {
                                 var labeledIonViewModel = new LabeledIonViewModel(ion.Composition, ionType, true, LcMsRun)
                                 {
@@ -219,8 +218,7 @@ namespace LcmsSpectator.Models
                     var startIndex = ionType.IsPrefixIon ? 0 : i;
                     var length = ionType.IsPrefixIon ? i : sequence.Count - i;
                     var fragment = new Sequence(Sequence.GetRange(startIndex, length));
-                    var ions = ionType.GetPossibleIons(fragment);
-                    foreach (var ion in ions)
+                    foreach (var ion in ionType.GetPossibleIons(fragment))
                     {
                         var labeledIonViewModel = new LabeledIonViewModel(ion.Composition, ionType, true, LcMsRun)
                         {

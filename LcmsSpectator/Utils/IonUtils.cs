@@ -263,7 +263,7 @@ namespace LcmsSpectator.Utils
         {
             var deconIonTypeName = labeledIon.IonType.Name.Insert(1, "'");
             var ionType = ionTypeFactory.GetIonType(deconIonTypeName);
-            var deconLabeledIon = new LabeledIonViewModel(
+            return new LabeledIonViewModel(
                                                           labeledIon.Composition,
                                                           ionType,
                                                           labeledIon.IsFragmentIon,
@@ -271,7 +271,6 @@ namespace LcmsSpectator.Utils
                                                           labeledIon.PrecursorIon,
                                                           labeledIon.IsChargeState,
                                                           labeledIon.Index);
-            return deconLabeledIon;
         }
 
         /// <summary>

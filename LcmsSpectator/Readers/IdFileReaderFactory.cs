@@ -33,15 +33,13 @@ namespace LcmsSpectator.Readers
                     //   Dataset_IcDecoy.tsv
                     //   Dataset_IcTda.tsv
 
-                    var icFileReader = new IcFileReader(fileName);
-                    return icFileReader;
+                    return new IcFileReader(fileName);
 
                 case ".tsv":
                 case ".txt":
                     if (fileName.EndsWith("_syn.txt"))
                     {
-                        var synFileReader = new MsgfSynopsisReader(fileName);
-                        return synFileReader;
+                        return new MsgfSynopsisReader(fileName);
                     }
 
                     string headerLine;
@@ -50,34 +48,29 @@ namespace LcmsSpectator.Readers
                         headerLine = streamReader.ReadLine();
                     }
 
-                    if (headerLine != null && headerLine.Contains("MSGFScore"))
+                    if (headerLine?.Contains("MSGFScore") == true)
                     {
-                        var msgfPlusReader = new MsgfFileReader(fileName);
-                        return msgfPlusReader;
+                        return new MsgfFileReader(fileName);
                     }
 
-                    if (headerLine != null && headerLine.Contains("#MatchedFragments"))
+                    if (headerLine?.Contains("#MatchedFragments") == true)
                     {
-                        var msPathFinderReader = new IcFileReader(fileName);
-                        return msPathFinderReader;
+                        return new IcFileReader(fileName);
                     }
 
-                    if (headerLine != null && headerLine.Contains("Score"))
+                    if (headerLine?.Contains("Score") == true)
                     {
-                        var genericReader = new BruteForceSearchResultsReader(fileName);
-                        return genericReader;
+                        return new BruteForceSearchResultsReader(fileName);
                     }
 
                     break;
 
                 case ".mzid":
                 case ".mzid.gz":
-                    var mzidReader = new MzIdentMlReader(fileName);
-                    return mzidReader;
+                    return new MzIdentMlReader(fileName);
 
                 case ".mtdb":
-                    var mtdbReader = new MtdbReader(fileName);
-                    return mtdbReader;
+                    return new MtdbReader(fileName);
             }
             return null;
         }

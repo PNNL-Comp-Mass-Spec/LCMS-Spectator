@@ -196,8 +196,7 @@ namespace LcmsSpectator.Readers
         public List<string> GetRawFilesByDataSetName(string directoryPath, string datasetName)
         {
             var rawFiles = new List<string>();
-            var directory = Directory.GetFiles(directoryPath);
-            foreach (var filePath in directory)
+            foreach (var filePath in Directory.GetFiles(directoryPath))
             {
                 // Raw file in same directory as tsv file?
                 var fileName = Path.GetFileNameWithoutExtension(filePath);

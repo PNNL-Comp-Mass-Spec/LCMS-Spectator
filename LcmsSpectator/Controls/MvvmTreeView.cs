@@ -72,8 +72,7 @@ namespace LcmsSpectator.Controls
                 return;
             }
 
-            var selectedItem = treeView.SelectedItem;
-            SelectedItemTarget = selectedItem;
+            SelectedItemTarget = treeView.SelectedItem;
         }
     }
 }

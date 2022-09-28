@@ -255,8 +255,7 @@ namespace LcmsSpectator.Readers
         {
             var msgfPlusJobs = GetJobsByDataset(mostRecentWeeks, datasetNameFilter, MsgfplusToolFilter);
             var mspfJobs = GetJobsByDataset(mostRecentWeeks, datasetNameFilter, MsPathFinderToolFilter);
-            var allJobs = msgfPlusJobs.Concat(mspfJobs).ToDictionary(x => x.Key, x => x.Value);
-            return allJobs;
+            return msgfPlusJobs.Concat(mspfJobs).ToDictionary(x => x.Key, x => x.Value);
         }
 
         /// <summary>
@@ -272,9 +271,7 @@ namespace LcmsSpectator.Readers
             var datasets = GetDatasets(mostRecentWeeks, datasetNameFilter);
 
             // Find the MSGF+/MSPathFinder jobs for the datasets
-            var msgfPlusJobs = GetJobsByDataset(datasets.Values.ToList(), toolNameFilter);
-
-            return msgfPlusJobs;
+            return GetJobsByDataset(datasets.Values.ToList(), toolNameFilter);
         }
 
         /// <summary>
@@ -287,8 +284,7 @@ namespace LcmsSpectator.Readers
             var udtDatasetInfos = datasets as UdtDatasetInfo[] ?? datasets.ToArray();
             var msgfPlusJobs = GetJobsByDataset(udtDatasetInfos, MsgfplusToolFilter);
             var mspfPathFinderJobs = GetJobsByDataset(udtDatasetInfos, MsPathFinderToolFilter);
-            var allJobs = msgfPlusJobs.Concat(mspfPathFinderJobs).ToDictionary(x => x.Key, x => x.Value);
-            return allJobs;
+            return msgfPlusJobs.Concat(mspfPathFinderJobs).ToDictionary(x => x.Key, x => x.Value);
         }
 
         /// <summary>

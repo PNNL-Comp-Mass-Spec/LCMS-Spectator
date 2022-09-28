@@ -208,8 +208,7 @@ namespace LcmsSpectator.Models
                 }
 
                 var prevms1Scan = LcMs.GetPrevScanNum(Scan, 1);
-                var spectrum = LcMs.GetSpectrum(prevms1Scan);
-                return spectrum;
+                return LcMs.GetSpectrum(prevms1Scan);
             }
         }
 
@@ -431,8 +430,7 @@ namespace LcmsSpectator.Models
         /// <returns>Integer indicating if this is greater than the PRSM object.</returns>
         public int CompareTo(PrSm other)
         {
-            var comp = UseGolfScoring ? other.Score.CompareTo(Score) : Score.CompareTo(other.Score);
-            return comp;
+            return UseGolfScoring ? other.Score.CompareTo(Score) : Score.CompareTo(other.Score);
         }
 
         /// <summary>
@@ -476,8 +474,7 @@ namespace LcmsSpectator.Models
         {
             try
             {
-                var seq = sequenceReader.Read(sequenceStr);
-                return seq;
+                return sequenceReader.Read(sequenceStr);
             }
             catch (Exception)
             {
@@ -505,8 +502,7 @@ namespace LcmsSpectator.Models
                 if (y == null)
                     return 1;
 
-                var comp = x.UseGolfScoring ? x.Score.CompareTo(y.Score) : y.Score.CompareTo(x.Score);
-                return comp;
+                return x.UseGolfScoring ? x.Score.CompareTo(y.Score) : y.Score.CompareTo(x.Score);
             }
         }
 
