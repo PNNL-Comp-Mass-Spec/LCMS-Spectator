@@ -222,9 +222,8 @@ namespace LcmsSpectator.SequenceGraph
                             aminoAcid = AminoAcidSet.GetAminoAcid(sequence[graphSi]);
                         }
 
-                        var modAa = aminoAcid as ModifiedAminoAcid;
                         Modification aminoAcidMod = null;
-                        if (modAa != null)
+                        if (aminoAcid is ModifiedAminoAcid modAa)
                         {
                             aminoAcidMod = modAa.Modification;
                         }

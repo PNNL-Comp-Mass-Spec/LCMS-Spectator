@@ -211,8 +211,8 @@ namespace LcmsSpectatorTests
                             var baseComp = baseIonType.IsPrefix ? cleavage.PrefixComposition : cleavage.SuffixComposition;
                             var composition = baseComp + baseIonType.OffsetComposition;
                             var mass = composition.Mass;
-                            var peak = spectrum.FindPeak(mass, new Tolerance(10, ToleranceUnit.Ppm)) as DeconvolutedPeak;
-                            if (peak == null)
+
+                            if (!(spectrum.FindPeak(mass, new Tolerance(10, ToleranceUnit.Ppm)) is DeconvolutedPeak peak))
                             {
                                 continue;
                             }
@@ -258,8 +258,7 @@ namespace LcmsSpectatorTests
 
         private DeconvolutedSpectrum GetDeconvolutedSpectrum(int scan, PbfLcMsRun pbfLcMsRun)
         {
-            var spectrum = pbfLcMsRun.GetSpectrum(scan) as ProductSpectrum;
-            if (spectrum == null)
+            if (!(pbfLcMsRun.GetSpectrum(scan) is ProductSpectrum spectrum))
             {
                 return null;
             }

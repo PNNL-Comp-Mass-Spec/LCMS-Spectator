@@ -404,16 +404,13 @@ namespace LcmsSpectator.ViewModels.Plots
             var lowDiff = Math.Abs(index - lowIndex);
             var highDiff = Math.Abs(highIndex - index);
 
-            var lowSpec = lcms.GetSpectrum(scans[lowIndex]) as ProductSpectrum;
-            var highSpec = lcms.GetSpectrum(scans[highIndex]) as ProductSpectrum;
-
             ProductSpectrum spectrum;
 
-            if ((lowDiff < highDiff || (lowDiff == highDiff && lowDiff > 0)) && lowSpec != null)
+            if ((lowDiff < highDiff || (lowDiff == highDiff && lowDiff > 0)) && lcms.GetSpectrum(scans[lowIndex]) is ProductSpectrum lowSpec)
             {
                 spectrum = lowSpec;
             }
-            else if (highDiff < lowDiff && highSpec != null)
+            else if (highDiff < lowDiff && lcms.GetSpectrum(scans[highIndex]) is ProductSpectrum highSpec)
             {
                 spectrum = highSpec;
             }

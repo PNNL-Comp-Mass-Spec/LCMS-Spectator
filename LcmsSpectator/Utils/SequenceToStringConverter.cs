@@ -27,11 +27,10 @@ namespace LcmsSpectator.Utils
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var formatted = string.Empty;
-            var sequence = value as Sequence;
 
             var stringBuilder = new StringBuilder();
 
-            if (sequence != null)
+            if (value is Sequence sequence)
             {
                 var pos = 0;
                 foreach (var aa in sequence)
