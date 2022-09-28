@@ -78,7 +78,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
                                             x => !string.IsNullOrWhiteSpace(x.Item1) &&
                                             x.Item2 >= 0 && x.Item3 >= 0 && x.Item4 >= 0));
 
-            BrowseFilesCommand = ReactiveCommand.Create(() => FilePath = this.dialogService.SaveFile(".png", @"Png Files (*.png)|*.png"));
+            BrowseFilesCommand = ReactiveCommand.Create(() => FilePath = this.dialogService.SaveFile(".png", "Png Files (*.png)|*.png"));
 
             SuccessCommand.Where(_ => plotModel != null).Subscribe(_ => ExportPlotModel(plotModel));
         }

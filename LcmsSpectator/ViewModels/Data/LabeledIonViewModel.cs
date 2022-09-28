@@ -328,7 +328,7 @@ namespace LcmsSpectator.ViewModels.Data
                 else
                 {
                     var ionTypeFactory = IcParameters.Instance.DeconvolutedIonTypeFactory;
-                    var ionTypeName = IonType.Name.Insert(1, @"'");
+                    var ionTypeName = IonType.Name.Insert(1, "'");
                     ion = ionTypeFactory.GetIonType(ionTypeName).GetIon(Composition);
                 }
             }

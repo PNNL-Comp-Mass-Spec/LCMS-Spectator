@@ -984,7 +984,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 peakDataPoints = Array.Empty<IList<PeakDataPoint>>();
             }
 
-            var filePath = dialogService.SaveFile(".tsv", @"TSV Files (*.tsv)|*.tsv");
+            var filePath = dialogService.SaveFile(".tsv", "TSV Files (*.tsv)|*.tsv");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
@@ -1082,7 +1082,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveAsImageImplementation()
         {
-            var filePath = dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            var filePath = dialogService.SaveFile(".png", "Png Files (*.png)|*.png");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;

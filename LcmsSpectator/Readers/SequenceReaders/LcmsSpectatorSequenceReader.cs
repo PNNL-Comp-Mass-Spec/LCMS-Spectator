@@ -61,7 +61,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
                 }
             }
 
-            const string AminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
+            const string AminoAcidRegex = "[" + AminoAcid.StandardAminoAcidCharacters + "]";
             ////const string modRegex = @"\[([A-Z]|[a-z])+\]";
             const string ModRegex = @"\[([A-Z]|[a-z]|[0-9]|_|-|>)+\]";
 

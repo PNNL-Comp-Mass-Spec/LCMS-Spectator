@@ -72,7 +72,7 @@ namespace LcmsSpectator.Writers
         {
             foreach (var cv in CV.TermData)
             {
-                if (cv.Value.CVRef == @"UNIMOD")
+                if (cv.Value.CVRef == "UNIMOD")
                 {
                     var accStr = cv.Value.Id.Split(':');
                     if (accStr.Length < 2 || int.TryParse(accStr[1], out var accession))

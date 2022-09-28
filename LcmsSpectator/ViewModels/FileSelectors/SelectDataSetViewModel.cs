@@ -160,7 +160,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         {
             var path = dialogService.OpenFile(
                 ".raw",
-                @"Supported Files|*.raw;*.mzML;*.mzML.gz|Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl[.gz])|*.mzMl;*.mzML.gz");
+                "Supported Files|*.raw;*.mzML;*.mzML.gz|Raw Files (*.raw)|*.raw|MzMl Files (*.mzMl[.gz])|*.mzMl;*.mzML.gz");
             if (!string.IsNullOrEmpty(path))
             {
                 RawFilePath = path;

@@ -76,7 +76,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
                 }
             }
 
-            const string AminoAcidRegex = @"[" + AminoAcid.StandardAminoAcidCharacters + "]";
+            const string AminoAcidRegex = "[" + AminoAcid.StandardAminoAcidCharacters + "]";
             const string MassRegex = @"[+-]?\d+\.\d+";
 
             if (string.IsNullOrEmpty(msgfPlusPeptideStr))

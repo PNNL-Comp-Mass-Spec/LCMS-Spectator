@@ -781,7 +781,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveAsImageImplementation()
         {
-            var filePath = dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            var filePath = dialogService.SaveFile(".png", "Png Files (*.png)|*.png");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;

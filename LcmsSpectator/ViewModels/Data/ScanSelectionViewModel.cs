@@ -87,7 +87,7 @@ namespace LcmsSpectator.ViewModels.Data
         {
             if (msLevel < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(msLevel), msLevel, @"MSLevel must be greater than 0.");
+                throw new ArgumentOutOfRangeException(nameof(msLevel), msLevel, "MSLevel must be greater than 0.");
             }
 
             MsLevel = msLevel;

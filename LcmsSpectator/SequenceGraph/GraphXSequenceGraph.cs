@@ -115,7 +115,7 @@ namespace LcmsSpectator.SequenceGraph
         {
             const char Delimiter = (char)FastaDatabaseConstants.Delimiter;
             if (annotation == null
-                || !Regex.IsMatch(annotation, @"^[A-Z" + Delimiter + @"]\.[A-Z]+\.[A-Z" + Delimiter + @"]$"))
+                || !Regex.IsMatch(annotation, "^[A-Z" + Delimiter + @"]\.[A-Z]+\.[A-Z" + Delimiter + "]$"))
             {
                 return null;
             }

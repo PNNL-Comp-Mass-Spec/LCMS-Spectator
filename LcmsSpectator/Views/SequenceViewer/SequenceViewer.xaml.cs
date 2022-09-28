@@ -50,7 +50,7 @@ namespace LcmsSpectator.Views.SequenceViewer
         private void MenuItem_OnClick(object sender, RoutedEventArgs e)
         {
             var dialogService = new DialogService();
-            var filePath = dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            var filePath = dialogService.SaveFile(".png", "Png Files (*.png)|*.png");
             if (!string.IsNullOrWhiteSpace(filePath))
             {
                 WriteToPng(filePath);

@@ -82,12 +82,12 @@ namespace LcmsSpectator.Readers
                 {
                     foreach (var job in lstJobsForDataset)
                     {
-                        Console.WriteLine(@"DatasetID " + dataset.Value.DatasetId + @": " + dataset.Value.Dataset + @", Job " + job.Job);
+                        Console.WriteLine("DatasetID " + dataset.Value.DatasetId + ": " + dataset.Value.Dataset + ", Job " + job.Job);
                     }
                 }
                 else
                 {
-                    Console.WriteLine(@"DatasetID " + dataset.Value.DatasetId + @": " + dataset.Value.Dataset + @", No MSGF+ jobs");
+                    Console.WriteLine("DatasetID " + dataset.Value.DatasetId + ": " + dataset.Value.Dataset + ", No MSGF+ jobs");
                 }
             }
         }

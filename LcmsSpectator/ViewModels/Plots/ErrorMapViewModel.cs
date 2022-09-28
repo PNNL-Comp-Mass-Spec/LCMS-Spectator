@@ -509,7 +509,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveAsImageImpl()
         {
-            var filePath = dialogService.SaveFile(".png", @"Png Files (*.png)|*.png");
+            var filePath = dialogService.SaveFile(".png", "Png Files (*.png)|*.png");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
@@ -543,7 +543,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// </summary>
         private void SaveDataTableImpl()
         {
-            var filePath = dialogService.SaveFile(".tsv", @"Tab-separated value Files (*.tsv)|*.tsv");
+            var filePath = dialogService.SaveFile(".tsv", "Tab-separated value Files (*.tsv)|*.tsv");
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 return;
