@@ -30,6 +30,8 @@ namespace LcmsSpectator.ViewModels.Data
     /// </summary>
     public class LabeledIonViewModel : ReactiveObject
     {
+        // Ignore Spelling: de, deconvoluted
+
         /// <summary>
         /// Cache that stores the smoothed XICs generated for this ion.
         /// </summary>
@@ -43,7 +45,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// <summary>
         /// Cache that stores peaks generated for this ion for a given spectrum.
         /// </summary>
-        /// <remarks>The tuple is a spectrum and a bool for IsDeconvoluted</remarks>
+        /// <remarks>The tuple is a spectrum and a boolean for IsDeconvoluted</remarks>
         private readonly MemoizingMRUCache<Tuple<Spectrum, bool>, IList<PeakDataPoint>> peakCache;
 
         /// <summary>
@@ -229,7 +231,7 @@ namespace LcmsSpectator.ViewModels.Data
             IList<PeakDataPoint> peaks;
             lock (peakCacheLock)
             {
-                // MemoizingMRUCache isn't threadsafe. Shouldn't matter for my purposes,
+                // MemoizingMRUCache isn't thread safe. Shouldn't matter for my purposes,
                 // but I'm putting a lock around it just in case.
                 var key = new Tuple<Spectrum, bool>(spectrum, deconvoluted);
                 if (!useCache)

@@ -29,6 +29,8 @@ namespace LcmsSpectator.Utils
     /// </summary>
     public class IonUtils
     {
+        // Ignore Spelling: de
+
         /// <summary>
         /// Get all prefix/suffix compositions for a sequence.
         /// </summary>
@@ -226,7 +228,7 @@ namespace LcmsSpectator.Utils
         /// <param name="ion">The ion to find isotope peaks for.</param>
         /// <param name="spectrum">The spectrum to extract peaks from.</param>
         /// <param name="tolerance">The ppm tolerance to use when finding peaks.</param>
-        /// <param name="decharged">Has this ion been de charged?</param>
+        /// <param name="decharged">Has this ion been de-charged?</param>
         /// <returns>
         /// Tuple containing array of isotope peaks and their Pearson correlation with the theoretical isotope envelope for this ion.
         /// </returns>

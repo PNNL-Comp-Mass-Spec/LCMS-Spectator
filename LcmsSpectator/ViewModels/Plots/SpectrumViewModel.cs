@@ -104,7 +104,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 1.25,
                 false);
 
-            // When prev ms1 spectrum plot is zoomed/panned, next ms1 spectrum plot should zoom/pan
+            // When previous ms1 spectrum plot is zoomed/panned, next ms1 spectrum plot should zoom/pan
             isAxisInternalChange = false;
             PrevMs1SpectrumViewModel.XAxis.AxisChanged += (o, e) =>
                 {
@@ -118,7 +118,7 @@ namespace LcmsSpectator.ViewModels.Plots
                 isAxisInternalChange = false;
             };
 
-            // When next ms1 spectrum plot is zoomed/panned, prev ms1 spectrum plot should zoom/pan
+            // When next ms1 spectrum plot is zoomed/panned, previous ms1 spectrum plot should zoom/pan
             NextMs1SpectrumViewModel.XAxis.AxisChanged += (o, e) =>
                 {
                     if (isAxisInternalChange)

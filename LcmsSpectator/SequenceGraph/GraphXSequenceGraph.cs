@@ -24,6 +24,8 @@ namespace LcmsSpectator.SequenceGraph
     /// </summary>
     public class GraphXSequenceGraph : InformedProteomics.Backend.Data.Sequence.SequenceGraph
     {
+        // Ignore Spelling: vertices
+
         /// <summary>
         /// AminoAcid on n-terminus of sequence.
         /// </summary>

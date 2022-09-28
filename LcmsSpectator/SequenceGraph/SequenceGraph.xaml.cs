@@ -24,6 +24,8 @@ namespace LcmsSpectator.SequenceGraph
     /// </summary>
     public partial class SequenceGraph
     {
+        // Ignore Spelling: vertices
+
         /// <summary>
         /// Converts InformedProteomics sequence graph to GraphX sequence graph.
         /// </summary>

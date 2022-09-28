@@ -38,6 +38,8 @@ namespace LcmsSpectator.ViewModels.Plots
     /// </summary>
     public class SpectrumPlotViewModel : ReactiveObject
     {
+        // Ignore Spelling: deconvoluted, png
+
         /// <summary>
         /// Method used to filter data for the fragmentation spectrum plot and the fragmentation ion view
         /// </summary>

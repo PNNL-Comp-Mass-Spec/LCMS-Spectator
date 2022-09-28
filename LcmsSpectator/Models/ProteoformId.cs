@@ -22,10 +22,12 @@ namespace LcmsSpectator.Models
     /// </summary>
     public class ProteoformId : IIdData
     {
+        // Ignore Spelling: proteoform
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ProteoformId"/> class.
         /// </summary>
-        /// <param name="sequence">The proteoform's sequence text.</param>
+        /// <param name="sequence">The proteoform sequence text</param>
         /// <param name="sequenceText">The string representation of the sequence.</param>
         /// <param name="modLocations">Location string of modifications in the sequence.</param>
         /// <param name="proteinSequence">The protein sequence.</param>
@@ -42,7 +44,7 @@ namespace LcmsSpectator.Models
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProteoformId"/> class.
-        /// This creates the proteform from a PRSM object.
+        /// This creates the proteoform from a PRSM object.
         /// </summary>
         /// <param name="prsm">The PRSM to generate the ProteoformID from.</param>
         /// <param name="proteinSequence">The sequence of the protein that this Proteoform is associated with.</param>
@@ -86,7 +88,7 @@ namespace LcmsSpectator.Models
         public Sequence Sequence { get; }
 
         /// <summary>
-        /// Gets the proteoform's sequence text.
+        /// Gets the proteoform sequence
         /// </summary>
         public string SequenceText { get; private set; }
 

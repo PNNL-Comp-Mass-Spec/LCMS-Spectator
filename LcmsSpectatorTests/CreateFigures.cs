@@ -250,7 +250,7 @@ namespace LcmsSpectatorTests
                         writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", result.Corr, result.Cosine, result.Error, result.Intensity, isTarget);
                     }
                 }
-            } //foreach
+            }
 
             if (datasetsProcessed == 0)
                 Assert.Ignore("Did not find any valid datasets in " + datasetDir);

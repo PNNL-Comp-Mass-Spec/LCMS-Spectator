@@ -32,6 +32,8 @@ namespace LcmsSpectator.ViewModels.Data
     /// </summary>
     public class IonListViewModel : ReactiveObject
     {
+        // Ignore Spelling: virtualization
+
         /// <summary>
         /// The LCMSRun for the data set.
         /// </summary>

@@ -32,6 +32,8 @@ namespace LcmsSpectator.ViewModels.Plots
     /// </summary>
     public class FeatureMapViewModel : ReactiveObject
     {
+        // Ignore Spelling: png, prsm
+
         /// <summary>
         /// Scale of the highlight.
         /// </summary>

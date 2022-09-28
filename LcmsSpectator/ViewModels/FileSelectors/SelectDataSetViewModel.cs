@@ -22,6 +22,8 @@ namespace LcmsSpectator.ViewModels.FileSelectors
     /// </summary>
     public class SelectDataSetViewModel : ReactiveObject
     {
+        // Ignore Spelling: Ok
+
         /// <summary>
         /// Dialog service for opening dialogs from view model.
         /// </summary>

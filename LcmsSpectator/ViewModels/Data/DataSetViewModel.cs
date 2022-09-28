@@ -33,6 +33,8 @@ namespace LcmsSpectator.ViewModels.Data
     /// </summary>
     public class DataSetViewModel : ReactiveObject
     {
+        // Ignore Spelling: async, prsm
+
         /// <summary>
         /// Dialog service for opening dialogs from view model.
         /// </summary>
@@ -131,7 +133,7 @@ namespace LcmsSpectator.ViewModels.Data
             // When a PrSm is selected from the ScanViewModel, update the SelectedPrSm for this data set
             ScanViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(x => SelectedPrSm = x);
 
-            // When the scan number in the selected prsm changes, the selected scan in the xic plots should update
+            // When the scan number in the selected prsm changes, the selected scan in the XIC plots should update
             this.WhenAnyValue(x => x.SelectedPrSm)
             .Where(_ => SelectedPrSm != null && SpectrumViewModel != null && XicViewModel != null)
             .Subscribe(prsm =>
@@ -389,19 +391,19 @@ namespace LcmsSpectator.ViewModels.Data
             //LcMs = await Task.Run(() => PbfLcMsRun.GetLcMsRun(filePath, 0, 0, progress));
             LcMs = await Task.Run(() => new DatasetReaderWrapper(filePath, progress));
 
-            // Now that we have an LcMsRun, initialize viewmodels that require it
+            // Now that we have an LcMsRun, initialize view models that require it
             var pbfCreator = new PbfCreationViewModel(LcMs);
             XicViewModel = new XicViewModel(dialogService, LcMs, pbfCreator);
             SpectrumViewModel = new SpectrumViewModel(dialogService, LcMs);
             FeatureMapViewModel = new FeatureViewerViewModel(LcMs, pbfCreator, dialogService);
 
-            // When the selected scan changes in the xic plots, the selected scan for the prsm should update
+            // When the selected scan changes in the XIC plots, the selected scan for the prsm should update
             XicViewModel.SelectedScanUpdated().Subscribe(scan => SelectedPrSm.Scan = scan);
 
             // When an ID is selected on FeatureMap, update selectedPrSm
             FeatureMapViewModel.FeatureMapViewModel.WhenAnyValue(x => x.SelectedPrSm).Where(prsm => prsm != null).Subscribe(prsm => SelectedPrSm = prsm);
 
-            // Create prsms for scan numbers (unidentified)
+            // Create PRSMs for scan numbers (unidentified)
             await LoadScans();
             ////await this.ScanViewModel.ToggleShowInstrumentDataAsync(IcParameters.Instance.ShowInstrumentData, (PbfLcMsRun)this.LcMs);
             SelectedPrSm.LcMs = LcMs; // For the selected PrSm, we should always use the LcMsRun for this dataset.

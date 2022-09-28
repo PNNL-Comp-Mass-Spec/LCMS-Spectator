@@ -26,6 +26,8 @@ namespace LcmsSpectator.ViewModels.Plots
     /// </summary>
     public class IsotopicEnvelopePlotViewModel : ReactiveObject
     {
+        // Ignore Spelling: averagine
+
         /// <summary>
         /// The XAxis of spectrum PlotModel plot.
         /// </summary>
