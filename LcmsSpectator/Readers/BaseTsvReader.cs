@@ -46,19 +46,16 @@ namespace LcmsSpectator.Readers
 
             var ext = Path.GetExtension(filePath);
 
-            IEnumerable<PrSm> prsmList;
             if (string.Equals(ext, ".tsv", StringComparison.OrdinalIgnoreCase))
             {
                 var fileInfo = new FileInfo(filePath);
                 var reader = new StreamReader(File.Open(fileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                prsmList = await ReadTsv(reader, scanStart, scanEnd, modIgnoreList, fileInfo.Length, progress);
-                return prsmList;
+                return await ReadTsv(reader, scanStart, scanEnd, modIgnoreList, fileInfo.Length, progress);
             }
 
             if (string.Equals(ext, ".zip", StringComparison.OrdinalIgnoreCase))
             {
-                prsmList = await ReadZip(scanStart, scanEnd, modIgnoreList, progress);
-                return prsmList;
+                return await ReadZip(scanStart, scanEnd, modIgnoreList, progress);
             }
 
             throw new ArgumentException(string.Format("Cannot read file with extension \"{0}\"", ext));

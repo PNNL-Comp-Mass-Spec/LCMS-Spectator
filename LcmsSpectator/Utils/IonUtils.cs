@@ -89,29 +89,32 @@ namespace LcmsSpectator.Utils
         /// <returns>Number of neighboring charge states.</returns>
         public static int GetNumNeighboringChargeStates(int charge)
         {
-            var chargeStates = 1;
             if (charge >= 2 && charge <= 4)
             {
-                chargeStates = 1;
-            }
-            else if (charge >= 5 && charge <= 10)
-            {
-                chargeStates = 2;
-            }
-            else if (charge >= 11 && charge <= 20)
-            {
-                chargeStates = 3;
-            }
-            else if (charge >= 21 && charge <= 30)
-            {
-                chargeStates = 4;
-            }
-            else if (charge >= 31)
-            {
-                chargeStates = 5;
+                return 1;
             }
 
-            return chargeStates;
+            if (charge >= 5 && charge <= 10)
+            {
+                return 2;
+            }
+
+            if (charge >= 11 && charge <= 20)
+            {
+                return 3;
+            }
+
+            if (charge >= 21 && charge <= 30)
+            {
+                return 4;
+            }
+
+            if (charge >= 31)
+            {
+                return 5;
+            }
+
+            return 1;
         }
 
         /// <summary>

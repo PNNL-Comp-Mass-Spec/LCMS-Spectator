@@ -87,17 +87,9 @@ namespace LcmsSpectator.PlotModels.ColorDictionaries
         /// <returns>Color associated with a precursor ion of the given index.</returns>
         public OxyColor GetColor(int precursorIndex)
         {
-            OxyColor color;
-            if (precursorColors.ContainsKey(precursorIndex))
-            {
-                color = precursorColors[precursorIndex];
-            }
-            else
-            {
-                color = precursorIndex > 0 ? OxyColors.DarkRed : OxyColors.AliceBlue;
-            }
-
-            return color;
+            return precursorColors.ContainsKey(precursorIndex)
+                ? precursorColors[precursorIndex]
+                : precursorIndex > 0 ? OxyColors.DarkRed : OxyColors.AliceBlue;
         }
 
         /// <summary>

@@ -545,17 +545,12 @@ namespace LcmsSpectator.ViewModels.Plots
                 ratio = 0.0;
             }
 
-            string formatted;
             if (ratio > 1000 || ratio < 0.001)
             {
-                formatted = string.Format("{0:0.###EE0}", ratio);
-            }
-            else
-            {
-                formatted = Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
+                return string.Format("{0:0.###EE0}", ratio);
             }
 
-            return formatted;
+            return Math.Round(ratio, 3).ToString(CultureInfo.InvariantCulture);
         }
     }
 }

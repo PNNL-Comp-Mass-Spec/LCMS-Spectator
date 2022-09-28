@@ -285,21 +285,21 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns></returns>
         public Spectrum GetSelectedSpectrum(ILcMsRun lcms)
         {
-            Spectrum spectrum = null;
             if (ScanNumbers.Count == 1)
             {   // Single spectrum selected.
-                spectrum = lcms.GetSpectrum(ScanNumbers[0]);
-            }
-            else if (ScanNumbers.Count > 1)
-            {   // Multiple spectra selected. Need to sum.
-                var summedScanNumbers = ScanNumbers.Sum();
-                var summedSpectrum = lcms.GetSummedSpectrum(ScanNumbers);
-                spectrum = MsLevel == 1
-                               ? new Spectrum(summedSpectrum.Peaks, 0)
-                               : new ProductSpectrum(summedSpectrum.Peaks, summedScanNumbers);
+                return lcms.GetSpectrum(ScanNumbers[0]);
             }
 
-            return spectrum;
+            if (ScanNumbers.Count > 1)
+            { // Multiple spectra selected. Need to sum.
+                var summedScanNumbers = ScanNumbers.Sum();
+                var summedSpectrum = lcms.GetSummedSpectrum(ScanNumbers);
+                return MsLevel == 1
+                    ? new Spectrum(summedSpectrum.Peaks, 0)
+                    : new ProductSpectrum(summedSpectrum.Peaks, summedScanNumbers);
+            }
+
+            return null;
         }
 
         /// <summary>

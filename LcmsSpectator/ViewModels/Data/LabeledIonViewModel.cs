@@ -436,28 +436,24 @@ namespace LcmsSpectator.ViewModels.Data
         /// <returns>The raw XIC.</returns>
         private Xic GetXic()
         {
-            Xic x;
             if (IsFragmentIon)
             {
-                x = Lcms.GetFullProductExtractedIonChromatogram(
+                return Lcms.GetFullProductExtractedIonChromatogram(
                     Ion.GetMostAbundantIsotopeMz(),
                     IcParameters.Instance.ProductIonTolerancePpm,
                     PrecursorIon.GetMostAbundantIsotopeMz());
             }
-            else if (IsChargeState)
+
+            if (IsChargeState)
             {
-                x = Lcms.GetFullPrecursorIonExtractedIonChromatogram(
-                   Ion.GetMostAbundantIsotopeMz(),
-                   IcParameters.Instance.PrecursorTolerancePpm);
-            }
-            else
-            {
-                x = Lcms.GetFullPrecursorIonExtractedIonChromatogram(
-                    Ion.GetIsotopeMz(Index),
+                return Lcms.GetFullPrecursorIonExtractedIonChromatogram(
+                    Ion.GetMostAbundantIsotopeMz(),
                     IcParameters.Instance.PrecursorTolerancePpm);
             }
 
-            return x;
+            return Lcms.GetFullPrecursorIonExtractedIonChromatogram(
+                Ion.GetIsotopeMz(Index),
+                IcParameters.Instance.PrecursorTolerancePpm);
         }
 
         public override string ToString()

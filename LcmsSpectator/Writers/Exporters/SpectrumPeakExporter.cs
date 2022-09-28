@@ -203,13 +203,12 @@ namespace LcmsSpectator.Writers.Exporters
 
         private string GetLine(Tuple<Peak, PeakDataPoint> match)
         {
-            string line;
             var peak = match.Item1;
             var peakDataPoint = match.Item2;
 
             if (peakDataPoint?.IonType != null)
             {
-                line = string.Format(
+                return string.Format(
                                      "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
                                      peak.Mz,
                                      peak.Intensity,
@@ -219,12 +218,8 @@ namespace LcmsSpectator.Writers.Exporters
                                      peakDataPoint.Error,
                                      peakDataPoint.Correlation);
             }
-            else
-            {
-                line = string.Format("{0}\t{1}", peak.Mz, peak.Intensity);
-            }
 
-            return line;
+            return string.Format("{0}\t{1}", peak.Mz, peak.Intensity);
         }
 
         private string GetHeaders()

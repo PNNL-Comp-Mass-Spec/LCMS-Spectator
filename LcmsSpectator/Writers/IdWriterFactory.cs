@@ -9,21 +9,20 @@ namespace LcmsSpectator.Writers
         public static IIdWriter GetIdWriter(string filePath)
         {
             var extension = Path.GetExtension(filePath);
-            IIdWriter writer = null;
 
             if (string.IsNullOrEmpty(extension))
                 throw new Exception("Specified file path does not have an extension");
+
             switch (extension.ToLower())
             {
                 case ".tsv":
-                    writer = new IcFileWriter(filePath);
-                    break;
+                    return new IcFileWriter(filePath);
+
                 case ".mzid":
-                    writer = new MzIdWriter(filePath);
-                    break;
+                    return new MzIdWriter(filePath);
             }
 
-            return writer;
+            return null;
         }
     }
 }
