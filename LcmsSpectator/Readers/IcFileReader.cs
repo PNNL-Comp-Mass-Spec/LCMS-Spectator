@@ -34,7 +34,7 @@ namespace LcmsSpectator.Readers
             // Dataset_IcTda.tsv files has column QValue
             // Files _IcTarget.tsv and _IcDecoy.tsv do not have that column
 
-            doNotReadQValue = filePath.ToLower().Contains("_ictarget") || filePath.ToLower().Contains("_icdecoy");
+            doNotReadQValue = filePath.IndexOf("_ictarget", StringComparison.OrdinalIgnoreCase) >= 0 || filePath.IndexOf("_icdecoy", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>
