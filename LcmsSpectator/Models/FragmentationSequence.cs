@@ -142,11 +142,9 @@ namespace LcmsSpectator.Models
 
                 var parallelOptions = new ParallelOptions();
 
-                var useThreading = USE_THREADING;
-
                 // ReSharper disable ConditionIsAlwaysTrueOrFalse
                 // ReSharper disable HeuristicUnreachableCode
-                if (!useThreading)
+                if (!USE_THREADING)
                 {
                     parallelOptions.MaxDegreeOfParallelism = 1;
                     GetIonFragmentsNonThreaded(precursorIon, sequence, ionTypes, fragmentLabelList);

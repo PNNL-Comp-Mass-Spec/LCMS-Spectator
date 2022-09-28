@@ -85,9 +85,8 @@ namespace LcmsSpectator.Readers
             }
 
             var parts = line.Split('\t');
-            var scoreLabel = "Score";
 
-            var score = Convert.ToDouble(parts[headers[scoreLabel]]);
+            var score = Convert.ToDouble(parts[headers["Score"]]);
 
             var proteinNames = parts[headers["Protein"]].Split(';');
             var prsmList = new List<PrSm> { Capacity = proteinNames.Length };
