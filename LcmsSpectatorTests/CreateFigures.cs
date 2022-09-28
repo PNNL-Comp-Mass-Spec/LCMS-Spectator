@@ -216,19 +216,17 @@ namespace LcmsSpectatorTests
                             {
                                 continue;
                             }
-                            else
-                            {
-                                var result = new ResultLine
-                                {
-                                    Corr = peak.Corr,
-                                    Cosine = peak.Dist,
-                                    Error = Math.Abs(mass - peak.Mass) / peak.Mass * 1e6,
-                                    Intensity = peak.Intensity,
-                                    IsTarget = id.IsTarget
-                                };
 
-                                results.Add(result);
-                            }
+                            var result = new ResultLine
+                            {
+                                Corr = peak.Corr,
+                                Cosine = peak.Dist,
+                                Error = Math.Abs(mass - peak.Mass) / peak.Mass * 1e6,
+                                Intensity = peak.Intensity,
+                                IsTarget = id.IsTarget
+                            };
+
+                            results.Add(result);
                         }
                     }
                 }
