@@ -118,17 +118,16 @@ namespace LcmsSpectator.Models
         {
             get
             {
+                var endIndex = Math.Min(MaxLineLength, ProteinSequenceText.Length);
+                var sb = new StringBuilder(ProteinSequenceText.Length + ProteinSequenceText.Length / MaxLineLength);
+
                 var startIndex = 0;
-                var endIndex = Math.Min(MaxLineLength, ProteinSequenceText.Length - startIndex);
-                var strbuilder =
-                    new StringBuilder(
-                        ProteinSequenceText.Length + (ProteinSequenceText.Length / MaxLineLength));
 
                 while (endIndex <= ProteinSequenceText.Length)
                 {
                     var length = endIndex - startIndex;
-                    strbuilder.Append(ProteinSequenceText.Substring(startIndex, length));
-                    strbuilder.Append('\n');
+                    sb.Append(ProteinSequenceText, startIndex, length);
+                    sb.Append('\n');
                     startIndex += MaxLineLength;
                     if (endIndex == ProteinSequenceText.Length)
                     {
@@ -142,7 +141,7 @@ namespace LcmsSpectator.Models
                     ">{0} {1}\n{2}",
                     ProteinName,
                     ProteinDescription,
-                    strbuilder);
+                    sb);
             }
         }
     }
