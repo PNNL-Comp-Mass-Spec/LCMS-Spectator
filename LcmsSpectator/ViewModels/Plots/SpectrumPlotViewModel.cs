@@ -159,12 +159,12 @@ namespace LcmsSpectator.ViewModels.Plots
         private NoiseFilterModes filteredSpectrumNoiseMode = NoiseFilterModes.Disabled;
 
         /// <summary>
-        /// Stores the de-convoluted version of the spectrum for fast access
+        /// Stores the deconvoluted version of the spectrum for fast access
         /// </summary>
         private Spectrum deconvolutedSpectrum;
 
         /// <summary>
-        /// Stores the filtered and de-convoluted version of the spectrum for fast access
+        /// Stores the filtered and deconvoluted version of the spectrum for fast access
         /// </summary>
         private Spectrum filteredDeconvolutedSpectrum;
 
@@ -194,7 +194,7 @@ namespace LcmsSpectator.ViewModels.Plots
         private LinearAxis xAxis;
 
         /// <summary>
-        /// A value indicating whether or not de-convoluted spectrum is showing.
+        /// A value indicating whether or not deconvoluted spectrum is showing.
         /// </summary>
         private bool showDeconvolutedSpectrum;
 
@@ -574,7 +574,7 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether or not de-convoluted spectrum is showing.
+        /// Gets or sets a value indicating whether or not deconvoluted spectrum is showing.
         /// </summary>
         public bool ShowDeconvolutedSpectrum
         {
@@ -819,9 +819,9 @@ namespace LcmsSpectator.ViewModels.Plots
         }
 
         /// <summary>
-        /// Get correctly filtered and/or de-convoluted spectrum (for use in the plot)
+        /// Get correctly filtered and/or deconvoluted spectrum (for use in the plot)
         /// </summary>
-        /// <returns>Filtered and/or de-convoluted spectrum</returns>
+        /// <returns>Filtered and/or deconvoluted spectrum</returns>
         private Spectrum GetSpectrum()
         {
             if (Spectrum == null)
