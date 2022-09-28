@@ -26,7 +26,7 @@ namespace LcmsSpectator.Utils
     /// <summary>
     /// This is a utility class for containing methods for performing common calculations on sequences and ions.
     /// </summary>
-    public class IonUtils
+    public static class IonUtils
     {
         // Ignore Spelling: de
 
