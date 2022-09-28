@@ -382,6 +382,7 @@ namespace LcmsSpectator.ViewModels.Plots
         /// <param name="ms1Scan">MS1 scan number</param>
         /// <param name="precursorMz">Precursor M/Z that should be in MS/MS spectrum's isolation window range.</param>
         /// <returns>Product spectrum for the nearest MS/MS spectrum. Returns null if one cannot be found.</returns>
+        // ReSharper disable once UnusedMember.Local
         private ProductSpectrum FindNearestMs2Spectrum(int ms1Scan, double precursorMz)
         {
             // Do not have a valid LCMSRun or PrecursorMz, so we're not going to find an ms2 spectrum.
