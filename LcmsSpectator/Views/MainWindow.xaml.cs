@@ -100,10 +100,7 @@ namespace LcmsSpectator.Views
                 var serializer = new XmlLayoutSerializer(AvDock);
                 using (var stream = new StreamReader(layout))
                 {
-                    serializer.LayoutSerializationCallback += (s, args) =>
-                    {
-                        args.Content = Application.Current.MainWindow.FindName(args.Model.ContentId);
-                    };
+                    serializer.LayoutSerializationCallback += (s, args) => args.Content = Application.Current.MainWindow.FindName(args.Model.ContentId);
                     serializer.Deserialize(stream);
                 }
             }

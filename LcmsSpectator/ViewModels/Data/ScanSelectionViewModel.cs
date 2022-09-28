@@ -106,10 +106,10 @@ namespace LcmsSpectator.ViewModels.Data
             ScanRangeDescription = string.Format("Select {0} range", msLevelStr);
 
             // When UseScanRange changes, toggle UseScanOffset.
-            this.WhenAnyValue(x => x.UseScanRange).Subscribe(value => { UseScanOffset = !value; });
+            this.WhenAnyValue(x => x.UseScanRange).Subscribe(value => UseScanOffset = !value);
 
             // When UseScanOffset changes, toggle UseScanRange
-            this.WhenAnyValue(x => x.UseScanOffset).Subscribe(value => { UseScanRange = !value; });
+            this.WhenAnyValue(x => x.UseScanOffset).Subscribe(value => UseScanRange = !value);
         }
 
         /// <summary>

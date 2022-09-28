@@ -157,10 +157,7 @@ namespace LcmsSpectator.ViewModels.Plots
             });
 
             // Update area when x Axis is zoomed/panned
-            this.xaxis.AxisChanged += async (o, e) =>
-            {
-                Area = await GetCurrentAreaAsync();
-            };
+            this.xaxis.AxisChanged += async (o, e) => Area = await GetCurrentAreaAsync();
 
             // Update point marker when selected scan changes
             this.WhenAnyValue(x => x.SelectedScan, x => x.IsPlotUpdating)

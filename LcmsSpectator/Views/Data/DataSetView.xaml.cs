@@ -49,10 +49,7 @@ namespace LcmsSpectator.Views.Data
                 ScanDataGrid.UpdateLayout();
             };
 
-            DataContextChanged += (o, e) =>
-            {
-                SpectrumView.StartMsPfSearch.DataContext = DataContext;
-            };
+            DataContextChanged += (o, e) => SpectrumView.StartMsPfSearch.DataContext = DataContext;
         }
 
         /// <summary>
@@ -118,10 +115,7 @@ namespace LcmsSpectator.Views.Data
                 var serializer = new XmlLayoutSerializer(AvDock);
                 using (var stream = new StreamReader(layout))
                 {
-                    serializer.LayoutSerializationCallback += (s, args) =>
-                    {
-                        args.Content = FindName(args.Model.ContentId);
-                    };
+                    serializer.LayoutSerializationCallback += (s, args) => args.Content = FindName(args.Model.ContentId);
                     serializer.Deserialize(stream);
                 }
             }

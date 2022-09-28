@@ -24,10 +24,10 @@ namespace LcmsSpectator.Views.Plots
         public XicView()
         {
             InitializeComponent();
-            FragmentIonXic.Loaded += (o, e) => { FragmentIonXic.ContextMenu.DataContext = FragmentIonXic.DataContext; };
-            HeavyFragmentIonXic.Loaded += (o, e) => { HeavyFragmentIonXic.ContextMenu.DataContext = HeavyFragmentIonXic.DataContext; };
-            PrecursorIonXic.Loaded += (o, e) => { PrecursorIonXic.ContextMenu.DataContext = PrecursorIonXic.DataContext; };
-            HeavyPrecursorIonXic.Loaded += (o, e) => { HeavyPrecursorIonXic.ContextMenu.DataContext = HeavyPrecursorIonXic.DataContext; };
+            FragmentIonXic.Loaded += (o, e) => FragmentIonXic.ContextMenu.DataContext = FragmentIonXic.DataContext;
+            HeavyFragmentIonXic.Loaded += (o, e) => HeavyFragmentIonXic.ContextMenu.DataContext = HeavyFragmentIonXic.DataContext;
+            PrecursorIonXic.Loaded += (o, e) => PrecursorIonXic.ContextMenu.DataContext = PrecursorIonXic.DataContext;
+            HeavyPrecursorIonXic.Loaded += (o, e) => HeavyPrecursorIonXic.ContextMenu.DataContext = HeavyPrecursorIonXic.DataContext;
             if (ShowHeavy.IsChecked == true)
             {
                 LightColumn.Width = new GridLength(50, GridUnitType.Star);
