@@ -1,4 +1,5 @@
 # LCMS-Spectator
+
 LCMS raw data and MSGF+ results viewer
 
 LCMS-Spectator is a standalone Windows program for viewing LC-MS data and peptide identifications.
@@ -36,22 +37,22 @@ Also supports .tsv files created by MSPathFinder or MS-GF+.
 
 ## System Requirements
 Minimum required:
-* .NET 4.6.2
+* .NET 4.7.2
 
 Minimum recommended:
 * 2.4 GHz, quad-core CPU
 * 16 GB RAM
-* Windows 7 or newer
+* Windows 10 or newer
 * 250 GB hard drive
 
 ## Running MSPathFinder from LCMS Spectator
 
 The suggested method for running MSPathFinder is to use the console version, available at https://github.com/PNNL-Comp-Mass-Spec/Informed-Proteomics/releases
-This has the advantage that you can see all of the log messages shown at the console.
+* This has the advantage that you can see all of the log messages shown at the console.
 
 However, LCMS Spectator also supports running MSPathFinder, as outlined here:
 
-1) Convert your data file to a centroided .mzML file
+1) Convert your data file to a centroided .mzML file\
 `msconvert.exe --32 --mzML --filter "peakPicking true 1-" DatasetName.raw`
 
 2) Start LCMS Spectator and choose the Search menu
