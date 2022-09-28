@@ -191,7 +191,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </returns>
         public int CompareTo(LabeledIonViewModel other)
         {
-            return string.Compare(Label, other.Label, StringComparison.Ordinal);
+            return string.CompareOrdinal(Label, other.Label);
         }
 
         /// <summary>

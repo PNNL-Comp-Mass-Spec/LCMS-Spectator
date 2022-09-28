@@ -265,9 +265,8 @@ namespace LcmsSpectatorTests
             foreach (var aa in sequence)
             {
                 sequenceStr += aa.Residue;
-                if (aa is ModifiedAminoAcid)
+                if (aa is ModifiedAminoAcid modAa)
                 {
-                    var modAa = aa as ModifiedAminoAcid;
                     sequenceStr += "[" + modAa.Modification.Name + "]";
                 }
             }

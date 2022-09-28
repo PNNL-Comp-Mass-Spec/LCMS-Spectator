@@ -457,12 +457,12 @@ namespace LcmsSpectator.Models
                 }
                 unchecked
                 {
-                    var hashCode = obj.Name != null ? obj.Name.GetHashCode() : 0;
-                    hashCode = (hashCode * 397) ^ (obj.OffsetComposition != null ? obj.OffsetComposition.GetHashCode() : 0);
+                    var hashCode = obj.Name?.GetHashCode() ?? 0;
+                    hashCode = (hashCode * 397) ^ (obj.OffsetComposition?.GetHashCode() ?? 0);
                     hashCode = (hashCode * 397) ^ obj.Charge;
                     hashCode = (hashCode * 397) ^ obj.IsPrefixIon.GetHashCode();
-                    hashCode = (hashCode * 397) ^ (obj.BaseIonType != null ? obj.BaseIonType.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (obj.NeutralLoss != null ? obj.NeutralLoss.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (obj.BaseIonType?.GetHashCode() ?? 0);
+                    hashCode = (hashCode * 397) ^ (obj.NeutralLoss?.GetHashCode() ?? 0);
                     return hashCode;
                 }
             }
@@ -522,7 +522,7 @@ namespace LcmsSpectator.Models
                 }
                 unchecked
                 {
-                    var hashCode = obj.Name != null ? obj.Name.GetHashCode() : 0;
+                    var hashCode = obj.Name?.GetHashCode() ?? 0;
                     hashCode = (hashCode * 397) ^ obj.AccessionNum;
                     hashCode = (hashCode * 397) ^ obj.Composition.GetHashCode();
                     return hashCode;

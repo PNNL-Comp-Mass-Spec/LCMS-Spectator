@@ -196,7 +196,7 @@ namespace LcmsSpectator.Models
                 if (y == null)
                     return 1;
 
-                return string.Compare(x.ProteinName, y.ProteinName, StringComparison.Ordinal);
+                return string.CompareOrdinal(x.ProteinName, y.ProteinName);
             }
         }
     }

@@ -646,7 +646,7 @@ namespace LcmsSpectator.ViewModels.Plots
                         "{0}" + Environment.NewLine +
                         "{1}: {2:0.###}" + Environment.NewLine +
                         "{3}: {4:0.###E0}",
-                    IsVisible = proteinName == string.Empty ? showFoundUnIdMs2 : showFoundIdMs2,
+                    IsVisible = proteinName?.Length == 0 ? showFoundUnIdMs2 : showFoundIdMs2,
                 };
 
                 ms2SeriesDictionary.Add(proteinName, scatterSeries);

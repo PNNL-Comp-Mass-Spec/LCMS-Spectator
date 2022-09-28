@@ -156,7 +156,7 @@ namespace LcmsSpectator.Readers
         {
             var mods = modifications.Split(',');
             var parsedMods = new List<Tuple<int, Modification>>();
-            if (mods.Length < 1 || mods[0] == string.Empty)
+            if (mods.Length < 1 || mods[0].Length == 0)
             {
                 return parsedMods;
             }

@@ -51,7 +51,7 @@ namespace LcmsSpectatorTests
                         Cosine = Convert.ToDouble(parts[1]),
                         Error = Convert.ToDouble(parts[2]),
                         Intensity = Convert.ToDouble(parts[3]),
-                        IsTarget = Convert.ToInt32(parts[4]) == 1 ? true : false,
+                        IsTarget = Convert.ToInt32(parts[4]) == 1
                     });
                 }
 

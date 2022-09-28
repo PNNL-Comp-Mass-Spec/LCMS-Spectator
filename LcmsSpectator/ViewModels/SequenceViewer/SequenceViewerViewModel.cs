@@ -227,10 +227,7 @@ namespace LcmsSpectator.ViewModels.SequenceViewer
                 }
             }
 
-            foreach (var sequenceFragment in sequenceFragments)
-            {
-                SequenceFragments.Add(sequenceFragment);
-            }
+            SequenceFragments.AddRange(sequenceFragments);
 
             SequenceCoverage = Math.Round(IonUtils.CalculateSequenceCoverage(
                 allPeakDataPoints,

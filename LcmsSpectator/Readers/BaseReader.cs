@@ -83,10 +83,10 @@ namespace LcmsSpectator.Readers
         /// <param name="scanEnd"></param>
         protected void StoreIDs(List<PrSm> prsmList, IList<PrSm> idData, int scanStart, int scanEnd)
         {
-            if (idData == null || !idData.Any())
+            if (idData == null || idData.Count == 0)
                 return;
 
-            var scanNumber = idData.First().Scan;
+            var scanNumber = idData[0].Scan;
             if (scanStart > 0 && (scanNumber < scanStart || scanNumber > scanEnd))
                 return;
 

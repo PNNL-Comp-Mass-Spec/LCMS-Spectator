@@ -204,7 +204,7 @@ namespace LcmsSpectator.Readers
                             }
                             catch (Exception ex)
                             {
-                                retryCount -= 1;
+                                retryCount--;
                                 var msg = "Exception querying database in GetDatasets: " + ex.Message;
                                 msg += ", RetryCount = " + retryCount;
 
@@ -375,7 +375,7 @@ namespace LcmsSpectator.Readers
                         }
                         catch (Exception ex)
                         {
-                            retryCount -= 1;
+                            retryCount--;
                             var msg = "Exception querying database in GetJobs: " + ex.Message;
                             msg += ", RetryCount = " + retryCount;
 

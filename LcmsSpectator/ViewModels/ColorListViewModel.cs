@@ -114,10 +114,7 @@ namespace LcmsSpectator.ViewModels
         private void SetColors(IEnumerable<Color> colors)
         {
             ColorViewModels.Clear();
-            foreach (var color in colors.Select(color => new ColorViewModel { SelectedColor = color }))
-            {
-                ColorViewModels.Add(color);
-            }
+            ColorViewModels.AddRange(colors.Select(color => new ColorViewModel { SelectedColor = color }));
         }
     }
 }

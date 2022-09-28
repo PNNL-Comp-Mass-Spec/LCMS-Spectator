@@ -261,7 +261,7 @@ namespace LcmsSpectator.ViewModels.Data
         /// </summary>
         private void InsertStaticModifications()
         {
-            if (SequenceText == string.Empty || IcParameters.Instance.SearchModifications.Count == 0)
+            if (SequenceText.Length == 0 || IcParameters.Instance.SearchModifications.Count == 0)
             {
                 return;
             }

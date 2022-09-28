@@ -314,7 +314,7 @@ namespace LcmsSpectator.Models
                 if (y == null)
                     return 1;
 
-                return string.Compare(x.SequenceText, y.SequenceText, StringComparison.Ordinal);
+                return string.CompareOrdinal(x.SequenceText, y.SequenceText);
             }
         }
     }

@@ -87,7 +87,7 @@ namespace LcmsSpectatorTests
 
             Console.WriteLine("Validated {0:N0} ions for {1:N0} PSMs", ionsValidated, psmsValidated);
 
-            if (validationErrors.Count <= 0)
+            if (validationErrors.Count == 0)
                 return;
 
             var validationMsg = string.Format("{0} ions had errors greater than {1} ppm", validationErrors.Count, tolerance);

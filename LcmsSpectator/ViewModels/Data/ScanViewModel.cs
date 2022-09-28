@@ -110,10 +110,7 @@ namespace LcmsSpectator.ViewModels.Data
                 IdTree.ClearIds();
                 await IdTree.BuildIdTree(filteredData);
                 FilteredProteins.Clear();
-                foreach (var protein in IdTree.ProteinIds)
-                {
-                    FilteredProteins.Add(protein);
-                }
+                FilteredProteins.AddRange(IdTree.ProteinIds);
             });
 
             // When data is filtered and a PRSM has not been selected yet, select the first PRSM
@@ -284,7 +281,7 @@ namespace LcmsSpectator.ViewModels.Data
                 }
                 else if (scanFilter.Values.Count == 1)
                 {
-                    if (!scanFilter.Values.First().Equals(scanNumberText))
+                    if (!scanFilter.Values[0].Equals(scanNumberText))
                     {
                         scanFilter.Values[0] = scanNumberText;
                     }

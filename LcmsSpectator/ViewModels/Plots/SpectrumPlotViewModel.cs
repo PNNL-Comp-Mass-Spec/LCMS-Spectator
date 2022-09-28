@@ -990,8 +990,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             var fragmentPeaks =
                 peakDataPoints.SelectMany(peaks => peaks)
-                    .Where(peak => !peak.X.Equals(double.NaN))
-                    .Where(peak => !peak.Y.Equals(double.NaN))
+                    .Where(peak => !peak.X.Equals(double.NaN) && !peak.Y.Equals(double.NaN))
                     .OrderBy(peak => peak.X)
                     .ToArray();
 
@@ -1019,8 +1018,7 @@ namespace LcmsSpectator.ViewModels.Plots
 
             var fragmentPeaks =
                 peakDataPoints.SelectMany(peaks => peaks)
-                    .Where(peak => !peak.X.Equals(double.NaN))
-                    .Where(peak => !peak.Y.Equals(double.NaN))
+                    .Where(peak => !peak.X.Equals(double.NaN) && !peak.Y.Equals(double.NaN))
                     .OrderBy(peak => peak.X)
                     .ToArray();
 

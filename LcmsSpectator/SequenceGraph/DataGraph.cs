@@ -133,10 +133,7 @@ namespace LcmsSpectator.SequenceGraph
                     sequences[sequenceIndex].Add(newVertex);
                     sequences.Add(new List<DataVertex>());
                     var newIndex = sequences.Count - 1;
-                    foreach (var vertex in sequences[sequenceIndex])
-                    {
-                        sequences[newIndex].Add(vertex);
-                    }
+                    sequences[newIndex].AddRange(sequences[sequenceIndex]);
 
                     GetAllSequencePathsRec(newVertex, end, sequences, newIndex);
                 }

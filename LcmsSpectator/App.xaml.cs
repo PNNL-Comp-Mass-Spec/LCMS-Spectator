@@ -23,8 +23,11 @@ namespace LcmsSpectator
         {
             AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
 
-            var mainWindow = new MainWindow();
-            mainWindow.DataContext = new MainWindowViewModel(new MainDialogService(), new DataReader());
+            var mainWindow = new MainWindow
+            {
+                DataContext = new MainWindowViewModel(new MainDialogService(), new DataReader())
+            };
+
             mainWindow.Show();
         }
 

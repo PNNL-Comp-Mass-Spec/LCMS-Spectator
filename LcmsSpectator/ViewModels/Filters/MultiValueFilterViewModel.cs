@@ -276,12 +276,9 @@ namespace LcmsSpectator.ViewModels.Filters
         {
             var values = ParseValues(Value);
             values = values.Where(val => validator(val)).Where(val => !Values.Contains(val));
-            if (value.Any())
+            if (value.Length > 0)
             {
-                foreach (var v in values)
-                {
-                    Values.Add(v);
-                }
+                Values.AddRange(values);
             }
             else
             {
