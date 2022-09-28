@@ -186,7 +186,7 @@ namespace LcmsSpectator.ViewModels.FileSelectors
         {
             if (string.IsNullOrEmpty(RawFilePath) && SelectedDataSet == null)
             {
-                dialogService.MessageBox("Please select data set or new raw/mzml file to open.");
+                dialogService.MessageBox("Please select data set or new raw/mzML file to open.");
                 return;
             }
 
