@@ -163,11 +163,6 @@ namespace LcmsSpectator.Readers
 
             foreach (var modParts in mods.Select(mod => mod.Split(' ')))
             {
-                if (modParts.Length < 0)
-                {
-                    throw new FormatException("Unknown Modification");
-                }
-
                 var modName = modParts[0];
                 var modPos = Convert.ToInt32(modParts[1]);
                 var modification = Modification.Get(modName);
