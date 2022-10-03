@@ -398,6 +398,11 @@ namespace LcmsSpectator.ViewModels
 
                 foreach (var file in rawFilePaths)
                 {
+#if SHOW_DEBUG
+                    System.Windows.Forms.MessageBox.Show(string.Format("Reading instrument data: {0}",
+                        PRISM.PathUtils.CompactPathString(file, 120)));
+#endif
+
                     var dataSetViewModel = await ReadRawFile(file);
 
                     if (dataSetViewModel.MsPfParameters == null)
@@ -418,10 +423,25 @@ namespace LcmsSpectator.ViewModels
                     IdFileLoading = true;
                     if (!string.IsNullOrWhiteSpace(dataSetViewModel.FastaDbFilePath) && File.Exists(dataSetViewModel.FastaDbFilePath))
                     {
+#if SHOW_DEBUG
+                        System.Windows.Forms.MessageBox.Show(string.Format("Reading FASTA file: {0}",
+                                PRISM.PathUtils.CompactPathString(dataSetViewModel.FastaDbFilePath, 120)));
+#endif
+
                         await ScanViewModel.IdTree.AddFastaEntriesAsync(await dataReader.ReadFastaFile(dataSetViewModel.FastaDbFilePath));
                     }
 
+#if SHOW_DEBUG
+                    System.Windows.Forms.MessageBox.Show(string.Format("Reading .mzid file: {0}",
+                        PRISM.PathUtils.CompactPathString(idFilePath, 120)));
+#endif
+
                     await ReadIdFile(idFilePath, dataSetViewModel);
+
+#if SHOW_DEBUG
+                    System.Windows.Forms.MessageBox.Show("Calling dataReader.OpenDataSet()");
+#endif
+
                     await dataReader.OpenDataSet(dataSetViewModel, file, featureFilePath: featureFilePath);
                     IdFileLoadProgress = 0;
                     IdFileLoading = false;
