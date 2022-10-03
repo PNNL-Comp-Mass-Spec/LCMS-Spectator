@@ -375,7 +375,8 @@ namespace LcmsSpectator.ViewModels.Data
             rawFilePath = filePath;
 
             LoadProgressPercent = 0.0;
-            LoadProgressStatus = "Loading...";
+            LoadProgressStatus = string.Format("Loading: {0}", PRISM.PathUtils.CompactPathString(filePath, 120));
+
             var progress = new Progress<PRISM.ProgressData>(progressData =>
             {
                 progressData.UpdateFrequencySeconds = 2;

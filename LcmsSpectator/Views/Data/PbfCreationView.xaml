@@ -40,7 +40,7 @@
                     <RowDefinition Height="50*" />
                 </Grid.RowDefinitions>
                 <StackPanel
-                    Width="250"
+                    Width="750"
                     Height="75"
                     Background="LightGray">
                     <TextBlock Margin="10" Text="{Binding Path=LoadProgressStatus}" />
