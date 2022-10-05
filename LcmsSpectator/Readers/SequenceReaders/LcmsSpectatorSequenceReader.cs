@@ -22,6 +22,27 @@ namespace LcmsSpectator.Readers.SequenceReaders
     public class LcmsSpectatorSequenceReader : ISequenceReader
     {
         // Ignore Spelling: Carbamidomethyl
+
+        const string AminoAcidRegEx = "[" + AminoAcid.StandardAminoAcidCharacters + "]";
+
+        /// <summary>
+        /// Regular expression for matching modification names inside square brackets
+        /// </summary>
+        /// <comments>
+        /// <para>
+        /// Option 1: explicitly look for letters, numbers, and symbols using "\[[A-Z0-9a-z_:()>+-]+\]"</para>
+        /// <para>
+        /// <para>
+        /// Option 2: just match all text between two square brackets using   "\[[^\]]+\]"
+        /// </para>
+        /// Example modification names:
+        /// [Oxidation]
+        /// [Carbamidomethyl]
+        /// [Label:13C(6)15N(4)]
+        /// [Glu->pyro-Glu+Methyl]
+        /// </para>
+        /// </comments>
+        const string ModRegEx = @"\[[^\]]+\]";
         /// <summary>
         /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
         /// </summary>
@@ -37,6 +58,11 @@ namespace LcmsSpectator.Readers.SequenceReaders
         {
             this.trimAnnotations = trimAnnotations;
         }
+
+        /// <summary>
+        /// RegEx matcher for finding amino acid symbols (capital letters) and modification names surrounded by square brackets
+        /// </summary>
+        private readonly Regex mResidueAndModMatcher = new Regex("(" + AminoAcidRegEx + "|" + ModRegEx + ")", RegexOptions.Compiled);
 
         /// <summary>
         /// Parse a protein/peptide sequence in the LCMSSpectator style.
@@ -62,16 +88,14 @@ namespace LcmsSpectator.Readers.SequenceReaders
                 }
             }
 
-            const string AminoAcidRegex = "[" + AminoAcid.StandardAminoAcidCharacters + "]";
-            ////const string modRegex = @"\[([A-Z]|[a-z])+\]";
-            const string ModRegex = @"\[([A-Z]|[a-z]|[0-9]|_|-|>)+\]";
-
             if (string.IsNullOrEmpty(sequence))
             {
                 return new Sequence(new List<AminoAcid>());
             }
 
-            if (!Regex.IsMatch(sequence, "(" + AminoAcidRegex + "|" + ModRegex + ")+"))
+            var matches = mResidueAndModMatcher.Matches(sequence);
+
+            if (matches.Count == 0)
             {
                 return null;
             }
@@ -79,7 +103,6 @@ namespace LcmsSpectator.Readers.SequenceReaders
             var stdAaSet = new AminoAcidSet();
             var aminoAcidList = new List<AminoAcid>();
 
-            var matches = Regex.Matches(sequence, "(" + AminoAcidRegex + "|" + ModRegex + ")");
             AminoAcid aa = null;
             var mods = new List<Modification>();
             foreach (Match match in matches)
