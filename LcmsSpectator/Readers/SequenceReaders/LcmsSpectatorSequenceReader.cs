@@ -43,6 +43,12 @@ namespace LcmsSpectator.Readers.SequenceReaders
         /// </para>
         /// </comments>
         const string ModRegEx = @"\[[^\]]+\]";
+
+        /// <summary>
+        /// Standard amino acid set.
+        /// </summary>
+        private readonly AminoAcidSet mAminoAcidSet;
+
         /// <summary>
         /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
         /// </summary>
@@ -57,6 +63,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
         public LcmsSpectatorSequenceReader(bool trimAnnotations = false)
         {
             this.trimAnnotations = trimAnnotations;
+            mAminoAcidSet = new AminoAcidSet();
         }
 
         /// <summary>
@@ -100,7 +107,6 @@ namespace LcmsSpectator.Readers.SequenceReaders
                 return null;
             }
 
-            var stdAaSet = new AminoAcidSet();
             var aminoAcidList = new List<AminoAcid>();
 
             AminoAcid aa = null;
@@ -122,7 +128,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
                         mods = new List<Modification>();
                     }
 
-                    aa = stdAaSet.GetAminoAcid(element[0]);
+                    aa = mAminoAcidSet.GetAminoAcid(element[0]);
                     if (aa == null)
                     {
                         throw new FormatException("Unrecognized amino acid character: " + element[0]);
