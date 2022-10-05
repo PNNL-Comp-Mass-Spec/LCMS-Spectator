@@ -1923,6 +1923,12 @@
             <param name="msgfPlusPeptideStr">string of format "+229.163C+57.021GLGGSGTPVDELDK+229.163C+57.021C+57.021QTHDNC+57.021YDQAK+229.163"</param>
             <returns>Sequence object</returns>
         </member>
+        <member name="M:InformedProteomics.Backend.Data.Sequence.Sequence.ToString">
+            <summary>
+            Convert the list of amino acids tracked by this class to a peptide sequence
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:InformedProteomics.Backend.Data.Sequence.SequenceGraph">
             <summary>
             Creates a graph for scoring a sequence or annotation
