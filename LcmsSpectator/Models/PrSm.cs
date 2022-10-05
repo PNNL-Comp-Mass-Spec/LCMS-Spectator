@@ -383,7 +383,7 @@ namespace LcmsSpectator.Models
         #endregion
 
         /// <summary>
-        /// Set newSequence as the visibile sequence and actual underlying sequence.
+        /// Set newSequence as the visible sequence and actual underlying sequence.
         /// If the underlying sequence is null, the visible sequence will be parsed to
         /// create it.
         /// </summary>
@@ -527,6 +527,11 @@ namespace LcmsSpectator.Models
 
                 return x.Scan.CompareTo(y.Scan);
             }
+        }
+
+        public override string ToString()
+        {
+            return SequenceText ?? Sequence.ToString();
         }
     }
 }
