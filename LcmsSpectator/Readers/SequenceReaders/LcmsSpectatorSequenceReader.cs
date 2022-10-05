@@ -21,7 +21,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
     /// </summary>
     public class LcmsSpectatorSequenceReader : ISequenceReader
     {
-        // Ignore Spelling: Carbamidomethyl
+        // Ignore Spelling: Carbamidomethyl, Glu, pyro
 
         const string AminoAcidRegEx = "[" + AminoAcid.StandardAminoAcidCharacters + "]";
 
@@ -111,6 +111,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
 
             AminoAcid aa = null;
             var mods = new List<Modification>();
+
             foreach (Match match in matches)
             {
                 var element = match.Value;
@@ -133,7 +134,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
                     {
                         throw new FormatException("Unrecognized amino acid character: " + element[0]);
                     }
-                    ////                    Console.WriteLine("{0} {1} {2}", aa.Residue, aa.Composition, aa.GetMass());
+                    //                    Console.WriteLine("{0} {1} {2}", aa.Residue, aa.Composition, aa.GetMass());
                 }
                 else
                 {
@@ -145,7 +146,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
                     }
 
                     mods.Add(mod);
-                    ////                    Console.WriteLine("{0} {1} {2}", mod.Name, mod.Composition, mod.Composition.AveragineMass);
+                    //                    Console.WriteLine("{0} {1} {2}", mod.Name, mod.Composition, mod.Composition.Mass);
                 }
             }
 
