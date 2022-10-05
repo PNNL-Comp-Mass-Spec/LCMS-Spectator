@@ -322,10 +322,8 @@ namespace LcmsSpectator.ViewModels.Filters
             }
 
             // Get only values that are not in value list.
-            parsedValues = parsedValues.Where(val => !string.IsNullOrWhiteSpace(val))
-                                       .Where(val => !Values.Contains(val));
+            return parsedValues.Where(val => !string.IsNullOrWhiteSpace(val) && !Values.Contains(val));
 
-            return parsedValues;
         }
     }
 }
