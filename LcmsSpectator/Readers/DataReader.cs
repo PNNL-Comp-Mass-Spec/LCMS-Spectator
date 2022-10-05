@@ -98,8 +98,11 @@ namespace LcmsSpectator.Readers
             IEnumerable<string> modIgnoreList = null)
         {
             var reader = IdFileReaderFactory.CreateReader(idFilePath);
+
             var ids = await reader.ReadAsync(scanStart, scanEnd, modIgnoreList);
+
             var idList = ids.ToList();
+
             foreach (var id in idList)
             {
                 id.RawFileName = dataSetViewModel.Title;
