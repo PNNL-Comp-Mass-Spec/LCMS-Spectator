@@ -21,6 +21,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
     /// </summary>
     public class LcmsSpectatorSequenceReader : ISequenceReader
     {
+        // Ignore Spelling: Carbamidomethyl
         /// <summary>
         /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
         /// </summary>
