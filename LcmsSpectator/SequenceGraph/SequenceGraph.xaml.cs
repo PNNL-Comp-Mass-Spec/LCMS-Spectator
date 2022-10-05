@@ -36,7 +36,7 @@ namespace LcmsSpectator.SequenceGraph
         /// </summary>
         [Obsolete("Unused")]
 #pragma warning disable 649
-        private List<List<DataVertex>> selectedVertices;
+        private readonly List<List<DataVertex>> selectedVertices;
 #pragma warning restore 649
 
         public SequenceGraph()
