@@ -72,12 +72,13 @@ namespace LcmsSpectator.Readers
                     progressData.StepRange(50);
                 }
 
-                progressData.Status = "Caching scan metadata...";
+                progressData.Status = string.Format("Caching spectra: {0}", PathUtils.CompactPathString(datasetPath, 120));
                 specReader = MassSpecDataReaderFactory.GetMassSpecDataAccessor(datasetPath, new Progress<ProgressData>(x => progressData.Report(x.Percent)));
+
                 if (!string.IsNullOrWhiteSpace(pbfPath))
                 {
                     progressData.StepRange(100);
-                    progressData.Status = "Opening PBF file...";
+                    progressData.Status = string.Format("Opening PBF file: {0}", PathUtils.CompactPathString(pbfPath, 120));
                     xicReader = PbfLcMsRun.GetLcMsRun(pbfPath, 0, 0, new Progress<ProgressData>(x => progressData.Report(x.Percent)));
                 }
             }
