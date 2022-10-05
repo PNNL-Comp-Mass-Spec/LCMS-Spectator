@@ -52,7 +52,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
         /// <summary>
         /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
         /// </summary>
-        private readonly bool trimAnnotations;
+        private readonly bool mTrimAnnotations;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LcmsSpectatorSequenceReader"/> class.
@@ -62,7 +62,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
         /// </param>
         public LcmsSpectatorSequenceReader(bool trimAnnotations = false)
         {
-            this.trimAnnotations = trimAnnotations;
+            mTrimAnnotations = trimAnnotations;
             mAminoAcidSet = new AminoAcidSet();
         }
 
@@ -78,7 +78,7 @@ namespace LcmsSpectator.Readers.SequenceReaders
         /// <returns>The parsed sequence.</returns>
         public Sequence Read(string sequence)
         {
-            if (trimAnnotations)
+            if (mTrimAnnotations)
             {
                 var firstIndex = sequence.IndexOf('.');
                 if (firstIndex >= 0)
