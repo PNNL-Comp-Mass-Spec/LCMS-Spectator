@@ -17,20 +17,20 @@ namespace LcmsSpectator.Readers.SequenceReaders
     /// </summary>
     public class SequenceReader : ISequenceReader
     {
-        /// <summary>
-        /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
-        /// </summary>
-        private readonly bool trimAnnotations;
+        private readonly MsgfPlusSequenceReader mMsgfPlusSequenceParser;
+
+        private readonly LcmsSpectatorSequenceReader mLcmsSpectatorSequenceParser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SequenceReader"/> class.
         /// </summary>
         /// <param name="trimAnnotations">
-        /// A value indicating whether the n-terminal and c-terminal amino acids should be trimmed.
+        /// A value indicating whether the N-terminal and C-terminal amino acids should be trimmed.
         /// </param>
         public SequenceReader(bool trimAnnotations = false)
         {
-            this.trimAnnotations = trimAnnotations;
+            mMsgfPlusSequenceParser = new MsgfPlusSequenceReader(trimAnnotations);
+            mLcmsSpectatorSequenceParser = new LcmsSpectatorSequenceReader(trimAnnotations);
         }
 
         /// <summary>
@@ -40,17 +40,9 @@ namespace LcmsSpectator.Readers.SequenceReaders
         /// <returns>The parsed sequence.</returns>
         public Sequence Read(string sequence)
         {
-            ISequenceReader reader;
-            if (!sequence.Contains("["))
-            {
-                reader = new MsgfPlusSequenceReader(trimAnnotations);
-            }
-            else
-            {
-                reader = new LcmsSpectatorSequenceReader(trimAnnotations);
-            }
-
-            return reader.Read(sequence);
+            return sequence.Contains("[")
+                ? mLcmsSpectatorSequenceParser.Read(sequence)
+                : mMsgfPlusSequenceParser.Read(sequence);
         }
     }
 }
